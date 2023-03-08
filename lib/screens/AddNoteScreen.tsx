@@ -1,12 +1,20 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 
-const AddNoteScreen = ({ navigation, route }) => {
+type AddNoteScreenProps = {
+  navigation: any;
+  route: any;
+};
+
+const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [text, setText] = useState('');
 
   const saveNote = () => {
-    let note = { text };
-    navigation.navigate('Home', { note });
+    const note = { text };
+    if (route.params?.onSave) {
+      route.params.onSave(note);
+    }
+    navigation.goBack();
   };
 
   return (
