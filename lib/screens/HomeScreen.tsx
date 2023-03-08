@@ -11,7 +11,7 @@ interface Note {
   text: string;
 }
 
-type HomeScreenProps = {
+export type HomeScreenProps = {
   navigation: any;
   route: { params?: { note: Note; onSave: (note: Note) => void } };
 }

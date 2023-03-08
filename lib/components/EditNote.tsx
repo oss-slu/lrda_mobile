@@ -2,7 +2,7 @@ import React from 'react';
 import { Note } from '../../types';
 import EditNoteScreen from '../screens/EditNoteScreen';
 
-type EditNoteProps = {
+export type EditNoteProps = {
   route: { params: { note: Note; onSave: (note: Note) => void } };
   navigation: { setOptions: (options: { headerTitle: string }) => void };
 };

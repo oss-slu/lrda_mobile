@@ -3,7 +3,7 @@ import { View, TextInput, Button, StyleSheet } from 'react-native';
 
 import { Note, RootStackParamList } from '../../types';
 
-type EditNoteScreenProps = {
+export type EditNoteScreenProps = {
   route: {
     params: {
       note: Note;
