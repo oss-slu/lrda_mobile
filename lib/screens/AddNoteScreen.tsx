@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { Note, RootStackParamList } from '../../types';
 
 type AddNoteScreenProps = {
   navigation: any;
@@ -8,9 +9,12 @@ type AddNoteScreenProps = {
 
 const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [text, setText] = useState('');
+  let id: number;
+  id = 401209;
+  let note: Note;
 
   const saveNote = () => {
-    const note = { text };
+    const note = { text , id};
     if (route.params?.onSave) {
       route.params.onSave(note);
     }
