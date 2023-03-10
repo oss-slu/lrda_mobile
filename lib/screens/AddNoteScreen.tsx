@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import { Note, RootStackParamList } from '../../types';
+import PhotoScroller from '../components/photoScroller';
 
 type AddNoteScreenProps = {
   navigation: any;
@@ -29,6 +30,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         onChangeText={(text) => setText(text)}
         value={text}
       />
+      <PhotoScroller/>
       <TouchableOpacity style={styles.saveButton} onPress={saveNote}>
         <Text style={styles.saveText}>Save</Text>
       </TouchableOpacity>
