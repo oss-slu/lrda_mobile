@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import { Note, RootStackParamList } from '../../types';
 import PhotoScroller from '../components/photoScroller';
+import  generateID  from "../utils/CreateID";
 
 type AddNoteScreenProps = {
   navigation: any;
@@ -11,7 +12,7 @@ type AddNoteScreenProps = {
 const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [text, setText] = useState('');
   let id: number;
-  id = 401209;
+  id = generateID();
   let note: Note;
 
   const saveNote = () => {
