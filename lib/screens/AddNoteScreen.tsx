@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import { Note, RootStackParamList } from '../../types';
 import PhotoScroller from '../components/photoScroller';
-import  generateID  from "../utils/CreateID";
 
 type AddNoteScreenProps = {
   navigation: any;
@@ -11,17 +10,36 @@ type AddNoteScreenProps = {
 
 const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [text, setText] = useState('');
-  let id: number;
-  id = generateID();
-  let note: Note;
-
-  const saveNote = () => {
-    const note = { text , id};
-    if (route.params?.onSave) {
-      route.params.onSave(note);
-    }
-    navigation.goBack();
+  
+  const createNote = async (note: Note) => {
+    const response = await fetch("http://lived-religion-dev.rerum.io/deer-lr/create", {
+      method: "POST",
+      headers: {
+          'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(note.text)
+    });
+    
+    const obj = await response.json();
+    console.log(obj.type);
+    return obj["@id"];
   };
+  
+  const saveNote = async () => {
+    try {
+      const note: Note = { id: '', text };
+      const id = await createNote(note);
+      note.id = id;
+  
+      if (route.params?.onSave) {
+        route.params.onSave(note);
+      }
+      navigation.goBack();
+    } catch (error) {
+      console.error("An error occurred while creating the note:", error);
+    }
+  };
+  
 
   return (
     <View style={styles.container}>

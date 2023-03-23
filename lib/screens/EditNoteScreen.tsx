@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+// EditNoteScreen.tsx
+import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet } from 'react-native';
-
-import { Note, RootStackParamList } from '../../types';
+import { Note } from '../../types';
 
 export type EditNoteScreenProps = {
   route: {
@@ -10,20 +10,19 @@ export type EditNoteScreenProps = {
       onSave: (note: Note) => void;
     };
   };
+  navigation: {
+    goBack: () => void;
+  };
 }
 
-const EditNoteScreen: React.FC<EditNoteScreenProps> = ({ route }) => {
+const EditNoteScreen: React.FC<EditNoteScreenProps> = ({ route, navigation }) => {
   const { note, onSave } = route.params;
   const [text, setText] = useState(note.text);
-
-  // useEffect(() => {
-  //   // This effect will be called every time the 'note' prop changes
-  //   setText(note.text);
-  // }, [note]);
 
   const handleSaveNote = () => {
     const updatedNote = { ...note, text };
     onSave(updatedNote);
+    navigation.goBack();
   };
 
   return (
