@@ -10,27 +10,26 @@ type AddNoteScreenProps = {
 
 const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [text, setText] = useState('');
-  
-  const createNote = async (note: Note) => {
+
+  const createNote = async (text: string) => {
     const response = await fetch("http://lived-religion-dev.rerum.io/deer-lr/create", {
       method: "POST",
       headers: {
-          'Content-Type': 'application/json'
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify(note.text)
+      body: JSON.stringify({ text })
     });
-    
+
     const obj = await response.json();
-    console.log(obj.type);
+    console.log(obj["@id"]);
     return obj["@id"];
   };
-  
+
   const saveNote = async () => {
     try {
-      const note: Note = { id: '', text };
-      const id = await createNote(note);
-      note.id = id;
-  
+      const id = await createNote(text);
+      const note: Note = { id, text };
+
       if (route.params?.onSave) {
         route.params.onSave(note);
       }
@@ -39,7 +38,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
       console.error("An error occurred while creating the note:", error);
     }
   };
-  
+
+  console.log("Rendering AddNoteScreen");
 
   return (
     <View style={styles.container}>
@@ -49,7 +49,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         onChangeText={(text) => setText(text)}
         value={text}
       />
-      <PhotoScroller/>
+      <PhotoScroller />
       <TouchableOpacity style={styles.saveButton} onPress={saveNote}>
         <Text style={styles.saveText}>Save</Text>
       </TouchableOpacity>
