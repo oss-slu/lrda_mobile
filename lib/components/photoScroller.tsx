@@ -15,7 +15,7 @@ function PhotoScroller() {
   
       if (!result.canceled && result.assets) {
         const newImageUris = result.assets.map(asset => asset.uri);
-        setNewImages(prevImages => [...prevImages, ...newImageUris]);
+        setNewImages(prevImages => [ ...newImageUris, ...prevImages]);
       }
     };
   
