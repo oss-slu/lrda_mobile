@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { Note, RootStackParamList } from '../../types';
 import PhotoScroller from '../components/photoScroller';
 
@@ -39,20 +39,29 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     }
   };
 
-  console.log("Rendering AddNoteScreen");
+  //console.log("Rendering AddNoteScreen");
 
   return (
     <View style={styles.container}>
       <TextInput
-        style={styles.input}
-        placeholder="Add a note..."
+        style={styles.title}
+        placeholder="Title you note here"
         onChangeText={(text) => setText(text)}
         value={text}
       />
-      <PhotoScroller />
-      <TouchableOpacity style={styles.saveButton} onPress={saveNote}>
-        <Text style={styles.saveText}>Save</Text>
-      </TouchableOpacity>
+      <ScrollView>
+        <PhotoScroller />
+        <TextInput
+          style={styles.input}
+          placeholder="Write your note here"
+          multiline = {true}
+          //onChangeText={(text) => setText(text)}
+          //value={text}
+        />
+        <TouchableOpacity style={styles.saveButton} onPress={saveNote}>
+          <Text style={styles.saveText}>Save</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </View>
   );
 };
@@ -63,21 +72,34 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 20,
   },
-  input: {
-    height: 40,
-    borderColor: 'gray',
+  title: {
+    height: 60,
+    borderColor: '#111111',
     borderWidth: 1,
+    borderRadius: 30,
     marginBottom: 20,
     padding: 10,
+    textAlign: 'center',
+    fontSize: 30,
+  },
+  input: {
+    height: 40,
+    borderColor: '#111111',
+    borderWidth: 1,
+    borderRadius: 10,
+    marginBottom: 20,
+    minHeight: 400,
+    padding: 10,
+    fontSize: 22,
   },
   saveButton: {
-    backgroundColor: 'lightblue',
+    backgroundColor: '#C7EBB3',
     padding: 10,
     alignItems: 'center',
     borderRadius: 5,
   },
   saveText: {
-    color: 'white',
+    color: '#111111',
     fontWeight: 'bold',
   },
 });
