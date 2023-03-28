@@ -45,7 +45,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     <View style={styles.container}>
       <TextInput
         style={styles.title}
-        placeholder="Title you note here"
+        placeholder="Title your note here"
         onChangeText={(text) => setText(text)}
         value={text}
       />
