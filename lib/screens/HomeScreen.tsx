@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Image, Text, StyleSheet, FlatList, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types';
-
-
 
 interface Note {
   id: number;
@@ -41,22 +39,36 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   const renderItem = ({ item }: { item: Note }) => {
     return (
-      <TouchableOpacity
-        style={styles.noteItem}
-        onPress={() =>
-          navigation.navigate('EditNote', { note: item, onSave: updateNote })
-        }
-      >
-        <Text style={styles.noteText}>{item.text}</Text>
-        <TouchableOpacity onPress={() => deleteNote(item.id)}>
-          <Ionicons name="trash-outline" size={24} color="black" />
+        <TouchableOpacity style={styles.noteContainer}
+          onPress={() =>
+            navigation.navigate('EditNote', { note: item, onSave: updateNote })
+          }
+        >
+          <Text style={styles.noteText}>{item.text}</Text>
+          <TouchableOpacity onPress={() => deleteNote(item.id)}>
+            <Ionicons name="trash-outline" size={24} color="#111111" />
+          </TouchableOpacity>
         </TouchableOpacity>
-      </TouchableOpacity>
     );
   };
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity style={styles.menuButton}>
+        <Ionicons name='menu-outline' size={24} color="white" />
+      </TouchableOpacity>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Image style={styles.pfp} source={require("../components/public/izak.png")} />
+        <Text style={{ marginLeft: 10, fontSize: 20, fontWeight: "600", }}>Hi, Izak</Text>
+      </View>
+
+      <Text style={styles.title}>My{"\n"}Notes</Text>
+      <ScrollView style={styles.filtersContainer} horizontal={true} showsHorizontalScrollIndicator={false}>
+          <View style={styles.filtersSelected}><Text style= {styles.selectedFont}>All ({notes.length})</Text></View>
+          <View style={styles.filters}><Text style={styles.filterFont} >St. Louis</Text></View>
+          <View style={styles.filters}><Text style={styles.filterFont} >Alphabetical</Text></View>
+          <View style={styles.filters}><Text style={styles.filterFont} >Nearest</Text></View>
+      </ScrollView>
       <FlatList
         data={notes}
         keyExtractor={(item) => item.id.toString()}
@@ -67,6 +79,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           </View>
         )}
       />
+      
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => navigation.navigate('AddNote', { onSave: addNote })}
@@ -81,13 +94,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  noteItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
   noteText: {
     flex: 1,
     fontSize: 18,
@@ -98,20 +104,93 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyText: {
-    fontSize: 18,
+    marginTop: 22,
+    fontSize: 28,
     color: '#bbb',
   },
   addButton: {
     position: 'absolute',
     bottom: 20,
     right: 20,
-    backgroundColor: 'blue',
+    backgroundColor: '#111111',
     borderRadius: 50,
     width: 50,
     height: 50,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  menuButton: {
+    position: 'absolute',
+    top: 10,
+    right: 20,
+    backgroundColor: '#111111',
+    borderRadius: 50,
+    width: 50,
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  noteContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    marginBottom: 10,
+    maxWidth: 355, 
+    padding: 20,
+    paddingHorizontal: 35,
+    flexDirection: 'row',
+  },
+  filtersContainer: {
+    //justifyContent: 'center',
+    //alignItems: 'center',
+    alignSelf: 'center',
+    borderRadius: 20,
+    paddingHorizontal: 20,
+    maxHeight: 30,
+    marginBottom: 17,
+  },
+  filters: {
+    justifyContent: 'center',
+    borderColor: '#F4DFCD',
+    borderWidth: 2,
+    borderRadius: 30,
+    marginRight: 10,
+    paddingHorizontal: 10,
+  },
+  filtersSelected: {
+    justifyContent: 'center',
+    backgroundColor: '#C7EBB3',
+    fontSize: 22,
+    borderRadius: 30,
+    marginRight: 10,
+    paddingHorizontal: 10,
+  },
+  selectedFont: {
+    fontSize: 17,
+    color: '#111111',
+    fontWeight: '700',
+  },
+  filterFont:{
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#111111',
+  },
+  title: {
+    fontSize: 72,
+    fontWeight: 'bold',
+    lineHeight: 80,
+    color: '#111111',
+    marginBottom: 10,
+  },
+  pfp: {
+    width: 50,
+    height: 50,
+    borderRadius: 50,
+    marginLeft: 3,
+    marginTop: 3,
+  }
 });
 
 export default HomeScreen;
