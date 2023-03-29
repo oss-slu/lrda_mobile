@@ -51,17 +51,20 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
       />
       <ScrollView>
         <PhotoScroller />
-        <TextInput
-          style={styles.input}
-          placeholder="Write your note here"
-          multiline = {true}
-          //onChangeText={(text) => setText(text)}
-          //value={text}
-        />
-        <TouchableOpacity style={styles.saveButton} onPress={saveNote}>
-          <Text style={styles.saveText}>Save</Text>
-        </TouchableOpacity>
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Write your note here"
+            multiline={true}
+            textAlignVertical="top" // Add this line
+            //onChangeText={(text) => setText(text)}
+            //value={text}
+          />
+        </View>
       </ScrollView>
+      <TouchableOpacity style={styles.saveButton} onPress={saveNote}>
+            <Text style={styles.saveText}>Save</Text>
+          </TouchableOpacity>
     </View>
   );
 };
@@ -82,21 +85,26 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 30,
   },
+  inputContainer: {
+    height: 400,
+    justifyContent: 'space-between',
+  },
   input: {
-    height: 40,
+    flex: 1,
     borderColor: '#111111',
     borderWidth: 1,
     borderRadius: 10,
-    marginBottom: 20,
-    minHeight: 400,
     padding: 10,
     fontSize: 22,
   },
   saveButton: {
     backgroundColor: '#C7EBB3',
+    paddingHorizontal: 120,
     padding: 10,
     alignItems: 'center',
-    borderRadius: 5,
+    borderRadius: 25,
+    marginBottom: 10,
+    alignSelf: 'center',
   },
   saveText: {
     color: '#111111',
