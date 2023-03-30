@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { Note, RootStackParamList } from '../../types';
 import PhotoScroller from '../components/photoScroller';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 type AddNoteScreenProps = {
   navigation: any;
@@ -43,13 +44,14 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
+      <KeyboardAwareScrollView showsVerticalScrollIndicator={false} style={{ overflow: 'hidden' }}>     
       <TextInput
         style={styles.title}
         placeholder="Title your note here"
         onChangeText={(text) => setText(text)}
         value={text}
       />
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false} style={{ overflow: 'hidden' }}>
         <PhotoScroller />
         <View style={styles.inputContainer}>
           <TextInput
@@ -63,8 +65,9 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         </View>
       </ScrollView>
       <TouchableOpacity style={styles.saveButton} onPress={saveNote}>
-            <Text style={styles.saveText}>Save</Text>
-          </TouchableOpacity>
+        <Text style={styles.saveText}>Save</Text>
+      </TouchableOpacity>
+      </KeyboardAwareScrollView>
     </View>
   );
 };
@@ -103,7 +106,7 @@ const styles = StyleSheet.create({
     padding: 10,
     alignItems: 'center',
     borderRadius: 25,
-    marginBottom: 10,
+    marginVertical: 10,
     alignSelf: 'center',
   },
   saveText: {

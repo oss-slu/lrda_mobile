@@ -63,11 +63,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       </View>
 
       <Text style={styles.title}>My{"\n"}Notes</Text>
-      <ScrollView style={styles.filtersContainer} horizontal={true} showsHorizontalScrollIndicator={false}>
+      <ScrollView style={styles.filtersContainer} 
+      horizontal={true} 
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={{ paddingRight: 20 }}>
           <View style={styles.filtersSelected}><Text style= {styles.selectedFont}>All ({notes.length})</Text></View>
+          <View style={styles.filters}><Text style={styles.filterFont} >Nearest</Text></View>
           <View style={styles.filters}><Text style={styles.filterFont} >St. Louis</Text></View>
           <View style={styles.filters}><Text style={styles.filterFont} >Alphabetical</Text></View>
-          <View style={styles.filters}><Text style={styles.filterFont} >Nearest</Text></View>
+          <View style={styles.filters}><Text style={styles.filterFont} >Most Recent</Text></View>
       </ScrollView>
       <FlatList
         data={notes}
@@ -145,6 +149,7 @@ const styles = StyleSheet.create({
   filtersContainer: {
     //justifyContent: 'center',
     //alignItems: 'center',
+    minHeight: 30,
     alignSelf: 'center',
     borderRadius: 20,
     paddingHorizontal: 20,

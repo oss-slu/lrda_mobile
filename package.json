@@ -20,6 +20,7 @@
     "react-native": "^0.70.5",
     "react-native-datepicker": "^1.7.2",
     "react-native-gesture-handler": "^2.9.0",
+    "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-paper": "^5.2.0",
     "react-native-web": "~0.18.9",
     "react-navigation": "^4.4.4",
