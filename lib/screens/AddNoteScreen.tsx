@@ -10,15 +10,21 @@ type AddNoteScreenProps = {
 };
 
 const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
-  const [text, setText] = useState('');
+  const [titleText, setTitleText] = useState('');
+  const [bodyText, setBodyText] = useState('');
 
-  const createNote = async (text: string) => {
+  const createNote = async (title: string, body: string) => {
     const response = await fetch("http://lived-religion-dev.rerum.io/deer-lr/create", {
       method: "POST",
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ text })
+      body: JSON.stringify({
+        "type": "message",
+        "title": title,
+        "BodyText": body,
+        "creator": "http://devstore.rerum.io/v1/id/5da75981e4b07f0c56c0f7f9"
+      })
     });
 
     const obj = await response.json();
@@ -28,8 +34,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
 
   const saveNote = async () => {
     try {
-      const id = await createNote(text);
-      const note: Note = { id, text };
+      const id = await createNote(titleText, bodyText);
+      const note: Note = { id, text: titleText };
 
       if (route.params?.onSave) {
         route.params.onSave(note);
@@ -40,16 +46,14 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     }
   };
 
-  //console.log("Rendering AddNoteScreen");
-
   return (
     <View style={styles.container}>
       <KeyboardAwareScrollView showsVerticalScrollIndicator={false} style={{ overflow: 'hidden' }}>     
       <TextInput
         style={styles.title}
         placeholder="Title your note here"
-        onChangeText={(text) => setText(text)}
-        value={text}
+        onChangeText={(text) => setTitleText(text)}
+        value={titleText}
       />
       <ScrollView showsVerticalScrollIndicator={false} style={{ overflow: 'hidden' }}>
         <PhotoScroller />
@@ -58,9 +62,9 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             style={styles.input}
             placeholder="Write your note here"
             multiline={true}
-            textAlignVertical="top" // Add this line
-            //onChangeText={(text) => setText(text)}
-            //value={text}
+            textAlignVertical="top"
+            onChangeText={(text) => setBodyText(text)}
+            value={bodyText}
           />
         </View>
       </ScrollView>
@@ -71,7 +75,6 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
