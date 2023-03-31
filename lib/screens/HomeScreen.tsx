@@ -16,12 +16,38 @@ export type HomeScreenProps = {
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [notes, setNotes] = useState<Note[]>([]);
+  const [messages, setMessages] = useState<any[]>([]);
 
   useEffect(() => {
     if (route.params?.note) {
       setNotes([...notes, route.params.note]);
     }
+    fetchMessages();
   }, [route.params]);
+
+  const fetchMessages = async () => {
+    try {
+      const response = await fetch('http://lived-religion-dev.rerum.io/deer-lr/query', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          "type": "message",
+          "creator": "http://devstore.rerum.io/v1/id/5da75981e4b07f0c56c0f7f9"
+        })
+      });
+
+      const data = await response.json();
+      setMessages(data);
+      for (let i = 0; i < messages.length; i++) {
+        console.log(messages[i].title);
+      }
+      
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    }
+  };
 
   const addNote = (note: Note) => {
     setNotes((prevNotes) => [...prevNotes, note]);
