@@ -35,7 +35,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const saveNote = async () => {
     try {
       const id = await createNote(titleText, bodyText);
-      const note: Note = { id, text: titleText };
+      const note: Note = { id, title: titleText, text: bodyText };
 
       if (route.params?.onSave) {
         route.params.onSave(note);
@@ -91,10 +91,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 30,
   },
-  inputContainer: {
-    height: 400,
-    justifyContent: 'space-between',
-  },
   input: {
     flex: 1,
     borderColor: '#111111',
@@ -102,6 +98,10 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     fontSize: 22,
+  },
+  inputContainer: {
+    height: 400,
+    justifyContent: 'space-between',
   },
   saveButton: {
     backgroundColor: '#C7EBB3',

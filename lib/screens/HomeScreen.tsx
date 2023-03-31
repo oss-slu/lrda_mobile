@@ -6,6 +6,7 @@ import { RootStackParamList } from '../../types';
 
 interface Note {
   id: number;
+  title: string;
   text: string;
 }
 
@@ -44,7 +45,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             navigation.navigate('EditNote', { note: item, onSave: updateNote })
           }
         >
-          <Text style={styles.noteText}>{item.text}</Text>
+          <Text style={styles.noteText}>{item.title}</Text>
           <TouchableOpacity onPress={() => deleteNote(item.id)}>
             <Ionicons name="trash-outline" size={24} color="#111111" />
           </TouchableOpacity>
