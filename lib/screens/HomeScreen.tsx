@@ -45,7 +45,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     const fetchedNotes: Note[] = data.map((message: any) => ({
       id: message['@id'],
       title: message.title || '',
-      text: message.text || '' // Fallback to an empty string if 'text' is not available in the fetched message
+      text: message.BodyText || '' // Fallback to an empty string if 'text' is not available in the fetched message
     }));
     setNotes(fetchedNotes);
   } catch (error) {
