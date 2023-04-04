@@ -41,13 +41,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
       const data = await response.json();
       setMessages(data);
-      for (let i = 0; i < messages.length; i++) {
-        console.log(messages[i].title);
-      }
-      
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-    }
+      // Map fetched messages to notes
+    const fetchedNotes: Note[] = data.map((message: any) => ({
+      id: message['@id'],
+      title: message.title || '',
+      text: message.text || '' // Fallback to an empty string if 'text' is not available in the fetched message
+    }));
+    setNotes(fetchedNotes);
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+  }
   };
 
   const addNote = (note: Note) => {
