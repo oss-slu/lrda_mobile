@@ -22,44 +22,68 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({ route, navigation }) =>
   const { note, onSave } = route.params;
   const [title, setTitle] = useState(note.title);
   const [text, setText] = useState(note.text);
-  //console.log(note);
+
+  const updateNote = async (updatedNote: Note) => {
+    try {
+      const response = await fetch('http://lived-religion-dev.rerum.io/deer-lr/overwrite', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          '@id': updatedNote.id,
+          'title': updatedNote.title,
+          'BodyText': updatedNote.text,
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Error updating the note.');
+      }
+
+      // Update note in the app
+      onSave(updatedNote);
+      navigation.goBack();
+    } catch (error) {
+      console.error('Error updating the note:', error);
+    }
+  };
 
   const handleSaveNote = () => {
     const updatedNote = { ...note, title, text };
-    onSave(updatedNote);
-    navigation.goBack();
+    updateNote(updatedNote);
   };
 
   return (
     <View style={styles.container}>
       <KeyboardAwareScrollView showsVerticalScrollIndicator={false} style={{ overflow: 'hidden' }}>
-      <TextInput
-        style={styles.title}
-        value={title}
-        onChangeText={setTitle}
-      />
+        <TextInput
+          style={styles.title}
+          value={title}
+          onChangeText={setTitle}
+        />
 
-
-      <ScrollView showsVerticalScrollIndicator={false} style={{ overflow: 'hidden' }}>
-        <PhotoScroller />
-        <View style={styles.inputContainer}>
+        <ScrollView showsVerticalScrollIndicator={false} style={{ overflow: 'hidden' }}>
+          <PhotoScroller />
+          <View style={styles.inputContainer}>
             <TextInput
-            style={styles.input}
-            multiline={true}
-            textAlignVertical="top"
-            value={text}
-            onChangeText={setText}
+              style={styles.input}
+              multiline={true}
+              textAlignVertical="top"
+              value={text}
+              onChangeText={setText}
             />
-        </View>
-      </ScrollView>
-      
-      <TouchableOpacity style={styles.saveButton} onPress={handleSaveNote}>
-        <Text style={styles.saveText}>Save Changes</Text>
-      </TouchableOpacity>
+          </View>
+        </ScrollView>
+
+        <TouchableOpacity style={styles.saveButton} onPress={handleSaveNote}>
+          <Text style={styles.saveText}>Save Changes</Text>
+        </TouchableOpacity>
       </KeyboardAwareScrollView>
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
