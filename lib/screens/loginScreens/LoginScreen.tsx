@@ -85,6 +85,8 @@ const styles = StyleSheet.create({
       height: 50,
       color: "#111111",
       fontSize: 16,
+      width: "100%",
+      borderRadius: 25, 
     },
     forgot: {
       color: '#111111',
