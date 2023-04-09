@@ -15,7 +15,7 @@ function PhotoScroller() {
   
       if (!result.canceled && result.assets) {
         const newImageUris = result.assets.map(asset => asset.uri);
-        setNewImages(prevImages => [...prevImages, ...newImageUris]);
+        setNewImages(prevImages => [ ...newImageUris, ...prevImages]);
       }
     };
   
@@ -32,19 +32,22 @@ function PhotoScroller() {
             </TouchableOpacity>
           ))}
           <TouchableOpacity>
-            <Image style={styles.image} source={require("./public/cityScape.png")} />
+            <Image style={styles.image} source={require("./public/festival.png")} />
           </TouchableOpacity>
           <TouchableOpacity>
-            <Image style={styles.image} source={require("./public/darkOx.png")} />
+            <Image style={styles.image} source={require("./public/church.png")} />
           </TouchableOpacity>
           <TouchableOpacity>
-            <Image style={styles.image} source={require("./public/ox.png")} />
+            <Image style={styles.image} source={require("./public/gallery.png")} />
           </TouchableOpacity>
           <TouchableOpacity>
-            <Image style={styles.image} source={require("./public/darkPenguin.png")} />
+            <Image style={styles.image} source={require("./public/blues.png")} />
           </TouchableOpacity>
           <TouchableOpacity>
-            <Image style={styles.image} source={require("./public/penguin.png")} />
+            <Image style={styles.image} source={require("./public/islam.png")} />
+          </TouchableOpacity>
+          <TouchableOpacity>
+            <Image style={styles.image} source={require("./public/stadium.png")} />
           </TouchableOpacity>
         </ScrollView>
       </View>
