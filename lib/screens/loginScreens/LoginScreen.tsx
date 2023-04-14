@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-// main.ts
 import { User } from '../../utils/user_class';
 
 const user = User.getInstance();

@@ -31,7 +31,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({ route, navigation }) =>
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          "type" : "message",
           '@id': updatedNote.id,
           'title': updatedNote.title,
           'BodyText': updatedNote.text,
