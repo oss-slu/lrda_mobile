@@ -1,6 +1,6 @@
-<<<<<<< HEAD
+
 # lrda_mobile
-=======
+
 ## LRDA Mobile
 This is the mobile app for the Lived Religion Application (LRDA). The app is built using React Native and connects to the Rerum Website to provide Ethnographers an application which is easily accsible and they can share their data worldwide.
 
@@ -31,4 +31,4 @@ You can launch the app on your device or emulator using the npm run start comman
 
 ## License
 LRDA Mobile is released under the MIT License.
->>>>>>> origin/main
+
