@@ -3,9 +3,6 @@ import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-nativ
 import { Ionicons } from '@expo/vector-icons';
 import { User } from '../../utils/user_class';
 
-const user = User.getInstance();
-user.login("Stuart Ray", "4");
-
 type LoginProps = {
   navigation: any;
   route: any;
