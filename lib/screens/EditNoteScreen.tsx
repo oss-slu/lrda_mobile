@@ -5,6 +5,11 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Note } from '../../types';
 import PhotoScroller from '../components/photoScroller';
+import { User } from '../utils/user_class';
+
+const user = User.getInstance();
+user.login("Stuart Ray", "4");
+console.log(user.getId());
 
 export type EditNoteScreenProps = {
   route: {
@@ -26,7 +31,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({ route, navigation }) =>
   const updateNote = async (updatedNote: Note) => {
     try {
       const response = await fetch('http://lived-religion-dev.rerum.io/deer-lr/overwrite', {
-        method: 'POST',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
@@ -34,6 +39,8 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({ route, navigation }) =>
           '@id': updatedNote.id,
           'title': updatedNote.title,
           'BodyText': updatedNote.text,
+          "type": "message",
+          "creator": "http://devstore.rerum.io/v1/id/5da75981e4b07f0c56c0f7f9"
         })
       });
 
