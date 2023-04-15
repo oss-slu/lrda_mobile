@@ -40,7 +40,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({ route, navigation }) =>
           'title': updatedNote.title,
           'BodyText': updatedNote.text,
           "type": "message",
-          "creator": "http://devstore.rerum.io/v1/id/5da75981e4b07f0c56c0f7f9"
+          "creator": user.getId(), //"http://devstore.rerum.io/v1/id/5da75981e4b07f0c56c0f7f9"
         })
       });
 
