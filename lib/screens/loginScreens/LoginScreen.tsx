@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Ionicons } from '@expo/vector-icons';
 import { Snackbar } from 'react-native-paper';
 
@@ -42,11 +43,11 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
     }
   };
   
-  
-
   return (
-    <View style={styles.container}>
-    <Text style={[styles.logo, { marginTop: -40 }]}>Where's Religion</Text>
+    <KeyboardAwareScrollView contentContainerStyle={styles.container}
+      style={{backgroundColor: '#F4DFCD',}}
+      >
+      <Text style={[styles.logo, { marginTop: -40 }]}>Where's Religion</Text>
 
       <View style={styles.inputView}>
         <TextInput
@@ -68,33 +69,36 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
         <TouchableOpacity>
             <Text style={styles.forgot}>Forgot Password?</Text>
         </TouchableOpacity>
-    <View style = {styles.buttons}>
+      <View style = {styles.buttons}>
         <TouchableOpacity style={styles.loginBtn} onPress={handleLogin}>
-            <Text style={styles.loginText}>LOGIN</Text>
+          <Text style={styles.loginText}>LOGIN</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.Btn} onPress={handleGoRegister}>
-            <Text style={styles.loginText}>Register</Text>
+          <Text style={styles.loginText}>Register</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.skip} onPress={handleGoHome}>
-            <Text style={{color: 'white', fontSize: 18, marginRight: 20,}}>Skip</Text>
-            <Ionicons name="arrow-forward-outline" size={24} color="white" />
+          <Text style={{color: 'white', fontSize: 18, marginRight: 20,}}>Skip</Text>
+          <Ionicons name="arrow-forward-outline" size={24} color="white" />
         </TouchableOpacity>
       </View>
       <Snackbar
         visible={snackState}
-        onDismiss={onDismissSnackBar}>
+        onDismiss={onDismissSnackBar}
+        style = {{justifyContent: 'center', alignItems: 'center', backgroundColor: 'white',}}
+        >
+        <Text style={{ textAlign: 'center', }}>
           Invalid User Credentials
+        </Text>
       </Snackbar>
-    </View>
+    </KeyboardAwareScrollView>
   );
-}
+};
 
 const styles = StyleSheet.create({
     container: {
       flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#F4DFCD',
     },
     logo: {
       fontWeight: "bold",
