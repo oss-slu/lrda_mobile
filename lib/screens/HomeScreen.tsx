@@ -11,8 +11,8 @@ interface Note {
   text: string;
 }
 const user = User.getInstance();
-user.login("Stuart Ray", "4");
-console.log(user.getId());
+// user.login("Stuart Ray", "4");
+// console.log(user.getId());
 
 export type HomeScreenProps = {
   navigation: any;
@@ -93,7 +93,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       </TouchableOpacity>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <Image style={styles.pfp} source={require("../components/public/izak.png")} />
-        <Text style={{ marginLeft: 10, fontSize: 20, fontWeight: "600", }}>Hi, Izak</Text>
+        <Text style={{ marginLeft: 10, fontSize: 20, fontWeight: "600", }}>Hi, {user.getName()}</Text>
       </View>
 
       <Text style={styles.title}>My{"\n"}Notes</Text>

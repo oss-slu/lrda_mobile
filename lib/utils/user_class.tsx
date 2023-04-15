@@ -20,7 +20,7 @@ export class User {
     return User.instance;
   }
 
-  public async login(username: string, password: string): Promise<void> {
+  public async login(username: string, password: string): Promise<string> {
     try {
       const response = await fetch('http://lived-religion-dev.rerum.io/deer-lr/login', {
         method: "POST",
@@ -34,16 +34,19 @@ export class User {
           password: password
         })
       });
-
+  
       if (response.ok) {
         this.userData = await response.json();
+        return "success";
       } else {
         throw new Error("There was a server error logging in.");
       }
     } catch (error) {
       console.error(error);
+      return Promise.reject(error);
     }
   }
+  
 
   public getId(): string | null {
     return this.userData?.["@id"] ?? null;
