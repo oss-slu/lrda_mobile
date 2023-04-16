@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Ionicons } from '@expo/vector-icons';
+import { Snackbar } from 'react-native-paper';
+
+// main.ts
+import { User } from '../../utils/user_class';
+
+const user = User.getInstance();
 
 type LoginProps = {
   navigation: any;
@@ -8,8 +15,9 @@ type LoginProps = {
 };
 
 const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [snackState, toggleSnack] = useState(false);
 
   const handleGoHome = () => {
     navigation.navigate("Home");
@@ -18,16 +26,35 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
     navigation.navigate("Register");
   };
 
+  const onDismissSnackBar = () => toggleSnack(false);
+
+  const handleLogin = async () => {
+    if (username === '' || password === '') {
+      toggleSnack(!snackState);
+    } else {
+      try {
+        const status = await user.login(username, password);
+        if(status == 'success'){
+          handleGoHome();
+        }
+      } catch (error) {
+        toggleSnack(true);
+      }
+    }
+  };
+  
   return (
-    <View style={styles.container}>
-    <Text style={[styles.logo, { marginTop: -40 }]}>Where's Religion</Text>
+    <KeyboardAwareScrollView contentContainerStyle={styles.container}
+      style={{backgroundColor: '#F4DFCD',}}
+      >
+      <Text style={[styles.logo, { marginTop: -40 }]}>Where's Religion</Text>
 
       <View style={styles.inputView}>
         <TextInput
           style={styles.inputText}
-          placeholder="Email..."
+          placeholder="Username..."
           placeholderTextColor="#003f5c"
-          onChangeText={text => setEmail(text)}
+          onChangeText={text => setUsername(text)}
         />
       </View>
       <View style={styles.inputView}>
@@ -42,28 +69,36 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
         <TouchableOpacity>
             <Text style={styles.forgot}>Forgot Password?</Text>
         </TouchableOpacity>
-    <View style = {styles.buttons}>
-        <TouchableOpacity style={styles.loginBtn}>
-            <Text style={styles.loginText}>LOGIN</Text>
+      <View style = {styles.buttons}>
+        <TouchableOpacity style={styles.loginBtn} onPress={handleLogin}>
+          <Text style={styles.loginText}>LOGIN</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.Btn} onPress={handleGoRegister}>
-            <Text style={styles.loginText}>Register</Text>
+          <Text style={styles.loginText}>Register</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.skip} onPress={handleGoHome}>
-            <Text style={{color: 'white', fontSize: 18, marginRight: 20,}}>Skip</Text>
-            <Ionicons name="arrow-forward-outline" size={24} color="white" />
+          <Text style={{color: 'white', fontSize: 18, marginRight: 20,}}>Skip</Text>
+          <Ionicons name="arrow-forward-outline" size={24} color="white" />
         </TouchableOpacity>
       </View>
-    </View>
+      <Snackbar
+        visible={snackState}
+        onDismiss={onDismissSnackBar}
+        style = {{justifyContent: 'center', alignItems: 'center', backgroundColor: 'white',}}
+        >
+        <Text style={{ textAlign: 'center', }}>
+          Invalid User Credentials
+        </Text>
+      </Snackbar>
+    </KeyboardAwareScrollView>
   );
-}
+};
 
 const styles = StyleSheet.create({
     container: {
       flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#F4DFCD',
     },
     logo: {
       fontWeight: "bold",
@@ -144,3 +179,4 @@ const styles = StyleSheet.create({
   
 
 export default LoginScreen;
+

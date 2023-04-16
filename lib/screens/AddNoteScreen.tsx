@@ -3,6 +3,13 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 
 import { Note, RootStackParamList } from '../../types';
 import PhotoScroller from '../components/photoScroller';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { User } from '../utils/user_class';
+
+
+const user = User.getInstance();
+user.login("Stuart Ray", "4");
+console.log(user.getId());
+
 
 type AddNoteScreenProps = {
   navigation: any;
@@ -23,7 +30,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         "type": "message",
         "title": title,
         "BodyText": body,
-        "creator": "http://devstore.rerum.io/v1/id/5da75981e4b07f0c56c0f7f9"
+        "creator": user.getId()
       })
     });
 
