@@ -3,8 +3,6 @@ import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-nativ
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Ionicons } from '@expo/vector-icons';
 import { Snackbar } from 'react-native-paper';
-
-// main.ts
 import { User } from '../../utils/user_class';
 
 const user = User.getInstance();
@@ -19,9 +17,15 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   const [password, setPassword] = useState("");
   const [snackState, toggleSnack] = useState(false);
 
+
   const handleGoHome = () => {
     navigation.navigate("Home");
   };
+    // temp adding a login for stuart if we click skip
+  const handleSkip = async () => {
+    await user.login("Stuart Ray", "4");
+    handleGoHome();
+  }
   const handleGoRegister = () => {
     navigation.navigate("Register");
   };
@@ -76,7 +80,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
         <TouchableOpacity style={styles.Btn} onPress={handleGoRegister}>
           <Text style={styles.loginText}>Register</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.skip} onPress={handleGoHome}>
+        <TouchableOpacity style={styles.skip} onPress={handleSkip}>
           <Text style={{color: 'white', fontSize: 18, marginRight: 20,}}>Skip</Text>
           <Ionicons name="arrow-forward-outline" size={24} color="white" />
         </TouchableOpacity>

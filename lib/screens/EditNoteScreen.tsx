@@ -8,8 +8,7 @@ import PhotoScroller from '../components/photoScroller';
 import { User } from '../utils/user_class';
 
 const user = User.getInstance();
-// user.login("Stuart Ray", "4");
-// console.log(user.getId());
+console.log("User id: ", user.getId());
 
 export type EditNoteScreenProps = {
   route: {
@@ -40,7 +39,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({ route, navigation }) =>
           'title': updatedNote.title,
           'BodyText': updatedNote.text,
           "type": "message",
-          "creator": user.getId(), //"http://devstore.rerum.io/v1/id/5da75981e4b07f0c56c0f7f9"
+          "creator": user.getId(), 
         })
       });
 
