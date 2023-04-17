@@ -17,7 +17,10 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   const [password, setPassword] = useState("");
   const [snackState, toggleSnack] = useState(false);
 
+
+  // temp adding a login for stuart if we click skip
   const handleGoHome = () => {
+    user.login("Stuart Ray", "4");
     navigation.navigate("Home");
   };
   const handleGoRegister = () => {
