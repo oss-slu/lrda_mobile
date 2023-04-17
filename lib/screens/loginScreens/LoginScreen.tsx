@@ -18,11 +18,14 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   const [snackState, toggleSnack] = useState(false);
 
 
-  // temp adding a login for stuart if we click skip
   const handleGoHome = () => {
-    user.login("Stuart Ray", "4");
     navigation.navigate("Home");
   };
+    // temp adding a login for stuart if we click skip
+  const handleSkip = async () => {
+    await user.login("Stuart Ray", "4");
+    handleGoHome();
+  }
   const handleGoRegister = () => {
     navigation.navigate("Register");
   };
@@ -77,7 +80,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
         <TouchableOpacity style={styles.Btn} onPress={handleGoRegister}>
           <Text style={styles.loginText}>Register</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.skip} onPress={handleGoHome}>
+        <TouchableOpacity style={styles.skip} onPress={handleSkip}>
           <Text style={{color: 'white', fontSize: 18, marginRight: 20,}}>Skip</Text>
           <Ionicons name="arrow-forward-outline" size={24} color="white" />
         </TouchableOpacity>
