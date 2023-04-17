@@ -8,8 +8,7 @@ import PhotoScroller from '../components/photoScroller';
 import { User } from '../utils/user_class';
 
 const user = User.getInstance();
-// user.login("Stuart Ray", "4");
-// console.log(user.getId());
+console.log("User id: ", user.getId());
 
 export type EditNoteScreenProps = {
   route: {

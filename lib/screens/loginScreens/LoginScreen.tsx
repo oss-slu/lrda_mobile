@@ -3,8 +3,6 @@ import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-nativ
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Ionicons } from '@expo/vector-icons';
 import { Snackbar } from 'react-native-paper';
-
-// main.ts
 import { User } from '../../utils/user_class';
 
 const user = User.getInstance();

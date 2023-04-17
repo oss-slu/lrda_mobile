@@ -11,8 +11,7 @@ interface Note {
   text: string;
 }
 const user = User.getInstance();
-// user.login("Stuart Ray", "4");
-// console.log(user.getId());
+console.log("User id: ", user.getId());
 
 export type HomeScreenProps = {
   navigation: any;
