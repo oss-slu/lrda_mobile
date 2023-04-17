@@ -11,6 +11,7 @@ interface Note {
   text: string;
 }
 const user = User.getInstance();
+user.login("Stuart Ray", "4");
 console.log("User id: ", user.getId());
 
 export type HomeScreenProps = {
@@ -66,9 +67,42 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     );
   };
 
-  const deleteNote = (id: string) => {
-    setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
+  const deleteNoteFromAPI = async (id: string) => {
+    try {
+      const url = `http://lived-religion-dev.rerum.io/deer-lr/delete`;
+      const response = await fetch(url, {
+        method: 'DELETE',
+        headers: new Headers({
+          'Content-Type': 'text/plain; charset=utf-8',
+        }),
+        body: JSON.stringify({
+          "type": "message",
+          "creator": user.getId(),
+          "@id": id
+        })
+      });
+      console.log(response);
+  
+      if (response.status === 204) {
+        return true;
+      } else {
+        console.log(response);
+        throw response;
+      }
+    } catch (error) {
+      console.error('Error deleting note:', error);
+      return false;
+    }
   };
+  
+  
+  const deleteNote = async (id: string) => {
+    const success = await deleteNoteFromAPI(id);
+    if (success) {
+      setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
+    }
+  };
+  
 
   const renderItem = ({ item }: { item: Note }) => {
     return (
