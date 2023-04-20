@@ -1,23 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import { View, Image, ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { launchImageLibraryAsync, MediaTypeOptions } from 'expo-image-picker';
+// import heic2any from 'react-native-heic-converter';
 
 function PhotoScroller() {
-    const [newImages, setNewImages] = useState<string[]>([]);
-  
-    const handleNewImage = async () => {
-      const result = await launchImageLibraryAsync({
-        mediaTypes: MediaTypeOptions.All,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
-      });
-  
-      if (!result.canceled && result.assets) {
-        const newImageUris = result.assets.map(asset => asset.uri);
-        setNewImages(prevImages => [ ...newImageUris, ...prevImages]);
-      }
-    };
+  const [newImages, setNewImages] = useState<string[]>([]);
+
+  const handleNewImage = async () => {
+    const result = await launchImageLibraryAsync({
+      mediaTypes: MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    // if (!result.canceled && result.assets) {
+    //   const newImageUris = await Promise.all(
+    //     result.assets.map(async (asset) => {
+    //       if (asset.uri.endsWith('.heic')) {
+    //         const convertedBlob = await heic2any({blob: await fetch(asset.uri).then(res => res.blob())});
+    //         const convertedUri = URL.createObjectURL(convertedBlob);
+    //         return convertedUri;
+    //       } else {
+    //         return asset.uri;
+    //       }
+    //     }),
+    //   );
+    //   setNewImages((prevImages) => [...newImageUris, ...prevImages]);
+    // }
+  };
   
     return (
       <View style={styles.container}>
