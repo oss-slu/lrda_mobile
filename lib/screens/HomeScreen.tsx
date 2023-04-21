@@ -160,7 +160,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   };
 
   const handleLogout = () => {
-    // Implement User Logout
+    user.logout();
     navigation.navigate("Login");
   };
 
