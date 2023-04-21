@@ -22,7 +22,7 @@ export type HomeScreenProps = {
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const [drawerAnimation] = useState(new Animated.Value(0));
   const [buttonAnimation] = useState(new Animated.Value(0));
 
@@ -50,7 +50,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     if (isOpen) {
       Animated.timing(buttonAnimation, {
         toValue: 1,
-        duration: 400,
+        duration: 500,
         useNativeDriver: true,
       }).start();
     } else {
