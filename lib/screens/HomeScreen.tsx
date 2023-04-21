@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { View, Image, Text, StyleSheet, FlatList, ScrollView, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../../types';
-import { User } from '../utils/user_class';
+import React, { useState, useEffect, useRef } from "react";
+import { View, Image, Text, StyleSheet, FlatList, ScrollView, TouchableOpacity, Animated } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../../types";
+import { User } from "../utils/user_class";
+
 
 interface Note {
   id: string;
@@ -11,16 +12,77 @@ interface Note {
   text: string;
 }
 const user = User.getInstance();
-console.log("User id: ", user.getId());
+// console.log("User id: ", user.getId());
 
 export type HomeScreenProps = {
   navigation: any;
   route: { params?: { note: Note; onSave: (note: Note) => void } };
-}
+};
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [drawerAnimation] = useState(new Animated.Value(0));
+  const [buttonAnimation] = useState(new Animated.Value(0));
+
+  const toggleDrawer = () => {
+    setIsOpen(!isOpen);
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      Animated.timing(drawerAnimation, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      Animated.timing(drawerAnimation, {
+        toValue: 0,
+        duration: 400,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen) {
+      Animated.timing(buttonAnimation, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      Animated.timing(buttonAnimation, {
+        toValue: 0,
+        duration: 400,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [isOpen]);
+
+  const animatedStyles = {
+    transform: [
+      {
+        translateX: drawerAnimation.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, 500],
+        }),
+      },
+    ],
+  };
+
+  const buttonAnimatedStyles = {
+    transform: [
+      {
+        rotate: buttonAnimation.interpolate({
+          inputRange: [0, 1],
+          outputRange: ['0deg', '180deg'],
+        }),
+      },
+    ],
+  };
 
   useEffect(() => {
     if (route.params?.note) {
@@ -31,29 +93,32 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   const fetchMessages = async () => {
     try {
-      const response = await fetch('http://lived-religion-dev.rerum.io/deer-lr/query', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          "type": "message",
-          "creator": user.getId()
-        })
-      });
+      const response = await fetch(
+        "http://lived-religion-dev.rerum.io/deer-lr/query",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            type: "message",
+            creator: user.getId(),
+          }),
+        }
+      );
 
       const data = await response.json();
       setMessages(data);
       // Map fetched messages to notes
-    const fetchedNotes: Note[] = data.map((message: any) => ({
-      id: message['@id'],
-      title: message.title || '',
-      text: message.BodyText || '' // Fallback to an empty string if 'text' is not available in the fetched message
-    }));
-    setNotes(fetchedNotes);
-  } catch (error) {
-    console.error('Error fetching messages:', error);
-  }
+      const fetchedNotes: Note[] = data.map((message: any) => ({
+        id: message["@id"],
+        title: message.title || "",
+        text: message.BodyText || "", // Fallback to an empty string if 'text' is not available in the fetched message
+      }));
+      setNotes(fetchedNotes);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    }
   };
 
   const addNote = (note: Note) => {
@@ -70,18 +135,18 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     try {
       const url = `http://lived-religion-dev.rerum.io/deer-lr/delete`;
       const response = await fetch(url, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: new Headers({
-          'Content-Type': 'text/plain; charset=utf-8',
+          "Content-Type": "text/plain; charset=utf-8",
         }),
         body: JSON.stringify({
-          "type": "message",
-          "creator": user.getId(),
-          "@id": id
-        })
+          type: "message",
+          creator: user.getId(),
+          "@id": id,
+        }),
       });
       console.log(response);
-  
+
       if (response.status === 204) {
         return true;
       } else {
@@ -89,55 +154,94 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         throw response;
       }
     } catch (error) {
-      console.error('Error deleting note:', error);
+      console.error("Error deleting note:", error);
       return false;
     }
   };
-  
-  
+
+  const handleLogout = () => {
+    // Implement User Logout
+    navigation.navigate("Login");
+  };
+
   const deleteNote = async (id: string) => {
     const success = await deleteNoteFromAPI(id);
     if (success) {
       setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
     }
   };
-  
 
   const renderItem = ({ item }: { item: Note }) => {
     return (
-        <TouchableOpacity style={styles.noteContainer}
-          onPress={() =>
-            navigation.navigate('EditNote', { note: item, onSave: updateNote })
-          }
-        >
-          <Text style={styles.noteText}>{item.title}</Text>
-          <TouchableOpacity onPress={() => deleteNote(item.id)}>
-            <Ionicons name="trash-outline" size={24} color="#111111" />
-          </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.noteContainer}
+        onPress={() =>
+          navigation.navigate("EditNote", { note: item, onSave: updateNote })
+        }
+      >
+        <Text style={styles.noteText}>{item.title}</Text>
+        <TouchableOpacity onPress={() => deleteNote(item.id)}>
+          <Ionicons name="trash-outline" size={24} color="#111111" />
         </TouchableOpacity>
+      </TouchableOpacity>
     );
   };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.menuButton}>
-        <Ionicons name='menu-outline' size={24} color="white" />
+       <Animated.View style={[styles.drawer, animatedStyles]}>
+        <Animated.View style={[buttonAnimatedStyles]}>
+          <TouchableOpacity style={styles.backButton} onPress={toggleDrawer}>
+            <Ionicons
+              name={isOpen ? "chevron-back-outline" : "chevron-forward-outline"}
+              size={24}
+              color="white"
+            />
+          </TouchableOpacity>
+        </Animated.View>
+        <TouchableOpacity onPress={handleLogout}>
+          <Text style={styles.mediumText}>Logout</Text>
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Text style={styles.mediumText}>Account</Text>
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Text style={styles.mediumText}>Friends</Text>
+        </TouchableOpacity>
+      </Animated.View>
+      <TouchableOpacity onPress={toggleDrawer} style={styles.menuButton}>
+        <Ionicons name="menu-outline" size={24} color="white" />
       </TouchableOpacity>
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <Image style={styles.pfp} source={require("../components/public/izak.png")} />
-        <Text style={{ marginLeft: 10, fontSize: 20, fontWeight: "600", }}>Hi, {user.getName()}</Text>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Image
+          style={styles.pfp}
+          source={require("../components/public/izak.png")}
+        />
+        <Text style={styles.mediumText}>Hi, {user.getName()}</Text>
       </View>
 
-      <Text style={styles.title}>My{"\n"}Notes</Text>
-      <ScrollView style={styles.filtersContainer} 
-      horizontal={true} 
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ paddingRight: 20 }}>
-          <View style={styles.filtersSelected}><Text style= {styles.selectedFont}>All ({notes.length})</Text></View>
-          <View style={styles.filters}><Text style={styles.filterFont} >Nearest</Text></View>
-          <View style={styles.filters}><Text style={styles.filterFont} >St. Louis</Text></View>
-          <View style={styles.filters}><Text style={styles.filterFont} >Alphabetical</Text></View>
-          <View style={styles.filters}><Text style={styles.filterFont} >Most Recent</Text></View>
+      <Text style={styles.title}>Field{"\n"}Notes</Text>
+      <ScrollView
+        style={styles.filtersContainer}
+        horizontal={true}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingRight: 20 }}
+      >
+        <View style={styles.filtersSelected}>
+          <Text style={styles.selectedFont}>All ({notes.length})</Text>
+        </View>
+        <View style={styles.filters}>
+          <Text style={styles.filterFont}>Nearest</Text>
+        </View>
+        <View style={styles.filters}>
+          <Text style={styles.filterFont}>St. Louis</Text>
+        </View>
+        <View style={styles.filters}>
+          <Text style={styles.filterFont}>Alphabetical</Text>
+        </View>
+        <View style={styles.filters}>
+          <Text style={styles.filterFont}>Most Recent</Text>
+        </View>
       </ScrollView>
       <FlatList
         data={notes}
@@ -149,10 +253,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           </View>
         )}
       />
-      
+
       <TouchableOpacity
         style={styles.addButton}
-        onPress={() => navigation.navigate('AddNote', { onSave: addNote })}
+        onPress={() => navigation.navigate("AddNote", { onSave: addNote })}
       >
         <Ionicons name="add-outline" size={24} color="white" />
       </TouchableOpacity>
@@ -162,7 +266,32 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
 const styles = StyleSheet.create({
   container: {
+    paddingTop: 50,
     flex: 1,
+  },
+  drawer: {
+    paddingTop: "30%",
+    height: 100000,
+    width: 200,
+    position: "absolute",
+    backgroundColor: "white",
+    zIndex: 99,
+    right: 0,
+  },
+  backButton: {
+    margin: "7%",
+    backgroundColor: "#111111",
+    borderRadius: 50,
+    width: 50,
+    height: 50,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  mediumText: {
+    marginLeft: 10,
+    fontSize: 20,
+    fontWeight: "600",
+    maxWidth: "100%",
   },
   noteText: {
     flex: 1,
@@ -170,69 +299,70 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   emptyText: {
     marginTop: 22,
     fontSize: 28,
-    color: '#bbb',
+    color: "#bbb",
   },
   addButton: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 20,
     right: 20,
-    backgroundColor: '#111111',
+    backgroundColor: "#111111",
     borderRadius: 50,
     width: 50,
     height: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   menuButton: {
-    position: 'absolute',
-    top: 10,
+    position: "absolute",
+    top: 50,
     right: 20,
-    backgroundColor: '#111111',
+    backgroundColor: "#111111",
     borderRadius: 50,
     width: 50,
     height: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 20,
   },
   noteContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    alignSelf: 'center',
-    backgroundColor: '#fff',
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
+    backgroundColor: "#fff",
     borderRadius: 20,
     marginBottom: 10,
-    maxWidth: 355, 
+    maxWidth: 355,
     padding: 20,
     paddingHorizontal: 35,
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   filtersContainer: {
-    //justifyContent: 'center',
-    //alignItems: 'center',
     minHeight: 30,
-    alignSelf: 'center',
+    alignSelf: "center",
     borderRadius: 20,
     paddingHorizontal: 20,
     maxHeight: 30,
     marginBottom: 17,
+    zIndex: 10,
   },
   filters: {
-    justifyContent: 'center',
-    borderColor: '#F4DFCD',
+    justifyContent: "center",
+    borderColor: "#F4DFCD",
     borderWidth: 2,
     borderRadius: 30,
     marginRight: 10,
     paddingHorizontal: 10,
+    zIndex: 10,
   },
   filtersSelected: {
-    justifyContent: 'center',
-    backgroundColor: '#C7EBB3',
+    justifyContent: "center",
+    backgroundColor: "#C7EBB3",
     fontSize: 22,
     borderRadius: 30,
     marginRight: 10,
@@ -240,19 +370,19 @@ const styles = StyleSheet.create({
   },
   selectedFont: {
     fontSize: 17,
-    color: '#111111',
-    fontWeight: '700',
+    color: "#111111",
+    fontWeight: "700",
   },
-  filterFont:{
+  filterFont: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#111111',
+    fontWeight: "600",
+    color: "#111111",
   },
   title: {
     fontSize: 72,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     lineHeight: 80,
-    color: '#111111',
+    color: "#111111",
     marginBottom: 10,
   },
   pfp: {
@@ -261,7 +391,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     marginLeft: 3,
     marginTop: 3,
-  }
+  },
 });
 
 export default HomeScreen;
