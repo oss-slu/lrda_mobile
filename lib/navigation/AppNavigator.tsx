@@ -26,17 +26,17 @@ const AppNavigator: React.FC = () => {
         <Stack.Screen
           name="Home"
           component={(props: HomeScreenProps) => <HomeScreen {...props} />}
-          options={{ title: 'Notes' }}
+          options={{ headerShown: false, gestureEnabled: false}}
         />
         <Stack.Screen
           name="AddNote"
           component={AddNoteScreen}
-          options={{ title: 'Add Note' }}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="EditNote"
           component={(props: EditNoteProps) => <EditNote {...props} />}
-          options={{ title: 'Edit Note' }}
+          options={{headerShown: false }}
         />
         <Stack.Screen
           name="Login"
