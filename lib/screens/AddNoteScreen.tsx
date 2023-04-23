@@ -1,14 +1,13 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
-import { Note, RootStackParamList } from '../../types';
-import PhotoScroller from '../components/photoScroller';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { User } from '../utils/user_class';
-
+import React, { useState } from "react";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import { Note, RootStackParamList } from "../../types";
+import PhotoScroller from "../components/photoScroller";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { User } from "../utils/user_class";
+import { Ionicons } from "@expo/vector-icons";
 
 const user = User.getInstance();
-console.log("User id: ", user.getId());
-
+// console.log("User id: ", user.getId());
 
 type AddNoteScreenProps = {
   navigation: any;
@@ -16,22 +15,25 @@ type AddNoteScreenProps = {
 };
 
 const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
-  const [titleText, setTitleText] = useState('');
-  const [bodyText, setBodyText] = useState('');
+  const [titleText, setTitleText] = useState("");
+  const [bodyText, setBodyText] = useState("");
 
   const createNote = async (title: string, body: string) => {
-    const response = await fetch("http://lived-religion-dev.rerum.io/deer-lr/create", {
-      method: "POST",
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        "type": "message",
-        "title": title,
-        "BodyText": body,
-        "creator": user.getId()
-      })
-    });
+    const response = await fetch(
+      "http://lived-religion-dev.rerum.io/deer-lr/create",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          type: "message",
+          title: title,
+          BodyText: body,
+          creator: user.getId(),
+        }),
+      }
+    );
 
     const obj = await response.json();
     console.log(obj["@id"]);
@@ -53,74 +55,128 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <KeyboardAwareScrollView showsVerticalScrollIndicator={false} style={{ overflow: 'hidden' }}>     
-      <TextInput
-        style={styles.title}
-        placeholder="Title your note here"
-        onChangeText={(text) => setTitleText(text)}
-        value={titleText}
-      />
-      <ScrollView showsVerticalScrollIndicator={false} style={{ overflow: 'hidden' }}>
-        <PhotoScroller />
-        <View style={styles.inputContainer}>
+    <View>
+      <View style={styles.topContainer}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back-outline" size={24} color="white" />
+        </TouchableOpacity>
+        <Text style={styles.topText}>Creating Note</Text>
+      </View>
+      <View style={styles.container}>
+        <KeyboardAwareScrollView
+          showsVerticalScrollIndicator={false}
+          style={{ overflow: "hidden", paddingTop: 10, paddingBottom: 100 }}
+        >
           <TextInput
-            style={styles.input}
-            placeholder="Write your note here"
-            multiline={true}
-            textAlignVertical="top"
-            onChangeText={(text) => setBodyText(text)}
-            value={bodyText}
+            style={styles.title}
+            placeholder="Title your note here"
+            onChangeText={(text) => setTitleText(text)}
+            value={titleText}
           />
-        </View>
-      </ScrollView>
-      <TouchableOpacity style={styles.saveButton} onPress={saveNote}>
-        <Text style={styles.saveText}>Save</Text>
-      </TouchableOpacity>
-      </KeyboardAwareScrollView>
+          <PhotoScroller />
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Write your note here"
+              multiline={true}
+              textAlignVertical="top"
+              onChangeText={(text) => setBodyText(text)}
+              value={bodyText}
+            />
+          </View>
+          <TouchableOpacity style={styles.saveButton} onPress={saveNote}>
+            <Text style={styles.saveText}>Save</Text>
+          </TouchableOpacity>
+        </KeyboardAwareScrollView>
+      </View>
     </View>
   );
 };
+
 const styles = StyleSheet.create({
-  container: {
+  topContainer: {
     flex: 1,
-    backgroundColor: '#fff',
-    padding: 20,
+    minHeight: "15%",
+    paddingTop: "15%",
+    flexDirection: "row",
+    backgroundColor: "#F4DFCD",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  topText: {
+    flex: 1,
+    maxWidth: "100%",
+    fontWeight: "700",
+    fontSize: 32,
+    textAlign: "center",
+  },
+  backButton: {
+    position: "absolute",
+    top: "100%",
+    left: 10,
+    backgroundColor: "#111111",
+    borderRadius: 50,
+    width: 50,
+    height: 50,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 99,
+  },
+  container: {
+    paddingHorizontal: 16,
+    backgroundColor: "white",
+    overflow: "hidden",
+    paddingBottom: "20%",
   },
   title: {
-    height: 60,
-    borderColor: '#111111',
+    height: 45,
+    borderColor: "#111111",
     borderWidth: 1,
     borderRadius: 30,
     marginBottom: 20,
-    padding: 10,
-    textAlign: 'center',
+    paddingHorizontal: 10,
+    textAlign: "center",
     fontSize: 30,
   },
   input: {
     flex: 1,
-    borderColor: '#111111',
+    borderColor: "#111111",
     borderWidth: 1,
     borderRadius: 10,
     padding: 10,
     fontSize: 22,
   },
-  inputContainer: {
-    height: 400,
-    justifyContent: 'space-between',
+  addButton: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+    backgroundColor: "#111111",
+    borderRadius: 50,
+    width: 50,
+    height: 50,
+    alignItems: "center",
+    justifyContent: "center",
   },
   saveButton: {
-    backgroundColor: '#C7EBB3',
+    backgroundColor: "#C7EBB3",
     paddingHorizontal: 120,
     padding: 10,
-    alignItems: 'center',
+    alignItems: "center",
     borderRadius: 25,
     marginVertical: 10,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   saveText: {
-    color: '#111111',
-    fontWeight: 'bold',
+    color: "#111111",
+    fontWeight: "bold",
+    fontSize: 12,
+  },
+  inputContainer: {
+    height: 400,
+    justifyContent: "space-between",
   },
 });
 

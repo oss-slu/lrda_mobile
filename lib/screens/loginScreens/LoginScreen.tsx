@@ -39,6 +39,8 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
       try {
         const status = await user.login(username, password);
         if(status == 'success'){
+          setUsername('');
+          setPassword('');
           handleGoHome();
         }
       } catch (error) {
@@ -58,6 +60,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
           style={styles.inputText}
           placeholder="Username..."
           placeholderTextColor="#003f5c"
+          value={username}
           onChangeText={text => setUsername(text)}
         />
       </View>
@@ -67,6 +70,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
           style={styles.inputText}
           placeholder="Password..."
           placeholderTextColor="#003f5c"
+          value={password}
           onChangeText={text => setPassword(text)}
         />
       </View>
@@ -77,13 +81,13 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
         <TouchableOpacity style={styles.loginBtn} onPress={handleLogin}>
           <Text style={styles.loginText}>LOGIN</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.Btn} onPress={handleGoRegister}>
+        {/* <TouchableOpacity style={styles.Btn} onPress={handleGoRegister}>
           <Text style={styles.loginText}>Register</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.skip} onPress={handleSkip}>
+        </TouchableOpacity> */}
+        {/* <TouchableOpacity style={styles.skip} onPress={handleSkip}>
           <Text style={{color: 'white', fontSize: 18, marginRight: 20,}}>Skip</Text>
           <Ionicons name="arrow-forward-outline" size={24} color="white" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
       <Snackbar
         visible={snackState}

@@ -22,19 +22,22 @@ export class User {
 
   public async login(username: string, password: string): Promise<string> {
     try {
-      const response = await fetch('http://lived-religion-dev.rerum.io/deer-lr/login', {
-        method: "POST",
-        mode: "cors",
-        cache: "no-cache",
-        headers: {
-          'Content-Type': 'application/json;charset=utf-8'
-        },
-        body: JSON.stringify({
-          username: username,
-          password: password
-        })
-      });
-  
+      const response = await fetch(
+        "http://lived-religion-dev.rerum.io/deer-lr/login",
+        {
+          method: "POST",
+          mode: "cors",
+          cache: "no-cache",
+          headers: {
+            "Content-Type": "application/json;charset=utf-8",
+          },
+          body: JSON.stringify({
+            username: username,
+            password: password,
+          }),
+        }
+      );
+
       if (response.ok) {
         this.userData = await response.json();
         return "success";
@@ -46,7 +49,27 @@ export class User {
       return Promise.reject(error);
     }
   }
-  
+
+  public async logout() {
+    try {
+      await fetch("http://lived-religion-dev.rerum.io/deer-lr/logout", {
+        method: "POST",
+        mode: "cors",
+        headers: {
+          "Content-Type": "text/plain",
+        },
+      })
+        .then((response) => {
+          if (response.ok) {
+            this.userData = null;
+            console.log('User logged out');
+          }
+        })
+        .catch((err) => {
+          return err;
+        });
+    } catch (error) {console.log('User did not succesfully log out')}
+  }
 
   public getId(): string | null {
     return this.userData?.["@id"] ?? null;
