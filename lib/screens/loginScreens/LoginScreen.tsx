@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import * as SplashScreen from 'expo-splash-screen';
 import { Ionicons } from '@expo/vector-icons';
 import { Snackbar } from 'react-native-paper';
 import { User } from '../../utils/user_class';
@@ -17,11 +18,22 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   const [password, setPassword] = useState("");
   const [snackState, toggleSnack] = useState(false);
 
+  useEffect(() => {
+    (async () => {
+      await SplashScreen.preventAutoHideAsync();
+      // If a user is already cached navigate home
+      if(user.getId()){
+        handleGoHome();
+      }
+      await SplashScreen.hideAsync();
+    })();
+  }, []);
 
   const handleGoHome = () => {
     navigation.navigate("Home");
   };
-    // temp adding a login for stuart if we click skip
+  
+  // temp adding a login for stuart if we click skip
   const handleSkip = async () => {
     await user.login("Stuart Ray", "4");
     handleGoHome();
