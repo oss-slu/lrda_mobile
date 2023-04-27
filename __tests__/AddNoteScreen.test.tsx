@@ -9,7 +9,7 @@ import AddNoteScreen from '../lib/screens/AddNoteScreen';
 
 describe("AddNoteScreen", () => {
   it("renders without crashing", () => {
-    const wrapper = shallow(<AddNoteScreen />);
+    const wrapper = shallow(<AddNoteScreen navigation={undefined} route={undefined} />);
     expect(wrapper).toMatchSnapshot();
   });
 });
