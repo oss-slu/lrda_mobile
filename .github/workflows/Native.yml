@@ -14,9 +14,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Change directory
-      run: cd lrda_mobile
-
     - name: Install Node.js
       uses: actions/setup-node@v2
       with:
@@ -24,9 +21,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        cd lrda_mobile
         yarn install --force
     - name: Run tests
       run: |
-        cd lrda_mobile
         yarn test
