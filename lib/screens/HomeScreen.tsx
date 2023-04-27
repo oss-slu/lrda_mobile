@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Image, Text, StyleSheet, FlatList, ScrollView, TouchableOpacity, Animated } from "react-native";
+import { Linking, View, Image, Text, StyleSheet, FlatList, 
+  ScrollView, TouchableOpacity, Animated } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../types";
 import { User } from "../utils/user_class";
-
 
 interface Note {
   id: string;
@@ -78,7 +78,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       {
         rotate: buttonAnimation.interpolate({
           inputRange: [0, 1],
-          outputRange: ['0deg', '180deg'],
+          outputRange: ["0deg", "180deg"],
         }),
       },
     ],
@@ -159,6 +159,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     }
   };
 
+  const handleGoWeb = () => {
+    Linking.openURL(
+      "http://lived-religion-dev.rerum.io/deer-lr/dashboard.html"
+    );
+  };
+
   const handleLogout = () => {
     user.logout();
     navigation.navigate("Login");
@@ -189,7 +195,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
-       <Animated.View style={[styles.drawer, animatedStyles]}>
+      <TouchableOpacity onPress={toggleDrawer}
+        style={[styles.overlay, { display: !isOpen ? "flex" : "none" }]}/>
+      <Animated.View style={[styles.drawer, animatedStyles]}>
         <Animated.View style={[buttonAnimatedStyles]}>
           <TouchableOpacity style={styles.backButton} onPress={toggleDrawer}>
             <Ionicons
@@ -199,14 +207,29 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             />
           </TouchableOpacity>
         </Animated.View>
-        <TouchableOpacity onPress={handleLogout}>
-          <Text style={styles.mediumText}>Logout</Text>
-        </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity style={styles.drawerItem}>
+          <Ionicons name={"person-outline"} size={30} color="black" />
           <Text style={styles.mediumText}>Account</Text>
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity style={styles.drawerItem}>
+          <Ionicons name={"people-outline"} size={30} color="black" />
           <Text style={styles.mediumText}>Friends</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.drawerItem} onPress={handleGoWeb}>
+          <Ionicons name={"laptop-outline"} size={30} color="black" />
+          <Text style={styles.mediumText}>Our Website</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.drawerItem}>
+          <Ionicons name={"settings-outline"} size={30} color="black" />
+          <Text style={styles.mediumText}>Settings</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.drawerItem}>
+          <Ionicons name={"bug-outline"} size={30} color="black" />
+          <Text style={styles.mediumText}>Report a Bug</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.logout} onPress={handleLogout}>
+          <Text style={styles.logoutText}>Logout</Text>
+          <Ionicons name={"log-out-outline"} size={30} color="white" />
         </TouchableOpacity>
       </Animated.View>
       <TouchableOpacity onPress={toggleDrawer} style={styles.menuButton}>
@@ -215,7 +238,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       <View style={{ flexDirection: "row", alignItems: "center" }}>
         <Image
           style={styles.pfp}
-          source={require("../components/public/izak.png")}
+          source={require("../components/public/nopfp.png")}
         />
         <Text style={styles.mediumText}>Hi, {user.getName()}</Text>
       </View>
@@ -269,14 +292,47 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     flex: 1,
   },
+  overlay: {
+    position: "absolute",
+    width: "150%",
+    height: "150%",
+    flex: 1,
+    zIndex: 80,
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // semi-transparent black color
+  },
   drawer: {
     paddingTop: "30%",
-    height: 100000,
+    height: "110%",
     width: 200,
     position: "absolute",
     backgroundColor: "white",
     zIndex: 99,
     right: 0,
+  },
+  drawerItem: {
+    paddingLeft: 10,
+    paddingTop: 10,
+    flexDirection: "row",
+  },
+  logout: {
+    flexDirection: "row",
+    position: "absolute",
+    bottom: "10%",
+    backgroundColor: "black",
+    justifyContent: "center",
+    alignItems: "center",
+    height: 50,
+    marginLeft: "10%",
+    width: "80%",
+    borderRadius: 20,
+  },
+  logoutText: {
+    marginLeft: 5,
+    marginRight: 10,
+    fontSize: 20,
+    fontWeight: "600",
+    maxWidth: "100%",
+    color: "white",
   },
   backButton: {
     margin: "7%",
