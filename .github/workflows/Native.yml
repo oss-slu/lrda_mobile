@@ -1,0 +1,32 @@
+name: App test
+
+on:
+  push:
+    branches: [ main,13-generate-test-cases ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Change directory
+      run: cd lrda_mobile
+
+    - name: Install Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14.x'
+
+    - name: Install dependencies
+      run: |
+        cd lrda_mobile
+        yarn install --force
+    - name: Run tests
+      run: |
+        cd lrda_mobile
+        yarn test
