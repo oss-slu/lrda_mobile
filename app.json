@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "ldra",
-    "slug": "ldra",
+    "slug": "lrda",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -12,7 +12,8 @@
       "backgroundColor": "#ffffff"
     },
     "updates": {
-      "fallbackToCacheTimeout": 0
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/aa02d222-f978-4070-9189-57be1014042a"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -28,6 +29,15 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "aa02d222-f978-4070-9189-57be1014042a"
+      }
+    },
+    "owner": "izakrobles",
+    "runtimeVersion": {
+      "policy": "sdkVersion"
     }
   }
 }

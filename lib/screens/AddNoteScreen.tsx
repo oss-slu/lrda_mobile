@@ -76,7 +76,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             onChangeText={(text) => setTitleText(text)}
             value={titleText}
           />
-          <PhotoScroller />
+          {/* <PhotoScroller /> */}
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     backgroundColor: "white",
     overflow: "hidden",
-    paddingBottom: "20%",
+    paddingBottom: "50%",
   },
   title: {
     height: 45,

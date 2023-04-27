@@ -89,7 +89,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             value={title}
             onChangeText={setTitle}
           />
-            <PhotoScroller />
+            {/* <PhotoScroller /> */}
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.input}
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     backgroundColor: "white",
     overflow: "hidden",
-    paddingBottom: "20%",
+    paddingBottom: "50%",
   },
   title: {
     height: 45,
