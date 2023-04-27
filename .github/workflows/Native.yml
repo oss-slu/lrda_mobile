@@ -1,0 +1,27 @@
+name: App test
+
+on:
+  push:
+    branches: [ main,13-generate-test-cases ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14.x'
+
+    - name: Install dependencies
+      run: |
+        yarn install --force
+    - name: Run tests
+      run: |
+        yarn test
