@@ -1,7 +1,49 @@
 import React, { useEffect, useState } from 'react';
 import { View, Image, ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { launchImageLibraryAsync, MediaTypeOptions } from 'expo-image-picker';
-// import heic2any from 'react-native-heic-converter';
+import * as FileSystem from 'expo-file-system';
+import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
+
+async function convertHeicToJpg(uri: string) {
+  const convertedImage = await manipulateAsync(uri, [], { format: SaveFormat.JPEG });
+  return convertedImage.uri;
+}
+
+async function uploadImage(uri: string): Promise<string> {
+  // Fetch the file and create a blob
+  const response = await fetch(uri);
+  const blob = await response.blob();
+
+  // Create a new FormData object
+  let data = new FormData();
+
+  // Create a file-like object
+  let file = {
+    uri: uri,
+    name: `photo.${uri.split('.').pop()}`,
+    type: `image/${uri.split('.').pop()}`,
+  };
+
+  // Append the blob to the FormData object
+  data.append('file', blob, file.name);
+
+  // Execute the API call
+  return fetch("http://s3-proxy.rerum.io/S3/uploadFile", {
+    method: "POST",
+    mode: "cors",
+    body: data
+  })
+  .then(resp => {
+    // Get the URL of the media from the response
+    if(resp.ok) return resp.headers.get("Location");
+  })
+  .catch(err => {
+    console.error(err);
+    return err;
+  });
+}
+
+
 
 function PhotoScroller() {
   const [newImages, setNewImages] = useState<string[]>([]);
@@ -14,20 +56,18 @@ function PhotoScroller() {
       quality: 1,
     });
 
-    // if (!result.canceled && result.assets) {
-    //   const newImageUris = await Promise.all(
-    //     result.assets.map(async (asset) => {
-    //       if (asset.uri.endsWith('.heic')) {
-    //         const convertedBlob = await heic2any({blob: await fetch(asset.uri).then(res => res.blob())});
-    //         const convertedUri = URL.createObjectURL(convertedBlob);
-    //         return convertedUri;
-    //       } else {
-    //         return asset.uri;
-    //       }
-    //     }),
-    //   );
-    //   setNewImages((prevImages) => [...newImageUris, ...prevImages]);
-    // }
+    if (!result.canceled) {
+      const { uri } = result.assets[0];
+
+      if (uri.endsWith('.heic') || uri.endsWith('.HEIC')) {
+        const jpgUri = await convertHeicToJpg(uri);
+        const uploadedUrl = await uploadImage(jpgUri);
+        setNewImages([...newImages, uploadedUrl]);
+      } else {
+        const uploadedUrl = await uploadImage(uri);
+        setNewImages([...newImages, uploadedUrl]);
+      }
+    }
   };
   
     return (
@@ -42,24 +82,6 @@ function PhotoScroller() {
               <Image style={styles.image} source={{ uri }} />
             </TouchableOpacity>
           ))}
-          <TouchableOpacity>
-            <Image style={styles.image} source={require("./public/festival.png")} />
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Image style={styles.image} source={require("./public/church.png")} />
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Image style={styles.image} source={require("./public/gallery.png")} />
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Image style={styles.image} source={require("./public/blues.png")} />
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Image style={styles.image} source={require("./public/islam.png")} />
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Image style={styles.image} source={require("./public/stadium.png")} />
-          </TouchableOpacity>
         </ScrollView>
       </View>
     );
