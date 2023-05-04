@@ -58,6 +58,7 @@ function PhotoScroller() {
 
     if (!result.canceled) {
       const { uri } = result.assets[0];
+      console.log(uri);
 
       if (uri.endsWith('.heic') || uri.endsWith('.HEIC')) {
         const jpgUri = await convertHeicToJpg(uri);
