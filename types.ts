@@ -2,6 +2,7 @@ export type Note = {
     id: string;
     title: string;
     text: string;
+    time: string;
   };
   
   export type RootStackParamList = {
