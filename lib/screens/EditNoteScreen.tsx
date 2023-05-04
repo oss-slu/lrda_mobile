@@ -1,6 +1,6 @@
 // EditNoteScreen.tsx
 import React, { useState } from "react";
-import { View, TextInput, Text, StyleSheet } from "react-native";
+import { Alert, View, TextInput, Text, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Ionicons } from "@expo/vector-icons";
@@ -10,7 +10,6 @@ import { User } from "../utils/user_class";
 import { white } from "react-native-paper/lib/typescript/styles/themes/v2/colors";
 
 const user = User.getInstance();
-// console.log("User id: ", user.getId());
 
 export type EditNoteScreenProps = {
   route: {
@@ -68,16 +67,39 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     updateNote(updatedNote);
   };
 
+  const handleGoBackCheck = () => {
+    Alert.alert(
+      "Going Back?",
+      "Your note will not be saved!",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "OK",
+          onPress: async () => {
+            navigation.goBack();
+        },
+      }
+      ],
+      { cancelable: false }
+    );
+  };
+
   return (
     <View>
       <View style={styles.topContainer}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.goBack()}
+          onPress={handleGoBackCheck}
         >
           <Ionicons name="arrow-back-outline" size={24} color="white" />
         </TouchableOpacity>
         <Text style={styles.topText}>Editing Note</Text>
+        <TouchableOpacity style={styles.backButton} onPress={handleSaveNote}>
+          <Ionicons name="save-outline" size={24} color="white" />
+        </TouchableOpacity>
       </View>
       <View style={styles.container}>
         <KeyboardAwareScrollView
@@ -99,9 +121,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
                 onChangeText={setText}
               />
             </View>
-          <TouchableOpacity style={styles.saveButton} onPress={handleSaveNote}>
-            <Text style={styles.saveText}>Save Changes</Text>
-          </TouchableOpacity>
         </KeyboardAwareScrollView>
       </View>
     </View>
@@ -111,11 +130,14 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
 const styles = StyleSheet.create({
   topContainer: {
     flex: 1,
+    justifyContent: "space-between",
+    paddingHorizontal: 5,
     minHeight: "15%",
     paddingTop: "15%",
     flexDirection: "row",
     backgroundColor: "#F4DFCD",
     alignItems: "center",
+    textAlign: "center",
   },
   topText: {
     maxWidth: "100%",
@@ -123,7 +145,6 @@ const styles = StyleSheet.create({
     fontSize: 32,
   },
   backButton: {
-    margin: "7%",
     backgroundColor: "#111111",
     borderRadius: 50,
     width: 50,
