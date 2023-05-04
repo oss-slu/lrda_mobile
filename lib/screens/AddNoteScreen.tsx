@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import { Alert, View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import { Note, RootStackParamList } from "../../types";
 import PhotoScroller from "../components/photoScroller";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { User } from "../utils/user_class";
 import { Ionicons } from "@expo/vector-icons";
+import { createdAt } from "expo-updates";
 
 const user = User.getInstance();
 // console.log("User id: ", user.getId());
@@ -43,7 +44,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const saveNote = async () => {
     try {
       const id = await createNote(titleText, bodyText);
-      const note: Note = { id, title: titleText, text: bodyText };
+      const note: Note = { id, title: titleText, text: bodyText, time: '' }; // The note will get assigned a time
 
       if (route.params?.onSave) {
         route.params.onSave(note);
@@ -54,16 +55,39 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     }
   };
 
+  const handleGoBackCheck = () => {
+    Alert.alert(
+      "Going Back?",
+      "Your note will not be saved!",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "OK",
+          onPress: async () => {
+            navigation.goBack();
+        },
+      }
+      ],
+      { cancelable: false }
+    );
+  };
+
   return (
     <View>
       <View style={styles.topContainer}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.goBack()}
+          onPress={handleGoBackCheck}
         >
           <Ionicons name="arrow-back-outline" size={24} color="white" />
         </TouchableOpacity>
         <Text style={styles.topText}>Creating Note</Text>
+        <TouchableOpacity style={styles.backButton} onPress={saveNote}>
+          <Ionicons name="save-outline" size={24} color="white" />
+        </TouchableOpacity>
       </View>
       <View style={styles.container}>
         <KeyboardAwareScrollView
@@ -87,9 +111,6 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
               value={bodyText}
             />
           </View>
-          <TouchableOpacity style={styles.saveButton} onPress={saveNote}>
-            <Text style={styles.saveText}>Save</Text>
-          </TouchableOpacity>
         </KeyboardAwareScrollView>
       </View>
     </View>
@@ -99,6 +120,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   topContainer: {
     flex: 1,
+    justifyContent: "space-between",
+    paddingHorizontal: 5,
     minHeight: "15%",
     paddingTop: "15%",
     flexDirection: "row",
@@ -114,9 +137,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   backButton: {
-    position: "absolute",
-    top: "100%",
-    left: 10,
     backgroundColor: "#111111",
     borderRadius: 50,
     width: 50,

@@ -31,12 +31,12 @@ const AppNavigator: React.FC = () => {
         <Stack.Screen
           name="AddNote"
           component={AddNoteScreen}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
           name="EditNote"
           component={(props: EditNoteProps) => <EditNote {...props} />}
-          options={{headerShown: false }}
+          options={{headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
           name="Login"
