@@ -100,7 +100,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             onChangeText={(text) => setTitleText(text)}
             value={titleText}
           />
-          {/* <PhotoScroller /> */}
+          { <PhotoScroller /> }
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}

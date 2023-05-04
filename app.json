@@ -30,12 +30,6 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "extra": {
-      "eas": {
-        "projectId": "aa02d222-f978-4070-9189-57be1014042a"
-      }
-    },
-    "owner": "izakrobles",
     "runtimeVersion": {
       "policy": "sdkVersion"
     }
