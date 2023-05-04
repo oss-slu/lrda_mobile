@@ -10,7 +10,7 @@ interface Note {
   id: string;
   title: string;
   text: string;
-  time: string;
+  created_time: string;
 }
 const user = User.getInstance();
 
@@ -112,21 +112,21 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       setMessages(data);
 
       const fetchedNotes: Note[] = data.map((message: any) => {
-        const time = message.__rerum.isOverwritten
+        const created_time = message.__rerum.isOverwritten
           ? new Date(message.__rerum.isOverwritten)
           : new Date(message.__rerum.createdAt);
-        time.setHours(time.getHours() - 5);
+        created_time.setHours(created_time.getHours() - 5);
         return {
           id: message["@id"],
           title: message.title || "",
           text: message.BodyText || "",
-          time:
-            time.toLocaleString("en-US", { timeZone: "America/Chicago" }) || "",
+          created_time:
+            created_time.toLocaleString("en-US", { timeZone: "America/Chicago" }) || "",
         };
       });
 
       fetchedNotes.sort(
-        (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
+        (a, b) => new Date(b.created_time).getTime() - new Date(a.created_time).getTime()
       );
       setNotes(fetchedNotes);
     } catch (error) {
@@ -218,7 +218,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       >
         <View style={styles.noteBox}>
           <Text style={styles.mediumText}>{item.title}</Text>
-          <Text style={styles.noteText}>{item.time}</Text>
+          <Text style={styles.noteText}>{item.created_time}</Text>
         </View>
         <TouchableOpacity onPress={() => deleteNote(item.id)}>
           <Ionicons name="trash-outline" size={24} color="#111111" />
