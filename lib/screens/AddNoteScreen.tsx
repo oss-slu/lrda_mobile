@@ -1,14 +1,13 @@
 import React, { useState } from "react";
-import { Alert, View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import { Alert, View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from "react-native";
 import { Note, RootStackParamList } from "../../types";
 import PhotoScroller from "../components/photoScroller";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { KeyboardAvoidingScrollView } from 'react-native-keyboard-avoiding-scroll-view';
 import { User } from "../utils/user_class";
 import { Ionicons } from "@expo/vector-icons";
 import { createdAt } from "expo-updates";
 
 const user = User.getInstance();
-// console.log("User id: ", user.getId());
 
 type AddNoteScreenProps = {
   navigation: any;
@@ -76,7 +75,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   };
 
   return (
-    <View>
+    <View style={{flex: 1}}>
       <View style={styles.topContainer}>
         <TouchableOpacity
           style={styles.backButton}
@@ -89,11 +88,6 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           <Ionicons name="save-outline" size={24} color="white" />
         </TouchableOpacity>
       </View>
-      <View style={styles.container}>
-        <KeyboardAwareScrollView
-          showsVerticalScrollIndicator={false}
-          style={{ overflow: "hidden", paddingTop: 10, paddingBottom: 100 }}
-        >
           <TextInput
             style={styles.title}
             placeholder="Title your note here"
@@ -101,7 +95,6 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             value={titleText}
           />
           {/* <PhotoScroller /> */}
-          <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
               placeholder="Write your note here"
@@ -110,20 +103,17 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
               onChangeText={(text) => setBodyText(text)}
               value={bodyText}
             />
-          </View>
-        </KeyboardAwareScrollView>
-      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   topContainer: {
-    flex: 1,
     justifyContent: "space-between",
     paddingHorizontal: 5,
-    minHeight: "15%",
+    Height: "15%",
     paddingTop: "15%",
+    paddingBottom: "5%",
     flexDirection: "row",
     backgroundColor: "#F4DFCD",
     alignItems: "center",
@@ -163,11 +153,9 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    borderColor: "#111111",
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 10,
     fontSize: 22,
+    padding: 10,
+    paddingBottom: '90%',
   },
   addButton: {
     position: "absolute",
@@ -193,10 +181,6 @@ const styles = StyleSheet.create({
     color: "#111111",
     fontWeight: "bold",
     fontSize: 12,
-  },
-  inputContainer: {
-    height: 400,
-    justifyContent: "space-between",
   },
 });
 
