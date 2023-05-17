@@ -13,12 +13,17 @@ async function convertHeicToJpg(uri: string) {
 
 async function uploadImage(uri: string): Promise<string> {
   console.log('uploadImage - Input URI:', uri);
-  
-  const base64 = await FileSystem.readAsStringAsync(uri, { encoding: 'base64' });
-  const base64WithMime = `data:image/jpeg;base64,${base64}`;
-  
+
+  const response = await fetch(uri);
+  const blob = await response.blob();
+  const uniqueName = `image-${Date.now()}.jpg`; // Generate a unique name based on the current timestamp
+  const file = new File([blob], uniqueName, { type: 'image/jpeg' });
+  console.log('Blob size:', blob.size);
+  console.log('File size:', file.size);
+
   let data = new FormData();
-  data.append('file', base64WithMime);
+  data.append('file', file);
+  console.log('data file being sent as a File object: ', data);
 
   return fetch("http://s3-proxy.rerum.io/S3/uploadFile", {
     method: "POST",
@@ -27,7 +32,7 @@ async function uploadImage(uri: string): Promise<string> {
   })
   .then(resp => {
     console.log('uploadImage - Server response status:', resp.status);
-    if(resp.ok) {
+    if (resp.ok) {
       const location = resp.headers.get("Location");
       console.log('uploadImage - Uploaded successfully, Location:', location);
       return location;
@@ -40,6 +45,7 @@ async function uploadImage(uri: string): Promise<string> {
     return err;
   });
 }
+
 
 
 function PhotoScroller() {
