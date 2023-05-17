@@ -28,6 +28,10 @@ async function uploadImage(uri: string): Promise<string> {
   return fetch("http://s3-proxy.rerum.io/S3/uploadFile", {
     method: "POST",
     mode: "cors",
+  headers: {
+    'Content-Type': 'multipart/form-data',
+    'Accept': 'text/plain'
+  },
     body: data
   })
   .then(resp => {
