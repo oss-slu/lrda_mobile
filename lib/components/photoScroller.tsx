@@ -25,23 +25,23 @@ async function uploadImage(uri: string): Promise<string> {
   data.append('file', file);
   console.log('data file being sent as a File object: ', data);
 
-  return fetch("http://s3-proxy.rerum.io/S3/uploadFile", {
+  const S3_PROXY_PREFIX = "http://localhost:8080/S3/"; // assuming this is the correct prefix
+
+  return fetch(S3_PROXY_PREFIX+"uploadFile", {
     method: "POST",
     mode: "cors",
-  headers: {
-    'Content-Type': 'multipart/form-data',
-    'Accept': 'text/plain'
-  },
     body: data
   })
   .then(resp => {
+    console.log("Got the response from the upload file servlet");
     console.log('uploadImage - Server response status:', resp.status);
-    if (resp.ok) {
+    if(resp.ok) {
       const location = resp.headers.get("Location");
       console.log('uploadImage - Uploaded successfully, Location:', location);
       return location;
     } else {
       console.log('uploadImage - Server response body:', resp.body);
+     //uploadFailed(resp); // Assuming that you have the uploadFailed function in scope
     }
   })
   .catch(err => {
@@ -49,6 +49,7 @@ async function uploadImage(uri: string): Promise<string> {
     return err;
   });
 }
+
 
 
 
