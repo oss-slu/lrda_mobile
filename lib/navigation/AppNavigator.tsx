@@ -22,7 +22,7 @@ const Stack = createStackNavigator<RootStackParamList>();
 const AppNavigator: React.FC = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="AddNote">
+      <Stack.Navigator initialRouteName="Login">
         <Stack.Screen
           name="Home"
           component={(props: HomeScreenProps) => <HomeScreen {...props} />}
