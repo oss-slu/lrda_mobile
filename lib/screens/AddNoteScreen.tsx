@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Alert, View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import { Note, RootStackParamList } from "../../types";
 import PhotoScroller from "../components/photoScroller";
@@ -20,6 +20,11 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [titleText, setTitleText] = useState("");
   const [bodyText, setBodyText] = useState("");
   const [newImages, setNewImages] = useState<string[]>([]);
+
+  useEffect(() => {
+    console.log(newImages);
+  }, [newImages]);
+
 
   const createNote = async (title: string, body: string) => {
     const response = await fetch(
@@ -102,9 +107,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             onChangeText={(text) => setTitleText(text)}
             value={titleText}
           />
-          { <PhotoScroller newImages={[]} setNewImages={function (value: React.SetStateAction<string[]>): void {
-            throw new Error("Function not implemented.");
-          } } /> }
+          { <PhotoScroller newImages={newImages} setNewImages={setNewImages} />}
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
