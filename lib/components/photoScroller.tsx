@@ -52,9 +52,7 @@ async function uploadImage(uri: string): Promise<string> {
 
 
 
-
-function PhotoScroller() {
-  const [newImages, setNewImages] = useState<string[]>([]);
+function PhotoScroller({ newImages, setNewImages }: { newImages: string[], setNewImages: React.Dispatch<React.SetStateAction<string[]>> }) {
 
   console.log("Current images: ", newImages); // Log the current images every time the component renders
 
@@ -82,6 +80,7 @@ function PhotoScroller() {
     }
   };
 
+  // Return JSX here
   return (
     <View style={styles.container}>
       <Text style={styles.selectText}>Select a Photo</Text>
@@ -98,7 +97,6 @@ function PhotoScroller() {
     </View>
   );
 }
-
 
 // Styles for the PhotoScroller component
 const styles = StyleSheet.create({

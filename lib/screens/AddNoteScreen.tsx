@@ -7,6 +7,7 @@ import { User } from "../utils/user_class";
 import { Ionicons } from "@expo/vector-icons";
 import { createdAt } from "expo-updates";
 
+
 const user = User.getInstance();
 // console.log("User id: ", user.getId());
 
@@ -18,6 +19,7 @@ type AddNoteScreenProps = {
 const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [titleText, setTitleText] = useState("");
   const [bodyText, setBodyText] = useState("");
+  const [newImages, setNewImages] = useState<string[]>([]);
 
   const createNote = async (title: string, body: string) => {
     const response = await fetch(
@@ -100,7 +102,9 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             onChangeText={(text) => setTitleText(text)}
             value={titleText}
           />
-          { <PhotoScroller /> }
+          { <PhotoScroller newImages={[]} setNewImages={function (value: React.SetStateAction<string[]>): void {
+            throw new Error("Function not implemented.");
+          } } /> }
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
