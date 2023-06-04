@@ -37,6 +37,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         body: JSON.stringify({
           type: "message",
           title: title,
+          items: newImages,
           BodyText: body,
           creator: user.getId(),
         }),
@@ -51,7 +52,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const saveNote = async () => {
     try {
       const id = await createNote(titleText, bodyText);
-      const note: Note = { id, title: titleText, text: bodyText, time: '' }; // The note will get assigned a time
+      const note: Note = { id, title: titleText, text: bodyText, time: '', images: [] }; // The note will get assigned a time
 
       if (route.params?.onSave) {
         route.params.onSave(note);

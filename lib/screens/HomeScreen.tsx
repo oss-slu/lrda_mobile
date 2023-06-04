@@ -7,6 +7,7 @@ import { RootStackParamList } from "../../types";
 import { User } from "../utils/user_class";
 
 interface Note {
+  images: any;
   id: string;
   title: string;
   text: string;
@@ -120,6 +121,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           id: message["@id"],
           title: message.title || "",
           text: message.BodyText || "",
+          images: message.items || [],
           time:
             time.toLocaleString("en-US", { timeZone: "America/Chicago" }) || "",
         };
@@ -209,6 +211,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   };
 
   const renderItem = ({ item }: { item: Note }) => {
+    console.log(item.images);
     return (
       <TouchableOpacity
         style={styles.noteContainer}
@@ -217,6 +220,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         }
       >
         <View style={styles.noteBox}>
+          <Image source={item.images[0]} style={[styles.pfp, { borderRadius: 50 }]} ></Image>
           <Text style={styles.mediumText}>{item.title}</Text>
           <Text style={styles.noteText}>{item.time}</Text>
         </View>

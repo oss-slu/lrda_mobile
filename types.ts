@@ -3,6 +3,7 @@ export type Note = {
     title: string;
     text: string;
     time: string;
+    images: string[];
   };
   
   export type RootStackParamList = {
