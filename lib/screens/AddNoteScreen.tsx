@@ -22,7 +22,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [newImages, setNewImages] = useState<string[]>([]);
 
   useEffect(() => {
-    console.log(newImages);
+    console.log("new Images array:", newImages);
   }, [newImages]);
 
 
