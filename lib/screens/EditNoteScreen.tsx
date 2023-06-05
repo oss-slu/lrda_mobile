@@ -30,6 +30,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const { note, onSave } = route.params;
   const [title, setTitle] = useState(note.title);
   const [text, setText] = useState(note.text);
+  const [images, setimages] = useState<string[]>(note.images);
 
   const updateNote = async (updatedNote: Note) => {
     try {
@@ -44,6 +45,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             "@id": updatedNote.id,
             title: updatedNote.title,
             BodyText: updatedNote.text,
+            items: updatedNote.images,
             type: "message",
             creator: user.getId(),
           }),
@@ -63,7 +65,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   };
 
   const handleSaveNote = () => {
-    const updatedNote = { ...note, title, text };
+    const updatedNote = { ...note, title, text, images };
     updateNote(updatedNote);
   };
 
@@ -111,7 +113,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             value={title}
             onChangeText={setTitle}
           />
-            {/* <PhotoScroller /> */}
+          { <PhotoScroller newImages={images} setNewImages={setimages} />}
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.input}

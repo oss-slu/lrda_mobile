@@ -25,8 +25,8 @@ async function uploadImage(uri: string): Promise<string> {
   data.append('file', file);
   console.log('data file being sent as a File object: ', data);
 
-  // const S3_PROXY_PREFIX = "http://99.7.218.98:8080/S3/"; // assuming this is the correct prefix
-  const S3_PROXY_PREFIX = "http://localhost:8080/S3/"; // assuming this is the correct prefix
+  const S3_PROXY_PREFIX = "http://99.7.218.98:8080/S3/"; // S3 Proxy
+  // const S3_PROXY_PREFIX = "http://localhost:8080/S3/"; // local tomcat
 
   return fetch(S3_PROXY_PREFIX+"uploadFile", {
     method: "POST",
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#fff',
     marginBottom: 10,
-    maxWidth: 355,
+    width: '95%',
     justifyContent: 'center',
   },
   image:{

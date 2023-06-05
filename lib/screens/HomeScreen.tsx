@@ -220,9 +220,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         }
       >
         <View style={styles.noteBox}>
-          <Image source={item.images[0]} style={[styles.pfp, { borderRadius: 50 }]} ></Image>
-          <Text style={styles.mediumText}>{item.title}</Text>
-          <Text style={styles.noteText}>{item.time}</Text>
+          {
+            item.images.length >= 1 ?
+              <Image source={item.images[0]} style={styles.preview} ></Image>
+              :
+              <Image source={require("../components/public/noPreview.png")} style={styles.preview} ></Image>
+          }
+
+          <View>
+            <Text style={styles.noteTitle}>{item.title}</Text>
+            <Text style={styles.noteText}>{item.time}</Text>
+          </View>
         </View>
         <TouchableOpacity onPress={() => deleteNote(item.id)}>
           <Ionicons name="trash-outline" size={24} color="#111111" />
@@ -393,11 +401,18 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     maxWidth: "100%",
   },
+  noteTitle: {
+    fontSize: 20,
+    marginLeft: '20%',
+    fontWeight: "600",
+    maxWidth: "100%",
+  },
   noteBox: {
     width: "100%",
+    flexDirection: 'row',
   },
   noteText: {
-    marginLeft: "10%",
+    marginLeft: "20%",
     fontSize: 18,
   },
   emptyContainer: {
@@ -498,6 +513,12 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     marginLeft: 3,
     marginTop: 3,
+  },
+  preview: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+    alignContent: 'center',
   },
 });
 
