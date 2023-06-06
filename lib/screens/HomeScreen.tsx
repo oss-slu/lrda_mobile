@@ -188,30 +188,40 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   };
 
   const deleteNote = (id: string) => {
-    Alert.alert(
-      "Delete Note",
-      "Are you sure you want to delete this note?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel"
-        },
-        {
-          text: "OK",
-          onPress: async () => {
-            const success = await deleteNoteFromAPI(id);
-            if (success) {
-              setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
-            }
-          }
-        }
-      ],
-      { cancelable: false }
-    );
+
+    async function name() {
+      const success = await deleteNoteFromAPI(id);
+      if (success) {
+        setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
+      }
+    }
+    
+    name();
+
+
+    // Alert.alert(
+    //   "Delete Note",
+    //   "Are you sure you want to delete this note?",
+    //   [
+    //     {
+    //       text: "Cancel",
+    //       style: "cancel"
+    //     },
+    //     {
+    //       text: "OK",
+    //       onPress: async () => {
+    //         const success = await deleteNoteFromAPI(id);
+    //         if (success) {
+    //           setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
+    //         }
+    //       }
+    //     }
+    //   ],
+    //   { cancelable: false }
+    // );
   };
 
   const renderItem = ({ item }: { item: Note }) => {
-    console.log(item.images);
     return (
       <TouchableOpacity
         style={styles.noteContainer}
@@ -219,22 +229,21 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           navigation.navigate("EditNote", { note: item, onSave: updateNote })
         }
       >
-        <View style={styles.noteBox}>
           {
             item.images.length >= 1 ?
-              <Image source={item.images[0]} style={styles.preview} ></Image>
+              <Image style={styles.preview} source={{ uri: item.images[0] }}/>
               :
               <Image source={require("../components/public/noPreview.png")} style={styles.preview} ></Image>
           }
-
-          <View>
-            <Text style={styles.noteTitle}>{item.title}</Text>
-            <Text style={styles.noteText}>{item.time}</Text>
-          </View>
-        </View>
-        <TouchableOpacity onPress={() => deleteNote(item.id)}>
-          <Ionicons name="trash-outline" size={24} color="#111111" />
-        </TouchableOpacity>
+            <View> 
+              <Text style={styles.noteTitle}>{item.title}</Text>
+              <Text style={styles.noteText}>
+                {`${item.time.split(', ')[0]}\n${item.time.split(', ')[1]}`}
+              </Text>
+            </View>
+            <TouchableOpacity style={{justifyContent: 'center', alignItems: 'center'}} onPress={() => deleteNote(item.id)}>
+              <Ionicons name="trash-outline" size={24} color="#111111" />
+            </TouchableOpacity>
       </TouchableOpacity>
     );
   };
@@ -403,7 +412,6 @@ const styles = StyleSheet.create({
   },
   noteTitle: {
     fontSize: 20,
-    marginLeft: '20%',
     fontWeight: "600",
     maxWidth: "100%",
   },
@@ -412,8 +420,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   noteText: {
-    marginLeft: "20%",
     fontSize: 18,
+ 
+  },
+  noteTextBox: {
+    width: '60%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   emptyContainer: {
     flex: 1,
@@ -452,15 +465,15 @@ const styles = StyleSheet.create({
     zIndex: 20,
   },
   noteContainer: {
-    justifyContent: "center",
+    justifyContent: "space-between",
     alignItems: "center",
     alignSelf: "center",
     backgroundColor: "#fff",
     borderRadius: 20,
     marginBottom: 10,
     width: '95%',
-    padding: 20,
-    paddingHorizontal: 35,
+    padding: 10,
+    paddingHorizontal: 10,
     flexDirection: "row",
   },
   filtersContainer: {

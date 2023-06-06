@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Image, ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { View, Image, ScrollView, StyleSheet, Text, TouchableOpacity, Platform } from 'react-native';
 import { launchImageLibraryAsync, MediaTypeOptions } from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
@@ -14,19 +14,29 @@ async function convertHeicToJpg(uri: string) {
 async function uploadImage(uri: string): Promise<string> {
   console.log('uploadImage - Input URI:', uri);
 
-  const response = await fetch(uri);
-  const blob = await response.blob();
-  const uniqueName = `image-${Date.now()}.jpg`; // Generate a unique name based on the current timestamp
-  const file = new File([blob], uniqueName, { type: 'image/jpeg' });
-  console.log('Blob size:', blob.size);
-  console.log('File size:', file.size);
-
   let data = new FormData();
-  data.append('file', file);
-  console.log('data file being sent as a File object: ', data);
+
+  if (Platform.OS === 'web') {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    const uniqueName = `image-${Date.now()}.jpg`; // Generate a unique name based on the current timestamp
+    const file = new File([blob], uniqueName, { type: 'image/jpeg' });
+    console.log('Blob size:', blob.size);
+    console.log('File size:', file.size);
+
+    data.append('file', file);
+  } else {
+    let base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
+    base64 = `data:image/jpeg;base64,${base64}`;
+    data.append('file', {
+      type: 'image/jpeg',
+      uri: base64,
+      name: 'image.jpg'
+    });
+  }
 
   const S3_PROXY_PREFIX = "http://99.7.218.98:8080/S3/"; // S3 Proxy
-  // const S3_PROXY_PREFIX = "http://localhost:8080/S3/"; // local tomcat
+  // const S3_PROXY_PREFIX = "http://:8080/S3/"; // localhost proxy
 
   return fetch(S3_PROXY_PREFIX+"uploadFile", {
     method: "POST",
@@ -42,7 +52,6 @@ async function uploadImage(uri: string): Promise<string> {
       return location;
     } else {
       console.log('uploadImage - Server response body:', resp.body);
-     //uploadFailed(resp); // Assuming that you have the uploadFailed function in scope
     }
   })
   .catch(err => {
@@ -50,8 +59,6 @@ async function uploadImage(uri: string): Promise<string> {
     return err;
   });
 }
-
-
 
 function PhotoScroller({ newImages, setNewImages }: { newImages: string[], setNewImages: React.Dispatch<React.SetStateAction<string[]>> }) {
 
@@ -81,7 +88,6 @@ function PhotoScroller({ newImages, setNewImages }: { newImages: string[], setNe
     }
   };
 
-  // Return JSX here
   return (
     <View style={styles.container}>
       <Text style={styles.selectText}>Select a Photo</Text>

@@ -7,9 +7,7 @@ import { User } from "../utils/user_class";
 import { Ionicons } from "@expo/vector-icons";
 import { createdAt } from "expo-updates";
 
-
 const user = User.getInstance();
-// console.log("User id: ", user.getId());
 
 type AddNoteScreenProps = {
   navigation: any;
