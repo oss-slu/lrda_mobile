@@ -3,6 +3,7 @@ import { View, Image, ScrollView, StyleSheet, Text, TouchableOpacity, Platform }
 import { launchImageLibraryAsync, MediaTypeOptions } from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
+import { Ionicons } from "@expo/vector-icons";
 
 async function convertHeicToJpg(uri: string) {
   console.log("Converting HEIC to JPG..."); // Log before starting the conversion
@@ -15,11 +16,12 @@ async function uploadImage(uri: string): Promise<string> {
   console.log('uploadImage - Input URI:', uri);
 
   let data = new FormData();
+  const uniqueName = `image-${Date.now()}.jpg`; // Generate a unique name based on the current timestamp
+
 
   if (Platform.OS === 'web') {
     const response = await fetch(uri);
     const blob = await response.blob();
-    const uniqueName = `image-${Date.now()}.jpg`; // Generate a unique name based on the current timestamp
     const file = new File([blob], uniqueName, { type: 'image/jpeg' });
     console.log('Blob size:', blob.size);
     console.log('File size:', file.size);
@@ -31,7 +33,7 @@ async function uploadImage(uri: string): Promise<string> {
     data.append('file', {
       type: 'image/jpeg',
       uri: base64,
-      name: 'image.jpg'
+      name: uniqueName,
     });
   }
 
@@ -88,6 +90,12 @@ function PhotoScroller({ newImages, setNewImages }: { newImages: string[], setNe
     }
   };
 
+  const handleDeleteImage = (index: number) => {
+    const updatedImages = [...newImages];
+    updatedImages.splice(index, 1);
+    setNewImages(updatedImages);
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.selectText}>Select a Photo</Text>
@@ -96,9 +104,14 @@ function PhotoScroller({ newImages, setNewImages }: { newImages: string[], setNe
           <Image style={styles.image} source={require("./public/new.png")} />
         </TouchableOpacity>
         {newImages.map((uri, index) => (
-          <TouchableOpacity key={index}>
-            <Image style={styles.image} source={{ uri }} />
-          </TouchableOpacity>
+          <View key={index}>
+            <TouchableOpacity style={styles.trash} onPress={() => handleDeleteImage(index)}>
+              <Ionicons style={{alignSelf :'center'}} name="trash-outline" size={20} color="#111111" />
+            </TouchableOpacity>
+            <TouchableOpacity key={index}>
+              <Image style={styles.image} source={{ uri }} />
+            </TouchableOpacity>
+          </View>
         ))}
       </ScrollView>
     </View>
@@ -121,6 +134,15 @@ const styles = StyleSheet.create({
   },
   selectText: {
     marginBottom: 5,
+  },
+  trash: {
+    position: 'absolute',
+    zIndex: 99,
+    height: '20%',
+    width: '20%',
+    backgroundColor: 'red',
+    borderRadius: 10,
+    justifyContent: 'center',
   },
 });
 
