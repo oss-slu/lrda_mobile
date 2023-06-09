@@ -27,6 +27,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [updateCounter, setUpdateCounter] = useState(0);
   const [drawerAnimation] = useState(new Animated.Value(0));
   const [buttonAnimation] = useState(new Animated.Value(0));
+  const [global,setGlobal] = useState(false);
 
   const toggleDrawer = () => {
     setIsOpen(!isOpen);
@@ -94,20 +95,36 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   }, [route.params, updateCounter]);
 
   const fetchMessages = async () => {
+    let response;
     try {
-      const response = await fetch(
-        "http://lived-religion-dev.rerum.io/deer-lr/query",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            type: "message",
-            creator: user.getId(),
-          }),
-        }
-      );
+      if(global){
+        response = await fetch(
+          "http://lived-religion-dev.rerum.io/deer-lr/query",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              type: "message"
+            }),
+          }
+        );
+      } else {
+        response = await fetch(
+          "http://lived-religion-dev.rerum.io/deer-lr/query",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              type: "message",
+              creator: user.getId(),
+            }),
+          }
+        );
+      }
 
       const data = await response.json();
       setMessages(data);
@@ -186,6 +203,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     user.logout();
     navigation.navigate("Login");
   };
+
+  const handleToggleGlobal = () => {
+    console.log('global was clicked and is: ',global);
+    setUpdateCounter(updateCounter+1);
+    setGlobal(!global);
+  }
 
   const deleteNote = (id: string) => {
     if (Platform.OS === 'web'){
@@ -309,21 +332,21 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingRight: 20 }}
       >
-        <View style={styles.filtersSelected}>
+        <TouchableOpacity style={styles.filtersSelected}>
           <Text style={styles.selectedFont}>All ({notes.length})</Text>
-        </View>
-        <View style={styles.filters}>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleToggleGlobal} style={global ? styles.filtersSelected : styles.filters}>
+          <Text style={global ? styles.selectedFont : styles.filterFont}>Global</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.filters}>
           <Text style={styles.filterFont}>Most Recent</Text>
-        </View>
-        <View style={styles.filters}>
-          <Text style={styles.filterFont}>Nearest</Text>
-        </View>
-        <View style={styles.filters}>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.filters}>
           <Text style={styles.filterFont}>St. Louis</Text>
-        </View>
-        <View style={styles.filters}>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.filters}>
           <Text style={styles.filterFont}>Alphabetical</Text>
-        </View>
+        </TouchableOpacity>
       </ScrollView>
       <FlatList
         data={notes}
