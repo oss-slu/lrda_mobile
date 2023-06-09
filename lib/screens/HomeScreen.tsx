@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Alert, Linking, View, Image, Text, StyleSheet, FlatList,
+import { Alert, Platform, Linking, View, Image, Text, StyleSheet, FlatList,
    ScrollView, TouchableOpacity, Animated } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -188,37 +188,36 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   };
 
   const deleteNote = (id: string) => {
-
-    async function name() {
-      const success = await deleteNoteFromAPI(id);
-      if (success) {
-        setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
+    if (Platform.OS === 'web'){
+      async function name() {
+        const success = await deleteNoteFromAPI(id);
+        if (success) {
+          setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
+        }
       }
+      name();
+    } else {
+      Alert.alert(
+        "Delete Note",
+        "Are you sure you want to delete this note?",
+        [
+          {
+            text: "Cancel",
+            style: "cancel"
+          },
+          {
+            text: "OK",
+            onPress: async () => {
+              const success = await deleteNoteFromAPI(id);
+              if (success) {
+                setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
+              }
+            }
+          }
+        ],
+        { cancelable: false }
+      );
     }
-    
-    name();
-
-
-    // Alert.alert(
-    //   "Delete Note",
-    //   "Are you sure you want to delete this note?",
-    //   [
-    //     {
-    //       text: "Cancel",
-    //       style: "cancel"
-    //     },
-    //     {
-    //       text: "OK",
-    //       onPress: async () => {
-    //         const success = await deleteNoteFromAPI(id);
-    //         if (success) {
-    //           setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
-    //         }
-    //       }
-    //     }
-    //   ],
-    //   { cancelable: false }
-    // );
   };
 
   const renderItem = ({ item }: { item: Note }) => {

@@ -18,7 +18,6 @@ async function uploadImage(uri: string): Promise<string> {
   let data = new FormData();
   const uniqueName = `image-${Date.now()}.jpg`; // Generate a unique name based on the current timestamp
 
-
   if (Platform.OS === 'web') {
     const response = await fetch(uri);
     const blob = await response.blob();
@@ -146,5 +145,4 @@ const styles = StyleSheet.create({
   },
 });
 
-// Export the PhotoScroller component
 export default PhotoScroller;

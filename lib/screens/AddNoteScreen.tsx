@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Alert, View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import { Alert, View, Text, StyleSheet, TextInput, TouchableOpacity, Platform } from "react-native";
 import { Note, RootStackParamList } from "../../types";
 import PhotoScroller from "../components/photoScroller";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -62,23 +62,27 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   };
 
   const handleGoBackCheck = () => {
-    Alert.alert(
-      "Going Back?",
-      "Your note will not be saved!",
-      [
-        {
-          text: "Cancel",
-          style: "cancel"
-        },
-        {
-          text: "OK",
-          onPress: async () => {
-            navigation.goBack();
-        },
-      }
-      ],
-      { cancelable: false }
-    );
+    if (Platform.OS === 'web'){
+      navigation.goBack();
+    } else {
+      Alert.alert(
+        "Going Back?",
+        "Your note will not be saved!",
+        [
+          {
+            text: "Cancel",
+            style: "cancel"
+          },
+          {
+            text: "OK",
+            onPress: async () => {
+              navigation.goBack();
+          },
+        }
+        ],
+        { cancelable: false }
+      );
+    }
   };
 
   return (
