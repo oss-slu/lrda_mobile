@@ -1,6 +1,6 @@
 // EditNoteScreen.tsx
-import React, { useState } from "react";
-import { Alert, View, TextInput, Text, StyleSheet } from "react-native";
+import React, { useState, useEffect } from "react";
+import { Alert, Platform, View, TextInput, Text, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Ionicons } from "@expo/vector-icons";
@@ -31,6 +31,18 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const [title, setTitle] = useState(note.title);
   const [text, setText] = useState(note.text);
   const [images, setimages] = useState<string[]>(note.images);
+  const [creator, setCreator] = useState(note.creator);
+  const [owner, setOwner] = useState(false);
+
+  useEffect(() => {
+    console.log("creator: ",note);
+    console.log("User: ",user.getId());
+    if (creator === user.getId()) {
+      setOwner(true);
+    } else {
+      setOwner(false);
+    }
+  }, [creator]);
 
   const updateNote = async (updatedNote: Note) => {
     try {
@@ -70,23 +82,27 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   };
 
   const handleGoBackCheck = () => {
-    Alert.alert(
-      "Going Back?",
-      "Your note will not be saved!",
-      [
-        {
-          text: "Cancel",
-          style: "cancel"
-        },
-        {
-          text: "OK",
-          onPress: async () => {
-            navigation.goBack();
-        },
-      }
-      ],
-      { cancelable: false }
-    );
+    if (Platform.OS === 'web'){
+      navigation.goBack();
+    } else {
+      Alert.alert(
+        "Going Back?",
+        "Your note will not be saved!",
+        [
+          {
+            text: "Cancel",
+            style: "cancel"
+          },
+          {
+            text: "OK",
+            onPress: async () => {
+              navigation.goBack();
+          },
+        }
+        ],
+        { cancelable: false }
+      );
+    }
   };
 
   return (
@@ -99,9 +115,11 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           <Ionicons name="arrow-back-outline" size={24} color="white" />
         </TouchableOpacity>
         <Text style={styles.topText}>Editing Note</Text>
+        { owner ? 
         <TouchableOpacity style={styles.backButton} onPress={handleSaveNote}>
           <Ionicons name="save-outline" size={24} color="white" />
         </TouchableOpacity>
+        : <View/>}
       </View>
       <View style={styles.container}>
         <KeyboardAwareScrollView

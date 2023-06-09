@@ -141,6 +141,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           images: message.items || [],
           time:
             time.toLocaleString("en-US", { timeZone: "America/Chicago" }) || "",
+          creator: message.creator || "",
         };
       });
 
@@ -205,7 +206,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   };
 
   const handleToggleGlobal = () => {
-    console.log('global was clicked and is: ',global);
     setUpdateCounter(updateCounter+1);
     setGlobal(!global);
   }
@@ -251,18 +251,21 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           navigation.navigate("EditNote", { note: item, onSave: updateNote })
         }
       >
-          {
+        <View style={{flexDirection: 'row'}}>
+        {
             item.images.length >= 1 ?
               <Image style={styles.preview} source={{ uri: item.images[0] }}/>
               :
               <Image source={require("../components/public/noPreview.png")} style={styles.preview} ></Image>
           }
-            <View> 
+            <View style={{alignSelf: 'center'}}> 
               <Text style={styles.noteTitle}>{item.title}</Text>
               <Text style={styles.noteText}>
                 {`${item.time.split(', ')[0]}\n${item.time.split(', ')[1]}`}
               </Text>
             </View>
+        </View>
+          
             <TouchableOpacity style={{justifyContent: 'center', alignItems: 'center'}} onPress={() => deleteNote(item.id)}>
               <Ionicons name="trash-outline" size={24} color="#111111" />
             </TouchableOpacity>
@@ -553,7 +556,9 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 10,
+    marginRight: '10%',
     alignContent: 'center',
+    alignSelf: 'center',
   },
 });
 
