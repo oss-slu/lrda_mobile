@@ -67,37 +67,40 @@ const AppNavigator: React.FC = () => {
   return (
     <NavigationContainer>
       {isLoggedIn ? (
-        <Tab.Navigator
-        screenOptions={{ tabBarShowLabel: false }}
-      >
-        <Tab.Screen
-          name="Home"
-          component={HomeStack}
-          options={{
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="ios-pencil" color={color} size={size} />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Tab1"
-          component={() => null}
-          options={{
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="ios-map" color={color} size={size} />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Tab2"
-          component={() => null}
-          options={{
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="ios-person" color={color} size={size} />
-            ),
-          }}
-        />
-      </Tab.Navigator>
+       <Tab.Navigator
+       screenOptions={{ tabBarShowLabel: false }}
+     >
+       <Tab.Screen
+         name="Home"
+         component={HomeStack}
+         options={{
+           headerShown: false, // This line hides the header
+           tabBarIcon: ({ color, size }) => (
+             <Ionicons name="ios-pencil" color={color} size={size} />
+           ),
+         }}
+       />
+       <Tab.Screen
+         name="Tab1"
+         component={() => null}
+         options={{
+           headerShown: false, // This line hides the header
+           tabBarIcon: ({ color, size }) => (
+             <Ionicons name="ios-map" color={color} size={size} />
+           ),
+         }}
+       />
+       <Tab.Screen
+         name="Tab2"
+         component={() => null}
+         options={{
+           headerShown: false, // This line hides the header
+           tabBarIcon: ({ color, size }) => (
+             <Ionicons name="ios-person" color={color} size={size} />
+           ),
+         }}
+       />
+     </Tab.Navigator>
       ) : (
         <Stack.Navigator initialRouteName="Login">
           <Stack.Screen
