@@ -28,6 +28,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [drawerAnimation] = useState(new Animated.Value(0));
   const [buttonAnimation] = useState(new Animated.Value(0));
   const [global,setGlobal] = useState(false);
+  const [reversed,setReversed] = useState(true);
 
   const toggleDrawer = () => {
     setIsOpen(!isOpen);
@@ -148,7 +149,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       fetchedNotes.sort(
         (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
       );
-      setNotes(fetchedNotes);
+
+      if (Platform.OS === "web") {
+        setNotes(reversed ? fetchedNotes.reverse() : fetchedNotes);
+      } else {
+        setNotes(!reversed ? fetchedNotes : fetchedNotes.reverse());
+      }
+    
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
@@ -208,6 +215,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const handleToggleGlobal = () => {
     setUpdateCounter(updateCounter+1);
     setGlobal(!global);
+  }
+
+  const handleReverseOrder = () => {
+    setNotes(notes.reverse());
+    setReversed(!reversed);
+    setUpdateCounter(updateCounter+1);
   }
 
   const deleteNote = (id: string) => {
@@ -341,8 +354,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         <TouchableOpacity onPress={handleToggleGlobal} style={global ? styles.filtersSelected : styles.filters}>
           <Text style={global ? styles.selectedFont : styles.filterFont}>Global</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.filters}>
-          <Text style={styles.filterFont}>Most Recent</Text>
+        <TouchableOpacity onPress={handleReverseOrder} style={styles.filters}>
+          <Text style={styles.filterFont}>Sort by Time</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.filters}>
           <Text style={styles.filterFont}>St. Louis</Text>

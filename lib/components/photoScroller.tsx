@@ -63,7 +63,7 @@ async function uploadImage(uri: string): Promise<string> {
 
 function PhotoScroller({ newImages, setNewImages }: { newImages: string[], setNewImages: React.Dispatch<React.SetStateAction<string[]>> }) {
 
-  console.log("Current images: ", newImages); // Log the current images every time the component renders
+  // console.log("Current images: ", newImages); // Log the current images every time the component renders
 
   const handleNewImage = async () => {
     console.log("Opening image library..."); // Log before opening the image library
