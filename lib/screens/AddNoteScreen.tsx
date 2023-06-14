@@ -43,7 +43,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     );
 
     const obj = await response.json();
-    console.log(obj["@id"]);
+    // console.log(obj["@id"]);
     return obj["@id"];
   };
 

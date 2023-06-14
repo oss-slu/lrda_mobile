@@ -32,7 +32,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   // temp adding a login for stuart if we click skip
   const handleSkip = async () => {
     await user.login("Stuart Ray", "4");
-    navigation.replace('Home');
+    navigation.navigate('Home');
   }
   const handleGoRegister = () => {
     navigation.navigate("Register");
@@ -49,7 +49,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
         if(status == 'success'){
           setUsername('');
           setPassword('');
-          navigation.replace('Home');
+          // navigation.navigate('Home');
         }
       } catch (error) {
         toggleSnack(true);

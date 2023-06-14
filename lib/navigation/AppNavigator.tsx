@@ -15,13 +15,13 @@ import { User } from '../utils/user_class';
 // Get the single instance of the User class
 const user = User.getInstance();
 
+const Placeholder = () => null;
+
 export type RootTabParamList = {
-  Home: undefined;
+  HomeTab: undefined;
   Tab1: undefined;
   Tab2: undefined;
 };
-
-
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -29,21 +29,18 @@ const Stack = createStackNavigator<RootStackParamList>();
 const HomeStack = () => {
   return (
     <Stack.Navigator>
-      <Stack.Screen
-        name="Home"
-        component={(props: HomeScreenProps) => <HomeScreen {...props} />}
-        options={{ headerShown: false, gestureEnabled: false }}
-      />
+      <Stack.Screen name="Home" options={{headerShown: false, gestureEnabled: false }}>
+        {(props: HomeScreenProps) => <HomeScreen {...props} />}
+      </Stack.Screen>
       <Stack.Screen
         name="AddNote"
         component={AddNoteScreen}
         options={{ headerShown: false, gestureEnabled: false }}
       />
-      <Stack.Screen
-        name="EditNote"
-        component={(props: EditNoteProps) => <EditNote {...props} />}
-        options={{ headerShown: false, gestureEnabled: false }}
-      />
+      <Stack.Screen name="EditNote" options={{headerShown: false, gestureEnabled: false }}>
+        {(props: EditNoteProps) => <EditNote {...props} />}
+      </Stack.Screen>
+
     </Stack.Navigator>
   );
 };
@@ -71,7 +68,7 @@ const AppNavigator: React.FC = () => {
        screenOptions={{ tabBarShowLabel: false }}
      >
        <Tab.Screen
-         name="Home"
+         name="HomeTab"
          component={HomeStack}
          options={{
            headerShown: false, // This line hides the header
@@ -82,7 +79,7 @@ const AppNavigator: React.FC = () => {
        />
        <Tab.Screen
          name="Tab1"
-         component={() => null}
+         component={Placeholder}
          options={{
            headerShown: false, // This line hides the header
            tabBarIcon: ({ color, size }) => (
@@ -92,7 +89,7 @@ const AppNavigator: React.FC = () => {
        />
        <Tab.Screen
          name="Tab2"
-         component={() => null}
+         component={Placeholder}
          options={{
            headerShown: false, // This line hides the header
            tabBarIcon: ({ color, size }) => (

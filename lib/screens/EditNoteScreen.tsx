@@ -7,7 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Note } from "../../types";
 import PhotoScroller from "../components/photoScroller";
 import { User } from "../utils/user_class";
-import { white } from "react-native-paper/lib/typescript/styles/themes/v2/colors";
+// import { white } from "react-native-paper/lib/typescript/styles/themes/v2/colors";
 
 const user = User.getInstance();
 
