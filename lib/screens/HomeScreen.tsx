@@ -31,6 +31,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [global,setGlobal] = useState(false);
   const [reversed,setReversed] = useState(true);
   let textLength = 16;
+  let userInitals = user.getName()?.split(' ').map((namePart) => namePart[0]).join('');
 
   const toggleDrawer = () => {
     setIsOpen(!isOpen);
@@ -334,13 +335,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       </Animated.View>
       <View style={styles.topView} >
         <View style={{ flexDirection: "row", alignItems: "center" }} >
-          <Image
-            style={[styles.pfp, { borderRadius: 50 }]}
-            source={require("../components/public/nopfp.png")}
-          />
+          <View style={styles.userPhoto}>
+            <Text style={{fontWeight: '600', fontSize: 20, alignSelf: 'center'}} >{userInitals}</Text>
+          </View>
           <Text style={styles.title}>Field Notes</Text>
         </View>
-
         <TouchableOpacity onPress={toggleDrawer} style={[styles.menuButton]}>
           <Ionicons name="menu-outline" size={24} color="white" />
         </TouchableOpacity>
@@ -444,6 +443,14 @@ const styles = StyleSheet.create({
     height: 50,
     alignItems: "center",
     justifyContent: "center",
+  },
+  userPhoto: {
+    backgroundColor: '#F4DFCD',
+    height: 50, 
+    width: 50, 
+    borderRadius: 50, 
+    alignContent: 'center', 
+    justifyContent: 'center',
   },
   mediumText: {
     marginLeft: 10,
