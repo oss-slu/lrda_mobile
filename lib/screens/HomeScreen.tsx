@@ -29,7 +29,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [drawerAnimation] = useState(new Animated.Value(0));
   const [buttonAnimation] = useState(new Animated.Value(0));
   const [global,setGlobal] = useState(false);
-  const [reversed,setReversed] = useState(true);
+  const [reversed,setReversed] = useState(false);
   let textLength = 16;
   let userInitals = user.getName()?.split(' ').map((namePart) => namePart[0]).join('');
 
@@ -157,7 +157,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         textLength = 50;
         setNotes(reversed ? fetchedNotes.reverse() : fetchedNotes);
       } else {
-        setNotes(!reversed ? fetchedNotes : fetchedNotes.reverse());
+        setNotes(reversed ? fetchedNotes : fetchedNotes.reverse());
       }
     
     } catch (error) {
@@ -213,7 +213,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   const handleLogout = () => {
     user.logout();
-    navigation.navigate("Login");
   };
 
   const handleToggleGlobal = () => {
