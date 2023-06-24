@@ -1,14 +1,13 @@
 // EditNoteScreen.tsx
-import React, { useState } from "react";
-import { Alert, View, TextInput, Text, StyleSheet, ScrollView } from "react-native";
+import React, { useState, useEffect } from "react";
+import { Alert, Platform, View, TextInput, Text, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { KeyboardAvoidingScrollView } from 'react-native-keyboard-avoiding-scroll-view';
-import { KeyboardAvoidingView } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Ionicons } from "@expo/vector-icons";
 import { Note } from "../../types";
 import PhotoScroller from "../components/photoScroller";
 import { User } from "../utils/user_class";
-import { white } from "react-native-paper/lib/typescript/styles/themes/v2/colors";
+// import { white } from "react-native-paper/lib/typescript/styles/themes/v2/colors";
 
 const user = User.getInstance();
 
@@ -31,6 +30,19 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const { note, onSave } = route.params;
   const [title, setTitle] = useState(note.title);
   const [text, setText] = useState(note.text);
+  const [images, setimages] = useState<string[]>(note.images);
+  const [creator, setCreator] = useState(note.creator);
+  const [owner, setOwner] = useState(false);
+
+  useEffect(() => {
+    console.log("creator: ",note);
+    console.log("User: ",user.getId());
+    if (creator === user.getId()) {
+      setOwner(true);
+    } else {
+      setOwner(false);
+    }
+  }, [creator]);
 
   const updateNote = async (updatedNote: Note) => {
     try {
@@ -45,6 +57,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             "@id": updatedNote.id,
             title: updatedNote.title,
             BodyText: updatedNote.text,
+            items: updatedNote.images,
             type: "message",
             creator: user.getId(),
           }),
@@ -64,32 +77,36 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   };
 
   const handleSaveNote = () => {
-    const updatedNote = { ...note, title, text };
+    const updatedNote = { ...note, title, text, images };
     updateNote(updatedNote);
   };
 
   const handleGoBackCheck = () => {
-    Alert.alert(
-      "Going Back?",
-      "Your note will not be saved!",
-      [
-        {
-          text: "Cancel",
-          style: "cancel"
-        },
-        {
-          text: "OK",
-          onPress: async () => {
-            navigation.goBack();
-        },
-      }
-      ],
-      { cancelable: false }
-    );
+    if (Platform.OS === 'web'){
+      navigation.goBack();
+    } else {
+      Alert.alert(
+        "Going Back?",
+        "Your note will not be saved!",
+        [
+          {
+            text: "Cancel",
+            style: "cancel"
+          },
+          {
+            text: "OK",
+            onPress: async () => {
+              navigation.goBack();
+          },
+        }
+        ],
+        { cancelable: false }
+      );
+    }
   };
 
   return (
-    <View style={{flex:1}} >
+    <View>
       <View style={styles.topContainer}>
         <TouchableOpacity
           style={styles.backButton}
@@ -98,34 +115,45 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           <Ionicons name="arrow-back-outline" size={24} color="white" />
         </TouchableOpacity>
         <Text style={styles.topText}>Editing Note</Text>
+        { owner ? 
         <TouchableOpacity style={styles.backButton} onPress={handleSaveNote}>
           <Ionicons name="save-outline" size={24} color="white" />
         </TouchableOpacity>
+        : <View/>}
       </View>
+      <View style={styles.container}>
+        <KeyboardAwareScrollView
+          showsVerticalScrollIndicator={false}
+          style={{ paddingTop: 10 }}
+        >
           <TextInput
             style={styles.title}
             value={title}
             onChangeText={setTitle}
           />
-            {/* <PhotoScroller /> */}
-            <TextInput
-              style={styles.input}
-              multiline={true}
-              textAlignVertical="top"
-              value={text}
-              onChangeText={setText}
-            />
+          { <PhotoScroller newImages={images} setNewImages={setimages} />}
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                multiline={true}
+                textAlignVertical="top"
+                value={text}
+                onChangeText={setText}
+              />
+            </View>
+        </KeyboardAwareScrollView>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   topContainer: {
+    flex: 1,
     justifyContent: "space-between",
     paddingHorizontal: 5,
-    Height: "15%",
+    minHeight: "15%",
     paddingTop: "15%",
-    paddingBottom: "5%",
     flexDirection: "row",
     backgroundColor: "#F4DFCD",
     alignItems: "center",
@@ -144,12 +172,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  container: {
+    paddingHorizontal: 16,
+    backgroundColor: "white",
+    overflow: "hidden",
+    paddingBottom: "50%",
+  },
   title: {
     width: '90%',
     alignSelf: 'center',
     height: 45,
     borderColor: "#111111",
-    borderBottomWidth: 5,
+    borderWidth: 1,
+    borderRadius: 30,
     marginBottom: 20,
     paddingHorizontal: 10,
     textAlign: "center",
@@ -157,9 +192,23 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontSize: 22,
+    borderColor: "#111111",
+    borderWidth: 1,
+    borderRadius: 10,
     padding: 10,
+    fontSize: 22,
     paddingBottom: '90%',
+  },
+  addButton: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+    backgroundColor: "#111111",
+    borderRadius: 50,
+    width: 50,
+    height: 50,
+    alignItems: "center",
+    justifyContent: "center",
   },
   addButton: {
     position: "absolute",

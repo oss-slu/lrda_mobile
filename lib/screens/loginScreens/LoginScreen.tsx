@@ -23,20 +23,16 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
       await SplashScreen.preventAutoHideAsync();
       // If a user is already cached navigate home
       if(user.getId()){
-        handleGoHome();
+        navigation.replace('Home');
       }
       await SplashScreen.hideAsync();
     })();
   }, []);
 
-  const handleGoHome = () => {
-    navigation.navigate("Home");
-  };
-  
   // temp adding a login for stuart if we click skip
   const handleSkip = async () => {
     await user.login("Stuart Ray", "4");
-    handleGoHome();
+    navigation.navigate('Home');
   }
   const handleGoRegister = () => {
     navigation.navigate("Register");
@@ -53,7 +49,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
         if(status == 'success'){
           setUsername('');
           setPassword('');
-          handleGoHome();
+          // navigation.navigate('Home');
         }
       } catch (error) {
         toggleSnack(true);

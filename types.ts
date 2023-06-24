@@ -2,7 +2,9 @@ export type Note = {
     id: string;
     title: string;
     text: string;
-    created_time: string;
+    time: string;
+    images: string[];
+    creator: string;
   };
   
   export type RootStackParamList = {

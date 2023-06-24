@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Alert, Linking, View, Image, Text, StyleSheet, FlatList,
+import { Alert, Platform, Linking, View, Image, Text, StyleSheet, FlatList,
    ScrollView, TouchableOpacity, Animated } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -7,11 +7,13 @@ import { RootStackParamList } from "../../types";
 import { User } from "../utils/user_class";
 
 interface Note {
+  images: any;
   id: string;
   title: string;
   text: string;
-  created_time: string;
+  time: string;
 }
+
 const user = User.getInstance();
 
 export type HomeScreenProps = {
@@ -26,6 +28,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [updateCounter, setUpdateCounter] = useState(0);
   const [drawerAnimation] = useState(new Animated.Value(0));
   const [buttonAnimation] = useState(new Animated.Value(0));
+  const [global,setGlobal] = useState(false);
+  const [reversed,setReversed] = useState(true);
+  let textLength = 16;
 
   const toggleDrawer = () => {
     setIsOpen(!isOpen);
@@ -93,42 +98,67 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   }, [route.params, updateCounter]);
 
   const fetchMessages = async () => {
+    let response;
     try {
-      const response = await fetch(
-        "http://lived-religion-dev.rerum.io/deer-lr/query",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            type: "message",
-            creator: user.getId(),
-          }),
-        }
-      );
+      if(global){
+        response = await fetch(
+          "http://lived-religion-dev.rerum.io/deer-lr/query",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              type: "message"
+            }),
+          }
+        );
+      } else {
+        response = await fetch(
+          "http://lived-religion-dev.rerum.io/deer-lr/query",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              type: "message",
+              creator: user.getId(),
+            }),
+          }
+        );
+      }
 
       const data = await response.json();
       setMessages(data);
 
       const fetchedNotes: Note[] = data.map((message: any) => {
-        const created_time = message.__rerum.isOverwritten
+        const time = message.__rerum.isOverwritten
           ? new Date(message.__rerum.isOverwritten)
           : new Date(message.__rerum.createdAt);
-        created_time.setHours(created_time.getHours() - 5);
+        time.setHours(time.getHours() - 5);
         return {
           id: message["@id"],
           title: message.title || "",
           text: message.BodyText || "",
-          created_time:
-            created_time.toLocaleString("en-US", { timeZone: "America/Chicago" }) || "",
+          images: message.items || [],
+          time:
+            time.toLocaleString("en-US", { timeZone: "America/Chicago" }) || "",
+          creator: message.creator || "",
         };
       });
 
       fetchedNotes.sort(
-        (a, b) => new Date(b.created_time).getTime() - new Date(a.created_time).getTime()
+        (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
       );
-      setNotes(fetchedNotes);
+
+      if (Platform.OS === "web") {
+        textLength = 50;
+        setNotes(reversed ? fetchedNotes.reverse() : fetchedNotes);
+      } else {
+        setNotes(!reversed ? fetchedNotes : fetchedNotes.reverse());
+      }
+    
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
@@ -185,27 +215,48 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     navigation.navigate("Login");
   };
 
+  const handleToggleGlobal = () => {
+    setUpdateCounter(updateCounter+1);
+    setGlobal(!global);
+  }
+
+  const handleReverseOrder = () => {
+    setNotes(notes.reverse());
+    setReversed(!reversed);
+    setUpdateCounter(updateCounter+1);
+  }
+
   const deleteNote = (id: string) => {
-    Alert.alert(
-      "Delete Note",
-      "Are you sure you want to delete this note?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel"
-        },
-        {
-          text: "OK",
-          onPress: async () => {
-            const success = await deleteNoteFromAPI(id);
-            if (success) {
-              setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
+    if (Platform.OS === 'web'){
+      async function name() {
+        const success = await deleteNoteFromAPI(id);
+        if (success) {
+          setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
+        }
+      }
+      name();
+    } else {
+      Alert.alert(
+        "Delete Note",
+        "Are you sure you want to delete this note?",
+        [
+          {
+            text: "Cancel",
+            style: "cancel"
+          },
+          {
+            text: "OK",
+            onPress: async () => {
+              const success = await deleteNoteFromAPI(id);
+              if (success) {
+                setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
+              }
             }
           }
-        }
-      ],
-      { cancelable: false }
-    );
+        ],
+        { cancelable: false }
+      );
+    }
   };
 
   const renderItem = ({ item }: { item: Note }) => {
@@ -216,13 +267,26 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           navigation.navigate("EditNote", { note: item, onSave: updateNote })
         }
       >
-        <View style={styles.noteBox}>
-          <Text style={styles.mediumText}>{item.title}</Text>
-          <Text style={styles.noteText}>{item.created_time}</Text>
+        <View style={{flexDirection: 'row'}}>
+        {
+            item.images.length >= 1 ?
+              <Image style={styles.preview} source={{ uri: item.images[0] }}/>
+              :
+              <Image source={require("../components/public/noPreview.png")} style={styles.preview} ></Image>
+          }
+            <View style={{alignSelf: 'center', position: 'absolute', left: 120}}>
+
+              <Text style={styles.noteTitle}>{item.title.length > textLength ? item.title.slice(0, textLength) + '...' : item.title}</Text>
+
+              <Text style={styles.noteText}>
+                {`${item.time.split(', ')[0]}\n${item.time.split(', ')[1]}`}
+              </Text>
+            </View>
         </View>
-        <TouchableOpacity onPress={() => deleteNote(item.id)}>
-          <Ionicons name="trash-outline" size={24} color="#111111" />
-        </TouchableOpacity>
+          
+            <TouchableOpacity style={{justifyContent: 'center', alignItems: 'center', position: 'absolute', right: 10}} onPress={() => deleteNote(item.id)}>
+              <Ionicons name="trash-outline" size={24} color="#111111" />
+            </TouchableOpacity>
       </TouchableOpacity>
     );
   };
@@ -274,36 +338,34 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             style={[styles.pfp, { borderRadius: 50 }]}
             source={require("../components/public/nopfp.png")}
           />
-          <Text style={styles.mediumText}>Hi, {user.getName()}</Text>
+          <Text style={styles.title}>Field Notes</Text>
         </View>
 
         <TouchableOpacity onPress={toggleDrawer} style={[styles.menuButton]}>
           <Ionicons name="menu-outline" size={24} color="white" />
         </TouchableOpacity>
       </View>
-
-      <Text style={styles.title}>Field Notes</Text>
       <ScrollView
         style={styles.filtersContainer}
         horizontal={true}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingRight: 20 }}
       >
-        <View style={styles.filtersSelected}>
+        <TouchableOpacity style={styles.filtersSelected}>
           <Text style={styles.selectedFont}>All ({notes.length})</Text>
-        </View>
-        <View style={styles.filters}>
-          <Text style={styles.filterFont}>Most Recent</Text>
-        </View>
-        <View style={styles.filters}>
-          <Text style={styles.filterFont}>Nearest</Text>
-        </View>
-        <View style={styles.filters}>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleToggleGlobal} style={global ? styles.filtersSelected : styles.filters}>
+          <Text style={global ? styles.selectedFont : styles.filterFont}>Global</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleReverseOrder} style={styles.filters}>
+          <Text style={styles.filterFont}>Sort by Time</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.filters}>
           <Text style={styles.filterFont}>St. Louis</Text>
-        </View>
-        <View style={styles.filters}>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.filters}>
           <Text style={styles.filterFont}>Alphabetical</Text>
-        </View>
+        </TouchableOpacity>
       </ScrollView>
       <FlatList
         data={notes}
@@ -389,12 +451,24 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     maxWidth: "100%",
   },
+  noteTitle: {
+    fontSize: 20,
+    fontWeight: "600",
+    maxWidth: "100%",
+    flexShrink: 1,
+  },
   noteBox: {
     width: "100%",
+    flexDirection: 'column',
+    flexWrap: 'wrap',
   },
   noteText: {
-    marginLeft: "10%",
     fontSize: 18,
+  },
+  noteTextBox: {
+    width: '60%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   emptyContainer: {
     flex: 1,
@@ -433,15 +507,15 @@ const styles = StyleSheet.create({
     zIndex: 20,
   },
   noteContainer: {
-    justifyContent: "center",
+    justifyContent: "space-between",
     alignItems: "center",
     alignSelf: "center",
     backgroundColor: "#fff",
     borderRadius: 20,
     marginBottom: 10,
     width: '95%',
-    padding: 20,
-    paddingHorizontal: 35,
+    padding: 10,
+    paddingHorizontal: 10,
     flexDirection: "row",
   },
   filtersContainer: {
@@ -481,7 +555,7 @@ const styles = StyleSheet.create({
     color: "#111111",
   },
   title: {
-    fontSize: 60,
+    fontSize: 40,
     fontWeight: "bold",
     lineHeight: 80,
     color: "#111111",
@@ -494,6 +568,14 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     marginLeft: 3,
     marginTop: 3,
+  },
+  preview: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+    marginRight: '10%',
+    alignContent: 'center',
+    alignSelf: 'center',
   },
 });
 

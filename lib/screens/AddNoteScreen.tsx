@@ -1,11 +1,10 @@
-import React, { useState } from "react";
-import { Alert, View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Alert, View, Text, StyleSheet, TextInput, TouchableOpacity, Platform } from "react-native";
 import { Note, RootStackParamList } from "../../types";
 import PhotoScroller from "../components/photoScroller";
-import { KeyboardAvoidingScrollView } from 'react-native-keyboard-avoiding-scroll-view';
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { User } from "../utils/user_class";
 import { Ionicons } from "@expo/vector-icons";
-import { createdAt } from "expo-updates";
 
 const user = User.getInstance();
 
@@ -17,6 +16,12 @@ type AddNoteScreenProps = {
 const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [titleText, setTitleText] = useState("");
   const [bodyText, setBodyText] = useState("");
+  const [newImages, setNewImages] = useState<string[]>([]);
+
+  useEffect(() => {
+    console.log("new Images array:", newImages);
+  }, [newImages]);
+
 
   const createNote = async (title: string, body: string) => {
     const response = await fetch(
@@ -29,6 +34,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         body: JSON.stringify({
           type: "message",
           title: title,
+          items: newImages,
           BodyText: body,
           creator: user.getId(),
         }),
@@ -36,14 +42,14 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     );
 
     const obj = await response.json();
-    console.log(obj["@id"]);
+    // console.log(obj["@id"]);
     return obj["@id"];
   };
 
   const saveNote = async () => {
     try {
       const id = await createNote(titleText, bodyText);
-      const note: Note = { id, title: titleText, text: bodyText, created_time: '' }; // The note will get assigned a time
+      const note: Note = { id, title: titleText, text: bodyText, time: '', images: [], creator: '' }; // The note will get assigned a time
 
       if (route.params?.onSave) {
         route.params.onSave(note);
@@ -55,27 +61,31 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   };
 
   const handleGoBackCheck = () => {
-    Alert.alert(
-      "Going Back?",
-      "Your note will not be saved!",
-      [
-        {
-          text: "Cancel",
-          style: "cancel"
-        },
-        {
-          text: "OK",
-          onPress: async () => {
-            navigation.goBack();
-        },
-      }
-      ],
-      { cancelable: false }
-    );
+    if (Platform.OS === 'web'){
+      navigation.goBack();
+    } else {
+      Alert.alert(
+        "Going Back?",
+        "Your note will not be saved!",
+        [
+          {
+            text: "Cancel",
+            style: "cancel"
+          },
+          {
+            text: "OK",
+            onPress: async () => {
+              navigation.goBack();
+          },
+        }
+        ],
+        { cancelable: false }
+      );
+    }
   };
 
   return (
-    <View style={{flex: 1}}>
+    <View>
       <View style={styles.topContainer}>
         <TouchableOpacity
           style={styles.backButton}
@@ -88,13 +98,19 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           <Ionicons name="save-outline" size={24} color="white" />
         </TouchableOpacity>
       </View>
+      <View style={styles.container}>
+        <KeyboardAwareScrollView
+          showsVerticalScrollIndicator={false}
+          style={{ overflow: "hidden", paddingTop: 10, paddingBottom: 100 }}
+        >
           <TextInput
             style={styles.title}
             placeholder="Title your note here"
             onChangeText={(text) => setTitleText(text)}
             value={titleText}
           />
-          {/* <PhotoScroller /> */}
+          { <PhotoScroller newImages={newImages} setNewImages={setNewImages} />}
+          <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
               placeholder="Write your note here"
@@ -103,17 +119,20 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
               onChangeText={(text) => setBodyText(text)}
               value={bodyText}
             />
+          </View>
+        </KeyboardAwareScrollView>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   topContainer: {
+    flex: 1,
     justifyContent: "space-between",
     paddingHorizontal: 5,
-    Height: "15%",
+    minHeight: "15%",
     paddingTop: "15%",
-    paddingBottom: "5%",
     flexDirection: "row",
     backgroundColor: "#F4DFCD",
     alignItems: "center",
@@ -153,8 +172,11 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontSize: 22,
+    borderColor: "#111111",
+    borderWidth: 1,
+    borderRadius: 10,
     padding: 10,
+    fontSize: 22,
     paddingBottom: '90%',
   },
   addButton: {
@@ -181,6 +203,10 @@ const styles = StyleSheet.create({
     color: "#111111",
     fontWeight: "bold",
     fontSize: 12,
+  },
+  inputContainer: {
+    height: 400,
+    justifyContent: "space-between",
   },
 });
 
