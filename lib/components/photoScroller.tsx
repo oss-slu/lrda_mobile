@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Image, ScrollView, StyleSheet, Text, TouchableOpacity, Platform } from 'react-native';
-import { launchImageLibraryAsync, MediaTypeOptions } from 'expo-image-picker';
+import { View, Image, ScrollView, StyleSheet, Text, TouchableOpacity, Platform, Alert } from 'react-native';
+import { launchCameraAsync, launchImageLibraryAsync, MediaTypeOptions, requestCameraPermissionsAsync, requestMediaLibraryPermissionsAsync } from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import { Ionicons } from "@expo/vector-icons";
@@ -62,31 +62,76 @@ async function uploadImage(uri: string): Promise<string> {
 }
 
 function PhotoScroller({ newImages, setNewImages }: { newImages: string[], setNewImages: React.Dispatch<React.SetStateAction<string[]>> }) {
+  const handleImageSelection = async (result: { canceled?: false; assets: any; }) => {
+    const { uri } = result.assets[0];
+    console.log("Selected image URI: ", uri);
 
-  // console.log("Current images: ", newImages); // Log the current images every time the component renders
+    if (uri.endsWith('.heic') || uri.endsWith('.HEIC')) {
+      const jpgUri = await convertHeicToJpg(uri);
+      const uploadedUrl = await uploadImage(jpgUri);
+      setNewImages([...newImages, uploadedUrl]);
+    } else {
+      const uploadedUrl = await uploadImage(uri);
+      setNewImages([...newImages, uploadedUrl]);
+    }
+  };
 
   const handleNewImage = async () => {
-    console.log("Opening image library..."); // Log before opening the image library
-    const result = await launchImageLibraryAsync({
-      mediaTypes: MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
+    Alert.alert(
+      "Upload Photo",
+      "Choose from library or take a photo",
+      [
+        {
+          text: "Take a Photo",
+          onPress: async () => {
+            const { status } = await requestCameraPermissionsAsync();
+            if (status !== 'granted') {
+              alert('Sorry, we need camera permissions to make this work!');
+              return;
+            }
 
-    if (!result.canceled) {
-      const { uri } = result.assets[0];
-      console.log("Selected image URI: ", uri); // Log the URI of the selected image
+            console.log("Opening camera...");
+            const cameraResult = await launchCameraAsync({
+              mediaTypes: MediaTypeOptions.All,
+              allowsEditing: true,
+              aspect: [4, 3],
+              quality: 1,
+            });
 
-      if (uri.endsWith('.heic') || uri.endsWith('.HEIC')) {
-        const jpgUri = await convertHeicToJpg(uri);
-        const uploadedUrl = await uploadImage(jpgUri);
-        setNewImages([...newImages, uploadedUrl]);
-      } else {
-        const uploadedUrl = await uploadImage(uri);
-        setNewImages([...newImages, uploadedUrl]);
-      }
-    }
+            if (!cameraResult.canceled) {
+              handleImageSelection(cameraResult);
+            }
+          },
+        },
+        {
+          text: "Choose from Library",
+          onPress: async () => {
+            const { status } = await requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+              alert('Sorry, we need media library permissions to make this work!');
+              return;
+            }
+
+            console.log("Opening image library...");
+            const libraryResult = await launchImageLibraryAsync({
+              mediaTypes: MediaTypeOptions.All,
+              allowsEditing: true,
+              aspect: [4, 3],
+              quality: 1,
+            });
+
+            if (!libraryResult.canceled) {
+              handleImageSelection(libraryResult);
+            }
+          },
+        },
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+      ],
+      { cancelable: false }
+    );
   };
 
   const handleDeleteImage = (index: number) => {
@@ -97,7 +142,6 @@ function PhotoScroller({ newImages, setNewImages }: { newImages: string[], setNe
 
   return (
     <View style={styles.container}>
-      <Text style={styles.selectText}>Select a Photo</Text>
       <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
         <TouchableOpacity onPress={handleNewImage}>
           <Image style={styles.image} source={require("./public/new.png")} />
@@ -130,9 +174,6 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 20,
     marginRight: 10,
-  },
-  selectText: {
-    marginBottom: 5,
   },
   trash: {
     position: 'absolute',
