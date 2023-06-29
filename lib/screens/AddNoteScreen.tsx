@@ -123,7 +123,6 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         <TouchableOpacity style={styles.toggles} onPress={() => {setViewAudio(!viewAudio)}}>
           <Ionicons name="mic-outline" size={24} color="white" />
         </TouchableOpacity>
-        
       </View>
       <View style={styles.container}>
         <KeyboardAwareScrollView

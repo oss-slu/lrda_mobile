@@ -7,6 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Note } from "../../types";
 import PhotoScroller from "../components/photoScroller";
 import { User } from "../utils/user_class";
+import AudioContainer from "../components/audio";
 // import { white } from "react-native-paper/lib/typescript/styles/themes/v2/colors";
 
 const user = User.getInstance();
@@ -33,6 +34,8 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const [images, setimages] = useState<string[]>(note.images);
   const [creator, setCreator] = useState(note.creator);
   const [owner, setOwner] = useState(false);
+  const [viewMedia, setViewMedia] = useState(false);
+  const [viewAudio, setViewAudio] = useState(false);
 
   useEffect(() => {
     console.log("creator: ",note);
@@ -114,24 +117,43 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         >
           <Ionicons name="arrow-back-outline" size={24} color="white" />
         </TouchableOpacity>
-        <Text style={styles.topText}>Editing Note</Text>
+        <TextInput
+            style={styles.title}
+            value={title}
+            onChangeText={setTitle}
+          />
         { owner ? 
         <TouchableOpacity style={styles.backButton} onPress={handleSaveNote}>
           <Ionicons name="save-outline" size={24} color="white" />
         </TouchableOpacity>
         : <View/>}
       </View>
+      <View style={styles.keyContainer}>
+        <TouchableOpacity style={styles.toggles} onPress={() => {setViewMedia(!viewMedia)}}>
+          <Ionicons name="images-outline" size={24} color="white" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.toggles} onPress={() => {setViewAudio(!viewAudio)}}>
+          <Ionicons name="mic-outline" size={24} color="white" />
+        </TouchableOpacity>
+      </View>
       <View style={styles.container}>
         <KeyboardAwareScrollView
           showsVerticalScrollIndicator={false}
           style={{ paddingTop: 10 }}
         >
-          <TextInput
-            style={styles.title}
-            value={title}
-            onChangeText={setTitle}
-          />
-          { <PhotoScroller newImages={images} setNewImages={setimages} />}
+          {viewMedia && (
+            <PhotoScroller newImages={images} setNewImages={setimages} />
+          )}
+          {viewAudio && (
+            <AudioContainer
+              newImages={[]}
+              setNewAudio={function (
+                value: React.SetStateAction<string[]>
+              ): void {
+                throw new Error("Function not implemented.");
+              }}
+            />
+          )}
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.input}
@@ -179,13 +201,12 @@ const styles = StyleSheet.create({
     paddingBottom: "50%",
   },
   title: {
-    width: '90%',
+    width: '70%',
     alignSelf: 'center',
     height: 45,
     borderColor: "#111111",
     borderWidth: 1,
     borderRadius: 30,
-    marginBottom: 20,
     paddingHorizontal: 10,
     textAlign: "center",
     fontSize: 30,
@@ -210,16 +231,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  addButton: {
-    position: "absolute",
-    bottom: 20,
-    right: 20,
+  toggles: {
     backgroundColor: "#111111",
     borderRadius: 50,
     width: 50,
     height: 50,
     alignItems: "center",
     justifyContent: "center",
+    marginLeft: 10,
+    zIndex: 99,
+  },
+  keyContainer: {
+    height: "7%",
+    width: 130,
+    backgroundColor: "tan",
+    borderRadius: 30,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   saveButton: {
     backgroundColor: "#C7EBB3",
