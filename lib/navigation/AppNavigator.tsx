@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 
 import GoogleMap from '../screens/mapPage/googleMap';
-import ProfilePage from '../screens/profilePage/ProfilePage';
+import ProfilePage from '../screens/profilePage/profilePage';
 import HomeScreen, { HomeScreenProps } from '../screens/HomeScreen';
 import LoginScreen from '../screens/loginScreens/LoginScreen';
 import RegisterScreen from '../screens/loginScreens/RegisterScreen';
