@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { User } from "../utils/user_class";
+import PhotoScroller from "../components/photoScroller";
 
 interface Note {
   images: any;
@@ -17,6 +18,7 @@ interface Note {
   title: string;
   text: string;
   time: string;
+  creator: string;
 }
 
 const user = User.getInstance();
@@ -24,26 +26,26 @@ const user = User.getInstance();
 export default function ProfilePage() {
   const [messages, setMessages] = useState<any[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
+  const [allImages, setAllImages] = useState<string[]>([]);
   const [count, setCount] = useState(0);
+  const [key, setKey] = useState(0);
 
   const fetchMessages = async () => {
     let response;
     try {
-      {
-        response = await fetch(
-          "http://lived-religion-dev.rerum.io/deer-lr/query",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              type: "message",
-              creator: user.getId(),
-            }),
-          }
-        );
-      }
+      response = await fetch(
+        "http://lived-religion-dev.rerum.io/deer-lr/query",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            type: "message",
+            creator: user.getId(),
+          }),
+        }
+      );
 
       const data = await response.json();
       setMessages(data);
@@ -67,10 +69,13 @@ export default function ProfilePage() {
       fetchedNotes.sort(
         (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
       );
-      
-      setNotes(fetchedNotes);
 
+      setNotes(fetchedNotes);
       setCount(fetchedNotes.length);
+
+      let extractedImages = fetchedNotes.flatMap((note) => note.images);
+
+      setAllImages(extractedImages.reverse());
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
@@ -130,63 +135,29 @@ export default function ProfilePage() {
               },
             ]}
           >
-            <Text style={[styles.text, { fontSize: 24 }]}>45,844</Text>
-            <Text style={[styles.text, styles.subText]}>Followers</Text>
+            <Text style={[styles.text, { fontSize: 24 }]}>
+              {allImages.length}
+            </Text>
+            <Text style={[styles.text, styles.subText]}>Images</Text>
           </View>
           <View style={styles.statsBox}>
-            <Text style={[styles.text, { fontSize: 24 }]}>302</Text>
-            <Text style={[styles.text, styles.subText]}>Following</Text>
+            <Text style={[styles.text, { fontSize: 24 }]}>{"< Year "}</Text>
+            <Text style={[styles.text, styles.subText]}>Age</Text>
           </View>
         </View>
 
-        <View style={{ marginTop: 32 }}>
-          <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-            {notes?.map((item: Note) => {
-              const textLength = 20;
-              return (
-                <TouchableOpacity
-                  key={item.id}
-                  //   style={styles.noteContainer}
-                  //   onPress={() =>
-                  //     navigation.navigate("EditNote", { note: item, onSave: updateNote })
-                  //   }
-                >
-                  <View style={{ flexDirection: "row" }}>
-                    {item.images.length >= 1 ? (
-                      <Image
-                        style={styles.preview}
-                        source={{ uri: item.images[0] }}
-                      />
-                    ) : (
-                      <Image
-                        source={require("../components/public/noPreview.png")}
-                        style={styles.preview}
-                      ></Image>
-                    )}
-                    <View
-                      style={{
-                        alignSelf: "center",
-                        position: "absolute",
-                        left: 120,
-                      }}
-                    >
-                      <Text style={styles.noteTitle}>
-                        {item.title.length > textLength
-                          ? item.title.slice(0, textLength) + "..."
-                          : item.title}
-                      </Text>
-                      <Text style={styles.noteText}>
-                        {`${item.time.split(", ")[0]}\n${
-                          item.time.split(", ")[1]
-                        }`}
-                      </Text>
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
+        <View style={{ marginTop: 32, width: "100%" }}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {allImages?.map((uri, index) => (
+              <View key={index}>
+                <View key={index}>
+                  <Image style={styles.preview} source={{ uri }} />
+                </View>
+              </View>
+            ))}
           </ScrollView>
         </View>
+
         <Text style={[styles.subText, styles.recent]}>Recent Activity</Text>
         <View style={{ alignItems: "center" }}>
           <View style={styles.recentItem}>
@@ -233,43 +204,11 @@ const styles = StyleSheet.create({
     height: undefined,
     width: undefined,
   },
-  titleBar: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 24,
-    marginHorizontal: 16,
-  },
-  subText: {
-    fontSize: 12,
-    color: "#AEB5BC",
-    textTransform: "uppercase",
-    fontWeight: "500",
-  },
   profileImage: {
     width: 200,
     height: 200,
     borderRadius: 100,
     overflow: "hidden",
-  },
-  dm: {
-    backgroundColor: "#41444B",
-    position: "absolute",
-    top: 20,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  active: {
-    backgroundColor: "#34FFB9",
-    position: "absolute",
-    bottom: 28,
-    left: 10,
-    padding: 4,
-    height: 20,
-    width: 20,
-    borderRadius: 10,
   },
   add: {
     backgroundColor: "#41444B",
@@ -296,28 +235,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flex: 1,
   },
-  mediaImageContainer: {
-    width: 180,
-    height: 200,
-    borderRadius: 12,
-    overflow: "hidden",
-    marginHorizontal: 10,
+  subText: {
+    fontSize: 12,
+    color: "#AEB5BC",
+    textTransform: "uppercase",
+    fontWeight: "500",
   },
-  mediaCount: {
-    backgroundColor: "#41444B",
-    position: "absolute",
-    top: "50%",
-    marginTop: -50,
-    marginLeft: 30,
-    width: 100,
-    height: 100,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 12,
-    shadowColor: "rgba(0, 0, 0, 0.38)",
-    shadowOffset: { width: 0, height: 10 },
-    shadowRadius: 20,
-    shadowOpacity: 1,
+  preview: {
+    width: 200,
+    height: 200,
+    marginRight: 1,
   },
   recent: {
     marginLeft: 78,
@@ -338,34 +265,5 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     marginTop: 3,
     marginRight: 20,
-  },
-  noteContainer: {
-    justifyContent: "space-between",
-    alignItems: "center",
-    alignSelf: "center",
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    marginBottom: 10,
-    width: "95%",
-    padding: 10,
-    paddingHorizontal: 10,
-    flexDirection: "row",
-  },
-  preview: {
-    width: 100,
-    height: 100,
-    borderRadius: 10,
-    marginRight: "10%",
-    alignContent: "center",
-    alignSelf: "center",
-  },
-  noteText: {
-    fontSize: 18,
-  },
-  noteTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    maxWidth: "100%",
-    flexShrink: 1,
   },
 });

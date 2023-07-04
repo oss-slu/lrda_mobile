@@ -40,6 +40,7 @@ export class User {
 
       if (response.ok) {
         this.userData = await response.json();
+        console.log(this.userData);
         return "success";
       } else {
         throw new Error("There was a server error logging in.");
