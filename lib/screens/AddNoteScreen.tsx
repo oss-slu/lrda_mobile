@@ -234,6 +234,7 @@ const styles = StyleSheet.create({
   },
   keyContainer: {
     height: "7%",
+    paddingVertical: 5,
     width: 130,
     backgroundColor: "tan",
     borderRadius: 30,
