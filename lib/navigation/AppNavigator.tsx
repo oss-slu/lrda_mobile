@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 
 import GoogleMap from '../screens/mapPage/googleMap';
+import profilePage from '../screens/profilePage/profilePage';
 import HomeScreen, { HomeScreenProps } from '../screens/HomeScreen';
 import LoginScreen from '../screens/loginScreens/LoginScreen';
 import RegisterScreen from '../screens/loginScreens/RegisterScreen';
@@ -90,7 +91,7 @@ const AppNavigator: React.FC = () => {
         />
        <Tab.Screen
          name="Tab2"
-         component={Placeholder}
+         component={profilePage}
          options={{
            headerShown: false, // This line hides the header
            tabBarIcon: ({ color, size }) => (
