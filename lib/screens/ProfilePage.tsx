@@ -21,12 +21,21 @@ interface Note {
   creator: string;
 }
 
+type ImageNote = {
+  image: string;
+  note: Note;
+};
+
 const user = User.getInstance();
 
-export default function ProfilePage() {
+export type ProfilePageProps = {
+  navigation: any;
+};
+
+export default function ProfilePage({ navigation }: ProfilePageProps) {
   const [messages, setMessages] = useState<any[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
-  const [allImages, setAllImages] = useState<string[]>([]);
+  const [allImages, setAllImages] = useState<ImageNote[]>([]);
   const [count, setCount] = useState(0);
   const [key, setKey] = useState(0);
 
@@ -73,13 +82,16 @@ export default function ProfilePage() {
       setNotes(fetchedNotes);
       setCount(fetchedNotes.length);
 
-      let extractedImages = fetchedNotes.flatMap((note) => note.images);
+      let extractedImages = fetchedNotes.flatMap((note) => 
+          note.images.map((image: any) => ({ image, note }))
+        );
 
       setAllImages(extractedImages.reverse());
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
   };
+  
 
   useEffect(() => {
     fetchMessages();
@@ -145,18 +157,21 @@ export default function ProfilePage() {
             <Text style={[styles.text, styles.subText]}>Age</Text>
           </View>
         </View>
-
+        
         <View style={{ marginTop: 32, width: "100%" }}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {allImages?.map((uri, index) => (
-              <View key={index}>
-                <View key={index}>
-                  <Image style={styles.preview} source={{ uri }} />
-                </View>
-              </View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {allImages?.map((data: ImageNote, index: number) => (
+              <TouchableOpacity 
+                key={index} 
+                onPress={() => navigation.navigate('EditNote', { note: data.note })}
+              >
+                <Image style={styles.preview} source={{ uri: data.image }} />
+              </TouchableOpacity>
             ))}
           </ScrollView>
-        </View>
+          </View>
+
+
 
         <Text style={[styles.subText, styles.recent]}>Recent Activity</Text>
         <View style={{ alignItems: "center" }}>
