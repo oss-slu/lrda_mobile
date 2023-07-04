@@ -1,11 +1,14 @@
 import React from 'react';
-import MapView from 'react-native-maps';
+import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import { StyleSheet, View } from 'react-native';
 
 export default function GoogleMap() {
   return (
     <View style={styles.container}>
-      <MapView style={styles.map} />
+      <MapView 
+        provider={PROVIDER_GOOGLE}
+        style={styles.map} 
+      />
     </View>
   );
 }
