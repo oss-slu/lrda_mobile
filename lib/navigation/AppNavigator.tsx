@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 
+import GoogleMap from '../screens/mapPage/googleMap';
 import HomeScreen, { HomeScreenProps } from '../screens/HomeScreen';
 import LoginScreen from '../screens/loginScreens/LoginScreen';
 import RegisterScreen from '../screens/loginScreens/RegisterScreen';
@@ -78,15 +79,15 @@ const AppNavigator: React.FC = () => {
          }}
        />
        <Tab.Screen
-         name="Tab1"
-         component={Placeholder}
-         options={{
-           headerShown: false, // This line hides the header
-           tabBarIcon: ({ color, size }) => (
-             <Ionicons name="ios-map" color={color} size={size} />
-           ),
-         }}
-       />
+          name="Tab1"
+          component={GoogleMap} // Replaced 'Placeholder' with 'MapComponent'
+          options={{
+            headerShown: false, // This line hides the header
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="ios-map" color={color} size={size} />
+            ),
+          }}
+        />
        <Tab.Screen
          name="Tab2"
          component={Placeholder}
