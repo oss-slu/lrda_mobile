@@ -4,7 +4,6 @@ import {
   Image,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   Platform,
   Alert,
@@ -19,9 +18,16 @@ import {
 import * as FileSystem from "expo-file-system";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import { Ionicons } from "@expo/vector-icons";
+import { getThumbnailAsync } from 'expo-video-thumbnails';
 
 const S3_PROXY_PREFIX = "http://99.7.218.98:8080/S3/"; // S3 Proxy
 // const S3_PROXY_PREFIX = "http://:8080/S3/"; // localhost proxy
+
+
+async function getThumbnail(uri: string): Promise<string> {
+  const { uri: thumbnailUri } = await getThumbnailAsync(uri);
+  return thumbnailUri;
+}
 
 async function convertHeicToJpg(uri: string) {
   console.log("Converting HEIC to JPG..."); // Log before starting the conversion
@@ -32,16 +38,16 @@ async function convertHeicToJpg(uri: string) {
   return convertedImage.uri;
 }
 
-async function uploadImage(uri: string): Promise<string> {
-  console.log("uploadImage - Input URI:", uri);
+async function uploadMedia(uri: string, mediaType: string): Promise<string> {
+  console.log("uploadMedia - Input URI:", uri);
 
   let data = new FormData();
-  const uniqueName = `image-${Date.now()}.jpg`; // Generate a unique name based on the current timestamp
+  const uniqueName = `media-${Date.now()}.${mediaType === "image" ? "jpg" : "mp4"}`; // Generate a unique name based on the current timestamp and media type
 
   if (Platform.OS === "web") {
     const response = await fetch(uri);
     const blob = await response.blob();
-    const file = new File([blob], uniqueName, { type: "image/jpeg" });
+    const file = new File([blob], uniqueName, { type: mediaType === "image" ? "image/jpeg" : "video/mp4" });
     console.log("Blob size:", blob.size);
     console.log("File size:", file.size);
 
@@ -50,9 +56,10 @@ async function uploadImage(uri: string): Promise<string> {
     let base64 = await FileSystem.readAsStringAsync(uri, {
       encoding: FileSystem.EncodingType.Base64,
     });
-    base64 = `data:image/jpeg;base64,${base64}`;
+    console.log("base64 has been defined and will attempt to upload to S3 soon")
+    base64 = `data:${mediaType === "image" ? "image/jpeg" : "video/mp4"};base64,${base64}`;
     data.append("file", {
-      type: "image/jpeg",
+      type: mediaType === "image" ? "image/jpeg" : "video/mp4",
       uri: base64,
       name: uniqueName,
     });
@@ -65,17 +72,17 @@ async function uploadImage(uri: string): Promise<string> {
   })
     .then((resp) => {
       console.log("Got the response from the upload file servlet");
-      console.log("uploadImage - Server response status:", resp.status);
+      console.log("uploadMedia - Server response status:", resp.status);
       if (resp.ok) {
         const location = resp.headers.get("Location");
-        console.log("uploadImage - Uploaded successfully, Location:", location);
+        console.log("uploadMedia - Uploaded successfully, Location:", location);
         return location;
       } else {
-        console.log("uploadImage - Server response body:", resp.body);
+        console.log("uploadMedia - Server response body:", resp.body);
       }
     })
     .catch((err) => {
-      console.error("uploadImage - Error:", err);
+      console.error("uploadMedia - Error:", err);
       return err;
     });
 }
@@ -84,10 +91,10 @@ function PhotoScroller({
   newImages,
   setNewImages,
 }: {
-  newImages: string[];
-  setNewImages: React.Dispatch<React.SetStateAction<string[]>>;
+  newImages: { uri: string, thumbnail: string }[];
+  setNewImages: React.Dispatch<React.SetStateAction<{ uri: string, thumbnail: string }[]>>;
 }) {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [videoToPlay, setVideoToPlay] = useState('');
 
   const handleImageSelection = async (result: {
     canceled?: false;
@@ -98,21 +105,35 @@ function PhotoScroller({
 
     if (uri.endsWith(".heic") || uri.endsWith(".HEIC")) {
       const jpgUri = await convertHeicToJpg(uri);
-      const uploadedUrl = await uploadImage(jpgUri);
-      setNewImages([...newImages, uploadedUrl]);
-    } else {
-      const uploadedUrl = await uploadImage(uri);
-      setNewImages([...newImages, uploadedUrl]);
+      const uploadedUrl = await uploadMedia(jpgUri, 'image');
+      setNewImages([...newImages, {uri: uploadedUrl, thumbnail: ''}]);
+    } else if (uri.endsWith(".jpg") || uri.endsWith('png') || uri.endsWith('.jpeg')) {
+      const uploadedUrl = await uploadMedia(uri, 'image');
+      setNewImages([...newImages, {uri: uploadedUrl, thumbnail: ''}]);
+    } else if (uri.endsWith('.MOV') || uri.endsWith('.mov') || uri.endsWith('.mp4')){
+      const uploadedUrl = await uploadMedia(uri, 'video');
+      const thumbnail = await getThumbnail(uri);
+      setNewImages([...newImages, { uri: uploadedUrl, thumbnail: thumbnail }]);
     }
   };
 
+  const goBig = (index) => {
+    const currentImage = newImages[index];
+    if(currentImage.uri.endsWith('.mp4')){
+      // launch video player
+    } else {
+      // make image better for viewing
+    }
+  }
+  
+
   const handleNewImage = async () => {
     Alert.alert(
-      "Upload Photo",
-      "Choose from library or take a photo",
+      "Upload Media",
+      "Choose from library or take a photo/video",
       [
         {
-          text: "Take a Photo",
+          text: "Take a Photo or Video",
           onPress: async () => {
             const { status } = await requestCameraPermissionsAsync();
             if (status !== "granted") {
@@ -125,7 +146,8 @@ function PhotoScroller({
               mediaTypes: MediaTypeOptions.All,
               allowsEditing: true,
               aspect: [4, 3],
-              quality: 1,
+              quality: 0.75,
+              videoMaxDuration: 300,
             });
 
             if (!cameraResult.canceled) {
@@ -174,6 +196,7 @@ function PhotoScroller({
 
   return (
     <View style={styles.container}>
+      {/* Define a video player */}
       <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
         <TouchableOpacity onPress={handleNewImage}>
           <Image style={styles.image} source={require("./public/new.png")} />
@@ -194,11 +217,16 @@ function PhotoScroller({
             <TouchableOpacity
               key={index}
               onPress={() => {
-                setCurrentImageIndex(index);
+                goBig(index)
               }}
             >
-              <Image style={styles.image} source={{ uri }} />
+              {uri.uri.endsWith('.mp4') ? (
+                <Image style={styles.image} source={{ uri: uri.thumbnail }} />
+              ) : (
+                <Image style={styles.image} source={{ uri: uri.uri }} />
+              )}
             </TouchableOpacity>
+
           </View>
         ))}
       </ScrollView>
@@ -228,6 +256,10 @@ const styles = StyleSheet.create({
     backgroundColor: "red",
     borderRadius: 10,
     justifyContent: "center",
+  },
+  video: {
+    width: "100%",
+    height: "100%",
   },
 });
 
