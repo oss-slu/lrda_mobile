@@ -26,7 +26,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [titleText, setTitleText] = useState("");
   const [bodyText, setBodyText] = useState("");
   const [newImages, setNewImages] = useState<string[]>([]);
-  const [viewMedia, setViewMedia] = useState(false);
+  const [viewMedia, setViewMedia] = useState(true);
   const [viewAudio, setViewAudio] = useState(false);
 
   useEffect(() => {

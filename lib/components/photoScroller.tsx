@@ -19,7 +19,9 @@ import {
 import * as FileSystem from "expo-file-system";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import { Ionicons } from "@expo/vector-icons";
-import ImageView from "react-native-image-view";
+
+const S3_PROXY_PREFIX = "http://99.7.218.98:8080/S3/"; // S3 Proxy
+// const S3_PROXY_PREFIX = "http://:8080/S3/"; // localhost proxy
 
 async function convertHeicToJpg(uri: string) {
   console.log("Converting HEIC to JPG..."); // Log before starting the conversion
@@ -56,9 +58,6 @@ async function uploadImage(uri: string): Promise<string> {
     });
   }
 
-  const S3_PROXY_PREFIX = "http://99.7.218.98:8080/S3/"; // S3 Proxy
-  // const S3_PROXY_PREFIX = "http://:8080/S3/"; // localhost proxy
-
   return fetch(S3_PROXY_PREFIX + "uploadFile", {
     method: "POST",
     mode: "cors",
@@ -88,7 +87,6 @@ function PhotoScroller({
   newImages: string[];
   setNewImages: React.Dispatch<React.SetStateAction<string[]>>;
 }) {
-  const [isImageViewVisible, setIsImageViewVisible] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const handleImageSelection = async (result: {
@@ -176,14 +174,6 @@ function PhotoScroller({
 
   return (
     <View style={styles.container}>
-      {isImageViewVisible && (
-        <ImageView
-          images={newImages.map((uri) => ({ source: { uri } }))}
-          imageIndex={currentImageIndex}
-          visible={isImageViewVisible}
-          onRequestClose={() => setIsImageViewVisible(false)}
-        />
-      )}
       <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
         <TouchableOpacity onPress={handleNewImage}>
           <Image style={styles.image} source={require("./public/new.png")} />
@@ -205,7 +195,6 @@ function PhotoScroller({
               key={index}
               onPress={() => {
                 setCurrentImageIndex(index);
-                setIsImageViewVisible(true);
               }}
             >
               <Image style={styles.image} source={{ uri }} />
