@@ -11,7 +11,7 @@ import {
 import { Note, RootStackParamList } from "../../types";
 import PhotoScroller from "../components/photoScroller";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { User } from "../utils/user_class";
+import { User } from "../models/user_class";
 import { Ionicons } from "@expo/vector-icons";
 import AudioContainer from "../components/audio";
 

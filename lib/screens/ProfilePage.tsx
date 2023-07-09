@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { User } from "../utils/user_class";
+import { User } from "../models/user_class";
 import PhotoScroller from "../components/photoScroller";
 
 interface Note {

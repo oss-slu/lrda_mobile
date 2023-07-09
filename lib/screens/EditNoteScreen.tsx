@@ -6,7 +6,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { Ionicons } from "@expo/vector-icons";
 import { Note } from "../../types";
 import PhotoScroller from "../components/photoScroller";
-import { User } from "../utils/user_class";
+import { User } from "../models/user_class";
 import AudioContainer from "../components/audio";
 // import { white } from "react-native-paper/lib/typescript/styles/themes/v2/colors";
 

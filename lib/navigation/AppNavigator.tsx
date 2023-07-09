@@ -12,7 +12,7 @@ import AddNoteScreen from '../screens/AddNoteScreen';
 import EditNote, { EditNoteProps } from '../components/EditNote';
 import { Note, RootStackParamList } from '../../types';
 import { createStackNavigator } from '@react-navigation/stack';
-import { User } from '../utils/user_class';
+import { User } from '../models/user_class';
 
 // Get the single instance of the User class
 const user = User.getInstance();

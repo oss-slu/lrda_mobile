@@ -4,7 +4,7 @@ import { Alert, Platform, Linking, View, Image, Text, StyleSheet, FlatList,
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../types";
-import { User } from "../utils/user_class";
+import { User } from "../models/user_class";
 
 interface Note {
   images: any;
