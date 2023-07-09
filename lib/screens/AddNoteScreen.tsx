@@ -14,6 +14,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { User } from "../models/user_class";
 import { Ionicons } from "@expo/vector-icons";
 import AudioContainer from "../components/audio";
+import * as Location from 'expo-location';
 
 const user = User.getInstance();
 
@@ -28,10 +29,27 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [newImages, setNewImages] = useState([]);
   const [viewMedia, setViewMedia] = useState();
   const [viewAudio, setViewAudio] = useState(false);
+  const [location, setLocation] = useState<{ latitude: number, longitude: number } | null>(null);
 
   useEffect(() => {
     console.log("new Images array:", newImages);
   }, [newImages]);
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.log('Permission to access location was denied');
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+    })();
+  }, []);
 
   const createNote = async (title: string, body: string) => {
     const response = await fetch(
@@ -47,8 +65,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           items: newImages,
           BodyText: body,
           creator: user.getId(),
-          latitude: "38.627003",
-          longitude: "-90.199402",
+          latitude: location?.latitude.toString() || "",
+          longitude: location?.longitude.toString() || "",
         }),
       }
     );
