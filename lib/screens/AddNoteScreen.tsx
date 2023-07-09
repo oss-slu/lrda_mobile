@@ -13,6 +13,7 @@ import PhotoScroller from "../components/photoScroller";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { User } from "../models/user_class";
 import { Ionicons } from "@expo/vector-icons";
+import { Media } from "../models/media_class";
 import AudioContainer from "../components/audio";
 
 const user = User.getInstance();
@@ -25,13 +26,13 @@ type AddNoteScreenProps = {
 const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [titleText, setTitleText] = useState("");
   const [bodyText, setBodyText] = useState("");
-  const [newImages, setNewImages] = useState([]);
-  const [viewMedia, setViewMedia] = useState();
+  const [newMedia, setNewMedia] = useState<Media[]>([]);
+  const [viewMedia, setViewMedia] = useState(false);
   const [viewAudio, setViewAudio] = useState(false);
 
   useEffect(() => {
-    console.log("new Images array:", newImages);
-  }, [newImages]);
+    console.log("new Media array:", newMedia);
+  }, [newMedia]);
 
   const createNote = async (title: string, body: string) => {
     const response = await fetch(
@@ -44,7 +45,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         body: JSON.stringify({
           type: "message",
           title: title,
-          items: newImages,
+          items: newMedia,
           BodyText: body,
           creator: user.getId(),
         }),
@@ -130,7 +131,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           style={{ overflow: "hidden", paddingTop: 10, paddingBottom: 100 }}
         >
           {viewMedia && (
-            <PhotoScroller newImages={newImages} setNewImages={setNewImages} />
+            <PhotoScroller newMedia={newMedia} setNewMedia={setNewMedia} />
           )}
           {viewAudio && (
             <AudioContainer
@@ -236,7 +237,7 @@ const styles = StyleSheet.create({
     height: "7%",
     paddingVertical: 5,
     width: 130,
-    backgroundColor: "tan",
+   backgroundColor: "tan",
     borderRadius: 30,
     flexDirection: 'row',
     alignItems: 'center',

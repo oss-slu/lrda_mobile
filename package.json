@@ -38,6 +38,7 @@
     "react-native-maps": "^1.7.1",
     "react-native-paper": "^5.8.0",
     "react-native-reanimated": "~2.14.4",
+    "react-native-uuid": "^2.0.1",
     "react-native-video": "^2.0.0",
     "react-native-video-player": "^0.14.0",
     "react-native-view-shot": "^3.7.0",
