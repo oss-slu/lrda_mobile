@@ -146,6 +146,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           time:
             time.toLocaleString("en-US", { timeZone: "America/Chicago" }) || "",
           creator: message.creator || "",
+          latitude: message.latitude || "",
+          longitude: message.longitude || "",
         };
       });
 

@@ -47,6 +47,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           items: newImages,
           BodyText: body,
           creator: user.getId(),
+          latitude: "38.627003",
+          longitude: "-90.199402",
         }),
       }
     );
@@ -65,6 +67,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         time: "",
         images: [],
         creator: "",
+        latitude: "",
+        longitude: ""
       }; // The note will get assigned a time
 
       if (route.params?.onSave) {
