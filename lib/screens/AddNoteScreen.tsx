@@ -15,6 +15,7 @@ import { User } from "../models/user_class";
 import { Ionicons } from "@expo/vector-icons";
 import { Media } from "../models/media_class";
 import AudioContainer from "../components/audio";
+import * as Location from 'expo-location';
 
 const user = User.getInstance();
 
@@ -29,10 +30,27 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [newMedia, setNewMedia] = useState<Media[]>([]);
   const [viewMedia, setViewMedia] = useState(false);
   const [viewAudio, setViewAudio] = useState(false);
+  const [location, setLocation] = useState<{ latitude: number, longitude: number } | null>(null);
 
   useEffect(() => {
     console.log("new Media array:", newMedia);
   }, [newMedia]);
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.log('Permission to access location was denied');
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+    })();
+  }, []);
 
   const createNote = async (title: string, body: string) => {
     const response = await fetch(
@@ -48,6 +66,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           items: newMedia,
           BodyText: body,
           creator: user.getId(),
+          latitude: location?.latitude.toString() || "",
+          longitude: location?.longitude.toString() || "",
         }),
       }
     );
@@ -66,6 +86,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         time: "",
         images: [],
         creator: "",
+        latitude: "",
+        longitude: ""
       }; // The note will get assigned a time
 
       if (route.params?.onSave) {

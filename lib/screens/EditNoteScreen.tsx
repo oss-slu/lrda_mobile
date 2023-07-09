@@ -40,6 +40,8 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   useEffect(() => {
     console.log("creator: ",note);
     console.log("User: ",user.getId());
+    console.log("latitude: ",note.latitude);
+    console.log("longitude: ",note.longitude);
     if (creator === user.getId()) {
       setOwner(true);
     } else {
@@ -63,6 +65,8 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             items: updatedNote.images,
             type: "message",
             creator: user.getId(),
+            latitude: updatedNote.latitude,
+            longitude: updatedNote.longitude,
           }),
         }
       );

@@ -5,6 +5,8 @@ export type Note = {
     time: string;
     images: string[];
     creator: string;
+    latitude: string;
+    longitude: string;
   };
   
   export type RootStackParamList = {
