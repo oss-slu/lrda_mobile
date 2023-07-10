@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Image,
@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Platform,
+  Button,
   Alert,
 } from "react-native";
 import {
@@ -20,8 +21,8 @@ import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import { Ionicons } from "@expo/vector-icons";
 import { getThumbnailAsync } from "expo-video-thumbnails";
 import { Media } from "../models/media_class";
-
 import uuid from "react-native-uuid";
+import { Video } from "expo-av";
 
 const S3_PROXY_PREFIX = "http://99.7.218.98:8080/S3/"; // S3 Proxy
 // const S3_PROXY_PREFIX = "http://:8080/S3/"; // localhost proxy
@@ -105,6 +106,9 @@ function PhotoScroller({
   setNewMedia: React.Dispatch<React.SetStateAction<Media[]>>;
 }) {
   const [videoToPlay, setVideoToPlay] = useState("");
+  const [imageToShow, setImageToShow] = useState("");
+  const [type, setType] = useState('photo');
+  const [playing, setPlaying] = useState(false);
 
   const handleImageSelection = async (result: {
     canceled?: false;
@@ -164,12 +168,15 @@ function PhotoScroller({
 
   const goBig = (index: number) => {
     const currentMedia = newMedia[index];
-    if(currentMedia.getType() === "video"){
+    if (currentMedia.getType() === "video") {
+      setType('video');
       setVideoToPlay(currentMedia.getUri());
+      setPlaying(true);
     } else {
-      //big Image
+      setType('image');
+      setImageToShow(currentMedia.getUri());
+      setPlaying(true);
     }
-
   };
 
   const handleNewMedia = async () => {
@@ -240,61 +247,97 @@ function PhotoScroller({
   };
 
   return (
-    <View style={styles.container}>
-      <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-        <TouchableOpacity onPress={handleNewMedia}>
-          <Image style={styles.image} source={require("./public/new.png")} />
-        </TouchableOpacity>
-        {newMedia?.map((media, index) => {
-          return (
-            <View key={index}>
-              <TouchableOpacity
-                style={styles.trash}
-                onPress={() => handleDeleteMedia(index)}
-              >
-                <Ionicons
-                  style={{ alignSelf: "center" }}
-                  name="trash-outline"
-                  size={20}
-                  color="#111111"
-                />
-              </TouchableOpacity>
-              <TouchableOpacity key={index} onPress={() => goBig(index)}>
-                {media.isVideo() ? (
-                  <View style={styles.miniContainer}>
+    <View
+      style={[
+        styles.container,
+        { marginBottom: playing ? 100 : 0, marginTop: playing ? 30 : 0, height: playing ? 'auto' : 110 },
+      ]}
+    >
+      {playing && type === 'video' ? (
+        <View style={styles.miniContainer}>
+          <Button
+            title="Close Viewer"
+            onPress={() => setPlaying(false)}
+          ></Button>
+          <Video
+            source={{ uri: videoToPlay }}
+            resizeMode="cover"
+            shouldPlay
+            useNativeControls
+            isLooping
+            style={styles.video}
+          />
+        </View>
+      ) : playing && type === 'image' ? (
+        <View style={styles.miniContainer}>
+          <Button
+            title="Close Viewer"
+            onPress={() => setPlaying(false)}
+          ></Button>
+          <Image
+            source={{ uri: imageToShow }}
+            style={styles.video}
+          />
+        </View>
+      ) : (
+        <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+          <TouchableOpacity onPress={handleNewMedia}>
+            <Image style={styles.image} source={require("./public/new.png")} />
+          </TouchableOpacity>
+          {newMedia?.map((media, index) => {
+            return (
+              <View key={index}>
+                <TouchableOpacity
+                  style={styles.trash}
+                  onPress={() => handleDeleteMedia(index)}
+                >
+                  <Ionicons
+                    style={{ alignSelf: "center" }}
+                    name="trash-outline"
+                    size={20}
+                    color="#111111"
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity key={index} onPress={() => goBig(index)}>
+                  {media.isVideo() ? (
+                    <View style={styles.miniContainer}>
+                      <Image
+                        style={styles.image}
+                        source={{ uri: media.getThumbnail() }}
+                      />
+                      <View style={styles.playUnderlay}>
+                        <Ionicons
+                          name="play-outline"
+                          size={24}
+                          color="#dfe5e8"
+                          style={styles.icon}
+                        />
+                      </View>
+                    </View>
+                  ) : (
                     <Image
                       style={styles.image}
-                      source={{ uri: media.getThumbnail() }}
+                      source={{ uri: media.getUri() }}
                     />
-                    <View style={styles.playUnderlay}>
-                      <Ionicons
-                        name="play-outline"
-                        size={24}
-                        color="#dfe5e8"
-                        style={styles.icon}
-                      />
-                    </View>
-                  </View>
-                ) : (
-                  <Image
-                    style={styles.image}
-                    source={{ uri: media.getUri() }}
-                  />
-                )}
-              </TouchableOpacity>
-            </View>
-          );
-        })}
-      </ScrollView>
+                  )}
+                </TouchableOpacity>
+              </View>
+            );
+          })}
+        </ScrollView>
+      )}
     </View>
   );
+  
+
+
 }
 
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff",
     marginBottom: 10,
-    width: "95%",
+    width: "100%",
     justifyContent: "center",
   },
   image: {
@@ -312,19 +355,21 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     justifyContent: "center",
   },
-  video: {
-    width: "100%",
-    height: "100%",
-  },
+  video: { 
+  width: "100%",
+  height: "100%",
+  justifyContent: 'center',
+  alignSelf: 'center',
+ },
   miniContainer: {
+    width: '100%',
     position: "relative",
     justifyContent: "center",
-    // alignSelf: "center",
-    alignItems: 'center',
+    alignItems: "center",
   },
   icon: {
     position: "relative",
-    alignSelf: 'center',
+    alignSelf: "center",
     marginLeft: 2,
     marginTop: 2,
   },
