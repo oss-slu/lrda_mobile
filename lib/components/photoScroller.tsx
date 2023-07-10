@@ -164,6 +164,12 @@ function PhotoScroller({
 
   const goBig = (index: number) => {
     const currentMedia = newMedia[index];
+    if(currentMedia.getType() === "video"){
+      setVideoToPlay(currentMedia.getUri());
+    } else {
+      //big Image
+    }
+
   };
 
   const handleNewMedia = async () => {
@@ -295,7 +301,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 20,
-    marginRight: 10,
+    marginRight: 5,
   },
   trash: {
     position: "absolute",
@@ -328,8 +334,8 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     backgroundColor: "rgba(5,5,5,0.5)",
     position: "absolute",
-    right: 43,
-    bottom: 37.5,
+    right: 40,
+    bottom: 36,
   },
 });
 
