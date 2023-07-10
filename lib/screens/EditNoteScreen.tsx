@@ -8,7 +8,7 @@ import { Note } from "../../types";
 import PhotoScroller from "../components/photoScroller";
 import { User } from "../models/user_class";
 import AudioContainer from "../components/audio";
-// import { white } from "react-native-paper/lib/typescript/styles/themes/v2/colors";
+import { Media } from "../models/media_class";
 
 const user = User.getInstance();
 
@@ -31,17 +31,13 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const { note, onSave } = route.params;
   const [title, setTitle] = useState(note.title);
   const [text, setText] = useState(note.text);
-  const [images, setimages] = useState<string[]>(note.images);
+  const [media, setMedia] = useState<Media[]>(note.media); //const [media, setMedia] = useState<Media[]>(note.media.map((m) => new Media(m)));
   const [creator, setCreator] = useState(note.creator);
   const [owner, setOwner] = useState(false);
   const [viewMedia, setViewMedia] = useState(false);
   const [viewAudio, setViewAudio] = useState(false);
 
   useEffect(() => {
-    console.log("creator: ",note);
-    console.log("User: ",user.getId());
-    console.log("latitude: ",note.latitude);
-    console.log("longitude: ",note.longitude);
     if (creator === user.getId()) {
       setOwner(true);
     } else {
@@ -62,9 +58,9 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             "@id": updatedNote.id,
             title: updatedNote.title,
             BodyText: updatedNote.text,
-            items: updatedNote.images,
             type: "message",
             creator: user.getId(),
+            media: updatedNote.media,
             latitude: updatedNote.latitude,
             longitude: updatedNote.longitude,
           }),
@@ -84,7 +80,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   };
 
   const handleSaveNote = () => {
-    const updatedNote = { ...note, title, text, images };
+    const updatedNote = { ...note, title, text, media };
     updateNote(updatedNote);
   };
 
@@ -146,7 +142,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           style={{ paddingTop: 10 }}
         >
           {viewMedia && (
-            <PhotoScroller newImages={images} setNewImages={setimages} />
+            <PhotoScroller newMedia={media} setNewMedia={setMedia} />
           )}
           {viewAudio && (
             <AudioContainer

@@ -1,18 +1,23 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Alert, Platform, Linking, View, Image, Text, StyleSheet, FlatList,
-   ScrollView, TouchableOpacity, Animated } from "react-native";
+import {
+  Alert,
+  Platform,
+  Linking,
+  View,
+  Image,
+  Text,
+  StyleSheet,
+  FlatList,
+  ScrollView,
+  TouchableOpacity,
+  Animated,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../types";
 import { User } from "../models/user_class";
-
-interface Note {
-  images: any;
-  id: string;
-  title: string;
-  text: string;
-  time: string;
-}
+import { Media } from "../models/media_class";
+import { Note } from "../../types";
 
 const user = User.getInstance();
 
@@ -28,10 +33,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [updateCounter, setUpdateCounter] = useState(0);
   const [drawerAnimation] = useState(new Animated.Value(0));
   const [buttonAnimation] = useState(new Animated.Value(0));
-  const [global,setGlobal] = useState(false);
-  const [reversed,setReversed] = useState(false);
+  const [global, setGlobal] = useState(false);
+  const [reversed, setReversed] = useState(false);
   let textLength = 16;
-  let userInitals = user.getName()?.split(' ').map((namePart) => namePart[0]).join('');
+  let userInitals = user
+    .getName()
+    ?.split(" ")
+    .map((namePart) => namePart[0])
+    .join("");
 
   const toggleDrawer = () => {
     setIsOpen(!isOpen);
@@ -101,7 +110,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const fetchMessages = async () => {
     let response;
     try {
-      if(global){
+      if (global) {
         response = await fetch(
           "http://lived-religion-dev.rerum.io/deer-lr/query",
           {
@@ -110,7 +119,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              type: "message"
+              type: "message",
             }),
           }
         );
@@ -138,14 +147,24 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           ? new Date(message.__rerum.isOverwritten)
           : new Date(message.__rerum.createdAt);
         time.setHours(time.getHours() - 5);
+        const mediaItems = message.media.map(
+          (item: any) =>
+            new Media({
+              uuid: item.uuid,
+              type: item.type,
+              uri: item.uri,
+              thumbnail: item.thumbnail,
+            })
+        );
+
         return {
           id: message["@id"],
           title: message.title || "",
           text: message.BodyText || "",
-          images: message.items || [],
           time:
             time.toLocaleString("en-US", { timeZone: "America/Chicago" }) || "",
           creator: message.creator || "",
+          media: mediaItems || [],
           latitude: message.latitude || "",
           longitude: message.longitude || "",
         };
@@ -161,7 +180,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       } else {
         setNotes(reversed ? fetchedNotes : fetchedNotes.reverse());
       }
-    
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
@@ -218,18 +236,18 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   };
 
   const handleToggleGlobal = () => {
-    setUpdateCounter(updateCounter+1);
+    setUpdateCounter(updateCounter + 1);
     setGlobal(!global);
-  }
+  };
 
   const handleReverseOrder = () => {
     setNotes(notes.reverse());
     setReversed(!reversed);
-    setUpdateCounter(updateCounter+1);
-  }
+    setUpdateCounter(updateCounter + 1);
+  };
 
   const deleteNote = (id: string) => {
-    if (Platform.OS === 'web'){
+    if (Platform.OS === "web") {
       async function name() {
         const success = await deleteNoteFromAPI(id);
         if (success) {
@@ -244,17 +262,19 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         [
           {
             text: "Cancel",
-            style: "cancel"
+            style: "cancel",
           },
           {
             text: "OK",
             onPress: async () => {
               const success = await deleteNoteFromAPI(id);
               if (success) {
-                setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
+                setNotes((prevNotes) =>
+                  prevNotes.filter((note) => note.id !== id)
+                );
               }
-            }
-          }
+            },
+          },
         ],
         { cancelable: false }
       );
@@ -269,26 +289,46 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           navigation.navigate("EditNote", { note: item, onSave: updateNote })
         }
       >
-        <View style={{flexDirection: 'row'}}>
-        {
-            item.images.length >= 1 ?
-              <Image style={styles.preview} source={{ uri: item.images[0] }}/>
-              :
-              <Image source={require("../components/public/noPreview.png")} style={styles.preview} ></Image>
-          }
-            <View style={{alignSelf: 'center', position: 'absolute', left: 120}}>
+        <View style={{ flexDirection: "row" }}>
+          {item?.media?.[0]?.isImage() ? (
+            <Image style={styles.preview} source={{ uri: item.media[0].uri }} />
+          ) : item?.media?.[0]?.isVideo() ? (
+            <Image
+              style={styles.preview}
+              source={{ uri: item.media[0].thumbnail }}
+            />
+          ) : (
+            <Image
+              source={require("../components/public/noPreview.png")}
+              style={styles.preview}
+            ></Image>
+          )}
+          <View
+            style={{ alignSelf: "center", position: "absolute", left: 120 }}
+          >
+            <Text style={styles.noteTitle}>
+              {item.title.length > textLength
+                ? item.title.slice(0, textLength) + "..."
+                : item.title}
+            </Text>
 
-              <Text style={styles.noteTitle}>{item.title.length > textLength ? item.title.slice(0, textLength) + '...' : item.title}</Text>
-
-              <Text style={styles.noteText}>
-                {`${item.time.split(', ')[0]}\n${item.time.split(', ')[1]}`}
-              </Text>
-            </View>
+            <Text style={styles.noteText}>
+              {`${item.time.split(", ")[0]}\n${item.time.split(", ")[1]}`}
+            </Text>
+          </View>
         </View>
-          
-            <TouchableOpacity style={{justifyContent: 'center', alignItems: 'center', position: 'absolute', right: 10}} onPress={() => deleteNote(item.id)}>
-              <Ionicons name="trash-outline" size={24} color="#111111" />
-            </TouchableOpacity>
+
+        <TouchableOpacity
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            position: "absolute",
+            right: 10,
+          }}
+          onPress={() => deleteNote(item.id)}
+        >
+          <Ionicons name="trash-outline" size={24} color="#111111" />
+        </TouchableOpacity>
       </TouchableOpacity>
     );
   };
@@ -334,10 +374,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           <Ionicons name={"log-out-outline"} size={30} color="white" />
         </TouchableOpacity>
       </Animated.View>
-      <View style={styles.topView} >
-        <View style={{ flexDirection: "row", alignItems: "center" }} >
+      <View style={styles.topView}>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
           <View style={styles.userPhoto}>
-            <Text style={{fontWeight: '600', fontSize: 20, alignSelf: 'center'}} >{userInitals}</Text>
+            <Text
+              style={{ fontWeight: "600", fontSize: 20, alignSelf: "center" }}
+            >
+              {userInitals}
+            </Text>
           </View>
           <Text style={styles.title}>Field Notes</Text>
         </View>
@@ -354,8 +398,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         <TouchableOpacity style={styles.filtersSelected}>
           <Text style={styles.selectedFont}>All ({notes.length})</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleToggleGlobal} style={global ? styles.filtersSelected : styles.filters}>
-          <Text style={global ? styles.selectedFont : styles.filterFont}>Global</Text>
+        <TouchableOpacity
+          onPress={handleToggleGlobal}
+          style={global ? styles.filtersSelected : styles.filters}
+        >
+          <Text style={global ? styles.selectedFont : styles.filterFont}>
+            Global
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleReverseOrder} style={styles.filters}>
           <Text style={styles.filterFont}>Sort by Time</Text>
@@ -446,12 +495,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   userPhoto: {
-    backgroundColor: '#F4DFCD',
-    height: 50, 
-    width: 50, 
-    borderRadius: 50, 
-    alignContent: 'center', 
-    justifyContent: 'center',
+    backgroundColor: "#F4DFCD",
+    height: 50,
+    width: 50,
+    borderRadius: 50,
+    alignContent: "center",
+    justifyContent: "center",
   },
   mediumText: {
     marginLeft: 10,
@@ -467,16 +516,16 @@ const styles = StyleSheet.create({
   },
   noteBox: {
     width: "100%",
-    flexDirection: 'column',
-    flexWrap: 'wrap',
+    flexDirection: "column",
+    flexWrap: "wrap",
   },
   noteText: {
     fontSize: 18,
   },
   noteTextBox: {
-    width: '60%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    width: "60%",
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   emptyContainer: {
     flex: 1,
@@ -521,7 +570,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 20,
     marginBottom: 10,
-    width: '95%',
+    width: "95%",
     padding: 10,
     paddingHorizontal: 10,
     flexDirection: "row",
@@ -568,7 +617,7 @@ const styles = StyleSheet.create({
     lineHeight: 80,
     color: "#111111",
     marginLeft: 5,
-    marginBottom: '-1%',
+    marginBottom: "-1%",
   },
   pfp: {
     width: 50,
@@ -581,9 +630,9 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 10,
-    marginRight: '10%',
-    alignContent: 'center',
-    alignSelf: 'center',
+    marginRight: "10%",
+    alignContent: "center",
+    alignSelf: "center",
   },
 });
 

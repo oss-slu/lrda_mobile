@@ -1,16 +1,30 @@
 import React, { useEffect, useState } from "react";
-import { View, Image, ScrollView, StyleSheet, TouchableOpacity, Platform, Alert } from "react-native";
-import { launchCameraAsync, launchImageLibraryAsync, MediaTypeOptions, requestCameraPermissionsAsync, requestMediaLibraryPermissionsAsync } from "expo-image-picker";
+import {
+  View,
+  Image,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  Platform,
+  Alert,
+} from "react-native";
+import {
+  launchCameraAsync,
+  launchImageLibraryAsync,
+  MediaTypeOptions,
+  requestCameraPermissionsAsync,
+  requestMediaLibraryPermissionsAsync,
+} from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import { Ionicons } from "@expo/vector-icons";
-import { getThumbnailAsync } from 'expo-video-thumbnails';
+import { getThumbnailAsync } from "expo-video-thumbnails";
 import { Media } from "../models/media_class";
-import { v4 as uuidv4 } from 'react-native-uuid';
+
+import uuid from "react-native-uuid";
 
 const S3_PROXY_PREFIX = "http://99.7.218.98:8080/S3/"; // S3 Proxy
 // const S3_PROXY_PREFIX = "http://:8080/S3/"; // localhost proxy
-
 
 async function getThumbnail(uri: string): Promise<string> {
   const { uri: thumbnailUri } = await getThumbnailAsync(uri);
@@ -30,12 +44,16 @@ async function uploadMedia(uri: string, mediaType: string): Promise<string> {
   console.log("uploadMedia - Input URI:", uri);
 
   let data = new FormData();
-  const uniqueName = `media-${Date.now()}.${mediaType === "image" ? "jpg" : "mp4"}`; // Generate a unique name based on the current timestamp and media type
+  const uniqueName = `media-${Date.now()}.${
+    mediaType === "image" ? "jpg" : "mp4"
+  }`; // Generate a unique name based on the current timestamp and media type
 
   if (Platform.OS === "web") {
     const response = await fetch(uri);
     const blob = await response.blob();
-    const file = new File([blob], uniqueName, { type: mediaType === "image" ? "image/jpeg" : "video/mp4" });
+    const file = new File([blob], uniqueName, {
+      type: mediaType === "image" ? "image/jpeg" : "video/mp4",
+    });
     console.log("Blob size:", blob.size);
     console.log("File size:", file.size);
 
@@ -44,8 +62,12 @@ async function uploadMedia(uri: string, mediaType: string): Promise<string> {
     let base64 = await FileSystem.readAsStringAsync(uri, {
       encoding: FileSystem.EncodingType.Base64,
     });
-    console.log("base64 has been defined and will attempt to upload to S3 soon")
-    base64 = `data:${mediaType === "image" ? "image/jpeg" : "video/mp4"};base64,${base64}`;
+    console.log(
+      "base64 has been defined and will attempt to upload to S3 soon"
+    );
+    base64 = `data:${
+      mediaType === "image" ? "image/jpeg" : "video/mp4"
+    };base64,${base64}`;
     data.append("file", {
       type: mediaType === "image" ? "image/jpeg" : "video/mp4",
       uri: base64,
@@ -82,7 +104,7 @@ function PhotoScroller({
   newMedia: Media[];
   setNewMedia: React.Dispatch<React.SetStateAction<Media[]>>;
 }) {
-  const [videoToPlay, setVideoToPlay] = useState('');
+  const [videoToPlay, setVideoToPlay] = useState("");
 
   const handleImageSelection = async (result: {
     canceled?: false;
@@ -93,43 +115,56 @@ function PhotoScroller({
 
     if (uri.endsWith(".heic") || uri.endsWith(".HEIC")) {
       const jpgUri = await convertHeicToJpg(uri);
-      const uploadedUrl = await uploadMedia(jpgUri, 'image');
+      const uploadedUrl = await uploadMedia(jpgUri, "image");
+      console.log("I don't think it is getting here!!!!!!");
+      console.log("After URL is retrieved from upload Media ", uploadedUrl);
       const newMediaItem = new Media({
-        uuid: uuidv4(),
-        type: 'image',
+        uuid: uuid.v4().toString(),
+        type: "image",
         uri: uploadedUrl,
-        thumbnail: ''
+        thumbnail: "",
       });
-      console.log("!!!!!!!!!newMediaItem!!!!!!!!!!!!!!",newMediaItem)
+      console.log("!!!!!!!!!newMediaItem!!!!!!!!!!!!!!", newMediaItem);
       setNewMedia([...newMedia, newMediaItem]);
-    } else if (uri.endsWith(".jpg") || uri.endsWith('png') || uri.endsWith('.jpeg')) {
-      const uploadedUrl = await uploadMedia(uri, 'image');
+    } else if (
+      uri.endsWith(".jpg") ||
+      uri.endsWith("png") ||
+      uri.endsWith(".jpeg")
+    ) {
+      const uploadedUrl = await uploadMedia(uri, "image");
+      console.log("I don't think it is getting here!!!!!!");
+      console.log("After URL is retrieved from upload Media ", uploadedUrl);
       const newMediaItem = new Media({
-        uuid: uuidv4(),
-        type: 'image',
+        uuid: uuid.v4().toString(),
+        type: "image",
         uri: uploadedUrl,
-        thumbnail: ''
+        thumbnail: "",
       });
-      console.log("!!!!!!!!!newMediaItem!!!!!!!!!!!!!!",newMediaItem)
+      console.log("!!!!!!!!!newMediaItem!!!!!!!!!!!!!!", newMediaItem);
       setNewMedia([...newMedia, newMediaItem]);
-    } else if (uri.endsWith('.MOV') || uri.endsWith('.mov') || uri.endsWith('.mp4')){
-      const uploadedUrl = await uploadMedia(uri, 'video');
+    } else if (
+      uri.endsWith(".MOV") ||
+      uri.endsWith(".mov") ||
+      uri.endsWith(".mp4")
+    ) {
+      const uploadedUrl = await uploadMedia(uri, "video");
       const thumbnail = await getThumbnail(uri);
+      console.log("I don't think it is getting here!!!!!!");
+      console.log("After URL is retrieved from upload Media ", uploadedUrl);
       const newMediaItem = new Media({
-        uuid: uuidv4(),
-        type: 'video',
+        uuid: uuid.v4().toString(),
+        type: "video",
         uri: uploadedUrl,
-        thumbnail: thumbnail
+        thumbnail: thumbnail,
       });
-      console.log("!!!!!!!!!newMediaItem!!!!!!!!!!!!!!",newMediaItem)
+      console.log("!!!!!!!!!newMediaItem!!!!!!!!!!!!!!", newMediaItem);
       setNewMedia([...newMedia, newMediaItem]);
     }
   };
-  console.log("!!!!!!!!!!!!This is the note!!!!!!!!",newMedia);
 
   const goBig = (index: number) => {
     const currentMedia = newMedia[index];
-  }
+  };
 
   const handleNewMedia = async () => {
     Alert.alert(
@@ -188,7 +223,7 @@ function PhotoScroller({
           style: "cancel",
         },
       ],
-     { cancelable: false }
+      { cancelable: false }
     );
   };
 
@@ -204,32 +239,46 @@ function PhotoScroller({
         <TouchableOpacity onPress={handleNewMedia}>
           <Image style={styles.image} source={require("./public/new.png")} />
         </TouchableOpacity>
-        {newMedia?.map((media, index) => (
-          <View key={index}>
-            <TouchableOpacity
-              style={styles.trash}
-              onPress={() => handleDeleteMedia(index)}
-            >
-              <Ionicons
-                style={{ alignSelf: "center" }}
-                name="trash-outline"
-                size={20}
-                color="#111111"
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              key={index}
-              onPress={() => goBig(index)}
-            >
-              {media.isVideo() ? (
-                <Image style={styles.image} source={{ uri: media.getThumbnail() }} />
-              ) : (
-                <Image style={styles.image} source={{ uri: media.getUri() }} />
-              )}
-            </TouchableOpacity>
-          </View>
-        ))}
-        
+        {newMedia?.map((media, index) => {
+          return (
+            <View key={index}>
+              <TouchableOpacity
+                style={styles.trash}
+                onPress={() => handleDeleteMedia(index)}
+              >
+                <Ionicons
+                  style={{ alignSelf: "center" }}
+                  name="trash-outline"
+                  size={20}
+                  color="#111111"
+                />
+              </TouchableOpacity>
+              <TouchableOpacity key={index} onPress={() => goBig(index)}>
+                {media.isVideo() ? (
+                  <View style={styles.miniContainer}>
+                    <Image
+                      style={styles.image}
+                      source={{ uri: media.getThumbnail() }}
+                    />
+                    <View style={styles.playUnderlay}>
+                      <Ionicons
+                        name="play-outline"
+                        size={24}
+                        color="#dfe5e8"
+                        style={styles.icon}
+                      />
+                    </View>
+                  </View>
+                ) : (
+                  <Image
+                    style={styles.image}
+                    source={{ uri: media.getUri() }}
+                  />
+                )}
+              </TouchableOpacity>
+            </View>
+          );
+        })}
       </ScrollView>
     </View>
   );
@@ -260,6 +309,27 @@ const styles = StyleSheet.create({
   video: {
     width: "100%",
     height: "100%",
+  },
+  miniContainer: {
+    position: "relative",
+    justifyContent: "center",
+    // alignSelf: "center",
+    alignItems: 'center',
+  },
+  icon: {
+    position: "relative",
+    alignSelf: 'center',
+    marginLeft: 2,
+    marginTop: 2,
+  },
+  playUnderlay: {
+    width: 30,
+    height: 30,
+    borderRadius: 30,
+    backgroundColor: "rgba(5,5,5,0.5)",
+    position: "absolute",
+    right: 43,
+    bottom: 37.5,
   },
 });
 
