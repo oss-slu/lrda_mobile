@@ -55,8 +55,8 @@ export default function GoogleMap({ route, updateCounter }: GoogleMapProps) {
           uuid: item.uuid,
           type: item.type,
           uri: item.uri,
-          thumbnail: item.thumbnail,
         })),
+        audio: message.audio || "",
         latitude: message.latitude || "",
         longitude: message.longitude || "",
       }));
