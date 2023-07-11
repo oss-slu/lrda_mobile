@@ -17,7 +17,7 @@ type GoogleMapProps = {
 
 export default function GoogleMap({ route, updateCounter }: GoogleMapProps) {
   const [global, setGlobal] = useState(false);
-  const [notes, setNotes] = useState([]);
+  const [notes, setNotes] = useState<Note[]>([]);
 
   useEffect(() => {
     fetchMessages();
@@ -70,7 +70,7 @@ export default function GoogleMap({ route, updateCounter }: GoogleMapProps) {
       />
       <MapView 
         provider={PROVIDER_GOOGLE}
-        style={styles.map} 
+        style={styles.map}
         initialRegion={{
           latitude: 37.78825,
           longitude: -122.4324,
@@ -82,7 +82,7 @@ export default function GoogleMap({ route, updateCounter }: GoogleMapProps) {
           note.latitude && note.longitude && (
             <Marker
               key={note.id}
-              coordinate={{latitude: note.latitude, longitude: note.longitude}}
+              coordinate={{latitude: parseFloat(note.latitude), longitude: parseFloat(note.longitude)}}
             >
               <Image source={require("../../components/public/marker.png")} style={{height: 35, width: 35}} />
             </Marker>
