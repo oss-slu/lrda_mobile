@@ -1,35 +1,93 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
-import { Image, StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View, Switch } from 'react-native';
+import { Note } from "../../../types";
+import { User } from "../../models/user_class";
+import { Media } from "../../models/media_class";
 
-export default function GoogleMap() {
-  // For demo purposes, use two made-up lat-long coordinates
-  const note1 = { latitude: 37.78825, longitude: -122.4324 };
-  const note2 = { latitude: 37.68825, longitude: -122.3324 };
+
+const user = User.getInstance();
+
+type GoogleMapProps = {
+  route: any, // substitute any with the actual type if you know it
+  updateCounter: any, // substitute any with the actual type if you know it
+  user: User,
+};
+
+
+export default function GoogleMap({ route, updateCounter }: GoogleMapProps) {
+  const [global, setGlobal] = useState(false);
+  const [notes, setNotes] = useState([]);
+
+  useEffect(() => {
+    fetchMessages();
+  }, [route.params, updateCounter, global]);
+
+  const fetchMessages = async () => {
+    let response;
+    try {
+      const body = global
+        ? { type: "message" }
+        : { type: "message", creator: user.getId() };
+
+      response = await fetch("http://lived-religion-dev.rerum.io/deer-lr/query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      const data = await response.json();
+
+      const fetchedNotes: Note[] = data.map((message: any): Note => ({
+        id: message["@id"],
+        title: message.title || "",
+        text: message.BodyText || "",
+        time: (message.__rerum.isOverwritten ? new Date(message.__rerum.isOverwritten) : new Date(message.__rerum.createdAt)).toLocaleString("en-US", { timeZone: "America/Chicago" }),
+        creator: message.creator || "",
+        media: message.media.map((item: any) => new Media({
+          uuid: item.uuid,
+          type: item.type,
+          uri: item.uri,
+          thumbnail: item.thumbnail,
+        })),
+        latitude: message.latitude || "",
+        longitude: message.longitude || "",
+      }));
+      
+
+      setNotes(fetchedNotes);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    }
+  };
 
   return (
     <View style={styles.container}>
+      <Switch
+        style={styles.toggle}
+        value={global}
+        onValueChange={(newValue) => setGlobal(newValue)}
+      />
       <MapView 
         provider={PROVIDER_GOOGLE}
         style={styles.map} 
         initialRegion={{
-          latitude: note1.latitude,
-          longitude: note1.longitude,
+          latitude: 37.78825,
+          longitude: -122.4324,
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         }}
       >
-        <Marker
-          coordinate={note1}
-        >
-          <Image source={require("../../components/public/marker.png")} style={{height: 35, width: 35}} />
-        </Marker>
-
-        <Marker
-          coordinate={note2}
-        >
-          <Image source={require("../../components/public/marker.png")} style={{height: 35, width: 35}} />
-        </Marker>
+        {notes.map(note => 
+          note.latitude && note.longitude && (
+            <Marker
+              key={note.id}
+              coordinate={{latitude: note.latitude, longitude: note.longitude}}
+            >
+              <Image source={require("../../components/public/marker.png")} style={{height: 35, width: 35}} />
+            </Marker>
+          )
+        )}
       </MapView>
     </View>
   );
@@ -40,7 +98,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   map: {
-    width: '100%',
-    height: '100%',
+    ...StyleSheet.absoluteFillObject,
+  },
+  toggle: {
+    position: 'absolute',
+    top: 70,
+    left: 15,
+    zIndex: 1,
   },
 });
