@@ -120,14 +120,12 @@ function PhotoScroller({
     if (uri.endsWith(".heic") || uri.endsWith(".HEIC")) {
       const jpgUri = await convertHeicToJpg(uri);
       const uploadedUrl = await uploadMedia(jpgUri, "image");
-      console.log("I don't think it is getting here!!!!!!");
       console.log("After URL is retrieved from upload Media ", uploadedUrl);
       const newMediaItem = new PhotoType({
         uuid: uuid.v4().toString(),
         type: "image",
         uri: uploadedUrl,
       });
-      console.log("!!!!!!!!!newMediaItem!!!!!!!!!!!!!!", newMediaItem);
       setNewMedia([...newMedia, newMediaItem]);
     } else if (
       uri.endsWith(".jpg") ||
@@ -157,7 +155,7 @@ function PhotoScroller({
         type: "video",
         uri: uploadedUrl,
         thumbnail: thumbnail,
-        duration: 0,
+        duration: '0:00',
       });
       console.log("!!!!!!!!!newMediaItem!!!!!!!!!!!!!!", newMediaItem);
       setNewMedia([...newMedia, newMediaItem]);

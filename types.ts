@@ -1,4 +1,4 @@
-import { Media } from "./lib/models/media_class";
+import { Media, AudioType } from "./lib/models/media_class";
 
 export type MediaData = {
   uuid: string;
@@ -12,7 +12,8 @@ export type Note = {
     text: string;
     time: string;
     media: Media[];
-    creator: string; 
+    audio: AudioType[];
+    creator: string;
     latitude: string;
     longitude: string;
   };

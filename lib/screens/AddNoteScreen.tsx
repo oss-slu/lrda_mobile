@@ -14,7 +14,7 @@ import { User } from "../models/user_class";
 import { Ionicons } from "@expo/vector-icons";
 import { Media, AudioType } from "../models/media_class";
 import AudioContainer from "../components/audio";
-import * as Location from 'expo-location';
+import * as Location from "expo-location";
 
 const user = User.getInstance();
 
@@ -30,7 +30,10 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [newAudio, setNewAudio] = useState<AudioType[]>([]);
   const [viewMedia, setViewMedia] = useState(false);
   const [viewAudio, setViewAudio] = useState(false);
-  const [location, setLocation] = useState<{ latitude: number, longitude: number } | null>(null);
+  const [location, setLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
 
   useEffect(() => {
     console.log("new Media array:", newMedia);
@@ -39,8 +42,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.log('Permission to access location was denied');
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
         return;
       }
 
@@ -68,6 +71,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           creator: user.getId(),
           latitude: location?.latitude.toString() || "",
           longitude: location?.longitude.toString() || "",
+          audio: newAudio,
         }),
       }
     );
@@ -87,7 +91,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         media: [],
         creator: "",
         latitude: "",
-        longitude: ""
+        longitude: "",
+        audio: [],
       }; // The note will get assigned a time and creator
 
       if (route.params?.onSave) {
@@ -140,10 +145,20 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         </TouchableOpacity>
       </View>
       <View style={styles.keyContainer}>
-        <TouchableOpacity style={styles.toggles} onPress={() => {setViewMedia(!viewMedia)}}>
+        <TouchableOpacity
+          style={styles.toggles}
+          onPress={() => {
+            setViewMedia(!viewMedia);
+          }}
+        >
           <Ionicons name="images-outline" size={24} color="white" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.toggles} onPress={() => {setViewAudio(!viewAudio)}}>
+        <TouchableOpacity
+          style={styles.toggles}
+          onPress={() => {
+            setViewAudio(!viewAudio);
+          }}
+        >
           <Ionicons name="mic-outline" size={24} color="white" />
         </TouchableOpacity>
       </View>
@@ -156,10 +171,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             <PhotoScroller newMedia={newMedia} setNewMedia={setNewMedia} />
           )}
           {viewAudio && (
-            <AudioContainer
-              newAudio={newAudio}
-              setNewAudio={setNewAudio}
-            />
+            <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
           )}
           <View style={styles.inputContainer}>
             <TextInput
@@ -223,7 +235,7 @@ const styles = StyleSheet.create({
   },
   title: {
     height: 45,
-    width: '70%',
+    width: "70%",
     borderColor: "#111111",
     borderWidth: 1,
     borderRadius: 30,
@@ -255,10 +267,10 @@ const styles = StyleSheet.create({
     height: "7%",
     paddingVertical: 5,
     width: 130,
-   backgroundColor: "tan",
+    backgroundColor: "tan",
     borderRadius: 30,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   saveText: {
     color: "#111111",

@@ -16,7 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../types";
 import { User } from "../models/user_class";
-import { Media, PhotoType, VideoType } from "../models/media_class";
+import { Media, PhotoType, VideoType, AudioType } from "../models/media_class";
 import { Note } from "../../types";
 
 const user = User.getInstance();
@@ -164,6 +164,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             });
           }
         });
+
+        const audioItems = message.audio?.map((item: AudioType) => {
+          return new AudioType({
+              uuid: item.uuid,
+              type: item.type,
+              uri: item.uri,
+              duration: item.duration,
+              name: item.name,
+          })
+        })
         
 
         return {
@@ -174,6 +184,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             time.toLocaleString("en-US", { timeZone: "America/Chicago" }) || "",
           creator: message.creator || "",
           media: mediaItems || [],
+          audio: audioItems || [],
           latitude: message.latitude || "",
           longitude: message.longitude || "",
         };
@@ -201,7 +212,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   const updateNote = (note: Note) => {
     setNotes((prevNotes) =>
-      prevNotes.map((prevNote) => (prevNote.id === note.id ? note : prevNote))
+      prevNotes?.map((prevNote) => (prevNote.id === note.id ? note : prevNote))
     );
     setUpdateCounter(updateCounter + 1);
   };

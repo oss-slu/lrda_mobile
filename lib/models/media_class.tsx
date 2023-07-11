@@ -25,33 +25,36 @@ export class Media {
 }
 
 export class AudioType extends Media {
-  duration: number;
+  duration: string;
+  name: string;
 
-  constructor({ uuid, uri, duration }: MediaData & { duration: number }) {
+  constructor({ uuid, uri, duration, name }: MediaData & { duration: string; name: string }) {
     super({ uuid, type: 'audio', uri });
     this.duration = duration;
+    this.name = name;
   }
 
   isAudio(): boolean {
     return true;
   }
 
-  getDuration(): number {
+  getDuration(): string {
     return this.duration;
   }
 }
 
+
 export class VideoType extends Media {
   thumbnail: string;
-  duration: number;
+  duration: string;
 
-  constructor({ uuid, uri, thumbnail, duration }: MediaData & { thumbnail: string, duration: number }) {
+  constructor({ uuid, uri, thumbnail, duration }: MediaData & { thumbnail: string, duration: string }) {
     super({ uuid, type: 'video', uri });
     this.thumbnail = thumbnail;
     this.duration = duration;
   }
 
-  getDuration(): number {
+  getDuration(): string {
     return this.duration;
   }
 
