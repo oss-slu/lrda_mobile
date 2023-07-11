@@ -4,7 +4,6 @@ export type MediaData = {
   uuid: string;
   type: string;
   uri: string;
-  thumbnail: string;
 };
 
 export type Note = {

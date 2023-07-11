@@ -16,7 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../types";
 import { User } from "../models/user_class";
-import { Media } from "../models/media_class";
+import { Media, PhotoType, VideoType } from "../models/media_class";
 import { Note } from "../../types";
 
 const user = User.getInstance();
@@ -147,15 +147,24 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           ? new Date(message.__rerum.isOverwritten)
           : new Date(message.__rerum.createdAt);
         time.setHours(time.getHours() - 5);
-        const mediaItems = message.media.map(
-          (item: any) =>
-            new Media({
+        const mediaItems = message.media.map((item: any) => {
+          if (item.type === 'video') {
+            return new VideoType({
               uuid: item.uuid,
               type: item.type,
               uri: item.uri,
               thumbnail: item.thumbnail,
-            })
-        );
+              duration: item.duration,
+            });
+          } else {
+            return new PhotoType({
+              uuid: item.uuid,
+              type: item.type,
+              uri: item.uri,
+            });
+          }
+        });
+        
 
         return {
           id: message["@id"],
@@ -282,6 +291,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   };
 
   const renderItem = ({ item }: { item: Note }) => {
+    const mediaItem = item.media[0];
     return (
       <TouchableOpacity
         style={styles.noteContainer}
@@ -290,18 +300,18 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         }
       >
         <View style={{ flexDirection: "row" }}>
-          {item?.media?.[0]?.isImage() ? (
-            <Image style={styles.preview} source={{ uri: item.media[0].uri }} />
-          ) : item?.media?.[0]?.isVideo() ? (
+          {mediaItem?.getType() === 'image' ? (
+            <Image style={styles.preview} source={{ uri: mediaItem.getUri() }} />
+          ) : mediaItem?.getType() === 'video' ? (
             <Image
               style={styles.preview}
-              source={{ uri: item.media[0].thumbnail }}
+              source={{ uri: (mediaItem as VideoType).getThumbnail() }}
             />
           ) : (
             <Image
               source={require("../components/public/noPreview.png")}
               style={styles.preview}
-            ></Image>
+            />
           )}
           <View
             style={{ alignSelf: "center", position: "absolute", left: 120 }}
@@ -311,13 +321,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                 ? item.title.slice(0, textLength) + "..."
                 : item.title}
             </Text>
-
+  
             <Text style={styles.noteText}>
               {`${item.time.split(", ")[0]}\n${item.time.split(", ")[1]}`}
             </Text>
           </View>
         </View>
-
+  
         <TouchableOpacity
           style={{
             justifyContent: "center",
@@ -332,6 +342,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       </TouchableOpacity>
     );
   };
+  
 
   return (
     <View style={styles.container}>

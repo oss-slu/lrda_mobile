@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
   Alert,
   View,
-  Text,
   StyleSheet,
   TextInput,
   TouchableOpacity,
@@ -13,7 +12,7 @@ import PhotoScroller from "../components/photoScroller";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { User } from "../models/user_class";
 import { Ionicons } from "@expo/vector-icons";
-import { Media } from "../models/media_class";
+import { Media, AudioType } from "../models/media_class";
 import AudioContainer from "../components/audio";
 import * as Location from 'expo-location';
 
@@ -28,6 +27,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [titleText, setTitleText] = useState("");
   const [bodyText, setBodyText] = useState("");
   const [newMedia, setNewMedia] = useState<Media[]>([]);
+  const [newAudio, setNewAudio] = useState<AudioType[]>([]);
   const [viewMedia, setViewMedia] = useState(false);
   const [viewAudio, setViewAudio] = useState(false);
   const [location, setLocation] = useState<{ latitude: number, longitude: number } | null>(null);
@@ -157,12 +157,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           )}
           {viewAudio && (
             <AudioContainer
-              newImages={[]}
-              setNewAudio={function (
-                value: React.SetStateAction<string[]>
-              ): void {
-                throw new Error("Function not implemented.");
-              }}
+              newAudio={newAudio}
+              setNewAudio={setNewAudio}
             />
           )}
           <View style={styles.inputContainer}>
