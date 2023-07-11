@@ -20,7 +20,7 @@ import * as FileSystem from "expo-file-system";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import { Ionicons } from "@expo/vector-icons";
 import { getThumbnailAsync } from "expo-video-thumbnails";
-import { Media } from "../models/media_class";
+import { Media, VideoType, PhotoType } from "../models/media_class";
 import uuid from "react-native-uuid";
 import { Video } from "expo-av";
 
@@ -120,15 +120,12 @@ function PhotoScroller({
     if (uri.endsWith(".heic") || uri.endsWith(".HEIC")) {
       const jpgUri = await convertHeicToJpg(uri);
       const uploadedUrl = await uploadMedia(jpgUri, "image");
-      console.log("I don't think it is getting here!!!!!!");
       console.log("After URL is retrieved from upload Media ", uploadedUrl);
-      const newMediaItem = new Media({
+      const newMediaItem = new PhotoType({
         uuid: uuid.v4().toString(),
         type: "image",
         uri: uploadedUrl,
-        thumbnail: "",
       });
-      console.log("!!!!!!!!!newMediaItem!!!!!!!!!!!!!!", newMediaItem);
       setNewMedia([...newMedia, newMediaItem]);
     } else if (
       uri.endsWith(".jpg") ||
@@ -138,11 +135,10 @@ function PhotoScroller({
       const uploadedUrl = await uploadMedia(uri, "image");
       console.log("I don't think it is getting here!!!!!!");
       console.log("After URL is retrieved from upload Media ", uploadedUrl);
-      const newMediaItem = new Media({
+      const newMediaItem = new PhotoType({
         uuid: uuid.v4().toString(),
         type: "image",
         uri: uploadedUrl,
-        thumbnail: "",
       });
       console.log("!!!!!!!!!newMediaItem!!!!!!!!!!!!!!", newMediaItem);
       setNewMedia([...newMedia, newMediaItem]);
@@ -153,13 +149,13 @@ function PhotoScroller({
     ) {
       const uploadedUrl = await uploadMedia(uri, "video");
       const thumbnail = await getThumbnail(uri);
-      console.log("I don't think it is getting here!!!!!!");
       console.log("After URL is retrieved from upload Media ", uploadedUrl);
-      const newMediaItem = new Media({
+      const newMediaItem = new VideoType({
         uuid: uuid.v4().toString(),
         type: "video",
         uri: uploadedUrl,
         thumbnail: thumbnail,
+        duration: '0:00',
       });
       console.log("!!!!!!!!!newMediaItem!!!!!!!!!!!!!!", newMediaItem);
       setNewMedia([...newMedia, newMediaItem]);
@@ -299,11 +295,11 @@ function PhotoScroller({
                   />
                 </TouchableOpacity>
                 <TouchableOpacity key={index} onPress={() => goBig(index)}>
-                  {media.isVideo() ? (
+                  {media.getType()==="video" ? (
                     <View style={styles.miniContainer}>
                       <Image
                         style={styles.image}
-                        source={{ uri: media.getThumbnail() }}
+                        source={{ uri: (media as VideoType).getThumbnail() }}
                       />
                       <View style={styles.playUnderlay}>
                         <Ionicons
