@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
-import { Image, StyleSheet, View, Switch } from 'react-native';
+import MapView, { PROVIDER_GOOGLE, Marker, MapType } from 'react-native-maps';
+import { Image, StyleSheet, View, Switch, Button } from 'react-native';
 import { Note } from "../../../types";
 import { User } from "../../models/user_class";
 import { Media } from "../../models/media_class";
-
 
 const user = User.getInstance();
 
@@ -14,10 +13,18 @@ type GoogleMapProps = {
   user: User,
 };
 
+const mapTypes: MapType[] = ['standard', 'satellite', 'hybrid', 'terrain'];
 
 export default function GoogleMap({ route, updateCounter }: GoogleMapProps) {
   const [global, setGlobal] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
+  const [mapType, setMapType] = useState<MapType>('standard');
+
+  const changeMapType = () => {
+    const currentIndex = mapTypes.indexOf(mapType);
+    const nextIndex = (currentIndex + 1) % mapTypes.length;
+    setMapType(mapTypes[nextIndex]);
+  };
 
   useEffect(() => {
     fetchMessages();
@@ -63,14 +70,10 @@ export default function GoogleMap({ route, updateCounter }: GoogleMapProps) {
 
   return (
     <View style={styles.container}>
-      <Switch
-        style={styles.toggle}
-        value={global}
-        onValueChange={(newValue) => setGlobal(newValue)}
-      />
       <MapView 
         provider={PROVIDER_GOOGLE}
         style={styles.map}
+        mapType={mapType}
         initialRegion={{
           latitude: 37.78825,
           longitude: -122.4324,
@@ -89,6 +92,13 @@ export default function GoogleMap({ route, updateCounter }: GoogleMapProps) {
           )
         )}
       </MapView>
+      <View style={styles.overlay}>
+        <Switch
+          value={global}
+          onValueChange={(newValue) => setGlobal(newValue)}
+        />
+        <Button title="Change Map Type" onPress={changeMapType} />
+      </View>
     </View>
   );
 }
@@ -100,10 +110,10 @@ const styles = StyleSheet.create({
   map: {
     ...StyleSheet.absoluteFillObject,
   },
-  toggle: {
+  overlay: {
     position: 'absolute',
     top: 70,
-    left: 15,
+    left: 20,
     zIndex: 1,
   },
 });
