@@ -1,13 +1,21 @@
 // EditNoteScreen.tsx
 import React, { useState, useEffect } from "react";
-import { Alert, Platform, View, TextInput, Text, StyleSheet } from "react-native";
+import {
+  Alert,
+  Platform,
+  View,
+  TextInput,
+  Text,
+  StyleSheet,
+} from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Ionicons } from "@expo/vector-icons";
 import { Note } from "../../types";
 import PhotoScroller from "../components/photoScroller";
-import { User } from "../utils/user_class";
-// import { white } from "react-native-paper/lib/typescript/styles/themes/v2/colors";
+import { User } from "../models/user_class";
+import AudioContainer from "../components/audio";
+import { Media, AudioType } from "../models/media_class";
 
 const user = User.getInstance();
 
@@ -30,13 +38,14 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const { note, onSave } = route.params;
   const [title, setTitle] = useState(note.title);
   const [text, setText] = useState(note.text);
-  const [images, setimages] = useState<string[]>(note.images);
+  const [media, setMedia] = useState<Media[]>(note.media);
+  const [newAudio, setNewAudio] = useState<AudioType[]>(note.audio);
   const [creator, setCreator] = useState(note.creator);
   const [owner, setOwner] = useState(false);
+  const [viewMedia, setViewMedia] = useState(false);
+  const [viewAudio, setViewAudio] = useState(false);
 
   useEffect(() => {
-    console.log("creator: ",note);
-    console.log("User: ",user.getId());
     if (creator === user.getId()) {
       setOwner(true);
     } else {
@@ -57,9 +66,12 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             "@id": updatedNote.id,
             title: updatedNote.title,
             BodyText: updatedNote.text,
-            items: updatedNote.images,
             type: "message",
             creator: user.getId(),
+            media: updatedNote.media,
+            latitude: updatedNote.latitude,
+            longitude: updatedNote.longitude,
+            audio: newAudio,
           }),
         }
       );
@@ -77,12 +89,12 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   };
 
   const handleSaveNote = () => {
-    const updatedNote = { ...note, title, text, images };
+    const updatedNote = { ...note, title, text, media };
     updateNote(updatedNote);
   };
 
   const handleGoBackCheck = () => {
-    if (Platform.OS === 'web'){
+    if (Platform.OS === "web") {
       navigation.goBack();
     } else {
       Alert.alert(
@@ -91,14 +103,14 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         [
           {
             text: "Cancel",
-            style: "cancel"
+            style: "cancel",
           },
           {
             text: "OK",
             onPress: async () => {
               navigation.goBack();
+            },
           },
-        }
         ],
         { cancelable: false }
       );
@@ -108,39 +120,59 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   return (
     <View>
       <View style={styles.topContainer}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={handleGoBackCheck}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={handleGoBackCheck}>
           <Ionicons name="arrow-back-outline" size={24} color="white" />
         </TouchableOpacity>
-        <Text style={styles.topText}>Editing Note</Text>
-        { owner ? 
-        <TouchableOpacity style={styles.backButton} onPress={handleSaveNote}>
-          <Ionicons name="save-outline" size={24} color="white" />
-        </TouchableOpacity>
-        : <View/>}
+        <TextInput style={styles.title} value={title} onChangeText={setTitle} />
+        {owner ? (
+          <TouchableOpacity style={styles.backButton} onPress={handleSaveNote}>
+            <Ionicons name="save-outline" size={24} color="white" />
+          </TouchableOpacity>
+        ) : (
+          <View />
+        )}
       </View>
+      <View style={{backgroundColor: 'white'}}>
+        <View style={styles.keyContainer}>
+          <TouchableOpacity
+            style={styles.toggles}
+            onPress={() => {
+              setViewMedia(!viewMedia);
+            }}
+          >
+            <Ionicons name="images-outline" size={24} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.toggles}
+            onPress={() => {
+              setViewAudio(!viewAudio);
+            }}
+          >
+            <Ionicons name="mic-outline" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
       <View style={styles.container}>
         <KeyboardAwareScrollView
           showsVerticalScrollIndicator={false}
           style={{ paddingTop: 10 }}
         >
-          <TextInput
-            style={styles.title}
-            value={title}
-            onChangeText={setTitle}
-          />
-          { <PhotoScroller newImages={images} setNewImages={setimages} />}
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                multiline={true}
-                textAlignVertical="top"
-                value={text}
-                onChangeText={setText}
-              />
-            </View>
+          {viewMedia && (
+            <PhotoScroller newMedia={media} setNewMedia={setMedia} />
+          )}
+          {viewAudio && (
+            <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
+          )}
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              multiline={true}
+              textAlignVertical="top"
+              value={text}
+              onChangeText={setText}
+            />
+          </View>
         </KeyboardAwareScrollView>
       </View>
     </View>
@@ -179,13 +211,12 @@ const styles = StyleSheet.create({
     paddingBottom: "50%",
   },
   title: {
-    width: '90%',
-    alignSelf: 'center',
+    width: "70%",
+    alignSelf: "center",
     height: 45,
     borderColor: "#111111",
     borderWidth: 1,
     borderRadius: 30,
-    marginBottom: 20,
     paddingHorizontal: 10,
     textAlign: "center",
     fontSize: 30,
@@ -197,7 +228,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     fontSize: 22,
-    paddingBottom: '90%',
+    paddingBottom: "90%",
   },
   addButton: {
     position: "absolute",
@@ -210,16 +241,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  addButton: {
-    position: "absolute",
-    bottom: 20,
-    right: 20,
+  toggles: {
     backgroundColor: "#111111",
     borderRadius: 50,
     width: 50,
     height: 50,
     alignItems: "center",
     justifyContent: "center",
+    marginLeft: 10,
+    zIndex: 99,
+  },
+  keyContainer: {
+    height: 60,
+    paddingVertical: 5,
+    width: 130,
+    backgroundColor: "tan",
+    borderRadius: 30,
+    flexDirection: "row",
+    alignItems: "center",
   },
   saveButton: {
     backgroundColor: "#C7EBB3",

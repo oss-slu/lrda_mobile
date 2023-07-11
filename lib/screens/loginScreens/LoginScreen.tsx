@@ -4,7 +4,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import * as SplashScreen from 'expo-splash-screen';
 import { Ionicons } from '@expo/vector-icons';
 import { Snackbar } from 'react-native-paper';
-import { User } from '../../utils/user_class';
+import { User } from '../../models/user_class';
 
 const user = User.getInstance();
 

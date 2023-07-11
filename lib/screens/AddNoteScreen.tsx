@@ -1,10 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { Alert, View, Text, StyleSheet, TextInput, TouchableOpacity, Platform } from "react-native";
+import {
+  Alert,
+  View,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Platform,
+} from "react-native";
 import { Note, RootStackParamList } from "../../types";
 import PhotoScroller from "../components/photoScroller";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { User } from "../utils/user_class";
+import { User } from "../models/user_class";
 import { Ionicons } from "@expo/vector-icons";
+import { Media, AudioType } from "../models/media_class";
+import AudioContainer from "../components/audio";
+import * as Location from "expo-location";
 
 const user = User.getInstance();
 
@@ -16,12 +26,34 @@ type AddNoteScreenProps = {
 const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [titleText, setTitleText] = useState("");
   const [bodyText, setBodyText] = useState("");
-  const [newImages, setNewImages] = useState<string[]>([]);
+  const [newMedia, setNewMedia] = useState<Media[]>([]);
+  const [newAudio, setNewAudio] = useState<AudioType[]>([]);
+  const [viewMedia, setViewMedia] = useState(false);
+  const [viewAudio, setViewAudio] = useState(false);
+  const [location, setLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
 
   useEffect(() => {
-    console.log("new Images array:", newImages);
-  }, [newImages]);
+    console.log("new Media array:", newMedia);
+  }, [newMedia]);
 
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+    })();
+  }, []);
 
   const createNote = async (title: string, body: string) => {
     const response = await fetch(
@@ -34,22 +66,34 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         body: JSON.stringify({
           type: "message",
           title: title,
-          items: newImages,
+          media: newMedia,
           BodyText: body,
           creator: user.getId(),
+          latitude: location?.latitude.toString() || "",
+          longitude: location?.longitude.toString() || "",
+          audio: newAudio,
         }),
       }
     );
 
     const obj = await response.json();
-    // console.log(obj["@id"]);
     return obj["@id"];
   };
 
   const saveNote = async () => {
     try {
       const id = await createNote(titleText, bodyText);
-      const note: Note = { id, title: titleText, text: bodyText, time: '', images: [], creator: '' }; // The note will get assigned a time
+      const note: Note = {
+        id,
+        title: titleText,
+        text: bodyText,
+        time: "",
+        media: [],
+        creator: "",
+        latitude: "",
+        longitude: "",
+        audio: [],
+      }; // The note will get assigned a time and creator
 
       if (route.params?.onSave) {
         route.params.onSave(note);
@@ -61,7 +105,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   };
 
   const handleGoBackCheck = () => {
-    if (Platform.OS === 'web'){
+    if (Platform.OS === "web") {
       navigation.goBack();
     } else {
       Alert.alert(
@@ -70,14 +114,14 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         [
           {
             text: "Cancel",
-            style: "cancel"
+            style: "cancel",
           },
           {
             text: "OK",
             onPress: async () => {
               navigation.goBack();
+            },
           },
-        }
         ],
         { cancelable: false }
       );
@@ -87,29 +131,50 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   return (
     <View>
       <View style={styles.topContainer}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={handleGoBackCheck}
-        >
+        <TouchableOpacity style={styles.topButtons} onPress={handleGoBackCheck}>
           <Ionicons name="arrow-back-outline" size={24} color="white" />
         </TouchableOpacity>
-        <Text style={styles.topText}>Creating Note</Text>
-        <TouchableOpacity style={styles.backButton} onPress={saveNote}>
+        <TextInput
+          style={styles.title}
+          placeholder="Title Note"
+          onChangeText={(text) => setTitleText(text)}
+          value={titleText}
+        />
+        <TouchableOpacity style={styles.topButtons} onPress={saveNote}>
           <Ionicons name="save-outline" size={24} color="white" />
         </TouchableOpacity>
+      </View>
+      <View style={{backgroundColor: 'white'}}>
+        <View style={styles.keyContainer}>
+          <TouchableOpacity
+            style={styles.toggles}
+            onPress={() => {
+              setViewMedia(!viewMedia);
+            }}
+          >
+            <Ionicons name="images-outline" size={24} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.toggles}
+            onPress={() => {
+              setViewAudio(!viewAudio);
+            }}
+          >
+            <Ionicons name="mic-outline" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
       </View>
       <View style={styles.container}>
         <KeyboardAwareScrollView
           showsVerticalScrollIndicator={false}
           style={{ overflow: "hidden", paddingTop: 10, paddingBottom: 100 }}
         >
-          <TextInput
-            style={styles.title}
-            placeholder="Title your note here"
-            onChangeText={(text) => setTitleText(text)}
-            value={titleText}
-          />
-          { <PhotoScroller newImages={newImages} setNewImages={setNewImages} />}
+          {viewMedia && (
+            <PhotoScroller newMedia={newMedia} setNewMedia={setNewMedia} />
+          )}
+          {viewAudio && (
+            <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
+          )}
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
@@ -145,13 +210,23 @@ const styles = StyleSheet.create({
     fontSize: 32,
     textAlign: "center",
   },
-  backButton: {
+  topButtons: {
     backgroundColor: "#111111",
     borderRadius: 50,
     width: 50,
     height: 50,
     alignItems: "center",
     justifyContent: "center",
+    zIndex: 99,
+  },
+  toggles: {
+    backgroundColor: "#111111",
+    borderRadius: 50,
+    width: 50,
+    height: 50,
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 10,
     zIndex: 99,
   },
   container: {
@@ -162,10 +237,10 @@ const styles = StyleSheet.create({
   },
   title: {
     height: 45,
+    width: "70%",
     borderColor: "#111111",
     borderWidth: 1,
     borderRadius: 30,
-    marginBottom: 20,
     paddingHorizontal: 10,
     textAlign: "center",
     fontSize: 30,
@@ -177,7 +252,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     fontSize: 22,
-    paddingBottom: '90%',
+    paddingBottom: "90%",
   },
   addButton: {
     position: "absolute",
@@ -190,14 +265,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  saveButton: {
-    backgroundColor: "#C7EBB3",
-    paddingHorizontal: 120,
-    padding: 10,
+  keyContainer: {
+    height: 60,
+    paddingVertical: 5,
+    width: 130,
+    backgroundColor: "tan",
+    borderRadius: 30,
+    flexDirection: "row",
     alignItems: "center",
-    borderRadius: 25,
-    marginVertical: 10,
-    alignSelf: "center",
   },
   saveText: {
     color: "#111111",

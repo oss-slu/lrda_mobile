@@ -1,10 +1,21 @@
+import { Media, AudioType } from "./lib/models/media_class";
+
+export type MediaData = {
+  uuid: string;
+  type: string;
+  uri: string;
+};
+
 export type Note = {
     id: string;
     title: string;
     text: string;
     time: string;
-    images: string[];
+    media: Media[];
+    audio: AudioType[];
     creator: string;
+    latitude: string;
+    longitude: string;
   };
   
   export type RootStackParamList = {

@@ -3,6 +3,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 
+import GoogleMap from '../screens/mapPage/googleMap';
+import ProfilePage from '../screens/ProfilePage';
 import HomeScreen, { HomeScreenProps } from '../screens/HomeScreen';
 import LoginScreen from '../screens/loginScreens/LoginScreen';
 import RegisterScreen from '../screens/loginScreens/RegisterScreen';
@@ -10,7 +12,7 @@ import AddNoteScreen from '../screens/AddNoteScreen';
 import EditNote, { EditNoteProps } from '../components/EditNote';
 import { Note, RootStackParamList } from '../../types';
 import { createStackNavigator } from '@react-navigation/stack';
-import { User } from '../utils/user_class';
+import { User } from '../models/user_class';
 
 // Get the single instance of the User class
 const user = User.getInstance();
@@ -78,18 +80,18 @@ const AppNavigator: React.FC = () => {
          }}
        />
        <Tab.Screen
-         name="Tab1"
-         component={Placeholder}
-         options={{
-           headerShown: false, // This line hides the header
-           tabBarIcon: ({ color, size }) => (
-             <Ionicons name="ios-map" color={color} size={size} />
-           ),
-         }}
-       />
+          name="Tab1"
+          component={GoogleMap} // Replaced 'Placeholder' with 'MapComponent'
+          options={{
+            headerShown: false, // This line hides the header
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="ios-map" color={color} size={size} />
+            ),
+          }}
+        />
        <Tab.Screen
          name="Tab2"
-         component={Placeholder}
+         component={ProfilePage}
          options={{
            headerShown: false, // This line hides the header
            tabBarIcon: ({ color, size }) => (
