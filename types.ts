@@ -1,10 +1,19 @@
+import { Media } from "./lib/models/media_class";
+
+export type MediaData = {
+  uuid: string;
+  type: string;
+  uri: string;
+  thumbnail: string;
+};
+
 export type Note = {
     id: string;
     title: string;
     text: string;
     time: string;
-    images: string[];
-    creator: string;
+    media: Media[];
+    creator: string; 
     latitude: string;
     longitude: string;
   };

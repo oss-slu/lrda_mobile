@@ -1,9 +1,4 @@
-type MediaData = {
-    uuid: string;
-    type: string;
-    uri: string;
-    thumbnail: string;
-  };
+import { MediaData } from "../../types";
   
   export class Media {
     uuid: string;

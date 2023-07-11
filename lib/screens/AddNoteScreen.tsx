@@ -63,7 +63,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         body: JSON.stringify({
           type: "message",
           title: title,
-          items: newMedia,
+          media: newMedia,
           BodyText: body,
           creator: user.getId(),
           latitude: location?.latitude.toString() || "",
@@ -84,11 +84,11 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         title: titleText,
         text: bodyText,
         time: "",
-        images: [],
+        media: [],
         creator: "",
         latitude: "",
         longitude: ""
-      }; // The note will get assigned a time
+      }; // The note will get assigned a time and creator
 
       if (route.params?.onSave) {
         route.params.onSave(note);
