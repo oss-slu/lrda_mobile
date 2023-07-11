@@ -132,24 +132,27 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           <View />
         )}
       </View>
-      <View style={styles.keyContainer}>
-        <TouchableOpacity
-          style={styles.toggles}
-          onPress={() => {
-            setViewMedia(!viewMedia);
-          }}
-        >
-          <Ionicons name="images-outline" size={24} color="white" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.toggles}
-          onPress={() => {
-            setViewAudio(!viewAudio);
-          }}
-        >
-          <Ionicons name="mic-outline" size={24} color="white" />
-        </TouchableOpacity>
+      <View style={{backgroundColor: 'white'}}>
+        <View style={styles.keyContainer}>
+          <TouchableOpacity
+            style={styles.toggles}
+            onPress={() => {
+              setViewMedia(!viewMedia);
+            }}
+          >
+            <Ionicons name="images-outline" size={24} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.toggles}
+            onPress={() => {
+              setViewAudio(!viewAudio);
+            }}
+          >
+            <Ionicons name="mic-outline" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
       </View>
+
       <View style={styles.container}>
         <KeyboardAwareScrollView
           showsVerticalScrollIndicator={false}
@@ -249,7 +252,7 @@ const styles = StyleSheet.create({
     zIndex: 99,
   },
   keyContainer: {
-    height: "7%",
+    height: 60,
     paddingVertical: 5,
     width: 130,
     backgroundColor: "tan",
