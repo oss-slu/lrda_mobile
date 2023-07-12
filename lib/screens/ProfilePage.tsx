@@ -11,20 +11,13 @@ import {
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
 import PhotoScroller from "../components/photoScroller";
-
-interface Note {
-  images: any;
-  id: string;
-  title: string;
-  text: string;
-  time: string;
-  creator: string;
-}
+import { Note } from "../../types";
+import { Media, PhotoType, VideoType } from "../models/media_class";
 
 type ImageNote = {
   image: string;
   note: Note;
-};
+} | null;
 
 const user = User.getInstance();
 
@@ -68,10 +61,13 @@ export default function ProfilePage({ navigation }: ProfilePageProps) {
           id: message["@id"],
           title: message.title || "",
           text: message.BodyText || "",
-          images: message.items || [],
+          media: message.media || [],
+          audio: message.audio || [],
           time:
             time.toLocaleString("en-US", { timeZone: "America/Chicago" }) || "",
           creator: message.creator || "",
+          latitude: message.latitude,
+          longitude: message.longitude,
         };
       });
 
@@ -82,16 +78,79 @@ export default function ProfilePage({ navigation }: ProfilePageProps) {
       setNotes(fetchedNotes);
       setCount(fetchedNotes.length);
 
-      let extractedImages = fetchedNotes.flatMap((note) => 
-          note.images.map((image: any) => ({ image, note }))
-        );
+      let extractedImages: ImageNote[] = fetchedNotes.flatMap((note) => {
+        return note.media.map((item: any) => {
+          if (item.type === 'video') {
+            return {
+              image: item.thumbnail,
+              note: {
+                id: note.id,
+                title: note.title || "",
+                text: note.text || "",
+                media: note.media.map((mediaItem: any) => {
+                  if (mediaItem.type === 'video') {
+                    return new VideoType({
+                      uuid: mediaItem.uuid,
+                      type: mediaItem.type,
+                      uri: mediaItem.uri,
+                      thumbnail: mediaItem.thumbnail,
+                      duration: mediaItem.duration,
+                    });
+                  } else {
+                    return new PhotoType({
+                      uuid: mediaItem.uuid,
+                      type: mediaItem.type,
+                      uri: mediaItem.uri,
+                    });
+                  }
+                }),
+                audio: note.audio || [],
+                time: note.time || "",
+                creator: note.creator || "",
+                latitude: note.latitude,
+                longitude: note.longitude,
+              },
+            };
+          } else {
+            return {
+              image: item.uri,
+              note: {
+                id: note.id,
+                title: note.title || "",
+                text: note.text || "",
+                media: note.media.map((mediaItem: any) => {
+                  if (mediaItem.type === 'video') {
+                    return new VideoType({
+                      uuid: mediaItem.uuid,
+                      type: mediaItem.type,
+                      uri: mediaItem.uri,
+                      thumbnail: mediaItem.thumbnail,
+                      duration: mediaItem.duration,
+                    });
+                  } else {
+                    return new PhotoType({
+                      uuid: mediaItem.uuid,
+                      type: mediaItem.type,
+                      uri: mediaItem.uri,
+                    });
+                  }
+                }),
+                audio: note.audio || [],
+                time: note.time || "",
+                creator: note.creator || "",
+                latitude: note.latitude,
+                longitude: note.longitude,
+              },
+            };
+          }
+        });
+      });
 
       setAllImages(extractedImages.reverse());
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
   };
-  
 
   useEffect(() => {
     fetchMessages();
@@ -157,21 +216,21 @@ export default function ProfilePage({ navigation }: ProfilePageProps) {
             <Text style={[styles.text, styles.subText]}>Age</Text>
           </View>
         </View>
-        
+
         <View style={{ marginTop: 32, width: "100%" }}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {allImages?.map((data: ImageNote, index: number) => (
-              <TouchableOpacity 
-                key={index} 
-                onPress={() => navigation.navigate('EditNote', { note: data.note })}
+              <TouchableOpacity
+                key={index}
+                onPress={() =>
+                  navigation.navigate("EditNote", { note: data?.note })
+                }
               >
-                <Image style={styles.preview} source={{ uri: data.image }} />
+                <Image style={styles.preview} source={{ uri: data?.image }} />
               </TouchableOpacity>
             ))}
           </ScrollView>
-          </View>
-
-
+        </View>
 
         <Text style={[styles.subText, styles.recent]}>Recent Activity</Text>
         <View style={{ alignItems: "center" }}>

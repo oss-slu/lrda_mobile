@@ -29,7 +29,8 @@ const S3_PROXY_PREFIX = "http://99.7.218.98:8080/S3/"; // S3 Proxy
 
 async function getThumbnail(uri: string): Promise<string> {
   const { uri: thumbnailUri } = await getThumbnailAsync(uri);
-  return thumbnailUri;
+  const address = await uploadMedia(thumbnailUri, 'image');
+  return address;
 }
 
 async function convertHeicToJpg(uri: string) {
@@ -140,7 +141,6 @@ function PhotoScroller({
         type: "image",
         uri: uploadedUrl,
       });
-      console.log("!!!!!!!!!newMediaItem!!!!!!!!!!!!!!", newMediaItem);
       setNewMedia([...newMedia, newMediaItem]);
     } else if (
       uri.endsWith(".MOV") ||
@@ -157,7 +157,6 @@ function PhotoScroller({
         thumbnail: thumbnail,
         duration: '0:00',
       });
-      console.log("!!!!!!!!!newMediaItem!!!!!!!!!!!!!!", newMediaItem);
       setNewMedia([...newMedia, newMediaItem]);
     }
   };
