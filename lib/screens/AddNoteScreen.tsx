@@ -136,7 +136,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         </TouchableOpacity>
         <TextInput
           style={styles.title}
-          placeholder="Title Note"
+          placeholder="Title Field Note"
           onChangeText={(text) => setTitleText(text)}
           value={titleText}
         />

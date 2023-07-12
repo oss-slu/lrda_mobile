@@ -123,7 +123,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         <TouchableOpacity style={styles.backButton} onPress={handleGoBackCheck}>
           <Ionicons name="arrow-back-outline" size={24} color="white" />
         </TouchableOpacity>
-        <TextInput style={styles.title} value={title} onChangeText={setTitle} />
+        <TextInput placeholder="Title Field Note" style={styles.title} value={title} onChangeText={setTitle} />
         {owner ? (
           <TouchableOpacity style={styles.backButton} onPress={handleSaveNote}>
             <Ionicons name="save-outline" size={24} color="white" />

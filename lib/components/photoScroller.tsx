@@ -276,8 +276,13 @@ function PhotoScroller({
         </View>
       ) : (
         <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-          <TouchableOpacity onPress={handleNewMedia}>
-            <Image style={styles.image} source={require("./public/new.png")} />
+          <TouchableOpacity style={[styles.image, {backgroundColor: 'rgb(240,240,240)', justifyContent: 'center'}]} onPress={handleNewMedia}>
+            <Ionicons
+                    style={{ alignSelf: "center" }}
+                    name="camera-outline"
+                    size={60}
+                    color="#111111"
+                  />
           </TouchableOpacity>
           {newMedia?.map((media, index) => {
             return (
@@ -323,9 +328,6 @@ function PhotoScroller({
       )}
     </View>
   );
-  
-
-
 }
 
 const styles = StyleSheet.create({
