@@ -13,18 +13,12 @@ import {
   Animated,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../../types";
 import { User } from "../models/user_class";
 import { Media, PhotoType, VideoType, AudioType } from "../models/media_class";
 import { Note } from "../../types";
+import { HomeScreenProps } from "../../types";
 
 const user = User.getInstance();
-
-export type HomeScreenProps = {
-  navigation: any;
-  route: { params?: { note: Note; onSave: (note: Note) => void } };
-};
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [notes, setNotes] = useState<Note[]>([]);
