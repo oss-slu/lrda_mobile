@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Alert,
   Platform,
@@ -14,9 +14,10 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
-import { Media, PhotoType, VideoType, AudioType } from "../models/media_class";
+import { PhotoType, VideoType, AudioType } from "../models/media_class";
 import { Note } from "../../types";
 import { HomeScreenProps } from "../../types";
+import ApiService from "../utils/api_calls";
 
 const user = User.getInstance();
 
@@ -102,38 +103,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   }, [route.params, updateCounter]);
 
   const fetchMessages = async () => {
-    let response;
     try {
-      if (global) {
-        response = await fetch(
-          "http://lived-religion-dev.rerum.io/deer-lr/query",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              type: "message",
-            }),
-          }
-        );
-      } else {
-        response = await fetch(
-          "http://lived-religion-dev.rerum.io/deer-lr/query",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              type: "message",
-              creator: user.getId(),
-            }),
-          }
-        );
-      }
-
-      const data = await response.json();
+      const data = await ApiService.fetchMessages(global, user.getId() || "");
       setMessages(data);
 
       const fetchedNotes: Note[] = data.map((message: any) => {
@@ -142,7 +113,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           : new Date(message.__rerum.createdAt);
         time.setHours(time.getHours() - 5);
         const mediaItems = message.media.map((item: any) => {
-          if (item.type === 'video') {
+          if (item.type === "video") {
             return new VideoType({
               uuid: item.uuid,
               type: item.type,
@@ -161,14 +132,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
         const audioItems = message.audio?.map((item: AudioType) => {
           return new AudioType({
-              uuid: item.uuid,
-              type: item.type,
-              uri: item.uri,
-              duration: item.duration,
-              name: item.name,
-          })
-        })
-        
+            uuid: item.uuid,
+            type: item.type,
+            uri: item.uri,
+            duration: item.duration,
+            name: item.name,
+          });
+        });
 
         return {
           id: message["@id"],
@@ -213,25 +183,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   const deleteNoteFromAPI = async (id: string) => {
     try {
-      const url = `http://lived-religion-dev.rerum.io/deer-lr/delete`;
-      const response = await fetch(url, {
-        method: "DELETE",
-        headers: new Headers({
-          "Content-Type": "text/plain; charset=utf-8",
-        }),
-        body: JSON.stringify({
-          type: "message",
-          creator: user.getId(),
-          "@id": id,
-        }),
-      });
-      console.log(response);
-
-      if (response.status === 204) {
+      const success = await ApiService.deleteNoteFromAPI(
+        id,
+        user.getId() || ""
+      );
+      if (success) {
         return true;
-      } else {
-        console.log(response);
-        throw response;
       }
     } catch (error) {
       console.error("Error deleting note:", error);
@@ -305,9 +262,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         }
       >
         <View style={{ flexDirection: "row" }}>
-          {mediaItem?.getType() === 'image' ? (
-            <Image style={styles.preview} source={{ uri: mediaItem.getUri() }} />
-          ) : mediaItem?.getType() === 'video' ? (
+          {mediaItem?.getType() === "image" ? (
+            <Image
+              style={styles.preview}
+              source={{ uri: mediaItem.getUri() }}
+            />
+          ) : mediaItem?.getType() === "video" ? (
             <Image
               style={styles.preview}
               source={{ uri: (mediaItem as VideoType).getThumbnail() }}
@@ -326,13 +286,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                 ? item.title.slice(0, textLength) + "..."
                 : item.title}
             </Text>
-  
+
             <Text style={styles.noteText}>
               {`${item.time.split(", ")[0]}\n${item.time.split(", ")[1]}`}
             </Text>
           </View>
         </View>
-  
+
         <TouchableOpacity
           style={{
             justifyContent: "center",
@@ -347,7 +307,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       </TouchableOpacity>
     );
   };
-  
 
   return (
     <View style={styles.container}>

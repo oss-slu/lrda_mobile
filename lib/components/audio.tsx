@@ -1,77 +1,10 @@
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  ScrollView,
-  Text,
-  Image,
-  TouchableOpacity,
-  StyleSheet,
-  Platform,
-} from "react-native";
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Media, AudioType } from "../models/media_class";
-import { Audio, Video } from "expo-av";
+import { AudioType } from "../models/media_class";
+import { Audio } from "expo-av";
 import uuid from "react-native-uuid";
-import * as FileSystem from "expo-file-system";
-
-const S3_PROXY_PREFIX = "http://99.7.218.98:8080/S3/";
-
-let attempts = 0;
-
-async function uploadAudio(uri: string): Promise<string> {
-  console.log("uploadMedia - Input URI:", uri);
-
-  let data = new FormData();
-  const uniqueName = `media-${Date.now()}.mp3`; // Use fileType variable
-
-  if (Platform.OS === "web") {
-    const response = await fetch(uri);
-    const blob = await response.blob();
-    const file = new File([blob], uniqueName, {
-      type: `audio/mp3`,
-    });
-    console.log("Blob size:", blob.size);
-    console.log("File size:", file.size);
-
-    data.append("file", file);
-  } else {
-    let base64 = await FileSystem.readAsStringAsync(uri, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
-    base64 = `data:audio/mp3;base64,${base64}`;
-    data.append("file", {
-      type: `audio/mp3`,
-      uri: base64,
-      name: uniqueName,
-    });
-  }
-
-  return fetch(S3_PROXY_PREFIX + "uploadFile", {
-    method: "POST",
-    mode: "cors",
-    body: data,
-  })
-    .then((resp) => {
-      console.log("Got the response from the upload file servlet");
-      console.log("uploadMedia - Server response status:", resp.status);
-      if (resp.ok) {
-        const location = resp.headers.get("Location");
-        console.log("uploadMedia - Uploaded successfully, Location:", location);
-        attempts = 0;
-        return location;
-      } else {
-        console.log("uploadMedia - Server response body:", resp.body);
-      }
-    })
-    .catch((err) => {
-      if (attempts > 3) {
-        console.error("uploadMedia - Error:", err);
-        return err;
-      }
-      attempts++;
-      return uploadAudio(uri);
-    });
-}
+import { uploadAudio } from "../utils/S3_proxy";
 
 function getDurationFormatted(millis: number) {
   const minutes = millis / 1000 / 60;
@@ -89,10 +22,7 @@ function AudioContainer({
   setNewAudio: React.Dispatch<React.SetStateAction<AudioType[]>>;
 }) {
   const [isRecording, setIsRecording] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [recording, setRecording] = useState<null | Audio.Recording>(null);
-  const [playingUI, setPlayingUI] = useState(false);
-  const [audio, setAudio] = useState<AudioType[]>([]);
 
   async function startRecording() {
     setIsRecording(true);
@@ -128,7 +58,7 @@ function AudioContainer({
         await recording.stopAndUnloadAsync();
 
         const uri = await recording.getURI();
-        const dat = await uploadAudio(uri);
+        const dat = await uploadAudio(uri || "");
         const index = newAudio ? newAudio.length : 0;
 
         if (uri) {
@@ -145,11 +75,7 @@ function AudioContainer({
             name: `Recording ${index + 1}`,
           });
 
-          console.log("This is the recording object: ", newRecording);
-
           setNewAudio([...newAudio, newRecording]);
-
-          // setRecording(null);
         } else {
           console.error("Failed to get URI from recording");
         }
@@ -184,14 +110,6 @@ function AudioContainer({
     setNewAudio(updatedAudio);
   };
 
-  // const loadAudio = (index: number) => {
-  //   const audioToLoad = newAudio[index];
-  //   if (audioToLoad) {
-  //     setAudio(audioToLoad);
-  //     setPlayingUI(true);
-  //   }
-  // };
-
   return (
     <View style={styles.container}>
       <View
@@ -215,13 +133,19 @@ function AudioContainer({
         )}
       </View>
 
-      <View style={{backgroundColor: 'darkGrey', width: '95%', height: 5, borderRadius: 30, marginBottom: 10}}>
-      </View>
+      <View
+        style={{
+          backgroundColor: "darkGrey",
+          width: "95%",
+          height: 5,
+          borderRadius: 30,
+          marginBottom: 10,
+        }}
+      ></View>
 
       <View
         style={{
           width: "100%",
-          // justifyContent: "center",
           alignItems: "center",
         }}
       >
@@ -231,20 +155,24 @@ function AudioContainer({
               flexDirection: "row",
               width: "70%",
               justifyContent: "space-between",
-              alignItems: 'center',
+              alignItems: "center",
             }}
             key={index}
           >
-            <TouchableOpacity onPress={() => playAudio(index)} style={{ flex: 1 }}>
-                <Text style={{ textAlign: "center" }}>
-                  {audio.name} ------- {audio.duration} {"\n"}
-                </Text>
+            <TouchableOpacity
+              onPress={() => playAudio(index)}
+              style={{ flex: 1 }}
+            >
+              <Text style={{ textAlign: "center" }}>
+                {audio.name} ------- {audio.duration} {"\n"}
+              </Text>
             </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => handleDeleteAudio(index)} style={{ marginBottom: "10%" }}>
-                 <Ionicons name="trash-outline" size={24} color="#111111" />
+            <TouchableOpacity
+              onPress={() => handleDeleteAudio(index)}
+              style={{ marginBottom: "10%" }}
+            >
+              <Ionicons name="trash-outline" size={24} color="#111111" />
             </TouchableOpacity>
-
           </View>
         ))}
       </View>
@@ -259,7 +187,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     marginBottom: 10,
     width: "100%",
-    // height: ,
     alignItems: "center",
   },
   image: {

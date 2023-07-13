@@ -4,8 +4,6 @@ export class User {
   private static instance: User;
   private userData: UserData | null = null;
 
-  private constructor() {}
-
   public static getInstance(): User {
     if (!User.instance) {
       User.instance = new User();
@@ -55,13 +53,15 @@ export class User {
         .then((response) => {
           if (response.ok) {
             this.userData = null;
-            console.log('User logged out');
+            console.log("User logged out");
           }
         })
         .catch((err) => {
           return err;
         });
-    } catch (error) {console.log('User did not succesfully log out')}
+    } catch (error) {
+      console.log("User did not succesfully log out");
+    }
   }
 
   public getId(): string | null {

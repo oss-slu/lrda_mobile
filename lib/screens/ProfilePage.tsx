@@ -8,18 +8,13 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
-import PhotoScroller from "../components/photoScroller";
 import { Note } from "../../types";
-import { Media, PhotoType, VideoType } from "../models/media_class";
-import { ImageNote } from "../../types";
+import { PhotoType, VideoType } from "../models/media_class";
+import { ImageNote, ProfilePageProps } from "../../types";
 
 const user = User.getInstance();
-
-export type ProfilePageProps = {
-  navigation: any;
-};
 
 export default function ProfilePage({ navigation }: ProfilePageProps) {
   const [messages, setMessages] = useState<any[]>([]);
@@ -76,7 +71,7 @@ export default function ProfilePage({ navigation }: ProfilePageProps) {
 
       let extractedImages: ImageNote[] = fetchedNotes.flatMap((note) => {
         return note.media.map((item: any) => {
-          if (item.type === 'video') {
+          if (item.type === "video") {
             return {
               image: item.thumbnail,
               note: {
@@ -84,7 +79,7 @@ export default function ProfilePage({ navigation }: ProfilePageProps) {
                 title: note.title || "",
                 text: note.text || "",
                 media: note.media.map((mediaItem: any) => {
-                  if (mediaItem.type === 'video') {
+                  if (mediaItem.type === "video") {
                     return new VideoType({
                       uuid: mediaItem.uuid,
                       type: mediaItem.type,
@@ -115,7 +110,7 @@ export default function ProfilePage({ navigation }: ProfilePageProps) {
                 title: note.title || "",
                 text: note.text || "",
                 media: note.media.map((mediaItem: any) => {
-                  if (mediaItem.type === 'video') {
+                  if (mediaItem.type === "video") {
                     return new VideoType({
                       uuid: mediaItem.uuid,
                       type: mediaItem.type,

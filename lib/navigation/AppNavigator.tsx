@@ -1,29 +1,20 @@
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
-import { Ionicons } from '@expo/vector-icons';
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { NavigationContainer } from "@react-navigation/native";
+import React, { useEffect, useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import GoogleMap from "../screens/mapPage/googleMap";
+import ProfilePage from "../screens/ProfilePage";
+import HomeScreen from "../screens/HomeScreen";
+import LoginScreen from "../screens/loginScreens/LoginScreen";
+import RegisterScreen from "../screens/loginScreens/RegisterScreen";
+import AddNoteScreen from "../screens/AddNoteScreen";
+import EditNote from "../components/EditNote";
+import { RootStackParamList } from "../../types";
+import { createStackNavigator } from "@react-navigation/stack";
+import { User } from "../models/user_class";
+import { HomeScreenProps, RootTabParamList, EditNoteProps } from "../../types";
 
-import GoogleMap from '../screens/mapPage/googleMap';
-import ProfilePage from '../screens/ProfilePage';
-import HomeScreen, { HomeScreenProps } from '../screens/HomeScreen';
-import LoginScreen from '../screens/loginScreens/LoginScreen';
-import RegisterScreen from '../screens/loginScreens/RegisterScreen';
-import AddNoteScreen from '../screens/AddNoteScreen';
-import EditNote, { EditNoteProps } from '../components/EditNote';
-import { Note, RootStackParamList } from '../../types';
-import { createStackNavigator } from '@react-navigation/stack';
-import { User } from '../models/user_class';
-
-// Get the single instance of the User class
 const user = User.getInstance();
-
-const Placeholder = () => null;
-
-export type RootTabParamList = {
-  HomeTab: undefined;
-  Tab1: undefined;
-  Tab2: undefined;
-};
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -31,7 +22,10 @@ const Stack = createStackNavigator<RootStackParamList>();
 const HomeStack = () => {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="Home" options={{headerShown: false, gestureEnabled: false }}>
+      <Stack.Screen
+        name="Home"
+        options={{ headerShown: false, gestureEnabled: false }}
+      >
         {(props: HomeScreenProps) => <HomeScreen {...props} />}
       </Stack.Screen>
       <Stack.Screen
@@ -39,10 +33,12 @@ const HomeStack = () => {
         component={AddNoteScreen}
         options={{ headerShown: false, gestureEnabled: false }}
       />
-      <Stack.Screen name="EditNote" options={{headerShown: false, gestureEnabled: false }}>
+      <Stack.Screen
+        name="EditNote"
+        options={{ headerShown: false, gestureEnabled: false }}
+      >
         {(props: EditNoteProps) => <EditNote {...props} />}
       </Stack.Screen>
-
     </Stack.Navigator>
   );
 };
@@ -66,40 +62,38 @@ const AppNavigator: React.FC = () => {
   return (
     <NavigationContainer>
       {isLoggedIn ? (
-       <Tab.Navigator
-       screenOptions={{ tabBarShowLabel: false }}
-     >
-       <Tab.Screen
-         name="HomeTab"
-         component={HomeStack}
-         options={{
-           headerShown: false, // This line hides the header
-           tabBarIcon: ({ color, size }) => (
-             <Ionicons name="ios-pencil" color={color} size={size} />
-           ),
-         }}
-       />
-       <Tab.Screen
-          name="Tab1"
-          component={GoogleMap} // Replaced 'Placeholder' with 'MapComponent'
-          options={{
-            headerShown: false, // This line hides the header
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="ios-map" color={color} size={size} />
-            ),
-          }}
-        />
-       <Tab.Screen
-         name="Tab2"
-         component={ProfilePage}
-         options={{
-           headerShown: false, // This line hides the header
-           tabBarIcon: ({ color, size }) => (
-             <Ionicons name="ios-person" color={color} size={size} />
-           ),
-         }}
-       />
-     </Tab.Navigator>
+        <Tab.Navigator screenOptions={{ tabBarShowLabel: false }}>
+          <Tab.Screen
+            name="HomeTab"
+            component={HomeStack}
+            options={{
+              headerShown: false, // This line hides the header
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name="ios-pencil" color={color} size={size} />
+              ),
+            }}
+          />
+          <Tab.Screen
+            name="Tab1"
+            component={GoogleMap} // Replaced 'Placeholder' with 'MapComponent'
+            options={{
+              headerShown: false, // This line hides the header
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name="ios-map" color={color} size={size} />
+              ),
+            }}
+          />
+          <Tab.Screen
+            name="Tab2"
+            component={ProfilePage}
+            options={{
+              headerShown: false, // This line hides the header
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name="ios-person" color={color} size={size} />
+              ),
+            }}
+          />
+        </Tab.Navigator>
       ) : (
         <Stack.Navigator initialRouteName="Login">
           <Stack.Screen

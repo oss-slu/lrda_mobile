@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import MapView, { PROVIDER_GOOGLE, Marker, MapType } from 'react-native-maps';
-import { Image, StyleSheet, View, Switch, Button } from 'react-native';
+import React, { useState, useEffect } from "react";
+import MapView, { PROVIDER_GOOGLE, Marker, MapType } from "react-native-maps";
+import { Image, StyleSheet, View, Switch, Button } from "react-native";
 import { Note, GoogleMapProps } from "../../../types";
 import { User } from "../../models/user_class";
 import { Media } from "../../models/media_class";
 
 const user = User.getInstance();
 
-const mapTypes: MapType[] = ['standard', 'satellite', 'hybrid', 'terrain'];
+const mapTypes: MapType[] = ["standard", "satellite", "hybrid", "terrain"];
 
 export default function GoogleMap({ route, updateCounter }: GoogleMapProps) {
   const [global, setGlobal] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
-  const [mapType, setMapType] = useState<MapType>('standard');
+  const [mapType, setMapType] = useState<MapType>("standard");
 
   const changeMapType = () => {
     const currentIndex = mapTypes.indexOf(mapType);
@@ -31,30 +31,40 @@ export default function GoogleMap({ route, updateCounter }: GoogleMapProps) {
         ? { type: "message" }
         : { type: "message", creator: user.getId() };
 
-      response = await fetch("http://lived-religion-dev.rerum.io/deer-lr/query", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
+      response = await fetch(
+        "http://lived-religion-dev.rerum.io/deer-lr/query",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }
+      );
 
       const data = await response.json();
 
-      const fetchedNotes: Note[] = data.map((message: any): Note => ({
-        id: message["@id"],
-        title: message.title || "",
-        text: message.BodyText || "",
-        time: (message.__rerum.isOverwritten ? new Date(message.__rerum.isOverwritten) : new Date(message.__rerum.createdAt)).toLocaleString("en-US", { timeZone: "America/Chicago" }),
-        creator: message.creator || "",
-        media: message.media.map((item: any) => new Media({
-          uuid: item.uuid,
-          type: item.type,
-          uri: item.uri,
-        })),
-        audio: message.audio || "",
-        latitude: message.latitude || "",
-        longitude: message.longitude || "",
-      }));
-      
+      const fetchedNotes: Note[] = data.map(
+        (message: any): Note => ({
+          id: message["@id"],
+          title: message.title || "",
+          text: message.BodyText || "",
+          time: (message.__rerum.isOverwritten
+            ? new Date(message.__rerum.isOverwritten)
+            : new Date(message.__rerum.createdAt)
+          ).toLocaleString("en-US", { timeZone: "America/Chicago" }),
+          creator: message.creator || "",
+          media: message.media.map(
+            (item: any) =>
+              new Media({
+                uuid: item.uuid,
+                type: item.type,
+                uri: item.uri,
+              })
+          ),
+          audio: message.audio || "",
+          latitude: message.latitude || "",
+          longitude: message.longitude || "",
+        })
+      );
 
       setNotes(fetchedNotes);
     } catch (error) {
@@ -64,7 +74,7 @@ export default function GoogleMap({ route, updateCounter }: GoogleMapProps) {
 
   return (
     <View style={styles.container}>
-      <MapView 
+      <MapView
         provider={PROVIDER_GOOGLE}
         style={styles.map}
         mapType={mapType}
@@ -75,15 +85,23 @@ export default function GoogleMap({ route, updateCounter }: GoogleMapProps) {
           longitudeDelta: 0.0421,
         }}
       >
-        {notes.map(note => 
-          note.latitude && note.longitude && (
-            <Marker
-              key={note.id}
-              coordinate={{latitude: parseFloat(note.latitude), longitude: parseFloat(note.longitude)}}
-            >
-              <Image source={require("../../components/public/marker.png")} style={{height: 35, width: 35}} />
-            </Marker>
-          )
+        {notes.map(
+          (note) =>
+            note.latitude &&
+            note.longitude && (
+              <Marker
+                key={note.id}
+                coordinate={{
+                  latitude: parseFloat(note.latitude),
+                  longitude: parseFloat(note.longitude),
+                }}
+              >
+                <Image
+                  source={require("../../components/public/marker.png")}
+                  style={{ height: 35, width: 35 }}
+                />
+              </Marker>
+            )
         )}
       </MapView>
       <View style={styles.overlay}>
@@ -105,7 +123,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
   overlay: {
-    position: 'absolute',
+    position: "absolute",
     top: 70,
     left: 20,
     zIndex: 1,

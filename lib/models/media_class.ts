@@ -28,8 +28,13 @@ export class AudioType extends Media {
   duration: string;
   name: string;
 
-  constructor({ uuid, uri, duration, name }: MediaData & { duration: string; name: string }) {
-    super({ uuid, type: 'audio', uri });
+  constructor({
+    uuid,
+    uri,
+    duration,
+    name,
+  }: MediaData & { duration: string; name: string }) {
+    super({ uuid, type: "audio", uri });
     this.duration = duration;
     this.name = name;
   }
@@ -43,13 +48,17 @@ export class AudioType extends Media {
   }
 }
 
-
 export class VideoType extends Media {
   thumbnail: string;
   duration: string;
 
-  constructor({ uuid, uri, thumbnail, duration }: MediaData & { thumbnail: string, duration: string }) {
-    super({ uuid, type: 'video', uri });
+  constructor({
+    uuid,
+    uri,
+    thumbnail,
+    duration,
+  }: MediaData & { thumbnail: string; duration: string }) {
+    super({ uuid, type: "video", uri });
     this.thumbnail = thumbnail;
     this.duration = duration;
   }
@@ -65,6 +74,6 @@ export class VideoType extends Media {
 
 export class PhotoType extends Media {
   constructor({ uuid, uri }: MediaData) {
-    super({ uuid, type: 'image', uri });
+    super({ uuid, type: "image", uri });
   }
 }
