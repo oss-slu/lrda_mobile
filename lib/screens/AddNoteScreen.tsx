@@ -15,13 +15,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { Media, AudioType } from "../models/media_class";
 import AudioContainer from "../components/audio";
 import * as Location from "expo-location";
+import { AddNoteScreenProps } from "../../types";
 
 const user = User.getInstance();
-
-type AddNoteScreenProps = {
-  navigation: any;
-  route: any;
-};
 
 const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [titleText, setTitleText] = useState("");

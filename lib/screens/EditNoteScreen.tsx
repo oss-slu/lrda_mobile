@@ -16,20 +16,9 @@ import PhotoScroller from "../components/photoScroller";
 import { User } from "../models/user_class";
 import AudioContainer from "../components/audio";
 import { Media, AudioType } from "../models/media_class";
+import { EditNoteScreenProps } from "../../types";
 
 const user = User.getInstance();
-
-export type EditNoteScreenProps = {
-  route: {
-    params: {
-      note: Note;
-      onSave: (note: Note) => void;
-    };
-  };
-  navigation: {
-    goBack: () => void;
-  };
-};
 
 const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   route,

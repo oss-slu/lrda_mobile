@@ -1,17 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import MapView, { PROVIDER_GOOGLE, Marker, MapType } from 'react-native-maps';
 import { Image, StyleSheet, View, Switch, Button } from 'react-native';
-import { Note } from "../../../types";
+import { Note, GoogleMapProps } from "../../../types";
 import { User } from "../../models/user_class";
 import { Media } from "../../models/media_class";
 
 const user = User.getInstance();
-
-type GoogleMapProps = {
-  route: any, // substitute any with the actual type if you know it
-  updateCounter: any, // substitute any with the actual type if you know it
-  user: User,
-};
 
 const mapTypes: MapType[] = ['standard', 'satellite', 'hybrid', 'terrain'];
 

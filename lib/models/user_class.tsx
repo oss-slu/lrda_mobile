@@ -1,11 +1,4 @@
-type UserData = {
-  "@id": string;
-  name: string;
-  roles: {
-    administrator: boolean;
-    contributor: boolean;
-  };
-};
+import { UserData } from "../../types";
 
 export class User {
   private static instance: User;

@@ -13,11 +13,7 @@ import { User } from "../models/user_class";
 import PhotoScroller from "../components/photoScroller";
 import { Note } from "../../types";
 import { Media, PhotoType, VideoType } from "../models/media_class";
-
-type ImageNote = {
-  image: string;
-  note: Note;
-} | null;
+import { ImageNote } from "../../types";
 
 const user = User.getInstance();
 
