@@ -18,6 +18,7 @@ import { PhotoType, VideoType, AudioType } from "../models/media_class";
 import { Note } from "../../types";
 import { HomeScreenProps } from "../../types";
 import ApiService from "../utils/api_calls";
+import DataConversion from "../utils/data_conversion";
 
 const user = User.getInstance();
 
@@ -40,6 +41,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const toggleDrawer = () => {
     setIsOpen(!isOpen);
   };
+
+  const refreshPage = () => {
+    setUpdateCounter(updateCounter+1)
+  }
 
   useEffect(() => {
     if (isOpen) {
@@ -107,56 +112,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       const data = await ApiService.fetchMessages(global, user.getId() || "");
       setMessages(data);
 
-      const fetchedNotes: Note[] = data.map((message: any) => {
-        const time = message.__rerum.isOverwritten
-          ? new Date(message.__rerum.isOverwritten)
-          : new Date(message.__rerum.createdAt);
-        time.setHours(time.getHours() - 5);
-        const mediaItems = message.media.map((item: any) => {
-          if (item.type === "video") {
-            return new VideoType({
-              uuid: item.uuid,
-              type: item.type,
-              uri: item.uri,
-              thumbnail: item.thumbnail,
-              duration: item.duration,
-            });
-          } else {
-            return new PhotoType({
-              uuid: item.uuid,
-              type: item.type,
-              uri: item.uri,
-            });
-          }
-        });
-
-        const audioItems = message.audio?.map((item: AudioType) => {
-          return new AudioType({
-            uuid: item.uuid,
-            type: item.type,
-            uri: item.uri,
-            duration: item.duration,
-            name: item.name,
-          });
-        });
-
-        return {
-          id: message["@id"],
-          title: message.title || "",
-          text: message.BodyText || "",
-          time:
-            time.toLocaleString("en-US", { timeZone: "America/Chicago" }) || "",
-          creator: message.creator || "",
-          media: mediaItems || [],
-          audio: audioItems || [],
-          latitude: message.latitude || "",
-          longitude: message.longitude || "",
-        };
-      });
-
-      fetchedNotes.sort(
-        (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
-      );
+      const fetchedNotes = DataConversion.convertMediaTypes(data); // returns sorted Notes with proper media types.
 
       if (Platform.OS === "web") {
         textLength = 50;
@@ -171,14 +127,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   const addNote = (note: Note) => {
     setNotes((prevNotes) => [...prevNotes, note]);
-    setUpdateCounter(updateCounter + 1);
+    refreshPage();
   };
 
   const updateNote = (note: Note) => {
     setNotes((prevNotes) =>
       prevNotes?.map((prevNote) => (prevNote.id === note.id ? note : prevNote))
     );
-    setUpdateCounter(updateCounter + 1);
+    refreshPage();
   };
 
   const deleteNoteFromAPI = async (id: string) => {
@@ -188,6 +144,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         user.getId() || ""
       );
       if (success) {
+        refreshPage();
         return true;
       }
     } catch (error) {
@@ -207,8 +164,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   };
 
   const handleToggleGlobal = () => {
-    setUpdateCounter(updateCounter + 1);
     setGlobal(!global);
+    refreshPage();
   };
 
   const handleReverseOrder = () => {
@@ -405,7 +362,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
       <TouchableOpacity
         style={styles.addButton}
-        onPress={() => navigation.navigate("AddNote", { onSave: addNote })}
+        onPress={() => navigation.navigate("AddNote", { refreshPage })}
       >
         <Ionicons name="add-outline" size={24} color="white" />
       </TouchableOpacity>

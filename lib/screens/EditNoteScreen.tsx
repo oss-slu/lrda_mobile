@@ -17,6 +17,7 @@ import { User } from "../models/user_class";
 import AudioContainer from "../components/audio";
 import { Media, AudioType } from "../models/media_class";
 import { EditNoteScreenProps } from "../../types";
+import ApiService from "../utils/api_calls";
 
 const user = User.getInstance();
 
@@ -44,32 +45,22 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
 
   const updateNote = async (updatedNote: Note) => {
     try {
-      const response = await fetch(
-        "http://lived-religion-dev.rerum.io/deer-lr/overwrite",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            "@id": updatedNote.id,
-            title: updatedNote.title,
-            BodyText: updatedNote.text,
-            type: "message",
-            creator: user.getId(),
-            media: updatedNote.media,
-            latitude: updatedNote.latitude,
-            longitude: updatedNote.longitude,
-            audio: newAudio,
-          }),
-        }
-      );
+      const editedNote = {
+        "@id": updatedNote.id,
+        title: updatedNote.title,
+        text: updatedNote.text,
+        type: "message",
+        creator: user.getId(),
+        media: updatedNote.media,
+        latitude: updatedNote.latitude,
+        longitude: updatedNote.longitude,
+        audio: newAudio,
+      };
+      console.log(newAudio);
+      console.log(editedNote.audio);
 
-      if (!response.ok) {
-        throw new Error("Error updating the note.");
-      }
+      const response = await ApiService.overwriteNote(editedNote);
 
-      // Update note in the app
       onSave(updatedNote);
       navigation.goBack();
     } catch (error) {
@@ -78,7 +69,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   };
 
   const handleSaveNote = () => {
-    const updatedNote = { ...note, title, text, media };
+    const updatedNote = { ...note, title, text, media, newAudio };
     updateNote(updatedNote);
   };
 
@@ -112,7 +103,12 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         <TouchableOpacity style={styles.backButton} onPress={handleGoBackCheck}>
           <Ionicons name="arrow-back-outline" size={24} color="white" />
         </TouchableOpacity>
-        <TextInput placeholder="Title Field Note" style={styles.title} value={title} onChangeText={setTitle} />
+        <TextInput
+          placeholder="Title Field Note"
+          style={styles.title}
+          value={title}
+          onChangeText={setTitle}
+        />
         {owner ? (
           <TouchableOpacity style={styles.backButton} onPress={handleSaveNote}>
             <Ionicons name="save-outline" size={24} color="white" />
@@ -121,7 +117,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           <View />
         )}
       </View>
-      <View style={{backgroundColor: 'white'}}>
+      <View style={{ backgroundColor: "white" }}>
         <View style={styles.keyContainer}>
           <TouchableOpacity
             style={styles.toggles}

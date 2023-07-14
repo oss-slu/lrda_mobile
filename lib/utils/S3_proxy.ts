@@ -62,7 +62,6 @@ async function uploadMedia(uri: string, mediaType: string): Promise<string> {
     body: data,
   })
     .then((resp) => {
-      console.log("Got the response from the upload file servlet");
       console.log("uploadMedia - Server response status:", resp.status);
       if (resp.ok) {
         const location = resp.headers.get("Location");
@@ -81,8 +80,6 @@ async function uploadMedia(uri: string, mediaType: string): Promise<string> {
 export { getThumbnail, convertHeicToJpg, uploadMedia };
 
 export async function uploadAudio(uri: string): Promise<string> {
-  console.log("uploadMedia - Input URI:", uri);
-
   let data = new FormData();
   const uniqueName = `media-${Date.now()}.mp3`;
 
@@ -92,8 +89,6 @@ export async function uploadAudio(uri: string): Promise<string> {
     const file = new File([blob], uniqueName, {
       type: `audio/mp3`,
     });
-    console.log("Blob size:", blob.size);
-    console.log("File size:", file.size);
 
     data.append("file", file);
   } else {

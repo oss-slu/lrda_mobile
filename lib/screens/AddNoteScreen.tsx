@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Platform,
 } from "react-native";
-import { Note, RootStackParamList } from "../../types";
+import { Note, AddNoteScreenProps } from "../../types";
 import PhotoScroller from "../components/photoScroller";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { User } from "../models/user_class";
@@ -15,7 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Media, AudioType } from "../models/media_class";
 import AudioContainer from "../components/audio";
 import * as Location from "expo-location";
-import { AddNoteScreenProps } from "../../types";
+import ApiService from "../utils/api_calls";
 
 const user = User.getInstance();
 
@@ -51,49 +51,23 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     })();
   }, []);
 
-  const createNote = async (title: string, body: string) => {
-    const response = await fetch(
-      "http://lived-religion-dev.rerum.io/deer-lr/create",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          type: "message",
-          title: title,
-          media: newMedia,
-          BodyText: body,
-          creator: user.getId(),
-          latitude: location?.latitude.toString() || "",
-          longitude: location?.longitude.toString() || "",
-          audio: newAudio,
-        }),
-      }
-    );
-
-    const obj = await response.json();
-    return obj["@id"];
-  };
-
   const saveNote = async () => {
     try {
-      const id = await createNote(titleText, bodyText);
-      const note: Note = {
-        id,
+      const newNote = {
         title: titleText,
         text: bodyText,
-        time: "",
-        media: [],
-        creator: "",
-        latitude: "",
-        longitude: "",
-        audio: [],
-      }; // The note will get assigned a time and creator
+        media: newMedia,
+        audio: newAudio,
+        creator: user.getId(),
+        latitude: location?.latitude.toString() || "",
+        longitude: location?.longitude.toString() || "",
+      };
+      const response = await ApiService.writeNewNote(newNote);
 
-      if (route.params?.onSave) {
-        route.params.onSave(note);
-      }
+      const obj = await response.json();
+      const id = obj["@id"];
+
+      route.params.refreshPage();
       navigation.goBack();
     } catch (error) {
       console.error("An error occurred while creating the note:", error);
@@ -140,7 +114,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           <Ionicons name="save-outline" size={24} color="white" />
         </TouchableOpacity>
       </View>
-      <View style={{backgroundColor: 'white'}}>
+      <View style={{ backgroundColor: "white" }}>
         <View style={styles.keyContainer}>
           <TouchableOpacity
             style={styles.toggles}
