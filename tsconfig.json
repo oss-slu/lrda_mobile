@@ -1,12 +1,14 @@
 {
   "compilerOptions": {
-      "target": "es6",
-      "module": "commonjs",
-      "jsx": "react-native",
-      "strict": true,
-      "esModuleInterop": true
+    "target": "es6",
+    "module": "commonjs",
+    "jsx": "react-native",
+    "strict": true,
+    "esModuleInterop": true,
+    "allowJs": true
   },
   "exclude": [
-      "node_modules"
-  ]
+    "node_modules"
+  ],
+  "extends": "expo/tsconfig.base"
 }
