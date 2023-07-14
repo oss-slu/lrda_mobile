@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 
-import GoogleMap from '../screens/mapPage/googleMap';
+import GoogleMap from '../screens/mapPage/ExploreScreen';
 import ProfilePage from '../screens/ProfilePage';
 import HomeScreen, { HomeScreenProps } from '../screens/HomeScreen';
 import LoginScreen from '../screens/loginScreens/LoginScreen';
