@@ -1,5 +1,6 @@
 import { Note } from "../../types";
 import { VideoType, AudioType, PhotoType } from "../models/media_class";
+import DeviceInfo from 'react-native-device-info';
 
 /**
  * Utility class for converting media types in fetched data to the appropriate classes.
@@ -13,7 +14,10 @@ export default class DataConversion {
   static convertMediaTypes(data: any[]): Note[] {
     const fetchedNotes: Note[] = data.map((message: any) => {
       const time = new Date(message.__rerum.createdAt);
-      time.setHours(time.getHours() - 5);
+      var date = new Date();
+      var offsetInHours = date.getTimezoneOffset() / 60;
+
+      time.setHours(time.getHours() - offsetInHours);
       const mediaItems = message.media.map((item: any) => {
         if (item.type === "video") {
           return new VideoType({
