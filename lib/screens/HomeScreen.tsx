@@ -260,8 +260,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             </Text>
           </View>
         </View>
-
-        <TouchableOpacity
+        {isPrivate ? <TouchableOpacity
           style={{
             justifyContent: "center",
             alignItems: "center",
@@ -271,7 +270,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           onPress={() => deleteNote(item.id)}
         >
           <Ionicons name="trash-outline" size={24} color="#111111" />
-        </TouchableOpacity>
+        </TouchableOpacity> : null}
+        
       </TouchableOpacity>
     );
   };
