@@ -2,7 +2,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import GoogleMap from "../screens/mapPage/googleMap";
+import ExploreScreen from '../screens/mapPage/ExploreScreen.js';
 import ProfilePage from "../screens/ProfilePage";
 import HomeScreen from "../screens/HomeScreen";
 import LoginScreen from "../screens/loginScreens/LoginScreen";
@@ -74,15 +74,15 @@ const AppNavigator: React.FC = () => {
             }}
           />
           <Tab.Screen
-            name="Tab1"
-            component={GoogleMap} // Replaced 'Placeholder' with 'MapComponent'
-            options={{
-              headerShown: false, // This line hides the header
-              tabBarIcon: ({ color, size }) => (
-                <Ionicons name="ios-map" color={color} size={size} />
-              ),
-            }}
-          />
+          name="Tab1"
+          component={ExploreScreen} // Replaced 'Placeholder' with 'MapComponent'
+          options={{
+            headerShown: false, // This line hides the header
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="ios-map" color={color} size={size} />
+            ),
+          }}
+        />
           <Tab.Screen
             name="Tab2"
             component={ProfilePage}
