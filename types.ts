@@ -26,6 +26,7 @@ export type Note = {
     creator: string;
     latitude: string;
     longitude: string;
+    published: boolean;
   };
   
 export type RootStackParamList = {
