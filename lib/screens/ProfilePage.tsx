@@ -21,7 +21,6 @@ export default function ProfilePage({ navigation }: ProfilePageProps) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [allImages, setAllImages] = useState<ImageNote[]>([]);
   const [count, setCount] = useState(0);
-  const [key, setKey] = useState(0);
 
   const fetchMessages = async () => {
     let response;
