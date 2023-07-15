@@ -109,7 +109,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   }, [route.params, updateCounter]);
 
   const fetchMessages = async () => {
-    // console.log("published: ",published)
     try {
       const data = await ApiService.fetchMessages(global, published, user.getId() || "");
       setMessages(data);
