@@ -48,6 +48,21 @@ export type EditNoteScreenProps = {
   };
 };
 
+export type RootTabParamList = {
+  HomeTab: undefined;
+  Tab1: undefined;
+  Tab2: undefined;
+};
+
+export type HomeScreenProps = {
+  navigation: any;
+  route: { params?: { note: Note; onSave: (note: Note) => void } };
+};
+
+export type ProfilePageProps = {
+  navigation: any;
+};
+
 export type EditNoteProps = {
   route: { params: { note: Note; onSave: (note: Note) => void } };
   navigation: {
