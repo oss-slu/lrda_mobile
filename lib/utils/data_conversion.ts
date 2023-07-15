@@ -1,6 +1,5 @@
 import { Note } from "../../types";
 import { VideoType, AudioType, PhotoType } from "../models/media_class";
-import DeviceInfo from 'react-native-device-info';
 
 /**
  * Utility class for converting media types in fetched data to the appropriate classes.
