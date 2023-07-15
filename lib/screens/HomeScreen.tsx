@@ -160,13 +160,23 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     user.logout();
   };
 
-  const handleToggleGlobal = () => {
-    setGlobal(!global);
-    refreshPage();
-  };
-  const handleTogglePublished = () => {
-    setPublished(!published);
-    refreshPage();
+  const handleFilters = (name: string) => {
+    if (name == "published"){
+      setGlobal(false);
+      setIsPrivate(false);
+      setPublished(true);
+      refreshPage();
+    } else if (name == "global"){
+      setGlobal(true);
+      setIsPrivate(false);
+      setPublished(false);
+      refreshPage();
+    } else if (name == "private"){
+      setGlobal(false);
+      setIsPrivate(true);
+      setPublished(false);
+      refreshPage();
+    }
   };
 
   const handleReverseOrder = () => {
@@ -329,12 +339,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         contentContainerStyle={{ paddingRight: 20 }}
       >
         <TouchableOpacity
-        onPress={() => setIsPrivate(!isPrivate)}
+        onPress={() => handleFilters("private")}
         style={isPrivate ? styles.filtersSelected : styles.filters}>
-          <Text style={styles.selectedFont}>Private ({notes.length})</Text>
+          <Text style={styles.selectedFont}>Private {isPrivate ? `(${notes.length})` : ''}</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={handleTogglePublished}
+          onPress={() => handleFilters("published")}
           style={published ? styles.filtersSelected : styles.filters}
         >
           <Text style={published ? styles.selectedFont : styles.filterFont}>
@@ -342,7 +352,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={handleToggleGlobal}
+          onPress={() => handleFilters("global")}
           style={global ? styles.filtersSelected : styles.filters}
         >
           <Text style={global ? styles.selectedFont : styles.filterFont}>
