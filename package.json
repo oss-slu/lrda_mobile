@@ -18,7 +18,8 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^13.0.0",
-    "@expo/webpack-config": "^18.0.1",
+    "@expo/webpack-config": "^0.12.52",
+    "@react-native-community/geolocation": "^3.0.6",
     "@react-navigation/bottom-tabs": "^6.5.7",
     "@react-navigation/native": "^6.1.6",
     "@react-navigation/stack": "^6.3.17",
@@ -50,13 +51,13 @@
     "react-native-video": "^2.0.0",
     "react-native-video-player": "^0.14.0",
     "react-native-view-shot": "3.5.0",
-    "react-native-web": "~0.18.10",
-    "typescript": "^4.9.4"
+    "react-native-web": "~0.18.10"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
     "@testing-library/jest-native": "^5.4.2",
-    "@types/react-native": "^0.72.2"
+    "@types/react-native": "^0.72.2",
+    "typescript": "^4.9.4"
   },
   "private": true
 }
