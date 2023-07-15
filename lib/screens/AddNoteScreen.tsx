@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Alert,
   View,
@@ -26,6 +26,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [newAudio, setNewAudio] = useState<AudioType[]>([]);
   const [viewMedia, setViewMedia] = useState(false);
   const [viewAudio, setViewAudio] = useState(false);
+  const [isPublished, setIsPublished] = useState(false);
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -61,6 +62,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         creator: user.getId(),
         latitude: location?.latitude.toString() || "",
         longitude: location?.longitude.toString() || "",
+        published: isPublished,
       };
       const response = await ApiService.writeNewNote(newNote);
 
@@ -101,8 +103,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   return (
     <View>
       <View style={styles.topContainer}>
-        <TouchableOpacity style={styles.topButtons} onPress={handleGoBackCheck}>
-          <Ionicons name="arrow-back-outline" size={24} color="white" />
+        <TouchableOpacity style={styles.topButtons} onPress={saveNote}>
+          <Ionicons name="arrow-back-outline" size={30} color="white" />
         </TouchableOpacity>
         <TextInput
           style={styles.title}
@@ -110,29 +112,49 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           onChangeText={(text) => setTitleText(text)}
           value={titleText}
         />
-        <TouchableOpacity style={styles.topButtons} onPress={saveNote}>
-          <Ionicons name="save-outline" size={24} color="white" />
-        </TouchableOpacity>
+
+        {isPublished ? (
+          <TouchableOpacity
+            style={styles.topButtons}
+            onPress={() => setIsPublished(!isPublished)}
+          >
+            <Ionicons name="earth" size={30} color="white" />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={styles.topButtons}
+            onPress={() => setIsPublished(!isPublished)}
+          >
+            <Ionicons name="earth-outline" size={30} color="white" />
+          </TouchableOpacity>
+        )}
       </View>
-      <View style={{ backgroundColor: "white" }}>
-        <View style={styles.keyContainer}>
-          <TouchableOpacity
-            style={styles.toggles}
-            onPress={() => {
-              setViewMedia(!viewMedia);
-            }}
-          >
-            <Ionicons name="images-outline" size={24} color="white" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.toggles}
-            onPress={() => {
-              setViewAudio(!viewAudio);
-            }}
-          >
-            <Ionicons name="mic-outline" size={24} color="white" />
-          </TouchableOpacity>
-        </View>
+      <View style={styles.keyContainer}>
+        <TouchableOpacity
+          // style={styles.toggles}
+          onPress={() => {
+            setViewMedia(!viewMedia);
+          }}
+        >
+          <Ionicons name="images-outline" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          // style={styles.toggles}
+          onPress={() => {
+            setViewAudio(!viewAudio);
+          }}
+        >
+          <Ionicons name="mic-outline" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Ionicons name="location-outline" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Ionicons name="time-outline" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Ionicons name="pricetag-outline" size={30} color="black" />
+        </TouchableOpacity>
       </View>
       <View style={styles.container}>
         <KeyboardAwareScrollView
@@ -238,11 +260,12 @@ const styles = StyleSheet.create({
   keyContainer: {
     height: 60,
     paddingVertical: 5,
-    width: 130,
-    backgroundColor: "tan",
-    borderRadius: 30,
+    width: "100%",
+    backgroundColor: "#F4DFCD",
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 40,
   },
   saveText: {
     color: "#111111",

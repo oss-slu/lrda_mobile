@@ -8,24 +8,31 @@ export default class ApiService {
    * @param {string} userId - The ID of the user for user-specific messages.
    * @returns {Promise<any[]>} The array of messages fetched from the API.
    */
-  static async fetchMessages(global: boolean, userId: string): Promise<any[]> {
-    let response;
+  static async fetchMessages(global: boolean, published: boolean, userId: string): Promise<any[]> {
     try {
       const url = "http://lived-religion-dev.rerum.io/deer-lr/query";
       const headers = {
         "Content-Type": "application/json",
       };
 
-      const body = global
-        ? { type: "message" }
-        : { type: "message", creator: userId };
-
-      response = await fetch(url, {
+      
+  
+      let body: { type: string, published?: boolean, creator?: string } = { type: "message" };
+  
+      if (global) {
+        body = { type: "message" };
+      } else if (published) {
+        body = { type: "message", published: true };
+      } else {
+        body = { type: "message", creator: userId };
+      }
+  
+      const response = await fetch(url, {
         method: "POST",
         headers,
         body: JSON.stringify(body),
       });
-
+  
       const data = await response.json();
       return data;
     } catch (error) {
@@ -33,7 +40,7 @@ export default class ApiService {
       throw error;
     }
   }
-
+  
   /**
    * Deletes a note from the API.
    * @param {string} id - The ID of the note to delete.
@@ -61,7 +68,6 @@ export default class ApiService {
       if (response.status === 204) {
         return true;
       } else {
-        console.log(response);
         throw response;
       }
     } catch (error) {
@@ -90,6 +96,7 @@ export default class ApiService {
         latitude: note.latitude || "",
         longitude: note.longitude || "",
         audio: note.audio,
+        published: note.published,
       }),
     });
   }
@@ -106,7 +113,7 @@ export default class ApiService {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        "@id": note["@id"],
+        "@id": note.id,
         title: note.title,
         BodyText: note.text,
         type: "message",
@@ -115,6 +122,7 @@ export default class ApiService {
         latitude: note.latitude,
         longitude: note.longitude,
         audio: note.audio,
+        published: note.published,
       }),
     });
   }

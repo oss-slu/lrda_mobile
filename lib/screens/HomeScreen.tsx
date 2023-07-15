@@ -30,6 +30,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [drawerAnimation] = useState(new Animated.Value(0));
   const [buttonAnimation] = useState(new Animated.Value(0));
   const [global, setGlobal] = useState(false);
+  const [published, setPublished] = useState(false);
   const [reversed, setReversed] = useState(false);
   let textLength = 16;
   let userInitals = user
@@ -108,8 +109,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   }, [route.params, updateCounter]);
 
   const fetchMessages = async () => {
+    // console.log("published: ",published)
     try {
-      const data = await ApiService.fetchMessages(global, user.getId() || "");
+      const data = await ApiService.fetchMessages(global, published, user.getId() || "");
       setMessages(data);
 
       const fetchedNotes = DataConversion.convertMediaTypes(data); // returns sorted Notes with proper media types.
@@ -165,6 +167,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   const handleToggleGlobal = () => {
     setGlobal(!global);
+    refreshPage();
+  };
+  const handleTogglePublished = () => {
+    setPublished(!published);
     refreshPage();
   };
 
@@ -336,6 +342,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         >
           <Text style={global ? styles.selectedFont : styles.filterFont}>
             Global
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={handleTogglePublished}
+          style={published ? styles.filtersSelected : styles.filters}
+        >
+          <Text style={published ? styles.selectedFont : styles.filterFont}>
+            Published
           </Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleReverseOrder} style={styles.filters}>

@@ -30,6 +30,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const [text, setText] = useState(note.text);
   const [media, setMedia] = useState<Media[]>(note.media);
   const [newAudio, setNewAudio] = useState<AudioType[]>(note.audio);
+  const [isPublished, setIsPublished] = useState(note.published);
   const [creator, setCreator] = useState(note.creator);
   const [owner, setOwner] = useState(false);
   const [viewMedia, setViewMedia] = useState(false);
@@ -43,35 +44,34 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     }
   }, [creator]);
 
-  const updateNote = async (updatedNote: Note) => {
+  const handleSaveNote = async () => {
     try {
-      const editedNote = {
-        "@id": updatedNote.id,
-        title: updatedNote.title,
-        text: updatedNote.text,
-        type: "message",
-        creator: user.getId(),
-        media: updatedNote.media,
-        latitude: updatedNote.latitude,
-        longitude: updatedNote.longitude,
+      const editedNote: Note = {
+        id: note.id,
+        title: title,
+        text: text,
+        creator: user.getId() || '',
+        media: media,
+        latitude: note.latitude,
+        longitude: note.longitude,
         audio: newAudio,
+        published: isPublished,
+        time: note.time,
       };
-      console.log(newAudio);
-      console.log(editedNote.audio);
 
       const response = await ApiService.overwriteNote(editedNote);
 
-      onSave(updatedNote);
+      onSave(editedNote);
       navigation.goBack();
     } catch (error) {
       console.error("Error updating the note:", error);
     }
   };
 
-  const handleSaveNote = () => {
-    const updatedNote = { ...note, title, text, media, newAudio };
-    updateNote(updatedNote);
-  };
+  // const handleSaveNote = () => {
+  //   const updatedNote = { ...note, title, text, media };
+  //   updateNote(updatedNote);
+  // };
 
   const handleGoBackCheck = () => {
     if (Platform.OS === "web") {
@@ -97,71 +97,85 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     }
   };
 
-  return (
-    <View>
-      <View style={styles.topContainer}>
-        <TouchableOpacity style={styles.backButton} onPress={handleGoBackCheck}>
-          <Ionicons name="arrow-back-outline" size={24} color="white" />
-        </TouchableOpacity>
-        <TextInput
-          placeholder="Title Field Note"
-          style={styles.title}
-          value={title}
-          onChangeText={setTitle}
-        />
-        {owner ? (
-          <TouchableOpacity style={styles.backButton} onPress={handleSaveNote}>
-            <Ionicons name="save-outline" size={24} color="white" />
+return (
+  <View>
+    <View style={styles.topContainer}>
+      <TouchableOpacity
+        style={styles.topButtons}
+        onPress={owner ? handleSaveNote : handleGoBackCheck}
+      >
+        <Ionicons name="arrow-back-outline" size={30} color="white" />
+      </TouchableOpacity>
+      <TextInput
+        placeholder="Title Field Note"
+        style={styles.title}
+        value={title}
+        onChangeText={setTitle}
+      />
+      {owner ? (
+        isPublished ? (
+          <TouchableOpacity
+            style={styles.topButtons}
+            onPress={() => setIsPublished(!isPublished)}
+          >
+            <Ionicons name="earth" size={30} color="white" />
           </TouchableOpacity>
         ) : (
-          <View />
-        )}
-      </View>
-      <View style={{ backgroundColor: "white" }}>
-        <View style={styles.keyContainer}>
           <TouchableOpacity
-            style={styles.toggles}
-            onPress={() => {
-              setViewMedia(!viewMedia);
-            }}
+            style={styles.topButtons}
+            onPress={() => setIsPublished(!isPublished)}
           >
-            <Ionicons name="images-outline" size={24} color="white" />
+            <Ionicons name="earth-outline" size={30} color="white" />
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.toggles}
-            onPress={() => {
-              setViewAudio(!viewAudio);
-            }}
-          >
-            <Ionicons name="mic-outline" size={24} color="white" />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <View style={styles.container}>
-        <KeyboardAwareScrollView
-          showsVerticalScrollIndicator={false}
-          style={{ paddingTop: 10 }}
-        >
-          {viewMedia && (
-            <PhotoScroller newMedia={media} setNewMedia={setMedia} />
-          )}
-          {viewAudio && (
-            <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
-          )}
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              multiline={true}
-              textAlignVertical="top"
-              value={text}
-              onChangeText={setText}
-            />
-          </View>
-        </KeyboardAwareScrollView>
+        )
+      ) : (
+        <View />
+      )}
+    </View>
+    <View style={{ backgroundColor: "black" }}>
+      <View style={styles.keyContainer}>
+        <TouchableOpacity onPress={() => setViewMedia(!viewMedia)}>
+          <Ionicons name="images-outline" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => setViewAudio(!viewAudio)}>
+          <Ionicons name="mic-outline" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Ionicons name="location-outline" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Ionicons name="time-outline" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Ionicons name="pricetag-outline" size={30} color="black" />
+        </TouchableOpacity>
       </View>
     </View>
-  );
+    <View style={styles.container}>
+      <KeyboardAwareScrollView
+        showsVerticalScrollIndicator={false}
+        style={{ paddingTop: 10 }}
+      >
+        {viewMedia && (
+          <PhotoScroller newMedia={media} setNewMedia={setMedia} />
+        )}
+        {viewAudio && (
+          <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
+        )}
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            multiline={true}
+            textAlignVertical="top"
+            value={text}
+            onChangeText={setText}
+          />
+        </View>
+      </KeyboardAwareScrollView>
+    </View>
+  </View>
+);
+
 };
 
 const styles = StyleSheet.create({
@@ -181,7 +195,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     fontSize: 32,
   },
-  backButton: {
+  topButtons: {
     backgroundColor: "#111111",
     borderRadius: 50,
     width: 50,
@@ -239,11 +253,12 @@ const styles = StyleSheet.create({
   keyContainer: {
     height: 60,
     paddingVertical: 5,
-    width: 130,
-    backgroundColor: "tan",
-    borderRadius: 30,
+    width: "100%",
+    backgroundColor: "#F4DFCD",
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 40,
   },
   saveButton: {
     backgroundColor: "#C7EBB3",

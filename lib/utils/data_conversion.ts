@@ -62,6 +62,7 @@ export default class DataConversion {
         audio: audioItems || [],
         latitude: message.latitude || "",
         longitude: message.longitude || "",
+        published: message.published,
       };
     });
 
