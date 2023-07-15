@@ -1,4 +1,9 @@
-import { Media, AudioType } from "./lib/models/media_class";
+import {
+  Media,
+  PhotoType,
+  VideoType,
+  AudioType,
+} from "./lib/models/media_class";
 import { User } from "./lib/models/user_class";
 
 export type MediaData = {
@@ -17,18 +22,18 @@ export type UserData = {
 };
 
 export type Note = {
-    id: string;
-    title: string;
-    text: string;
-    time: string;
-    media: Media[];
-    audio: AudioType[];
-    creator: string;
-    latitude: string;
-    longitude: string;
-    published: boolean;
-  };
-  
+  id: string;
+  title: string;
+  text: string;
+  time: string;
+  media: (VideoType | PhotoType)[];
+  audio: AudioType[];
+  creator: string;
+  latitude: string;
+  longitude: string;
+  published: boolean | undefined;
+};
+
 export type RootStackParamList = {
   Home: undefined;
   Login: undefined;
@@ -80,10 +85,10 @@ export type AddNoteScreenProps = {
 export type ImageNote = {
   image: string;
   note: Note;
-} | null;
+};
 
 export type GoogleMapProps = {
-  route: any, // substitute any with the actual type if you know it
-  updateCounter: any, // substitute any with the actual type if you know it
-  user: User,
+  route: any; // substitute any with the actual type if you know it
+  updateCounter: any; // substitute any with the actual type if you know it
+  user: User;
 };
