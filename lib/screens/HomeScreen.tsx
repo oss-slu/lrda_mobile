@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Alert,
   Platform,
@@ -13,18 +13,14 @@ import {
   Animated,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../../types";
 import { User } from "../models/user_class";
-import { Media } from "../models/media_class";
+import { PhotoType, VideoType, AudioType } from "../models/media_class";
 import { Note } from "../../types";
+import { HomeScreenProps } from "../../types";
+import ApiService from "../utils/api_calls";
+import DataConversion from "../utils/data_conversion";
 
 const user = User.getInstance();
-
-export type HomeScreenProps = {
-  navigation: any;
-  route: { params?: { note: Note; onSave: (note: Note) => void } };
-};
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -33,7 +29,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [updateCounter, setUpdateCounter] = useState(0);
   const [drawerAnimation] = useState(new Animated.Value(0));
   const [buttonAnimation] = useState(new Animated.Value(0));
+  const [isPrivate, setIsPrivate] = useState(true);
   const [global, setGlobal] = useState(false);
+  const [published, setPublished] = useState(false);
   const [reversed, setReversed] = useState(false);
   let textLength = 16;
   let userInitals = user
@@ -45,6 +43,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const toggleDrawer = () => {
     setIsOpen(!isOpen);
   };
+
+  const refreshPage = () => {
+    setUpdateCounter(updateCounter+1)
+  }
 
   useEffect(() => {
     if (isOpen) {
@@ -108,71 +110,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   }, [route.params, updateCounter]);
 
   const fetchMessages = async () => {
-    let response;
     try {
-      if (global) {
-        response = await fetch(
-          "http://lived-religion-dev.rerum.io/deer-lr/query",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              type: "message",
-            }),
-          }
-        );
-      } else {
-        response = await fetch(
-          "http://lived-religion-dev.rerum.io/deer-lr/query",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              type: "message",
-              creator: user.getId(),
-            }),
-          }
-        );
-      }
-
-      const data = await response.json();
+      const data = await ApiService.fetchMessages(global, published, user.getId() || "");
       setMessages(data);
 
-      const fetchedNotes: Note[] = data.map((message: any) => {
-        const time = message.__rerum.isOverwritten
-          ? new Date(message.__rerum.isOverwritten)
-          : new Date(message.__rerum.createdAt);
-        time.setHours(time.getHours() - 5);
-        const mediaItems = message.media.map(
-          (item: any) =>
-            new Media({
-              uuid: item.uuid,
-              type: item.type,
-              uri: item.uri,
-              thumbnail: item.thumbnail,
-            })
-        );
-
-        return {
-          id: message["@id"],
-          title: message.title || "",
-          text: message.BodyText || "",
-          time:
-            time.toLocaleString("en-US", { timeZone: "America/Chicago" }) || "",
-          creator: message.creator || "",
-          media: mediaItems || [],
-          latitude: message.latitude || "",
-          longitude: message.longitude || "",
-        };
-      });
-
-      fetchedNotes.sort(
-        (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
-      );
+      const fetchedNotes = DataConversion.convertMediaTypes(data); // returns sorted Notes with proper media types.
 
       if (Platform.OS === "web") {
         textLength = 50;
@@ -185,39 +127,22 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     }
   };
 
-  const addNote = (note: Note) => {
-    setNotes((prevNotes) => [...prevNotes, note]);
-    setUpdateCounter(updateCounter + 1);
-  };
-
   const updateNote = (note: Note) => {
     setNotes((prevNotes) =>
-      prevNotes.map((prevNote) => (prevNote.id === note.id ? note : prevNote))
+      prevNotes?.map((prevNote) => (prevNote.id === note.id ? note : prevNote))
     );
-    setUpdateCounter(updateCounter + 1);
+    refreshPage();
   };
 
   const deleteNoteFromAPI = async (id: string) => {
     try {
-      const url = `http://lived-religion-dev.rerum.io/deer-lr/delete`;
-      const response = await fetch(url, {
-        method: "DELETE",
-        headers: new Headers({
-          "Content-Type": "text/plain; charset=utf-8",
-        }),
-        body: JSON.stringify({
-          type: "message",
-          creator: user.getId(),
-          "@id": id,
-        }),
-      });
-      console.log(response);
-
-      if (response.status === 204) {
+      const success = await ApiService.deleteNoteFromAPI(
+        id,
+        user.getId() || ""
+      );
+      if (success) {
+        refreshPage();
         return true;
-      } else {
-        console.log(response);
-        throw response;
       }
     } catch (error) {
       console.error("Error deleting note:", error);
@@ -235,9 +160,23 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     user.logout();
   };
 
-  const handleToggleGlobal = () => {
-    setUpdateCounter(updateCounter + 1);
-    setGlobal(!global);
+  const handleFilters = (name: string) => {
+    if (name == "published"){
+      setGlobal(false);
+      setIsPrivate(false);
+      setPublished(true);
+      refreshPage();
+    } else if (name == "global"){
+      setGlobal(true);
+      setIsPrivate(false);
+      setPublished(false);
+      refreshPage();
+    } else if (name == "private"){
+      setGlobal(false);
+      setIsPrivate(true);
+      setPublished(false);
+      refreshPage();
+    }
   };
 
   const handleReverseOrder = () => {
@@ -282,6 +221,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   };
 
   const renderItem = ({ item }: { item: Note }) => {
+    const mediaItem = item.media[0];
     return (
       <TouchableOpacity
         style={styles.noteContainer}
@@ -290,18 +230,21 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         }
       >
         <View style={{ flexDirection: "row" }}>
-          {item?.media?.[0]?.isImage() ? (
-            <Image style={styles.preview} source={{ uri: item.media[0].uri }} />
-          ) : item?.media?.[0]?.isVideo() ? (
+          {mediaItem?.getType() === "image" ? (
             <Image
               style={styles.preview}
-              source={{ uri: item.media[0].thumbnail }}
+              source={{ uri: mediaItem.getUri() }}
+            />
+          ) : mediaItem?.getType() === "video" ? (
+            <Image
+              style={styles.preview}
+              source={{ uri: (mediaItem as VideoType).getThumbnail() }}
             />
           ) : (
             <Image
               source={require("../components/public/noPreview.png")}
               style={styles.preview}
-            ></Image>
+            />
           )}
           <View
             style={{ alignSelf: "center", position: "absolute", left: 120 }}
@@ -317,8 +260,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             </Text>
           </View>
         </View>
-
-        <TouchableOpacity
+        {isPrivate ? <TouchableOpacity
           style={{
             justifyContent: "center",
             alignItems: "center",
@@ -328,7 +270,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           onPress={() => deleteNote(item.id)}
         >
           <Ionicons name="trash-outline" size={24} color="#111111" />
-        </TouchableOpacity>
+        </TouchableOpacity> : null}
+        
       </TouchableOpacity>
     );
   };
@@ -395,15 +338,25 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingRight: 20 }}
       >
-        <TouchableOpacity style={styles.filtersSelected}>
-          <Text style={styles.selectedFont}>All ({notes.length})</Text>
+        <TouchableOpacity
+        onPress={() => handleFilters("private")}
+        style={isPrivate ? styles.filtersSelected : styles.filters}>
+          <Text style={styles.selectedFont}>Private {isPrivate ? `(${notes.length})` : ''}</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={handleToggleGlobal}
+          onPress={() => handleFilters("published")}
+          style={published ? styles.filtersSelected : styles.filters}
+        >
+          <Text style={published ? styles.selectedFont : styles.filterFont}>
+            Published {published ? `(${notes.length})` : ''}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => handleFilters("global")}
           style={global ? styles.filtersSelected : styles.filters}
         >
           <Text style={global ? styles.selectedFont : styles.filterFont}>
-            Global
+            Global {global ? `(${notes.length})` : ''}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleReverseOrder} style={styles.filters}>
@@ -430,7 +383,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
       <TouchableOpacity
         style={styles.addButton}
-        onPress={() => navigation.navigate("AddNote", { onSave: addNote })}
+        onPress={() => navigation.navigate("AddNote", { refreshPage })}
       >
         <Ionicons name="add-outline" size={24} color="white" />
       </TouchableOpacity>

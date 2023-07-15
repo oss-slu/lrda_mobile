@@ -1,36 +1,36 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Alert,
   View,
-  Text,
   StyleSheet,
   TextInput,
   TouchableOpacity,
   Platform,
 } from "react-native";
-import { Note, RootStackParamList } from "../../types";
+import { Note, AddNoteScreenProps } from "../../types";
 import PhotoScroller from "../components/photoScroller";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { User } from "../models/user_class";
 import { Ionicons } from "@expo/vector-icons";
-import { Media } from "../models/media_class";
+import { Media, AudioType } from "../models/media_class";
 import AudioContainer from "../components/audio";
-import * as Location from 'expo-location';
+import * as Location from "expo-location";
+import ApiService from "../utils/api_calls";
 
 const user = User.getInstance();
-
-type AddNoteScreenProps = {
-  navigation: any;
-  route: any;
-};
 
 const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [titleText, setTitleText] = useState("");
   const [bodyText, setBodyText] = useState("");
   const [newMedia, setNewMedia] = useState<Media[]>([]);
+  const [newAudio, setNewAudio] = useState<AudioType[]>([]);
   const [viewMedia, setViewMedia] = useState(false);
   const [viewAudio, setViewAudio] = useState(false);
-  const [location, setLocation] = useState<{ latitude: number, longitude: number } | null>(null);
+  const [isPublished, setIsPublished] = useState(false);
+  const [location, setLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
 
   useEffect(() => {
     console.log("new Media array:", newMedia);
@@ -39,8 +39,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.log('Permission to access location was denied');
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
         return;
       }
 
@@ -52,47 +52,24 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     })();
   }, []);
 
-  const createNote = async (title: string, body: string) => {
-    const response = await fetch(
-      "http://lived-religion-dev.rerum.io/deer-lr/create",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          type: "message",
-          title: title,
-          media: newMedia,
-          BodyText: body,
-          creator: user.getId(),
-          latitude: location?.latitude.toString() || "",
-          longitude: location?.longitude.toString() || "",
-        }),
-      }
-    );
-
-    const obj = await response.json();
-    return obj["@id"];
-  };
-
   const saveNote = async () => {
     try {
-      const id = await createNote(titleText, bodyText);
-      const note: Note = {
-        id,
+      const newNote = {
         title: titleText,
         text: bodyText,
-        time: "",
-        media: [],
-        creator: "",
-        latitude: "",
-        longitude: ""
-      }; // The note will get assigned a time and creator
+        media: newMedia,
+        audio: newAudio,
+        creator: user.getId(),
+        latitude: location?.latitude.toString() || "",
+        longitude: location?.longitude.toString() || "",
+        published: isPublished,
+      };
+      const response = await ApiService.writeNewNote(newNote);
 
-      if (route.params?.onSave) {
-        route.params.onSave(note);
-      }
+      const obj = await response.json();
+      const id = obj["@id"];
+
+      route.params.refreshPage();
       navigation.goBack();
     } catch (error) {
       console.error("An error occurred while creating the note:", error);
@@ -126,25 +103,57 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   return (
     <View>
       <View style={styles.topContainer}>
-        <TouchableOpacity style={styles.topButtons} onPress={handleGoBackCheck}>
-          <Ionicons name="arrow-back-outline" size={24} color="white" />
+        <TouchableOpacity style={styles.topButtons} onPress={saveNote}>
+          <Ionicons name="arrow-back-outline" size={30} color="white" />
         </TouchableOpacity>
         <TextInput
           style={styles.title}
-          placeholder="Title Note"
+          placeholder="Title Field Note"
           onChangeText={(text) => setTitleText(text)}
           value={titleText}
         />
-        <TouchableOpacity style={styles.topButtons} onPress={saveNote}>
-          <Ionicons name="save-outline" size={24} color="white" />
-        </TouchableOpacity>
+
+        {isPublished ? (
+          <TouchableOpacity
+            style={styles.topButtons}
+            onPress={() => setIsPublished(!isPublished)}
+          >
+            <Ionicons name="earth" size={30} color="white" />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={styles.topButtons}
+            onPress={() => setIsPublished(!isPublished)}
+          >
+            <Ionicons name="earth-outline" size={30} color="white" />
+          </TouchableOpacity>
+        )}
       </View>
       <View style={styles.keyContainer}>
-        <TouchableOpacity style={styles.toggles} onPress={() => {setViewMedia(!viewMedia)}}>
-          <Ionicons name="images-outline" size={24} color="white" />
+        <TouchableOpacity
+          // style={styles.toggles}
+          onPress={() => {
+            setViewMedia(!viewMedia);
+          }}
+        >
+          <Ionicons name="images-outline" size={30} color="black" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.toggles} onPress={() => {setViewAudio(!viewAudio)}}>
-          <Ionicons name="mic-outline" size={24} color="white" />
+        <TouchableOpacity
+          // style={styles.toggles}
+          onPress={() => {
+            setViewAudio(!viewAudio);
+          }}
+        >
+          <Ionicons name="mic-outline" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Ionicons name="location-outline" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Ionicons name="time-outline" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Ionicons name="pricetag-outline" size={30} color="black" />
         </TouchableOpacity>
       </View>
       <View style={styles.container}>
@@ -156,14 +165,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             <PhotoScroller newMedia={newMedia} setNewMedia={setNewMedia} />
           )}
           {viewAudio && (
-            <AudioContainer
-              newImages={[]}
-              setNewAudio={function (
-                value: React.SetStateAction<string[]>
-              ): void {
-                throw new Error("Function not implemented.");
-              }}
-            />
+            <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
           )}
           <View style={styles.inputContainer}>
             <TextInput
@@ -227,7 +229,7 @@ const styles = StyleSheet.create({
   },
   title: {
     height: 45,
-    width: '70%',
+    width: "70%",
     borderColor: "#111111",
     borderWidth: 1,
     borderRadius: 30,
@@ -256,13 +258,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   keyContainer: {
-    height: "7%",
+    height: 60,
     paddingVertical: 5,
-    width: 130,
-   backgroundColor: "tan",
-    borderRadius: 30,
-    flexDirection: 'row',
-    alignItems: 'center',
+    width: "100%",
+    backgroundColor: "#F4DFCD",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 40,
   },
   saveText: {
     color: "#111111",
