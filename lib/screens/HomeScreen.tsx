@@ -29,6 +29,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [updateCounter, setUpdateCounter] = useState(0);
   const [drawerAnimation] = useState(new Animated.Value(0));
   const [buttonAnimation] = useState(new Animated.Value(0));
+  const [isPrivate, setIsPrivate] = useState(true);
   const [global, setGlobal] = useState(false);
   const [published, setPublished] = useState(false);
   const [reversed, setReversed] = useState(false);
@@ -124,11 +125,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
-  };
-
-  const addNote = (note: Note) => {
-    setNotes((prevNotes) => [...prevNotes, note]);
-    refreshPage();
   };
 
   const updateNote = (note: Note) => {
@@ -332,23 +328,25 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingRight: 20 }}
       >
-        <TouchableOpacity style={styles.filtersSelected}>
-          <Text style={styles.selectedFont}>All ({notes.length})</Text>
-        </TouchableOpacity>
         <TouchableOpacity
-          onPress={handleToggleGlobal}
-          style={global ? styles.filtersSelected : styles.filters}
-        >
-          <Text style={global ? styles.selectedFont : styles.filterFont}>
-            Global
-          </Text>
+        onPress={() => setIsPrivate(!isPrivate)}
+        style={isPrivate ? styles.filtersSelected : styles.filters}>
+          <Text style={styles.selectedFont}>Private ({notes.length})</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={handleTogglePublished}
           style={published ? styles.filtersSelected : styles.filters}
         >
           <Text style={published ? styles.selectedFont : styles.filterFont}>
-            Published
+            Published {published ? `(${notes.length})` : ''}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={handleToggleGlobal}
+          style={global ? styles.filtersSelected : styles.filters}
+        >
+          <Text style={global ? styles.selectedFont : styles.filterFont}>
+            Global {global ? `(${notes.length})` : ''}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleReverseOrder} style={styles.filters}>
