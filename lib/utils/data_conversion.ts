@@ -12,9 +12,7 @@ export default class DataConversion {
    */
   static convertMediaTypes(data: any[]): Note[] {
     const fetchedNotes: Note[] = data.map((message: any) => {
-      const time = message.__rerum.isOverwritten
-        ? new Date(message.__rerum.isOverwritten)
-        : new Date(message.__rerum.createdAt);
+      const time = new Date(message.__rerum.createdAt);
       time.setHours(time.getHours() - 5);
       const mediaItems = message.media.map((item: any) => {
         if (item.type === "video") {
