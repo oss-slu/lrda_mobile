@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Modal, TouchableOpacity, Image } from "react-native";
+import { ScrollView, View, Text, StyleSheet, Modal, TouchableOpacity, Image } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { Note } from "../../../types";
 import { Media } from "../../../lib/models/media_class";
@@ -20,7 +20,7 @@ const NoteDetailModal: React.FC<Props> = ({ isVisible, onClose, note }) => {
 
   return (
     <Modal animationType="slide" transparent={false} visible={isVisible}>
-      <View style={styles.modalView}>
+      <ScrollView contentContainerStyle={styles.modalView}>
         <TouchableOpacity onPress={onClose}>
           <Ionicons name="close" size={24} color="#000" />
         </TouchableOpacity>
@@ -39,7 +39,7 @@ const NoteDetailModal: React.FC<Props> = ({ isVisible, onClose, note }) => {
             return null;
           }
         }) : <Text>No images</Text>}
-      </View>
+      </ScrollView>
     </Modal>
   );
 };
@@ -50,6 +50,7 @@ const styles = StyleSheet.create({
     marginTop: 50,
     marginLeft: 20,
     marginRight: 20,
+    paddingBottom: 20, // Add padding to ensure all content can be scrolled to
   },
   modalTitle: {
     fontSize: 20,
