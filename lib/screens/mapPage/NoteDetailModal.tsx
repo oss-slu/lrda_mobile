@@ -11,10 +11,11 @@ interface Props {
 }
 
 const NoteDetailModal: React.FC<Props> = ({ isVisible, onClose, note }) => {
-  let images: Media[] = [];
+  console.log("Im a component: ", note)
+  let images: {uri: string}[] = [];
   
-  if (note?.media) {
-    images = note.media.filter((mediaItem) => mediaItem.getType() === "image");
+  if (note?.images) {
+    images = note.images.filter((mediaItem) => mediaItem.uri.endsWith(".jpg") || mediaItem.uri.endsWith(".png"));
   }
 
   return (
@@ -24,13 +25,13 @@ const NoteDetailModal: React.FC<Props> = ({ isVisible, onClose, note }) => {
           <Ionicons name="close" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.modalTitle}>{note?.title}</Text>
-        <Text style={styles.modalText}>{note?.text}</Text>
+        <Text style={styles.modalText}>{note?.description}</Text>
         {images && images.length > 0 ? images.map((image, index) => {
           if(image) {
             return (
               <Image
                 key={index}
-                source={{ uri: image.getUri() }}
+                source={{ uri: image.uri }}
                 style={styles.image}
               />
             )
@@ -42,6 +43,7 @@ const NoteDetailModal: React.FC<Props> = ({ isVisible, onClose, note }) => {
     </Modal>
   );
 };
+
 
 const styles = StyleSheet.create({
   modalView: {
