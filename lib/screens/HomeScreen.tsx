@@ -190,21 +190,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     setUpdateCounter(updateCounter + 1);
   };
 
-  const deleteNote = (id: string) => {
-    async function name() {
-      const success = await deleteNoteFromAPI(id);
-      if (success) {
-        setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
-      }
-    }
-    name();
-  };
-
   const sideMenu = ({ item }: { item: Note }) => {
     return (
       <View style={styles.rowBack}>
         <TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => publishNote(item.id)}>
             <Ionicons name="earth" size={30} color="black" />
           </TouchableOpacity>
         </TouchableOpacity>
@@ -227,32 +217,55 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     );
   };
 
-  const deleteSwipe = (noteID: string) => {
-    deleteNote(noteID)
-  }
+  const deleteNote = (id: string) => {
+    setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
+    deleteNoteFromAPI(id);
+  };
 
-  const publishSwipe = (noteID: string) => {
-
-  }
+  async function publishNote(noteID: string){
+    const foundNote = notes.find((note) => note.id === noteID);
+    const editedNote: Note = {
+      id: foundNote?.id || "",
+      title: foundNote?.title || "",
+      text: foundNote?.text || "",
+      creator: foundNote?.creator || "",
+      media: foundNote?.media || [],
+      latitude: foundNote?.latitude || "",
+      longitude: foundNote?.longitude || "",
+      audio: foundNote?.audio || [],
+      published: !foundNote?.published || false,
+      time: foundNote?.time || "",
+    };
+    await ApiService.overwriteNote(editedNote);
+    refreshPage();
+  };
 
   const renderList = (notes: Note[]) => {
     return (
-      <SwipeListView
-        data={notes}
-        renderItem={renderItem}
-        renderHiddenItem={sideMenu}
-        leftActivationValue={160}
-        rightActivationValue={-160}
-        leftOpenValue={75}
-        rightOpenValue={-75}
-        stopLeftSwipe={175}
-        stopRightSwipe={-175}
-        keyExtractor={(item) => item.id}
-        onRightAction={deleteSwipe}
-        onLeftAction={publishSwipe}
-      />
+      isPrivate ? 
+        <SwipeListView
+          data={notes}
+          renderItem={renderItem}
+          renderHiddenItem={sideMenu}
+          leftActivationValue={160}
+          rightActivationValue={-160}
+          leftOpenValue={75}
+          rightOpenValue={-75}
+          stopLeftSwipe={175}
+          stopRightSwipe={-175}
+          keyExtractor={(item) => item.id}
+          onRightAction={deleteNote}
+          onLeftAction={publishNote}
+        />
+      :
+        <SwipeListView
+          data={notes}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+        />
     );
   };
+  
 
   const renderItem = ({ item }: { item: Note }) => {
     const mediaItem = item.media[0];
@@ -302,6 +315,21 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             </Text>
           </View>
         </View>
+        <TouchableOpacity
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            position: "absolute",
+            right: 10,
+          }}
+          onPress={() => deleteNote(item.id)}
+        >
+          {item.published ? (
+            <Ionicons name="earth" size={24} color="#111111" />
+          ) : (
+            <Ionicons name="earth-outline" size={24} color="#111111" />
+          )}
+        </TouchableOpacity>
       </TouchableOpacity>
     );
   };
