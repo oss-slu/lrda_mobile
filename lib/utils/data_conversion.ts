@@ -15,7 +15,6 @@ export default class DataConversion {
       const time = new Date(message.__rerum.createdAt);
       var date = new Date();
       var offsetInHours = date.getTimezoneOffset() / 60;
-      console.log(offsetInHours);
 
       time.setHours(time.getHours() - offsetInHours);
       const mediaItems = message.media.map((item: any) => {
