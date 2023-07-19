@@ -190,11 +190,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     setUpdateCounter(updateCounter + 1);
   };
 
-  const sideMenu = ({ item }: { item: Note }) => {
+  const sideMenu = (data: any, rowMap: any) => {
     return (
-      <View style={styles.rowBack}>
+      <View style={styles.rowBack} key={data.index}>
         <TouchableOpacity>
-          <TouchableOpacity onPress={() => publishNote(item.id)}>
+          <TouchableOpacity onPress={() => publishNote(data, rowMap)}>
             <Ionicons name="earth" size={30} color="black" />
           </TouchableOpacity>
         </TouchableOpacity>
@@ -207,7 +207,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                 position: "absolute",
                 right: 20,
               }}
-              onPress={() => deleteNote(item.id)}
+              onPress={() => deleteNote(data, rowMap)}
             >
               <Ionicons name="trash-outline" size={24} color="#111111" />
             </TouchableOpacity>
@@ -217,13 +217,19 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     );
   };
 
-  const deleteNote = (id: string) => {
-    setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
-    deleteNoteFromAPI(id);
+  const deleteNote = (data: any, rowMap: any) => {
+    if (rowMap[data.item.id]) {
+      rowMap[data.item.id].closeRow();
+    }
+    setNotes((prevNotes) => prevNotes.filter((note) => note.id !== data.item.id));
+    deleteNoteFromAPI(data.item.id);
   };
 
-  async function publishNote(noteID: string){
-    const foundNote = notes.find((note) => note.id === noteID);
+  async function publishNote(data: any, rowMap:any){
+    if (rowMap[data.item.id]) {
+      rowMap[data.item.id].closeRow();
+    }
+    const foundNote = notes.find((note) => note.id === data.item.id);
     const editedNote: Note = {
       id: foundNote?.id || "",
       title: foundNote?.title || "",
@@ -322,7 +328,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             position: "absolute",
             right: 10,
           }}
-          onPress={() => deleteNote(item.id)}
         >
           {item.published ? (
             <Ionicons name="earth" size={24} color="#111111" />
