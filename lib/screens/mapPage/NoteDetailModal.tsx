@@ -1,5 +1,5 @@
-import React from "react";
-import { ScrollView, View, Text, StyleSheet, Modal, TouchableOpacity, Image } from "react-native";
+import React, { useState } from "react";
+import { ActivityIndicator, ScrollView, View, Text, StyleSheet, Modal, TouchableOpacity, Image } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { Note } from "../../../types";
 import { Media } from "../../../lib/models/media_class";
@@ -11,11 +11,17 @@ interface Props {
 }
 
 const NoteDetailModal: React.FC<Props> = ({ isVisible, onClose, note }) => {
-  console.log("Im a component: ", note)
   let images: {uri: string}[] = [];
+  
+  // Declare a new state variable for image loading
+  const [imageLoadedState, setImageLoadedState] = useState<{ [key: string]: boolean }>({});
   
   if (note?.images) {
     images = note.images.filter((mediaItem) => mediaItem.uri.endsWith(".jpg") || mediaItem.uri.endsWith(".png"));
+  }
+
+  const handleLoad = (uri: string) => {
+    setImageLoadedState(prev => ({...prev, [uri]: true}));
   }
 
   return (
@@ -24,26 +30,24 @@ const NoteDetailModal: React.FC<Props> = ({ isVisible, onClose, note }) => {
         <TouchableOpacity onPress={onClose}>
           <Ionicons name="close" size={24} color="#000" />
         </TouchableOpacity>
-        <Text style={styles.modalTitle}>{note?.title}</Text>
-        <Text style={styles.modalText}>{note?.description}</Text>
         {images && images.length > 0 ? images.map((image, index) => {
-          if(image) {
-            return (
+          return (
+            <View key={index} style={styles.imageContainer}>
+              {!imageLoadedState[image.uri] && <ActivityIndicator size="large" color="#0000ff" />}
               <Image
-                key={index}
                 source={{ uri: image.uri }}
                 style={styles.image}
+                onLoad={() => handleLoad(image.uri)}
               />
-            )
-          } else {
-            return null;
-          }
+            </View>
+          )
         }) : <Text>No images</Text>}
       </ScrollView>
+      <Text style={styles.modalTitle}>{note?.title}</Text>
+      <Text style={styles.modalText}>{note?.description}</Text>
     </Modal>
   );
 };
-
 
 const styles = StyleSheet.create({
   modalView: {
@@ -59,11 +63,16 @@ const styles = StyleSheet.create({
   modalText: {
     marginBottom: 15,
   },
+  imageContainer: {
+    width: "100%", // Adjust as necessary
+    height: 200, // Adjust as necessary
+    marginBottom: 10, // Adds some space between images
+  },
   image: {
     width: "100%", // Adjust as necessary
     height: 200, // Adjust as necessary
     resizeMode: "cover", // Or "contain", according to your needs
-    marginBottom: 10, // Adds some space between images
+    position: "absolute",
   },
 });
 

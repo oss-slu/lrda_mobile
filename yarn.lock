@@ -5117,6 +5117,11 @@
   "resolved" "https://registry.npmjs.org/expo-keep-awake/-/expo-keep-awake-12.0.1.tgz"
   "version" "12.0.1"
 
+"expo-linear-gradient@^12.3.0":
+  "integrity" "sha512-f9e+Oxe5z7fNQarTBZXilMyswlkbYWQHONVfq8MqmiEnW3h9XsxxmVJLG8uVQSQPUsbW+x1UUT/tnU6mkMWeLg=="
+  "resolved" "https://registry.npmjs.org/expo-linear-gradient/-/expo-linear-gradient-12.3.0.tgz"
+  "version" "12.3.0"
+
 "expo-location@~15.1.1":
   "integrity" "sha512-hoKRlmi6Ya+NeZ72Zt385SDcSsIDpJI60TCBVO+Hc9xfKA9Hyminyyo5WiwI8J03igmPTCl8Y37MxBNKY9AWkg=="
   "resolved" "https://registry.npmjs.org/expo-location/-/expo-location-15.1.1.tgz"
@@ -9215,7 +9220,7 @@
     "kleur" "^3.0.3"
     "sisteransi" "^1.0.5"
 
-"prop-types@*", "prop-types@^15.5.10", "prop-types@^15.6.2", "prop-types@^15.7.2":
+"prop-types@*", "prop-types@^15.5.10", "prop-types@^15.6.2", "prop-types@^15.7.2", "prop-types@>=15.6.0":
   "integrity" "sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg=="
   "resolved" "https://registry.npmjs.org/prop-types/-/prop-types-15.8.1.tgz"
   "version" "15.8.1"
@@ -9449,6 +9454,11 @@
     "prop-types" "^15.6.2"
     "react-native-iphone-x-helper" "^1.0.3"
 
+"react-native-linear-gradient@^2.7.3", "react-native-linear-gradient@>=2.4.0":
+  "integrity" "sha512-iyJszlZ1Ech2c+2qV+isMvvJKyoctR9ashDkhJg1/cuSF0vQaeLV1FAYTT3qW9doxChJGxVAFfYoxotH0yi3Iw=="
+  "resolved" "https://registry.npmjs.org/react-native-linear-gradient/-/react-native-linear-gradient-2.7.3.tgz"
+  "version" "2.7.3"
+
 "react-native-maps@0.30.2":
   "integrity" "sha512-WVv5e7aWdnNJugqNSG/87U+12Pg4RFWU7x/UigTPG1FEUZx2TbYKChL6xZCMGPOv5m5b4Z7bMeKJnZosg+yPyQ=="
   "resolved" "https://registry.npmjs.org/react-native-maps/-/react-native-maps-0.30.2.tgz"
@@ -9499,6 +9509,11 @@
   dependencies:
     "react-freeze" "^1.0.0"
     "warn-once" "^0.1.0"
+
+"react-native-shimmer-placeholder@^2.0.9":
+  "integrity" "sha512-s2pfAAO6uaybREYM2KcaxP3c2XlZvLfHfzmhMlGEoOhSKaoM92KpA1Hx0BeC75yilkliJuowqO/hFzvLB0h7hg=="
+  "resolved" "https://registry.npmjs.org/react-native-shimmer-placeholder/-/react-native-shimmer-placeholder-2.0.9.tgz"
+  "version" "2.0.9"
 
 "react-native-uuid@^2.0.1":
   "integrity" "sha512-cptnoIbL53GTCrWlb/+jrDC6tvb7ypIyzbXNJcpR3Vab0mkeaaVd5qnB3f0whXYzS+SMoSQLcUUB0gEWqkPC0g=="
