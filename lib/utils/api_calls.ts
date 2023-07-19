@@ -95,6 +95,7 @@ export default class ApiService {
         longitude: note.longitude || "",
         audio: note.audio,
         published: note.published,
+        tags: note.tags,
       }),
     });
   }
@@ -121,6 +122,7 @@ export default class ApiService {
         longitude: note.longitude,
         audio: note.audio,
         published: note.published,
+        tags: note.tags,
       }),
     });
   }

@@ -16,6 +16,7 @@ import { Media, AudioType } from "../models/media_class";
 import AudioContainer from "../components/audio";
 import * as Location from "expo-location";
 import ApiService from "../utils/api_calls";
+import TagWindow from "../components/tagging"
 
 const user = User.getInstance();
 
@@ -24,8 +25,10 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [bodyText, setBodyText] = useState("");
   const [newMedia, setNewMedia] = useState<Media[]>([]);
   const [newAudio, setNewAudio] = useState<AudioType[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
   const [viewMedia, setViewMedia] = useState(false);
   const [viewAudio, setViewAudio] = useState(false);
+  const [isTagging, setIsTagging] = useState(false);
   const [isPublished, setIsPublished] = useState(false);
   const [location, setLocation] = useState<{
     latitude: number;
@@ -63,40 +66,18 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         latitude: location?.latitude.toString() || "",
         longitude: location?.longitude.toString() || "",
         published: isPublished,
+        tags: tags,
       };
       const response = await ApiService.writeNewNote(newNote);
 
       const obj = await response.json();
       const id = obj["@id"];
 
+      console.log(obj);
       route.params.refreshPage();
       navigation.goBack();
     } catch (error) {
       console.error("An error occurred while creating the note:", error);
-    }
-  };
-
-  const handleGoBackCheck = () => {
-    if (Platform.OS === "web") {
-      navigation.goBack();
-    } else {
-      Alert.alert(
-        "Going Back?",
-        "Your note will not be saved!",
-        [
-          {
-            text: "Cancel",
-            style: "cancel",
-          },
-          {
-            text: "OK",
-            onPress: async () => {
-              navigation.goBack();
-            },
-          },
-        ],
-        { cancelable: false }
-      );
     }
   };
 
@@ -152,12 +133,13 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         <TouchableOpacity>
           <Ionicons name="time-outline" size={30} color="black" />
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={()=>setIsTagging(!isTagging)}>
           <Ionicons name="pricetag-outline" size={30} color="black" />
         </TouchableOpacity>
       </View>
       <View style={styles.container}>
         <KeyboardAwareScrollView
+          nestedScrollEnabled
           showsVerticalScrollIndicator={false}
           style={{ overflow: "hidden", paddingTop: 10, paddingBottom: 100 }}
         >
@@ -166,6 +148,9 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           )}
           {viewAudio && (
             <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
+          )}
+          {isTagging && (
+          <TagWindow tags={tags} setTags={setTags} />
           )}
           <View style={styles.inputContainer}>
             <TextInput

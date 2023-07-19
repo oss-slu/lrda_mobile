@@ -18,6 +18,7 @@ import AudioContainer from "../components/audio";
 import { Media, AudioType } from "../models/media_class";
 import { EditNoteScreenProps } from "../../types";
 import ApiService from "../utils/api_calls";
+import TagWindow from "../components/tagging";
 
 const user = User.getInstance();
 
@@ -28,6 +29,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const { note, onSave } = route.params;
   const [title, setTitle] = useState(note.title);
   const [text, setText] = useState(note.text);
+  const [tags, setTags] = useState(note.tags);
   const [media, setMedia] = useState<Media[]>(note.media);
   const [newAudio, setNewAudio] = useState<AudioType[]>(note.audio);
   const [isPublished, setIsPublished] = useState(note.published);
@@ -35,6 +37,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const [owner, setOwner] = useState(false);
   const [viewMedia, setViewMedia] = useState(false);
   const [viewAudio, setViewAudio] = useState(false);
+  const [isTagging, setIsTagging] = useState(false);
 
   useEffect(() => {
     if (creator === user.getId()) {
@@ -50,132 +53,106 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         id: note.id,
         title: title,
         text: text,
-        creator: user.getId() || '',
+        creator: user.getId() || "",
         media: media,
         latitude: note.latitude,
         longitude: note.longitude,
         audio: newAudio,
         published: isPublished,
         time: note.time,
+        tags: tags,
       };
 
       const response = await ApiService.overwriteNote(editedNote);
 
       onSave(editedNote);
-      navigation.goBack();
+      () => navigation.goBack();
     } catch (error) {
       console.error("Error updating the note:", error);
     }
   };
 
-  // const handleSaveNote = () => {
-  //   const updatedNote = { ...note, title, text, media };
-  //   updateNote(updatedNote);
-  // };
-
-  const handleGoBackCheck = () => {
-    if (Platform.OS === "web") {
-      navigation.goBack();
-    } else {
-      Alert.alert(
-        "Going Back?",
-        "Your note will not be saved!",
-        [
-          {
-            text: "Cancel",
-            style: "cancel",
-          },
-          {
-            text: "OK",
-            onPress: async () => {
-              navigation.goBack();
-            },
-          },
-        ],
-        { cancelable: false }
-      );
-    }
-  };
-
-return (
-  <View>
-    <View style={styles.topContainer}>
-      <TouchableOpacity
-        style={styles.topButtons}
-        onPress={owner ? handleSaveNote : handleGoBackCheck}
-      >
-        <Ionicons name="arrow-back-outline" size={30} color="white" />
-      </TouchableOpacity>
-      <TextInput
-        placeholder="Title Field Note"
-        style={styles.title}
-        value={title}
-        onChangeText={setTitle}
-      />
-      {owner ? (
-        isPublished ? (
-          <TouchableOpacity
-            style={styles.topButtons}
-            onPress={() => setIsPublished(!isPublished)}
-          >
-            <Ionicons name="earth" size={30} color="white" />
-          </TouchableOpacity>
+  return (
+    <View>
+      <View style={styles.topContainer}>
+        <TouchableOpacity
+          style={styles.topButtons}
+          onPress={owner ? handleSaveNote : () => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back-outline" size={30} color="white" />
+        </TouchableOpacity>
+        <TextInput
+          placeholder="Title Field Note"
+          style={styles.title}
+          value={title}
+          onChangeText={setTitle}
+        />
+        {owner ? (
+          isPublished ? (
+            <TouchableOpacity
+              style={styles.topButtons}
+              onPress={() => setIsPublished(!isPublished)}
+            >
+              <Ionicons name="earth" size={30} color="white" />
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={styles.topButtons}
+              onPress={() => setIsPublished(!isPublished)}
+            >
+              <Ionicons name="earth-outline" size={30} color="white" />
+            </TouchableOpacity>
+          )
         ) : (
-          <TouchableOpacity
-            style={styles.topButtons}
-            onPress={() => setIsPublished(!isPublished)}
-          >
-            <Ionicons name="earth-outline" size={30} color="white" />
+          <View />
+        )}
+      </View>
+      <View style={{ backgroundColor: "black" }}>
+        <View style={styles.keyContainer}>
+          <TouchableOpacity onPress={() => setViewMedia(!viewMedia)}>
+            <Ionicons name="images-outline" size={30} color="black" />
           </TouchableOpacity>
-        )
-      ) : (
-        <View />
-      )}
-    </View>
-    <View style={{ backgroundColor: "black" }}>
-      <View style={styles.keyContainer}>
-        <TouchableOpacity onPress={() => setViewMedia(!viewMedia)}>
-          <Ionicons name="images-outline" size={30} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setViewAudio(!viewAudio)}>
-          <Ionicons name="mic-outline" size={30} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Ionicons name="location-outline" size={30} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Ionicons name="time-outline" size={30} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Ionicons name="pricetag-outline" size={30} color="black" />
-        </TouchableOpacity>
+          <TouchableOpacity onPress={() => setViewAudio(!viewAudio)}>
+            <Ionicons name="mic-outline" size={30} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity>
+            <Ionicons name="location-outline" size={30} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity>
+            <Ionicons name="time-outline" size={30} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setIsTagging(!isTagging)}>
+            <Ionicons name="pricetag-outline" size={30} color="black" />
+          </TouchableOpacity>
+        </View>
+      </View>
+      <View style={styles.container}>
+        
+        <KeyboardAwareScrollView
+          nestedScrollEnabled
+          showsVerticalScrollIndicator={false}
+          style={{ paddingTop: 10 }}
+        >
+          {viewMedia && (
+            <PhotoScroller newMedia={media} setNewMedia={setMedia} />
+          )}
+          {viewAudio && (
+            <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
+          )}
+          {isTagging && <TagWindow tags={tags} setTags={setTags} />}
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              multiline={true}
+              textAlignVertical="top"
+              value={text}
+              onChangeText={setText}
+            />
+          </View>
+        </KeyboardAwareScrollView>
       </View>
     </View>
-    <View style={styles.container}>
-      <KeyboardAwareScrollView
-        showsVerticalScrollIndicator={false}
-        style={{ paddingTop: 10 }}
-      >
-        {viewMedia && (
-          <PhotoScroller newMedia={media} setNewMedia={setMedia} />
-        )}
-        {viewAudio && (
-          <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
-        )}
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            multiline={true}
-            textAlignVertical="top"
-            value={text}
-            onChangeText={setText}
-          />
-        </View>
-      </KeyboardAwareScrollView>
-    </View>
-  </View>
-);
-
+  );
 };
 
 const styles = StyleSheet.create({

@@ -1,74 +1,153 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useState, useRef } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  TextInput,
+} from "react-native";
 import { SwipeListView } from "react-native-swipe-list-view";
 import { Ionicons } from "@expo/vector-icons";
 
-function tagWindow(tags: string[]) {
-  let data = tags.map((tag: string, index: number) => {
+function TagWindow({
+  tags,
+  setTags,
+}: {
+  tags: string[];
+  setTags: React.Dispatch<React.SetStateAction<string[]>>;
+}) {
+  const [inputText, setInputText] = useState("");
+
+  let data = tags?.map((tag: string, index: number) => {
     return {
       key: index,
       tag: tag,
     };
-  });
-  const renderHidden = (data: any) => {
+  }) || [];
+
+  const handleDeleteTag = (rowKey: string, rowMap: any) => {
+    if (rowMap[rowKey]) {
+      rowMap[rowKey].closeRow();
+    }
+    const index = data.findIndex((item) => item.key.toString() === rowKey);
+    const newTagList = [...tags];
+    newTagList.splice(index, 1);
+    setTags(newTagList);
+  };
+
+  const renderHidden = (data: any, rowMap: any) => {
     return (
-      <View style={styles.rowBack}>
-        <TouchableOpacity></TouchableOpacity>
-        <View style={[styles.backRightBtn, styles.backRightBtnRight]}>
-          <Ionicons name="trash-outline" size={24} color="#111111" />
-        </View>
+      <View key={data.item.key} style={styles.rowBack}>
+        <TouchableOpacity
+          onPress={() => handleDeleteTag(data.item.key.toString(), rowMap)}
+        >
+          <Ionicons
+            name="trash-outline"
+            size={24}
+            color="#111111"
+            style={{ alignSelf: "center" }}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => handleDeleteTag(data.item.key.toString(), rowMap)}
+        >
+          <Ionicons
+            name="trash-outline"
+            size={24}
+            color="#111111"
+            style={{ alignSelf: "center" }}
+          />
+        </TouchableOpacity>
       </View>
     );
   };
-  const renderText = (data: any) => {
+
+  const updateTag = ({ item }: { item: { key: number; tag: string } }) => {
+    const newTagList = [...tags];
+    newTagList.splice(item.key, 1);
+    setTags(newTagList);
+    setInputText(item.tag);
+  };
+
+  const renderText = ({ item }: { item: { key: number; tag: string } }) => {
     return (
-      <View style={styles.rowBack}>
-        <TouchableOpacity></TouchableOpacity>
-        <View style={[styles.backRightBtn, styles.backRightBtnRight]}>
-          <Ionicons name="trash-outline" size={24} color="#111111" />
-        </View>
-      </View>
+      <TouchableOpacity
+        activeOpacity={1}
+        key={item.key}
+        style={styles.rowFront}
+        onPress={() => updateTag({ item })}
+      >
+        <Text style={styles.text}>{item.tag}</Text>
+      </TouchableOpacity>
     );
   };
+
   return (
-    <SwipeListView
-      data={data}
-      renderItem={renderText}
-      renderHiddenItem={renderHidden}
-    />
+    <View>
+      <TextInput
+        style={styles.textBox}
+        value={inputText}
+        onChangeText={setInputText}
+        placeholder="Your Tag Here"
+        onSubmitEditing={() => {
+          if(tags){
+            setTags([...tags, inputText]);
+          } else{
+            setTags([inputText]);
+          }
+          setInputText("");
+        }}        
+      />
+      <SwipeListView
+        data={data}
+        scrollEnabled={false}
+        renderItem={renderText}
+        renderHiddenItem={renderHidden}
+        keyExtractor={(item) => item.key.toString()}
+        leftActivationValue={160}
+        rightActivationValue={-160}
+        leftOpenValue={75}
+        rightOpenValue={-75}
+        stopLeftSwipe={175}
+        stopRightSwipe={-175}
+        onRightAction={(rowKey, rowMap) => handleDeleteTag(rowKey, rowMap)}
+        onLeftAction={(rowKey, rowMap) => handleDeleteTag(rowKey, rowMap)}
+      />
+    </View>
   );
 }
 
+export default TagWindow;
+
 const styles = StyleSheet.create({
-  backRightBtn: {
-    alignItems: "flex-end",
-    bottom: 0,
-    justifyContent: "center",
-    position: "absolute",
-    top: 0,
-    width: 75,
-    paddingRight: 17,
-  },
-  backRightBtnLeft: {
-    backgroundColor: "#1f65ff",
-    right: 50,
-  },
-  backRightBtnRight: {
-    backgroundColor: "red",
-    width: "52%",
-    right: 0,
-    borderTopRightRadius: 20,
-    borderBottomRightRadius: 20,
-  },
   rowBack: {
     alignItems: "center",
-    backgroundColor: "#C7EBB3",
+    backgroundColor: "red",
     flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingLeft: 15,
-    margin: 5,
-    marginBottom: 15,
-    borderRadius: 20,
+    paddingHorizontal: 15,
+  },
+  rowFront: {
+    alignItems: "center",
+    backgroundColor: "white",
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  text: {
+    fontSize: 18,
+    fontWeight: "500",
+  },
+  textBox: {
+    borderRadius: 30,
+    height: 40,
+    width: "100%",
+    borderBottomWidth: 2,
+    backgroundColor: "white",
+    justifyContent: "center",
+    textAlign: "center",
+    fontSize: 18,
+    fontWeight: "500",
   },
 });

@@ -235,37 +235,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       audio: foundNote?.audio || [],
       published: !foundNote?.published || false,
       time: foundNote?.time || "",
+      tags: foundNote?.tags || [],
     };
     await ApiService.overwriteNote(editedNote);
     refreshPage();
   };
-
-  const renderList = (notes: Note[]) => {
-    return (
-      isPrivate ? 
-        <SwipeListView
-          data={notes}
-          renderItem={renderItem}
-          renderHiddenItem={sideMenu}
-          leftActivationValue={160}
-          rightActivationValue={-160}
-          leftOpenValue={75}
-          rightOpenValue={-75}
-          stopLeftSwipe={175}
-          stopRightSwipe={-175}
-          keyExtractor={(item) => item.id}
-          onRightAction={deleteNote}
-          onLeftAction={publishNote}
-        />
-      :
-        <SwipeListView
-          data={notes}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-        />
-    );
-  };
-  
 
   const renderItem = ({ item }: { item: Note }) => {
     const mediaItem = item.media[0];
@@ -331,6 +305,32 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           )}
         </TouchableOpacity>
       </TouchableOpacity>
+    );
+  };
+
+  const renderList = (notes: Note[]) => {
+    return (
+      isPrivate ? 
+        <SwipeListView
+          data={notes}
+          renderItem={renderItem}
+          renderHiddenItem={sideMenu}
+          leftActivationValue={160}
+          rightActivationValue={-160}
+          leftOpenValue={75}
+          rightOpenValue={-75}
+          stopLeftSwipe={175}
+          stopRightSwipe={-175}
+          keyExtractor={(item) => item.id}
+          onRightAction={deleteNote}
+          onLeftAction={publishNote}
+        />
+      :
+        <SwipeListView
+          data={notes}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+        />
     );
   };
 
