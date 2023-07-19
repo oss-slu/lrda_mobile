@@ -90,12 +90,13 @@ function TagWindow({
         onChangeText={setInputText}
         placeholder="Your Tag Here"
         onSubmitEditing={() => {
-          if(tags){
-            setTags([...tags, inputText]);
-          } else{
-            setTags([inputText]);
-          }
-          setInputText("");
+          if(inputText != '')
+            if(tags){
+              setTags([...tags, inputText]);
+            } else{
+              setTags([inputText]);
+            }
+            setInputText("");
         }}        
       />
       <SwipeListView
