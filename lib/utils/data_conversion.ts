@@ -65,6 +65,7 @@ export default class DataConversion {
         latitude: message.latitude || "",
         longitude: message.longitude || "",
         published: message.published || false,
+        tags: message.tags || [],
       };
     });
 
@@ -161,6 +162,7 @@ export default class DataConversion {
               latitude: note.latitude,
               longitude: note.longitude,
               published: note?.published || false,
+              tags: note?.tags || [],
             },
           };
         } else {
@@ -193,6 +195,7 @@ export default class DataConversion {
               latitude: note.latitude,
               longitude: note.longitude,
               published: note?.published || false,
+              tags: note?.tags || [],
             },
           };
         }

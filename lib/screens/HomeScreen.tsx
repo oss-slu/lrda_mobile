@@ -241,6 +241,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       audio: foundNote?.audio || [],
       published: !foundNote?.published || false,
       time: foundNote?.time || "",
+      tags: foundNote?.tags || [],
     };
     await ApiService.overwriteNote(editedNote);
     refreshPage();

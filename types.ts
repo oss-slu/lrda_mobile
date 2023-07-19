@@ -32,6 +32,7 @@ export type Note = {
   latitude: string;
   longitude: string;
   published: boolean | undefined;
+  tags: string[];
 };
 
 export type RootStackParamList = {
