@@ -15,8 +15,6 @@ export default class ApiService {
         "Content-Type": "application/json",
       };
 
-      
-  
       let body: { type: string, published?: boolean, creator?: string } = { type: "message" };
   
       if (global) {

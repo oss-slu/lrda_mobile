@@ -19,6 +19,7 @@ import { Note } from "../../types";
 import { HomeScreenProps } from "../../types";
 import ApiService from "../utils/api_calls";
 import DataConversion from "../utils/data_conversion";
+import { SwipeListView } from "react-native-swipe-list-view";
 
 const user = User.getInstance();
 
@@ -45,8 +46,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   };
 
   const refreshPage = () => {
-    setUpdateCounter(updateCounter+1)
-  }
+    setUpdateCounter(updateCounter + 1);
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -111,7 +112,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   const fetchMessages = async () => {
     try {
-      const data = await ApiService.fetchMessages(global, published, user.getId() || "");
+      const data = await ApiService.fetchMessages(
+        global,
+        published,
+        user.getId() || ""
+      );
       setMessages(data);
 
       const fetchedNotes = DataConversion.convertMediaTypes(data); // returns sorted Notes with proper media types.
@@ -161,17 +166,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   };
 
   const handleFilters = (name: string) => {
-    if (name == "published"){
+    if (name == "published") {
       setGlobal(false);
       setIsPrivate(false);
       setPublished(true);
       refreshPage();
-    } else if (name == "global"){
+    } else if (name == "global") {
       setGlobal(true);
       setIsPrivate(false);
       setPublished(false);
       refreshPage();
-    } else if (name == "private"){
+    } else if (name == "private") {
       setGlobal(false);
       setIsPrivate(true);
       setPublished(false);
@@ -185,48 +190,103 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     setUpdateCounter(updateCounter + 1);
   };
 
-  const deleteNote = (id: string) => {
-    if (Platform.OS === "web") {
-      async function name() {
-        const success = await deleteNoteFromAPI(id);
-        if (success) {
-          setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
-        }
-      }
-      name();
-    } else {
-      Alert.alert(
-        "Delete Note",
-        "Are you sure you want to delete this note?",
-        [
-          {
-            text: "Cancel",
-            style: "cancel",
-          },
-          {
-            text: "OK",
-            onPress: async () => {
-              const success = await deleteNoteFromAPI(id);
-              if (success) {
-                setNotes((prevNotes) =>
-                  prevNotes.filter((note) => note.id !== id)
-                );
-              }
-            },
-          },
-        ],
-        { cancelable: false }
-      );
+  const sideMenu = (data: any, rowMap: any) => {
+    return (
+      <View style={styles.rowBack} key={data.index}>
+        <TouchableOpacity>
+          <TouchableOpacity onPress={() => publishNote(data.item.id, rowMap)}>
+            <Ionicons name="earth" size={30} color="black" />
+          </TouchableOpacity>
+        </TouchableOpacity>
+        <View style={[styles.backRightBtn, styles.backRightBtnRight]}>
+          {isPrivate ? (
+            <TouchableOpacity
+              style={{
+                justifyContent: "center",
+                alignItems: "center",
+                position: "absolute",
+                right: 20,
+              }}
+              onPress={() => deleteNote(data.item.id, rowMap)}
+            >
+              <Ionicons name="trash-outline" size={24} color="#111111" />
+            </TouchableOpacity>
+          ) : null}
+        </View>
+      </View>
+    );
+  };
+
+  const deleteNote = (data: any, rowMap: any) => {
+    if (rowMap[data]) {
+      rowMap[data].closeRow();
     }
+    setNotes((prevNotes) => prevNotes.filter((note) => note.id !== data));
+    deleteNoteFromAPI(data);
+  };
+
+  async function publishNote(data: any, rowMap:any){
+    if (rowMap[data]) {
+      rowMap[data].closeRow();
+    }
+    const foundNote = notes.find((note) => note.id === data);
+    const editedNote: Note = {
+      id: foundNote?.id || "",
+      title: foundNote?.title || "",
+      text: foundNote?.text || "",
+      creator: foundNote?.creator || "",
+      media: foundNote?.media || [],
+      latitude: foundNote?.latitude || "",
+      longitude: foundNote?.longitude || "",
+      audio: foundNote?.audio || [],
+      published: !foundNote?.published || false,
+      time: foundNote?.time || "",
+    };
+    await ApiService.overwriteNote(editedNote);
+    refreshPage();
+  };
+
+  const renderList = (notes: Note[]) => {
+    return (
+      isPrivate ? 
+        <SwipeListView
+          data={notes}
+          renderItem={renderItem}
+          renderHiddenItem={sideMenu}
+          leftActivationValue={160}
+          rightActivationValue={-160}
+          leftOpenValue={75}
+          rightOpenValue={-75}
+          stopLeftSwipe={175}
+          stopRightSwipe={-175}
+          keyExtractor={(item) => item.id}
+          onRightAction={(data, rowMap) => deleteNote(data, rowMap)}
+          onLeftAction={(data, rowMap) => publishNote(data, rowMap)}
+        />
+      :
+        <SwipeListView
+          data={notes}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+        />
+    );
   };
 
   const renderItem = ({ item }: { item: Note }) => {
     const mediaItem = item.media[0];
     return (
       <TouchableOpacity
+        key={item.id}
+        activeOpacity={1}
         style={styles.noteContainer}
         onPress={() =>
-          navigation.navigate("EditNote", { note: item, onSave: updateNote })
+          navigation.navigate("EditNote", {
+            note: item,
+            onSave: (editedNote: Note) => {
+              updateNote(editedNote);
+              refreshPage();
+            },
+          })
         }
       >
         <View style={{ flexDirection: "row" }}>
@@ -260,18 +320,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             </Text>
           </View>
         </View>
-        {isPrivate ? <TouchableOpacity
+        <TouchableOpacity
           style={{
             justifyContent: "center",
             alignItems: "center",
             position: "absolute",
             right: 10,
           }}
-          onPress={() => deleteNote(item.id)}
         >
-          <Ionicons name="trash-outline" size={24} color="#111111" />
-        </TouchableOpacity> : null}
-        
+          {item.published ? (
+            <Ionicons name="earth" size={24} color="#111111" />
+          ) : (
+            <Ionicons name="earth-outline" size={24} color="#111111" />
+          )}
+        </TouchableOpacity>
       </TouchableOpacity>
     );
   };
@@ -339,16 +401,19 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         contentContainerStyle={{ paddingRight: 20 }}
       >
         <TouchableOpacity
-        onPress={() => handleFilters("private")}
-        style={isPrivate ? styles.filtersSelected : styles.filters}>
-          <Text style={styles.selectedFont}>Private {isPrivate ? `(${notes.length})` : ''}</Text>
+          onPress={() => handleFilters("private")}
+          style={isPrivate ? styles.filtersSelected : styles.filters}
+        >
+          <Text style={styles.selectedFont}>
+            Private {isPrivate ? `(${notes.length})` : ""}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => handleFilters("published")}
           style={published ? styles.filtersSelected : styles.filters}
         >
           <Text style={published ? styles.selectedFont : styles.filterFont}>
-            Published {published ? `(${notes.length})` : ''}
+            Published {published ? `(${notes.length})` : ""}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -356,7 +421,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           style={global ? styles.filtersSelected : styles.filters}
         >
           <Text style={global ? styles.selectedFont : styles.filterFont}>
-            Global {global ? `(${notes.length})` : ''}
+            Global {global ? `(${notes.length})` : ""}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleReverseOrder} style={styles.filters}>
@@ -369,18 +434,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           <Text style={styles.filterFont}>Alphabetical</Text>
         </TouchableOpacity>
       </ScrollView>
-      <FlatList
-        data={notes}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderItem}
-        contentContainerStyle={{ paddingBottom: 80 }}
-        ListEmptyComponent={() => (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No notes yet!</Text>
-          </View>
-        )}
-      />
-
+      {notes ? renderList(notes) : null}
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => navigation.navigate("AddNote", { refreshPage })}
@@ -523,7 +577,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 20,
     marginBottom: 10,
-    width: "95%",
+    width: "98%",
     padding: 10,
     paddingHorizontal: 10,
     flexDirection: "row",
@@ -586,6 +640,37 @@ const styles = StyleSheet.create({
     marginRight: "10%",
     alignContent: "center",
     alignSelf: "center",
+  },
+  backRightBtn: {
+    alignItems: "flex-end",
+    bottom: 0,
+    justifyContent: "center",
+    position: "absolute",
+    top: 0,
+    width: 75,
+    paddingRight: 17,
+  },
+  backRightBtnLeft: {
+    backgroundColor: "#1f65ff",
+    right: 50,
+  },
+  backRightBtnRight: {
+    backgroundColor: "red",
+    width: "52%",
+    right: 0,
+    borderTopRightRadius: 20,
+    borderBottomRightRadius: 20,
+  },
+  rowBack: {
+    alignItems: "center",
+    backgroundColor: "#C7EBB3",
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingLeft: 15,
+    margin: 5,
+    marginBottom: 15,
+    borderRadius: 20,
   },
 });
 

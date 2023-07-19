@@ -10,9 +10,11 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
-import { Note } from "../../types";
+import { Note, EditNoteScreenProps } from "../../types";
 import { PhotoType, VideoType } from "../models/media_class";
 import { ImageNote, ProfilePageProps } from "../../types";
+import DataConversion from "../utils/data_conversion";
+import ApiService from "../utils/api_calls";
 
 const user = User.getInstance();
 
@@ -21,120 +23,31 @@ export default function ProfilePage({ navigation }: ProfilePageProps) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [allImages, setAllImages] = useState<ImageNote[]>([]);
   const [count, setCount] = useState(0);
+  const [key, setKey] = useState(0);
+
+  const navigateToEditNoteScreen = (note: Note) => {
+    const data = {
+      note,
+      onSave: (note: Note) => {
+        console.log("Note saved:", note);
+      },
+    };
+  
+    navigation.navigate("EditNote", { note: data?.note, onSave: data?.onSave });
+  };
 
   const fetchMessages = async () => {
     let response;
     try {
-      response = await fetch(
-        "http://lived-religion-dev.rerum.io/deer-lr/query",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            type: "message",
-            creator: user.getId(),
-          }),
-        }
-      );
-
-      const data = await response.json();
+      const data = await ApiService.fetchMessages(false,false,user.getId() || '')
       setMessages(data);
 
-      const fetchedNotes: Note[] = data.map((message: any) => {
-        const time = message.__rerum.isOverwritten
-          ? new Date(message.__rerum.isOverwritten)
-          : new Date(message.__rerum.createdAt);
-        time.setHours(time.getHours() - 5);
-        return {
-          id: message["@id"],
-          title: message.title || "",
-          text: message.BodyText || "",
-          media: message.media || [],
-          audio: message.audio || [],
-          time:
-            time.toLocaleString("en-US", { timeZone: "America/Chicago" }) || "",
-          creator: message.creator || "",
-          latitude: message.latitude,
-          longitude: message.longitude,
-        };
-      });
-
-      fetchedNotes.sort(
-        (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
-      );
+      const fetchedNotes = DataConversion.convertMediaTypes(data);
 
       setNotes(fetchedNotes);
       setCount(fetchedNotes.length);
 
-      let extractedImages: ImageNote[] = fetchedNotes.flatMap((note) => {
-        return note.media.map((item: any) => {
-          if (item.type === "video") {
-            return {
-              image: item.thumbnail,
-              note: {
-                id: note.id,
-                title: note.title || "",
-                text: note.text || "",
-                media: note.media.map((mediaItem: any) => {
-                  if (mediaItem.type === "video") {
-                    return new VideoType({
-                      uuid: mediaItem.uuid,
-                      type: mediaItem.type,
-                      uri: mediaItem.uri,
-                      thumbnail: mediaItem.thumbnail,
-                      duration: mediaItem.duration,
-                    });
-                  } else {
-                    return new PhotoType({
-                      uuid: mediaItem.uuid,
-                      type: mediaItem.type,
-                      uri: mediaItem.uri,
-                    });
-                  }
-                }),
-                audio: note.audio || [],
-                time: note.time || "",
-                creator: note.creator || "",
-                latitude: note.latitude,
-                longitude: note.longitude,
-              },
-            };
-          } else {
-            return {
-              image: item.uri,
-              note: {
-                id: note.id,
-                title: note.title || "",
-                text: note.text || "",
-                media: note.media.map((mediaItem: any) => {
-                  if (mediaItem.type === "video") {
-                    return new VideoType({
-                      uuid: mediaItem.uuid,
-                      type: mediaItem.type,
-                      uri: mediaItem.uri,
-                      thumbnail: mediaItem.thumbnail,
-                      duration: mediaItem.duration,
-                    });
-                  } else {
-                    return new PhotoType({
-                      uuid: mediaItem.uuid,
-                      type: mediaItem.type,
-                      uri: mediaItem.uri,
-                    });
-                  }
-                }),
-                audio: note.audio || [],
-                time: note.time || "",
-                creator: note.creator || "",
-                latitude: note.latitude,
-                longitude: note.longitude,
-              },
-            };
-          }
-        });
-      });
+      const extractedImages = DataConversion.extractImages(fetchedNotes);
 
       setAllImages(extractedImages.reverse());
     } catch (error) {
@@ -212,9 +125,7 @@ export default function ProfilePage({ navigation }: ProfilePageProps) {
             {allImages?.map((data: ImageNote, index: number) => (
               <TouchableOpacity
                 key={index}
-                onPress={() =>
-                  navigation.navigate("EditNote", { note: data?.note })
-                }
+                onPress={() => navigateToEditNoteScreen(data?.note)}
               >
                 <Image style={styles.preview} source={{ uri: data?.image }} />
               </TouchableOpacity>
