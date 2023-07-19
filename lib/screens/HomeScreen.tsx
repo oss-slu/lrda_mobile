@@ -194,7 +194,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     return (
       <View style={styles.rowBack} key={data.index}>
         <TouchableOpacity>
-          <TouchableOpacity onPress={() => publishNote(data, rowMap)}>
+          <TouchableOpacity onPress={() => publishNote(data.item.id, rowMap)}>
             <Ionicons name="earth" size={30} color="black" />
           </TouchableOpacity>
         </TouchableOpacity>
@@ -207,7 +207,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                 position: "absolute",
                 right: 20,
               }}
-              onPress={() => deleteNote(data, rowMap)}
+              onPress={() => deleteNote(data.item.id, rowMap)}
             >
               <Ionicons name="trash-outline" size={24} color="#111111" />
             </TouchableOpacity>
@@ -218,18 +218,18 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   };
 
   const deleteNote = (data: any, rowMap: any) => {
-    if (rowMap[data.item.id]) {
-      rowMap[data.item.id].closeRow();
+    if (rowMap[data]) {
+      rowMap[data].closeRow();
     }
-    setNotes((prevNotes) => prevNotes.filter((note) => note.id !== data.item.id));
-    deleteNoteFromAPI(data.item.id);
+    setNotes((prevNotes) => prevNotes.filter((note) => note.id !== data));
+    deleteNoteFromAPI(data);
   };
 
   async function publishNote(data: any, rowMap:any){
-    if (rowMap[data.item.id]) {
-      rowMap[data.item.id].closeRow();
+    if (rowMap[data]) {
+      rowMap[data].closeRow();
     }
-    const foundNote = notes.find((note) => note.id === data.item.id);
+    const foundNote = notes.find((note) => note.id === data);
     const editedNote: Note = {
       id: foundNote?.id || "",
       title: foundNote?.title || "",
@@ -260,8 +260,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           stopLeftSwipe={175}
           stopRightSwipe={-175}
           keyExtractor={(item) => item.id}
-          onRightAction={deleteNote}
-          onLeftAction={publishNote}
+          onRightAction={(data, rowMap) => deleteNote(data, rowMap)}
+          onLeftAction={(data, rowMap) => publishNote(data, rowMap)}
         />
       :
         <SwipeListView
@@ -271,7 +271,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         />
     );
   };
-  
 
   const renderItem = ({ item }: { item: Note }) => {
     const mediaItem = item.media[0];
