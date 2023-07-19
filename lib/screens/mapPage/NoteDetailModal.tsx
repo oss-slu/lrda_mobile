@@ -12,6 +12,7 @@ interface Props {
 
 const NoteDetailModal: React.FC<Props> = ({ isVisible, onClose, note }) => {
   let images: {uri: string}[] = [];
+  console.log("This is a NoteDetailModal: ", note);
   
   // Declare a new state variable for image loading
   const [imageLoadedState, setImageLoadedState] = useState<{ [key: string]: boolean }>({});
