@@ -29,29 +29,35 @@ const NoteDetailModal: React.FC<Props> = ({ isVisible, onClose, note }) => {
   return (
     <Modal animationType="slide" transparent={false} visible={isVisible}>
       <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+        <View style={styles.closeIcon}>
           <Ionicons name="close" size={30} color="#000" />
-        </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
       <ScrollView contentContainerStyle={styles.modalView}>
-        {images && images.length > 0 ? images.map((image, index) => {
-          return (
-            <View key={index} style={styles.imageContainer}>
-              {!imageLoadedState[image.uri] && <ActivityIndicator size="large" color="#0000ff" />}
-              <Image
-                source={{ uri: image.uri }}
-                style={styles.image}
-                onLoad={() => handleLoad(image.uri)}
-              />
-            </View>
-          )
-        }) : <Text>No images</Text>}
-        <View style={styles.textContainer}>
+      {images && images.length > 0 ? images.map((image, index) => {
+            return (
+              <View key={index} style={styles.imageContainer}>
+                {!imageLoadedState[image.uri] && <ActivityIndicator size="large" color="#0000ff" />}
+                <Image
+                  source={{ uri: image.uri }}
+                  style={styles.image}
+                  onLoad={() => handleLoad(image.uri)}
+                />
+              </View>
+            )
+          }) : <Text>No images</Text>}
+      </ScrollView>
+      <View style={styles.textContainer}>
+        <ScrollView>
           <Text style={styles.modalTitle}>{note?.title}</Text>
           <Text style={styles.modalText}>{note?.description}</Text>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
     </Modal>
   );
-};
+  };
+
+
 
 const styles = StyleSheet.create({
   modalView: {
@@ -61,14 +67,31 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   closeButton: {
+    position: 'absolute',
     top: 50,
     left: 20,
     zIndex: 1,
-    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closeIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#ddd',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   textContainer: {
     padding: 20,
     backgroundColor: '#fafafa',
+    height: 200, // Height of text container
+    position: 'absolute',
+    bottom: 0, // Positioning it at the bottom
+    left: 0,
+    right: 0,
+    borderTopColor: '#ddd', // Add a border to distinguish from rest of modal
+    borderTopWidth: 1,
   },
   modalTitle: {
     fontSize: 24,
