@@ -10,13 +10,11 @@ import {
 } from "react-native";
 import {
   launchCameraAsync,
-  launchImageLibraryAsync,
   MediaTypeOptions,
   requestCameraPermissionsAsync,
-  requestMediaLibraryPermissionsAsync,
 } from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
-import { Video } from "expo-av";
+import { ResizeMode, Video } from "expo-av";
 import { Media, VideoType, PhotoType } from "../models/media_class";
 import uuid from "react-native-uuid";
 import { getThumbnail, convertHeicToJpg, uploadMedia } from "../utils/S3_proxy";
@@ -97,64 +95,24 @@ function PhotoScroller({
   };
 
   const handleNewMedia = async () => {
-    Alert.alert(
-      "Upload Media",
-      "Choose from library or take a photo/video",
-      [
-        {
-          text: "Take a Photo or Video",
-          onPress: async () => {
-            const { status } = await requestCameraPermissionsAsync();
-            if (status !== "granted") {
-              alert("Sorry, we need camera permissions to make this work!");
-              return;
-            }
+    const { status } = await requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      alert("Sorry, we need camera permissions to make this work!");
+      return;
+    }
 
-            console.log("Opening camera...");
-            const cameraResult = await launchCameraAsync({
-              mediaTypes: MediaTypeOptions.All,
-              allowsEditing: true,
-              aspect: [4, 3],
-              quality: 0.75,
-              videoMaxDuration: 300,
-            });
+    console.log("Opening camera...");
+    const cameraResult = await launchCameraAsync({
+      mediaTypes: MediaTypeOptions.All,
+      allowsEditing: false,
+      aspect: [3, 4],
+      quality: 0.75,
+      videoMaxDuration: 300,
+    });
 
-            if (!cameraResult.canceled) {
-              handleImageSelection(cameraResult);
-            }
-          },
-        },
-        {
-          text: "Choose from Library",
-          onPress: async () => {
-            const { status } = await requestMediaLibraryPermissionsAsync();
-            if (status !== "granted") {
-              alert(
-                "Sorry, we need media library permissions to make this work!"
-              );
-              return;
-            }
-
-            console.log("Opening image library...");
-            const libraryResult = await launchImageLibraryAsync({
-              mediaTypes: MediaTypeOptions.All,
-              allowsEditing: true,
-              aspect: [4, 3],
-              quality: 1,
-            });
-
-            if (!libraryResult.canceled) {
-              handleImageSelection(libraryResult);
-            }
-          },
-        },
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-      ],
-      { cancelable: false }
-    );
+    if (!cameraResult.canceled) {
+      handleImageSelection(cameraResult);
+    }
   };
 
   const handleDeleteMedia = (index: number) => {
@@ -167,7 +125,11 @@ function PhotoScroller({
     <View
       style={[
         styles.container,
-        { marginBottom: playing ? 100 : 0, marginTop: playing ? 30 : 0, height: playing ? 'auto' : 110 },
+        {
+          marginBottom: playing ? 100 : 0,
+          marginTop: playing ? 30 : 0,
+          height: playing ? "auto" : 110,
+        },
       ]}
     >
       {playing && type === "video" ? (
@@ -178,7 +140,7 @@ function PhotoScroller({
           ></Button>
           <Video
             source={{ uri: videoToPlay }}
-            resizeMode="cover"
+            resizeMode={ResizeMode.COVER}
             shouldPlay
             useNativeControls
             isLooping
@@ -260,7 +222,6 @@ function PhotoScroller({
 
 export default PhotoScroller;
 
-
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff",
@@ -283,14 +244,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     justifyContent: "center",
   },
-  video: { 
-  width: "100%",
-  height: "100%",
-  justifyContent: 'center',
-  alignSelf: 'center',
- },
+  video: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignSelf: "center",
+  },
   miniContainer: {
-    width: '100%',
+    width: "100%",
     position: "relative",
     justifyContent: "center",
     alignItems: "center",

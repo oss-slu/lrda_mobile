@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from "react";
 import {
-  Alert,
   Platform,
   Linking,
   View,
   Image,
   Text,
   StyleSheet,
-  FlatList,
   ScrollView,
   TouchableOpacity,
   Animated,
