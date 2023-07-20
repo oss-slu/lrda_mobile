@@ -61,7 +61,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
     <KeyboardAwareScrollView contentContainerStyle={styles.container}
       style={{backgroundColor: '#F4DFCD',}}
       >
-      <Text style={[styles.logo, { marginTop: -40 }]}>Where's Religion</Text>
+      <Text style={[styles.logo, { marginTop: -40 }]}>Where's{"\n"}Religion</Text>
 
       <View style={styles.inputView}>
         <TextInput
