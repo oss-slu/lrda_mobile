@@ -83,7 +83,7 @@ function TagWindow({
   };
 
   return (
-    <View>
+    <View style={{marginBottom: 10}}>
       <TextInput
         style={styles.textBox}
         value={inputText}
@@ -128,6 +128,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: 15,
+    paddingVertical: 1,
   },
   rowFront: {
     alignItems: "center",
@@ -135,6 +136,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     justifyContent: "center",
+    paddingVertical: 1,
   },
   text: {
     fontSize: 18,

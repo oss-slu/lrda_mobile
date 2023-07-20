@@ -109,10 +109,18 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       </View>
       <View style={{ backgroundColor: "black" }}>
         <View style={styles.keyContainer}>
-          <TouchableOpacity onPress={() => setViewMedia(!viewMedia)}>
+          <TouchableOpacity onPress={() =>{
+            setViewMedia(!viewMedia);
+            setViewAudio(false);
+            setIsTagging(false);
+          }}>
             <Ionicons name="images-outline" size={30} color="black" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => setViewAudio(!viewAudio)}>
+          <TouchableOpacity onPress={() =>{
+            setViewMedia(false);
+            setViewAudio(!viewAudio);
+            setIsTagging(false);
+          }}>
             <Ionicons name="mic-outline" size={30} color="black" />
           </TouchableOpacity>
           <TouchableOpacity>
@@ -121,7 +129,11 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           <TouchableOpacity>
             <Ionicons name="time-outline" size={30} color="black" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => setIsTagging(!isTagging)}>
+          <TouchableOpacity onPress={() =>{
+            setViewMedia(false);
+            setViewAudio(false);
+            setIsTagging(!isTagging);
+          }}>
             <Ionicons name="pricetag-outline" size={30} color="black" />
           </TouchableOpacity>
         </View>

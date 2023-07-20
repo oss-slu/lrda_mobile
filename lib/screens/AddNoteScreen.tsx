@@ -110,32 +110,34 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         )}
       </View>
       <View style={styles.keyContainer}>
-        <TouchableOpacity
-          // style={styles.toggles}
-          onPress={() => {
+          <TouchableOpacity onPress={() =>{
             setViewMedia(!viewMedia);
-          }}
-        >
-          <Ionicons name="images-outline" size={30} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          // style={styles.toggles}
-          onPress={() => {
+            setViewAudio(false);
+            setIsTagging(false);
+          }}>
+            <Ionicons name="images-outline" size={30} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() =>{
+            setViewMedia(false);
             setViewAudio(!viewAudio);
-          }}
-        >
-          <Ionicons name="mic-outline" size={30} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Ionicons name="location-outline" size={30} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Ionicons name="time-outline" size={30} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={()=>setIsTagging(!isTagging)}>
-          <Ionicons name="pricetag-outline" size={30} color="black" />
-        </TouchableOpacity>
-      </View>
+            setIsTagging(false);
+          }}>
+            <Ionicons name="mic-outline" size={30} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity>
+            <Ionicons name="location-outline" size={30} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity>
+            <Ionicons name="time-outline" size={30} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() =>{
+            setViewMedia(false);
+            setViewAudio(false);
+            setIsTagging(!isTagging);
+          }}>
+            <Ionicons name="pricetag-outline" size={30} color="black" />
+          </TouchableOpacity>
+        </View>
       <View style={styles.container}>
         <KeyboardAwareScrollView
           nestedScrollEnabled
