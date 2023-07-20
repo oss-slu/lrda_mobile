@@ -2140,6 +2140,11 @@
   "resolved" "https://registry.npmjs.org/@react-native-community/geolocation/-/geolocation-3.0.6.tgz"
   "version" "3.0.6"
 
+"@react-native-masked-view/masked-view@^0.2.8", "@react-native-masked-view/masked-view@^0.2.9":
+  "integrity" "sha512-Hs4vKBKj+15VxHZHFtMaFWSBxXoOE5Ea8saoigWhahp8Mepssm0ezU+2pTl7DK9z8Y9s5uOl/aPb4QmBZ3R3Zw=="
+  "resolved" "https://registry.npmjs.org/@react-native-masked-view/masked-view/-/masked-view-0.2.9.tgz"
+  "version" "0.2.9"
+
 "@react-native/assets@1.0.0":
   "integrity" "sha512-KrwSpS1tKI70wuKl68DwJZYEvXktDHdZMG0k2AXD/rJVSlB23/X2CB2cutVR0HwNMJIal9HOUOBB2rVfa6UGtQ=="
   "resolved" "https://registry.npmjs.org/@react-native/assets/-/assets-1.0.0.tgz"
@@ -9434,6 +9439,11 @@
     "prop-types" "^15.6.2"
     "react-native-iphone-x-helper" "^1.0.3"
 
+"react-native-linear-gradient@^2.5.6", "react-native-linear-gradient@^2.7.3":
+  "integrity" "sha512-iyJszlZ1Ech2c+2qV+isMvvJKyoctR9ashDkhJg1/cuSF0vQaeLV1FAYTT3qW9doxChJGxVAFfYoxotH0yi3Iw=="
+  "resolved" "https://registry.npmjs.org/react-native-linear-gradient/-/react-native-linear-gradient-2.7.3.tgz"
+  "version" "2.7.3"
+
 "react-native-maps@0.30.2":
   "integrity" "sha512-WVv5e7aWdnNJugqNSG/87U+12Pg4RFWU7x/UigTPG1FEUZx2TbYKChL6xZCMGPOv5m5b4Z7bMeKJnZosg+yPyQ=="
   "resolved" "https://registry.npmjs.org/react-native-maps/-/react-native-maps-0.30.2.tgz"
@@ -9484,6 +9494,11 @@
   dependencies:
     "react-freeze" "^1.0.0"
     "warn-once" "^0.1.0"
+
+"react-native-skeleton-placeholder@^5.2.4":
+  "integrity" "sha512-OZntVq1hU1UX33FltxK2ezT2v9vHIhV8YnEbnMWUCvxT0N9OsgD1qxiHm6qb9YRJVgq2o5z3S7dNPsPnDF/jNg=="
+  "resolved" "https://registry.npmjs.org/react-native-skeleton-placeholder/-/react-native-skeleton-placeholder-5.2.4.tgz"
+  "version" "5.2.4"
 
 "react-native-swipe-list-view@^3.2.9":
   "integrity" "sha512-SjAEuHc/D6ovp+RjDUhfNmw6NYOntdT7+GFhfMGfP/BSLMuMWynpzJy9GKQeyB8sI78T6Lzip21TVbongOg1Mw=="
@@ -9536,7 +9551,7 @@
     "postcss-value-parser" "^4.2.0"
     "styleq" "^0.1.2"
 
-"react-native@*", "react-native@^0.71.8", "react-native@>= 0.51", "react-native@>=0.23.1", "react-native@>=0.42.0", "react-native@>=0.44.0", "react-native@>=0.46", "react-native@>=0.48.4", "react-native@>=0.59":
+"react-native@*", "react-native@^0.71.8", "react-native@>= 0.51", "react-native@>=0.23.1", "react-native@>=0.42.0", "react-native@>=0.44.0", "react-native@>=0.46", "react-native@>=0.48.4", "react-native@>=0.50.1", "react-native@>=0.57", "react-native@>=0.59":
   "integrity" "sha512-ftMAuhpgTkbHU9brrqsEyxcNrpYvXKeATY+if22Nfhhg1zW+6wn95w9otwTnA3xHkljPCbng8mUhmmERjGEl7g=="
   "resolved" "https://registry.npmjs.org/react-native/-/react-native-0.71.8.tgz"
   "version" "0.71.8"
@@ -9598,7 +9613,7 @@
     "react-shallow-renderer" "^16.15.0"
     "scheduler" "^0.23.0"
 
-"react@*", "react@^16.0.0 || ^17.0.0 || ^18.0.0", "react@^16.8.0 || ^17.0.0 || ^18.0.0", "react@^17.0.2 || ^18.0.0", "react@^18.2.0", "react@>= 16.0 || < 18.0", "react@>=0.14.8", "react@>=15.2.0", "react@>=16.0.0", "react@>=16.3.0", "react@>=16.8", "react@>=17.0.0", "react@18.2.0":
+"react@*", "react@^16.0.0 || ^17.0.0 || ^18.0.0", "react@^16.8.0 || ^17.0.0 || ^18.0.0", "react@^17.0.2 || ^18.0.0", "react@^18.2.0", "react@>= 16.0 || < 18.0", "react@>=0.14.8", "react@>=15.2.0", "react@>=16", "react@>=16.0.0", "react@>=16.3.0", "react@>=16.8", "react@>=17.0.0", "react@18.2.0":
   "integrity" "sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ=="
   "resolved" "https://registry.npmjs.org/react/-/react-18.2.0.tgz"
   "version" "18.2.0"

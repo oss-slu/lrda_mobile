@@ -18,6 +18,7 @@ import { HomeScreenProps } from "../../types";
 import ApiService from "../utils/api_calls";
 import DataConversion from "../utils/data_conversion";
 import { SwipeListView } from "react-native-swipe-list-view";
+import Skeleton from "../components/noteSkeleton";
 
 const user = User.getInstance();
 
@@ -32,6 +33,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [global, setGlobal] = useState(false);
   const [published, setPublished] = useState(false);
   const [reversed, setReversed] = useState(false);
+
   let textLength = 16;
   let userInitals = user
     .getName()
@@ -433,7 +435,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           <Text style={styles.filterFont}>Alphabetical</Text>
         </TouchableOpacity>
       </ScrollView>
-      {notes ? renderList(notes) : null}
+      {notes ? renderList(notes) : <Skeleton/>}
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => navigation.navigate("AddNote", { refreshPage })}
