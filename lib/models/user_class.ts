@@ -36,7 +36,7 @@ export class User {
         throw new Error("There was a server error logging in.");
       }
     } catch (error) {
-      console.error(error);
+      console.log(error);
       return Promise.reject(error);
     }
   }
