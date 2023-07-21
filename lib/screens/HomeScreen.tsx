@@ -417,16 +417,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           onPress={() => handleFilters("private")}
           style={isPrivate ? styles.filtersSelected : styles.filters}
         >
-          <Text style={styles.selectedFont}>
-            Private {isPrivate ? `(${notes.length})` : ""}
+          <Text style={isPrivate ? styles.selectedFont : styles.filterFont}>
+            {rendering ? "Private" : (isPrivate ? `Private (${notes.length})` : "Private")}
           </Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           onPress={() => handleFilters("published")}
           style={published ? styles.filtersSelected : styles.filters}
         >
           <Text style={published ? styles.selectedFont : styles.filterFont}>
-            Published {published ? `(${notes.length})` : ""}
+            {rendering ? "Published" : (published ? `Published (${notes.length})` : "Published")}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -434,7 +435,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           style={global ? styles.filtersSelected : styles.filters}
         >
           <Text style={global ? styles.selectedFont : styles.filterFont}>
-            Global {global ? `(${notes.length})` : ""}
+            {rendering ? "Global" : (global ? `Global (${notes.length})` : "Global")}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleReverseOrder} style={styles.filters}>
