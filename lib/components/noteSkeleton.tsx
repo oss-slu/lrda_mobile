@@ -1,18 +1,51 @@
 import React from 'react';
-import {View} from 'react-native';
-import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
+import { View } from 'react-native';
+import {
+  Placeholder,
+  PlaceholderMedia,
+  PlaceholderLine,
+  Fade,
+} from 'rn-placeholder';
 
-const Skeleton = () => {
+export default function NoteSkeleton() {
   return (
-    <SkeletonPlaceholder borderRadius={4}>
-      <SkeletonPlaceholder.Item flexDirection="row" alignItems="center">
-        <SkeletonPlaceholder.Item width={60} height={60} borderRadius={50} />
-        <SkeletonPlaceholder.Item marginLeft={20}>
-          <SkeletonPlaceholder.Item width={120} height={20} />
-          <SkeletonPlaceholder.Item marginTop={6} width={80} height={20} />
-        </SkeletonPlaceholder.Item>
-      </SkeletonPlaceholder.Item>
-    </SkeletonPlaceholder>
+    <View>
+    <View style={{ width: '98%', alignSelf: 'center', padding:10, borderRadius:20}}>
+      <Placeholder Animation={Fade} Left={() => <PlaceholderMedia size={100} style={{ borderRadius: 10, marginRight: 20 }} />}>
+        <PlaceholderLine width={80} height={20} style={{marginTop: 10}} />
+        <PlaceholderLine width={40} height={13}/>
+        <PlaceholderLine width={30} height={13}/>
+      </Placeholder>
+    </View>
+    <View style={{ width: '98%', alignSelf: 'center', padding:10, borderRadius:20}}>
+      <Placeholder Animation={Fade} Left={() => <PlaceholderMedia size={100} style={{ borderRadius: 10, marginRight: 20 }} />}>
+        <PlaceholderLine width={80} height={20} style={{marginTop: 10}} />
+        <PlaceholderLine width={40} height={13}/>
+        <PlaceholderLine width={30} height={13}/>
+      </Placeholder>
+    </View>
+    <View style={{ width: '98%', alignSelf: 'center', padding:10, borderRadius:20}}>
+      <Placeholder Animation={Fade} Left={() => <PlaceholderMedia size={100} style={{ borderRadius: 10, marginRight: 20 }} />}>
+        <PlaceholderLine width={80} height={20} style={{marginTop: 10}} />
+        <PlaceholderLine width={40} height={13}/>
+        <PlaceholderLine width={30} height={13}/>
+      </Placeholder>
+    </View>
+    <View style={{ width: '98%', alignSelf: 'center', padding:10, borderRadius:20}}>
+      <Placeholder Animation={Fade} Left={() => <PlaceholderMedia size={100} style={{ borderRadius: 10, marginRight: 20 }} />}>
+        <PlaceholderLine width={80} height={20} style={{marginTop: 10}} />
+        <PlaceholderLine width={40} height={13}/>
+        <PlaceholderLine width={30} height={13}/>
+      </Placeholder>
+    </View>
+    <View style={{ width: '98%', alignSelf: 'center', padding:10, borderRadius:20}}>
+      <Placeholder Animation={Fade} Left={() => <PlaceholderMedia size={100} style={{ borderRadius: 10, marginRight: 20 }} />}>
+        <PlaceholderLine width={80} height={20} style={{marginTop: 10}} />
+        <PlaceholderLine width={40} height={13}/>
+        <PlaceholderLine width={30} height={13}/>
+      </Placeholder>
+    </View>
+    </View>
+
   );
-};
-export default Skeleton;
+}

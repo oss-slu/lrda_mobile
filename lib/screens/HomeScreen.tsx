@@ -18,7 +18,8 @@ import { HomeScreenProps } from "../../types";
 import ApiService from "../utils/api_calls";
 import DataConversion from "../utils/data_conversion";
 import { SwipeListView } from "react-native-swipe-list-view";
-import Skeleton from "../components/noteSkeleton";
+import NoteSkeleton from "../components/noteSkeleton";
+import LoadingImage from "../components/loadingImage";
 
 const user = User.getInstance();
 
@@ -33,6 +34,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [global, setGlobal] = useState(false);
   const [published, setPublished] = useState(false);
   const [reversed, setReversed] = useState(false);
+  const [imagesLoading, setImagesLoading] = useState<boolean[]>([]);
+
+  useEffect(() => {
+    setImagesLoading(new Array(notes.length).fill(true));
+}, [notes]);
+
+  const handleImageLoad = (index: number) => {
+    console.log("Image at index",index+1,"has loaded!")
+    setImagesLoading(prevImagesLoading => {
+        const updatedImagesLoading = [...prevImagesLoading]; // create a new copy
+        updatedImagesLoading[index] = false;
+        return updatedImagesLoading;
+    });
+};
 
   let textLength = 16;
   let userInitals = user
@@ -225,7 +240,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     deleteNoteFromAPI(data);
   };
 
-  async function publishNote(data: any, rowMap:any){
+  async function publishNote(data: any, rowMap: any) {
     if (rowMap[data]) {
       rowMap[data].closeRow();
     }
@@ -245,36 +260,46 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     };
     await ApiService.overwriteNote(editedNote);
     refreshPage();
-  };
+  }
 
   const renderList = (notes: Note[]) => {
-    return (
-      isPrivate ? 
-        <SwipeListView
-          data={notes}
-          renderItem={renderItem}
-          renderHiddenItem={sideMenu}
-          leftActivationValue={160}
-          rightActivationValue={-160}
-          leftOpenValue={75}
-          rightOpenValue={-75}
-          stopLeftSwipe={175}
-          stopRightSwipe={-175}
-          keyExtractor={(item) => item.id}
-          onRightAction={(data, rowMap) => deleteNote(data, rowMap)}
-          onLeftAction={(data, rowMap) => publishNote(data, rowMap)}
-        />
-      :
-        <SwipeListView
-          data={notes}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-        />
+    return isPrivate ? (
+      <SwipeListView
+        data={notes}
+        renderItem={renderItem}
+        renderHiddenItem={sideMenu}
+        leftActivationValue={160}
+        rightActivationValue={-160}
+        leftOpenValue={75}
+        rightOpenValue={-75}
+        stopLeftSwipe={175}
+        stopRightSwipe={-175}
+        keyExtractor={(item) => item.id}
+        onRightAction={(data, rowMap) => deleteNote(data, rowMap)}
+        onLeftAction={(data, rowMap) => publishNote(data, rowMap)}
+      />
+    ) : (
+      <SwipeListView
+        data={notes}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
+      />
     );
   };
 
-  const renderItem = ({ item }: { item: Note }) => {
+  const renderItem = (data: any) => {
+    const item = data.item;
     const mediaItem = item.media[0];
+    const ImageType = mediaItem?.getType();
+    let ImageURI = "";
+    let IsImage = false;
+    if(ImageType === "image"){
+      ImageURI = mediaItem.getUri();
+      IsImage = true;
+    } else if (ImageType === "video"){
+      ImageURI = mediaItem.getThumbnail();
+      IsImage = true;
+    } 
     return (
       <TouchableOpacity
         key={item.id}
@@ -291,22 +316,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         }
       >
         <View style={{ flexDirection: "row" }}>
-          {mediaItem?.getType() === "image" ? (
-            <Image
-              style={styles.preview}
-              source={{ uri: mediaItem.getUri() }}
-            />
-          ) : mediaItem?.getType() === "video" ? (
-            <Image
-              style={styles.preview}
-              source={{ uri: (mediaItem as VideoType).getThumbnail() }}
-            />
-          ) : (
-            <Image
-              source={require("../components/public/noPreview.png")}
-              style={styles.preview}
-            />
-          )}
+          {IsImage ? (
+            <View style={{alignSelf: 'center', height:100, width: 100}}><LoadingImage imageURI={ImageURI} isImage={true}/></View>
+           )
+          : (
+          <View style={{alignSelf: 'center', height:100, width:100}}><LoadingImage imageURI={''} isImage={false}/></View>)}
+
           <View
             style={{ alignSelf: "center", position: "absolute", left: 120 }}
           >
@@ -338,6 +353,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       </TouchableOpacity>
     );
   };
+  
 
   return (
     <View style={styles.container}>
@@ -435,7 +451,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           <Text style={styles.filterFont}>Alphabetical</Text>
         </TouchableOpacity>
       </ScrollView>
-      {notes ? renderList(notes) : <Skeleton/>}
+      {notes ? renderList(notes) : <NoteSkeleton />}
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => navigation.navigate("AddNote", { refreshPage })}
@@ -582,6 +598,7 @@ const styles = StyleSheet.create({
     padding: 10,
     paddingHorizontal: 10,
     flexDirection: "row",
+    height: 120
   },
   filtersContainer: {
     minHeight: 30,
@@ -633,14 +650,6 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     marginLeft: 3,
     marginTop: 3,
-  },
-  preview: {
-    width: 100,
-    height: 100,
-    borderRadius: 10,
-    marginRight: "10%",
-    alignContent: "center",
-    alignSelf: "center",
   },
   backRightBtn: {
     alignItems: "flex-end",
