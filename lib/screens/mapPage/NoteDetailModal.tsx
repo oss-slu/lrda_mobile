@@ -61,8 +61,7 @@ const NoteDetailModal: React.FC<Props> = ({ isVisible, onClose, note }) => {
 
 const styles = StyleSheet.create({
   modalView: {
-    marginTop: 50,
-    paddingBottom: 250, // equals to the height of textContainer plus a bit of margin
+    paddingBottom: 200, // equals to the height of textContainer plus a bit of margin
   },
   closeButton: {
     position: 'absolute',
