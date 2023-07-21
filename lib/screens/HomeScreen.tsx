@@ -34,20 +34,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [global, setGlobal] = useState(false);
   const [published, setPublished] = useState(false);
   const [reversed, setReversed] = useState(false);
-  const [imagesLoading, setImagesLoading] = useState<boolean[]>([]);
-
-  useEffect(() => {
-    setImagesLoading(new Array(notes.length).fill(true));
-}, [notes]);
-
-  const handleImageLoad = (index: number) => {
-    console.log("Image at index",index+1,"has loaded!")
-    setImagesLoading(prevImagesLoading => {
-        const updatedImagesLoading = [...prevImagesLoading]; // create a new copy
-        updatedImagesLoading[index] = false;
-        return updatedImagesLoading;
-    });
-};
+  const [rendering, setRendering] = useState(true);
 
   let textLength = 16;
   let userInitals = user
@@ -119,6 +106,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   };
 
   useEffect(() => {
+    setRendering(true);
     if (route.params?.note) {
       setNotes([...notes, route.params.note]);
     }
@@ -142,6 +130,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       } else {
         setNotes(reversed ? fetchedNotes : fetchedNotes.reverse());
       }
+      setRendering(false);
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
@@ -293,13 +282,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     const ImageType = mediaItem?.getType();
     let ImageURI = "";
     let IsImage = false;
-    if(ImageType === "image"){
+    if (ImageType === "image") {
       ImageURI = mediaItem.getUri();
       IsImage = true;
-    } else if (ImageType === "video"){
+    } else if (ImageType === "video") {
       ImageURI = mediaItem.getThumbnail();
       IsImage = true;
-    } 
+    }
     return (
       <TouchableOpacity
         key={item.id}
@@ -317,10 +306,18 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       >
         <View style={{ flexDirection: "row" }}>
           {IsImage ? (
-            <View style={{alignSelf: 'center', height:100, width: 100}}><LoadingImage imageURI={ImageURI} isImage={true}/></View>
-           )
-          : (
-          <View style={{alignSelf: 'center', height:100, width:100}}><LoadingImage imageURI={''} isImage={false}/></View>)}
+            <View style={{ alignSelf: "center", height: 100, width: 100 }}>
+              <LoadingImage
+                imageURI={ImageURI}
+                type={ImageType}
+                isImage={true}
+              />
+            </View>
+          ) : (
+            <View style={{ alignSelf: "center", height: 100, width: 100 }}>
+              <LoadingImage imageURI={""} type={ImageType} isImage={false} />
+            </View>
+          )}
 
           <View
             style={{ alignSelf: "center", position: "absolute", left: 120 }}
@@ -353,7 +350,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       </TouchableOpacity>
     );
   };
-  
 
   return (
     <View style={styles.container}>
@@ -451,7 +447,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           <Text style={styles.filterFont}>Alphabetical</Text>
         </TouchableOpacity>
       </ScrollView>
-      {notes ? renderList(notes) : <NoteSkeleton />}
+      {rendering ? <NoteSkeleton /> : renderList(notes)}
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => navigation.navigate("AddNote", { refreshPage })}
@@ -598,7 +594,7 @@ const styles = StyleSheet.create({
     padding: 10,
     paddingHorizontal: 10,
     flexDirection: "row",
-    height: 120
+    height: 120,
   },
   filtersContainer: {
     minHeight: 30,

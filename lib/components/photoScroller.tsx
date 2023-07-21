@@ -6,7 +6,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   Button,
-  Alert,
 } from "react-native";
 import {
   launchCameraAsync,
@@ -18,6 +17,7 @@ import { ResizeMode, Video } from "expo-av";
 import { Media, VideoType, PhotoType } from "../models/media_class";
 import uuid from "react-native-uuid";
 import { getThumbnail, convertHeicToJpg, uploadMedia } from "../utils/S3_proxy";
+import LoadingImage from "./loadingImage";
 
 function PhotoScroller({
   newMedia,
@@ -175,6 +175,16 @@ function PhotoScroller({
             />
           </TouchableOpacity>
           {newMedia?.map((media, index) => {
+            const ImageType = media?.getType();
+            let ImageURI = "";
+            let IsImage = false;
+            if (ImageType === "image") {
+              ImageURI = media.getUri();
+              IsImage = true;
+            } else if (ImageType === "video") {
+              ImageURI = (media as VideoType).getThumbnail();
+              IsImage = true;
+            }
             return (
               <View key={index}>
                 <TouchableOpacity
@@ -189,27 +199,15 @@ function PhotoScroller({
                   />
                 </TouchableOpacity>
                 <TouchableOpacity key={index} onPress={() => goBig(index)}>
-                  {media.getType() === "video" ? (
-                    <View style={styles.miniContainer}>
-                      <Image
-                        style={styles.image}
-                        source={{ uri: (media as VideoType).getThumbnail() }}
-                      />
-                      <View style={styles.playUnderlay}>
-                        <Ionicons
-                          name="play-outline"
-                          size={24}
-                          color="#dfe5e8"
-                          style={styles.icon}
-                        />
-                      </View>
-                    </View>
-                  ) : (
-                    <Image
-                      style={styles.image}
-                      source={{ uri: media.getUri() }}
+                  <View
+                    style={{ alignSelf: "center", height: 100, width: 100 }}
+                  >
+                    <LoadingImage
+                      imageURI={ImageURI}
+                      type={media?.getType()}
+                      isImage={true}
                     />
-                  )}
+                  </View>
                 </TouchableOpacity>
               </View>
             );
@@ -255,20 +253,5 @@ const styles = StyleSheet.create({
     position: "relative",
     justifyContent: "center",
     alignItems: "center",
-  },
-  icon: {
-    position: "relative",
-    alignSelf: "center",
-    marginLeft: 2,
-    marginTop: 2,
-  },
-  playUnderlay: {
-    width: 30,
-    height: 30,
-    borderRadius: 30,
-    backgroundColor: "rgba(5,5,5,0.5)",
-    position: "absolute",
-    right: 40,
-    bottom: 36,
   },
 });
