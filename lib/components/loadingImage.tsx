@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Image, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Placeholder, PlaceholderMedia, ShineOverlay } from "rn-placeholder";
+import { Placeholder, PlaceholderMedia, Progressive } from "rn-placeholder";
 
 interface LoadingImageProps {
   imageURI: string;
@@ -20,7 +20,7 @@ export default function LoadingImage({
       <View>
         {isLoading && (
           <Placeholder
-            Animation={ShineOverlay}
+            Animation={Progressive}
             Left={() => (
               <PlaceholderMedia
                 size={100}
@@ -59,7 +59,7 @@ export default function LoadingImage({
       <View>
         {isLoading && (
           <Placeholder
-            Animation={ShineOverlay}
+            Animation={Progressive}
             Left={() => (
               <PlaceholderMedia
                 size={100}
