@@ -14,6 +14,16 @@ interface Props {
 const NoteDetailModal: React.FC<Props> = ({ isVisible, onClose, note }) => {
   let images: {uri: string}[] = [];
   console.log("This is a NoteDetailModal: ", note);
+  const [creatorName, setCreatorName] = useState<string>('');
+
+  useEffect(() => {
+    if (note && note.creator) {
+      fetch(note.creator)
+        .then(response => response.json())
+        .then(data => setCreatorName(data.name))
+        .catch(err => console.error('Error fetching creator: ', err));
+    }
+  }, [note]);
 
   // Declare a new state variable for image loading
   const [imageLoadedState, setImageLoadedState] = useState<{ [key: string]: boolean }>({});
@@ -51,6 +61,8 @@ const NoteDetailModal: React.FC<Props> = ({ isVisible, onClose, note }) => {
         <ScrollView>
           <Text style={styles.modalTitle}>{note?.title}</Text>
           <Text style={styles.modalText}>{note?.description}</Text>
+          <Text style={styles.modalText}>{`Created by: ${creatorName}`}</Text>
+          <Text style={styles.modalText}>{note?.createdAt}</Text>
         </ScrollView>
       </View>
     </Modal>
