@@ -1,19 +1,15 @@
 {
   "expo": {
-    "name": "ldra",
-    "slug": "lrda",
+    "name": "lrda_mobile",
+    "slug": "lrda_mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.jpg",
-      "resizeMode": "cover",
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
       "backgroundColor": "#ffffff"
-    },
-    "updates": {
-      "fallbackToCacheTimeout": 0,
-      "url": "https://u.expo.dev/aa02d222-f978-4070-9189-57be1014042a"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -24,14 +20,11 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
+        "backgroundColor": "#ffffff"
       }
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    },
-    "runtimeVersion": {
-      "policy": "sdkVersion"
     }
   }
 }
