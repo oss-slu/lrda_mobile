@@ -1,7 +1,14 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  TextInput,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { AudioType } from "../models/media_class";
+import Slider from "@react-native-community/slider";
 import { Audio } from "expo-av";
 import uuid from "react-native-uuid";
 import { uploadAudio } from "../utils/S3_proxy";
@@ -23,6 +30,47 @@ function AudioContainer({
 }) {
   const [isRecording, setIsRecording] = useState(false);
   const [recording, setRecording] = useState<null | Audio.Recording>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [player, setPlayer] = useState<null | Audio.Sound>(null);
+  const [reNaming, setRenaming] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [sliderValue, setSliderValue] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(-1);
+  const [sliderValues, setSliderValues] = useState<number[]>([]);
+  const [pausedPosition, setPausedPosition] = useState<number | null>(null);
+  const [pausedAudioIndex, setPausedAudioIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    const checkPlayerStatus = async () => {
+      if (player) {
+        const status = await player.getStatusAsync();
+        console.log("status: ", status);
+        setIsPlaying(false);
+      }
+    };
+    checkPlayerStatus();
+  }, [isPlaying, player]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (isPlaying && currentIndex !== null) {
+      interval = setInterval(() => updateSlider(currentIndex), 1000);
+    } else {
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [isPlaying, currentIndex]);
+
+  const updateSlider = async (index: number) => {
+    if (player && isPlaying && currentIndex === index) {
+      const status = await player.getStatusAsync();
+      if (pausedAudioIndex === index && pausedPosition !== null) {
+        setSliderValueAtIndex(index, pausedPosition / status.durationMillis); // Update the slider value using the paused position
+      } else {
+        setSliderValueAtIndex(index, status.positionMillis / status.durationMillis);
+      }
+    }
+  };
 
   async function startRecording() {
     setIsRecording(true);
@@ -73,6 +121,7 @@ function AudioContainer({
                 ? getDurationFormatted(status.durationMillis)
                 : "",
             name: `Recording ${index + 1}`,
+            isPlaying: false,
           });
 
           setNewAudio([...newAudio, newRecording]);
@@ -90,24 +139,93 @@ function AudioContainer({
   async function playAudio(index: number) {
     console.log("entered audio player");
     const current = newAudio[index];
-    const player = new Audio.Sound();
-    await Audio.setAudioModeAsync({
-      allowsRecordingIOS: true,
-      playsInSilentModeIOS: true,
-    });
     try {
-      await player.loadAsync({ uri: current.getUri() });
-
-      await player.playAsync();
+      if (player !== null) {
+        await player.unloadAsync();
+      }
+  
+      const newPlayer = new Audio.Sound();
+      await newPlayer.loadAsync({ uri: current.getUri() });
+  
+      newPlayer.setOnPlaybackStatusUpdate((status) => {
+        if (status.didJustFinish) {
+          setIsPlaying(false);
+          const updatedAudio = [...newAudio];
+          updatedAudio[index].isPlaying = false;
+          setNewAudio(updatedAudio);
+          setCurrentIndex(-1);
+          setSliderValueAtIndex(index, 0); // Reset the slider value for the finished audio clip
+        } else if (status.isPlaying) {
+          if (pausedAudioIndex === index && pausedPosition !== null) {
+            setSliderValueAtIndex(index, pausedPosition / status.durationMillis); // Update the slider value using the paused position
+          } else {
+            setSliderValueAtIndex(index, status.positionMillis / status.durationMillis);
+          }
+        }
+      });
+  
+      await newPlayer.playAsync();
+      setPausedAudioIndex(null); // Reset the paused audio index when starting to play
+  
+      const updatedAudio = [...newAudio];
+      updatedAudio[index].isPlaying = true;
+      setNewAudio(updatedAudio);
+      setPlayer(newPlayer);
+      setCurrentIndex(index);
     } catch (error) {
-      console.error(error);
+      console.error("Error while playing audio:", error);
+      // Handle the error here, such as showing an error message or taking other actions
     }
   }
+  
+  async function pauseAudio(index: number) {
+    try {
+      if (player) {
+        const status = await player.getStatusAsync();
+        setPausedPosition(status.positionMillis); // Store the current position when pausing
+        await player.pauseAsync();
+      }
+  
+      const updatedAudio = [...newAudio];
+      updatedAudio[index].isPlaying = false;
+      setNewAudio(updatedAudio);
+      setCurrentIndex(-1);
+      updateSlider(index);
+      setPausedAudioIndex(index); // Set the paused audio index
+    } catch (error) {
+      console.error("Error while pausing audio:", error);
+      // Handle the error here, such as showing an error message or taking other actions
+    }
+  }
+
+  const setSliderValueAtIndex = (index: number, value: number) => {
+    const newSliderValues = [...sliderValues];
+    newSliderValues[index] = value;
+    setSliderValues(newSliderValues);
+  };
+  
+  const handleRename = (index: number) => {
+    if (newName == "") {
+      setRenaming(false);
+      return;
+    }
+    const updatedAudio = [...newAudio];
+    updatedAudio[index].name = newName;
+    setNewAudio(updatedAudio);
+    setRenaming(false);
+  };
 
   const handleDeleteAudio = (index: number) => {
     const updatedAudio = [...newAudio];
     updatedAudio.splice(index, 1);
     setNewAudio(updatedAudio);
+  };
+
+  const handleSliderChange = async (value: number, index: number) => {
+    if (player) {
+      const status = await player.getStatusAsync();
+      player.setPositionAsync(value * status.durationMillis);
+    }
   };
 
   return (
@@ -152,27 +270,66 @@ function AudioContainer({
         {newAudio?.map((audio, index) => (
           <View
             style={{
-              flexDirection: "row",
-              width: "70%",
-              justifyContent: "space-between",
-              alignItems: "center",
+              borderRadius: 10,
+              backgroundColor: "rgb(240,242,243)",
+              marginBottom: 10,
+              paddingHorizontal: 20,
+              paddingVertical: 5,
             }}
-            key={index}
           >
-            <TouchableOpacity
-              onPress={() => playAudio(index)}
-              style={{ flex: 1 }}
+            {reNaming && (
+              <TextInput
+                style={styles.textBox}
+                placeholder={audio.name}
+                onChangeText={(text) => setNewName(text)}
+                onSubmitEditing={() => {
+                  handleRename(index);
+                }}
+              ></TextInput>
+            )}
+            <View
+              style={{
+                flexDirection: "row",
+                width: "90%",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+              key={index}
             >
-              <Text style={{ textAlign: "center" }}>
-                {audio.name} ------- {audio.duration} {"\n"}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => handleDeleteAudio(index)}
-              style={{ marginBottom: "10%" }}
-            >
-              <Ionicons name="trash-outline" size={24} color="#111111" />
-            </TouchableOpacity>
+              {audio.isPlaying ? (
+                <TouchableOpacity onPress={() => pauseAudio(index)}>
+                  <Ionicons name={"pause-outline"} size={25} color="#111111" />
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity onPress={() => playAudio(index)}>
+                  <Ionicons name={"play-outline"} size={25} color="#111111" />
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity
+                onPress={() => setRenaming(!reNaming)}
+                style={{ flex: 1 }}
+              >
+                <Text style={{ textAlign: "center" }}>{audio.name}</Text>
+                <Slider
+                  style={{ width: 200, height: 40 }}
+                  minimumValue={0}
+                  maximumValue={1}
+                  value={sliderValues[index]}
+                  onValueChange={(value) => handleSliderChange(value, index)}
+                  minimumTrackTintColor="#FFFFFF"
+                  maximumTrackTintColor="#000000"
+                />
+
+                <Text style={{ textAlign: "center" }}>{audio.duration}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => handleDeleteAudio(index)}
+                style={{ marginBottom: 5 }}
+              >
+                <Ionicons name="trash-outline" size={25} color="#111111" />
+              </TouchableOpacity>
+            </View>
           </View>
         ))}
       </View>
@@ -189,11 +346,14 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
   },
-  image: {
-    width: 50,
-    height: 50,
-    borderRadius: 20,
-    marginRight: 10,
-    marginTop: 25,
+  textBox: {
+    borderColor: "black",
+    borderBottomWidth: 2,
+    borderRadius: 2,
+    justifyContent: "center",
+    alignSelf: "center",
+    marginBottom: 8,
+    width: 200,
+    textAlign: "center",
   },
 });
