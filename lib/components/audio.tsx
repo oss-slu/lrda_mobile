@@ -34,11 +34,11 @@ function AudioContainer({
   const [player, setPlayer] = useState<null | Audio.Sound>(null);
   const [reNaming, setRenaming] = useState(false);
   const [newName, setNewName] = useState("");
-  const [sliderValue, setSliderValue] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [sliderValues, setSliderValues] = useState<number[]>([]);
   const [pausedPosition, setPausedPosition] = useState<number | null>(null);
   const [pausedAudioIndex, setPausedAudioIndex] = useState<number | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     const checkPlayerStatus = async () => {
@@ -65,7 +65,7 @@ function AudioContainer({
     if (player && isPlaying && currentIndex === index) {
       const status = await player.getStatusAsync();
       if (pausedAudioIndex === index && pausedPosition !== null) {
-        setSliderValueAtIndex(index, pausedPosition / status.durationMillis); // Update the slider value using the paused position
+        setSliderValueAtIndex(index, pausedPosition / status.durationMillis);
       } else {
         setSliderValueAtIndex(index, status.positionMillis / status.durationMillis);
       }
@@ -105,7 +105,7 @@ function AudioContainer({
       if (recording) {
         await recording.stopAndUnloadAsync();
 
-        const uri = await recording.getURI();
+        const uri = recording.getURI();
         const dat = await uploadAudio(uri || "");
         const index = newAudio ? newAudio.length : 0;
 
@@ -140,14 +140,17 @@ function AudioContainer({
     console.log("entered audio player");
     const current = newAudio[index];
     try {
-      if (player !== null) {
+      if (player !== null && isLoaded) {
         await player.unloadAsync();
-      }
+        setIsLoaded(false);
+      }      
   
       const newPlayer = new Audio.Sound();
       await newPlayer.loadAsync({ uri: current.getUri() });
   
       newPlayer.setOnPlaybackStatusUpdate((status) => {
+        setIsLoaded(status.isLoaded);
+      
         if (status.didJustFinish) {
           setIsPlaying(false);
           const updatedAudio = [...newAudio];
@@ -156,25 +159,24 @@ function AudioContainer({
           setCurrentIndex(-1);
           setSliderValueAtIndex(index, 0); // Reset the slider value for the finished audio clip
         } else if (status.isPlaying) {
-          if (pausedAudioIndex === index && pausedPosition !== null) {
-            setSliderValueAtIndex(index, pausedPosition / status.durationMillis); // Update the slider value using the paused position
-          } else {
-            setSliderValueAtIndex(index, status.positionMillis / status.durationMillis);
-          }
+          setSliderValueAtIndex(index, status.positionMillis / status.durationMillis);
         }
       });
   
+      if (pausedPosition !== null && pausedAudioIndex === index) {
+        await newPlayer.setPositionAsync(pausedPosition);
+      }
+  
       await newPlayer.playAsync();
-      setPausedAudioIndex(null); // Reset the paused audio index when starting to play
   
       const updatedAudio = [...newAudio];
       updatedAudio[index].isPlaying = true;
       setNewAudio(updatedAudio);
       setPlayer(newPlayer);
       setCurrentIndex(index);
+      setPausedAudioIndex(null);
     } catch (error) {
       console.error("Error while playing audio:", error);
-      // Handle the error here, such as showing an error message or taking other actions
     }
   }
   
@@ -182,7 +184,7 @@ function AudioContainer({
     try {
       if (player) {
         const status = await player.getStatusAsync();
-        setPausedPosition(status.positionMillis); // Store the current position when pausing
+        setPausedPosition(status.positionMillis);
         await player.pauseAsync();
       }
   
@@ -190,11 +192,23 @@ function AudioContainer({
       updatedAudio[index].isPlaying = false;
       setNewAudio(updatedAudio);
       setCurrentIndex(-1);
-      updateSlider(index);
-      setPausedAudioIndex(index); // Set the paused audio index
+      setPausedAudioIndex(index);
     } catch (error) {
       console.error("Error while pausing audio:", error);
-      // Handle the error here, such as showing an error message or taking other actions
+    }
+  }
+
+  async function handleSliderChange(value: number, index: number) {
+    const newSliderValues = [...sliderValues];
+    newSliderValues[index] = value;
+    setSliderValues(newSliderValues);
+  
+    if (player && isLoaded) {
+      const status = await player.getStatusAsync();
+      await player.setPositionAsync(value * status.durationMillis);
+      if (!status.isPlaying) {
+        await playAudio(index);
+      }
     }
   }
 
@@ -221,13 +235,6 @@ function AudioContainer({
     setNewAudio(updatedAudio);
   };
 
-  const handleSliderChange = async (value: number, index: number) => {
-    if (player) {
-      const status = await player.getStatusAsync();
-      player.setPositionAsync(value * status.durationMillis);
-    }
-  };
-
   return (
     <View style={styles.container}>
       <View
@@ -239,7 +246,7 @@ function AudioContainer({
         }}
       >
         <Ionicons name={"mic-outline"} size={60} color="#111111" />
-        <Text style={{ fontSize: 24, fontWeight: "600" }}> Record </Text>
+        <Text style={{ fontSize: 24, fontWeight: "600" }}>Recordings</Text>
         {isRecording ? (
           <TouchableOpacity onPress={() => stopRecording()}>
             <Ionicons name={"stop-circle-outline"} size={45} color="#111111" />
@@ -276,6 +283,7 @@ function AudioContainer({
               paddingHorizontal: 20,
               paddingVertical: 5,
             }}
+            key={index}
           >
             {reNaming && (
               <TextInput
@@ -294,7 +302,6 @@ function AudioContainer({
                 justifyContent: "space-between",
                 alignItems: "center",
               }}
-              key={index}
             >
               {audio.isPlaying ? (
                 <TouchableOpacity onPress={() => pauseAudio(index)}>
