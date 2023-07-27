@@ -32,7 +32,7 @@ function AudioContainer({
   const [recording, setRecording] = useState<null | Audio.Recording>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [player, setPlayer] = useState<null | Audio.Sound>(null);
-  const [reNaming, setRenaming] = useState(false);
+  const [reNaming, setRenaming] = useState("");
   const [newName, setNewName] = useState("");
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [sliderValues, setSliderValues] = useState<number[]>([]);
@@ -67,7 +67,10 @@ function AudioContainer({
       if (pausedAudioIndex === index && pausedPosition !== null) {
         setSliderValueAtIndex(index, pausedPosition / status.durationMillis);
       } else {
-        setSliderValueAtIndex(index, status.positionMillis / status.durationMillis);
+        setSliderValueAtIndex(
+          index,
+          status.positionMillis / status.durationMillis
+        );
       }
     }
   };
@@ -143,14 +146,14 @@ function AudioContainer({
       if (player !== null && isLoaded) {
         await player.unloadAsync();
         setIsLoaded(false);
-      }      
-  
+      }
+
       const newPlayer = new Audio.Sound();
       await newPlayer.loadAsync({ uri: current.getUri() });
-  
+
       newPlayer.setOnPlaybackStatusUpdate((status) => {
         setIsLoaded(status.isLoaded);
-      
+
         if (status.didJustFinish) {
           setIsPlaying(false);
           const updatedAudio = [...newAudio];
@@ -159,16 +162,19 @@ function AudioContainer({
           setCurrentIndex(-1);
           setSliderValueAtIndex(index, 0); // Reset the slider value for the finished audio clip
         } else if (status.isPlaying) {
-          setSliderValueAtIndex(index, status.positionMillis / status.durationMillis);
+          setSliderValueAtIndex(
+            index,
+            status.positionMillis / status.durationMillis
+          );
         }
       });
-  
+
       if (pausedPosition !== null && pausedAudioIndex === index) {
         await newPlayer.setPositionAsync(pausedPosition);
       }
-  
+
       await newPlayer.playAsync();
-  
+
       const updatedAudio = [...newAudio];
       updatedAudio[index].isPlaying = true;
       setNewAudio(updatedAudio);
@@ -179,7 +185,7 @@ function AudioContainer({
       console.error("Error while playing audio:", error);
     }
   }
-  
+
   async function pauseAudio(index: number) {
     try {
       if (player) {
@@ -187,7 +193,7 @@ function AudioContainer({
         setPausedPosition(status.positionMillis);
         await player.pauseAsync();
       }
-  
+
       const updatedAudio = [...newAudio];
       updatedAudio[index].isPlaying = false;
       setNewAudio(updatedAudio);
@@ -202,7 +208,7 @@ function AudioContainer({
     const newSliderValues = [...sliderValues];
     newSliderValues[index] = value;
     setSliderValues(newSliderValues);
-  
+
     if (player && isLoaded) {
       const status = await player.getStatusAsync();
       await player.setPositionAsync(value * status.durationMillis);
@@ -217,16 +223,16 @@ function AudioContainer({
     newSliderValues[index] = value;
     setSliderValues(newSliderValues);
   };
-  
+
   const handleRename = (index: number) => {
     if (newName == "") {
-      setRenaming(false);
+      setRenaming("");
       return;
     }
     const updatedAudio = [...newAudio];
     updatedAudio[index].name = newName;
     setNewAudio(updatedAudio);
-    setRenaming(false);
+    setRenaming("");
   };
 
   const handleDeleteAudio = (index: number) => {
@@ -285,7 +291,7 @@ function AudioContainer({
             }}
             key={index}
           >
-            {reNaming && (
+            {reNaming === audio.uuid && (
               <TextInput
                 style={styles.textBox}
                 placeholder={audio.name}
@@ -312,11 +318,10 @@ function AudioContainer({
                   <Ionicons name={"play-outline"} size={25} color="#111111" />
                 </TouchableOpacity>
               )}
-              <TouchableOpacity
-                onPress={() => setRenaming(!reNaming)}
-                style={{ flex: 1 }}
-              >
-                <Text style={{ textAlign: "center" }}>{audio.name}</Text>
+              <View style={{ flex: 1 }}>
+                <TouchableOpacity onPress={() => setRenaming(audio.uuid)}>
+                  <Text style={{ textAlign: "center" }}>{audio.name}</Text>
+                </TouchableOpacity>
                 <Slider
                   style={{ width: 200, height: 40 }}
                   minimumValue={0}
@@ -326,9 +331,8 @@ function AudioContainer({
                   minimumTrackTintColor="#FFFFFF"
                   maximumTrackTintColor="#000000"
                 />
-
                 <Text style={{ textAlign: "center" }}>{audio.duration}</Text>
-              </TouchableOpacity>
+              </View>
 
               <TouchableOpacity
                 onPress={() => handleDeleteAudio(index)}
