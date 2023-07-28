@@ -33,6 +33,7 @@ export default class DataConversion {
             uri: item.uri,
             duration: item.duration,
             name: item.name,
+            isPlaying: false,
           });
         } else {
           return new PhotoType({
@@ -50,6 +51,7 @@ export default class DataConversion {
           uri: item.uri,
           duration: item.duration,
           name: item.name,
+          isPlaying: false,
         });
       });
 
