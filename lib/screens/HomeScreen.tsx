@@ -149,7 +149,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         user.getId() || ""
       );
       if (success) {
-        refreshPage();
+        // refreshPage();
         return true;
       }
     } catch (error) {

@@ -22,72 +22,139 @@ interface LocationProps {
   >;
 }
 
-export default function LocationWindow({ location, setLocation }: LocationProps) {
-    const [latitude, setLatitude] = useState(location?.latitude?.toString() || "");
-    const [longitude, setLongitude] = useState(location?.longitude?.toString() || "");
+async function getLocation() {
+  try {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      console.log("Permission to access location was denied");
+      return null; // Return null to indicate that location access is denied
+    }
+    return await Location.getCurrentPositionAsync({});
+  } catch (error) {
+    console.error("Error getting location:", error);
+    return null; // Return null to indicate an error occurred while getting location
+  }
+}
+
+function getDistanceFrom(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+) {
+  const R = 6371;
+  const dLat = deg2rad(lat2 - lat1);
+  const dLon = deg2rad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(deg2rad(lat1)) *
+      Math.cos(deg2rad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c;
+  const distanceInMiles = distance * 0.621371;
+
+  return distanceInMiles;
+}
+
+function deg2rad(deg: number) {
+  return deg * (Math.PI / 180);
+}
+
+export default function LocationWindow({
+  location,
+  setLocation,
+}: LocationProps) {
+  const [latitude, setLatitude] = useState(
+    location?.latitude?.toString() || ""
+  );
+  const [longitude, setLongitude] = useState(
+    location?.longitude?.toString() || ""
+  );
+  const [distanceFromEvent, setDistanceFromEvent] = useState<string>("");
+
+  useEffect(() => {
+    const updateDistance = async () => {
+      const distance = await getDistance();
+      setDistanceFromEvent(`${distance.toFixed(2)} Mi`);
+    };
+    updateDistance();
+  }, [location]);
+
+  const handleLatitudeChange = (newLatitude: string) => {
+    setLatitude(newLatitude);
+    setLocation((prevLocation) => ({
+      latitude: parseFloat(newLatitude),
+      longitude: prevLocation?.longitude ?? 0,
+    }));
+  };
+
+  const handleLongitudeChange = (newLongitude: string) => {
+    setLongitude(newLongitude);
+    setLocation((prevLocation) => ({
+      latitude: prevLocation?.latitude ?? 0,
+      longitude: parseFloat(newLongitude),
+    }));
+  };
+
+  useEffect(() => {
+    setLatitude(location?.latitude?.toString() || "");
+    setLongitude(location?.longitude?.toString() || "");
+  }, [location]);
+
+  const setShownLocation = async () => {
+    try {
+      let userLocation = await getLocation();
   
-    const handleLatitudeChange = (newLatitude: string) => {
-        setLatitude(newLatitude);
-        setLocation((prevLocation) => ({
-          latitude: parseFloat(newLatitude),
-          longitude: prevLocation?.longitude ?? 0,
-        }));
-      };
-      
-      const handleLongitudeChange = (newLongitude: string) => {
-        setLongitude(newLongitude);
-        setLocation((prevLocation) => ({
-          latitude: prevLocation?.latitude ?? 0,
-          longitude: parseFloat(newLongitude),
-        }));
-      };
-      
-  
-    useEffect(() => {
-      setLatitude(location?.latitude?.toString() || "");
-      setLongitude(location?.longitude?.toString() || "");
-    }, [location]);
-  
-    const getLocation = async () => {
-      try {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          console.log("Permission to access location was denied");
-          return;
-        }
-  
-        let userLocation = await Location.getCurrentPositionAsync({});
+      if (userLocation?.coords?.latitude !== undefined && userLocation?.coords?.longitude !== undefined) {
         setLocation({
           latitude: userLocation.coords.latitude,
           longitude: userLocation.coords.longitude,
         });
-        // Set latitude and longitude state variables
+  
         setLatitude(userLocation.coords.latitude.toString());
         setLongitude(userLocation.coords.longitude.toString());
-      } catch (error) {
-        console.error("Error getting location:", error);
+      } else {
+        console.log("Location data is not available.");
       }
-    };
-  
-    return (
-      <View style={styles.container}>
-        <Text style={styles.label}>Longitude</Text>
-        <TextInput
-          style={styles.input}
-          value={longitude}
-          onChangeText={handleLongitudeChange}
-        />
-        <Text style={styles.label}>Latitude</Text>
-        <TextInput
-          style={styles.input}
-          value={latitude}
-          onChangeText={handleLatitudeChange}
-        />
-        <Button title="Use Current Location" onPress={getLocation} />
-      </View>
-    );
+    } catch (error) {
+      console.error("Error setting location:", error);
+    }
   };
   
+  const getDistance = async () => {
+    const lat1 = location?.latitude || 0;
+    const lon1 = location?.longitude || 0;
+    const currentLocation = await getLocation();
+    const lat2 = currentLocation?.coords.latitude || 0;
+    const lon2 = currentLocation?.coords.longitude || 0;
+    return getDistanceFrom(lat1, lon1, lat2, lon2);
+  };
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.distanceContainer}>
+        <Text style={styles.distanceText}>
+          {(distanceFromEvent && location) && distanceFromEvent.toString()}
+        </Text>
+      </View>
+      <Text style={styles.label}>Longitude</Text>
+      <TextInput
+        style={styles.input}
+        value={longitude}
+        onChangeText={handleLongitudeChange}
+      />
+      <Text style={styles.label}>Latitude</Text>
+      <TextInput
+        style={styles.input}
+        value={latitude}
+        onChangeText={handleLatitudeChange}
+      />
+      <Button title="Use Current Location" onPress={setShownLocation} />
+    </View>
+  );
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -95,6 +162,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
+  },
+  distanceContainer: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    backgroundColor: "rgba(255, 255, 255, 0.5)",
+    padding: 5,
+    borderRadius: 5,
+  },
+  distanceText: {
+    color: "#000",
+    fontSize: 14,
+    fontWeight: "bold",
   },
   label: {
     fontSize: 18,
