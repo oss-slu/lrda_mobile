@@ -96,6 +96,7 @@ export default class ApiService {
         audio: note.audio,
         published: note.published,
         tags: note.tags,
+        time: note.time || new Date (),
       }),
     });
   }
@@ -123,6 +124,7 @@ export default class ApiService {
         audio: note.audio,
         published: note.published,
         tags: note.tags,
+        time: note.time,
       }),
     });
   }

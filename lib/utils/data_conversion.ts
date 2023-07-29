@@ -12,11 +12,16 @@ export default class DataConversion {
    */
   static convertMediaTypes(data: any[]): Note[] {
     const fetchedNotes: Note[] = data.map((message: any) => {
-      const time = new Date(message.__rerum.createdAt);
-      var date = new Date();
-      var offsetInHours = date.getTimezoneOffset() / 60;
+      let time = new Date(message.__rerum.createdAt);
+      if (message.time === undefined) {
+        time = new Date(message.__rerum.createdAt);
+        var date = new Date();
+        var offsetInHours = date.getTimezoneOffset() / 60;
+        time.setHours(time.getHours() - offsetInHours);
+      } else {
+        time = new Date (message.time);
+      }
 
-      time.setHours(time.getHours() - offsetInHours);
       const mediaItems = message.media.map((item: any) => {
         if (item.type === "video") {
           return new VideoType({
@@ -59,8 +64,7 @@ export default class DataConversion {
         id: message["@id"],
         title: message.title || "",
         text: message.BodyText || "",
-        time:
-          time.toLocaleString("en-US") || "",
+        time: time || "",
         creator: message.creator || "",
         media: mediaItems || [],
         audio: audioItems || [],
@@ -72,7 +76,7 @@ export default class DataConversion {
     });
 
     fetchedNotes.sort(
-      (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
+      (b, a) => new Date(b.time).getTime() - new Date(a.time).getTime()
     );
 
     return fetchedNotes;

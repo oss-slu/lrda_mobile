@@ -20,6 +20,7 @@ import { EditNoteScreenProps } from "../../types";
 import ApiService from "../utils/api_calls";
 import TagWindow from "../components/tagging";
 import LocationWindow from "../components/location";
+import TimeWindow from "../components/time"
 
 const user = User.getInstance();
 
@@ -30,6 +31,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const { note, onSave } = route.params;
   const [title, setTitle] = useState(note.title);
   const [text, setText] = useState(note.text);
+  const [time, setTime] = useState(note.time);
   const [tags, setTags] = useState(note.tags);
   const [media, setMedia] = useState<Media[]>(note.media);
   const [newAudio, setNewAudio] = useState<AudioType[]>(note.audio);
@@ -40,6 +42,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const [viewAudio, setViewAudio] = useState(false);
   const [isTagging, setIsTagging] = useState(false);
   const [isLocation, setIsLocation] = useState(false);
+  const [isTime, setIsTime] = useState(false);
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -72,7 +75,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         longitude: location?.longitude.toString() || "",
         audio: newAudio,
         published: isPublished,
-        time: note.time,
+        time: time,
         tags: tags,
       };
 
@@ -121,51 +124,61 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         )}
       </View>
       <View style={{ backgroundColor: "black" }}>
-        <View style={styles.keyContainer}>
-          <TouchableOpacity
-            onPress={() => {
-              setViewMedia(!viewMedia);
-              setViewAudio(false);
-              setIsTagging(false);
-              setIsLocation(false);
-            }}
-          >
-            <Ionicons name="images-outline" size={30} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setViewMedia(false);
-              setViewAudio(!viewAudio);
-              setIsTagging(false);
-              setIsLocation(false);
-            }}
-          >
-            <Ionicons name="mic-outline" size={30} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setViewMedia(false);
-              setViewAudio(false);
-              setIsTagging(false);
-              setIsLocation(!isLocation);
-            }}
-          >
-            <Ionicons name="location-outline" size={30} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Ionicons name="time-outline" size={30} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setViewMedia(false);
-              setViewAudio(false);
-              setIsTagging(!isTagging);
-              setIsLocation(false);
-            }}
-          >
-            <Ionicons name="pricetag-outline" size={30} color="black" />
-          </TouchableOpacity>
-        </View>
+      <View style={styles.keyContainer}>
+        <TouchableOpacity
+          onPress={() => {
+            setViewMedia(!viewMedia);
+            setViewAudio(false);
+            setIsTagging(false);
+            setIsLocation(false);
+            setIsTime(false);
+          }}
+        >
+          <Ionicons name="images-outline" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            setViewMedia(false);
+            setViewAudio(!viewAudio);
+            setIsTagging(false);
+            setIsLocation(false);
+            setIsTime(false);
+          }}
+        >
+          <Ionicons name="mic-outline" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            setViewMedia(false);
+            setViewAudio(false);
+            setIsTagging(false);
+            setIsLocation(!isLocation);
+            setIsTime(false);
+          }}
+        >
+          <Ionicons name="location-outline" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => {
+            setViewMedia(false);
+            setViewAudio(false);
+            setIsTagging(false);
+            setIsLocation(false);
+            setIsTime(!isTime);
+          }}>
+          <Ionicons name="time-outline" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            setViewMedia(false);
+            setViewAudio(false);
+            setIsTagging(!isTagging);
+            setIsLocation(false);
+            setIsTime(false);
+          }}
+        >
+          <Ionicons name="pricetag-outline" size={30} color="black" />
+        </TouchableOpacity>
+      </View>
       </View>
       <View style={styles.container}>
         <KeyboardAwareScrollView
@@ -173,16 +186,11 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           showsVerticalScrollIndicator={false}
           style={{ paddingTop: 10 }}
         >
-          {viewMedia && (
-            <PhotoScroller newMedia={media} setNewMedia={setMedia} />
-          )}
-          {viewAudio && (
-            <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
-          )}
+          {viewMedia && <PhotoScroller newMedia={media} setNewMedia={setMedia} />}
+          {viewAudio && <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />}
           {isTagging && <TagWindow tags={tags} setTags={setTags} />}
-          {isLocation && (
-            <LocationWindow location={location} setLocation={setLocation} />
-          )}
+          {isLocation && <LocationWindow location={location} setLocation={setLocation} />}
+          {isTime && <TimeWindow time={time} setTime={setTime} />}
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}

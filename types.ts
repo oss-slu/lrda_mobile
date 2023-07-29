@@ -25,7 +25,7 @@ export type Note = {
   id: string;
   title: string;
   text: string;
-  time: string;
+  time: Date;
   media: (VideoType | PhotoType)[];
   audio: AudioType[];
   creator: string;

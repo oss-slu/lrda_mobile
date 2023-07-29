@@ -18,6 +18,7 @@ import * as Location from "expo-location";
 import ApiService from "../utils/api_calls";
 import TagWindow from "../components/tagging";
 import LocationWindow from "../components/location";
+import TimeWindow from "../components/time";
 
 const user = User.getInstance();
 
@@ -27,10 +28,12 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [newMedia, setNewMedia] = useState<Media[]>([]);
   const [newAudio, setNewAudio] = useState<AudioType[]>([]);
   const [tags, setTags] = useState<string[]>([]);
+  const [time, setTime] = useState(new Date());
   const [viewMedia, setViewMedia] = useState(false);
   const [viewAudio, setViewAudio] = useState(false);
   const [isTagging, setIsTagging] = useState(false);
   const [isLocation, setIsLocation] = useState(false);
+  const [isTime, setIsTime] = useState(false);
   const [isPublished, setIsPublished] = useState(false);
   const [location, setLocation] = useState<{
     latitude: number;
@@ -53,6 +56,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         longitude: location?.longitude.toString() || "",
         published: isPublished,
         tags: tags,
+        time: time,
       };
       const response = await ApiService.writeNewNote(newNote);
 
@@ -102,6 +106,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             setViewAudio(false);
             setIsTagging(false);
             setIsLocation(false);
+            setIsTime(false);
           }}
         >
           <Ionicons name="images-outline" size={30} color="black" />
@@ -112,6 +117,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             setViewAudio(!viewAudio);
             setIsTagging(false);
             setIsLocation(false);
+            setIsTime(false);
           }}
         >
           <Ionicons name="mic-outline" size={30} color="black" />
@@ -122,11 +128,18 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             setViewAudio(false);
             setIsTagging(false);
             setIsLocation(!isLocation);
+            setIsTime(false);
           }}
         >
           <Ionicons name="location-outline" size={30} color="black" />
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => {
+            setViewMedia(false);
+            setViewAudio(false);
+            setIsTagging(false);
+            setIsLocation(false);
+            setIsTime(!isTime);
+          }}>
           <Ionicons name="time-outline" size={30} color="black" />
         </TouchableOpacity>
         <TouchableOpacity
@@ -135,6 +148,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             setViewAudio(false);
             setIsTagging(!isTagging);
             setIsLocation(false);
+            setIsTime(false);
           }}
         >
           <Ionicons name="pricetag-outline" size={30} color="black" />
@@ -146,16 +160,11 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           showsVerticalScrollIndicator={false}
           style={{ overflow: "hidden", paddingTop: 10, paddingBottom: 100 }}
         >
-          {viewMedia && (
-            <PhotoScroller newMedia={newMedia} setNewMedia={setNewMedia} />
-          )}
-          {viewAudio && (
-            <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
-          )}
+          {viewMedia && <PhotoScroller newMedia={newMedia} setNewMedia={setNewMedia} />}
+          {viewAudio && <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />}
           {isTagging && <TagWindow tags={tags} setTags={setTags} />}
-          {isLocation && (
-            <LocationWindow location={location} setLocation={setLocation} />
-          )}
+          {isLocation && <LocationWindow location={location} setLocation={setLocation} />}
+          {isTime && <TimeWindow time={time} setTime={setTime} />}
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}

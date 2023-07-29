@@ -3,7 +3,6 @@ import {
   Platform,
   Linking,
   View,
-  Image,
   Text,
   StyleSheet,
   ScrollView,
@@ -12,7 +11,6 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
-import { PhotoType, VideoType, AudioType } from "../models/media_class";
 import { Note } from "../../types";
 import { HomeScreenProps } from "../../types";
 import ApiService from "../utils/api_calls";
@@ -20,6 +18,7 @@ import DataConversion from "../utils/data_conversion";
 import { SwipeListView } from "react-native-swipe-list-view";
 import NoteSkeleton from "../components/noteSkeleton";
 import LoadingImage from "../components/loadingImage";
+import { formatToLocalDateString } from "../components/time"
 
 const user = User.getInstance();
 
@@ -122,7 +121,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       );
       setMessages(data);
 
-      const fetchedNotes = DataConversion.convertMediaTypes(data); // returns sorted Notes with proper media types.
+      const fetchedNotes = DataConversion.convertMediaTypes(data);
 
       if (Platform.OS === "web") {
         textLength = 50;
@@ -244,7 +243,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       longitude: foundNote?.longitude || "",
       audio: foundNote?.audio || [],
       published: !foundNote?.published || false,
-      time: foundNote?.time || "",
+      time: foundNote?.time || new Date(),
       tags: foundNote?.tags || [],
     };
     await ApiService.overwriteNote(editedNote);
@@ -278,6 +277,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   const renderItem = (data: any) => {
     const item = data.item;
+    // console.log("item.time: ",item.time);
+    const tempTime = new Date(item.time);
+    const showTime = formatToLocalDateString(tempTime)
     const mediaItem = item.media[0];
     const ImageType = mediaItem?.getType();
     let ImageURI = "";
@@ -328,9 +330,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                 : item.title}
             </Text>
 
-            <Text style={styles.noteText}>
-              {`${item.time.split(", ")[0]}\n${item.time.split(", ")[1]}`}
-            </Text>
+            <Text style={styles.noteText}>{showTime}</Text>
           </View>
         </View>
         <TouchableOpacity
@@ -541,6 +541,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   noteText: {
+    marginTop: 10,
     fontSize: 18,
   },
   noteTextBox: {
