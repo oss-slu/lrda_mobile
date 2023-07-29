@@ -93,7 +93,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
             onPress={fadeOut}
           >
             <Animated.Text style={[styles.logo, { opacity: fadeAnim }]}>
-              Where's {"\n"} Religion
+              Where's {"\n"} Religion?
             </Animated.Text>
           </TouchableOpacity>
         ) : (
