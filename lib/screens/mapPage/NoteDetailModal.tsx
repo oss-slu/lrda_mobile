@@ -1,5 +1,5 @@
-import React, { useRef, useState, useEffect } from "react";
-import { ActivityIndicator, ScrollView, View, Text, StyleSheet, Modal, TouchableOpacity, Image, Dimensions } from "react-native";
+import React, { useState, useEffect } from "react";
+import { ActivityIndicator, ScrollView, View, Text, StyleSheet, Modal, TouchableOpacity, Image } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { Note } from "../../../types";
 import { Media } from "../../../lib/models/media_class";
@@ -13,8 +13,19 @@ interface Props {
 
 const NoteDetailModal: React.FC<Props> = ({ isVisible, onClose, note }) => {
   let images: {uri: string}[] = [];
-  console.log("This is a NoteDetailModal: ", note);
   const [creatorName, setCreatorName] = useState<string>('');
+  const [isImageTouched, setImageTouched] = useState(false);
+  const [isTextTouched, setTextTouched] = useState(false);
+
+  const handleImageTouchStart = () => {
+    setImageTouched(true);
+    setTextTouched(false);
+  };
+
+  const handleTextTouchStart = () => {
+    setTextTouched(true);
+    setImageTouched(false);
+  };
 
   useEffect(() => {
     if (note && note.creator) {
@@ -38,43 +49,57 @@ const NoteDetailModal: React.FC<Props> = ({ isVisible, onClose, note }) => {
 
   return (
     <Modal animationType="slide" transparent={false} visible={isVisible}>
+      <View style={{height: 125}}> 
       <TouchableOpacity onPress={onClose} style={styles.closeButton}>
         <View style={styles.closeIcon}>
           <Ionicons name="close" size={30} color="#000" />
         </View>
       </TouchableOpacity>
-      <ScrollView contentContainerStyle={styles.modalView}>
-      {images && images.length > 0 ? images.map((image, index) => {
-            return (
-              <View key={index} style={styles.imageContainer}>
-                {!imageLoadedState[image.uri] && <ActivityIndicator size="large" color="#0000ff" />}
-                <Image
-                  source={{ uri: image.uri }}
-                  style={styles.image}
-                  onLoad={() => handleLoad(image.uri)}
-                />
-              </View>
-            )
-          }) : <Text>No images</Text>}
+      <Text style={styles.modalTitle}>{note?.title}</Text>
+      </View>
+      
+      <ScrollView
+        style={{height: isImageTouched ? '80%' : '50%',}}
+        onTouchStart={(images.length  > 2) ? handleImageTouchStart : undefined}
+      >
+        {images && images.length > 0 ? images.map((image, index) => {
+          return (
+            <View key={index} style={styles.imageContainer}>
+              {!imageLoadedState[image.uri] && <ActivityIndicator size="large" color="#0000ff" />}
+              <Image
+                source={{ uri: image.uri }}
+                style={styles.image}
+                onLoad={() => handleLoad(image.uri)}
+              />
+            </View>
+          );
+        }) : <Text style={{alignSelf: 'center', justifyContent: 'center'}}>No images</Text>}
+        <View style={{height:200}}></View>
       </ScrollView>
-      <View style={styles.textContainer}>
+      <View
+        style={[
+          styles.textContainer,
+          {
+            height: isTextTouched ? '60%' : '30%',
+          },
+        ]}
+        onTouchStart={handleTextTouchStart}
+      >
         <ScrollView>
-          <Text style={styles.modalTitle}>{note?.title}</Text>
-          <Text style={styles.modalText}>{note?.description}</Text>
           <Text style={styles.modalText}>{`Created by: ${creatorName}`}</Text>
           <Text style={styles.modalText}>{note?.createdAt}</Text>
+          <View style={{height: 2, width: '100%', backgroundColor :'black', marginBottom: 10}}></View>
+          <Text style={styles.modalText}>{note?.description}</Text>
         </ScrollView>
       </View>
     </Modal>
   );
-  };
+};
 
+export default NoteDetailModal;
 
 
 const styles = StyleSheet.create({
-  modalView: {
-    paddingBottom: 200, // equals to the height of textContainer plus a bit of margin
-  },
   closeButton: {
     position: 'absolute',
     top: 50,
@@ -107,6 +132,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 15,
     color: '#333',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    marginTop: "15%",
   },
   modalText: {
     fontSize: 18,
@@ -125,10 +153,8 @@ const styles = StyleSheet.create({
   },
   image: {
     width: "100%",
-    height: 200,
+    height: "100%",
     resizeMode: "cover",
     position: "absolute",
   },
 });
-
-export default NoteDetailModal;
