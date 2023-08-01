@@ -16,7 +16,9 @@ import { Media, AudioType } from "../models/media_class";
 import AudioContainer from "../components/audio";
 import * as Location from "expo-location";
 import ApiService from "../utils/api_calls";
-import TagWindow from "../components/tagging"
+import TagWindow from "../components/tagging";
+import LocationWindow from "../components/location";
+import TimeWindow from "../components/time";
 
 const user = User.getInstance();
 
@@ -26,9 +28,12 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [newMedia, setNewMedia] = useState<Media[]>([]);
   const [newAudio, setNewAudio] = useState<AudioType[]>([]);
   const [tags, setTags] = useState<string[]>([]);
+  const [time, setTime] = useState(new Date());
   const [viewMedia, setViewMedia] = useState(false);
   const [viewAudio, setViewAudio] = useState(false);
   const [isTagging, setIsTagging] = useState(false);
+  const [isLocation, setIsLocation] = useState(false);
+  const [isTime, setIsTime] = useState(false);
   const [isPublished, setIsPublished] = useState(false);
   const [location, setLocation] = useState<{
     latitude: number;
@@ -38,22 +43,6 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   useEffect(() => {
     console.log("new Media array:", newMedia);
   }, [newMedia]);
-
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        console.log("Permission to access location was denied");
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      });
-    })();
-  }, []);
 
   const saveNote = async () => {
     try {
@@ -67,6 +56,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         longitude: location?.longitude.toString() || "",
         published: isPublished,
         tags: tags,
+        time: time,
       };
       const response = await ApiService.writeNewNote(newNote);
 
@@ -110,49 +100,71 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         )}
       </View>
       <View style={styles.keyContainer}>
-          <TouchableOpacity onPress={() =>{
+        <TouchableOpacity
+          onPress={() => {
             setViewMedia(!viewMedia);
             setViewAudio(false);
             setIsTagging(false);
-          }}>
-            <Ionicons name="images-outline" size={30} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() =>{
+            setIsLocation(false);
+            setIsTime(false);
+          }}
+        >
+          <Ionicons name="images-outline" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
             setViewMedia(false);
             setViewAudio(!viewAudio);
             setIsTagging(false);
+            setIsLocation(false);
+            setIsTime(false);
+          }}
+        >
+          <Ionicons name="mic-outline" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            setViewMedia(false);
+            setViewAudio(false);
+            setIsTagging(false);
+            setIsLocation(!isLocation);
+            setIsTime(false);
+          }}
+        >
+          <Ionicons name="location-outline" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => {
+            setViewMedia(false);
+            setViewAudio(false);
+            setIsTagging(false);
+            setIsLocation(false);
+            setIsTime(!isTime);
           }}>
-            <Ionicons name="mic-outline" size={30} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Ionicons name="location-outline" size={30} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Ionicons name="time-outline" size={30} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() =>{
+          <Ionicons name="time-outline" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
             setViewMedia(false);
             setViewAudio(false);
             setIsTagging(!isTagging);
-          }}>
-            <Ionicons name="pricetag-outline" size={30} color="black" />
-          </TouchableOpacity>
-        </View>
+            setIsLocation(false);
+            setIsTime(false);
+          }}
+        >
+          <Ionicons name="pricetag-outline" size={30} color="black" />
+        </TouchableOpacity>
+      </View>
       <View style={styles.container}>
         <KeyboardAwareScrollView
           nestedScrollEnabled
           showsVerticalScrollIndicator={false}
           style={{ overflow: "hidden", paddingTop: 10, paddingBottom: 100 }}
         >
-          {viewMedia && (
-            <PhotoScroller newMedia={newMedia} setNewMedia={setNewMedia} />
-          )}
-          {viewAudio && (
-            <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
-          )}
-          {isTagging && (
-          <TagWindow tags={tags} setTags={setTags} />
-          )}
+          {viewMedia && <PhotoScroller newMedia={newMedia} setNewMedia={setNewMedia} />}
+          {viewAudio && <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />}
+          {isTagging && <TagWindow tags={tags} setTags={setTags} />}
+          {isLocation && <LocationWindow location={location} setLocation={setLocation} />}
+          {isTime && <TimeWindow time={time} setTime={setTime} />}
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}

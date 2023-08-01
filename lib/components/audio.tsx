@@ -1,7 +1,14 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  TextInput,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { AudioType } from "../models/media_class";
+import Slider from "@react-native-community/slider";
 import { Audio } from "expo-av";
 import uuid from "react-native-uuid";
 import { uploadAudio } from "../utils/S3_proxy";
@@ -23,6 +30,50 @@ function AudioContainer({
 }) {
   const [isRecording, setIsRecording] = useState(false);
   const [recording, setRecording] = useState<null | Audio.Recording>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [player, setPlayer] = useState<null | Audio.Sound>(null);
+  const [reNaming, setRenaming] = useState("");
+  const [newName, setNewName] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(-1);
+  const [sliderValues, setSliderValues] = useState<number[]>([]);
+  const [pausedPosition, setPausedPosition] = useState<number | null>(null);
+  const [pausedAudioIndex, setPausedAudioIndex] = useState<number | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    const checkPlayerStatus = async () => {
+      if (player) {
+        const status = await player.getStatusAsync();
+        console.log("status: ", status);
+        setIsPlaying(false);
+      }
+    };
+    checkPlayerStatus();
+  }, [isPlaying, player]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (isPlaying && currentIndex !== null) {
+      interval = setInterval(() => updateSlider(currentIndex), 1000);
+    } else {
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [isPlaying, currentIndex]);
+
+  const updateSlider = async (index: number) => {
+    if (player && isPlaying && currentIndex === index) {
+      const status = await player.getStatusAsync();
+      if (pausedAudioIndex === index && pausedPosition !== null) {
+        setSliderValueAtIndex(index, pausedPosition / status.durationMillis);
+      } else {
+        setSliderValueAtIndex(
+          index,
+          status.positionMillis / status.durationMillis
+        );
+      }
+    }
+  };
 
   async function startRecording() {
     setIsRecording(true);
@@ -57,7 +108,7 @@ function AudioContainer({
       if (recording) {
         await recording.stopAndUnloadAsync();
 
-        const uri = await recording.getURI();
+        const uri = recording.getURI();
         const dat = await uploadAudio(uri || "");
         const index = newAudio ? newAudio.length : 0;
 
@@ -73,6 +124,7 @@ function AudioContainer({
                 ? getDurationFormatted(status.durationMillis)
                 : "",
             name: `Recording ${index + 1}`,
+            isPlaying: false,
           });
 
           setNewAudio([...newAudio, newRecording]);
@@ -90,19 +142,98 @@ function AudioContainer({
   async function playAudio(index: number) {
     console.log("entered audio player");
     const current = newAudio[index];
-    const player = new Audio.Sound();
-    await Audio.setAudioModeAsync({
-      allowsRecordingIOS: true,
-      playsInSilentModeIOS: true,
-    });
     try {
-      await player.loadAsync({ uri: current.getUri() });
+      if (player !== null && isLoaded) {
+        await player.unloadAsync();
+        setIsLoaded(false);
+      }
 
-      await player.playAsync();
+      const newPlayer = new Audio.Sound();
+      await newPlayer.loadAsync({ uri: current.getUri() });
+
+      newPlayer.setOnPlaybackStatusUpdate((status) => {
+        setIsLoaded(status.isLoaded);
+
+        if (status.didJustFinish) {
+          setIsPlaying(false);
+          const updatedAudio = [...newAudio];
+          updatedAudio[index].isPlaying = false;
+          setNewAudio(updatedAudio);
+          setCurrentIndex(-1);
+          setSliderValueAtIndex(index, 0); // Reset the slider value for the finished audio clip
+        } else if (status.isPlaying) {
+          setSliderValueAtIndex(
+            index,
+            status.positionMillis / status.durationMillis
+          );
+        }
+      });
+
+      if (pausedPosition !== null && pausedAudioIndex === index) {
+        await newPlayer.setPositionAsync(pausedPosition);
+      }
+
+      await newPlayer.playAsync();
+
+      const updatedAudio = [...newAudio];
+      updatedAudio[index].isPlaying = true;
+      setNewAudio(updatedAudio);
+      setPlayer(newPlayer);
+      setCurrentIndex(index);
+      setPausedAudioIndex(null);
     } catch (error) {
-      console.error(error);
+      console.error("Error while playing audio:", error);
     }
   }
+
+  async function pauseAudio(index: number) {
+    try {
+      if (player) {
+        const status = await player.getStatusAsync();
+        setPausedPosition(status.positionMillis);
+        await player.pauseAsync();
+      }
+
+      const updatedAudio = [...newAudio];
+      updatedAudio[index].isPlaying = false;
+      setNewAudio(updatedAudio);
+      setCurrentIndex(-1);
+      setPausedAudioIndex(index);
+    } catch (error) {
+      console.error("Error while pausing audio:", error);
+    }
+  }
+
+  async function handleSliderChange(value: number, index: number) {
+    const newSliderValues = [...sliderValues];
+    newSliderValues[index] = value;
+    setSliderValues(newSliderValues);
+
+    if (player && isLoaded) {
+      const status = await player.getStatusAsync();
+      await player.setPositionAsync(value * status.durationMillis);
+      if (!status.isPlaying) {
+        await playAudio(index);
+      }
+    }
+  }
+
+  const setSliderValueAtIndex = (index: number, value: number) => {
+    const newSliderValues = [...sliderValues];
+    newSliderValues[index] = value;
+    setSliderValues(newSliderValues);
+  };
+
+  const handleRename = (index: number) => {
+    if (newName == "") {
+      setRenaming("");
+      return;
+    }
+    const updatedAudio = [...newAudio];
+    updatedAudio[index].name = newName;
+    setNewAudio(updatedAudio);
+    setRenaming("");
+  };
 
   const handleDeleteAudio = (index: number) => {
     const updatedAudio = [...newAudio];
@@ -121,7 +252,7 @@ function AudioContainer({
         }}
       >
         <Ionicons name={"mic-outline"} size={60} color="#111111" />
-        <Text style={{ fontSize: 24, fontWeight: "600" }}> Record </Text>
+        <Text style={{ fontSize: 24, fontWeight: "600" }}>Recordings</Text>
         {isRecording ? (
           <TouchableOpacity onPress={() => stopRecording()}>
             <Ionicons name={"stop-circle-outline"} size={45} color="#111111" />
@@ -152,27 +283,64 @@ function AudioContainer({
         {newAudio?.map((audio, index) => (
           <View
             style={{
-              flexDirection: "row",
-              width: "70%",
-              justifyContent: "space-between",
-              alignItems: "center",
+              borderRadius: 10,
+              backgroundColor: "rgb(240,242,243)",
+              marginBottom: 10,
+              paddingHorizontal: 20,
+              paddingVertical: 5,
             }}
             key={index}
           >
-            <TouchableOpacity
-              onPress={() => playAudio(index)}
-              style={{ flex: 1 }}
+            {reNaming === audio.uuid && (
+              <TextInput
+                style={styles.textBox}
+                placeholder={audio.name}
+                onChangeText={(text) => setNewName(text)}
+                onSubmitEditing={() => {
+                  handleRename(index);
+                }}
+              ></TextInput>
+            )}
+            <View
+              style={{
+                flexDirection: "row",
+                width: "90%",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
             >
-              <Text style={{ textAlign: "center" }}>
-                {audio.name} ------- {audio.duration} {"\n"}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => handleDeleteAudio(index)}
-              style={{ marginBottom: "10%" }}
-            >
-              <Ionicons name="trash-outline" size={24} color="#111111" />
-            </TouchableOpacity>
+              {audio.isPlaying ? (
+                <TouchableOpacity onPress={() => pauseAudio(index)}>
+                  <Ionicons name={"pause-outline"} size={25} color="#111111" />
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity onPress={() => playAudio(index)}>
+                  <Ionicons name={"play-outline"} size={25} color="#111111" />
+                </TouchableOpacity>
+              )}
+              <View style={{ flex: 1 }}>
+                <TouchableOpacity onPress={() => setRenaming(audio.uuid)}>
+                  <Text style={{ textAlign: "center" }}>{audio.name}</Text>
+                </TouchableOpacity>
+                <Slider
+                  style={{ width: 200, height: 40 }}
+                  minimumValue={0}
+                  maximumValue={1}
+                  value={sliderValues[index]}
+                  onValueChange={(value) => handleSliderChange(value, index)}
+                  minimumTrackTintColor="#FFFFFF"
+                  maximumTrackTintColor="#000000"
+                />
+                <Text style={{ textAlign: "center" }}>{audio.duration}</Text>
+              </View>
+
+              <TouchableOpacity
+                onPress={() => handleDeleteAudio(index)}
+                style={{ marginBottom: 5 }}
+              >
+                <Ionicons name="trash-outline" size={25} color="#111111" />
+              </TouchableOpacity>
+            </View>
           </View>
         ))}
       </View>
@@ -189,11 +357,14 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
   },
-  image: {
-    width: 50,
-    height: 50,
-    borderRadius: 20,
-    marginRight: 10,
-    marginTop: 25,
+  textBox: {
+    borderColor: "black",
+    borderBottomWidth: 2,
+    borderRadius: 2,
+    justifyContent: "center",
+    alignSelf: "center",
+    marginBottom: 8,
+    width: 200,
+    textAlign: "center",
   },
 });

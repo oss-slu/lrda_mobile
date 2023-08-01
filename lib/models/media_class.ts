@@ -64,6 +64,10 @@ export class AudioType extends Media {
    * The name of the audio.
    */
   name: string;
+  /**
+   * The play status of the audio.
+   */
+  isPlaying: boolean;
 
   /**
    * Creates a new AudioType instance.
@@ -74,10 +78,12 @@ export class AudioType extends Media {
     uri,
     duration,
     name,
-  }: MediaData & { duration: string; name: string }) {
+    isPlaying,
+  }: MediaData & { duration: string; name: string; isPlaying: boolean }) {
     super({ uuid, type: "audio", uri });
     this.duration = duration;
     this.name = name;
+    this.isPlaying = isPlaying || false;
   }
 
   /**
