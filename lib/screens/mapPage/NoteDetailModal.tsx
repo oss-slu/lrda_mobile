@@ -47,14 +47,11 @@ const NoteDetailModal: React.FC<Props> = ({ isVisible, onClose, note }) => {
 
   return (
     <Modal animationType="slide" transparent={false} visible={isVisible}>
-      <View style={{height: 125}}> 
       <TouchableOpacity onPress={onClose} style={styles.closeButton}>
         <View style={styles.closeIcon}>
           <Ionicons name="close" size={30} color="#000" />
         </View>
       </TouchableOpacity>
-      <Text style={styles.modalTitle}>{note?.title}</Text>
-      </View>
       
       <ScrollView
         style={{height: isImageTouched ? '80%' : '50%',}}
@@ -84,6 +81,7 @@ const NoteDetailModal: React.FC<Props> = ({ isVisible, onClose, note }) => {
         onTouchStart={handleTextTouchStart}
       >
         <ScrollView>
+          <Text style={styles.modalTitle}>{note?.title}</Text>
           <Text style={styles.modalText}>{`Created by: ${creatorName}`}</Text>
           <Text style={[styles.modalText,{marginBottom: 5}]}>{note?.time}</Text>
           <View style={{height: 2, width: '100%', backgroundColor :'black', marginBottom: 10}}></View>
@@ -126,13 +124,10 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
   },
   modalTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 15,
+    marginBottom: 5,
     color: '#333',
-    justifyContent: 'center',
-    alignSelf: 'center',
-    marginTop: "15%",
   },
   modalText: {
     fontSize: 18,
