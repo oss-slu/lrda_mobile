@@ -45,29 +45,35 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   }, [newMedia]);
 
   const saveNote = async () => {
-    try {
-      const userID = await user.getId();
-      const newNote = {
-        title: titleText,
-        text: bodyText,
-        media: newMedia,
-        audio: newAudio,
-        creator: userID,
-        latitude: location?.latitude.toString() || "",
-        longitude: location?.longitude.toString() || "",
-        published: isPublished,
-        tags: tags,
-        time: time,
-      };
-      const response = await ApiService.writeNewNote(newNote);
-
-      const obj = await response.json();
-      const id = obj["@id"];
-
-      route.params.refreshPage();
+    if (titleText === ""){
       navigation.goBack();
-    } catch (error) {
-      console.error("An error occurred while creating the note:", error);
+    } else if ((bodyText !== "") && (titleText === "")){
+      alert("A title is necessary to save")
+    } else {
+      try {
+        const userID = await user.getId();
+        const newNote = {
+          title: titleText,
+          text: bodyText,
+          media: newMedia,
+          audio: newAudio,
+          creator: userID,
+          latitude: location?.latitude.toString() || "",
+          longitude: location?.longitude.toString() || "",
+          published: isPublished,
+          tags: tags,
+          time: time,
+        };
+        const response = await ApiService.writeNewNote(newNote);
+  
+        const obj = await response.json();
+        const id = obj["@id"];
+  
+        route.params.refreshPage();
+        navigation.goBack();
+      } catch (error) {
+        console.error("An error occurred while creating the note:", error);
+      }
     }
   };
 
