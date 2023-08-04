@@ -127,7 +127,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       const data = await ApiService.fetchMessages(
         global,
         published,
-        userId || "" // use userId instead of directly using user.getId()
+        userId || "", // use userId instead of directly using user.getId()
       );
       setMessages(data);
 
@@ -154,10 +154,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   const deleteNoteFromAPI = async (id: string) => {
     try {
-      const userId = await user.getId(); // add await here
+      const userId = await user.getId();
+      console.log(userId)
       const success = await ApiService.deleteNoteFromAPI(
         id,
-        userId || "" // use userId instead of directly using user.getId()
+        userId || ""
       );
       if (success) {
         // refreshPage();
@@ -213,7 +214,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           </TouchableOpacity>
         </TouchableOpacity>
         <View style={[styles.backRightBtn, styles.backRightBtnRight]}>
-          {isPrivate ? (
+          {/* {isPrivate ? ( */}
             <TouchableOpacity
               style={{
                 justifyContent: "center",
@@ -225,7 +226,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             >
               <Ionicons name="trash-outline" size={24} color="#111111" />
             </TouchableOpacity>
-          ) : null}
+          {/* ) : null} */}
         </View>
       </View>
     );
@@ -236,6 +237,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       rowMap[data].closeRow();
     }
     setNotes((prevNotes) => prevNotes.filter((note) => note.id !== data));
+    console.log("data ",data)
     deleteNoteFromAPI(data);
   };
 
@@ -262,8 +264,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   }
 
   const renderList = (notes: Note[]) => {
-    return isPrivate ? (
-      <SwipeListView
+    // return isPrivate ? (
+      return <SwipeListView
         data={notes}
         renderItem={renderItem}
         renderHiddenItem={sideMenu}
@@ -277,13 +279,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         onRightAction={(data, rowMap) => deleteNote(data, rowMap)}
         onLeftAction={(data, rowMap) => publishNote(data, rowMap)}
       />
-    ) : (
-      <SwipeListView
-        data={notes}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-      />
-    );
+    // ) : (
+    //   <SwipeListView
+    //     data={notes}
+    //     renderItem={renderItem}
+    //     keyExtractor={(item) => item.id}
+    //   />
+    // );
   };
 
   const renderItem = (data: any) => {
@@ -463,12 +465,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         </TouchableOpacity>
         <TouchableOpacity onPress={handleReverseOrder} style={styles.filters}>
           <Text style={styles.filterFont}>Sort by Time</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.filters}>
-          <Text style={styles.filterFont}>St. Louis</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.filters}>
-          <Text style={styles.filterFont}>Alphabetical</Text>
         </TouchableOpacity>
       </ScrollView>
       {rendering ? <NoteSkeleton /> : renderList(notes)}
