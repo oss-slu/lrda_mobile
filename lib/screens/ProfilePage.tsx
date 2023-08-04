@@ -7,6 +7,7 @@ import {
   Image,
   ScrollView,
   TouchableOpacity,
+  FlatList,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
@@ -23,7 +24,22 @@ export default function ProfilePage({ navigation }: ProfilePageProps) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [allImages, setAllImages] = useState<ImageNote[]>([]);
   const [count, setCount] = useState(0);
-  const [key, setKey] = useState(0);
+  const [userInitials, setUserInitials] = useState("N/A");
+  const [userName, setUser] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      const name = await user.getName();
+      setUser(name || "");
+      if (name) {
+        const initials = name
+          .split(" ")
+          .map((namePart) => namePart[0])
+          .join("");
+        setUserInitials(initials);
+      }
+    })();
+  }, []);
 
   const navigateToEditNoteScreen = (note: Note) => {
     const data = {
@@ -32,14 +48,18 @@ export default function ProfilePage({ navigation }: ProfilePageProps) {
         console.log("Note saved:", note);
       },
     };
-  
+
     navigation.navigate("EditNote", { note: data?.note, onSave: data?.onSave });
   };
 
   const fetchMessages = async () => {
     let response;
     try {
-      const data = await ApiService.fetchMessages(false,false,user.getId() || '')
+      const data = await ApiService.fetchMessages(
+        false,
+        false,
+        (await user.getId()) || ""
+      );
       setMessages(data);
 
       const fetchedNotes = DataConversion.convertMediaTypes(data);
@@ -61,33 +81,21 @@ export default function ProfilePage({ navigation }: ProfilePageProps) {
 
   let role = "Administrator";
   let fieldNotes = count;
-  if (user.getRoles()) {
-    role = "Student";
-  }
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={{ alignSelf: "center" }}>
-          <View style={styles.profileImage}>
-            <Image
-              source={require("../../assets/profile-pic.jpg")}
-              style={styles.image}
-              resizeMode="center"
-            ></Image>
+          <View style={styles.userPhoto}>
+            <Text
+              style={{ fontWeight: "500", fontSize: 60, alignSelf: "center" }}
+            >
+              {userInitials}
+            </Text>
           </View>
-          <TouchableOpacity style={styles.add}>
-            <Ionicons
-              name="ios-add"
-              size={48}
-              color="#DFD8C8"
-              style={{ marginTop: 6, marginLeft: 2 }}
-            ></Ionicons>
-          </TouchableOpacity>
         </View>
-
         <View style={styles.infoContainer}>
           <Text style={[styles.text, { fontWeight: "200", fontSize: 36 }]}>
-            {user.getName()}
+            {userName}
           </Text>
           <Text style={[styles.text, { color: "#AEB5BC", fontSize: 14 }]}>
             {role}
@@ -121,44 +129,22 @@ export default function ProfilePage({ navigation }: ProfilePageProps) {
         </View>
 
         <View style={{ marginTop: 32, width: "100%" }}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {allImages?.map((data: ImageNote, index: number) => (
+          <FlatList
+            data={allImages}
+            numColumns={3}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item }) => (
               <TouchableOpacity
-                key={index}
-                onPress={() => navigateToEditNoteScreen(data?.note)}
+                onPress={() => navigateToEditNoteScreen(item?.note)}
+                style={{ flex: 1, aspectRatio: 1 }}
               >
-                <Image style={styles.preview} source={{ uri: data?.image }} />
+                <Image
+                  style={{ flex: 1, aspectRatio: 1 }}
+                  source={{ uri: item?.image }}
+                />
               </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-
-        <Text style={[styles.subText, styles.recent]}>Recent Activity</Text>
-        <View style={{ alignItems: "center" }}>
-          <View style={styles.recentItem}>
-            <View style={styles.activityIndicator}></View>
-            <View style={{ width: 250 }}>
-              <Text
-                style={[styles.text, { color: "#41444B", fontWeight: "300" }]}
-              >
-                Started following{" "}
-                <Text style={{ fontWeight: "400" }}>Jake Challeahe</Text> and{" "}
-                <Text style={{ fontWeight: "400" }}>Luis Poteer</Text>
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.recentItem}>
-            <View style={styles.activityIndicator}></View>
-            <View style={{ width: 250 }}>
-              <Text
-                style={[styles.text, { color: "#41444B", fontWeight: "300" }]}
-              >
-                Started following{" "}
-                <Text style={{ fontWeight: "400" }}>Luke Harper</Text>
-              </Text>
-            </View>
-          </View>
+            )}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -196,6 +182,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  userPhoto: {
+    backgroundColor: "#F4DFCD",
+    height: 190,
+    width: 190,
+    borderRadius: 200,
+    alignContent: "center",
+    justifyContent: "center",
+  },
   infoContainer: {
     alignSelf: "center",
     alignItems: "center",
@@ -219,7 +213,6 @@ const styles = StyleSheet.create({
   preview: {
     width: 200,
     height: 200,
-    marginRight: 1,
   },
   recent: {
     marginLeft: 78,

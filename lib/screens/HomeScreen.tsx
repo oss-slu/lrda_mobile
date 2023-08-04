@@ -154,11 +154,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   const deleteNoteFromAPI = async (id: string) => {
     try {
-      const userId = await user.getId(); // add await here
-      const success = await ApiService.deleteNoteFromAPI(
-        id,
-        userId || "" // use userId instead of directly using user.getId()
-      );
+      const userId = await user.getId();
+      const success = await ApiService.deleteNoteFromAPI(id, userId || "");
       if (success) {
         // refreshPage();
         return true;
@@ -463,12 +460,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         </TouchableOpacity>
         <TouchableOpacity onPress={handleReverseOrder} style={styles.filters}>
           <Text style={styles.filterFont}>Sort by Time</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.filters}>
-          <Text style={styles.filterFont}>St. Louis</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.filters}>
-          <Text style={styles.filterFont}>Alphabetical</Text>
         </TouchableOpacity>
       </ScrollView>
       {rendering ? <NoteSkeleton /> : renderList(notes)}
