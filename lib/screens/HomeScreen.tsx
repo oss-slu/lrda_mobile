@@ -19,6 +19,7 @@ import { SwipeListView } from "react-native-swipe-list-view";
 import NoteSkeleton from "../components/noteSkeleton";
 import LoadingImage from "../components/loadingImage";
 import { formatToLocalDateString } from "../components/time";
+import Constants from 'expo-constants'
 
 const user = User.getInstance();
 
@@ -285,7 +286,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   const renderItem = (data: any) => {
     const item = data.item;
-    // console.log("item.time: ",item.time);
     const tempTime = new Date(item.time);
     const showTime = formatToLocalDateString(tempTime);
     const mediaItem = item.media[0];
@@ -475,7 +475,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 50,
+    paddingTop: Constants.statusBarHeight - 10,
     flex: 1,
   },
   overlay: {
@@ -487,7 +487,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   drawer: {
-    paddingTop: "30%",
+    paddingTop: Constants.statusBarHeight - 10,
     height: "110%",
     width: 200,
     position: "absolute",

@@ -47,8 +47,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const saveNote = async () => {
     if (titleText === ""){
       navigation.goBack();
-    } else if ((bodyText !== "") && (titleText === "")){
-      alert("A title is necessary to save")
+    } else if (bodyText !== "" && titleText === "") {
+      Alert.alert("A title is necessary to save");
     } else {
       try {
         const userID = await user.getId();
