@@ -46,12 +46,13 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
 
   const saveNote = async () => {
     try {
+      const userID = await user.getId();
       const newNote = {
         title: titleText,
         text: bodyText,
         media: newMedia,
         audio: newAudio,
-        creator: user.getId(),
+        creator: userID,
         latitude: location?.latitude.toString() || "",
         longitude: location?.longitude.toString() || "",
         published: isPublished,
