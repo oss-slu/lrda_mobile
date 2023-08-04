@@ -124,11 +124,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   const fetchMessages = async () => {
     try {
-      const userId = await user.getId(); // add await here
+      const userId = await user.getId();
       const data = await ApiService.fetchMessages(
         global,
         published,
-        userId || "" // use userId instead of directly using user.getId()
+        userId || ""
       );
       setMessages(data);
 
@@ -475,7 +475,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: Constants.statusBarHeight - 10,
+    paddingTop: Constants.statusBarHeight - 20,
     flex: 1,
   },
   overlay: {
