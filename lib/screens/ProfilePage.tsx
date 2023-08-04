@@ -87,7 +87,7 @@ export default function ProfilePage({ navigation }: ProfilePageProps) {
         <View style={{ alignSelf: "center" }}>
           <View style={styles.userPhoto}>
             <Text
-              style={{ fontWeight: "500", fontSize: 120, alignSelf: "center" }}
+              style={{ fontWeight: "500", fontSize: 60, alignSelf: "center" }}
             >
               {userInitials}
             </Text>
