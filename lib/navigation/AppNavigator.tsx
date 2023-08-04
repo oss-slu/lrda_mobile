@@ -44,13 +44,23 @@ const HomeStack = () => {
 };
 
 const AppNavigator: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(user.getId() !== null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      const userId = await user.getId();
+      setIsLoggedIn(userId !== null);
+    };
+
+    checkLoginStatus();
+  }, []);
 
   // Listen for changes in the user's login state
   useEffect(() => {
     // Check the user's login state every second
-    const interval = setInterval(() => {
-      setIsLoggedIn(user.getId() !== null);
+    const interval = setInterval(async () => {
+      const userId = await user.getId();
+      setIsLoggedIn(userId !== null);
     }, 1000);
 
     // Clean up the interval on unmount

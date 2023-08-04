@@ -38,12 +38,18 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   useEffect(() => {
     (async () => {
       await SplashScreen.preventAutoHideAsync();
-      if (user.getId()) {
-        navigation.replace("Home");
+  
+      const userId = await user.getId();
+      if (userId !== null) {
+        setTimeout(() => {
+          navigation.navigate('HomeTab', { screen: 'Home' });
+        }, 1000);
       }
+  
       await SplashScreen.hideAsync();
     })();
   }, []);
+  
 
   const handleGoRegister = () => {
     navigation.navigate("Register");

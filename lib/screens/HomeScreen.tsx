@@ -18,7 +18,7 @@ import DataConversion from "../utils/data_conversion";
 import { SwipeListView } from "react-native-swipe-list-view";
 import NoteSkeleton from "../components/noteSkeleton";
 import LoadingImage from "../components/loadingImage";
-import { formatToLocalDateString } from "../components/time"
+import { formatToLocalDateString } from "../components/time";
 
 const user = User.getInstance();
 
@@ -34,13 +34,22 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [published, setPublished] = useState(false);
   const [reversed, setReversed] = useState(false);
   const [rendering, setRendering] = useState(true);
+  const [userInitials, setUserInitials] = useState("N/A");
+
+  useEffect(() => {
+    (async () => {
+      const name = await user.getName();
+      if (name) {
+        const initials = name
+          .split(" ")
+          .map((namePart) => namePart[0])
+          .join("");
+        setUserInitials(initials);
+      }
+    })();
+  }, []);
 
   let textLength = 16;
-  let userInitals = user
-    .getName()
-    ?.split(" ")
-    .map((namePart) => namePart[0])
-    .join("");
 
   const toggleDrawer = () => {
     setIsOpen(!isOpen);
@@ -114,10 +123,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   const fetchMessages = async () => {
     try {
+      const userId = await user.getId(); // add await here
       const data = await ApiService.fetchMessages(
         global,
         published,
-        user.getId() || ""
+        userId || "" // use userId instead of directly using user.getId()
       );
       setMessages(data);
 
@@ -144,9 +154,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   const deleteNoteFromAPI = async (id: string) => {
     try {
+      const userId = await user.getId(); // add await here
       const success = await ApiService.deleteNoteFromAPI(
         id,
-        user.getId() || ""
+        userId || "" // use userId instead of directly using user.getId()
       );
       if (success) {
         // refreshPage();
@@ -279,7 +290,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     const item = data.item;
     // console.log("item.time: ",item.time);
     const tempTime = new Date(item.time);
-    const showTime = formatToLocalDateString(tempTime)
+    const showTime = formatToLocalDateString(tempTime);
     const mediaItem = item.media[0];
     const ImageType = mediaItem?.getType();
     let ImageURI = "";
@@ -398,7 +409,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             <Text
               style={{ fontWeight: "600", fontSize: 20, alignSelf: "center" }}
             >
-              {userInitals}
+              {userInitials}
             </Text>
           </View>
           <Text style={styles.title}>Field Notes</Text>
@@ -418,7 +429,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           style={isPrivate ? styles.filtersSelected : styles.filters}
         >
           <Text style={isPrivate ? styles.selectedFont : styles.filterFont}>
-            {rendering ? "Private" : (isPrivate ? `Private (${notes.length})` : "Private")}
+            {rendering
+              ? "Private"
+              : isPrivate
+              ? `Private (${notes.length})`
+              : "Private"}
           </Text>
         </TouchableOpacity>
 
@@ -427,7 +442,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           style={published ? styles.filtersSelected : styles.filters}
         >
           <Text style={published ? styles.selectedFont : styles.filterFont}>
-            {rendering ? "Published" : (published ? `Published (${notes.length})` : "Published")}
+            {rendering
+              ? "Published"
+              : published
+              ? `Published (${notes.length})`
+              : "Published"}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -435,7 +454,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           style={global ? styles.filtersSelected : styles.filters}
         >
           <Text style={global ? styles.selectedFont : styles.filterFont}>
-            {rendering ? "Global" : (global ? `Global (${notes.length})` : "Global")}
+            {rendering
+              ? "Global"
+              : global
+              ? `Global (${notes.length})`
+              : "Global"}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleReverseOrder} style={styles.filters}>
