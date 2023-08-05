@@ -19,7 +19,7 @@ import { SwipeListView } from "react-native-swipe-list-view";
 import NoteSkeleton from "../components/noteSkeleton";
 import LoadingImage from "../components/loadingImage";
 import { formatToLocalDateString } from "../components/time";
-import Constants from 'expo-constants'
+import Constants from "expo-constants";
 
 const user = User.getInstance();
 
@@ -175,6 +175,18 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   const handleLogout = () => {
     user.logout();
+  };
+
+  const handleEmail = () => {
+    const emailAddress = "yashkamal.bhatia@slu.edu";
+    const subject = "Bug Report on 'Where's Religion?'";
+    const body = "Please provide details of your issue you are facing here.";
+
+    const emailUrl = `mailto:${emailAddress}?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(body)}`;
+
+    Linking.openURL(emailUrl);
   };
 
   const handleFilters = (name: string) => {
@@ -375,13 +387,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             />
           </TouchableOpacity>
         </Animated.View>
-        <TouchableOpacity style={styles.drawerItem}>
+        <TouchableOpacity
+          style={styles.drawerItem}
+          onPress={() => {
+            navigation.navigate("AccountPage");
+            toggleDrawer();
+          }}
+        >
           <Ionicons name={"person-outline"} size={30} color="black" />
           <Text style={styles.mediumText}>Account</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.drawerItem}>
-          <Ionicons name={"people-outline"} size={30} color="black" />
-          <Text style={styles.mediumText}>Friends</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem} onPress={handleGoWeb}>
           <Ionicons name={"laptop-outline"} size={30} color="black" />
@@ -391,7 +405,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           <Ionicons name={"settings-outline"} size={30} color="black" />
           <Text style={styles.mediumText}>Settings</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.drawerItem}>
+        <TouchableOpacity style={styles.drawerItem} onPress={handleEmail}>
           <Ionicons name={"bug-outline"} size={30} color="black" />
           <Text style={styles.mediumText}>Report a Bug</Text>
         </TouchableOpacity>
@@ -494,6 +508,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     zIndex: 99,
     right: 0,
+    flex: 1,
   },
   drawerItem: {
     paddingLeft: 10,
@@ -503,7 +518,7 @@ const styles = StyleSheet.create({
   logout: {
     flexDirection: "row",
     position: "absolute",
-    bottom: "10%",
+    bottom: "7%",
     backgroundColor: "black",
     justifyContent: "center",
     alignItems: "center",

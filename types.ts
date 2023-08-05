@@ -39,6 +39,7 @@ export type RootStackParamList = {
   Home: undefined;
   Login: undefined;
   Register: undefined;
+  AccountPage: undefined;
   AddNote: { onSave: (note: Note) => void };
   EditNote: { note: Note; onSave: (note: Note) => void };
 };

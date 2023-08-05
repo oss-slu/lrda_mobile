@@ -1,9 +1,10 @@
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { NavigationContainer } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import ExploreScreen from '../screens/mapPage/ExploreScreen.js';
 import ProfilePage from "../screens/ProfilePage";
+import MorePage from "../screens/morePage";
 import HomeScreen from "../screens/HomeScreen";
 import LoginScreen from "../screens/loginScreens/LoginScreen";
 import RegisterScreen from "../screens/loginScreens/RegisterScreen";
@@ -34,6 +35,10 @@ const HomeStack = () => {
         options={{ headerShown: false, gestureEnabled: false }}
       />
       <Stack.Screen
+        name="AccountPage"
+        component={ProfilePage}
+      />
+      <Stack.Screen
         name="EditNote"
         options={{ headerShown: false, gestureEnabled: false }}
       >
@@ -55,15 +60,12 @@ const AppNavigator: React.FC = () => {
     checkLoginStatus();
   }, []);
 
-  // Listen for changes in the user's login state
   useEffect(() => {
-    // Check the user's login state every second
     const interval = setInterval(async () => {
       const userId = await user.getId();
       setIsLoggedIn(userId !== null);
     }, 1000);
 
-    // Clean up the interval on unmount
     return () => {
       clearInterval(interval);
     };
@@ -77,7 +79,7 @@ const AppNavigator: React.FC = () => {
             name="HomeTab"
             component={HomeStack}
             options={{
-              headerShown: false, // This line hides the header
+              headerShown: false,
               tabBarIcon: ({ color, size }) => (
                 <Ionicons name="ios-pencil" color={color} size={size} />
               ),
@@ -85,9 +87,9 @@ const AppNavigator: React.FC = () => {
           />
           <Tab.Screen
           name="Tab1"
-          component={ExploreScreen} // Replaced 'Placeholder' with 'MapComponent'
+          component={ExploreScreen}
           options={{
-            headerShown: false, // This line hides the header
+            headerShown: false,
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="ios-map" color={color} size={size} />
             ),
@@ -95,11 +97,11 @@ const AppNavigator: React.FC = () => {
         />
           <Tab.Screen
             name="Tab2"
-            component={ProfilePage}
+            component={MorePage}
             options={{
-              headerShown: false, // This line hides the header
+              headerShown: false,
               tabBarIcon: ({ color, size }) => (
-                <Ionicons name="ios-person" color={color} size={size} />
+                <Ionicons name="menu-outline" color={color} size={size+10} />
               ),
             }}
           />
