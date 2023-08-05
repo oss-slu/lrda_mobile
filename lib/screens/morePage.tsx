@@ -1,5 +1,14 @@
 import React from "react";
-import { View, Text, ScrollView, StyleSheet, Image } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  Image,
+  Linking,
+  TouchableOpacity,
+} from "react-native";
+import Accordion from "@gapur/react-native-accordion";
 
 export default function MorePage() {
   return (
@@ -17,19 +26,92 @@ export default function MorePage() {
       </View>
       <View style={styles.textContainer}>
         <Text style={styles.titleText}>Welcome to Where's Religion?</Text>
-        <Text style={styles.text}>
-          Where's Religion? is a groundbreaking application designed to bring
-          ethnography into the modern era. Our mission is to provide a platform
-          that connects people across various religious backgrounds, beliefs,
-          and practices.{"\n\n"}
-          With Where's Religion?, users can explore different religious
-          traditions, find nearby places of worship, engage in meaningful
-          discussions, and much more. Whether you are a scholar, student, a
-          believer, or simply curious about the world's religions, this app
-          offers a unique and comprehensive insight into the diverse spiritual
-          landscape of our time.{"\n\n"}
-          Thank you for downloading and allowing us to be part of your journey!
-        </Text>
+        <Accordion headerTitleStyle={styles.headerText} headerTitle="Resources">
+          <TouchableOpacity
+            onPress={() =>
+              Linking.openURL(
+                "http://lived-religion-dev.rerum.io/deer-lr/dashboard.html"
+              )
+            }
+          ><Text style={styles.headerText}>{"\n"}{"\t"}Our Website{"\n"}</Text></TouchableOpacity>
+          <TouchableOpacity
+            onPress={() =>
+              Linking.openURL(
+                "https://guides.library.upenn.edu/ethnography/DoingEthnography"
+              )
+            }
+          ><Text style={styles.headerText}>{"\t"}Guide to Enthnography{"\n"}</Text></TouchableOpacity>
+          <TouchableOpacity
+            onPress={() =>
+              Linking.openURL(
+                "http://changingminds.org/explanations/research/analysis/ethnographic_coding.htm"
+              )
+            }
+          ><Text style={styles.headerText}>{"\t"}Guide to Coding{"\n"}</Text></TouchableOpacity>
+        </Accordion>
+        <Accordion  headerTitleStyle={styles.headerText} headerTitle="Meet our Team">
+            <Text>
+              {'\n'}Insert Team Photo
+            </Text>
+            <Text>{'\n'}Insert Team Message</Text>
+        </Accordion>
+        <Accordion headerTitleStyle={styles.headerText} headerTitle="Frequently Asked Questions">
+          <View style={styles.headerContainer}>
+            <Accordion
+              headerTitleStyle={styles.headerText}
+              headerTitle="What can users do?"
+            >
+              <Text style={styles.text}>
+                Explore religious traditions, find places of worship, engage in
+                meaningful discussions.
+              </Text>
+            </Accordion>
+          </View>
+          <View style={styles.headerContainer}>
+            <Accordion
+              headerTitleStyle={styles.headerText}
+              headerTitle="Who is it for?"
+            >
+              <Text style={styles.text}>
+                Scholars, students, believers, and the curious about the world's
+                religions.
+              </Text>
+            </Accordion>
+          </View>
+          <View style={styles.headerContainer}>
+            <Accordion
+              headerTitleStyle={styles.headerText}
+              headerTitle="What's unique?"
+            >
+              <Text style={styles.text}>
+                Provides a modern method to capture experiences using the
+                devices that are with us every day.
+              </Text>
+            </Accordion>
+          </View>
+          <View style={styles.headerContainer}>
+            <Accordion
+              headerTitleStyle={styles.headerText}
+              headerTitle="Our Mission"
+            >
+              <Text style={styles.text}>
+                Connect people of diverse religious backgrounds, beliefs, and
+                practices.
+              </Text>
+            </Accordion>
+          </View>
+          <View style={styles.headerContainer}>
+            <Accordion
+              headerTitleStyle={styles.headerText}
+              headerTitle="Why use 'Where's Religion?'"
+            >
+              <Text style={styles.text}>
+                Explore religious traditions, find places of worship, engage in
+                meaningful discussions.
+              </Text>
+            </Accordion>
+          </View>
+        </Accordion>
       </View>
     </ScrollView>
   );
@@ -43,7 +125,7 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     marginTop: 5,
-    width: "90%",
+    width: "100%",
   },
   titleText: {
     alignSelf: "center",
@@ -51,9 +133,16 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginBottom: 10,
   },
+  headerContainer: {
+    width: "100%",
+  },
+  headerText: {
+    fontSize: 18,
+    fontWeight: "500",
+  },
   text: {
     alignSelf: "center",
-    fontSize: 20,
+    fontSize: 16,
     lineHeight: 28,
   },
 });

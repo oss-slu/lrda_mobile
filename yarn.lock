@@ -1490,6 +1490,11 @@
     find-up "^5.0.0"
     js-yaml "^4.1.0"
 
+"@gapur/react-native-accordion@^1.0.7":
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/@gapur/react-native-accordion/-/react-native-accordion-1.0.7.tgz#2a705c9389f4d91140de0ca638132bd2bdc237a7"
+  integrity sha512-CooQKBpUba3/QKZqVCGGkyA3wxc6hWWVAkc2wc/DheSa5Idt3Qj1U50MMW+LiH+e5VPDiMMuo5UMc5xP5qh4cA==
+
 "@gar/promisify@^1.0.1":
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/@gar/promisify/-/promisify-1.1.3.tgz#555193ab2e3bb3b6adc3d551c9c030d9e860daf6"
