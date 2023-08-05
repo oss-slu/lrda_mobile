@@ -401,10 +401,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           <Ionicons name={"laptop-outline"} size={30} color="black" />
           <Text style={styles.mediumText}>Our Website</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.drawerItem}>
-          <Ionicons name={"settings-outline"} size={30} color="black" />
-          <Text style={styles.mediumText}>Settings</Text>
-        </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem} onPress={handleEmail}>
           <Ionicons name={"bug-outline"} size={30} color="black" />
           <Text style={styles.mediumText}>Report a Bug</Text>
