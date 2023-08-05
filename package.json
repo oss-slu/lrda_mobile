@@ -35,8 +35,7 @@
     "react-native-swipe-list-view": "^3.2.9",
     "react-native-uuid": "^2.0.1",
     "react-native-vector-icons": "^10.0.0",
-    "rn-placeholder": "^3.0.3",
-    "tamagui": "^1.49.7"
+    "rn-placeholder": "^3.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
