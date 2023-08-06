@@ -36,6 +36,15 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   };
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+        fadeOut();
+    }, 2000); 
+
+    return () => clearTimeout(timer); 
+}, []);
+
+
+  useEffect(() => {
     (async () => {
       await SplashScreen.preventAutoHideAsync();
   
