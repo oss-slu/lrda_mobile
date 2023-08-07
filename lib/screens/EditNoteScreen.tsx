@@ -56,12 +56,17 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   );
 
   useEffect(() => {
-    if (creator === user.getId()) {
-      setOwner(true);
-    } else {
-      setOwner(false);
-    }
+    const checkOwner = async () => {
+      if (creator === (await user.getId())) {
+        setOwner(true);
+      } else {
+        setOwner(false);
+      }
+    };
+  
+    checkOwner();
   }, [creator]);
+  
 
   const handleSaveNote = async () => {
     try {
@@ -69,7 +74,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         id: note.id,
         title: title,
         text: text,
-        creator: user.getId() || "",
+        creator: (await user.getId()) || "",
         media: media,
         latitude: location?.latitude.toString() || "",
         longitude: location?.longitude.toString() || "",
