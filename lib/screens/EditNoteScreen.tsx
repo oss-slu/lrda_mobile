@@ -1,13 +1,6 @@
 // EditNoteScreen.tsx
 import React, { useState, useEffect } from "react";
-import {
-  Alert,
-  Platform,
-  View,
-  TextInput,
-  Text,
-  StyleSheet,
-} from "react-native";
+import { ScrollView, View, TextInput, Image, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,12 +8,14 @@ import { Note } from "../../types";
 import PhotoScroller from "../components/photoScroller";
 import { User } from "../models/user_class";
 import AudioContainer from "../components/audio";
-import { Media, AudioType } from "../models/media_class";
+import { Media, AudioType, VideoType } from "../models/media_class";
 import { EditNoteScreenProps } from "../../types";
 import ApiService from "../utils/api_calls";
 import TagWindow from "../components/tagging";
 import LocationWindow from "../components/location";
-import TimeWindow from "../components/time"
+import TimeWindow from "../components/time";
+import { getThumbnail } from "../utils/S3_proxy";
+import Constants from "expo-constants";
 
 const user = User.getInstance();
 
@@ -63,10 +58,9 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         setOwner(false);
       }
     };
-  
+
     checkOwner();
   }, [creator]);
-  
 
   const handleSaveNote = async () => {
     try {
@@ -94,7 +88,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   };
 
   return (
-    <View>
+    <KeyboardAwareScrollView style={{ flex: 1 }} nestedScrollEnabled={true}>
       <View style={styles.topContainer}>
         <TouchableOpacity
           style={styles.topButtons}
@@ -128,96 +122,112 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           <View />
         )}
       </View>
-      <View style={{ backgroundColor: "black" }}>
-      <View style={styles.keyContainer}>
-        <TouchableOpacity
-          onPress={() => {
-            setViewMedia(!viewMedia);
-            setViewAudio(false);
-            setIsTagging(false);
-            setIsLocation(false);
-            setIsTime(false);
-          }}
-        >
-          <Ionicons name="images-outline" size={30} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => {
-            setViewMedia(false);
-            setViewAudio(!viewAudio);
-            setIsTagging(false);
-            setIsLocation(false);
-            setIsTime(false);
-          }}
-        >
-          <Ionicons name="mic-outline" size={30} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => {
-            setViewMedia(false);
-            setViewAudio(false);
-            setIsTagging(false);
-            setIsLocation(!isLocation);
-            setIsTime(false);
-          }}
-        >
-          <Ionicons name="location-outline" size={30} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => {
-            setViewMedia(false);
-            setViewAudio(false);
-            setIsTagging(false);
-            setIsLocation(false);
-            setIsTime(!isTime);
-          }}>
-          <Ionicons name="time-outline" size={30} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => {
-            setViewMedia(false);
-            setViewAudio(false);
-            setIsTagging(!isTagging);
-            setIsLocation(false);
-            setIsTime(false);
-          }}
-        >
-          <Ionicons name="pricetag-outline" size={30} color="black" />
-        </TouchableOpacity>
-      </View>
+      <View>
+        <View style={styles.keyContainer}>
+          <TouchableOpacity
+            onPress={() => {
+              setViewMedia(!viewMedia);
+              setViewAudio(false);
+              setIsTagging(false);
+              setIsLocation(false);
+              setIsTime(false);
+            }}
+          >
+            <Ionicons name="images-outline" size={30} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setViewMedia(false);
+              setViewAudio(!viewAudio);
+              setIsTagging(false);
+              setIsLocation(false);
+              setIsTime(false);
+            }}
+          >
+            <Ionicons name="mic-outline" size={30} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setViewMedia(false);
+              setViewAudio(false);
+              setIsTagging(false);
+              setIsLocation(!isLocation);
+              setIsTime(false);
+            }}
+          >
+            <Ionicons name="location-outline" size={30} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setViewMedia(false);
+              setViewAudio(false);
+              setIsTagging(false);
+              setIsLocation(false);
+              setIsTime(!isTime);
+            }}
+          >
+            <Ionicons name="time-outline" size={30} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setViewMedia(false);
+              setViewAudio(false);
+              setIsTagging(!isTagging);
+              setIsLocation(false);
+              setIsTime(false);
+            }}
+          >
+            <Ionicons name="pricetag-outline" size={30} color="black" />
+          </TouchableOpacity>
+        </View>
+        <View style={{backgroundColor:'white'}}>
+          {viewMedia && (
+            <PhotoScroller newMedia={media} setNewMedia={setMedia} />
+          )}
+          {viewAudio && (
+            <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
+          )}
+          {isTagging && <TagWindow tags={tags} setTags={setTags} />}
+          {isLocation && (
+            <LocationWindow location={location} setLocation={setLocation} />
+          )}
+          {isTime && <TimeWindow time={time} setTime={setTime} />}
+        </View>
       </View>
       <View style={styles.container}>
-        <KeyboardAwareScrollView
-          nestedScrollEnabled
-          showsVerticalScrollIndicator={false}
-          style={{ paddingTop: 10 }}
-        >
-          {viewMedia && <PhotoScroller newMedia={media} setNewMedia={setMedia} />}
-          {viewAudio && <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />}
-          {isTagging && <TagWindow tags={tags} setTags={setTags} />}
-          {isLocation && <LocationWindow location={location} setLocation={setLocation} />}
-          {isTime && <TimeWindow time={time} setTime={setTime} />}
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              multiline={true}
-              textAlignVertical="top"
-              value={text}
-              onChangeText={setText}
+        {media[0] && (
+          <View style={{ height: 280 }}>
+            <Image
+              source={{
+                uri:
+                  media[0].getType() === "video"
+                    ? (media[0] as VideoType).getThumbnail()
+                    : media[0].getUri(),
+              }}
+              resizeMode="contain"
+              style={{ height: "100%", width: "100%" }}
             />
           </View>
-        </KeyboardAwareScrollView>
+        )}
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            multiline={true}
+            textAlignVertical="top"
+            value={text}
+            onChangeText={setText}
+          />
+        </View>
       </View>
-    </View>
+    </KeyboardAwareScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   topContainer: {
-    flex: 1,
     justifyContent: "space-between",
     paddingHorizontal: 5,
-    minHeight: "15%",
-    paddingTop: "15%",
+    paddingTop: Constants.statusBarHeight,
     flexDirection: "row",
     backgroundColor: "#F4DFCD",
     alignItems: "center",
@@ -237,10 +247,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   container: {
-    paddingHorizontal: 16,
+    padding: "1%",
     backgroundColor: "white",
-    overflow: "hidden",
-    paddingBottom: "50%",
+    height: "100%",
   },
   title: {
     width: "70%",
@@ -254,13 +263,12 @@ const styles = StyleSheet.create({
     fontSize: 30,
   },
   input: {
-    flex: 1,
     borderColor: "#111111",
     borderWidth: 1,
     borderRadius: 10,
     padding: 10,
     fontSize: 22,
-    paddingBottom: "90%",
+    minHeight: 300,
   },
   addButton: {
     position: "absolute",
@@ -308,8 +316,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   inputContainer: {
-    height: 400,
-    justifyContent: "space-between",
+    flexGrow: 1,
+    backgroundColor: "white",
   },
 });
 

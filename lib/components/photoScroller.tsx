@@ -18,6 +18,7 @@ import { Media, VideoType, PhotoType } from "../models/media_class";
 import uuid from "react-native-uuid";
 import { getThumbnail, convertHeicToJpg, uploadMedia } from "../utils/S3_proxy";
 import LoadingImage from "./loadingImage";
+import DraggableFlatList from "react-native-draggable-flatlist";
 
 function PhotoScroller({
   newMedia,
@@ -30,6 +31,13 @@ function PhotoScroller({
   const [imageToShow, setImageToShow] = useState("");
   const [type, setType] = useState("photo");
   const [playing, setPlaying] = useState(false);
+
+  const getFeaturedPhoto = () => {
+    if (newMedia.length > 0) {
+      return newMedia[0].getUri();
+    }
+    return "";
+  };
 
   const handleImageSelection = async (result: {
     canceled?: false;
@@ -54,7 +62,6 @@ function PhotoScroller({
       uri.endsWith(".jpeg")
     ) {
       const uploadedUrl = await uploadMedia(uri, "image");
-      console.log("I don't think it is getting here!!!!!!");
       console.log("After URL is retrieved from upload Media ", uploadedUrl);
       const newMediaItem = new PhotoType({
         uuid: uuid.v4().toString(),
@@ -94,14 +101,55 @@ function PhotoScroller({
     }
   };
 
+  const renderItem = ({ item: media, getIndex, drag }) => {
+    const index = getIndex();
+    return (
+      <View>
+        <TouchableOpacity
+          style={styles.trash}
+          onPress={() => handleDeleteMedia(index)}
+        >
+          {/* <Ionicons
+            style={{ alignSelf: "center", marginLeft:1, }}
+            name="trash-outline"
+            size={20}
+            color="#111111"
+          /> */}
+        </TouchableOpacity>
+        <TouchableOpacity
+          onLongPress={drag}
+          delayLongPress={100}
+          onPress={() => goBig(index)}
+        >
+          <View
+            style={{
+              alignSelf: "center",
+              height: 100,
+              width: 100,
+              marginRight: index === newMedia.length - 1 ? 10 : 0,
+            }}
+          >
+            <LoadingImage
+              imageURI={
+                media.getType() === "video"
+                  ? (media as VideoType).getThumbnail()
+                  : media.getUri()
+              }
+              type={media?.getType()}
+              isImage={media.getType() === "image"}
+            />
+          </View>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
   const handleNewMedia = async () => {
     const { status } = await requestCameraPermissionsAsync();
     if (status !== "granted") {
       alert("Sorry, we need camera permissions to make this work!");
       return;
     }
-
-    console.log("Opening camera...");
     const cameraResult = await launchCameraAsync({
       mediaTypes: MediaTypeOptions.All,
       allowsEditing: false,
@@ -156,7 +204,7 @@ function PhotoScroller({
           <Image source={{ uri: imageToShow }} style={styles.video} />
         </View>
       ) : (
-        <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+        <View style={{ flexDirection: "row" }}>
           <TouchableOpacity
             style={[
               styles.image,
@@ -174,45 +222,16 @@ function PhotoScroller({
               color="#111111"
             />
           </TouchableOpacity>
-          {newMedia?.map((media, index) => {
-            const ImageType = media?.getType();
-            let ImageURI = "";
-            let IsImage = false;
-            if (ImageType === "image") {
-              ImageURI = media.getUri();
-              IsImage = true;
-            } else if (ImageType === "video") {
-              ImageURI = (media as VideoType).getThumbnail();
-              IsImage = true;
-            }
-            return (
-              <View key={index}>
-                <TouchableOpacity
-                  style={styles.trash}
-                  onPress={() => handleDeleteMedia(index)}
-                >
-                  <Ionicons
-                    style={{ alignSelf: "center" }}
-                    name="trash-outline"
-                    size={20}
-                    color="#111111"
-                  />
-                </TouchableOpacity>
-                <TouchableOpacity key={index} onPress={() => goBig(index)}>
-                  <View
-                    style={{ alignSelf: "center", height: 100, width: 100 }}
-                  >
-                    <LoadingImage
-                      imageURI={ImageURI}
-                      type={media?.getType()}
-                      isImage={true}
-                    />
-                  </View>
-                </TouchableOpacity>
-              </View>
-            );
-          })}
-        </ScrollView>
+          <DraggableFlatList
+            showsHorizontalScrollIndicator={false}
+            horizontal={true}
+            style={{ paddingLeft: 10, marginRight: 100 }}
+            data={newMedia}
+            renderItem={renderItem}
+            keyExtractor={(item, index) => `item-${index}`}
+            onDragEnd={({ data }) => setNewMedia(data)}
+          />
+        </View>
       )}
     </View>
   );
@@ -231,15 +250,15 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 20,
-    marginRight: 5,
   },
   trash: {
     position: "absolute",
+    left:-5,
     zIndex: 99,
-    height: "20%",
-    width: "20%",
+    height: "13%",
+    width: "13%",
     backgroundColor: "red",
-    borderRadius: 10,
+    borderRadius: 30,
     justifyContent: "center",
   },
   video: {
