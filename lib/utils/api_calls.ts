@@ -128,4 +128,32 @@ export default class ApiService {
       }),
     });
   }
+
+  static async searchMessages(query: string): Promise<any[]> {
+    try {
+      const url = "http://lived-religion-dev.rerum.io/deer-lr/query";
+      const headers = {
+        "Content-Type": "application/json",
+      };
+      
+      // Search query can be in title or tags
+      let body: { type: string, title?: string, tags?: string[] } = { type: "message" };
+      body.title = query;
+      body.tags = [query];
+  
+      const response = await fetch(url, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(body),
+      });
+  
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error searching messages:", error);
+      throw error;
+    }
+  }
+  
+
 }
