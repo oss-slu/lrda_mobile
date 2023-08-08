@@ -1,7 +1,9 @@
 import React, { useState } from "react";
-import { View, Image, StyleSheet } from "react-native";
+import { View, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Placeholder, PlaceholderMedia, Progressive } from "rn-placeholder";
+import * as FileSystem from "expo-file-system";
+import * as MediaLibrary from "expo-media-library";
 
 interface LoadingImageProps {
   imageURI: string;
@@ -15,6 +17,23 @@ export default function LoadingImage({
   isImage,
 }: LoadingImageProps) {
   const [isLoading, setIsLoading] = useState(true);
+
+  const handleSaveMedia = async () => {
+    try {
+      const fileName = imageURI.replace(/^.*[\\\/]/, "");
+      const imageFullPathInLocalStorage =
+        FileSystem.documentDirectory + fileName;
+
+      FileSystem.downloadAsync(imageURI, imageFullPathInLocalStorage).then(
+        async ({ uri }) => {
+          await MediaLibrary.saveToLibraryAsync(imageFullPathInLocalStorage);
+        }
+      );
+    } catch (error) {
+      console.error("Error saving media:", error);
+    }
+  };
+
   if (isImage && imageURI !== "") {
     return (
       <View>
@@ -30,7 +49,7 @@ export default function LoadingImage({
           />
         )}
         {type === "video" ? (
-          <View>
+          <TouchableOpacity activeOpacity={0.5} onLongPress={handleSaveMedia}>
             <Image
               style={styles.preview}
               source={{ uri: imageURI }}
@@ -44,13 +63,15 @@ export default function LoadingImage({
                 style={styles.icon}
               />
             </View>
-          </View>
+          </TouchableOpacity>
         ) : (
-          <Image
-            style={styles.preview}
-            source={{ uri: imageURI }}
-            onLoadEnd={() => setIsLoading(false)}
-          />
+          <TouchableOpacity activeOpacity={0.5} onLongPress={handleSaveMedia}>
+            <Image
+              style={styles.preview}
+              source={{ uri: imageURI }}
+              onLoadEnd={() => setIsLoading(false)}
+            />
+          </TouchableOpacity>
         )}
       </View>
     );

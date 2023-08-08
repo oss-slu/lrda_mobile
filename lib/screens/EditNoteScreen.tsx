@@ -1,6 +1,6 @@
 // EditNoteScreen.tsx
 import React, { useState, useEffect } from "react";
-import { ScrollView, View, TextInput, Image, StyleSheet } from "react-native";
+import { View, TextInput, Image, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,6 +16,7 @@ import LocationWindow from "../components/location";
 import TimeWindow from "../components/time";
 import { getThumbnail } from "../utils/S3_proxy";
 import Constants from "expo-constants";
+import { ResizeMode, Video } from "expo-av";
 
 const user = User.getInstance();
 
@@ -180,7 +181,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             <Ionicons name="pricetag-outline" size={30} color="black" />
           </TouchableOpacity>
         </View>
-        <View style={{backgroundColor:'white'}}>
+        <View style={{ backgroundColor: "white" }}>
           {viewMedia && (
             <PhotoScroller newMedia={media} setNewMedia={setMedia} />
           )}
@@ -197,16 +198,24 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       <View style={styles.container}>
         {media[0] && (
           <View style={{ height: 280 }}>
-            <Image
-              source={{
-                uri:
-                  media[0].getType() === "video"
-                    ? (media[0] as VideoType).getThumbnail()
-                    : media[0].getUri(),
-              }}
-              resizeMode="contain"
-              style={{ height: "100%", width: "100%" }}
-            />
+            {media[0].getType() === "image" ? (
+              <Image
+                source={{
+                  uri: media[0].getUri(),
+                }}
+                resizeMode="contain"
+                style={{ height: "100%", width: "100%" }}
+              />
+            ) : (
+              <Video
+              source={{ uri: media[0].getUri() }}
+              resizeMode={ResizeMode.COVER}
+              shouldPlay={true}
+              useNativeControls={true}
+              isLooping={true}
+              style={styles.video}
+              />
+            )}
           </View>
         )}
         <View style={styles.inputContainer}>
@@ -300,6 +309,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 40,
+  },
+  video: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignSelf: "center",
   },
   saveButton: {
     backgroundColor: "#C7EBB3",

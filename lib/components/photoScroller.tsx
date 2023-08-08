@@ -19,6 +19,7 @@ import uuid from "react-native-uuid";
 import { getThumbnail, convertHeicToJpg, uploadMedia } from "../utils/S3_proxy";
 import LoadingImage from "./loadingImage";
 import DraggableFlatList from "react-native-draggable-flatlist";
+import ImageView from "react-native-image-viewing";
 
 function PhotoScroller({
   newMedia,
@@ -28,16 +29,10 @@ function PhotoScroller({
   setNewMedia: React.Dispatch<React.SetStateAction<Media[]>>;
 }) {
   const [videoToPlay, setVideoToPlay] = useState("");
-  const [imageToShow, setImageToShow] = useState("");
+  const [imageToShow, setImageToShow] = useState(0);
   const [type, setType] = useState("photo");
   const [playing, setPlaying] = useState(false);
-
-  const getFeaturedPhoto = () => {
-    if (newMedia.length > 0) {
-      return newMedia[0].getUri();
-    }
-    return "";
-  };
+  const [images, setImages] = useState([]);
 
   const handleImageSelection = async (result: {
     canceled?: false;
@@ -89,33 +84,43 @@ function PhotoScroller({
   };
 
   const goBig = (index: number) => {
-    const currentMedia = newMedia[index];
-    if (currentMedia.getType() === "video") {
-      setType("video");
-      setVideoToPlay(currentMedia.getUri());
-      setPlaying(true);
-    } else {
-      setType("image");
-      setImageToShow(currentMedia.getUri());
-      setPlaying(true);
+    setImageToShow(index);
+
+    let curImages: string[] = [];
+
+    for (let x = 0; x < newMedia.length; x++) {
+      if (newMedia[x].getType() === "image") {
+        curImages.push(newMedia[x].getUri());
+      } else if (newMedia[x].getType() === "video"){
+        curImages.push((newMedia[x] as VideoType).getThumbnail())
+      }
     }
+
+    setImages(curImages);
+    setType("image");
+    setPlaying(true);
   };
 
   const renderItem = ({ item: media, getIndex, drag }) => {
     const index = getIndex();
+    const key = `media-${index}`;
+    const mediaItem = media;
+    const ImageType = mediaItem?.getType();
+    let ImageURI = "";
+    let IsImage = false;
+    if (ImageType === "image") {
+      ImageURI = mediaItem.getUri();
+      IsImage = true;
+    } else if (ImageType === "video") {
+      ImageURI = mediaItem.getThumbnail();
+      IsImage = true;
+    }
     return (
-      <View>
+      <View key={key}>
         <TouchableOpacity
           style={styles.trash}
           onPress={() => handleDeleteMedia(index)}
-        >
-          {/* <Ionicons
-            style={{ alignSelf: "center", marginLeft:1, }}
-            name="trash-outline"
-            size={20}
-            color="#111111"
-          /> */}
-        </TouchableOpacity>
+        ></TouchableOpacity>
         <TouchableOpacity
           onLongPress={drag}
           delayLongPress={100}
@@ -129,15 +134,15 @@ function PhotoScroller({
               marginRight: index === newMedia.length - 1 ? 10 : 0,
             }}
           >
-            <LoadingImage
-              imageURI={
-                media.getType() === "video"
-                  ? (media as VideoType).getThumbnail()
-                  : media.getUri()
-              }
-              type={media?.getType()}
-              isImage={media.getType() === "image"}
-            />
+            {IsImage ? (
+              <LoadingImage
+                imageURI={ImageURI}
+                type={ImageType}
+                isImage={true}
+              />
+            ) : (
+              <LoadingImage imageURI={""} type={ImageType} isImage={false} />
+            )}
           </View>
         </TouchableOpacity>
       </View>
@@ -196,13 +201,15 @@ function PhotoScroller({
           />
         </View>
       ) : playing && type === "image" ? (
-        <View style={styles.miniContainer}>
-          <Button
-            title="Close Viewer"
-            onPress={() => setPlaying(false)}
-          ></Button>
-          <Image source={{ uri: imageToShow }} style={styles.video} />
-        </View>
+        <ImageView
+          images={images.map((image, index) => ({
+            uri: image,
+            key: `image-${index}`,
+          }))}
+          imageIndex={imageToShow}
+          visible={playing}
+          onRequestClose={() => setPlaying(false)}
+        />
       ) : (
         <View style={{ flexDirection: "row" }}>
           <TouchableOpacity
@@ -253,7 +260,7 @@ const styles = StyleSheet.create({
   },
   trash: {
     position: "absolute",
-    left:-5,
+    left: -5,
     zIndex: 99,
     height: "13%",
     width: "13%",
