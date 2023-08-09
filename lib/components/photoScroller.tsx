@@ -17,6 +17,12 @@ import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
 import { Dimensions } from "react-native";
 
+// type CustomRenderItemParams = {
+//   item: Media;
+//   getIndex: Function;
+//   drag: () => void;
+// };
+
 function PhotoScroller({
   newMedia,
   setNewMedia,
@@ -124,7 +130,11 @@ function PhotoScroller({
     setPlaying(true);
   };
 
-  const renderItem = ({ item: media, getIndex, drag }) => {
+  const renderItem = ({ item: media, getIndex, drag }: {
+    item: Media;
+    getIndex: Function;
+    drag: () => void;
+  }) => {
     const index = getIndex();
     const key = `media-${index}`;
     const mediaItem = media;
@@ -135,7 +145,7 @@ function PhotoScroller({
       ImageURI = mediaItem.getUri();
       IsImage = true;
     } else if (ImageType === "video") {
-      ImageURI = mediaItem.getThumbnail();
+      ImageURI = (mediaItem as VideoType).getThumbnail();
       IsImage = true;
     }
     return (
