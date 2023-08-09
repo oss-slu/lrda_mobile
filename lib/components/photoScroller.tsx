@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Image,
-  ScrollView,
+  Text,
   StyleSheet,
   TouchableOpacity,
-  Button,
 } from "react-native";
 import {
   launchCameraAsync,
@@ -20,6 +19,8 @@ import { getThumbnail, convertHeicToJpg, uploadMedia } from "../utils/S3_proxy";
 import LoadingImage from "./loadingImage";
 import DraggableFlatList from "react-native-draggable-flatlist";
 import ImageView from "react-native-image-viewing";
+import * as FileSystem from "expo-file-system";
+import * as MediaLibrary from "expo-media-library";
 
 function PhotoScroller({
   newMedia,
@@ -28,11 +29,15 @@ function PhotoScroller({
   newMedia: Media[];
   setNewMedia: React.Dispatch<React.SetStateAction<Media[]>>;
 }) {
-  const [videoToPlay, setVideoToPlay] = useState("");
   const [imageToShow, setImageToShow] = useState(0);
-  const [type, setType] = useState("photo");
   const [playing, setPlaying] = useState(false);
-  const [images, setImages] = useState([]);
+  const [images, setImages] = useState<string[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showFooter, setShowFooter] = useState(false);
+
+  useEffect(() => {
+    setShowFooter(false);
+  }, [currentImageIndex]);
 
   const handleImageSelection = async (result: {
     canceled?: false;
@@ -83,6 +88,26 @@ function PhotoScroller({
     }
   };
 
+  const handleSaveMedia = async (imageURI: string) => {
+    try {
+      const fileName = imageURI.replace(/^.*[\\\/]/, "");
+      const imageFullPathInLocalStorage =
+        FileSystem.documentDirectory + fileName;
+
+      FileSystem.downloadAsync(imageURI, imageFullPathInLocalStorage).then(
+        async ({ uri }) => {
+          await MediaLibrary.saveToLibraryAsync(imageFullPathInLocalStorage);
+        }
+      );
+      setShowFooter(true);
+      setTimeout(() => {
+        setShowFooter(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Error saving media:", error);
+    }
+  };
+
   const goBig = (index: number) => {
     setImageToShow(index);
 
@@ -91,13 +116,12 @@ function PhotoScroller({
     for (let x = 0; x < newMedia.length; x++) {
       if (newMedia[x].getType() === "image") {
         curImages.push(newMedia[x].getUri());
-      } else if (newMedia[x].getType() === "video"){
-        curImages.push((newMedia[x] as VideoType).getThumbnail())
+      } else if (newMedia[x].getType() === "video") {
+        curImages.push((newMedia[x] as VideoType).getThumbnail());
       }
     }
 
     setImages(curImages);
-    setType("image");
     setPlaying(true);
   };
 
@@ -122,6 +146,7 @@ function PhotoScroller({
           onPress={() => handleDeleteMedia(index)}
         ></TouchableOpacity>
         <TouchableOpacity
+          activeOpacity={0.5}
           onLongPress={drag}
           delayLongPress={100}
           onPress={() => goBig(index)}
@@ -168,6 +193,15 @@ function PhotoScroller({
     }
   };
 
+  function Footer({ imageIndex }: { imageIndex: number }) {
+    return showFooter ? (
+      <View style={styles.footerContainer}>
+        <Text style={styles.footerText}>Media Saved to Device</Text>
+      </View>
+    ) : (null)
+  }
+  
+
   const handleDeleteMedia = (index: number) => {
     const updatedMedia = [...newMedia];
     updatedMedia.splice(index, 1);
@@ -185,32 +219,24 @@ function PhotoScroller({
         },
       ]}
     >
-      {playing && type === "video" ? (
-        <View style={styles.miniContainer}>
-          <Button
-            title="Close Viewer"
-            onPress={() => setPlaying(false)}
-          ></Button>
-          <Video
-            source={{ uri: videoToPlay }}
-            resizeMode={ResizeMode.COVER}
-            shouldPlay
-            useNativeControls
-            isLooping
-            style={styles.video}
+      {playing && (
+        <View>
+          <ImageView
+            images={images.map((image, index) => ({
+              uri: image,
+              key: `image-${index}`,
+            }))}
+            imageIndex={imageToShow}
+            onImageIndexChange={(index) => setCurrentImageIndex(index)}
+            onLongPress={() =>
+              handleSaveMedia(newMedia[currentImageIndex].getUri())
+            }
+            visible={playing}
+            onRequestClose={() => setPlaying(false)}
+            FooterComponent={(imageIndex) => Footer(imageIndex)}
           />
         </View>
-      ) : playing && type === "image" ? (
-        <ImageView
-          images={images.map((image, index) => ({
-            uri: image,
-            key: `image-${index}`,
-          }))}
-          imageIndex={imageToShow}
-          visible={playing}
-          onRequestClose={() => setPlaying(false)}
-        />
-      ) : (
+        )}
         <View style={{ flexDirection: "row" }}>
           <TouchableOpacity
             style={[
@@ -239,7 +265,6 @@ function PhotoScroller({
             onDragEnd={({ data }) => setNewMedia(data)}
           />
         </View>
-      )}
     </View>
   );
 }
@@ -279,5 +304,20 @@ const styles = StyleSheet.create({
     position: "relative",
     justifyContent: "center",
     alignItems: "center",
+  },
+  footerContainer: {
+    backgroundColor: "rgba(255,255,255, 0.8)",
+    padding: 10,
+    alignItems: "center",
+    marginBottom: "13%",
+    width: '80%',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    borderRadius: 10,
+  },
+  footerText: {
+    textAlign: "center",
+    fontSize: 16,
+    fontWeight: "700",
   },
 });

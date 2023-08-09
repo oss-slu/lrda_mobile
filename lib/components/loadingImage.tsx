@@ -49,7 +49,7 @@ export default function LoadingImage({
           />
         )}
         {type === "video" ? (
-          <TouchableOpacity activeOpacity={0.5} onLongPress={handleSaveMedia}>
+          <View>
             <Image
               style={styles.preview}
               source={{ uri: imageURI }}
@@ -63,15 +63,15 @@ export default function LoadingImage({
                 style={styles.icon}
               />
             </View>
-          </TouchableOpacity>
+          </View>
         ) : (
-          <TouchableOpacity activeOpacity={0.5} onLongPress={handleSaveMedia}>
+          <View>
             <Image
               style={styles.preview}
               source={{ uri: imageURI }}
               onLoadEnd={() => setIsLoading(false)}
             />
-          </TouchableOpacity>
+          </View>
         )}
       </View>
     );
