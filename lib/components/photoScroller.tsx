@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Image,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
+import { View, Image, Text, StyleSheet, TouchableOpacity } from "react-native";
 import {
   launchCameraAsync,
   MediaTypeOptions,
@@ -21,6 +15,7 @@ import DraggableFlatList from "react-native-draggable-flatlist";
 import ImageView from "react-native-image-viewing";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
+import { Dimensions } from "react-native";
 
 function PhotoScroller({
   newMedia,
@@ -34,9 +29,13 @@ function PhotoScroller({
   const [images, setImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showFooter, setShowFooter] = useState(false);
+  const [showHeader, setShowHeader] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
 
   useEffect(() => {
     setShowFooter(false);
+    setShowHeader(false);
+    setShowVideo(false);
   }, [currentImageIndex]);
 
   const handleImageSelection = async (result: {
@@ -198,9 +197,64 @@ function PhotoScroller({
       <View style={styles.footerContainer}>
         <Text style={styles.footerText}>Media Saved to Device</Text>
       </View>
-    ) : (null)
+    ) : null;
   }
-  
+
+  function Header({ imageIndex }: { imageIndex: number }) {
+    const [showVideo, setShowVideo] = useState(false);
+    const showHeader = newMedia[imageIndex].getType() === "video";
+
+    return showHeader ? (
+      <View>
+        <TouchableOpacity
+          style={styles.closeUnderlay}
+          onPress={() => setPlaying(false)}
+        >
+          <Ionicons
+            name="close-outline"
+            size={24}
+            color="#dfe5e8"
+            style={styles.icon}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.playUnderlay}
+          onPress={() => setShowVideo(true)}
+        >
+          <Ionicons
+            name="play-outline"
+            size={24}
+            color="#dfe5e8"
+            style={styles.icon}
+          />
+        </TouchableOpacity>
+        {showVideo && (
+          <View style={styles.videoContainer}>
+            <Video
+              source={{ uri: newMedia[imageIndex].getUri() }}
+              resizeMode={ResizeMode.CONTAIN}
+              shouldPlay={true}
+              useNativeControls={true}
+              isLooping={true}
+              style={styles.video}
+            />
+          </View>
+        )}
+      </View>
+    ) : (
+      <TouchableOpacity
+        style={styles.closeUnderlay}
+        onPress={() => setPlaying(false)}
+      >
+        <Ionicons
+          name="close-outline"
+          size={24}
+          color="#dfe5e8"
+          style={styles.icon}
+        />
+      </TouchableOpacity>
+    );
+  }
 
   const handleDeleteMedia = (index: number) => {
     const updatedMedia = [...newMedia];
@@ -234,37 +288,38 @@ function PhotoScroller({
             visible={playing}
             onRequestClose={() => setPlaying(false)}
             FooterComponent={(imageIndex) => Footer(imageIndex)}
+            HeaderComponent={(imageIndex) => Header(imageIndex)}
           />
         </View>
-        )}
-        <View style={{ flexDirection: "row" }}>
-          <TouchableOpacity
-            style={[
-              styles.image,
-              {
-                backgroundColor: "rgb(240,240,240)",
-                justifyContent: "center",
-              },
-            ]}
-            onPress={handleNewMedia}
-          >
-            <Ionicons
-              style={{ alignSelf: "center" }}
-              name="camera-outline"
-              size={60}
-              color="#111111"
-            />
-          </TouchableOpacity>
-          <DraggableFlatList
-            showsHorizontalScrollIndicator={false}
-            horizontal={true}
-            style={{ paddingLeft: 10, marginRight: 100 }}
-            data={newMedia}
-            renderItem={renderItem}
-            keyExtractor={(item, index) => `item-${index}`}
-            onDragEnd={({ data }) => setNewMedia(data)}
+      )}
+      <View style={{ flexDirection: "row" }}>
+        <TouchableOpacity
+          style={[
+            styles.image,
+            {
+              backgroundColor: "rgb(240,240,240)",
+              justifyContent: "center",
+            },
+          ]}
+          onPress={handleNewMedia}
+        >
+          <Ionicons
+            style={{ alignSelf: "center" }}
+            name="camera-outline"
+            size={60}
+            color="#111111"
           />
-        </View>
+        </TouchableOpacity>
+        <DraggableFlatList
+          showsHorizontalScrollIndicator={false}
+          horizontal={true}
+          style={{ paddingLeft: 10, marginRight: 100 }}
+          data={newMedia}
+          renderItem={renderItem}
+          keyExtractor={(item, index) => `item-${index}`}
+          onDragEnd={({ data }) => setNewMedia(data)}
+        />
+      </View>
     </View>
   );
 }
@@ -310,14 +365,51 @@ const styles = StyleSheet.create({
     padding: 10,
     alignItems: "center",
     marginBottom: "13%",
-    width: '80%',
-    justifyContent: 'center',
-    alignSelf: 'center',
+    width: "80%",
+    justifyContent: "center",
+    alignSelf: "center",
     borderRadius: 10,
   },
   footerText: {
     textAlign: "center",
     fontSize: 16,
     fontWeight: "700",
+  },
+  playUnderlay: {
+    marginTop: "60%",
+    top: "50%",
+    left: "50%",
+    transform: [{ translateY: -25 }, { translateX: -25 }],
+    width: 50,
+    height: 50,
+    borderRadius: 30,
+    backgroundColor: "rgba(5,5,5,0.5)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  closeUnderlay: {
+    position: "absolute",
+    top: 50,
+    right: 10,
+    width: 50,
+    height: 50,
+    borderRadius: 30,
+    backgroundColor: "rgba(5,5,5,0.5)",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 100,
+  },
+  icon: {
+    alignSelf: "center",
+    marginLeft: 4,
+  },
+  videoContainer: {
+    marginVertical: 50,
+    width: "100%",
+    height: Dimensions.get("screen").height-70,
+    justifyContent: "center",
+    alignItems: "center",
+    position: "absolute",
+    backgroundColor: "#000",
   },
 });
