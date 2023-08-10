@@ -135,11 +135,11 @@ export default class ApiService {
       const headers = {
         "Content-Type": "application/json",
       };
-      
-      // Search query can be in title or tags
-      let body: { type: string, title?: string, tags?: string[] } = { type: "message" };
-      body.title = query;
-      body.tags = [query];
+  
+      // Request body for retrieving messages of type "message"
+      const body = {
+        type: "message",
+      };
   
       const response = await fetch(url, {
         method: "POST",
@@ -147,7 +147,26 @@ export default class ApiService {
         body: JSON.stringify(body),
       });
   
-      const data = await response.json();
+      let data = await response.json();
+  
+      // Convert the query to lowercase for case-insensitive matching
+      const lowerCaseQuery = query.toLowerCase();
+  
+      // Filter the messages by title or tags containing the query string
+      data = data.filter((message: any) => {
+        // Check if title contains the query string
+        if (message.title && message.title.toLowerCase().includes(lowerCaseQuery)) {
+          return true;
+        }
+  
+        // Check if any tags contain the query string
+        if (message.tags && message.tags.some((tag: string) => tag.toLowerCase().includes(lowerCaseQuery))) {
+          return true;
+        }
+  
+        return false;
+      });
+  
       return data;
     } catch (error) {
       console.error("Error searching messages:", error);
@@ -155,5 +174,5 @@ export default class ApiService {
     }
   }
   
-
+  
 }
