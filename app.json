@@ -18,7 +18,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "beta.edu.slu.cs.oss.lrda",
       "config": {
-        "googleMapsApiKey": "AIzaSyBwi5lzjEmTzGZPRFwx6dIZK7EOwV6VEKw"
+        "googleMapsApiKey": ""
       }
     },
     "android": {
@@ -28,7 +28,7 @@
       },
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyBwi5lzjEmTzGZPRFwx6dIZK7EOwV6VEKw"
+          "apiKey": ""
         }
       }
     },
