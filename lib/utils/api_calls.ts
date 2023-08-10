@@ -128,4 +128,51 @@ export default class ApiService {
       }),
     });
   }
+
+  static async searchMessages(query: string): Promise<any[]> {
+    try {
+      const url = "http://lived-religion-dev.rerum.io/deer-lr/query";
+      const headers = {
+        "Content-Type": "application/json",
+      };
+  
+      // Request body for retrieving messages of type "message"
+      const body = {
+        type: "message",
+      };
+  
+      const response = await fetch(url, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(body),
+      });
+  
+      let data = await response.json();
+  
+      // Convert the query to lowercase for case-insensitive matching
+      const lowerCaseQuery = query.toLowerCase();
+  
+      // Filter the messages by title or tags containing the query string
+      data = data.filter((message: any) => {
+        // Check if title contains the query string
+        if (message.title && message.title.toLowerCase().includes(lowerCaseQuery)) {
+          return true;
+        }
+  
+        // Check if any tags contain the query string
+        if (message.tags && message.tags.some((tag: string) => tag.toLowerCase().includes(lowerCaseQuery))) {
+          return true;
+        }
+  
+        return false;
+      });
+  
+      return data;
+    } catch (error) {
+      console.error("Error searching messages:", error);
+      throw error;
+    }
+  }
+  
+  
 }
