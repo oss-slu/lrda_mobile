@@ -18,6 +18,8 @@
 
   },
   "dependencies": {
+    "enzyme": "^3.11.0",
+    "enzyme-adapter-react-16": "^1.15.7",
     "@gapur/react-native-accordion": "^1.0.7",
     "@react-native-async-storage/async-storage": "^1.19.1",
     "@react-native-community/datetimepicker": "6.7.3",
