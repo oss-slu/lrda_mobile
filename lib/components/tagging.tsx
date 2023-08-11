@@ -83,7 +83,7 @@ function TagWindow({
   };
 
   return (
-    <View style={{marginBottom: 10}}>
+    <View style={{marginBottom: 10, minHeight: 100}}>
       <TextInput
         style={styles.textBox}
         value={inputText}

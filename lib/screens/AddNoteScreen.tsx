@@ -6,10 +6,10 @@ import {
   TextInput,
   TouchableOpacity,
   Keyboard,
+  ScrollView,
 } from "react-native";
 import { Note, AddNoteScreenProps } from "../../types";
 import PhotoScroller from "../components/photoScroller";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { User } from "../models/user_class";
 import { Ionicons } from "@expo/vector-icons";
 import { Media, AudioType } from "../models/media_class";
@@ -18,7 +18,7 @@ import ApiService from "../utils/api_calls";
 import TagWindow from "../components/tagging";
 import LocationWindow from "../components/location";
 import TimeWindow from "../components/time";
-import { RichEditor, RichToolbar } from 'react-native-pell-rich-editor';
+import { RichEditor, RichToolbar } from "react-native-pell-rich-editor";
 import Constants from "expo-constants";
 
 const user = User.getInstance();
@@ -38,18 +38,25 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const richTextRef = useRef<RichEditor | null>(null);
   const [isPublished, setIsPublished] = useState(false);
   const [keyboardOpen, setKeyboard] = useState(false);
+  const scrollViewRef = useRef<ScrollView | null>(null);
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
 
   useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
-      setKeyboard(true);
-    });
-    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
-      setKeyboard(false);
-    });
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => {
+        setKeyboard(true);
+      }
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        setKeyboard(false);
+      }
+    );
 
     return () => {
       keyboardDidShowListener.remove();
@@ -57,8 +64,14 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     };
   }, []);
 
+  const handleScroll = (positionY: number) => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({ y: positionY - 100, animated: true });
+    }
+  };
+
   const saveNote = async () => {
-    if (titleText === ""){
+    if (titleText === "") {
       navigation.goBack();
     } else if (bodyText !== "" && titleText === "") {
       Alert.alert("A title is necessary to save");
@@ -78,10 +91,10 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           time: time,
         };
         const response = await ApiService.writeNewNote(newNote);
-  
+
         const obj = await response.json();
         const id = obj["@id"];
-  
+
         route.params.refreshPage();
         navigation.goBack();
       } catch (error) {
@@ -153,13 +166,15 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         >
           <Ionicons name="location-outline" size={30} color="black" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => {
+        <TouchableOpacity
+          onPress={() => {
             setViewMedia(false);
             setViewAudio(false);
             setIsTagging(false);
             setIsLocation(false);
             setIsTime(!isTime);
-          }}>
+          }}
+        >
           <Ionicons name="time-outline" size={30} color="black" />
         </TouchableOpacity>
         <TouchableOpacity
@@ -174,29 +189,46 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           <Ionicons name="pricetag-outline" size={30} color="black" />
         </TouchableOpacity>
       </View>
+      <View style={{ backgroundColor: "white" }}>
+        {viewMedia && (
+          <PhotoScroller newMedia={newMedia} setNewMedia={setNewMedia} />
+        )}
+        {viewAudio && (
+          <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
+        )}
+        {isTagging && <TagWindow tags={tags} setTags={setTags} />}
+        {isLocation && (
+          <LocationWindow location={location} setLocation={setLocation} />
+        )}
+        {isTime && <TimeWindow time={time} setTime={setTime} />}
+      </View>
       <RichToolbar editor={richTextRef} />
       <View style={styles.container}>
-        <KeyboardAwareScrollView
-          nestedScrollEnabled
+        <ScrollView
+          nestedScrollEnabled={true}
           showsVerticalScrollIndicator={false}
           style={{ overflow: "hidden", paddingTop: 10, paddingBottom: 100 }}
+          ref={scrollViewRef}
         >
-          {viewMedia && <PhotoScroller newMedia={newMedia} setNewMedia={setNewMedia} />}
-          {viewAudio && <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />}
-          {isTagging && <TagWindow tags={tags} setTags={setTags} />}
-          {isLocation && <LocationWindow location={location} setLocation={setLocation} />}
-          {isTime && <TimeWindow time={time} setTime={setTime} />}
-          <View style={[{ paddingBottom: keyboardOpen ? 50 :  150},{ minHeight: 600 }]}>
-          <RichEditor
+          <View
+            style={[
+              { paddingBottom: keyboardOpen ? 50 : 150 },
+              { minHeight: 900 },
+            ]}
+          >
+            <RichEditor
               ref={(r) => (richTextRef.current = r)}
               style={styles.input}
               placeholder="Write your note here"
-              onChange={(text)=>setBodyText(text)}
+              onChange={(text) => setBodyText(text)}
               initialContentHTML={bodyText}
+              onCursorPosition={(position) => {
+                handleScroll(position);
+              }}
             />
-            <View style={{height: 100}} />
+            <View style={{ height: keyboardOpen ? 590 : 270 }} />
           </View>
-        </KeyboardAwareScrollView>
+        </ScrollView>
       </View>
     </View>
   );

@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, TextInput, Image, StyleSheet, Keyboard } from "react-native";
+import {
+  View,
+  TextInput,
+  Image,
+  StyleSheet,
+  Keyboard,
+  ScrollView,
+} from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { Note } from "../../types";
@@ -15,7 +22,6 @@ import TimeWindow from "../components/time";
 import Constants from "expo-constants";
 import { ResizeMode, Video } from "expo-av";
 import { RichEditor, RichToolbar } from "react-native-pell-rich-editor";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 const user = User.getInstance();
 
@@ -33,6 +39,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const [isPublished, setIsPublished] = useState(note.published);
   const [creator, setCreator] = useState(note.creator);
   const [owner, setOwner] = useState(false);
+  const scrollViewRef = useRef<ScrollView | null>(null);
   const [viewMedia, setViewMedia] = useState(false);
   const [viewAudio, setViewAudio] = useState(false);
   const [isTagging, setIsTagging] = useState(false);
@@ -53,12 +60,18 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   );
 
   useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
-      setKeyboard(true);
-    });
-    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
-      setKeyboard(false);
-    });
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => {
+        setKeyboard(true);
+      }
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        setKeyboard(false);
+      }
+    );
 
     return () => {
       keyboardDidShowListener.remove();
@@ -77,6 +90,12 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
 
     checkOwner();
   }, [creator]);
+
+  const handleScroll = (positionY: number) => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({ y: positionY + (media[0] ? 100 : -100), animated: true });
+    }
+  };
 
   const handleSaveNote = async () => {
     try {
@@ -138,84 +157,83 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           <View />
         )}
       </View>
-      <View>
-        <View style={styles.keyContainer}>
-          <TouchableOpacity
-            onPress={() => {
-              setViewMedia(!viewMedia);
-              setViewAudio(false);
-              setIsTagging(false);
-              setIsLocation(false);
-              setIsTime(false);
-            }}
-          >
-            <Ionicons name="images-outline" size={30} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setViewMedia(false);
-              setViewAudio(!viewAudio);
-              setIsTagging(false);
-              setIsLocation(false);
-              setIsTime(false);
-            }}
-          >
-            <Ionicons name="mic-outline" size={30} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setViewMedia(false);
-              setViewAudio(false);
-              setIsTagging(false);
-              setIsLocation(!isLocation);
-              setIsTime(false);
-            }}
-          >
-            <Ionicons name="location-outline" size={30} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setViewMedia(false);
-              setViewAudio(false);
-              setIsTagging(false);
-              setIsLocation(false);
-              setIsTime(!isTime);
-            }}
-          >
-            <Ionicons name="time-outline" size={30} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setViewMedia(false);
-              setViewAudio(false);
-              setIsTagging(!isTagging);
-              setIsLocation(false);
-              setIsTime(false);
-            }}
-          >
-            <Ionicons name="pricetag-outline" size={30} color="black" />
-          </TouchableOpacity>
-        </View>
-        <RichToolbar editor={richTextRef} />
-        <View style={{ backgroundColor: "white" }}>
-          {viewMedia && (
-            <PhotoScroller newMedia={media} setNewMedia={setMedia} />
-          )}
-          {viewAudio && (
-            <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
-          )}
-          {isTagging && <TagWindow tags={tags} setTags={setTags} />}
-          {isLocation && (
-            <LocationWindow location={location} setLocation={setLocation} />
-          )}
-          {isTime && <TimeWindow time={time} setTime={setTime} />}
-        </View>
+      <View style={styles.keyContainer}>
+        <TouchableOpacity
+          onPress={() => {
+            setViewMedia(!viewMedia);
+            setViewAudio(false);
+            setIsTagging(false);
+            setIsLocation(false);
+            setIsTime(false);
+          }}
+        >
+          <Ionicons name="images-outline" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            setViewMedia(false);
+            setViewAudio(!viewAudio);
+            setIsTagging(false);
+            setIsLocation(false);
+            setIsTime(false);
+          }}
+        >
+          <Ionicons name="mic-outline" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            setViewMedia(false);
+            setViewAudio(false);
+            setIsTagging(false);
+            setIsLocation(!isLocation);
+            setIsTime(false);
+          }}
+        >
+          <Ionicons name="location-outline" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            setViewMedia(false);
+            setViewAudio(false);
+            setIsTagging(false);
+            setIsLocation(false);
+            setIsTime(!isTime);
+          }}
+        >
+          <Ionicons name="time-outline" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            setViewMedia(false);
+            setViewAudio(false);
+            setIsTagging(!isTagging);
+            setIsLocation(false);
+            setIsTime(false);
+          }}
+        >
+          <Ionicons name="pricetag-outline" size={30} color="black" />
+        </TouchableOpacity>
       </View>
+      <View style={{ backgroundColor: "white" }}>
+        {viewMedia && (
+          <PhotoScroller newMedia={media} setNewMedia={setMedia} />
+        )}
+        {viewAudio && (
+          <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
+        )}
+        {isTagging && <TagWindow tags={tags} setTags={setTags} />}
+        {isLocation && (
+          <LocationWindow location={location} setLocation={setLocation} />
+        )}
+        {isTime && <TimeWindow time={time} setTime={setTime} />}
+      </View>
+      <RichToolbar editor={richTextRef} />
       <View style={styles.container}>
-        <KeyboardAwareScrollView
-          nestedScrollEnabled
+        <ScrollView
+          nestedScrollEnabled={true}
           showsVerticalScrollIndicator={false}
           style={{ overflow: "hidden", paddingTop: 10, paddingBottom: 100 }}
+          ref={scrollViewRef}
         >
           {media[0] && (
             <View style={{ height: 280 }}>
@@ -239,17 +257,25 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
               )}
             </View>
           )}
-          <View style={[{ paddingBottom: keyboardOpen ? 50 :  150},{ minHeight: 600 }]}>
+          <View
+            style={[
+              { paddingBottom: keyboardOpen ? 50 : 150 },
+              { minHeight: 900 },
+            ]}
+          >
             <RichEditor
               ref={(r) => (richTextRef.current = r)}
               style={styles.input}
               placeholder="Write your note here"
               onChange={(text) => setText(text)}
               initialContentHTML={text}
+              onCursorPosition={(position) => {
+                handleScroll(position);
+              }}
             />
-            <View style={{ height: 100 }} />
+            <View style={{ height: keyboardOpen ? 400 : 90 }} />
           </View>
-        </KeyboardAwareScrollView>
+        </ScrollView>
       </View>
     </View>
   );
