@@ -1,13 +1,6 @@
 // EditNoteScreen.tsx
 import React, { useState, useEffect } from "react";
-import {
-  Alert,
-  Platform,
-  View,
-  TextInput,
-  Text,
-  StyleSheet,
-} from "react-native";
+import { View, TextInput, Image, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,21 +8,17 @@ import { Note } from "../../types";
 import PhotoScroller from "../components/photoScroller";
 import { User } from "../models/user_class";
 import AudioContainer from "../components/audio";
-import { Media, AudioType } from "../models/media_class";
+import { Media, AudioType, VideoType } from "../models/media_class";
+import { EditNoteScreenProps } from "../../types";
+import ApiService from "../utils/api_calls";
+import TagWindow from "../components/tagging";
+import LocationWindow from "../components/location";
+import TimeWindow from "../components/time";
+import { getThumbnail } from "../utils/S3_proxy";
+import Constants from "expo-constants";
+import { ResizeMode, Video } from "expo-av";
 
 const user = User.getInstance();
-
-export type EditNoteScreenProps = {
-  route: {
-    params: {
-      note: Note;
-      onSave: (note: Note) => void;
-    };
-  };
-  navigation: {
-    goBack: () => void;
-  };
-};
 
 const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   route,
@@ -38,154 +27,216 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const { note, onSave } = route.params;
   const [title, setTitle] = useState(note.title);
   const [text, setText] = useState(note.text);
+  const [time, setTime] = useState(note.time);
+  const [tags, setTags] = useState(note.tags);
   const [media, setMedia] = useState<Media[]>(note.media);
   const [newAudio, setNewAudio] = useState<AudioType[]>(note.audio);
+  const [isPublished, setIsPublished] = useState(note.published);
   const [creator, setCreator] = useState(note.creator);
   const [owner, setOwner] = useState(false);
   const [viewMedia, setViewMedia] = useState(false);
   const [viewAudio, setViewAudio] = useState(false);
+  const [isTagging, setIsTagging] = useState(false);
+  const [isLocation, setIsLocation] = useState(false);
+  const [isTime, setIsTime] = useState(false);
+  const [location, setLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(
+    note.latitude && note.longitude
+      ? {
+          latitude: parseFloat(note.latitude),
+          longitude: parseFloat(note.longitude),
+        }
+      : null
+  );
 
   useEffect(() => {
-    if (creator === user.getId()) {
-      setOwner(true);
-    } else {
-      setOwner(false);
-    }
+    const checkOwner = async () => {
+      if (creator === (await user.getId())) {
+        setOwner(true);
+      } else {
+        setOwner(false);
+      }
+    };
+
+    checkOwner();
   }, [creator]);
 
-  const updateNote = async (updatedNote: Note) => {
+  const handleSaveNote = async () => {
     try {
-      const response = await fetch(
-        "http://lived-religion-dev.rerum.io/deer-lr/overwrite",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            "@id": updatedNote.id,
-            title: updatedNote.title,
-            BodyText: updatedNote.text,
-            type: "message",
-            creator: user.getId(),
-            media: updatedNote.media,
-            latitude: updatedNote.latitude,
-            longitude: updatedNote.longitude,
-            audio: newAudio,
-          }),
-        }
-      );
+      const editedNote: Note = {
+        id: note.id,
+        title: title,
+        text: text,
+        creator: (await user.getId()) || "",
+        media: media,
+        latitude: location?.latitude.toString() || "",
+        longitude: location?.longitude.toString() || "",
+        audio: newAudio,
+        published: isPublished,
+        time: time,
+        tags: tags,
+      };
 
-      if (!response.ok) {
-        throw new Error("Error updating the note.");
-      }
+      const response = await ApiService.overwriteNote(editedNote);
 
-      // Update note in the app
-      onSave(updatedNote);
+      onSave(editedNote);
       navigation.goBack();
     } catch (error) {
       console.error("Error updating the note:", error);
     }
   };
 
-  const handleSaveNote = () => {
-    const updatedNote = { ...note, title, text, media };
-    updateNote(updatedNote);
-  };
-
-  const handleGoBackCheck = () => {
-    if (Platform.OS === "web") {
-      navigation.goBack();
-    } else {
-      Alert.alert(
-        "Going Back?",
-        "Your note will not be saved!",
-        [
-          {
-            text: "Cancel",
-            style: "cancel",
-          },
-          {
-            text: "OK",
-            onPress: async () => {
-              navigation.goBack();
-            },
-          },
-        ],
-        { cancelable: false }
-      );
-    }
-  };
-
   return (
-    <View>
+    <KeyboardAwareScrollView style={{ flex: 1 }} nestedScrollEnabled={true}>
       <View style={styles.topContainer}>
-        <TouchableOpacity style={styles.backButton} onPress={handleGoBackCheck}>
-          <Ionicons name="arrow-back-outline" size={24} color="white" />
+        <TouchableOpacity
+          style={styles.topButtons}
+          onPress={owner ? handleSaveNote : () => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back-outline" size={30} color="white" />
         </TouchableOpacity>
-        <TextInput style={styles.title} value={title} onChangeText={setTitle} />
+        <TextInput
+          placeholder="Title Field Note"
+          style={styles.title}
+          value={title}
+          onChangeText={setTitle}
+        />
         {owner ? (
-          <TouchableOpacity style={styles.backButton} onPress={handleSaveNote}>
-            <Ionicons name="save-outline" size={24} color="white" />
-          </TouchableOpacity>
+          isPublished ? (
+            <TouchableOpacity
+              style={styles.topButtons}
+              onPress={() => setIsPublished(!isPublished)}
+            >
+              <Ionicons name="earth" size={30} color="white" />
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={styles.topButtons}
+              onPress={() => setIsPublished(!isPublished)}
+            >
+              <Ionicons name="earth-outline" size={30} color="white" />
+            </TouchableOpacity>
+          )
         ) : (
           <View />
         )}
       </View>
-      <View style={{backgroundColor: 'white'}}>
+      <View>
         <View style={styles.keyContainer}>
           <TouchableOpacity
-            style={styles.toggles}
             onPress={() => {
               setViewMedia(!viewMedia);
+              setViewAudio(false);
+              setIsTagging(false);
+              setIsLocation(false);
+              setIsTime(false);
             }}
           >
-            <Ionicons name="images-outline" size={24} color="white" />
+            <Ionicons name="images-outline" size={30} color="black" />
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.toggles}
             onPress={() => {
+              setViewMedia(false);
               setViewAudio(!viewAudio);
+              setIsTagging(false);
+              setIsLocation(false);
+              setIsTime(false);
             }}
           >
-            <Ionicons name="mic-outline" size={24} color="white" />
+            <Ionicons name="mic-outline" size={30} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setViewMedia(false);
+              setViewAudio(false);
+              setIsTagging(false);
+              setIsLocation(!isLocation);
+              setIsTime(false);
+            }}
+          >
+            <Ionicons name="location-outline" size={30} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setViewMedia(false);
+              setViewAudio(false);
+              setIsTagging(false);
+              setIsLocation(false);
+              setIsTime(!isTime);
+            }}
+          >
+            <Ionicons name="time-outline" size={30} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setViewMedia(false);
+              setViewAudio(false);
+              setIsTagging(!isTagging);
+              setIsLocation(false);
+              setIsTime(false);
+            }}
+          >
+            <Ionicons name="pricetag-outline" size={30} color="black" />
           </TouchableOpacity>
         </View>
-      </View>
-
-      <View style={styles.container}>
-        <KeyboardAwareScrollView
-          showsVerticalScrollIndicator={false}
-          style={{ paddingTop: 10 }}
-        >
+        <View style={{ backgroundColor: "white" }}>
           {viewMedia && (
             <PhotoScroller newMedia={media} setNewMedia={setMedia} />
           )}
           {viewAudio && (
             <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
           )}
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              multiline={true}
-              textAlignVertical="top"
-              value={text}
-              onChangeText={setText}
-            />
-          </View>
-        </KeyboardAwareScrollView>
+          {isTagging && <TagWindow tags={tags} setTags={setTags} />}
+          {isLocation && (
+            <LocationWindow location={location} setLocation={setLocation} />
+          )}
+          {isTime && <TimeWindow time={time} setTime={setTime} />}
+        </View>
       </View>
-    </View>
+      <View style={styles.container}>
+        {media[0] && (
+          <View style={{ height: 280 }}>
+            {media[0].getType() === "image" ? (
+              <Image
+                source={{
+                  uri: media[0].getUri(),
+                }}
+                resizeMode="contain"
+                style={{ height: "100%", width: "100%" }}
+              />
+            ) : (
+              <Video
+              source={{ uri: media[0].getUri() }}
+              resizeMode={ResizeMode.COVER}
+              shouldPlay={true}
+              useNativeControls={true}
+              isLooping={true}
+              style={styles.video}
+              />
+            )}
+          </View>
+        )}
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            multiline={true}
+            textAlignVertical="top"
+            value={text}
+            onChangeText={setText}
+          />
+        </View>
+      </View>
+    </KeyboardAwareScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   topContainer: {
-    flex: 1,
     justifyContent: "space-between",
     paddingHorizontal: 5,
-    minHeight: "15%",
-    paddingTop: "15%",
+    paddingTop: Constants.statusBarHeight,
     flexDirection: "row",
     backgroundColor: "#F4DFCD",
     alignItems: "center",
@@ -196,7 +247,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     fontSize: 32,
   },
-  backButton: {
+  topButtons: {
     backgroundColor: "#111111",
     borderRadius: 50,
     width: 50,
@@ -205,10 +256,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   container: {
-    paddingHorizontal: 16,
+    padding: "1%",
     backgroundColor: "white",
-    overflow: "hidden",
-    paddingBottom: "50%",
+    height: "100%",
   },
   title: {
     width: "70%",
@@ -222,13 +272,12 @@ const styles = StyleSheet.create({
     fontSize: 30,
   },
   input: {
-    flex: 1,
     borderColor: "#111111",
     borderWidth: 1,
     borderRadius: 10,
     padding: 10,
     fontSize: 22,
-    paddingBottom: "90%",
+    minHeight: 300,
   },
   addButton: {
     position: "absolute",
@@ -254,11 +303,18 @@ const styles = StyleSheet.create({
   keyContainer: {
     height: 60,
     paddingVertical: 5,
-    width: 130,
-    backgroundColor: "tan",
-    borderRadius: 30,
+    width: "100%",
+    backgroundColor: "#F4DFCD",
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 40,
+  },
+  video: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignSelf: "center",
   },
   saveButton: {
     backgroundColor: "#C7EBB3",
@@ -275,8 +331,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   inputContainer: {
-    height: 400,
-    justifyContent: "space-between",
+    flexGrow: 1,
+    backgroundColor: "white",
   },
 });
 

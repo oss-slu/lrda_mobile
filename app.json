@@ -1,37 +1,44 @@
 {
   "expo": {
-    "name": "ldra",
-    "slug": "lrda",
-    "version": "1.0.0",
+    "name": "Where's Religion?",
+    "slug": "lrda_mobile",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.jpg",
+      "image": "./assets/splash.png",
       "resizeMode": "cover",
       "backgroundColor": "#ffffff"
-    },
-    "updates": {
-      "fallbackToCacheTimeout": 0,
-      "url": "https://u.expo.dev/aa02d222-f978-4070-9189-57be1014042a"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "beta.edu.slu.cs.oss.lrda",
+      "config": {
+        "googleMapsApiKey": ""
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
+        "backgroundColor": "#ffffff"
+      },
+      "config": {
+        "googleMaps": {
+          "apiKey": ""
+        }
       }
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "runtimeVersion": {
-      "policy": "sdkVersion"
+    "extra": {
+      "eas": {
+        "projectId": "622ba56f-88f9-440e-af87-280abce3b1e8"
+      }
     }
   }
 }

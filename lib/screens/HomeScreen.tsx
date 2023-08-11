@@ -1,30 +1,27 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  Alert,
   Platform,
   Linking,
   View,
-  Image,
   Text,
   StyleSheet,
-  FlatList,
   ScrollView,
   TouchableOpacity,
   Animated,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../../types";
 import { User } from "../models/user_class";
-import { Media, PhotoType, VideoType, AudioType } from "../models/media_class";
 import { Note } from "../../types";
+import { HomeScreenProps } from "../../types";
+import ApiService from "../utils/api_calls";
+import DataConversion from "../utils/data_conversion";
+import { SwipeListView } from "react-native-swipe-list-view";
+import NoteSkeleton from "../components/noteSkeleton";
+import LoadingImage from "../components/loadingImage";
+import { formatToLocalDateString } from "../components/time";
+import Constants from "expo-constants";
 
 const user = User.getInstance();
-
-export type HomeScreenProps = {
-  navigation: any;
-  route: { params?: { note: Note; onSave: (note: Note) => void } };
-};
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -33,17 +30,34 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [updateCounter, setUpdateCounter] = useState(0);
   const [drawerAnimation] = useState(new Animated.Value(0));
   const [buttonAnimation] = useState(new Animated.Value(0));
+  const [isPrivate, setIsPrivate] = useState(true);
   const [global, setGlobal] = useState(false);
+  const [published, setPublished] = useState(false);
   const [reversed, setReversed] = useState(false);
+  const [rendering, setRendering] = useState(true);
+  const [userInitials, setUserInitials] = useState("N/A");
+
+  useEffect(() => {
+    (async () => {
+      const name = await user.getName();
+      if (name) {
+        const initials = name
+          .split(" ")
+          .map((namePart) => namePart[0])
+          .join("");
+        setUserInitials(initials);
+      }
+    })();
+  }, []);
+
   let textLength = 16;
-  let userInitals = user
-    .getName()
-    ?.split(" ")
-    .map((namePart) => namePart[0])
-    .join("");
 
   const toggleDrawer = () => {
     setIsOpen(!isOpen);
+  };
+
+  const refreshPage = () => {
+    setUpdateCounter(updateCounter + 1);
   };
 
   useEffect(() => {
@@ -101,6 +115,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   };
 
   useEffect(() => {
+    setRendering(true);
     if (route.params?.note) {
       setNotes([...notes, route.params.note]);
     }
@@ -108,91 +123,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   }, [route.params, updateCounter]);
 
   const fetchMessages = async () => {
-    let response;
     try {
-      if (global) {
-        response = await fetch(
-          "http://lived-religion-dev.rerum.io/deer-lr/query",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              type: "message",
-            }),
-          }
-        );
-      } else {
-        response = await fetch(
-          "http://lived-religion-dev.rerum.io/deer-lr/query",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              type: "message",
-              creator: user.getId(),
-            }),
-          }
-        );
-      }
-
-      const data = await response.json();
+      const userId = await user.getId();
+      const data = await ApiService.fetchMessages(
+        global,
+        published,
+        userId || ""
+      );
       setMessages(data);
 
-      const fetchedNotes: Note[] = data.map((message: any) => {
-        const time = message.__rerum.isOverwritten
-          ? new Date(message.__rerum.isOverwritten)
-          : new Date(message.__rerum.createdAt);
-        time.setHours(time.getHours() - 5);
-        const mediaItems = message.media.map((item: any) => {
-          if (item.type === 'video') {
-            return new VideoType({
-              uuid: item.uuid,
-              type: item.type,
-              uri: item.uri,
-              thumbnail: item.thumbnail,
-              duration: item.duration,
-            });
-          } else {
-            return new PhotoType({
-              uuid: item.uuid,
-              type: item.type,
-              uri: item.uri,
-            });
-          }
-        });
-
-        const audioItems = message.audio?.map((item: AudioType) => {
-          return new AudioType({
-              uuid: item.uuid,
-              type: item.type,
-              uri: item.uri,
-              duration: item.duration,
-              name: item.name,
-          })
-        })
-        
-
-        return {
-          id: message["@id"],
-          title: message.title || "",
-          text: message.BodyText || "",
-          time:
-            time.toLocaleString("en-US", { timeZone: "America/Chicago" }) || "",
-          creator: message.creator || "",
-          media: mediaItems || [],
-          audio: audioItems || [],
-          latitude: message.latitude || "",
-          longitude: message.longitude || "",
-        };
-      });
-
-      fetchedNotes.sort(
-        (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
-      );
+      const fetchedNotes = DataConversion.convertMediaTypes(data);
 
       if (Platform.OS === "web") {
         textLength = 50;
@@ -200,44 +140,26 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       } else {
         setNotes(reversed ? fetchedNotes : fetchedNotes.reverse());
       }
+      setRendering(false);
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
-  };
-
-  const addNote = (note: Note) => {
-    setNotes((prevNotes) => [...prevNotes, note]);
-    setUpdateCounter(updateCounter + 1);
   };
 
   const updateNote = (note: Note) => {
     setNotes((prevNotes) =>
       prevNotes?.map((prevNote) => (prevNote.id === note.id ? note : prevNote))
     );
-    setUpdateCounter(updateCounter + 1);
+    refreshPage();
   };
 
   const deleteNoteFromAPI = async (id: string) => {
     try {
-      const url = `http://lived-religion-dev.rerum.io/deer-lr/delete`;
-      const response = await fetch(url, {
-        method: "DELETE",
-        headers: new Headers({
-          "Content-Type": "text/plain; charset=utf-8",
-        }),
-        body: JSON.stringify({
-          type: "message",
-          creator: user.getId(),
-          "@id": id,
-        }),
-      });
-      console.log(response);
-
-      if (response.status === 204) {
+      const userId = await user.getId();
+      const success = await ApiService.deleteNoteFromAPI(id, userId || "");
+      if (success) {
+        // refreshPage();
         return true;
-      } else {
-        console.log(response);
-        throw response;
       }
     } catch (error) {
       console.error("Error deleting note:", error);
@@ -255,9 +177,35 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     user.logout();
   };
 
-  const handleToggleGlobal = () => {
-    setUpdateCounter(updateCounter + 1);
-    setGlobal(!global);
+  const handleEmail = () => {
+    const emailAddress = "yashkamal.bhatia@slu.edu";
+    const subject = "Bug Report on 'Where's Religion?'";
+    const body = "Please provide details of your issue you are facing here.";
+
+    const emailUrl = `mailto:${emailAddress}?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(body)}`;
+
+    Linking.openURL(emailUrl);
+  };
+
+  const handleFilters = (name: string) => {
+    if (name == "published") {
+      setGlobal(false);
+      setIsPrivate(false);
+      setPublished(true);
+      refreshPage();
+    } else if (name == "global") {
+      setGlobal(true);
+      setIsPrivate(false);
+      setPublished(false);
+      refreshPage();
+    } else if (name == "private") {
+      setGlobal(false);
+      setIsPrivate(true);
+      setPublished(false);
+      refreshPage();
+    }
   };
 
   const handleReverseOrder = () => {
@@ -266,64 +214,133 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     setUpdateCounter(updateCounter + 1);
   };
 
-  const deleteNote = (id: string) => {
-    if (Platform.OS === "web") {
-      async function name() {
-        const success = await deleteNoteFromAPI(id);
-        if (success) {
-          setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
-        }
-      }
-      name();
-    } else {
-      Alert.alert(
-        "Delete Note",
-        "Are you sure you want to delete this note?",
-        [
-          {
-            text: "Cancel",
-            style: "cancel",
-          },
-          {
-            text: "OK",
-            onPress: async () => {
-              const success = await deleteNoteFromAPI(id);
-              if (success) {
-                setNotes((prevNotes) =>
-                  prevNotes.filter((note) => note.id !== id)
-                );
-              }
-            },
-          },
-        ],
-        { cancelable: false }
-      );
-    }
+  const sideMenu = (data: any, rowMap: any) => {
+    return (
+      <View style={styles.rowBack} key={data.index}>
+        <TouchableOpacity>
+          <TouchableOpacity onPress={() => publishNote(data.item.id, rowMap)}>
+            <Ionicons name="earth" size={30} color="black" />
+          </TouchableOpacity>
+        </TouchableOpacity>
+        <View style={[styles.backRightBtn, styles.backRightBtnRight]}>
+          {isPrivate ? (
+            <TouchableOpacity
+              style={{
+                justifyContent: "center",
+                alignItems: "center",
+                position: "absolute",
+                right: 20,
+              }}
+              onPress={() => deleteNote(data.item.id, rowMap)}
+            >
+              <Ionicons name="trash-outline" size={24} color="#111111" />
+            </TouchableOpacity>
+          ) : null}
+        </View>
+      </View>
+    );
   };
 
-  const renderItem = ({ item }: { item: Note }) => {
+  const deleteNote = (data: any, rowMap: any) => {
+    if (rowMap[data]) {
+      rowMap[data].closeRow();
+    }
+    setNotes((prevNotes) => prevNotes.filter((note) => note.id !== data));
+    deleteNoteFromAPI(data);
+  };
+
+  async function publishNote(data: any, rowMap: any) {
+    if (rowMap[data]) {
+      rowMap[data].closeRow();
+    }
+    const foundNote = notes.find((note) => note.id === data);
+    const editedNote: Note = {
+      id: foundNote?.id || "",
+      title: foundNote?.title || "",
+      text: foundNote?.text || "",
+      creator: foundNote?.creator || "",
+      media: foundNote?.media || [],
+      latitude: foundNote?.latitude || "",
+      longitude: foundNote?.longitude || "",
+      audio: foundNote?.audio || [],
+      published: !foundNote?.published || false,
+      time: foundNote?.time || new Date(),
+      tags: foundNote?.tags || [],
+    };
+    await ApiService.overwriteNote(editedNote);
+    refreshPage();
+  }
+
+  const renderList = (notes: Note[]) => {
+    return isPrivate ? (
+      <SwipeListView
+        data={notes}
+        renderItem={renderItem}
+        renderHiddenItem={sideMenu}
+        leftActivationValue={160}
+        rightActivationValue={-160}
+        leftOpenValue={75}
+        rightOpenValue={-75}
+        stopLeftSwipe={175}
+        stopRightSwipe={-175}
+        keyExtractor={(item) => item.id}
+        onRightAction={(data, rowMap) => deleteNote(data, rowMap)}
+        onLeftAction={(data, rowMap) => publishNote(data, rowMap)}
+      />
+    ) : (
+      <SwipeListView
+        data={notes}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
+      />
+    );
+  };
+
+  const renderItem = (data: any) => {
+    const item = data.item;
+    const tempTime = new Date(item.time);
+    const showTime = formatToLocalDateString(tempTime);
     const mediaItem = item.media[0];
+    const ImageType = mediaItem?.getType();
+    let ImageURI = "";
+    let IsImage = false;
+    if (ImageType === "image") {
+      ImageURI = mediaItem.getUri();
+      IsImage = true;
+    } else if (ImageType === "video") {
+      ImageURI = mediaItem.getThumbnail();
+      IsImage = true;
+    }
     return (
       <TouchableOpacity
+        key={item.id}
+        activeOpacity={1}
         style={styles.noteContainer}
         onPress={() =>
-          navigation.navigate("EditNote", { note: item, onSave: updateNote })
+          navigation.navigate("EditNote", {
+            note: item,
+            onSave: (editedNote: Note) => {
+              updateNote(editedNote);
+              refreshPage();
+            },
+          })
         }
       >
         <View style={{ flexDirection: "row" }}>
-          {mediaItem?.getType() === 'image' ? (
-            <Image style={styles.preview} source={{ uri: mediaItem.getUri() }} />
-          ) : mediaItem?.getType() === 'video' ? (
-            <Image
-              style={styles.preview}
-              source={{ uri: (mediaItem as VideoType).getThumbnail() }}
-            />
+          {IsImage ? (
+            <View style={{ alignSelf: "center", height: 100, width: 100 }}>
+              <LoadingImage
+                imageURI={ImageURI}
+                type={ImageType}
+                isImage={true}
+              />
+            </View>
           ) : (
-            <Image
-              source={require("../components/public/noPreview.png")}
-              style={styles.preview}
-            />
+            <View style={{ alignSelf: "center", height: 100, width: 100 }}>
+              <LoadingImage imageURI={""} type={ImageType} isImage={false} />
+            </View>
           )}
+
           <View
             style={{ alignSelf: "center", position: "absolute", left: 120 }}
           >
@@ -332,13 +349,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                 ? item.title.slice(0, textLength) + "..."
                 : item.title}
             </Text>
-  
-            <Text style={styles.noteText}>
-              {`${item.time.split(", ")[0]}\n${item.time.split(", ")[1]}`}
-            </Text>
+
+            <Text style={styles.noteText}>{showTime}</Text>
           </View>
         </View>
-  
         <TouchableOpacity
           style={{
             justifyContent: "center",
@@ -346,14 +360,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             position: "absolute",
             right: 10,
           }}
-          onPress={() => deleteNote(item.id)}
         >
-          <Ionicons name="trash-outline" size={24} color="#111111" />
+          {item.published ? (
+            <Ionicons name="earth" size={24} color="#111111" />
+          ) : (
+            <Ionicons name="earth-outline" size={24} color="#111111" />
+          )}
         </TouchableOpacity>
       </TouchableOpacity>
     );
   };
-  
 
   return (
     <View style={styles.container}>
@@ -371,23 +387,21 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             />
           </TouchableOpacity>
         </Animated.View>
-        <TouchableOpacity style={styles.drawerItem}>
+        <TouchableOpacity
+          style={styles.drawerItem}
+          onPress={() => {
+            navigation.navigate("AccountPage");
+            toggleDrawer();
+          }}
+        >
           <Ionicons name={"person-outline"} size={30} color="black" />
           <Text style={styles.mediumText}>Account</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.drawerItem}>
-          <Ionicons name={"people-outline"} size={30} color="black" />
-          <Text style={styles.mediumText}>Friends</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem} onPress={handleGoWeb}>
           <Ionicons name={"laptop-outline"} size={30} color="black" />
           <Text style={styles.mediumText}>Our Website</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.drawerItem}>
-          <Ionicons name={"settings-outline"} size={30} color="black" />
-          <Text style={styles.mediumText}>Settings</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.drawerItem}>
+        <TouchableOpacity style={styles.drawerItem} onPress={handleEmail}>
           <Ionicons name={"bug-outline"} size={30} color="black" />
           <Text style={styles.mediumText}>Report a Bug</Text>
         </TouchableOpacity>
@@ -402,7 +416,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             <Text
               style={{ fontWeight: "600", fontSize: 20, alignSelf: "center" }}
             >
-              {userInitals}
+              {userInitials}
             </Text>
           </View>
           <Text style={styles.title}>Field Notes</Text>
@@ -417,42 +431,51 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingRight: 20 }}
       >
-        <TouchableOpacity style={styles.filtersSelected}>
-          <Text style={styles.selectedFont}>All ({notes.length})</Text>
+        <TouchableOpacity
+          onPress={() => handleFilters("private")}
+          style={isPrivate ? styles.filtersSelected : styles.filters}
+        >
+          <Text style={isPrivate ? styles.selectedFont : styles.filterFont}>
+            {rendering
+              ? "Private"
+              : isPrivate
+              ? `Private (${notes.length})`
+              : "Private"}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => handleFilters("published")}
+          style={published ? styles.filtersSelected : styles.filters}
+        >
+          <Text style={published ? styles.selectedFont : styles.filterFont}>
+            {rendering
+              ? "Published"
+              : published
+              ? `Published (${notes.length})`
+              : "Published"}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={handleToggleGlobal}
+          onPress={() => handleFilters("global")}
           style={global ? styles.filtersSelected : styles.filters}
         >
           <Text style={global ? styles.selectedFont : styles.filterFont}>
-            Global
+            {rendering
+              ? "Global"
+              : global
+              ? `Global (${notes.length})`
+              : "Global"}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleReverseOrder} style={styles.filters}>
           <Text style={styles.filterFont}>Sort by Time</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.filters}>
-          <Text style={styles.filterFont}>St. Louis</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.filters}>
-          <Text style={styles.filterFont}>Alphabetical</Text>
-        </TouchableOpacity>
       </ScrollView>
-      <FlatList
-        data={notes}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderItem}
-        contentContainerStyle={{ paddingBottom: 80 }}
-        ListEmptyComponent={() => (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No notes yet!</Text>
-          </View>
-        )}
-      />
-
+      {rendering ? <NoteSkeleton /> : renderList(notes)}
       <TouchableOpacity
         style={styles.addButton}
-        onPress={() => navigation.navigate("AddNote", { onSave: addNote })}
+        onPress={() => navigation.navigate("AddNote", { refreshPage })}
       >
         <Ionicons name="add-outline" size={24} color="white" />
       </TouchableOpacity>
@@ -462,7 +485,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 50,
+    paddingTop: Constants.statusBarHeight - 20,
     flex: 1,
   },
   overlay: {
@@ -474,13 +497,14 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   drawer: {
-    paddingTop: "30%",
+    paddingTop: Constants.statusBarHeight - 10,
     height: "110%",
     width: 200,
     position: "absolute",
     backgroundColor: "white",
     zIndex: 99,
     right: 0,
+    flex: 1,
   },
   drawerItem: {
     paddingLeft: 10,
@@ -490,7 +514,7 @@ const styles = StyleSheet.create({
   logout: {
     flexDirection: "row",
     position: "absolute",
-    bottom: "10%",
+    bottom: "7%",
     backgroundColor: "black",
     justifyContent: "center",
     alignItems: "center",
@@ -542,6 +566,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   noteText: {
+    marginTop: 10,
     fontSize: 18,
   },
   noteTextBox: {
@@ -592,10 +617,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 20,
     marginBottom: 10,
-    width: "95%",
+    width: "98%",
     padding: 10,
     paddingHorizontal: 10,
     flexDirection: "row",
+    height: 120,
   },
   filtersContainer: {
     minHeight: 30,
@@ -648,13 +674,36 @@ const styles = StyleSheet.create({
     marginLeft: 3,
     marginTop: 3,
   },
-  preview: {
-    width: 100,
-    height: 100,
-    borderRadius: 10,
-    marginRight: "10%",
-    alignContent: "center",
-    alignSelf: "center",
+  backRightBtn: {
+    alignItems: "flex-end",
+    bottom: 0,
+    justifyContent: "center",
+    position: "absolute",
+    top: 0,
+    width: 75,
+    paddingRight: 17,
+  },
+  backRightBtnLeft: {
+    backgroundColor: "#1f65ff",
+    right: 50,
+  },
+  backRightBtnRight: {
+    backgroundColor: "red",
+    width: "52%",
+    right: 0,
+    borderTopRightRadius: 20,
+    borderBottomRightRadius: 20,
+  },
+  rowBack: {
+    alignItems: "center",
+    backgroundColor: "#C7EBB3",
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingLeft: 15,
+    margin: 5,
+    marginBottom: 15,
+    borderRadius: 20,
   },
 });
 
