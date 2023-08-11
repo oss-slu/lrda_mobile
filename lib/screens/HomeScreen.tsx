@@ -362,7 +362,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           }}
         >
           {item.published ? (
-            <Ionicons name="earth" size={24} color="#111111" />
+            <Ionicons name="earth" size={24} color="#008080" />
           ) : (
             <Ionicons name="earth-outline" size={24} color="#111111" />
           )}
