@@ -5,7 +5,7 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  Platform,
+  Keyboard,
 } from "react-native";
 import { Note, AddNoteScreenProps } from "../../types";
 import PhotoScroller from "../components/photoScroller";
@@ -14,11 +14,12 @@ import { User } from "../models/user_class";
 import { Ionicons } from "@expo/vector-icons";
 import { Media, AudioType } from "../models/media_class";
 import AudioContainer from "../components/audio";
-import * as Location from "expo-location";
 import ApiService from "../utils/api_calls";
 import TagWindow from "../components/tagging";
 import LocationWindow from "../components/location";
 import TimeWindow from "../components/time";
+import { RichEditor, RichToolbar } from 'react-native-pell-rich-editor';
+import Constants from "expo-constants";
 
 const user = User.getInstance();
 
@@ -34,15 +35,27 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [isTagging, setIsTagging] = useState(false);
   const [isLocation, setIsLocation] = useState(false);
   const [isTime, setIsTime] = useState(false);
+  const richTextRef = useRef<RichEditor | null>(null);
   const [isPublished, setIsPublished] = useState(false);
+  const [keyboardOpen, setKeyboard] = useState(false);
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
 
   useEffect(() => {
-    console.log("new Media array:", newMedia);
-  }, [newMedia]);
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboard(true);
+    });
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboard(false);
+    });
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
 
   const saveNote = async () => {
     if (titleText === ""){
@@ -161,6 +174,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           <Ionicons name="pricetag-outline" size={30} color="black" />
         </TouchableOpacity>
       </View>
+      <RichToolbar editor={richTextRef} />
       <View style={styles.container}>
         <KeyboardAwareScrollView
           nestedScrollEnabled
@@ -172,15 +186,15 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           {isTagging && <TagWindow tags={tags} setTags={setTags} />}
           {isLocation && <LocationWindow location={location} setLocation={setLocation} />}
           {isTime && <TimeWindow time={time} setTime={setTime} />}
-          <View style={styles.inputContainer}>
-            <TextInput
+          <View style={[{ paddingBottom: keyboardOpen ? 50 :  150},{ minHeight: 600 }]}>
+          <RichEditor
+              ref={(r) => (richTextRef.current = r)}
               style={styles.input}
               placeholder="Write your note here"
-              multiline={true}
-              textAlignVertical="top"
-              onChangeText={(text) => setBodyText(text)}
-              value={bodyText}
+              onChange={(text)=>setBodyText(text)}
+              initialContentHTML={bodyText}
             />
+            <View style={{height: 100}} />
           </View>
         </KeyboardAwareScrollView>
       </View>
@@ -190,11 +204,9 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
 
 const styles = StyleSheet.create({
   topContainer: {
-    flex: 1,
     justifyContent: "space-between",
     paddingHorizontal: 5,
-    minHeight: "15%",
-    paddingTop: "15%",
+    paddingTop: Constants.statusBarHeight,
     flexDirection: "row",
     backgroundColor: "#F4DFCD",
     alignItems: "center",
@@ -230,7 +242,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     backgroundColor: "white",
     overflow: "hidden",
-    paddingBottom: "50%",
   },
   title: {
     height: 45,
@@ -245,11 +256,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     borderColor: "#111111",
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 10,
     fontSize: 22,
-    paddingBottom: "90%",
   },
   addButton: {
     position: "absolute",
@@ -276,10 +283,6 @@ const styles = StyleSheet.create({
     color: "#111111",
     fontWeight: "bold",
     fontSize: 12,
-  },
-  inputContainer: {
-    height: 400,
-    justifyContent: "space-between",
   },
 });
 
