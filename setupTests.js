@@ -12,6 +12,3 @@ jest.mock('NativeModules', () => ({
     RCTView: () => {},
   },
 }));
-
-// Mock AsyncStorage
-jest.mock('@react-native-async-storage/async-storage');
