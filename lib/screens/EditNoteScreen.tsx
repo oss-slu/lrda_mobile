@@ -21,7 +21,11 @@ import LocationWindow from "../components/location";
 import TimeWindow from "../components/time";
 import Constants from "expo-constants";
 import { ResizeMode, Video } from "expo-av";
-import { RichEditor, RichToolbar } from "react-native-pell-rich-editor";
+import {
+  RichEditor,
+  RichToolbar,
+  actions,
+} from "react-native-pell-rich-editor";
 
 const user = User.getInstance();
 
@@ -93,7 +97,10 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
 
   const handleScroll = (positionY: number) => {
     if (scrollViewRef.current) {
-      scrollViewRef.current.scrollTo({ y: positionY + (media[0] ? 100 : -100), animated: true });
+      scrollViewRef.current.scrollTo({
+        y: positionY + (media[0] ? 100 : -100),
+        animated: true,
+      });
     }
   };
 
@@ -215,9 +222,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         </TouchableOpacity>
       </View>
       <View style={{ backgroundColor: "white" }}>
-        {viewMedia && (
-          <PhotoScroller newMedia={media} setNewMedia={setMedia} />
-        )}
+        {viewMedia && <PhotoScroller newMedia={media} setNewMedia={setMedia} />}
         {viewAudio && (
           <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
         )}
@@ -227,7 +232,23 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         )}
         {isTime && <TimeWindow time={time} setTime={setTime} />}
       </View>
-      <RichToolbar editor={richTextRef} />
+      <RichToolbar
+        editor={richTextRef}
+        actions={[
+          actions.keyboard,
+          actions.undo,
+          actions.redo,
+          actions.setBold,
+          actions.setItalic,
+          actions.setUnderline,
+          actions.insertBulletsList,
+          actions.blockquote,
+          actions.indent,
+          actions.outdent,
+        ]}
+        iconTint={"#000"}
+        selectedIconTint={"#2095F2"}
+      />
       <View style={styles.container}>
         <ScrollView
           nestedScrollEnabled={true}
@@ -318,7 +339,6 @@ const styles = StyleSheet.create({
     zIndex: 99,
   },
   container: {
-    paddingHorizontal: 16,
     backgroundColor: "white",
     overflow: "hidden",
     paddingBottom: "50%",

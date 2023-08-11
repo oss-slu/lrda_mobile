@@ -18,7 +18,11 @@ import ApiService from "../utils/api_calls";
 import TagWindow from "../components/tagging";
 import LocationWindow from "../components/location";
 import TimeWindow from "../components/time";
-import { RichEditor, RichToolbar } from "react-native-pell-rich-editor";
+import {
+  RichEditor,
+  RichToolbar,
+  actions,
+} from "react-native-pell-rich-editor";
 import Constants from "expo-constants";
 
 const user = User.getInstance();
@@ -202,7 +206,23 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         )}
         {isTime && <TimeWindow time={time} setTime={setTime} />}
       </View>
-      <RichToolbar editor={richTextRef} />
+      <RichToolbar
+        editor={richTextRef}
+        actions={[
+          actions.keyboard,
+          actions.undo,
+          actions.redo,
+          actions.setBold,
+          actions.setItalic,
+          actions.setUnderline,
+          actions.insertBulletsList,
+          actions.blockquote,
+          actions.indent,
+          actions.outdent,
+        ]}
+        iconTint={"#000"}
+        selectedIconTint={"#2095F2"}
+      />
       <View style={styles.container}>
         <ScrollView
           nestedScrollEnabled={true}
@@ -271,7 +291,6 @@ const styles = StyleSheet.create({
     zIndex: 99,
   },
   container: {
-    paddingHorizontal: 16,
     backgroundColor: "white",
     overflow: "hidden",
   },
