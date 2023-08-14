@@ -1,14 +1,7 @@
 import React from 'react';
 import { Note } from '../../types';
 import EditNoteScreen from '../screens/EditNoteScreen';
-
-export type EditNoteProps = {
-  route: { params: { note: Note; onSave: (note: Note) => void } };
-  navigation: {
-    setOptions: (options: { headerTitle: string }) => void;
-    goBack: () => void;
-  };
-};
+import { EditNoteProps } from '../../types';
 
 const EditNote: React.FC<EditNoteProps> = ({ route, navigation }) => {
   const { note, onSave } = route.params;

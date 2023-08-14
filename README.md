@@ -31,7 +31,3 @@ You can launch the app on your device or emulator using the npm run start comman
 
 ## License
 LRDA Mobile is released under the MIT License.
-
-
-## License
-LRDA Mobile is released under the MIT License.

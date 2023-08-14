@@ -1,29 +1,21 @@
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useEffect, useState } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { Ionicons } from "@expo/vector-icons";
+import ExploreScreen from '../screens/mapPage/ExploreScreen.js';
+import ProfilePage from "../screens/ProfilePage";
+import MorePage from "../screens/morePage";
+import HomeScreen from "../screens/HomeScreen";
+import LoginScreen from "../screens/loginScreens/LoginScreen";
+import RegisterScreen from "../screens/loginScreens/RegisterScreen";
+import AddNoteScreen from "../screens/AddNoteScreen";
+import EditNote from "../components/EditNote";
+import { RootStackParamList } from "../../types";
+import { createStackNavigator } from "@react-navigation/stack";
+import { User } from "../models/user_class";
+import { HomeScreenProps, RootTabParamList, EditNoteProps } from "../../types";
 
-import GoogleMap from '../screens/mapPage/googleMap';
-import ProfilePage from '../screens/ProfilePage';
-import HomeScreen, { HomeScreenProps } from '../screens/HomeScreen';
-import LoginScreen from '../screens/loginScreens/LoginScreen';
-import RegisterScreen from '../screens/loginScreens/RegisterScreen';
-import AddNoteScreen from '../screens/AddNoteScreen';
-import EditNote, { EditNoteProps } from '../components/EditNote';
-import { Note, RootStackParamList } from '../../types';
-import { createStackNavigator } from '@react-navigation/stack';
-import { User } from '../models/user_class';
-
-// Get the single instance of the User class
 const user = User.getInstance();
-
-const Placeholder = () => null;
-
-export type RootTabParamList = {
-  HomeTab: undefined;
-  Tab1: undefined;
-  Tab2: undefined;
-};
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -31,7 +23,10 @@ const Stack = createStackNavigator<RootStackParamList>();
 const HomeStack = () => {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="Home" options={{headerShown: false, gestureEnabled: false }}>
+      <Stack.Screen
+        name="Home"
+        options={{ headerShown: false, gestureEnabled: false }}
+      >
         {(props: HomeScreenProps) => <HomeScreen {...props} />}
       </Stack.Screen>
       <Stack.Screen
@@ -39,25 +34,38 @@ const HomeStack = () => {
         component={AddNoteScreen}
         options={{ headerShown: false, gestureEnabled: false }}
       />
-      <Stack.Screen name="EditNote" options={{headerShown: false, gestureEnabled: false }}>
+      <Stack.Screen
+        name="AccountPage"
+        component={ProfilePage}
+      />
+      <Stack.Screen
+        name="EditNote"
+        options={{ headerShown: false, gestureEnabled: false }}
+      >
         {(props: EditNoteProps) => <EditNote {...props} />}
       </Stack.Screen>
-
     </Stack.Navigator>
   );
 };
 
 const AppNavigator: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(user.getId() !== null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Listen for changes in the user's login state
   useEffect(() => {
-    // Check the user's login state every second
-    const interval = setInterval(() => {
-      setIsLoggedIn(user.getId() !== null);
+    const checkLoginStatus = async () => {
+      const userId = await user.getId();
+      setIsLoggedIn(userId !== null);
+    };
+
+    checkLoginStatus();
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const userId = await user.getId();
+      setIsLoggedIn(userId !== null);
     }, 1000);
 
-    // Clean up the interval on unmount
     return () => {
       clearInterval(interval);
     };
@@ -66,40 +74,38 @@ const AppNavigator: React.FC = () => {
   return (
     <NavigationContainer>
       {isLoggedIn ? (
-       <Tab.Navigator
-       screenOptions={{ tabBarShowLabel: false }}
-     >
-       <Tab.Screen
-         name="HomeTab"
-         component={HomeStack}
-         options={{
-           headerShown: false, // This line hides the header
-           tabBarIcon: ({ color, size }) => (
-             <Ionicons name="ios-pencil" color={color} size={size} />
-           ),
-         }}
-       />
-       <Tab.Screen
+        <Tab.Navigator screenOptions={{ tabBarShowLabel: false }}>
+          <Tab.Screen
+            name="HomeTab"
+            component={HomeStack}
+            options={{
+              headerShown: false,
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name="ios-pencil" color={color} size={size} />
+              ),
+            }}
+          />
+          <Tab.Screen
           name="Tab1"
-          component={GoogleMap} // Replaced 'Placeholder' with 'MapComponent'
+          component={ExploreScreen}
           options={{
-            headerShown: false, // This line hides the header
+            headerShown: false,
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="ios-map" color={color} size={size} />
             ),
           }}
         />
-       <Tab.Screen
-         name="Tab2"
-         component={ProfilePage}
-         options={{
-           headerShown: false, // This line hides the header
-           tabBarIcon: ({ color, size }) => (
-             <Ionicons name="ios-person" color={color} size={size} />
-           ),
-         }}
-       />
-     </Tab.Navigator>
+          <Tab.Screen
+            name="Tab2"
+            component={MorePage}
+            options={{
+              headerShown: false,
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name="menu-outline" color={color} size={size+10} />
+              ),
+            }}
+          />
+        </Tab.Navigator>
       ) : (
         <Stack.Navigator initialRouteName="Login">
           <Stack.Screen
