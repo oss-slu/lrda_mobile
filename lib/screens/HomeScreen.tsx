@@ -26,9 +26,9 @@ const user = User.getInstance();
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [updateCounter, setUpdateCounter] = useState(0);
-  const [drawerAnimation] = useState(new Animated.Value(0));
+  const [drawerAnimation] = useState(new Animated.Value(1));
   const [buttonAnimation] = useState(new Animated.Value(0));
   const [isPrivate, setIsPrivate] = useState(true);
   const [global, setGlobal] = useState(false);
@@ -63,29 +63,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   useEffect(() => {
     if (isOpen) {
       Animated.timing(drawerAnimation, {
-        toValue: 1,
+        toValue: 0,
         duration: 400,
         useNativeDriver: true,
       }).start();
     } else {
       Animated.timing(drawerAnimation, {
-        toValue: 0,
-        duration: 400,
-        useNativeDriver: true,
-      }).start();
-    }
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (isOpen) {
-      Animated.timing(buttonAnimation, {
         toValue: 1,
-        duration: 500,
-        useNativeDriver: true,
-      }).start();
-    } else {
-      Animated.timing(buttonAnimation, {
-        toValue: 0,
         duration: 400,
         useNativeDriver: true,
       }).start();
@@ -158,7 +142,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       const userId = await user.getId();
       const success = await ApiService.deleteNoteFromAPI(id, userId || "");
       if (success) {
-        // refreshPage();
         return true;
       }
     } catch (error) {
@@ -374,8 +357,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       <TouchableOpacity
-        onPress={toggleDrawer}
-        style={[styles.overlay, { display: !isOpen ? "flex" : "none" }]}
+        onPress={() => setIsOpen(false)}
+        style={[styles.overlay, { display: isOpen ? "flex" : "none" }]}
       />
       <Animated.View style={[styles.drawer, animatedStyles]}>
         <Animated.View style={[buttonAnimatedStyles]}>
