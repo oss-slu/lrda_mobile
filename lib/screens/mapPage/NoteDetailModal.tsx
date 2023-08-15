@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, memo, useMemo } from "react";
 import {
   ActivityIndicator,
   ScrollView,
@@ -20,12 +20,26 @@ interface Props {
   note?: Note;
 }
 
-const NoteDetailModal: React.FC<Props> = ({ isVisible, onClose, note }) => {
-  let images: { uri: string }[] = [];
-  const [creatorName, setCreatorName] = useState<string>("");
+const NoteDetailModal: React.FC<Props> = memo(({ isVisible, onClose, note }) => {
   const [isImageTouched, setImageTouched] = useState(false);
   const [isTextTouched, setTextTouched] = useState(true);
+  const [creatorName, setCreatorName] = useState('');
   const {height, width} = useWindowDimensions();
+  
+  useEffect(() => {
+    setTextTouched(true);
+    if (note?.creator) {
+      fetch(note.creator)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.name) {
+            setCreatorName(data.name);
+          }
+        })
+        .catch((err) => console.error("Error fetching creator: ", err));
+    }
+  }, [note]);
+  
 
   const handleImageTouchStart = () => {
     setImageTouched(true);
@@ -37,33 +51,36 @@ const NoteDetailModal: React.FC<Props> = ({ isVisible, onClose, note }) => {
     setImageTouched(false);
   };
 
-  useEffect(() => {
-    if (note && note.creator) {
-      fetch(note.creator)
-        .then((response) => response.json())
-        .then((data) => setCreatorName(data.name))
-        .catch((err) => console.error("Error fetching creator: ", err));
-    }
-  }, [note]);
-
   // Declare a new state variable for image loading
   const [imageLoadedState, setImageLoadedState] = useState<{
     [key: string]: boolean;
   }>({});
 
-  if (note?.images) {
-    images = note.images.filter(
-      (mediaItem) =>
-        mediaItem.uri.endsWith(".jpg") || mediaItem.uri.endsWith(".png")
-    );
-  }
+  const images: string = useMemo(() => {
+    if (note?.images) {
+      return note.images.filter(
+        (mediaItem: any) => mediaItem.uri.endsWith(".jpg") || mediaItem.uri.endsWith(".png")
+      );
+    }
+    return [];
+  }, [note]);
 
   const handleLoad = (uri: string) => {
     setImageLoadedState((prev) => ({ ...prev, [uri]: true }));
   };
-
+  let newNote = false;
+  if (note?.description && note.description.includes('<div>')) {
+    newNote = true;
+  }
+  
   const html = note?.description;
+  
+  const htmlSource = useMemo(() => {
+    return { html };
+  }, [html]);
 
+  const MemoizedRenderHtml = React.memo(RenderHTML);
+  
   return (
     <Modal animationType="slide" transparent={false} visible={isVisible}>
       <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -121,12 +138,15 @@ const NoteDetailModal: React.FC<Props> = ({ isVisible, onClose, note }) => {
               marginBottom: 10,
             }}
           ></View>
-          <RenderHTML baseStyle={{color: '#666'}} contentWidth={width} source={{ html }} />
+          {newNote ? (<MemoizedRenderHtml baseStyle={{color: '#666'}} contentWidth={width} source={ htmlSource } />
+          ) : (
+            <Text style={styles.modalText}>{note?.description}</Text>
+          )}
         </ScrollView>
       </View>
     </Modal>
   );
-};
+});
 
 export default NoteDetailModal;
 
@@ -150,12 +170,12 @@ const styles = StyleSheet.create({
   textContainer: {
     padding: 20,
     backgroundColor: "#fafafa",
-    height: 200, // Height of text container
+    height: 200,
     position: "absolute",
-    bottom: 0, // Positioning it at the bottom
+    bottom: 0,
     left: 0,
     right: 0,
-    borderTopColor: "#ddd", // Add a border to distinguish from rest of modal
+    borderTopColor: "#ddd",
     borderTopWidth: 1,
   },
   modalTitle: {
