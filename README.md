@@ -36,6 +36,7 @@ Launch the app on your device or emulator using the `expo start -c` command. Thi
 ## Known Bugs
 - The app does not compile to the web due to a dependency on react-native-maps.
 - In the location data section of a note, an error displaying "NaN" may appear.
+- Audio recording and playback inside of a note does not work on Android Devices
 
 ## License
 LRDA Mobile is released under the MIT License.
