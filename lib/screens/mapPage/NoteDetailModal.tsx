@@ -109,7 +109,7 @@ const NoteDetailModal: React.FC<Props> = memo(({ isVisible, onClose, note }) => 
             );
           })
         ) : (
-          <Text style={{ alignSelf: "center", justifyContent: "center" }}>
+          <Text style={{ alignSelf: "center", justifyContent: "center", marginTop: 200 }}>
             No images
           </Text>
         )}
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: "100%",
-    height: 200,
+    height: 340,
     marginBottom: 2,
   },
   image: {

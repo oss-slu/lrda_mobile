@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Keyboard,
   ScrollView,
+  useWindowDimensions,
 } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
@@ -26,6 +27,7 @@ import {
   RichToolbar,
   actions,
 } from "react-native-pell-rich-editor";
+import LoadingImage from "../components/loadingImage";
 
 const user = User.getInstance();
 
@@ -62,6 +64,8 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         }
       : null
   );
+  const {height, width} = useWindowDimensions();
+
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -257,15 +261,15 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           ref={scrollViewRef}
         >
           {media[0] && (
-            <View style={{ height: 280 }}>
+            <View style={{ height: 280, marginLeft: 3,}}>
               {media[0].getType() === "image" ? (
-                <Image
-                  source={{
-                    uri: media[0].getUri(),
-                  }}
-                  resizeMode="contain"
-                  style={{ height: "100%", width: "100%" }}
-                />
+                <LoadingImage
+                imageURI={media[0].getUri()}
+                type={"photo"}
+                isImage={true}
+                height={280}
+                width={width-6}
+              />
               ) : (
                 <Video
                   source={{ uri: media[0].getUri() }}

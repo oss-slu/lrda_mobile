@@ -326,9 +326,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           })
         }
       >
-        <View style={{ flexDirection: "row" }}>
+        <View style={{ flexDirection: "row", alignItems: 'center' }}>
           {IsImage ? (
-            <View style={{ alignSelf: "center", height: 100, width: 100 }}>
+            <View style={{ height: 100, width: 100 }}>
               <LoadingImage
                 imageURI={ImageURI}
                 type={ImageType}
@@ -336,13 +336,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
               />
             </View>
           ) : (
-            <View style={{ alignSelf: "center", height: 100, width: 100 }}>
+            <View style={{ height: 100, width: 100 }}>
               <LoadingImage imageURI={""} type={ImageType} isImage={false} />
             </View>
           )}
 
           <View
-            style={{ alignSelf: "center", position: "absolute", left: 120 }}
+            style={{ position: "absolute", left: 120 }}
           >
             <Text style={styles.noteTitle}>
               {item.title.length > textLength
@@ -619,7 +619,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     width: "98%",
     padding: 10,
-    paddingHorizontal: 10,
     flexDirection: "row",
     height: 120,
   },
