@@ -25,7 +25,7 @@ export default function MorePage() {
         />
       </View>
       <View style={styles.textContainer}>
-        <Text style={styles.titleText}>Welcome to Where's Religion?</Text>
+        <Text style={styles.titleText}>Where's Religion?</Text>
         <Accordion headerTitleStyle={styles.headerText} headerTitle="Resources">
           <TouchableOpacity
             onPress={() =>
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
   },
   titleText: {
     alignSelf: "center",
-    fontSize: 32,
+    fontSize: 40,
     fontWeight: "600",
     marginBottom: 10,
   },

@@ -1,37 +1,41 @@
+# LRDA Mobile
 
-# lrda_mobile
+## Overview
+LRDA Mobile is the mobile app for the Lived Religion Application (LRDA), designed to provide ethnographers with an accessible platform to share their data worldwide. Built using React Native and TypeScript, this app connects to the Rerum Website to facilitate seamless data integration.
 
-## LRDA Mobile
-This is the mobile app for the Lived Religion Application (LRDA). The app is built using React Native and connects to the Rerum Website to provide Ethnographers an application which is easily accsible and they can share their data worldwide.
+## Installation
 
-Installation
-To install and run the app, you'll need to have Node.js and React Native installed on your machine. You can follow the React Native Getting Started guide for instructions on setting up your development environment.
+### Prerequisites
+Make sure you have Node.js, React Native, and Expo CLI installed on your machine. If you need guidance, please follow the [React Native Getting Started guide](https://reactnative.dev/docs/getting-started).
 
-## Once you have Node.js and React Native installed, you can install the dependencies for the app by running:
+### Dependency Installation
+Once you have the prerequisites installed, you can install the dependencies for the app by running:
 
+```bash
+yarn install
 ```
-npm install --force
-```
-## To start the app, run:
 
-```
-npm run start
+### Starting the App
+To start the app, run:
 
+```bash
+expo start -c
 ```
-This will start the Expo server, which will compile the JavaScript code for the app which can be run either by a simulator or by your mobile device.
 
-## Running via simulator 
-It depends on either an android or an ios device as when you do ***npm run start*** it provides a QR code along with options ***a*** for running it on an android simultor or ***i*** for running the application in an ios simulator.
+This command will start the Expo server, compiling the JavaScript code for the app, which you can run either on a simulator or your mobile device.
+
+## Running via Simulator
+Depending on whether you have an Android or an iOS device, when you run `expo start -c`, it will provide a QR code along with options `a` for running on an Android simulator or `i` for running the application on an iOS simulator.
 
 ## Running via Phone
-For Running the application via phone you need to download ***EXPO*** application which is available on both android and ios playstore and appstore respectively.
+To run the application on your phone, you need to download the **EXPO** application, available on both the Android Play Store and iOS App Store.
 
 ## Usage
-You can launch the app on your device or emulator using the npm run start command. This will open the Expo DevTools in your browser, where you can select the device or emulator you want to use to run the app.
+Launch the app on your device or emulator using the `expo start -c` command. This will open the Expo DevTools in your browser, where you can select the device or emulator to run the app.
 
-## License
-LRDA Mobile is released under the MIT License.
-
+## Known Bugs
+- The app does not compile to the web due to a dependency on react-native-maps.
+- In the location data section of a note, an error displaying "NaN" may appear.
 
 ## License
 LRDA Mobile is released under the MIT License.
