@@ -12,8 +12,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import * as SplashScreen from "expo-splash-screen";
 import { Snackbar } from "react-native-paper";
 import { User } from "../../models/user_class";
-import { AsyncStorage } from 'react-native';
-
+import { removeItem } from "../../utils/async_storage";
 
 const user = User.getInstance();
 
@@ -82,6 +81,16 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
     }
   };
 
+  // this is simply for dev purposes and should be commented out in production
+  const clearOnboarding = async () => {
+    try {
+      await removeItem("onboarded"); // Replace 'onboarded' with the correct key if different
+      console.log("Onboarding key cleared!");
+    } catch (error) {
+      console.error("Failed to clear the onboarding key.", error);
+    }
+  };
+
   return (
     <KeyboardAwareScrollView
       contentContainerStyle={styles.container}
@@ -147,6 +156,11 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
             <TouchableOpacity style={styles.buttons} onPress={handleGoRegister}>
               <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
                 Register
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={clearOnboarding} style={styles.buttons}>
+              <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
+                Clear Onboarding
               </Text>
             </TouchableOpacity>
           </View>
