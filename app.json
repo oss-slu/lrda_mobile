@@ -2,7 +2,7 @@
   "expo": {
     "name": "Where's Religion?",
     "slug": "lrda_mobile",
-    "version": "1.0.3",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -18,7 +18,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "beta.edu.slu.cs.oss.lrda",
       "config": {
-        "googleMapsApiKey": ""
+        "googleMapsApiKey": "AIzaSyBwi5lzjEmTzGZPRFwx6dIZK7EOwV6VEKw"
       }
     },
     "android": {
@@ -28,7 +28,7 @@
       },
       "config": {
         "googleMaps": {
-          "apiKey": ""
+          "apiKey": "AIzaSyBwi5lzjEmTzGZPRFwx6dIZK7EOwV6VEKw"
         }
       }
     },

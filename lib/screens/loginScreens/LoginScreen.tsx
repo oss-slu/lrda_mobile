@@ -37,28 +37,26 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-        fadeOut();
-    }, 2000); 
+      fadeOut();
+    }, 2000);
 
-    return () => clearTimeout(timer); 
-}, []);
-
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     (async () => {
       await SplashScreen.preventAutoHideAsync();
-  
+
       const userId = await user.getId();
       if (userId !== null) {
         setTimeout(() => {
-          navigation.navigate('HomeTab', { screen: 'Home' });
+          navigation.navigate("HomeTab", { screen: "Home" });
         }, 1000);
       }
-  
+
       await SplashScreen.hideAsync();
     })();
   }, []);
-  
 
   const handleGoRegister = () => {
     navigation.navigate("Register");
@@ -83,24 +81,25 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   };
 
   return (
-    <KeyboardAwareScrollView contentContainerStyle={styles.container}
-      style={{backgroundColor: '#F4DFCD',}}
-      >
+    <KeyboardAwareScrollView
+      contentContainerStyle={styles.container}
+      style={{ backgroundColor: "#F4DFCD" }}
+    >
       <ImageBackground
         source={require("../../../assets/splash.jpg")}
         style={styles.imageBackground}
       >
-       <Snackbar
-        visible={snackState}
-        onDismiss={onDismissSnackBar}
-        style={{
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: "white",
-        }}
-      >
-        <Text style={{ textAlign: "center" }}>Invalid User Credentials</Text>
-      </Snackbar>
+        <Snackbar
+          visible={snackState}
+          onDismiss={onDismissSnackBar}
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "white",
+          }}
+        >
+          <Text style={{ textAlign: "center" }}>Invalid User Credentials</Text>
+        </Snackbar>
         {firstClick ? (
           <TouchableOpacity
             activeOpacity={1}
@@ -151,7 +150,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
           </View>
         )}
       </ImageBackground>
-      </KeyboardAwareScrollView>
+    </KeyboardAwareScrollView>
   );
 };
 
@@ -159,7 +158,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    alignItems: 'stretch',
+    alignItems: "stretch",
   },
   logo: {
     fontWeight: "bold",

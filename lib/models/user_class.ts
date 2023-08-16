@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { UserData } from "../../types";
+import { getItem } from "../utils/async_storage";
 
 export class User {
   private static instance: User;
@@ -124,6 +125,12 @@ export class User {
     }
     return this.userData?.name ?? null;
   }
+
+  public async hasOnboarded(): Promise<boolean> {
+    const onboarded = await getItem('onboarded');
+    return onboarded === '1';
+  }
+  
 
   public async getRoles(): Promise<{
     administrator: boolean;
