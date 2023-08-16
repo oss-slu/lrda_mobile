@@ -12,6 +12,8 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import * as SplashScreen from "expo-splash-screen";
 import { Snackbar } from "react-native-paper";
 import { User } from "../../models/user_class";
+import { AsyncStorage } from 'react-native';
+
 
 const user = User.getInstance();
 
