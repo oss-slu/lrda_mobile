@@ -4,7 +4,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import ExploreScreen from '../screens/mapPage/ExploreScreen.js';
 import ProfilePage from "../screens/ProfilePage";
-import MorePage from "../screens/morePage";
+import MorePage from "../screens/MorePage";
 import HomeScreen from "../screens/HomeScreen";
 import LoginScreen from "../screens/loginScreens/LoginScreen";
 import RegisterScreen from "../screens/loginScreens/RegisterScreen";
