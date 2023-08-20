@@ -8,19 +8,36 @@ LRDA Mobile is the mobile app for the Lived Religion Application (LRDA), designe
 ### Onboarding
 <div style="display: flex; justify-content: space-between;">
   <img src="./assets/demo_photos/IMG_9517.PNG" width="200">
-  <img src="./assets/demo_photos/IMG_9517.PNG" width="200">
-  <img src="./assets/demo_photos/IMG_9517.PNG" width="200">
+  <img src="./assets/demo_photos/IMG_9518.PNG" width="200">
+  <img src="./assets/demo_photos/IMG_9519.PNG" width="200">
+</div>
+
+
+### Login Page
+<div style="display: flex; justify-content: space-between;">
+  <img src="./assets/demo_photos/IMG_9520.PNG" width="200">
+  <img src="./assets/demo_photos/IMG_9521.PNG" width="200">
 </div>
 
 
 ### Home Page
-![Home Page](./assets/demo_photos/IMG_9517.PNG)
+<div style="display: flex; justify-content: space-between;">
+  <img src="./assets/demo_photos/IMG_9523.PNG" width="200">
+  <img src="./assets/demo_photos/IMG_9524.PNG" width="200">
+</div>
+
 
 ### Map Page
-![Map Page](./assets/demo_photos/IMG_9517.PNG)
+<div style="display: flex; justify-content: space-between;">
+  <img src="./assets/demo_photos/IMG_9525.PNG" width="200">
+  <img src="./assets/demo_photos/IMG_9526.PNG" width="200">
+  <img src="./assets/demo_photos/IMG_9527.PNG" width="200">
+</div>
 
-### Note Page
-![Note Page](./assets/demo_photos/IMG_9517.PNG)
+### More Page
+<div style="display: flex; justify-content: space-between;">
+  <img src="./assets/demo_photos/IMG_9528.PNG" width="200">
+</div>
 
 ## Installation
 
