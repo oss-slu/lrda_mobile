@@ -48,93 +48,78 @@ const HomeStack = () => {
 };
 
 const AppNavigator: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [hasOnboarded, setHasOnboarded] = useState(false);
+  const [navState, setNavState] = useState<"onboarding" | "login" | "home">("onboarding");
 
   useEffect(() => {
     const checkOnboarding = async () => {
       const onboarded = await getItem("onboarded");
-      setHasOnboarded(onboarded === "1");
+      if (onboarded === "1") {
+        const userId = await user.getId();
+        setNavState(userId ? "home" : "login");
+      }
     };
 
     checkOnboarding();
   }, []);
 
   useEffect(() => {
-    const checkLoginStatus = async () => {
-      const userId = await user.getId();
-      console.log("Login status:", userId !== null); // Log the login status
-      setIsLoggedIn(userId !== null);
-    };
+    user.setLoginCallback((isLoggedIn) => {
+      setNavState(isLoggedIn ? "home" : "login");
+    });
+  }, []);
+
   
-    checkLoginStatus();
-  }, []);
-
-  useEffect(() => {
-    user.setLoginCallback(setIsLoggedIn);
-  }, []);
-
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      const userId = await user.getId();
-      setIsLoggedIn(userId !== null);
-    }, 1000);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
 
   return (
     <NavigationContainer>
-      {hasOnboarded ? (
-        isLoggedIn ? (
-          <Tab.Navigator screenOptions={{ tabBarShowLabel: false }}>
-            <Tab.Screen
-              name="HomeTab"
-              component={HomeStack}
-              options={{
-                headerShown: false,
-                tabBarIcon: ({ color, size }) => (
-                  <Ionicons name="ios-pencil" color={color} size={size} />
-                ),
-              }}
-            />
-            <Tab.Screen
-              name="Tab1"
-              component={ExploreScreen}
-              options={{
-                headerShown: false,
-                tabBarIcon: ({ color, size }) => (
-                  <Ionicons name="ios-map" color={color} size={size} />
-                ),
-              }}
-            />
-            <Tab.Screen
-              name="Tab2"
-              component={MorePage}
-              options={{
-                headerShown: false,
-                tabBarIcon: ({ color, size }) => (
-                  <Ionicons name="menu-outline" color={color} size={size + 10} />
-                ),
-              }}
-            />
-          </Tab.Navigator>
-        ) : (
-          <Stack.Navigator initialRouteName="Login">
-            <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
-          </Stack.Navigator>
-        )
-      ) : (
-        <Stack.Navigator initialRouteName="Onboarding">
-      <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
+    {navState === "onboarding" && (
+       <Stack.Navigator initialRouteName="Onboarding">
+       <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
+       <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+       <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
+     </Stack.Navigator>
+    )}
+    {navState === "login" && (
+      <Stack.Navigator initialRouteName="Login">
       <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
     </Stack.Navigator>
-      )}
-    </NavigationContainer>
+    )}
+    {navState === "home" && (
+      <Tab.Navigator screenOptions={{ tabBarShowLabel: false }}>
+      <Tab.Screen
+        name="HomeTab"
+        component={HomeStack}
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="ios-pencil" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Tab1"
+        component={ExploreScreen}
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="ios-map" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Tab2"
+        component={MorePage}
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="menu-outline" color={color} size={size + 10} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+    )}
+  </NavigationContainer>
   );
   
 };
