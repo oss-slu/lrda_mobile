@@ -48,7 +48,7 @@ const OnboardingScreen: React.FC<OnboardingProps> = ({ navigation }) => {
     );
   };
 
-  const [lottieProgress] = useState(new Animated.Value(0)); // Declare the state variable
+  const [lottieProgress] = useState(new Animated.Value(0));
 
   useEffect(() => {
     Animated.loop(
@@ -77,10 +77,8 @@ const OnboardingScreen: React.FC<OnboardingProps> = ({ navigation }) => {
           image: (
             <View>
               <LottieView
-                progress={lottieProgress} // Use the lottieProgress state variable
-                loop={true}
-                autoPlay
-                style={{ width: width * 0.9, height: width }}
+                progress={lottieProgress}
+                style={{ width: width * 0.5, height: width }}
                 source={require("../../assets/animations/companion.json")}
                 renderMode={"SOFTWARE"}
               />
@@ -94,10 +92,9 @@ const OnboardingScreen: React.FC<OnboardingProps> = ({ navigation }) => {
           backgroundColor: "#fef3c7",
           image: (
             <LottieView
-              style={{ width: width * 0.9, height: width }}
+              progress={lottieProgress}
+              style={{ width: width * 0.3, height: width }}
               source={require("../../assets/animations/work.json")}
-              autoPlay
-              loop
             />
           ),
           title: "Privacy Meets Collaboration",
@@ -108,10 +105,9 @@ const OnboardingScreen: React.FC<OnboardingProps> = ({ navigation }) => {
           backgroundColor: "#a78bfa",
           image: (
             <LottieView
+              progress={lottieProgress}
               style={{ width: width * 0.3, height: width, marginLeft: 25}} 
               source={require("../../assets/animations/J5AX8XtKKZ.json")}
-              autoPlay
-              loop
             />
           ),
           title: "A World of Ethnographic Insight",
