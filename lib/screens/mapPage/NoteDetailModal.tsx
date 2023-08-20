@@ -126,10 +126,16 @@ const NoteDetailModal: React.FC<Props> = memo(({ isVisible, onClose, note }) => 
       >
         <ScrollView>
           <Text style={styles.modalTitle}>{note?.title}</Text>
-          <Text style={styles.modalText}>{`Created by: ${creatorName}`}</Text>
-          <Text style={[styles.modalText, { marginBottom: 5 }]}>
-            {note?.time}
-          </Text>
+          <View style={styles.metaDataContainer}>
+  <View style={styles.creatorContainer}>
+    <Ionicons name="person-circle-outline" size={18} color="#555" />
+    <Text style={styles.creatorText}>{creatorName}</Text>
+  </View>
+  <View style={styles.dateContainer}>
+    <Ionicons name="calendar-outline" size={18} color="#555" />
+    <Text style={styles.dateText}>{note?.time}</Text>
+  </View>
+</View>
           <View
             style={{
               height: 2,
@@ -158,50 +164,108 @@ const styles = StyleSheet.create({
     zIndex: 1,
     alignItems: "center",
     justifyContent: "center",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 2,
+    elevation: 3,
+    borderRadius: 25,
   },
   closeIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "#ddd",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#f0f0f0",
     alignItems: "center",
     justifyContent: "center",
   },
   textContainer: {
-    padding: 20,
+    padding: 10,
+    paddingLeft: 15, // Indentation for the body text
     backgroundColor: "#fafafa",
-    height: 200,
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    borderTopColor: "#ddd",
-    borderTopWidth: 1,
+    borderTopColor: "#e0e0e0",
+    borderTopWidth: 2,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 26,
     fontWeight: "bold",
-    marginBottom: 5,
-    color: "#333",
+    marginLeft: 15, // Less indent for title
+    marginBottom: 8,
+    color: "#2c3e50",
   },
   modalText: {
     fontSize: 18,
     lineHeight: 24,
-    color: "#666",
+    marginLeft: 15, // Uniform indentation for other texts
+    color: "#34495e",
   },
-  metaData: {
-    fontSize: 14,
-    color: "#888",
+  metaDataContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginLeft: 15,
+    marginRight: 15,
+    marginBottom: 10,
   },
+  creatorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  creatorIcon: {
+    fontSize: 16,
+    color: "#555",
+  },
+  creatorText: {
+    fontSize: 16,
+    color: "#555",
+    marginLeft: 5,
+  },
+  dateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  dateIcon: {
+    fontSize: 16,
+    color: "#555",
+  },
+  dateText: {
+    fontSize: 16,
+    color: "#555",
+    marginLeft: 5,
+  },
+  timeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  timeIcon: {
+    fontSize: 16,
+    color: "#555",
+  },
+  timeText: {
+    fontSize: 16,
+    color: "#555",
+    marginLeft: 5,
+  },  
   imageContainer: {
     width: "100%",
-    height: 340,
+    height: 360,
     marginBottom: 2,
+    borderRadius: 10,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
   },
   image: {
     width: "100%",
     height: "100%",
     resizeMode: "cover",
-    position: "absolute",
+  },
+  separator: { // Divider line style
+    height: 1,
+    width: "90%",
+    backgroundColor: "#e0e0e0",
+    marginLeft: "5%",
+    marginRight: "5%",
+    marginBottom: 20,
   },
 });
+
