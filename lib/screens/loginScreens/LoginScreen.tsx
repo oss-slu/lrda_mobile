@@ -71,6 +71,9 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
     } else {
       try {
         const status = await user.login(username, password);
+        console.log("Login status:", status); // Log the login status
+        const userId = await user.getId();
+        console.log("User ID after login:", userId); // Log the user ID
         if (status == "success") {
           setUsername("");
           setPassword("");

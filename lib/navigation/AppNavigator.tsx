@@ -63,10 +63,15 @@ const AppNavigator: React.FC = () => {
   useEffect(() => {
     const checkLoginStatus = async () => {
       const userId = await user.getId();
+      console.log("Login status:", userId !== null); // Log the login status
       setIsLoggedIn(userId !== null);
     };
-
+  
     checkLoginStatus();
+  }, []);
+
+  useEffect(() => {
+    user.setLoginCallback(setIsLoggedIn);
   }, []);
 
   useEffect(() => {
