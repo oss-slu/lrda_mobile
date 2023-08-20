@@ -161,11 +161,11 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
                 Register
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={clearOnboarding} style={styles.buttons}>
+            {/* <TouchableOpacity onPress={clearOnboarding} style={styles.buttons}>
               <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
                 Clear Onboarding
               </Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         )}
       </ImageBackground>
