@@ -16,7 +16,7 @@ LRDA Mobile is the mobile app for the Lived Religion Application (LRDA), designe
 ### Login Page
 <div style="display: flex; justify-content: space-between;">
   <img src="./assets/demo_photos/IMG_9520.PNG" width="200">
-  <img src="./assets/demo_photos/IMG_9521.PNG" width="200">
+  <img src="./assets/demo_photos/IMG_9522.PNG" width="200">
 </div>
 
 
