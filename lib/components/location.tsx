@@ -158,7 +158,7 @@ export default function LocationWindow({
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    height: 210,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,

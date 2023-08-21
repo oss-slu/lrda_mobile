@@ -5,20 +5,25 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  Platform,
+  Keyboard,
+  ScrollView,
 } from "react-native";
 import { Note, AddNoteScreenProps } from "../../types";
 import PhotoScroller from "../components/photoScroller";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { User } from "../models/user_class";
 import { Ionicons } from "@expo/vector-icons";
 import { Media, AudioType } from "../models/media_class";
 import AudioContainer from "../components/audio";
-import * as Location from "expo-location";
 import ApiService from "../utils/api_calls";
 import TagWindow from "../components/tagging";
 import LocationWindow from "../components/location";
 import TimeWindow from "../components/time";
+import {
+  RichEditor,
+  RichToolbar,
+  actions,
+} from "react-native-pell-rich-editor";
+import Constants from "expo-constants";
 
 const user = User.getInstance();
 
@@ -34,18 +39,43 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [isTagging, setIsTagging] = useState(false);
   const [isLocation, setIsLocation] = useState(false);
   const [isTime, setIsTime] = useState(false);
+  const richTextRef = useRef<RichEditor | null>(null);
   const [isPublished, setIsPublished] = useState(false);
+  const [keyboardOpen, setKeyboard] = useState(false);
+  const scrollViewRef = useRef<ScrollView | null>(null);
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
 
   useEffect(() => {
-    console.log("new Media array:", newMedia);
-  }, [newMedia]);
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => {
+        setKeyboard(true);
+      }
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        setKeyboard(false);
+      }
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
+
+  const handleScroll = (positionY: number) => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({ y: positionY - 100, animated: true });
+    }
+  };
 
   const saveNote = async () => {
-    if (titleText === ""){
+    if (titleText === "") {
       navigation.goBack();
     } else if (bodyText !== "" && titleText === "") {
       Alert.alert("A title is necessary to save");
@@ -65,10 +95,10 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           time: time,
         };
         const response = await ApiService.writeNewNote(newNote);
-  
+
         const obj = await response.json();
         const id = obj["@id"];
-  
+
         route.params.refreshPage();
         navigation.goBack();
       } catch (error) {
@@ -140,13 +170,15 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         >
           <Ionicons name="location-outline" size={30} color="black" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => {
+        <TouchableOpacity
+          onPress={() => {
             setViewMedia(false);
             setViewAudio(false);
             setIsTagging(false);
             setIsLocation(false);
             setIsTime(!isTime);
-          }}>
+          }}
+        >
           <Ionicons name="time-outline" size={30} color="black" />
         </TouchableOpacity>
         <TouchableOpacity
@@ -161,28 +193,62 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           <Ionicons name="pricetag-outline" size={30} color="black" />
         </TouchableOpacity>
       </View>
+      <View style={{ backgroundColor: "white" }}>
+        {viewMedia && (
+          <PhotoScroller newMedia={newMedia} setNewMedia={setNewMedia} />
+        )}
+        {viewAudio && (
+          <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
+        )}
+        {isTagging && <TagWindow tags={tags} setTags={setTags} />}
+        {isLocation && (
+          <LocationWindow location={location} setLocation={setLocation} />
+        )}
+        {isTime && <TimeWindow time={time} setTime={setTime} />}
+      </View>
+      <RichToolbar
+        editor={richTextRef}
+        actions={[
+          actions.keyboard,
+          actions.undo,
+          actions.redo,
+          actions.setBold,
+          actions.setItalic,
+          actions.setUnderline,
+          actions.insertBulletsList,
+          actions.blockquote,
+          actions.indent,
+          actions.outdent,
+        ]}
+        iconTint={"#000"}
+        selectedIconTint={"#2095F2"}
+      />
       <View style={styles.container}>
-        <KeyboardAwareScrollView
-          nestedScrollEnabled
+        <ScrollView
+          nestedScrollEnabled={true}
           showsVerticalScrollIndicator={false}
           style={{ overflow: "hidden", paddingTop: 10, paddingBottom: 100 }}
+          ref={scrollViewRef}
         >
-          {viewMedia && <PhotoScroller newMedia={newMedia} setNewMedia={setNewMedia} />}
-          {viewAudio && <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />}
-          {isTagging && <TagWindow tags={tags} setTags={setTags} />}
-          {isLocation && <LocationWindow location={location} setLocation={setLocation} />}
-          {isTime && <TimeWindow time={time} setTime={setTime} />}
-          <View style={styles.inputContainer}>
-            <TextInput
+          <View
+            style={[
+              { paddingBottom: keyboardOpen ? 50 : 150 },
+              { minHeight: 900 },
+            ]}
+          >
+            <RichEditor
+              ref={(r) => (richTextRef.current = r)}
               style={styles.input}
               placeholder="Write your note here"
-              multiline={true}
-              textAlignVertical="top"
-              onChangeText={(text) => setBodyText(text)}
-              value={bodyText}
+              onChange={(text) => setBodyText(text)}
+              initialContentHTML={bodyText}
+              onCursorPosition={(position) => {
+                handleScroll(position);
+              }}
             />
+            <View style={{ height: keyboardOpen ? 590 : 270 }} />
           </View>
-        </KeyboardAwareScrollView>
+        </ScrollView>
       </View>
     </View>
   );
@@ -190,11 +256,9 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
 
 const styles = StyleSheet.create({
   topContainer: {
-    flex: 1,
     justifyContent: "space-between",
     paddingHorizontal: 5,
-    minHeight: "15%",
-    paddingTop: "15%",
+    paddingTop: Constants.statusBarHeight,
     flexDirection: "row",
     backgroundColor: "#F4DFCD",
     alignItems: "center",
@@ -227,10 +291,8 @@ const styles = StyleSheet.create({
     zIndex: 99,
   },
   container: {
-    paddingHorizontal: 16,
     backgroundColor: "white",
     overflow: "hidden",
-    paddingBottom: "50%",
   },
   title: {
     height: 45,
@@ -245,11 +307,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     borderColor: "#111111",
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 10,
     fontSize: 22,
-    paddingBottom: "90%",
   },
   addButton: {
     position: "absolute",
@@ -276,10 +334,6 @@ const styles = StyleSheet.create({
     color: "#111111",
     fontWeight: "bold",
     fontSize: 12,
-  },
-  inputContainer: {
-    height: 400,
-    justifyContent: "space-between",
   },
 });
 

@@ -1,8 +1,14 @@
-// EditNoteScreen.tsx
-import React, { useState, useEffect } from "react";
-import { View, TextInput, Image, StyleSheet } from "react-native";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  View,
+  TextInput,
+  Image,
+  StyleSheet,
+  Keyboard,
+  ScrollView,
+  useWindowDimensions,
+} from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Ionicons } from "@expo/vector-icons";
 import { Note } from "../../types";
 import PhotoScroller from "../components/photoScroller";
@@ -14,9 +20,14 @@ import ApiService from "../utils/api_calls";
 import TagWindow from "../components/tagging";
 import LocationWindow from "../components/location";
 import TimeWindow from "../components/time";
-import { getThumbnail } from "../utils/S3_proxy";
 import Constants from "expo-constants";
 import { ResizeMode, Video } from "expo-av";
+import {
+  RichEditor,
+  RichToolbar,
+  actions,
+} from "react-native-pell-rich-editor";
+import LoadingImage from "../components/loadingImage";
 
 const user = User.getInstance();
 
@@ -34,10 +45,13 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const [isPublished, setIsPublished] = useState(note.published);
   const [creator, setCreator] = useState(note.creator);
   const [owner, setOwner] = useState(false);
+  const scrollViewRef = useRef<ScrollView | null>(null);
   const [viewMedia, setViewMedia] = useState(false);
   const [viewAudio, setViewAudio] = useState(false);
   const [isTagging, setIsTagging] = useState(false);
+  const [keyboardOpen, setKeyboard] = useState(false);
   const [isLocation, setIsLocation] = useState(false);
+  const richTextRef = useRef<RichEditor | null>(null);
   const [isTime, setIsTime] = useState(false);
   const [location, setLocation] = useState<{
     latitude: number;
@@ -50,6 +64,28 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         }
       : null
   );
+  const {height, width} = useWindowDimensions();
+
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => {
+        setKeyboard(true);
+      }
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        setKeyboard(false);
+      }
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
 
   useEffect(() => {
     const checkOwner = async () => {
@@ -62,6 +98,15 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
 
     checkOwner();
   }, [creator]);
+
+  const handleScroll = (positionY: number) => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({
+        y: positionY + (media[0] ? 100 : -100),
+        animated: true,
+      });
+    }
+  };
 
   const handleSaveNote = async () => {
     try {
@@ -89,7 +134,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   };
 
   return (
-    <KeyboardAwareScrollView style={{ flex: 1 }} nestedScrollEnabled={true}>
+    <View>
       <View style={styles.topContainer}>
         <TouchableOpacity
           style={styles.topButtons}
@@ -123,112 +168,141 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           <View />
         )}
       </View>
-      <View>
-        <View style={styles.keyContainer}>
-          <TouchableOpacity
-            onPress={() => {
-              setViewMedia(!viewMedia);
-              setViewAudio(false);
-              setIsTagging(false);
-              setIsLocation(false);
-              setIsTime(false);
-            }}
-          >
-            <Ionicons name="images-outline" size={30} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setViewMedia(false);
-              setViewAudio(!viewAudio);
-              setIsTagging(false);
-              setIsLocation(false);
-              setIsTime(false);
-            }}
-          >
-            <Ionicons name="mic-outline" size={30} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setViewMedia(false);
-              setViewAudio(false);
-              setIsTagging(false);
-              setIsLocation(!isLocation);
-              setIsTime(false);
-            }}
-          >
-            <Ionicons name="location-outline" size={30} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setViewMedia(false);
-              setViewAudio(false);
-              setIsTagging(false);
-              setIsLocation(false);
-              setIsTime(!isTime);
-            }}
-          >
-            <Ionicons name="time-outline" size={30} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setViewMedia(false);
-              setViewAudio(false);
-              setIsTagging(!isTagging);
-              setIsLocation(false);
-              setIsTime(false);
-            }}
-          >
-            <Ionicons name="pricetag-outline" size={30} color="black" />
-          </TouchableOpacity>
-        </View>
-        <View style={{ backgroundColor: "white" }}>
-          {viewMedia && (
-            <PhotoScroller newMedia={media} setNewMedia={setMedia} />
-          )}
-          {viewAudio && (
-            <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
-          )}
-          {isTagging && <TagWindow tags={tags} setTags={setTags} />}
-          {isLocation && (
-            <LocationWindow location={location} setLocation={setLocation} />
-          )}
-          {isTime && <TimeWindow time={time} setTime={setTime} />}
-        </View>
+      <View style={styles.keyContainer}>
+        <TouchableOpacity
+          onPress={() => {
+            setViewMedia(!viewMedia);
+            setViewAudio(false);
+            setIsTagging(false);
+            setIsLocation(false);
+            setIsTime(false);
+          }}
+        >
+          <Ionicons name="images-outline" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            setViewMedia(false);
+            setViewAudio(!viewAudio);
+            setIsTagging(false);
+            setIsLocation(false);
+            setIsTime(false);
+          }}
+        >
+          <Ionicons name="mic-outline" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            setViewMedia(false);
+            setViewAudio(false);
+            setIsTagging(false);
+            setIsLocation(!isLocation);
+            setIsTime(false);
+          }}
+        >
+          <Ionicons name="location-outline" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            setViewMedia(false);
+            setViewAudio(false);
+            setIsTagging(false);
+            setIsLocation(false);
+            setIsTime(!isTime);
+          }}
+        >
+          <Ionicons name="time-outline" size={30} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            setViewMedia(false);
+            setViewAudio(false);
+            setIsTagging(!isTagging);
+            setIsLocation(false);
+            setIsTime(false);
+          }}
+        >
+          <Ionicons name="pricetag-outline" size={30} color="black" />
+        </TouchableOpacity>
       </View>
-      <View style={styles.container}>
-        {media[0] && (
-          <View style={{ height: 280 }}>
-            {media[0].getType() === "image" ? (
-              <Image
-                source={{
-                  uri: media[0].getUri(),
-                }}
-                resizeMode="contain"
-                style={{ height: "100%", width: "100%" }}
-              />
-            ) : (
-              <Video
-              source={{ uri: media[0].getUri() }}
-              resizeMode={ResizeMode.COVER}
-              shouldPlay={true}
-              useNativeControls={true}
-              isLooping={true}
-              style={styles.video}
-              />
-            )}
-          </View>
+      <View style={{ backgroundColor: "white" }}>
+        {viewMedia && <PhotoScroller newMedia={media} setNewMedia={setMedia} />}
+        {viewAudio && (
+          <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
         )}
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            multiline={true}
-            textAlignVertical="top"
-            value={text}
-            onChangeText={setText}
-          />
-        </View>
+        {isTagging && <TagWindow tags={tags} setTags={setTags} />}
+        {isLocation && (
+          <LocationWindow location={location} setLocation={setLocation} />
+        )}
+        {isTime && <TimeWindow time={time} setTime={setTime} />}
       </View>
-    </KeyboardAwareScrollView>
+      <RichToolbar
+        editor={richTextRef}
+        actions={[
+          actions.keyboard,
+          actions.undo,
+          actions.redo,
+          actions.setBold,
+          actions.setItalic,
+          actions.setUnderline,
+          actions.insertBulletsList,
+          actions.blockquote,
+          actions.indent,
+          actions.outdent,
+        ]}
+        iconTint={"#000"}
+        selectedIconTint={"#2095F2"}
+      />
+      <View style={styles.container}>
+        <ScrollView
+          nestedScrollEnabled={true}
+          showsVerticalScrollIndicator={false}
+          style={{ overflow: "hidden", paddingTop: 10, paddingBottom: 100 }}
+          ref={scrollViewRef}
+        >
+          {media[0] && (
+            <View style={{ height: 280, marginLeft: 3,}}>
+              {media[0].getType() === "image" ? (
+                <LoadingImage
+                imageURI={media[0].getUri()}
+                type={"photo"}
+                isImage={true}
+                height={280}
+                width={width-6}
+              />
+              ) : (
+                <Video
+                  source={{ uri: media[0].getUri() }}
+                  resizeMode={ResizeMode.COVER}
+                  shouldPlay={true}
+                  useNativeControls={true}
+                  isLooping={true}
+                  style={styles.video}
+                />
+              )}
+            </View>
+          )}
+          <View
+            style={[
+              { paddingBottom: keyboardOpen ? 50 : 150 },
+              { minHeight: 900 },
+            ]}
+          >
+            <RichEditor
+              ref={(r) => (richTextRef.current = r)}
+              style={styles.input}
+              placeholder="Write your note here"
+              onChange={(text) => setText(text)}
+              initialContentHTML={text}
+              onCursorPosition={(position) => {
+                handleScroll(position);
+              }}
+            />
+            <View style={{ height: keyboardOpen ? 400 : 90 }} />
+          </View>
+        </ScrollView>
+      </View>
+    </View>
   );
 };
 
@@ -243,9 +317,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   topText: {
+    flex: 1,
     maxWidth: "100%",
     fontWeight: "700",
     fontSize: 32,
+    textAlign: "center",
   },
   topButtons: {
     backgroundColor: "#111111",
@@ -254,16 +330,26 @@ const styles = StyleSheet.create({
     height: 50,
     alignItems: "center",
     justifyContent: "center",
+    zIndex: 99,
+  },
+  toggles: {
+    backgroundColor: "#111111",
+    borderRadius: 50,
+    width: 50,
+    height: 50,
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 10,
+    zIndex: 99,
   },
   container: {
-    padding: "1%",
     backgroundColor: "white",
-    height: "100%",
+    overflow: "hidden",
+    paddingBottom: "50%",
   },
   title: {
-    width: "70%",
-    alignSelf: "center",
     height: 45,
+    width: "70%",
     borderColor: "#111111",
     borderWidth: 1,
     borderRadius: 30,
@@ -272,12 +358,9 @@ const styles = StyleSheet.create({
     fontSize: 30,
   },
   input: {
+    flex: 1,
     borderColor: "#111111",
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 10,
     fontSize: 22,
-    minHeight: 300,
   },
   addButton: {
     position: "absolute",
@@ -290,16 +373,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  toggles: {
-    backgroundColor: "#111111",
-    borderRadius: 50,
-    width: 50,
-    height: 50,
-    alignItems: "center",
-    justifyContent: "center",
-    marginLeft: 10,
-    zIndex: 99,
-  },
   keyContainer: {
     height: 60,
     paddingVertical: 5,
@@ -310,29 +383,16 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 40,
   },
-  video: {
-    width: "100%",
-    height: "100%",
-    justifyContent: "center",
-    alignSelf: "center",
-  },
-  saveButton: {
-    backgroundColor: "#C7EBB3",
-    paddingHorizontal: 120,
-    padding: 10,
-    alignItems: "center",
-    borderRadius: 25,
-    marginVertical: 10,
-    alignSelf: "center",
-  },
   saveText: {
     color: "#111111",
     fontWeight: "bold",
     fontSize: 12,
   },
-  inputContainer: {
-    flexGrow: 1,
-    backgroundColor: "white",
+  video: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignSelf: "center",
   },
 });
 

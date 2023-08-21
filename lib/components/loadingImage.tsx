@@ -1,57 +1,55 @@
 import React, { useState } from "react";
-import { View, Image, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Image, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Placeholder, PlaceholderMedia, Progressive } from "rn-placeholder";
-import * as FileSystem from "expo-file-system";
-import * as MediaLibrary from "expo-media-library";
 
 interface LoadingImageProps {
   imageURI: string;
   type: string;
   isImage: boolean;
+  height?: number;
+  width?: number;
 }
 
 export default function LoadingImage({
   imageURI,
   type,
   isImage,
+  height = 100,
+  width = 100,
 }: LoadingImageProps) {
   const [isLoading, setIsLoading] = useState(true);
 
-  const handleSaveMedia = async () => {
-    try {
-      const fileName = imageURI.replace(/^.*[\\\/]/, "");
-      const imageFullPathInLocalStorage =
-        FileSystem.documentDirectory + fileName;
-
-      FileSystem.downloadAsync(imageURI, imageFullPathInLocalStorage).then(
-        async ({ uri }) => {
-          await MediaLibrary.saveToLibraryAsync(imageFullPathInLocalStorage);
-        }
-      );
-    } catch (error) {
-      console.error("Error saving media:", error);
-    }
-  };
-
   if (isImage && imageURI !== "") {
     return (
-      <View>
+      <View
+        style={{
+          width: width,
+          height: height,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
         {isLoading && (
           <Placeholder
+            style={{ top: width / 2 }}
             Animation={Progressive}
             Left={() => (
-              <PlaceholderMedia
-                size={100}
-                style={{ borderRadius: 10, marginRight: 20 }}
-              />
+              <PlaceholderMedia size={width} style={{ borderRadius: 10 }} />
             )}
           />
         )}
         {type === "video" ? (
-          <View>
+          <View
+            style={{
+              width: width,
+              height: height,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
             <Image
-              style={styles.preview}
+              style={[styles.preview, { width: width, height: height }]}
               source={{ uri: imageURI }}
               onLoadEnd={() => setIsLoading(false)}
             />
@@ -67,7 +65,7 @@ export default function LoadingImage({
         ) : (
           <View>
             <Image
-              style={styles.preview}
+              style={[styles.preview, { width: width, height: height }]}
               source={{ uri: imageURI }}
               onLoadEnd={() => setIsLoading(false)}
             />
@@ -77,20 +75,25 @@ export default function LoadingImage({
     );
   } else {
     return (
-      <View>
+      <View
+        style={{
+          width: width,
+          height: height,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
         {isLoading && (
           <Placeholder
+            style={{ top: width / 2 }}
             Animation={Progressive}
             Left={() => (
-              <PlaceholderMedia
-                size={100}
-                style={{ borderRadius: 10, marginRight: 20 }}
-              />
+              <PlaceholderMedia size={width} style={{ borderRadius: 10 }} />
             )}
           />
         )}
         <Image
-          style={styles.preview}
+          style={[styles.preview, { width: width, height: height }]}
           source={require("./public/noPreview.png")}
           onLoadEnd={() => setIsLoading(false)}
         />
@@ -101,10 +104,7 @@ export default function LoadingImage({
 
 const styles = StyleSheet.create({
   preview: {
-    width: 100,
-    height: 100,
     borderRadius: 10,
-    marginRight: "10%",
     alignContent: "center",
     alignSelf: "center",
   },
@@ -120,7 +120,6 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     backgroundColor: "rgba(5,5,5,0.5)",
     position: "absolute",
-    right: 40,
-    bottom: 36,
+    alignSelf: "center",
   },
 });
