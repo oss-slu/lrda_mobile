@@ -2,7 +2,7 @@ name: App test
 
 on:
   push:
-    branches: [ main,13-generate-test-cases ]
+    branches: [ main,deliverable-6 ]
   pull_request:
     branches: [ main ]
 
@@ -21,7 +21,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        yarn install 
+        yarn install --force
     - name: Run tests
       run: |
         yarn test
