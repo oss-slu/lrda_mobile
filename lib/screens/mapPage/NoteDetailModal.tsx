@@ -251,8 +251,6 @@ const styles = StyleSheet.create({
     marginBottom: 2,
     borderRadius: 10,
     overflow: "hidden",
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
   },
   image: {
     width: "100%",
