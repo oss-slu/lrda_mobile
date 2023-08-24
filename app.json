@@ -20,7 +20,7 @@
       "config": {
         "googleMapsApiKey": ""
       },
-      "buildNumber" : "3"
+      "buildVersion" : "3"
     },
     "android": {
       "adaptiveIcon": {
