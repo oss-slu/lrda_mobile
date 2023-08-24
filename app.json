@@ -16,7 +16,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "beta.edu.slu.cs.oss.lrda",
+      "bundleIdentifier": "edu.slu.cs.oss.lrda",
       "config": {
         "googleMapsApiKey": "AIzaSyBwi5lzjEmTzGZPRFwx6dIZK7EOwV6VEKw"
       },
@@ -38,7 +38,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "622ba56f-88f9-440e-af87-280abce3b1e8"
+        "projectId": "801029ef-db83-4668-a97a-5adcc4c333e2"
       }
     }
   }
