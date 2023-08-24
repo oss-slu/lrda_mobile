@@ -113,7 +113,6 @@ const NoteDetailModal: React.FC<Props> = memo(({ isVisible, onClose, note }) => 
             No images
           </Text>
         )}
-        <View style={{ height: 250 }}></View>
       </ScrollView>
       <View
         style={[
@@ -249,10 +248,11 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 360,
     marginBottom: 2,
-    borderRadius: 10,
     overflow: "hidden",
-    borderWidth: 1,
+<<<<<<< HEAD
+=======
     borderColor: '#e0e0e0',
+>>>>>>> 60ad3d1 (fixing changes related to spacing of the images)
   },
   image: {
     width: "100%",

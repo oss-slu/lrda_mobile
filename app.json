@@ -20,7 +20,7 @@
       "config": {
         "googleMapsApiKey": ""
       },
-      "buildVersion" : "3"
+      "buildNumber" : "5"
     },
     "android": {
       "adaptiveIcon": {
@@ -35,11 +35,6 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    },
-    "extra": {
-      "eas": {
-        "projectId": "622ba56f-88f9-440e-af87-280abce3b1e8"
-      }
     }
   }
 }

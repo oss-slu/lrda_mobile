@@ -16,6 +16,9 @@ import { User } from "../models/user_class";
 import OnboardingScreen from "../screens/OnboardingScreen";
 import { getItem } from "../utils/async_storage";
 import { HomeScreenProps, RootTabParamList, EditNoteProps } from "../../types";
+import * as SplashScreen from 'expo-splash-screen';
+
+SplashScreen.preventAutoHideAsync();
 
 const user = User.getInstance();
 
@@ -48,27 +51,32 @@ const HomeStack = () => {
 };
 
 const AppNavigator: React.FC = () => {
-  const [navState, setNavState] = useState<"onboarding" | "login" | "home">("onboarding");
+  const [navState, setNavState] = useState<"loading" | "onboarding" | "login" | "home">("loading");
 
   useEffect(() => {
     const checkOnboarding = async () => {
       const onboarded = await getItem("onboarded");
-      if (onboarded === "1") {
-        const userId = await user.getId();
-        setNavState(userId ? "home" : "login");
+      const userId = await user.getId();
+
+      if (onboarded === "1" && userId) {
+        setNavState("home");
+      } else if (onboarded === "1") {
+        setNavState("login");
+      } else {
+        setNavState("onboarding");
       }
+      await SplashScreen.hideAsync();
     };
 
     checkOnboarding();
   }, []);
+
 
   useEffect(() => {
     user.setLoginCallback((isLoggedIn) => {
       setNavState(isLoggedIn ? "home" : "login");
     });
   }, []);
-
-  
 
   return (
     <NavigationContainer>

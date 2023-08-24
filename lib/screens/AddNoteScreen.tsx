@@ -239,6 +239,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             <RichEditor
               ref={(r) => (richTextRef.current = r)}
               style={styles.input}
+              autoCorrect={true}
               placeholder="Write your note here"
               onChange={(text) => setBodyText(text)}
               initialContentHTML={bodyText}
