@@ -16,11 +16,11 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "edu.slu.cs.oss.lrda",
+      "bundleIdentifier": "beta.edu.slu.cs.oss.lrda",
       "config": {
         "googleMapsApiKey": ""
       },
-      "buildVersion" : "3"
+      "buildNumber" : "4"
     },
     "android": {
       "adaptiveIcon": {
