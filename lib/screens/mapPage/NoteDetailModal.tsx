@@ -249,10 +249,6 @@ const styles = StyleSheet.create({
     height: 360,
     marginBottom: 2,
     overflow: "hidden",
-<<<<<<< HEAD
-=======
-    borderColor: '#e0e0e0',
->>>>>>> 60ad3d1 (fixing changes related to spacing of the images)
   },
   image: {
     width: "100%",

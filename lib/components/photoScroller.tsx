@@ -17,12 +17,6 @@ import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
 import { Dimensions } from "react-native";
 
-// type CustomRenderItemParams = {
-//   item: Media;
-//   getIndex: Function;
-//   drag: () => void;
-// };
-
 function PhotoScroller({
   newMedia,
   setNewMedia,
@@ -153,7 +147,18 @@ function PhotoScroller({
         <TouchableOpacity
           style={styles.trash}
           onPress={() => handleDeleteMedia(index)}
-        ></TouchableOpacity>
+        >
+          <Ionicons
+            name="close-outline"
+            size={15}
+            color="red"
+            // style={styles.icon}
+          />
+
+          {/* <View style={{height: '50%', width: '50%', backgroundColor: 'red'}}></View> */}
+        
+        
+        </TouchableOpacity>
         <TouchableOpacity
           activeOpacity={0.5}
           onLongPress={drag}
@@ -350,13 +355,13 @@ const styles = StyleSheet.create({
   },
   trash: {
     position: "absolute",
-    left: -5,
     zIndex: 99,
     height: "13%",
     width: "13%",
-    backgroundColor: "red",
+    backgroundColor: "rgba(5,5,5,0.75)",
     borderRadius: 30,
     justifyContent: "center",
+    alignItems: 'center',
   },
   video: {
     width: "100%",

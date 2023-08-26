@@ -28,6 +28,7 @@ import {
   actions,
 } from "react-native-pell-rich-editor";
 import LoadingImage from "../components/loadingImage";
+import ImageView from "react-native-image-viewing";
 
 const user = User.getInstance();
 
@@ -51,6 +52,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const [isTagging, setIsTagging] = useState(false);
   const [keyboardOpen, setKeyboard] = useState(false);
   const [isLocation, setIsLocation] = useState(false);
+  const [playing, setPlaying] = useState(false);
   const richTextRef = useRef<RichEditor | null>(null);
   const [isTime, setIsTime] = useState(false);
   const [location, setLocation] = useState<{
@@ -132,6 +134,23 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       console.error("Error updating the note:", error);
     }
   };
+
+  function Header() {
+    return(
+      <View>
+        <TouchableOpacity
+          style={styles.closeUnderlay}
+          onPress={() => setPlaying(false)}
+        >
+          <Ionicons
+            name="close-outline"
+            size={24}
+            color="#dfe5e8"
+            style={styles.icon}
+          />
+        </TouchableOpacity>
+      </View>);
+  }
 
   return (
     <View>
@@ -253,6 +272,19 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         iconTint={"#000"}
         selectedIconTint={"#2095F2"}
       />
+      {playing && (
+        <View>
+          <ImageView
+            images={URI: media[0].getUri()}
+            onLongPress={() =>
+              handleSaveMedia(newMedia[currentImageIndex].getUri())
+            }
+            visible={playing}
+            onRequestClose={() => setPlaying(false)}
+            HeaderComponent={Header}
+          />
+        </View>
+      )}
       <View style={styles.container}>
         <ScrollView
           nestedScrollEnabled={true}
@@ -260,6 +292,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           style={{ overflow: "hidden", paddingTop: 10, paddingBottom: 100 }}
           ref={scrollViewRef}
         >
+          <TouchableOpacity onPress={() => setPlaying(true)}>
           {media[0] && (
             <View style={{ height: 280, marginLeft: 3,}}>
               {media[0].getType() === "image" ? (
@@ -282,6 +315,8 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
               )}
             </View>
           )}
+          </TouchableOpacity>
+          
           <View
             style={[
               { paddingBottom: keyboardOpen ? 50 : 150 },
@@ -394,6 +429,22 @@ const styles = StyleSheet.create({
     height: "100%",
     justifyContent: "center",
     alignSelf: "center",
+  },
+  closeUnderlay: {
+    position: "absolute",
+    top: 50,
+    right: 10,
+    width: 50,
+    height: 50,
+    borderRadius: 30,
+    backgroundColor: "rgba(5,5,5,0.5)",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 100,
+  },
+  icon: {
+    alignSelf: "center",
+    marginLeft: 4,
   },
 });
 
