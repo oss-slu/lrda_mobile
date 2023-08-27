@@ -103,28 +103,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     }
   };
 
-  const handleGoWeb = () => {
-    Linking.openURL(
-      "http://lived-religion-dev.rerum.io/deer-lr/dashboard.html"
-    );
-  };
-
-  const handleLogout = () => {
-    user.logout();
-  };
-
-  const handleEmail = () => {
-    const emailAddress = "yashkamal.bhatia@slu.edu";
-    const subject = "Bug Report on 'Where's Religion?'";
-    const body = "Please provide details of your issue you are facing here.";
-
-    const emailUrl = `mailto:${emailAddress}?subject=${encodeURIComponent(
-      subject
-    )}&body=${encodeURIComponent(body)}`;
-
-    Linking.openURL(emailUrl);
-  };
-
   const handleFilters = (name: string) => {
     if (name == "published") {
       setIsPrivate(false);
@@ -148,7 +126,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       <View style={styles.rowBack} key={data.index}>
         <TouchableOpacity>
           <TouchableOpacity onPress={() => publishNote(data.item.id, rowMap)}>
-            <Ionicons name="earth" size={30} color="black" />
+            <Ionicons name="share" size={30} color="black" />
           </TouchableOpacity>
         </TouchableOpacity>
         <View style={[styles.backRightBtn, styles.backRightBtnRight]}>
@@ -291,9 +269,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           }}
         >
           {item.published ? (
-            <Ionicons name="earth" size={24} color="#008080" />
+            <Ionicons name="share" size={24} color="#008080" />
           ) : (
-            <Ionicons name="earth-outline" size={24} color="#111111" />
+            <Ionicons name="share-outline" size={24} color="#111111" />
           )}
         </TouchableOpacity>
       </TouchableOpacity>
@@ -388,26 +366,6 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     paddingTop: 10,
     flexDirection: "row",
-  },
-  logout: {
-    flexDirection: "row",
-    position: "absolute",
-    bottom: "7%",
-    backgroundColor: "black",
-    justifyContent: "center",
-    alignItems: "center",
-    height: 50,
-    marginLeft: "10%",
-    width: "80%",
-    borderRadius: 20,
-  },
-  logoutText: {
-    marginLeft: 5,
-    marginRight: 10,
-    fontSize: 20,
-    fontWeight: "600",
-    maxWidth: "100%",
-    color: "white",
   },
   backButton: {
     margin: "7%",

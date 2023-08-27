@@ -125,14 +125,14 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             style={styles.topButtons}
             onPress={() => setIsPublished(!isPublished)}
           >
-            <Ionicons name="earth" size={30} color="white" />
+            <Ionicons name="share" size={30} color="white" />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
             style={styles.topButtons}
             onPress={() => setIsPublished(!isPublished)}
           >
-            <Ionicons name="earth-outline" size={30} color="white" />
+            <Ionicons name="share-outline" size={30} color="white" />
           </TouchableOpacity>
         )}
       </View>
