@@ -194,9 +194,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         </TouchableOpacity>
       </View>
       <View style={{ backgroundColor: "white" }}>
-        {viewMedia && (
-          <PhotoScroller newMedia={newMedia} setNewMedia={setNewMedia} />
-        )}
+        <PhotoScroller active={viewMedia} newMedia={newMedia} setNewMedia={setNewMedia} />
         {viewAudio && (
           <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
         )}

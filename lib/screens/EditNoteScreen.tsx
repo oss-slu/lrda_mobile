@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   TextInput,
-  Image,
   StyleSheet,
   Keyboard,
   ScrollView,
@@ -28,7 +27,6 @@ import {
   actions,
 } from "react-native-pell-rich-editor";
 import LoadingImage from "../components/loadingImage";
-import ImageView from "react-native-image-viewing";
 
 const user = User.getInstance();
 
@@ -52,7 +50,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const [isTagging, setIsTagging] = useState(false);
   const [keyboardOpen, setKeyboard] = useState(false);
   const [isLocation, setIsLocation] = useState(false);
-  const [playing, setPlaying] = useState(false);
   const richTextRef = useRef<RichEditor | null>(null);
   const [isTime, setIsTime] = useState(false);
   const [location, setLocation] = useState<{
@@ -66,9 +63,8 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         }
       : null
   );
-  const {height, width} = useWindowDimensions();
-
-
+  const { height, width } = useWindowDimensions();
+  
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -97,7 +93,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         setOwner(false);
       }
     };
-
     checkOwner();
   }, [creator]);
 
@@ -107,6 +102,14 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         y: positionY + (media[0] ? 100 : -100),
         animated: true,
       });
+    }
+  };
+
+  const photoScrollerRef = React.useRef<{goBig(index: number): void} | null>(null);
+
+  const callGoBig = (index: number) => {
+    if (photoScrollerRef.current) {
+      photoScrollerRef.current.goBig(index);
     }
   };
 
@@ -134,23 +137,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       console.error("Error updating the note:", error);
     }
   };
-
-  function Header() {
-    return(
-      <View>
-        <TouchableOpacity
-          style={styles.closeUnderlay}
-          onPress={() => setPlaying(false)}
-        >
-          <Ionicons
-            name="close-outline"
-            size={24}
-            color="#dfe5e8"
-            style={styles.icon}
-          />
-        </TouchableOpacity>
-      </View>);
-  }
 
   return (
     <View>
@@ -245,9 +231,9 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         </TouchableOpacity>
       </View>
       <View style={{ backgroundColor: "white" }}>
-        {viewMedia && <PhotoScroller newMedia={media} setNewMedia={setMedia} />}
+      <PhotoScroller ref={photoScrollerRef} active={viewMedia} newMedia={media} setNewMedia={setMedia} />
         {viewAudio && (
-          <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
+        <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
         )}
         {isTagging && <TagWindow tags={tags} setTags={setTags} />}
         {isLocation && (
@@ -272,19 +258,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         iconTint={"#000"}
         selectedIconTint={"#2095F2"}
       />
-      {playing && (
-        <View>
-          <ImageView
-            images={URI: media[0].getUri()}
-            onLongPress={() =>
-              handleSaveMedia(newMedia[currentImageIndex].getUri())
-            }
-            visible={playing}
-            onRequestClose={() => setPlaying(false)}
-            HeaderComponent={Header}
-          />
-        </View>
-      )}
       <View style={styles.container}>
         <ScrollView
           nestedScrollEnabled={true}
@@ -292,17 +265,18 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           style={{ overflow: "hidden", paddingTop: 10, paddingBottom: 100 }}
           ref={scrollViewRef}
         >
-          <TouchableOpacity onPress={() => setPlaying(true)}>
           {media[0] && (
-            <View style={{ height: 280, marginLeft: 3,}}>
+            <View style={{ height: 280, marginLeft: 3 }}>
               {media[0].getType() === "image" ? (
-                <LoadingImage
-                imageURI={media[0].getUri()}
-                type={"photo"}
-                isImage={true}
-                height={280}
-                width={width-6}
-              />
+                <TouchableOpacity onPress={() => callGoBig(0)}>
+                  <LoadingImage
+                    imageURI={media[0].getUri()}
+                    type={"photo"}
+                    isImage={true}
+                    height={280}
+                    width={width - 6}
+                  />
+                </TouchableOpacity>
               ) : (
                 <Video
                   source={{ uri: media[0].getUri() }}
@@ -315,8 +289,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
               )}
             </View>
           )}
-          </TouchableOpacity>
-          
+
           <View
             style={[
               { paddingBottom: keyboardOpen ? 50 : 150 },
@@ -445,6 +418,21 @@ const styles = StyleSheet.create({
   icon: {
     alignSelf: "center",
     marginLeft: 4,
+  },
+  footerContainer: {
+    backgroundColor: "rgba(255,255,255, 0.8)",
+    padding: 10,
+    alignItems: "center",
+    marginBottom: "13%",
+    width: "80%",
+    justifyContent: "center",
+    alignSelf: "center",
+    borderRadius: 10,
+  },
+  footerText: {
+    textAlign: "center",
+    fontSize: 16,
+    fontWeight: "700",
   },
 });
 
