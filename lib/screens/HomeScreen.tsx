@@ -260,7 +260,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             <Text style={styles.noteText}>{showTime}</Text>
           </View>
         </View>
-        <TouchableOpacity
+        <View
           style={{
             justifyContent: "center",
             alignItems: "center",
@@ -273,7 +273,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           ) : (
             <Ionicons name="share-outline" size={24} color="#111111" />
           )}
-        </TouchableOpacity>
+        </View>
       </TouchableOpacity>
     );
   };
