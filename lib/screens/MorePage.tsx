@@ -9,8 +9,23 @@ import {
   TouchableOpacity,
 } from "react-native";
 import Accordion from "@gapur/react-native-accordion";
+import { Ionicons } from "@expo/vector-icons";
+import { User } from "../models/user_class";
+
+const user = User.getInstance();
 
 export default function MorePage() {
+  const handleEmail = () => {
+    const emailAddress = "yashkamal.bhatia@slu.edu";
+    const subject = "Bug Report on 'Where's Religion?'";
+    const body = "Please provide details of your issue you are facing here.";
+
+    const emailUrl = `mailto:${emailAddress}?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(body)}`;
+
+    Linking.openURL(emailUrl);
+  };
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={{ height: 300, width: "100%" }}>
@@ -48,6 +63,9 @@ export default function MorePage() {
               )
             }
           ><Text style={styles.headerText}>{"\t"}Guide to Coding{"\n"}</Text></TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => handleEmail()}
+          ><Text style={styles.headerText}>{"\t"}Report a Bug{"\n"}</Text></TouchableOpacity>
         </Accordion>
         <Accordion  headerTitleStyle={styles.headerText} headerTitle="Meet our Team">
             <Text>
@@ -113,6 +131,10 @@ export default function MorePage() {
           </View>
         </Accordion>
       </View>
+      <TouchableOpacity style={styles.logout} onPress={() => user.logout()}>
+          <Text style={styles.logoutText}>Logout</Text>
+          <Ionicons name={"log-out-outline"} size={30} color="white" />
+        </TouchableOpacity>
     </ScrollView>
   );
 }
@@ -144,5 +166,23 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     fontSize: 16,
     lineHeight: 28,
+  },
+  logout: {
+    flexDirection: "row",
+    backgroundColor: "black",
+    justifyContent: "center",
+    alignItems: "center",
+    height: 50,
+    width: "80%",
+    borderRadius: 20,
+    marginTop: 120,
+  },
+  logoutText: {
+    marginLeft: 5,
+    marginRight: 10,
+    fontSize: 20,
+    fontWeight: "600",
+    maxWidth: "100%",
+    color: "white",
   },
 });

@@ -26,16 +26,13 @@ const user = User.getInstance();
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
   const [updateCounter, setUpdateCounter] = useState(0);
-  const [drawerAnimation] = useState(new Animated.Value(1));
-  const [buttonAnimation] = useState(new Animated.Value(0));
   const [isPrivate, setIsPrivate] = useState(true);
-  const [global, setGlobal] = useState(false);
   const [published, setPublished] = useState(false);
   const [reversed, setReversed] = useState(false);
   const [rendering, setRendering] = useState(true);
   const [userInitials, setUserInitials] = useState("N/A");
+  let textLength = 16;
 
   useEffect(() => {
     (async () => {
@@ -50,52 +47,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     })();
   }, []);
 
-  let textLength = 16;
-
-  const toggleDrawer = () => {
-    setIsOpen(!isOpen);
-  };
-
   const refreshPage = () => {
     setUpdateCounter(updateCounter + 1);
-  };
-
-  useEffect(() => {
-    if (isOpen) {
-      Animated.timing(drawerAnimation, {
-        toValue: 0,
-        duration: 400,
-        useNativeDriver: true,
-      }).start();
-    } else {
-      Animated.timing(drawerAnimation, {
-        toValue: 1,
-        duration: 400,
-        useNativeDriver: true,
-      }).start();
-    }
-  }, [isOpen]);
-
-  const animatedStyles = {
-    transform: [
-      {
-        translateX: drawerAnimation.interpolate({
-          inputRange: [0, 1],
-          outputRange: [0, 500],
-        }),
-      },
-    ],
-  };
-
-  const buttonAnimatedStyles = {
-    transform: [
-      {
-        rotate: buttonAnimation.interpolate({
-          inputRange: [0, 1],
-          outputRange: ["0deg", "180deg"],
-        }),
-      },
-    ],
   };
 
   useEffect(() => {
@@ -110,7 +63,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     try {
       const userId = await user.getId();
       const data = await ApiService.fetchMessages(
-        global,
+        false,
         published,
         userId || ""
       );
@@ -174,17 +127,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   const handleFilters = (name: string) => {
     if (name == "published") {
-      setGlobal(false);
       setIsPrivate(false);
       setPublished(true);
       refreshPage();
-    } else if (name == "global") {
-      setGlobal(true);
-      setIsPrivate(false);
-      setPublished(false);
-      refreshPage();
     } else if (name == "private") {
-      setGlobal(false);
       setIsPrivate(true);
       setPublished(false);
       refreshPage();
@@ -356,57 +302,18 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        onPress={() => setIsOpen(false)}
-        style={[styles.overlay, { display: isOpen ? "flex" : "none" }]}
-      />
-      <Animated.View style={[styles.drawer, animatedStyles]}>
-        <Animated.View style={[buttonAnimatedStyles]}>
-          <TouchableOpacity style={styles.backButton} onPress={toggleDrawer}>
-            <Ionicons
-              name={isOpen ? "chevron-back-outline" : "chevron-forward-outline"}
-              size={24}
-              color="white"
-            />
-          </TouchableOpacity>
-        </Animated.View>
-        <TouchableOpacity
-          style={styles.drawerItem}
-          onPress={() => {
-            navigation.navigate("AccountPage");
-            toggleDrawer();
-          }}
-        >
-          <Ionicons name={"person-outline"} size={30} color="black" />
-          <Text style={styles.mediumText}>Account</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.drawerItem} onPress={handleGoWeb}>
-          <Ionicons name={"laptop-outline"} size={30} color="black" />
-          <Text style={styles.mediumText}>Our Website</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.drawerItem} onPress={handleEmail}>
-          <Ionicons name={"bug-outline"} size={30} color="black" />
-          <Text style={styles.mediumText}>Report a Bug</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.logout} onPress={handleLogout}>
-          <Text style={styles.logoutText}>Logout</Text>
-          <Ionicons name={"log-out-outline"} size={30} color="white" />
-        </TouchableOpacity>
-      </Animated.View>
       <View style={styles.topView}>
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <View style={styles.userPhoto}>
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: 'space-between', width: '100%'}}>
+          <TouchableOpacity style={[styles.userPhoto, {backgroundColor: "#F4DFCD"}]} onPress={() => {navigation.navigate("AccountPage")}}>
             <Text
               style={{ fontWeight: "600", fontSize: 20, alignSelf: "center" }}
             >
               {userInitials}
             </Text>
-          </View>
+          </TouchableOpacity>
           <Text style={styles.title}>Field Notes</Text>
+          <View style={styles.userPhoto} />
         </View>
-        <TouchableOpacity onPress={toggleDrawer} style={[styles.menuButton]}>
-          <Ionicons name="menu-outline" size={24} color="white" />
-        </TouchableOpacity>
       </View>
       <ScrollView
         style={styles.filtersContainer}
@@ -437,18 +344,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
               : published
               ? `Published (${notes.length})`
               : "Published"}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => handleFilters("global")}
-          style={global ? styles.filtersSelected : styles.filters}
-        >
-          <Text style={global ? styles.selectedFont : styles.filterFont}>
-            {rendering
-              ? "Global"
-              : global
-              ? `Global (${notes.length})`
-              : "Global"}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleReverseOrder} style={styles.filters}>
@@ -524,7 +419,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   userPhoto: {
-    backgroundColor: "#F4DFCD",
     height: 50,
     width: 50,
     borderRadius: 50,
