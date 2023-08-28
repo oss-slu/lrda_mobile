@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Keyboard,
   ScrollView,
+  Text,
 } from "react-native";
 import { Note, AddNoteScreenProps } from "../../types";
 import PhotoScroller from "../components/photoScroller";
@@ -228,6 +229,66 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           style={{ overflow: "hidden", paddingTop: 10, paddingBottom: 100 }}
           ref={scrollViewRef}
         >
+          <View key="Tags Container">
+            <ScrollView
+              horizontal={true}
+              style={{ width: "100%", marginHorizontal: 10, paddingLeft: 5, marginBottom: 10, }}
+            >
+              {tags &&
+                tags.map((tag, index) => (
+                  <View
+                    key={index}
+                    style={{
+                      flexDirection: "row",
+                      marginRight: 10,
+                      alignItems: "center",
+                    }}
+                  >
+                    <View
+                      style={{
+                        height: 20,
+                        width: 20,
+                        transform: [{ rotate: "45deg" }],
+                        position: "absolute",
+                        left: 2,
+                        borderLeftWidth: 2,
+                        borderBottomWidth: 2,
+                        borderColor: "black",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <View
+                        style={{
+                          height: 5,
+                          width: 5,
+                          left: 2,
+                          borderRadius: 10,
+                          backgroundColor: "black",
+                          marginRight: 5,
+                        }}
+                      />
+                    </View>
+                    <View
+                      style={{
+                        borderTopRightRadius: 5,
+                        borderBottomRightRadius: 5,
+                        borderColor: "black",
+                        borderRightWidth: 2,
+                        borderBottomWidth: 2,
+                        borderTopWidth: 2,
+                        paddingHorizontal: 10,
+                        justifyContent: "center",
+                        flexDirection: "row",
+                        marginLeft: 10,
+                      }}
+                    >
+                      <Text style={{ textAlign: "center" }}>{tag}</Text>
+                    </View>
+                  </View>
+                ))}
+            </ScrollView>
+          </View>
           <View
             style={[
               { paddingBottom: keyboardOpen ? 50 : 150 },

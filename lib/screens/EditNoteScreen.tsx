@@ -6,6 +6,7 @@ import {
   Keyboard,
   ScrollView,
   useWindowDimensions,
+  Text,
 } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
@@ -64,7 +65,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       : null
   );
   const { height, width } = useWindowDimensions();
-  
+
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -105,7 +106,9 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     }
   };
 
-  const photoScrollerRef = React.useRef<{goBig(index: number): void} | null>(null);
+  const photoScrollerRef = React.useRef<{ goBig(index: number): void } | null>(
+    null
+  );
 
   const callGoBig = (index: number) => {
     if (photoScrollerRef.current) {
@@ -231,9 +234,14 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         </TouchableOpacity>
       </View>
       <View style={{ backgroundColor: "white" }}>
-      <PhotoScroller ref={photoScrollerRef} active={viewMedia} newMedia={media} setNewMedia={setMedia} />
+        <PhotoScroller
+          ref={photoScrollerRef}
+          active={viewMedia}
+          newMedia={media}
+          setNewMedia={setMedia}
+        />
         {viewAudio && (
-        <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
+          <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
         )}
         {isTagging && <TagWindow tags={tags} setTags={setTags} />}
         {isLocation && (
@@ -258,6 +266,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         iconTint={"#000"}
         selectedIconTint={"#2095F2"}
       />
+
       <View style={styles.container}>
         <ScrollView
           nestedScrollEnabled={true}
@@ -265,6 +274,66 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           style={{ overflow: "hidden", paddingTop: 10, paddingBottom: 100 }}
           ref={scrollViewRef}
         >
+          <View key="Tags Container">
+            <ScrollView
+              horizontal={true}
+              style={{ width: "100%", marginHorizontal: 10, paddingLeft: 5, marginBottom: 10, }}
+            >
+              {tags &&
+                tags.map((tag, index) => (
+                  <View
+                    key={index}
+                    style={{
+                      flexDirection: "row",
+                      marginRight: 10,
+                      alignItems: "center",
+                    }}
+                  >
+                    <View
+                      style={{
+                        height: 20,
+                        width: 20,
+                        transform: [{ rotate: "45deg" }],
+                        position: "absolute",
+                        left: 2,
+                        borderLeftWidth: 2,
+                        borderBottomWidth: 2,
+                        borderColor: "black",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <View
+                        style={{
+                          height: 5,
+                          width: 5,
+                          left: 2,
+                          borderRadius: 10,
+                          backgroundColor: "black",
+                          marginRight: 5,
+                        }}
+                      />
+                    </View>
+                    <View
+                      style={{
+                        borderTopRightRadius: 5,
+                        borderBottomRightRadius: 5,
+                        borderColor: "black",
+                        borderRightWidth: 2,
+                        borderBottomWidth: 2,
+                        borderTopWidth: 2,
+                        paddingHorizontal: 10,
+                        justifyContent: "center",
+                        flexDirection: "row",
+                        marginLeft: 10,
+                      }}
+                    >
+                      <Text style={{ textAlign: "center" }}>{tag}</Text>
+                    </View>
+                  </View>
+                ))}
+            </ScrollView>
+          </View>
           {media[0] && (
             <View style={{ height: 280, marginLeft: 3 }}>
               {media[0].getType() === "image" ? (
