@@ -75,14 +75,12 @@ const OnboardingScreen: React.FC<OnboardingProps> = ({ navigation }) => {
         {
           backgroundColor: "#a7f3d0",
           image: (
-            <View>
-              <LottieView
-                progress={lottieProgress}
-                style={{ width: width * 0.5, height: width }}
-                source={require("../../assets/animations/companion.json")}
-                renderMode={"SOFTWARE"}
-              />
-            </View>
+            <LottieView
+              progress={lottieProgress}
+              style={{ width: width * 0.5, height: width }}
+              source={require("../../assets/animations/achieve.json")}
+              renderMode={"SOFTWARE"}
+            />
           ),
           title: "The Ethnographer's Companion",
           subtitle:
@@ -106,8 +104,8 @@ const OnboardingScreen: React.FC<OnboardingProps> = ({ navigation }) => {
           image: (
             <LottieView
               progress={lottieProgress}
-              style={{ width: width * 0.3, height: width, marginLeft: 25}} 
-              source={require("../../assets/animations/J5AX8XtKKZ.json")}
+              style={{ width: width * 0.3, height: width, marginLeft: 25 }}
+              source={require("../../assets/animations/boost.json")}
             />
           ),
           title: "A World of Ethnographic Insight",
@@ -169,7 +167,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "white",
-    paddingHorizontal: 20
+    paddingHorizontal: 20,
   },
   lottie: {
     width: width * 0.9,
