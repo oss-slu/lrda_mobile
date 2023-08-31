@@ -139,7 +139,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
               }}
               onPress={() => deleteNote(data.item.id, rowMap)}
             >
-              <Ionicons name="trash-outline" size={24} color={HomeStyles.backColor.color} />
+              <Ionicons
+                name="trash-outline"
+                size={24}
+                color={HomeStyles.backColor.color}
+              />
             </TouchableOpacity>
           ) : null}
         </View>
@@ -232,7 +236,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           })
         }
       >
-        <View style={{ flexDirection: "row", alignItems: 'center' }}>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
           {IsImage ? (
             <View style={{ height: 100, width: 100 }}>
               <LoadingImage
@@ -247,9 +251,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             </View>
           )}
 
-          <View
-            style={{ position: "absolute", left: 120 }}
-          >
+          <View style={{ position: "absolute", left: 120 }}>
             <Text style={HomeStyles.noteTitle}>
               {item.title.length > textLength
                 ? item.title.slice(0, textLength) + "..."
@@ -268,9 +270,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           }}
         >
           {item.published ? (
-            <Ionicons name="share" size={24} color={HomeStyles.shareColor.color} />
+            <Ionicons
+              name="share"
+              size={24}
+              color={HomeStyles.shareColor.color}
+            />
           ) : (
-            <Ionicons name="share-outline" size={24} color={HomeStyles.highlightColor.color}  />
+            <Ionicons
+              name="share-outline"
+              size={24}
+              color={HomeStyles.highlightColor.color}
+            />
           )}
         </View>
       </TouchableOpacity>
@@ -280,13 +290,24 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   return (
     <View style={HomeStyles.container}>
       <View style={HomeStyles.topView}>
-        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: 'space-between', width: '100%'}}>
-          <TouchableOpacity style={[HomeStyles.userPhoto, {backgroundColor: HomeStyles.highlightColor.color}]} onPress={() => {navigation.navigate("AccountPage")}}>
-            <Text
-              style={HomeStyles.pfpText}
-            >
-              {userInitials}
-            </Text>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            width: "100%",
+          }}
+        >
+          <TouchableOpacity
+            style={[
+              HomeStyles.userPhoto,
+              { backgroundColor: HomeStyles.highlightColor.color },
+            ]}
+            onPress={() => {
+              navigation.navigate("AccountPage");
+            }}
+          >
+            <Text style={HomeStyles.pfpText}>{userInitials}</Text>
           </TouchableOpacity>
           <Text style={HomeStyles.title}>Field Notes</Text>
           <View style={HomeStyles.userPhoto} />
@@ -302,7 +323,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           onPress={() => handleFilters("private")}
           style={isPrivate ? HomeStyles.filtersSelected : HomeStyles.filters}
         >
-          <Text style={isPrivate ? HomeStyles.selectedFont : HomeStyles.filterFont}>
+          <Text
+            style={isPrivate ? HomeStyles.selectedFont : HomeStyles.filterFont}
+          >
             {rendering
               ? "Private"
               : isPrivate
@@ -315,7 +338,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           onPress={() => handleFilters("published")}
           style={published ? HomeStyles.filtersSelected : HomeStyles.filters}
         >
-          <Text style={published ? HomeStyles.selectedFont : HomeStyles.filterFont}>
+          <Text
+            style={published ? HomeStyles.selectedFont : HomeStyles.filterFont}
+          >
             {rendering
               ? "Published"
               : published
@@ -323,7 +348,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
               : "Published"}
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleReverseOrder} style={HomeStyles.filters}>
+        <TouchableOpacity
+          onPress={handleReverseOrder}
+          style={HomeStyles.filters}
+        >
           <Text style={HomeStyles.filterFont}>Sort by Time</Text>
         </TouchableOpacity>
       </ScrollView>

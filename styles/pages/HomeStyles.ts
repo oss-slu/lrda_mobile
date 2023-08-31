@@ -3,7 +3,7 @@ import { lightTheme, darkTheme } from "../colors";
 import Constants from "expo-constants";
 
 // build out settings for dark/light mode configuration
-const globalStyle = lightTheme
+const globalStyle = lightTheme;
 // const globalStyle = darkTheme;
 
 export const HomeStyles = StyleSheet.create({
