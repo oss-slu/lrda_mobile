@@ -139,7 +139,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
               }}
               onPress={() => deleteNote(data.item.id, rowMap)}
             >
-              <Ionicons name="trash-outline" size={24} color="#111111" />
+              <Ionicons name="trash-outline" size={24} color={HomeStyles.backColor.color} />
             </TouchableOpacity>
           ) : null}
         </View>
@@ -268,9 +268,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           }}
         >
           {item.published ? (
-            <Ionicons name="share" size={24} color={globalTheme.highlightSecondary} />
+            <Ionicons name="share" size={24} color={HomeStyles.shareColor.color} />
           ) : (
-            <Ionicons name="share-outline" size={24} color="#111111" />
+            <Ionicons name="share-outline" size={24} color={HomeStyles.highlightColor.color}  />
           )}
         </View>
       </TouchableOpacity>
@@ -281,9 +281,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     <View style={HomeStyles.container}>
       <View style={HomeStyles.topView}>
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: 'space-between', width: '100%'}}>
-          <TouchableOpacity style={[HomeStyles.userPhoto, {backgroundColor: "#F4DFCD"}]} onPress={() => {navigation.navigate("AccountPage")}}>
+          <TouchableOpacity style={[HomeStyles.userPhoto, {backgroundColor: HomeStyles.highlightColor.color}]} onPress={() => {navigation.navigate("AccountPage")}}>
             <Text
-              style={{ fontWeight: "600", fontSize: 20, alignSelf: "center" }}
+              style={HomeStyles.pfpText}
             >
               {userInitials}
             </Text>
