@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   TextInput,
-  StyleSheet,
   Keyboard,
   ScrollView,
   useWindowDimensions,
@@ -28,6 +27,7 @@ import {
   actions,
 } from "react-native-pell-rich-editor";
 import LoadingImage from "../components/loadingImage";
+import { NotePageStyles } from "../../styles/pages/NoteStyles";
 
 const user = User.getInstance();
 
@@ -143,30 +143,30 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
 
   return (
     <View>
-      <View style={styles.topContainer}>
+      <View style={NotePageStyles.topContainer}>
         <TouchableOpacity
-          style={styles.topButtons}
+          style={NotePageStyles.topButtons}
           onPress={owner ? handleSaveNote : () => navigation.goBack()}
         >
           <Ionicons name="arrow-back-outline" size={30} color="white" />
         </TouchableOpacity>
         <TextInput
           placeholder="Title Field Note"
-          style={styles.title}
+          style={NotePageStyles.title}
           value={title}
           onChangeText={setTitle}
         />
         {owner ? (
           isPublished ? (
             <TouchableOpacity
-              style={styles.topButtons}
+              style={NotePageStyles.topButtons}
               onPress={() => setIsPublished(!isPublished)}
             >
               <Ionicons name="share" size={30} color="white" />
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
-              style={styles.topButtons}
+              style={NotePageStyles.topButtons}
               onPress={() => setIsPublished(!isPublished)}
             >
               <Ionicons name="share-outline" size={30} color="white" />
@@ -176,7 +176,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           <View />
         )}
       </View>
-      <View style={styles.keyContainer}>
+      <View style={NotePageStyles.keyContainer}>
         <TouchableOpacity
           onPress={() => {
             setViewMedia(!viewMedia);
@@ -267,7 +267,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         selectedIconTint={"#2095F2"}
       />
 
-      <View style={styles.container}>
+      <View style={NotePageStyles.container}>
         <ScrollView
           nestedScrollEnabled={true}
           showsVerticalScrollIndicator={false}
@@ -353,7 +353,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
                   shouldPlay={true}
                   useNativeControls={true}
                   isLooping={true}
-                  style={styles.video}
+                  style={NotePageStyles.video}
                 />
               )}
             </View>
@@ -367,7 +367,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           >
             <RichEditor
               ref={(r) => (richTextRef.current = r)}
-              style={styles.input}
+              style={NotePageStyles.input}
               autoCorrect={true}
               placeholder="Write your note here"
               onChange={(text) => setText(text)}
@@ -384,125 +384,120 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  topContainer: {
-    justifyContent: "space-between",
-    paddingHorizontal: 5,
-    paddingTop: Constants.statusBarHeight,
-    flexDirection: "row",
-    backgroundColor: "#F4DFCD",
-    alignItems: "center",
-    textAlign: "center",
-  },
-  topText: {
-    flex: 1,
-    maxWidth: "100%",
-    fontWeight: "700",
-    fontSize: 32,
-    textAlign: "center",
-  },
-  topButtons: {
-    backgroundColor: "#111111",
-    borderRadius: 50,
-    width: 50,
-    height: 50,
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 99,
-  },
-  toggles: {
-    backgroundColor: "#111111",
-    borderRadius: 50,
-    width: 50,
-    height: 50,
-    alignItems: "center",
-    justifyContent: "center",
-    marginLeft: 10,
-    zIndex: 99,
-  },
-  container: {
-    backgroundColor: "white",
-    overflow: "hidden",
-    paddingBottom: "50%",
-  },
-  title: {
-    height: 45,
-    width: "70%",
-    borderColor: "#111111",
-    borderWidth: 1,
-    borderRadius: 30,
-    paddingHorizontal: 10,
-    textAlign: "center",
-    fontSize: 30,
-  },
-  input: {
-    flex: 1,
-    borderColor: "#111111",
-    fontSize: 22,
-  },
-  addButton: {
-    position: "absolute",
-    bottom: 20,
-    right: 20,
-    backgroundColor: "#111111",
-    borderRadius: 50,
-    width: 50,
-    height: 50,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  keyContainer: {
-    height: 60,
-    paddingVertical: 5,
-    width: "100%",
-    backgroundColor: "#F4DFCD",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 40,
-  },
-  saveText: {
-    color: "#111111",
-    fontWeight: "bold",
-    fontSize: 12,
-  },
-  video: {
-    width: "100%",
-    height: "100%",
-    justifyContent: "center",
-    alignSelf: "center",
-  },
-  closeUnderlay: {
-    position: "absolute",
-    top: 50,
-    right: 10,
-    width: 50,
-    height: 50,
-    borderRadius: 30,
-    backgroundColor: "rgba(5,5,5,0.5)",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 100,
-  },
-  icon: {
-    alignSelf: "center",
-    marginLeft: 4,
-  },
-  footerContainer: {
-    backgroundColor: "rgba(255,255,255, 0.8)",
-    padding: 10,
-    alignItems: "center",
-    marginBottom: "13%",
-    width: "80%",
-    justifyContent: "center",
-    alignSelf: "center",
-    borderRadius: 10,
-  },
-  footerText: {
-    textAlign: "center",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-});
+// const styles = StyleSheet.create({
+//   topContainer: {
+//     justifyContent: "space-between",
+//     paddingHorizontal: 5,
+//     paddingTop: Constants.statusBarHeight,
+//     flexDirection: "row",
+//     backgroundColor: "#F4DFCD",
+//     alignItems: "center",
+//     textAlign: "center",
+//   },
+//   topText: {
+//     flex: 1,
+//     maxWidth: "100%",
+//     fontWeight: "700",
+//     fontSize: 32,
+//     textAlign: "center",
+//   },
+//   topButtons: {
+//     backgroundColor: "#111111",
+//     borderRadius: 50,
+//     width: 50,
+//     height: 50,
+//     alignItems: "center",
+//     justifyContent: "center",
+//     zIndex: 99,
+//   },
+//   toggles: {
+//     backgroundColor: "#111111",
+//     borderRadius: 50,
+//     width: 50,
+//     height: 50,
+//     alignItems: "center",
+//     justifyContent: "center",
+//     marginLeft: 10,
+//     zIndex: 99,
+//   },
+//   container: {
+//     backgroundColor: "white",
+//     overflow: "hidden",
+//     paddingBottom: "50%",
+//   },
+//   title: {
+//     height: 45,
+//     width: "70%",
+//     borderColor: "#111111",
+//     borderWidth: 1,
+//     borderRadius: 30,
+//     paddingHorizontal: 10,
+//     textAlign: "center",
+//     fontSize: 30,
+//   },
+//   input: {
+//     flex: 1,
+//     borderColor: "#111111",
+//     fontSize: 22,
+//   },
+//   addButton: {
+//     position: "absolute",
+//     bottom: 20,
+//     right: 20,
+//     backgroundColor: "#111111",
+//     borderRadius: 50,
+//     width: 50,
+//     height: 50,
+//     alignItems: "center",
+//     justifyContent: "center",
+//   },
+//   keyContainer: {
+//     height: 60,
+//     paddingVertical: 5,
+//     width: "100%",
+//     backgroundColor: "#F4DFCD",
+//     flexDirection: "row",
+//     alignItems: "center",
+//     justifyContent: "space-between",
+//     paddingHorizontal: 40,
+//   },
+//   saveText: {
+//     color: "#111111",
+//     fontWeight: "bold",
+//     fontSize: 12,
+//   },
+//   
+//   closeUnderlay: {
+//     position: "absolute",
+//     top: 50,
+//     right: 10,
+//     width: 50,
+//     height: 50,
+//     borderRadius: 30,
+//     backgroundColor: "rgba(5,5,5,0.5)",
+//     alignItems: "center",
+//     justifyContent: "center",
+//     zIndex: 100,
+//   },
+//   icon: {
+//     alignSelf: "center",
+//     marginLeft: 4,
+//   },
+//   footerContainer: {
+//     backgroundColor: "rgba(255,255,255, 0.8)",
+//     padding: 10,
+//     alignItems: "center",
+//     marginBottom: "13%",
+//     width: "80%",
+//     justifyContent: "center",
+//     alignSelf: "center",
+//     borderRadius: 10,
+//   },
+//   footerText: {
+//     textAlign: "center",
+//     fontSize: 16,
+//     fontWeight: "700",
+//   },
+// });
 
 export default EditNoteScreen;

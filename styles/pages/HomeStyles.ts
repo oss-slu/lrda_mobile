@@ -22,7 +22,7 @@ export const HomeStyles = StyleSheet.create({
     color: globalStyle.highlightSecondary,
   },
   highlightColor: {
-    color: globalStyle.border,
+    color: globalStyle.highlightTertiary,
   },
   backColor: {
     color: globalStyle.backgroundTertiary,
@@ -91,7 +91,7 @@ export const HomeStyles = StyleSheet.create({
   },
   filters: {
     justifyContent: "center",
-    borderColor: globalStyle.border,
+    borderColor: globalStyle.highlightTertiary,
     borderWidth: 2,
     borderRadius: 30,
     marginRight: 10,
