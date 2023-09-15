@@ -2,11 +2,10 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   TextInput,
-  Image,
-  StyleSheet,
   Keyboard,
   ScrollView,
   useWindowDimensions,
+  Text,
 } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
@@ -28,6 +27,7 @@ import {
   actions,
 } from "react-native-pell-rich-editor";
 import LoadingImage from "../components/loadingImage";
+import { NotePageStyles } from "../../styles/pages/NoteStyles";
 
 const user = User.getInstance();
 
@@ -64,8 +64,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         }
       : null
   );
-  const {height, width} = useWindowDimensions();
-
+  const { height, width } = useWindowDimensions();
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -95,7 +94,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         setOwner(false);
       }
     };
-
     checkOwner();
   }, [creator]);
 
@@ -105,6 +103,16 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         y: positionY + (media[0] ? 100 : -100),
         animated: true,
       });
+    }
+  };
+
+  const photoScrollerRef = React.useRef<{ goBig(index: number): void } | null>(
+    null
+  );
+
+  const callGoBig = (index: number) => {
+    if (photoScrollerRef.current) {
+      photoScrollerRef.current.goBig(index);
     }
   };
 
@@ -135,40 +143,40 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
 
   return (
     <View>
-      <View style={styles.topContainer}>
+      <View style={NotePageStyles.topContainer}>
         <TouchableOpacity
-          style={styles.topButtons}
+          style={NotePageStyles.topButtons}
           onPress={owner ? handleSaveNote : () => navigation.goBack()}
         >
           <Ionicons name="arrow-back-outline" size={30} color="white" />
         </TouchableOpacity>
         <TextInput
           placeholder="Title Field Note"
-          style={styles.title}
+          style={NotePageStyles.title}
           value={title}
           onChangeText={setTitle}
         />
         {owner ? (
           isPublished ? (
             <TouchableOpacity
-              style={styles.topButtons}
+              style={NotePageStyles.topButtons}
               onPress={() => setIsPublished(!isPublished)}
             >
-              <Ionicons name="earth" size={30} color="white" />
+              <Ionicons name="share" size={30} color="white" />
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
-              style={styles.topButtons}
+              style={NotePageStyles.topButtons}
               onPress={() => setIsPublished(!isPublished)}
             >
-              <Ionicons name="earth-outline" size={30} color="white" />
+              <Ionicons name="share-outline" size={30} color="white" />
             </TouchableOpacity>
           )
         ) : (
           <View />
         )}
       </View>
-      <View style={styles.keyContainer}>
+      <View style={NotePageStyles.keyContainer}>
         <TouchableOpacity
           onPress={() => {
             setViewMedia(!viewMedia);
@@ -226,7 +234,12 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         </TouchableOpacity>
       </View>
       <View style={{ backgroundColor: "white" }}>
-        {viewMedia && <PhotoScroller newMedia={media} setNewMedia={setMedia} />}
+        <PhotoScroller
+          ref={photoScrollerRef}
+          active={viewMedia}
+          newMedia={media}
+          setNewMedia={setMedia}
+        />
         {viewAudio && (
           <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
         )}
@@ -253,23 +266,86 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         iconTint={"#000"}
         selectedIconTint={"#2095F2"}
       />
-      <View style={styles.container}>
+
+      <View style={NotePageStyles.container}>
         <ScrollView
           nestedScrollEnabled={true}
           showsVerticalScrollIndicator={false}
           style={{ overflow: "hidden", paddingTop: 10, paddingBottom: 100 }}
           ref={scrollViewRef}
         >
+          <View key="Tags Container">
+            <ScrollView
+              horizontal={true}
+              style={{ width: "100%", marginHorizontal: 10, paddingLeft: 5, marginBottom: 10, }}
+            >
+              {tags &&
+                tags.map((tag, index) => (
+                  <View
+                    key={index}
+                    style={{
+                      flexDirection: "row",
+                      marginRight: 10,
+                      alignItems: "center",
+                    }}
+                  >
+                    <View
+                      style={{
+                        height: 20,
+                        width: 20,
+                        transform: [{ rotate: "45deg" }],
+                        position: "absolute",
+                        left: 2,
+                        borderLeftWidth: 2,
+                        borderBottomWidth: 2,
+                        borderColor: "black",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <View
+                        style={{
+                          height: 5,
+                          width: 5,
+                          left: 2,
+                          borderRadius: 10,
+                          backgroundColor: "black",
+                          marginRight: 5,
+                        }}
+                      />
+                    </View>
+                    <View
+                      style={{
+                        borderTopRightRadius: 5,
+                        borderBottomRightRadius: 5,
+                        borderColor: "black",
+                        borderRightWidth: 2,
+                        borderBottomWidth: 2,
+                        borderTopWidth: 2,
+                        paddingHorizontal: 10,
+                        justifyContent: "center",
+                        flexDirection: "row",
+                        marginLeft: 10,
+                      }}
+                    >
+                      <Text style={{ textAlign: "center" }}>{tag}</Text>
+                    </View>
+                  </View>
+                ))}
+            </ScrollView>
+          </View>
           {media[0] && (
-            <View style={{ height: 280, marginLeft: 3,}}>
+            <View style={{ height: 280, marginLeft: 3 }}>
               {media[0].getType() === "image" ? (
-                <LoadingImage
-                imageURI={media[0].getUri()}
-                type={"photo"}
-                isImage={true}
-                height={280}
-                width={width-6}
-              />
+                <TouchableOpacity onPress={() => callGoBig(0)}>
+                  <LoadingImage
+                    imageURI={media[0].getUri()}
+                    type={"photo"}
+                    isImage={true}
+                    height={280}
+                    width={width - 6}
+                  />
+                </TouchableOpacity>
               ) : (
                 <Video
                   source={{ uri: media[0].getUri() }}
@@ -277,11 +353,12 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
                   shouldPlay={true}
                   useNativeControls={true}
                   isLooping={true}
-                  style={styles.video}
+                  style={NotePageStyles.video}
                 />
               )}
             </View>
           )}
+
           <View
             style={[
               { paddingBottom: keyboardOpen ? 50 : 150 },
@@ -290,7 +367,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           >
             <RichEditor
               ref={(r) => (richTextRef.current = r)}
-              style={styles.input}
+              style={NotePageStyles.input}
               autoCorrect={true}
               placeholder="Write your note here"
               onChange={(text) => setText(text)}
@@ -306,95 +383,5 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  topContainer: {
-    justifyContent: "space-between",
-    paddingHorizontal: 5,
-    paddingTop: Constants.statusBarHeight,
-    flexDirection: "row",
-    backgroundColor: "#F4DFCD",
-    alignItems: "center",
-    textAlign: "center",
-  },
-  topText: {
-    flex: 1,
-    maxWidth: "100%",
-    fontWeight: "700",
-    fontSize: 32,
-    textAlign: "center",
-  },
-  topButtons: {
-    backgroundColor: "#111111",
-    borderRadius: 50,
-    width: 50,
-    height: 50,
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 99,
-  },
-  toggles: {
-    backgroundColor: "#111111",
-    borderRadius: 50,
-    width: 50,
-    height: 50,
-    alignItems: "center",
-    justifyContent: "center",
-    marginLeft: 10,
-    zIndex: 99,
-  },
-  container: {
-    backgroundColor: "white",
-    overflow: "hidden",
-    paddingBottom: "50%",
-  },
-  title: {
-    height: 45,
-    width: "70%",
-    borderColor: "#111111",
-    borderWidth: 1,
-    borderRadius: 30,
-    paddingHorizontal: 10,
-    textAlign: "center",
-    fontSize: 30,
-  },
-  input: {
-    flex: 1,
-    borderColor: "#111111",
-    fontSize: 22,
-  },
-  addButton: {
-    position: "absolute",
-    bottom: 20,
-    right: 20,
-    backgroundColor: "#111111",
-    borderRadius: 50,
-    width: 50,
-    height: 50,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  keyContainer: {
-    height: 60,
-    paddingVertical: 5,
-    width: "100%",
-    backgroundColor: "#F4DFCD",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 40,
-  },
-  saveText: {
-    color: "#111111",
-    fontWeight: "bold",
-    fontSize: 12,
-  },
-  video: {
-    width: "100%",
-    height: "100%",
-    justifyContent: "center",
-    alignSelf: "center",
-  },
-});
 
 export default EditNoteScreen;

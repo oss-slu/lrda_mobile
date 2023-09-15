@@ -2,11 +2,11 @@ import React, { useEffect, useState, useRef } from "react";
 import {
   Alert,
   View,
-  StyleSheet,
   TextInput,
   TouchableOpacity,
   Keyboard,
   ScrollView,
+  Text,
 } from "react-native";
 import { Note, AddNoteScreenProps } from "../../types";
 import PhotoScroller from "../components/photoScroller";
@@ -23,7 +23,7 @@ import {
   RichToolbar,
   actions,
 } from "react-native-pell-rich-editor";
-import Constants from "expo-constants";
+import { NotePageStyles } from "../../styles/pages/NoteStyles";
 
 const user = User.getInstance();
 
@@ -109,12 +109,12 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
 
   return (
     <View>
-      <View style={styles.topContainer}>
-        <TouchableOpacity style={styles.topButtons} onPress={saveNote}>
+      <View style={NotePageStyles.topContainer}>
+        <TouchableOpacity style={NotePageStyles.topButtons} onPress={saveNote}>
           <Ionicons name="arrow-back-outline" size={30} color="white" />
         </TouchableOpacity>
         <TextInput
-          style={styles.title}
+          style={NotePageStyles.title}
           placeholder="Title Field Note"
           onChangeText={(text) => setTitleText(text)}
           value={titleText}
@@ -122,21 +122,21 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
 
         {isPublished ? (
           <TouchableOpacity
-            style={styles.topButtons}
+            style={NotePageStyles.topButtons}
             onPress={() => setIsPublished(!isPublished)}
           >
-            <Ionicons name="earth" size={30} color="white" />
+            <Ionicons name="share" size={30} color="white" />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
-            style={styles.topButtons}
+            style={NotePageStyles.topButtons}
             onPress={() => setIsPublished(!isPublished)}
           >
-            <Ionicons name="earth-outline" size={30} color="white" />
+            <Ionicons name="share-outline" size={30} color="white" />
           </TouchableOpacity>
         )}
       </View>
-      <View style={styles.keyContainer}>
+      <View style={NotePageStyles.keyContainer}>
         <TouchableOpacity
           onPress={() => {
             setViewMedia(!viewMedia);
@@ -194,9 +194,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         </TouchableOpacity>
       </View>
       <View style={{ backgroundColor: "white" }}>
-        {viewMedia && (
-          <PhotoScroller newMedia={newMedia} setNewMedia={setNewMedia} />
-        )}
+        <PhotoScroller active={viewMedia} newMedia={newMedia} setNewMedia={setNewMedia} />
         {viewAudio && (
           <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
         )}
@@ -223,13 +221,73 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         iconTint={"#000"}
         selectedIconTint={"#2095F2"}
       />
-      <View style={styles.container}>
+      <View style={NotePageStyles.container}>
         <ScrollView
           nestedScrollEnabled={true}
           showsVerticalScrollIndicator={false}
           style={{ overflow: "hidden", paddingTop: 10, paddingBottom: 100 }}
           ref={scrollViewRef}
         >
+          <View key="Tags Container">
+            <ScrollView
+              horizontal={true}
+              style={{ width: "100%", marginHorizontal: 10, paddingLeft: 5, marginBottom: 10, }}
+            >
+              {tags &&
+                tags.map((tag, index) => (
+                  <View
+                    key={index}
+                    style={{
+                      flexDirection: "row",
+                      marginRight: 10,
+                      alignItems: "center",
+                    }}
+                  >
+                    <View
+                      style={{
+                        height: 20,
+                        width: 20,
+                        transform: [{ rotate: "45deg" }],
+                        position: "absolute",
+                        left: 2,
+                        borderLeftWidth: 2,
+                        borderBottomWidth: 2,
+                        borderColor: "black",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <View
+                        style={{
+                          height: 5,
+                          width: 5,
+                          left: 2,
+                          borderRadius: 10,
+                          backgroundColor: "black",
+                          marginRight: 5,
+                        }}
+                      />
+                    </View>
+                    <View
+                      style={{
+                        borderTopRightRadius: 5,
+                        borderBottomRightRadius: 5,
+                        borderColor: "black",
+                        borderRightWidth: 2,
+                        borderBottomWidth: 2,
+                        borderTopWidth: 2,
+                        paddingHorizontal: 10,
+                        justifyContent: "center",
+                        flexDirection: "row",
+                        marginLeft: 10,
+                      }}
+                    >
+                      <Text style={{ textAlign: "center" }}>{tag}</Text>
+                    </View>
+                  </View>
+                ))}
+            </ScrollView>
+          </View>
           <View
             style={[
               { paddingBottom: keyboardOpen ? 50 : 150 },
@@ -238,7 +296,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           >
             <RichEditor
               ref={(r) => (richTextRef.current = r)}
-              style={styles.input}
+              style={NotePageStyles.input}
               autoCorrect={true}
               placeholder="Write your note here"
               onChange={(text) => setBodyText(text)}
@@ -254,88 +312,5 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  topContainer: {
-    justifyContent: "space-between",
-    paddingHorizontal: 5,
-    paddingTop: Constants.statusBarHeight,
-    flexDirection: "row",
-    backgroundColor: "#F4DFCD",
-    alignItems: "center",
-    textAlign: "center",
-  },
-  topText: {
-    flex: 1,
-    maxWidth: "100%",
-    fontWeight: "700",
-    fontSize: 32,
-    textAlign: "center",
-  },
-  topButtons: {
-    backgroundColor: "#111111",
-    borderRadius: 50,
-    width: 50,
-    height: 50,
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 99,
-  },
-  toggles: {
-    backgroundColor: "#111111",
-    borderRadius: 50,
-    width: 50,
-    height: 50,
-    alignItems: "center",
-    justifyContent: "center",
-    marginLeft: 10,
-    zIndex: 99,
-  },
-  container: {
-    backgroundColor: "white",
-    overflow: "hidden",
-  },
-  title: {
-    height: 45,
-    width: "70%",
-    borderColor: "#111111",
-    borderWidth: 1,
-    borderRadius: 30,
-    paddingHorizontal: 10,
-    textAlign: "center",
-    fontSize: 30,
-  },
-  input: {
-    flex: 1,
-    borderColor: "#111111",
-    fontSize: 22,
-  },
-  addButton: {
-    position: "absolute",
-    bottom: 20,
-    right: 20,
-    backgroundColor: "#111111",
-    borderRadius: 50,
-    width: 50,
-    height: 50,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  keyContainer: {
-    height: 60,
-    paddingVertical: 5,
-    width: "100%",
-    backgroundColor: "#F4DFCD",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 40,
-  },
-  saveText: {
-    color: "#111111",
-    fontWeight: "bold",
-    fontSize: 12,
-  },
-});
 
 export default AddNoteScreen;
