@@ -325,6 +325,7 @@ const styles = StyleSheet.create({
     height: 360,
     marginBottom: 2,
     overflow: "hidden",
+    borderColor: '#e0e0e0'
   },
   image: {
     width: "100%",
