@@ -1,5 +1,5 @@
 Arguments: 
-  /usr/local/bin/node /usr/local/Cellar/yarn/1.22.19/libexec/bin/yarn.js install
+  /usr/local/bin/node /usr/local/Cellar/yarn/1.22.19/libexec/bin/yarn.js add @types/react-native-image-picker --dev
 
 PATH: 
   /Users/Anddrew/anaconda3/bin:/Users/Anddrew/anaconda3/condabin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/share/dotnet:~/.dotnet/tools:/Library/Apple/usr/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/Applications/Xamarin Workbooks.app/Contents/SharedSupport/path-bin:/Users/Anddrew/.cargo/bin
@@ -14,8 +14,17 @@ Platform:
   darwin x64
 
 Trace: 
-  Error: getaddrinfo ENOTFOUND registry.yarnpkg.com
-      at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:107:26)
+  Error: https://registry.yarnpkg.com/@types%2freact-native-image-picker: Not found
+      at params.callback [as _callback] (/usr/local/Cellar/yarn/1.22.19/libexec/lib/cli.js:66145:18)
+      at self.callback (/usr/local/Cellar/yarn/1.22.19/libexec/lib/cli.js:140890:22)
+      at Request.emit (node:events:513:28)
+      at Request.<anonymous> (/usr/local/Cellar/yarn/1.22.19/libexec/lib/cli.js:141862:10)
+      at Request.emit (node:events:513:28)
+      at IncomingMessage.<anonymous> (/usr/local/Cellar/yarn/1.22.19/libexec/lib/cli.js:141784:12)
+      at Object.onceWrapper (node:events:627:28)
+      at IncomingMessage.emit (node:events:525:35)
+      at endReadableNT (node:internal/streams/readable:1359:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
 
 npm manifest: 
   {
@@ -70,6 +79,7 @@ npm manifest:
       "react-native": "^0.72.4",
       "react-native-draggable-flatlist": "^4.0.1",
       "react-native-gesture-handler": "~2.9.0",
+      "react-native-image-picker": "^7.0.0",
       "react-native-image-viewing": "^0.2.2",
       "react-native-keyboard-aware-scroll-view": "^0.9.5",
       "react-native-maps": "0.30.2",
@@ -7563,6 +7573,11 @@ Lockfile:
       invariant "^2.2.4"
       lodash "^4.17.21"
       prop-types "^15.7.2"
+  
+  react-native-image-picker@^7.0.0:
+    version "7.0.0"
+    resolved "https://registry.yarnpkg.com/react-native-image-picker/-/react-native-image-picker-7.0.0.tgz#0a03b777751e7ae3f1a7190ddf33a6c9c52db135"
+    integrity sha512-eiDj0mJUPivranQJX/pwkGf/Ar9QrQ+BF3y0D8frHU3S7U86IGOnOzHN7Wh6ofXEnafRij0TpmRCdrSebBMV+Q==
   
   react-native-image-viewing@^0.2.2:
     version "0.2.2"
