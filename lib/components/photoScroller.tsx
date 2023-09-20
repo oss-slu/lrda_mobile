@@ -375,6 +375,7 @@ const PhotoScroller = forwardRef(
           {playing && renderImageView()}
           <View style={{ flexDirection: "row" }}>
             <TouchableOpacity
+              testID="photoScrollerButton"
               style={[
                 PhotoStyles.image,
                 {
