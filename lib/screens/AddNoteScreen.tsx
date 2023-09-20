@@ -195,7 +195,6 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
       </View>
       <View style={{ backgroundColor: "white" }}>
         <PhotoScroller active={viewMedia} newMedia={newMedia} setNewMedia={setNewMedia} />
-        <PhotoScroller active={viewMedia} newMedia={newMedia} setNewMedia={setNewMedia} />
         {viewAudio && (
           <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
         )}
