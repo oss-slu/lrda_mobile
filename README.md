@@ -74,7 +74,7 @@ Depending on whether you have an Android or an iOS device, when you run `yarn ru
 To run the application on your phone, you need to download the **EXPO** application, available on both the Android Play Store and iOS App Store.
 
 ## Usage
-Launch the app on your device or emulator using the `expo start -c` command. This will open the Expo DevTools in your browser, where you can select the device or emulator to run the app.
+Launch the app on your device or emulator using the `yarn run start` command. This will open the Expo DevTools in your browser, where you can select the device or emulator to run the app.
 
 ## Known Bugs
 - The app does not compile to the web due to a dependency on react-native-maps.
