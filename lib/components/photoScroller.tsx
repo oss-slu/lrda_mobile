@@ -4,11 +4,13 @@ import React, {
   forwardRef,
   useImperativeHandle,
 } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import {
   launchCameraAsync,
+  launchImageLibraryAsync,
   MediaTypeOptions,
   requestCameraPermissionsAsync,
+  requestMediaLibraryPermissionsAsync
 } from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { ResizeMode, Video } from "expo-av";
@@ -214,22 +216,58 @@ const PhotoScroller = forwardRef(
     };
 
     const handleNewMedia = async () => {
-      const { status } = await requestCameraPermissionsAsync();
-      if (status !== "granted") {
-        alert("Sorry, we need camera permissions to make this work!");
-        return;
-      }
-      const cameraResult = await launchCameraAsync({
-        mediaTypes: MediaTypeOptions.All,
-        allowsEditing: false,
-        aspect: [3, 4],
-        quality: 0.75,
-        videoMaxDuration: 300,
-      });
-
-      if (!cameraResult.canceled) {
-        handleImageSelection(cameraResult);
-      }
+      Alert.alert(
+        'Select Media',
+        'Choose the source for your media:',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'Take Photo',
+            onPress: async () => {
+              const { status } = await requestCameraPermissionsAsync();
+              if (status !== 'granted') {
+                alert('Sorry, we need camera permissions to make this work!');
+                return;
+              }
+              const cameraResult = await launchCameraAsync({
+                mediaTypes: MediaTypeOptions.All,
+                allowsEditing: false,
+                aspect: [3, 4],
+                quality: 0.75,
+                videoMaxDuration: 300,
+              });
+              if (!cameraResult.canceled) {
+                handleImageSelection(cameraResult);
+              }
+            },
+          },
+          {
+            text: 'Choose from Camera Roll',
+            onPress: async () => {
+              const { status } = await requestMediaLibraryPermissionsAsync();
+              if (status !== 'granted') {
+                alert('Sorry, we need camera roll permissions to make this work!');
+                return;
+              }
+              const galleryResult = await launchImageLibraryAsync({
+                mediaTypes: MediaTypeOptions.All,
+                allowsEditing: false,
+                aspect: [3, 4],
+                quality: 0.75,
+                videoMaxDuration: 300,
+              });
+              if (!galleryResult.canceled) {
+                // Pass the selected image to handleImageSelection
+                handleImageSelection(galleryResult);
+              }
+            },
+          },
+        ],
+        { cancelable: false }
+      );
     };
 
     function Footer({ imageIndex }: { imageIndex: number }) {
@@ -337,6 +375,7 @@ const PhotoScroller = forwardRef(
           {playing && renderImageView()}
           <View style={{ flexDirection: "row" }}>
             <TouchableOpacity
+              testID="photoScrollerButton"
               style={[
                 PhotoStyles.image,
                 {

@@ -145,6 +145,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             setIsLocation(false);
             setIsTime(false);
           }}
+          testID="images-icon"
         >
           <Ionicons name="images-outline" size={30} color="black" />
         </TouchableOpacity>
