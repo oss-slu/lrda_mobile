@@ -74,6 +74,10 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     }
   };
 
+  const addImageToEditor = (imageUri: string) => {
+    richTextRef.current?.insertImage(imageUri);
+  };
+
   const saveNote = async () => {
     if (titleText === "") {
       navigation.goBack();
@@ -194,7 +198,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         </TouchableOpacity>
       </View>
       <View style={{ backgroundColor: "white" }}>
-        <PhotoScroller active={viewMedia} newMedia={newMedia} setNewMedia={setNewMedia} />
+        <PhotoScroller active={viewMedia} newMedia={newMedia} setNewMedia={setNewMedia} insertImageToEditor={addImageToEditor} />
         {viewAudio && (
           <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
         )}
@@ -310,6 +314,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         </ScrollView>
       </View>
     </View>
+    
   );
 };
 
