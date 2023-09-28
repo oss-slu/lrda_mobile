@@ -17,24 +17,22 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "beta.edu.slu.cs.oss.lrda",
-      "config": {
-        "googleMapsApiKey": ""
-      },
-      "buildNumber" : "5"
+      "buildNumber": "5"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      },
-      "config": {
-        "googleMaps": {
-          "apiKey": "AIzaSyBwi5lzjEmTzGZPRFwx6dIZK7EOwV6VEKw"
-        }
       }
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/86ab2744-3978-4375-95c3-ff3918037148"
     }
   }
 }

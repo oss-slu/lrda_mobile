@@ -62,19 +62,19 @@ yarn install
 To start the app, run:
 
 ```bash
-expo start -c
+yarn run start 
 ```
 
 This command will start the Expo server, compiling the JavaScript code for the app, which you can run either on a simulator or your mobile device.
 
 ## Running via Simulator
-Depending on whether you have an Android or an iOS device, when you run `expo start -c`, it will provide a QR code along with options `a` for running on an Android simulator or `i` for running the application on an iOS simulator.
+Depending on whether you have an Android or an iOS device, when you run `yarn run start`, it will provide a QR code along with options `a` for running on an Android simulator or `i` for running the application on an iOS simulator.
 
 ## Running via Phone
 To run the application on your phone, you need to download the **EXPO** application, available on both the Android Play Store and iOS App Store.
 
 ## Usage
-Launch the app on your device or emulator using the `expo start -c` command. This will open the Expo DevTools in your browser, where you can select the device or emulator to run the app.
+Launch the app on your device or emulator using the `yarn run start` command. This will open the Expo DevTools in your browser, where you can select the device or emulator to run the app.
 
 ## Known Bugs
 - The app does not compile to the web due to a dependency on react-native-maps.
