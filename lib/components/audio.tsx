@@ -9,6 +9,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { AudioType } from "../models/media_class";
 import Slider from "@react-native-community/slider";
+// Checkout Audio for expo av!
 import { Audio } from "expo-av";
 import uuid from "react-native-uuid";
 import { uploadAudio } from "../utils/S3_proxy";
