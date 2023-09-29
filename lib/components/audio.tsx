@@ -103,6 +103,12 @@ function AudioContainer({
 
   async function stopRecording() {
     setIsRecording(false);
+    
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+      playsInSilentModeIOS: true,
+    });
+
     try {
       console.log("Stopping recording");
 
