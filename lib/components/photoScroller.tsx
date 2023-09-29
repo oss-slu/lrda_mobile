@@ -30,10 +30,12 @@ const PhotoScroller = forwardRef(
       newMedia,
       setNewMedia,
       active,
+      insertImageToEditor,
     }: {
       newMedia: Media[];
       setNewMedia: React.Dispatch<React.SetStateAction<Media[]>>;
       active: Boolean;
+      insertImageToEditor: Function;
     },
     ref
   ) => {
@@ -83,6 +85,7 @@ const PhotoScroller = forwardRef(
           uri: uploadedUrl,
         });
         setNewMedia([...newMedia, newMediaItem]);
+        insertImageToEditor(uploadedUrl);
       } else if (
         uri.endsWith(".jpg") ||
         uri.endsWith("png") ||
@@ -96,6 +99,9 @@ const PhotoScroller = forwardRef(
           uri: uploadedUrl,
         });
         setNewMedia([...newMedia, newMediaItem]);
+        if (insertImageToEditor) {
+          insertImageToEditor(uploadedUrl, 'Captured Image');
+        }
       } else if (
         uri.endsWith(".MOV") ||
         uri.endsWith(".mov") ||
