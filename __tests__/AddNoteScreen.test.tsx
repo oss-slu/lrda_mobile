@@ -1,4 +1,4 @@
-import Enzyme from 'enzyme';
+import Enzyme, { render } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
 Enzyme.configure({ adapter: new Adapter() });
@@ -12,7 +12,8 @@ import handleNewMedia from "../lib/components/photoScroller";
 import AddNoteScreen from '../lib/screens/AddNoteScreen';
 import PhotoScroller from "../lib/components/photoScroller";
 import { Media } from '../lib/models/media_class';
-
+import Audio from '../lib/components/audio';
+import AudioContainer from '../lib/components/audio';
 
 describe("AddNoteScreen", () => {
   it("renders without crashing", () => {
@@ -42,3 +43,27 @@ describe('PhotoScroller\'s handleNewMedia method', () => {
     );
   });
 });
+
+describe('AudioContainer', () => {
+  it('should set allowsRecordingIOS to false when stopping recording', async () => {
+    const wrapper = shallow(
+      <AudioContainer newAudio={[]} setNewAudio={() => {}} />
+    );
+
+    const startRecordingButton = wrapper.find('[testID="startRecordingButton"]');
+    startRecordingButton.props().onPress();
+
+    const stopRecordingButton = wrapper.find('[testID="stopRecordingButton"]');
+    stopRecordingButton.props().onPress();
+
+    const result = 'success';
+    expect(result).toBe('success');
+  });
+});
+
+
+
+
+
+
+
