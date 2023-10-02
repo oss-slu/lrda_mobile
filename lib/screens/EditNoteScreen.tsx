@@ -279,8 +279,9 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         <ScrollView
           nestedScrollEnabled={true}
           showsVerticalScrollIndicator={false}
-          style={{ overflow: "hidden", paddingTop: 10, paddingBottom: 100 }}
+          style={{overflow: "hidden", paddingTop: 10, paddingBottom: 100 }}
           ref={scrollViewRef}
+          scrollEnabled={true}
         >
           <View key="Tags Container">
             <ScrollView
@@ -380,9 +381,14 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
               placeholder="Write your note here"
               onChange={(text) => setText(text)}
               initialContentHTML={text}
-              //at first glance I believe changes need to be made here.
               onCursorPosition={(position) => {
-                handleScroll(position);
+                if(scrollViewRef.current){
+                  scrollViewRef.current.scrollTo({
+                    y: position - 100,
+                    animated: true,
+                  });
+                }
+
               }}
             />
             <View style={{ height: keyboardOpen ? 400 : 90 }} />
