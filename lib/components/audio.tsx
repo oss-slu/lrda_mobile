@@ -12,6 +12,10 @@ import Slider from "@react-native-community/slider";
 import { Audio } from "expo-av";
 import uuid from "react-native-uuid";
 import { uploadAudio } from "../utils/S3_proxy";
+import * as FileSystem from "expo-file-system";
+import * as MediaLibrary from "expo-media-library";
+import * as Permissions from "expo-permissions";
+
 
 function getDurationFormatted(millis: number) {
   const minutes = millis / 1000 / 60;
@@ -74,32 +78,7 @@ function AudioContainer({
       }
     }
   };
-  const HIGH_QUALITY = {
-    isMeteringEnabled: true,
-    android: {
-      extension: '.mp3',
-      outputFormat: Audio.RECORDING_OPTION_ANDROID_OUTPUT_FORMAT_MPEG_4,
-      audioEncoder: Audio.RECORDING_OPTION_ANDROID_AUDIO_ENCODER_AAC,
-      sampleRate: 44100,
-      numberOfChannels: 2,
-      bitRate: 128000,
-    },
-    ios: {
-      extension: '.4ma',
-      outputFormat: Audio.RECORDING_OPTION_IOS_OUTPUT_FORMAT_MPEG4AAC,
-      audioQuality: Audio.RECORDING_OPTION_IOS_AUDIO_QUALITY_MAX,
-      sampleRate: 44100,
-      numberOfChannels: 2,
-      bitRate: 128000,
-      linearPCMBitDepth: 16,
-      linearPCMIsBigEndian: false,
-      linearPCMIsFloat: false,
-    },
-  }
-  const recordingOptions = {
-    ...Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY,
-    ...HIGH_QUALITY,
-  };
+
 
   async function startRecording() {
     setIsRecording(true);
@@ -113,7 +92,7 @@ function AudioContainer({
         });
 
         const recording = new Audio.Recording();
-        await recording.prepareToRecordAsync(recordingOptions);
+        await recording.prepareToRecordAsync();
         await recording.startAsync();
 
         setRecording(recording);
@@ -125,7 +104,7 @@ function AudioContainer({
     }
     console.log("Start recording");
   }
-
+  
   async function stopRecording() {
     setIsRecording(false);
     try {
@@ -164,8 +143,10 @@ function AudioContainer({
       console.error("Failed to stop recording", err);
     }
   }
+  
+  
 
-  async function playAudio(index: number) {
+    async function playAudio(index: number) {
     console.log("entered audio player");
     const current = newAudio[index];
     try {
