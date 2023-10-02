@@ -104,6 +104,7 @@ function AudioContainer({
     }
     console.log("Start recording");
   }
+
   
   async function stopRecording() {
     setIsRecording(false);

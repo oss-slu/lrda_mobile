@@ -2,8 +2,6 @@ import { Platform } from "react-native";
 import { getThumbnailAsync } from "expo-video-thumbnails";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import * as FileSystem from "expo-file-system";
-import { Audio } from "expo-av";
-
 
 // const S3_PROXY_PREFIX = "http://99.7.218.98:8080/S3/";
 const S3_PROXY_PREFIX = "http://s3-proxy.rerum.io/S3/";
@@ -83,13 +81,11 @@ async function uploadMedia(uri: string, mediaType: string): Promise<string> {
 
 export { getThumbnail, convertHeicToJpg, uploadMedia };
 
-
 export async function uploadAudio(uri: string): Promise<string> {
   let data = new FormData();
   const uniqueName = `media-${Date.now()}.mp3`;
 
   if (Platform.OS === "web") {
-    // Handle web upload
     const response = await fetch(uri);
     const blob = await response.blob();
     const file = new File([blob], uniqueName, {
@@ -98,40 +94,25 @@ export async function uploadAudio(uri: string): Promise<string> {
 
     data.append("file", file);
   } else if (Platform.OS === "android") {
-    // Handle Android and iOS uploads differently
+    // Handle Android upload differently
+    const fileInfo = await FileSystem.getInfoAsync(uri);
+    const fileUri = fileInfo.uri;
 
-    // Check if the provided URI is a local file URI (Android)
-    if (Platform.OS === "android" && uri.startsWith("file://")) {
-      // Remove "file://" from the URI to get the local file path
-      const localFilePath = uri.substring(7); // Remove "file://"
-      const fileInfo = await FileSystem.getInfoAsync(localFilePath);
-      const fileUri = fileInfo.uri;
-
-      // Read the audio data as Base64-encoded string
-      let base64 = await FileSystem.readAsStringAsync(fileUri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-
-      // Create a data URI with the Base64-encoded audio data
-      base64 = `data:audio/mp3;base64,${base64}`;
-
-      data.append("file", {
-        type: `audio/mp3`,
-        uri: base64,
-        name: uniqueName,
-      });
-    } else {
-      // For iOS or non-local URIs, assume the URI is already accessible
-      let base64 = await FileSystem.readAsStringAsync(uri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-      base64 = `data:audio/mp3;base64,${base64}`;
-      data.append("file", {
-        type: `audio/mp3`,
-        uri: base64,
-        name: uniqueName,
-      });
-    }
+    data.append("file", {
+      uri: fileUri,
+      type: `audio/mp3`,
+      name: uniqueName,
+    });
+  } else {
+    let base64 = await FileSystem.readAsStringAsync(uri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    base64 = `data:audio/mp3;base64,${base64}`;
+    data.append("file", {
+      type: `audio/mp3`,
+      uri: base64,
+      name: uniqueName,
+    });
   }
 
   return fetch(S3_PROXY_PREFIX + "uploadFile", {
