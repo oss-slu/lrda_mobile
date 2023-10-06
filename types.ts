@@ -55,6 +55,7 @@ export type EditNoteScreenProps = {
   navigation: {
     goBack: () => void;
   };
+  insertImageToEditor: (capturedImage: string) => void;
 };
 
 export type RootTabParamList = {

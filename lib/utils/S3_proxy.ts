@@ -93,6 +93,16 @@ export async function uploadAudio(uri: string): Promise<string> {
     });
 
     data.append("file", file);
+  } else if (Platform.OS === "android") {
+    // Handle Android upload differently
+    const fileInfo = await FileSystem.getInfoAsync(uri);
+    const fileUri = fileInfo.uri;
+
+    data.append("file", {
+      uri: fileUri,
+      type: `audio/mp3`,
+      name: uniqueName,
+    });
   } else {
     let base64 = await FileSystem.readAsStringAsync(uri, {
       encoding: FileSystem.EncodingType.Base64,

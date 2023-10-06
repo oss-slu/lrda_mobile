@@ -7,6 +7,7 @@ import {
   useWindowDimensions,
   Text,
 } from "react-native";
+import * as ImagePicker from 'expo-image-picker';
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { Note } from "../../types";
@@ -34,6 +35,7 @@ const user = User.getInstance();
 const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   route,
   navigation,
+  insertImageToEditor,
 }) => {
   const { note, onSave } = route.params;
   const [title, setTitle] = useState(note.title);
@@ -115,6 +117,11 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       photoScrollerRef.current.goBig(index);
     }
   };
+
+  const addImageToEditor = (imageUri: string) => {
+    richTextRef.current?.insertImage(imageUri);
+  };
+  
 
   const handleSaveNote = async () => {
     try {
@@ -239,6 +246,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           active={viewMedia}
           newMedia={media}
           setNewMedia={setMedia}
+          insertImageToEditor={addImageToEditor}
         />
         {viewAudio && (
           <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
@@ -372,6 +380,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
               placeholder="Write your note here"
               onChange={(text) => setText(text)}
               initialContentHTML={text}
+              //at first glance I believe changes need to be made here.
               onCursorPosition={(position) => {
                 handleScroll(position);
               }}
