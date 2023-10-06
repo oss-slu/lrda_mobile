@@ -266,7 +266,7 @@ function AudioContainer({
         <Text style={{ fontSize: 24, fontWeight: "600" }}>Recordings</Text>
         {isRecording ? (
           <TouchableOpacity onPress={() => stopRecording()}>
-            <Ionicons name={"stop-circle-outline"} size={45} color="#111111"  testID="stopRecordingButton"/>
+            <Ionicons name={"stop-circle-outline"} size={45} color="#111111"  testID='stopRecordingButton'/>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity onPress={() => startRecording()}>
