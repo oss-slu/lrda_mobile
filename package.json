@@ -13,7 +13,8 @@
     "preset": "jest-expo",
     "testEnvironment": "node",
     "setupFilesAfterEnv": [
-      "@testing-library/jest-native/extend-expect"
+      "@testing-library/jest-native/extend-expect",
+      "<rootDir>/setupTests.js"
     ]
   },
   "dependencies": {
@@ -26,7 +27,9 @@
     "@react-navigation/stack": "^6.3.17",
     "@types/enzyme-adapter-react-16": "^1.0.6",
     "@types/mocha": "^10.0.1",
+    "@types/moxios": "^0.4.15",
     "@types/react-native-onboarding-swiper": "^1.1.4",
+    "axios": "^1.5.1",
     "babel-plugin-transform-inline-environment-variables": "^0.4.4",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.7",
@@ -45,6 +48,7 @@
     "jest-expo": "^49.0.0",
     "lottie-ios": "3.4.1",
     "lottie-react-native": "5.1.4",
+    "moxios": "^0.4.0",
     "react": "^18.2.0",
     "react-dom": "18.2.0",
     "react-native": "^0.72.4",
