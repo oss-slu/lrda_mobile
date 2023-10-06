@@ -9,7 +9,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { AudioType } from "../models/media_class";
 import Slider from "@react-native-community/slider";
-import { Audio } from "expo-av";
+import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import uuid from "react-native-uuid";
 import { uploadAudio } from "../utils/S3_proxy";
 import * as FileSystem from "expo-file-system";
@@ -87,23 +87,20 @@ function AudioContainer({
 
       if (permission.status === "granted") {
         await Audio.setAudioModeAsync({
-          allowsRecordingIOS: true,
           playsInSilentModeIOS: true,
+          allowsRecordingIOS: true,
         });
+          const { recording } = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
 
-        const recording = new Audio.Recording();
-        await recording.prepareToRecordAsync();
-        await recording.startAsync();
-
-        setRecording(recording);
-      } else {
-        alert("Please grant permission to app to access microphone");
+          setRecording(recording);
+        } else {
+          alert("Please grant permission to app to access microphone");
+        }
+      } catch (err) {
+        console.error("Failed to start recording", err);
       }
-    } catch (err) {
-      console.error("Failed to start recording", err);
+      console.log("Start recording");
     }
-    console.log("Start recording");
-  }
 
   
   async function stopRecording() {
@@ -147,19 +144,25 @@ function AudioContainer({
   
   
 
-    async function playAudio(index: number) {
+  async function playAudio(index: number) {
     console.log("entered audio player");
+    
     const current = newAudio[index];
     try {
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+        allowsRecordingIOS: true,
+      });
       if (player !== null && isLoaded) {
         await player.unloadAsync();
         setIsLoaded(false);
       }
-
       const newPlayer = new Audio.Sound();
-      await newPlayer.loadAsync({ uri: current.getUri() });
 
+      console.log("play uri===", current.getUri());
+      await newPlayer.loadAsync({ uri:current.getUri() });
       newPlayer.setOnPlaybackStatusUpdate((status) => {
+
         setIsLoaded(status.isLoaded);
 
         if (status.didJustFinish) {
@@ -263,11 +266,11 @@ function AudioContainer({
         <Text style={{ fontSize: 24, fontWeight: "600" }}>Recordings</Text>
         {isRecording ? (
           <TouchableOpacity onPress={() => stopRecording()}>
-            <Ionicons name={"stop-circle-outline"} size={45} color="#111111" />
+            <Ionicons name={"stop-circle-outline"} size={45} color="#111111"  testID="stopRecordingButton"/>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity onPress={() => startRecording()}>
-            <Ionicons name={"radio-button-on-outline"} size={45} color="red" />
+            <Ionicons name={"radio-button-on-outline"} size={45} color="red"  testID="startRecordingButton"/>
           </TouchableOpacity>
         )}
       </View>
@@ -322,7 +325,7 @@ function AudioContainer({
                   <Ionicons name={"pause-outline"} size={25} color="#111111" />
                 </TouchableOpacity>
               ) : (
-                <TouchableOpacity onPress={() => playAudio(index)}>
+                <TouchableOpacity onPress={() => playAudio(index)}testID="playButton">
                   <Ionicons name={"play-outline"} size={25} color="#111111" />
                 </TouchableOpacity>
               )}
