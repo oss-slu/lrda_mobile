@@ -90,6 +90,7 @@ function AudioContainer({
           playsInSilentModeIOS: true,
           allowsRecordingIOS: true,
         });
+        
           const { recording } = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
 
           setRecording(recording);
