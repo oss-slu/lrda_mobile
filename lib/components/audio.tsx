@@ -9,6 +9,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { AudioType } from "../models/media_class";
 import Slider from "@react-native-community/slider";
+// Checkout Audio for expo av!
 import { Audio } from "expo-av";
 import uuid from "react-native-uuid";
 import { uploadAudio } from "../utils/S3_proxy";
@@ -128,6 +129,12 @@ function AudioContainer({
 
   async function stopRecording() {
     setIsRecording(false);
+    
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+      playsInSilentModeIOS: true,
+    });
+
     try {
       console.log("Stopping recording");
       console.log(recording);
@@ -280,11 +287,17 @@ function AudioContainer({
         <Ionicons name={"mic-outline"} size={60} color="#111111" />
         <Text style={{ fontSize: 24, fontWeight: "600" }}>Recordings</Text>
         {isRecording ? (
-          <TouchableOpacity onPress={() => stopRecording()}>
-            <Ionicons name={"stop-circle-outline"} size={45} color="#111111" />
+          <TouchableOpacity 
+            onPress={ () => stopRecording() }
+            testID="stopRecordingButton"
+          >
+          <Ionicons name={"stop-circle-outline"} size={45} color="#111111" />
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity onPress={() => startRecording()}>
+          <TouchableOpacity 
+            onPress={ () => startRecording() }
+            testID="startRecordingButton"
+          >
             <Ionicons name={"radio-button-on-outline"} size={45} color="red" />
           </TouchableOpacity>
         )}
@@ -325,6 +338,7 @@ function AudioContainer({
                 onSubmitEditing={() => {
                   handleRename(index);
                 }}
+                testID="textInput"
               ></TextInput>
             )}
             <View
