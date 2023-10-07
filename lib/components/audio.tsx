@@ -107,6 +107,12 @@ function AudioContainer({
   
   async function stopRecording() {
     setIsRecording(false);
+    
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+      playsInSilentModeIOS: true,
+    });
+
     try {
       console.log("Stopping recording");
       console.log(recording);
@@ -267,12 +273,20 @@ function AudioContainer({
         <Ionicons name={"mic-outline"} size={60} color="#111111" />
         <Text style={{ fontSize: 24, fontWeight: "600" }}>Recordings</Text>
         {isRecording ? (
-          <TouchableOpacity onPress={() => stopRecording()}>
-            <Ionicons name={"stop-circle-outline"} size={45} color="#111111"  testID='stopRecordingButton'/>
+
+          <TouchableOpacity 
+            onPress={ () => stopRecording() }
+            testID="stopRecordingButton"
+          >
+          <Ionicons name={"stop-circle-outline"} size={45} color="#111111" />
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity onPress={() => startRecording()}>
-            <Ionicons name={"radio-button-on-outline"} size={45} color="red"  testID="startRecordingButton"/>
+          <TouchableOpacity 
+            onPress={ () => startRecording() }
+            testID="startRecordingButton"
+          >
+            <Ionicons name={"radio-button-on-outline"} size={45} color="red" />
+
           </TouchableOpacity>
         )}
       </View>
@@ -312,6 +326,7 @@ function AudioContainer({
                 onSubmitEditing={() => {
                   handleRename(index);
                 }}
+                testID="textInput"
               ></TextInput>
             )}
             <View
