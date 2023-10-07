@@ -82,7 +82,7 @@ async function uploadMedia(uri: string, mediaType: string): Promise<string> {
 export { getThumbnail, convertHeicToJpg, uploadMedia };
 
 export async function uploadAudio(uri: string): Promise<string> {
-  let type = "video/3gpp";
+  let type = "video/3gp.";
   let data = new FormData();
   const uniqueName = `media-${Date.now()}.3gp`;
 
@@ -101,7 +101,7 @@ export async function uploadAudio(uri: string): Promise<string> {
 
     data.append("file", {
       uri: fileUri,
-      type: `audio/mp3`,
+      type: type,
       name: uniqueName,
     });
   } else {
