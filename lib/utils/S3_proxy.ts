@@ -82,8 +82,9 @@ async function uploadMedia(uri: string, mediaType: string): Promise<string> {
 export { getThumbnail, convertHeicToJpg, uploadMedia };
 
 export async function uploadAudio(uri: string): Promise<string> {
+  let type = "video/3gp.";
   let data = new FormData();
-  const uniqueName = `media-${Date.now()}.mp3`;
+  const uniqueName = `media-${Date.now()}.3gp`;
 
   if (Platform.OS === "web") {
     const response = await fetch(uri);
@@ -100,7 +101,7 @@ export async function uploadAudio(uri: string): Promise<string> {
 
     data.append("file", {
       uri: fileUri,
-      type: `audio/mp3`,
+      type: type,
       name: uniqueName,
     });
   } else {
@@ -113,6 +114,7 @@ export async function uploadAudio(uri: string): Promise<string> {
       uri: base64,
       name: uniqueName,
     });
+    console.log("base64===",base64)
   }
 
   return fetch(S3_PROXY_PREFIX + "uploadFile", {

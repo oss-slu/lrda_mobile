@@ -9,7 +9,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { AudioType } from "../models/media_class";
 import Slider from "@react-native-community/slider";
-import { Audio } from "expo-av";
+// Checkout Audio for expo av!
+import { Audio} from "expo-av";
 import uuid from "react-native-uuid";
 import { uploadAudio } from "../utils/S3_proxy";
 
@@ -108,26 +109,32 @@ function AudioContainer({
 
       if (permission.status === "granted") {
         await Audio.setAudioModeAsync({
-          allowsRecordingIOS: true,
           playsInSilentModeIOS: true,
+          allowsRecordingIOS: true,
         });
-
+        
         const recording = new Audio.Recording();
         await recording.prepareToRecordAsync(recordingOptions);
         await recording.startAsync();
 
-        setRecording(recording);
-      } else {
-        alert("Please grant permission to app to access microphone");
+          setRecording(recording);
+        } else {
+          alert("Please grant permission to app to access microphone");
+        }
+      } catch (err) {
+        console.error("Failed to start recording", err);
       }
-    } catch (err) {
-      console.error("Failed to start recording", err);
+      console.log("Start recording");
     }
-    console.log("Start recording");
-  }
 
-  async function stopRecording() {
+   async function stopRecording() {
     setIsRecording(false);
+    
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+      playsInSilentModeIOS: true,
+    });
+
     try {
       console.log("Stopping recording");
       console.log(recording);
@@ -164,20 +171,25 @@ function AudioContainer({
       console.error("Failed to stop recording", err);
     }
   }
-
+  
   async function playAudio(index: number) {
     console.log("entered audio player");
     const current = newAudio[index];
     try {
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+        allowsRecordingIOS: false,
+      });
       if (player !== null && isLoaded) {
         await player.unloadAsync();
         setIsLoaded(false);
       }
-
       const newPlayer = new Audio.Sound();
-      await newPlayer.loadAsync({ uri: current.getUri() });
 
+      console.log("play uri===", current.getUri());
+      await newPlayer.loadAsync({ uri:current.getUri() });
       newPlayer.setOnPlaybackStatusUpdate((status) => {
+
         setIsLoaded(status.isLoaded);
 
         if (status.didJustFinish) {
@@ -280,12 +292,20 @@ function AudioContainer({
         <Ionicons name={"mic-outline"} size={60} color="#111111" />
         <Text style={{ fontSize: 24, fontWeight: "600" }}>Recordings</Text>
         {isRecording ? (
-          <TouchableOpacity onPress={() => stopRecording()}>
-            <Ionicons name={"stop-circle-outline"} size={45} color="#111111" />
+
+          <TouchableOpacity 
+            onPress={ () => stopRecording() }
+            testID="stopRecordingButton"
+          >
+          <Ionicons name={"stop-circle-outline"} size={45} color="#111111" />
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity onPress={() => startRecording()}>
+          <TouchableOpacity 
+            onPress={ () => startRecording() }
+            testID="startRecordingButton"
+          >
             <Ionicons name={"radio-button-on-outline"} size={45} color="red" />
+
           </TouchableOpacity>
         )}
       </View>
@@ -325,6 +345,7 @@ function AudioContainer({
                 onSubmitEditing={() => {
                   handleRename(index);
                 }}
+                testID="textInput"
               ></TextInput>
             )}
             <View
@@ -340,7 +361,7 @@ function AudioContainer({
                   <Ionicons name={"pause-outline"} size={25} color="#111111" />
                 </TouchableOpacity>
               ) : (
-                <TouchableOpacity onPress={() => playAudio(index)}>
+                <TouchableOpacity onPress={() => playAudio(index)}testID="playButton">
                   <Ionicons name={"play-outline"} size={25} color="#111111" />
                 </TouchableOpacity>
               )}
