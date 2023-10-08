@@ -11,10 +11,7 @@ import { AudioType } from "../models/media_class";
 import Slider from "@react-native-community/slider";
 import uuid from "react-native-uuid";
 import { uploadAudio } from "../utils/S3_proxy";
-import * as FileSystem from "expo-file-system";
-import * as MediaLibrary from "expo-media-library";
-import * as Permissions from "expo-permissions";
-import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
+import { Audio} from "expo-av";
 
 
 
