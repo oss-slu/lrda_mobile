@@ -387,7 +387,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
               placeholder="Write your note here"
               onChange={(text) => setText(text)}
               initialContentHTML={text}
-              //at first glance I believe changes need to be made here.
               onCursorPosition={(position) => {
                 handleScroll(position);
               }}
