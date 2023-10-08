@@ -9,11 +9,10 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { AudioType } from "../models/media_class";
 import Slider from "@react-native-community/slider";
+// Checkout Audio for expo av!
+import { Audio} from "expo-av";
 import uuid from "react-native-uuid";
 import { uploadAudio } from "../utils/S3_proxy";
-import { Audio} from "expo-av";
-
-
 
 function getDurationFormatted(millis: number) {
   const minutes = millis / 1000 / 60;
@@ -76,7 +75,6 @@ function AudioContainer({
       }
     }
   };
-
   const HIGH_QUALITY = {
     isMeteringEnabled: true,
     android: {
@@ -104,8 +102,6 @@ function AudioContainer({
     ...HIGH_QUALITY,
   };
 
-
-
   async function startRecording() {
     setIsRecording(true);
     try {
@@ -117,7 +113,9 @@ function AudioContainer({
           allowsRecordingIOS: true,
         });
         
-          const { recording } = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
+        const recording = new Audio.Recording();
+        await recording.prepareToRecordAsync(recordingOptions);
+        await recording.startAsync();
 
           setRecording(recording);
         } else {
@@ -129,8 +127,7 @@ function AudioContainer({
       console.log("Start recording");
     }
 
-  
-  async function stopRecording() {
+   async function stopRecording() {
     setIsRecording(false);
     
     await Audio.setAudioModeAsync({
@@ -175,16 +172,13 @@ function AudioContainer({
     }
   }
   
-  
-
   async function playAudio(index: number) {
     console.log("entered audio player");
-    
     const current = newAudio[index];
     try {
       await Audio.setAudioModeAsync({
         playsInSilentModeIOS: true,
-        allowsRecordingIOS: true,
+        allowsRecordingIOS: false,
       });
       if (player !== null && isLoaded) {
         await player.unloadAsync();
