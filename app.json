@@ -32,7 +32,12 @@
       "policy": "sdkVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/86ab2744-3978-4375-95c3-ff3918037148"
+      "url": "https://u.expo.dev/1ab6eacd-d4a8-4a10-8633-7aed1bde1cba"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "1ab6eacd-d4a8-4a10-8633-7aed1bde1cba"
+      }
     }
   }
 }
