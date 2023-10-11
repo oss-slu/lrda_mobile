@@ -71,7 +71,6 @@ const AppNavigator: React.FC = () => {
     checkOnboarding();
   }, []);
 
-
   useEffect(() => {
     user.setLoginCallback((isLoggedIn) => {
       setNavState(isLoggedIn ? "home" : "login");
@@ -80,56 +79,59 @@ const AppNavigator: React.FC = () => {
 
   return (
     <NavigationContainer>
-    {navState === "onboarding" && (
-       <Stack.Navigator initialRouteName="Onboarding">
-       <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
-       <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-       <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
-     </Stack.Navigator>
-    )}
-    {navState === "login" && (
-      <Stack.Navigator initialRouteName="Login">
-      <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
-    </Stack.Navigator>
-    )}
-    {navState === "home" && (
-      <Tab.Navigator screenOptions={{ tabBarShowLabel: false }}>
-      <Tab.Screen
-        name="HomeTab"
-        component={HomeStack}
-        options={{
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="ios-pencil" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Tab1"
-        component={ExploreScreen}
-        options={{
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="ios-map" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Tab2"
-        component={MorePage}
-        options={{
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="menu-outline" color={color} size={size + 10} />
-          ),
-        }}
-      />
-    </Tab.Navigator>
-    )}
-  </NavigationContainer>
+      
+        {navState === "onboarding" && (
+          <Stack.Navigator initialRouteName="Onboarding">
+          <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
+        </Stack.Navigator>
+        )}
+        {navState === "login" && (
+          <Stack.Navigator initialRouteName="Login">
+          <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
+        </Stack.Navigator>
+        )}
+      
+      {
+        navState === "home" && (
+          <Tab.Navigator screenOptions={{ tabBarShowLabel: false }}>
+            <Tab.Screen
+              name="HomeTab"
+              component={HomeStack}
+              options={{
+                headerShown: false,
+                tabBarIcon: ({ color, size }) => (
+                  <Ionicons name="ios-pencil" color={color} size={size} />
+                ),
+              }}
+            />
+            <Tab.Screen
+              name="Tab1"
+              component={ExploreScreen}
+              options={{
+                headerShown: false,
+                tabBarIcon: ({ color, size }) => (
+                  <Ionicons name="ios-map" color={color} size={size} />
+                ),
+              }}
+            />
+            <Tab.Screen
+              name="Tab2"
+              component={MorePage}
+              options={{
+                headerShown: false,
+                tabBarIcon: ({ color, size }) => (
+                  <Ionicons name="menu-outline" color={color} size={size + 10} />
+                ),
+              }}
+            />
+          </Tab.Navigator>
+        )
+      }
+    </NavigationContainer>
   );
-  
 };
 
 export default AppNavigator;
