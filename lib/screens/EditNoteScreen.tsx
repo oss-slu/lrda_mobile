@@ -342,30 +342,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
                 ))}
             </ScrollView>
           </View>
-          {media[0] && (
-            <View style={{ height: 280, marginLeft: 3 }}>
-              {media[0].getType() === "image" ? (
-                <TouchableOpacity onPress={() => callGoBig(0)}>
-                  <LoadingImage
-                    imageURI={media[0].getUri()}
-                    type={"photo"}
-                    isImage={true}
-                    height={280}
-                    width={width - 6}
-                  />
-                </TouchableOpacity>
-              ) : (
-                <Video
-                  source={{ uri: media[0].getUri() }}
-                  resizeMode={ResizeMode.COVER}
-                  shouldPlay={true}
-                  useNativeControls={true}
-                  isLooping={true}
-                  style={NotePageStyles.video}
-                />
-              )}
-            </View>
-          )}
+        
 
           <View
             style={[
