@@ -6,6 +6,8 @@ import {
   ScrollView,
   useWindowDimensions,
   Text,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -119,8 +121,17 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   };
 
   const addImageToEditor = (imageUri: string) => {
-    richTextRef.current?.insertImage(imageUri);
+    const customStyle = `
+      max-width: 50%; /* Set max width to 25% */
+      height: auto; /* Maintain aspect ratio */
+      /* Additional CSS properties for sizing */
+    `;
+  
+    const imgTag = `<img src="${imageUri}" style="${customStyle}" />`;
+  
+    richTextRef.current?.insertHTML(imgTag);
   };
+  
   
 
   const handleSaveNote = async () => {
@@ -346,7 +357,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
 
           <View
             style={[
-              { paddingBottom: keyboardOpen ? 50 : 150 },
+              { paddingBottom: keyboardOpen ? 200 : 200 },
               { minHeight: 900 },
             ]}
           >
