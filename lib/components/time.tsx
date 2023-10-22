@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet,Button} from "react-native";
+import { View, Text, StyleSheet ,Button} from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 export function formatToLocalDateString(date: Date): string {
@@ -24,7 +24,7 @@ export function formatToLocalDateString(date: Date): string {
   const formattedDate = localTime.toLocaleDateString("en-US", dateOptions);
   const formattedTime = localTime.toLocaleTimeString("en-US", timeOptions);
 
-  return formattedDate;
+  return `${formattedDate}\n${formattedTime}`;
 }
 
 export default function LocationWindow({
@@ -38,6 +38,7 @@ export default function LocationWindow({
   const [chosenDate, setChosenDate] = useState(new Date());
   const [chosenTime, setChosenTime] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
+  const [savedDateTime, setSavedDateTime] = useState<null | Date>(null);
 
   useEffect(() => {
     setDate(time);
@@ -62,38 +63,43 @@ export default function LocationWindow({
       chosenTime.getMinutes()
     );
     setTime(combinedDate);
-    setShowPicker(false); // Close the picker after saving.
+    setSavedDateTime(combinedDate); // Store the saved date and time
+    setShowPicker(false);
   };
-
-
 
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Date & Time</Text>
-      <View style={{ flexDirection: "row" }}>
-        <Button title="Select Date & Time" onPress={() => setShowPicker(true)} />
-        {showPicker && (
-          <View>
-            <DateTimePicker
-              testID="datePicker"
-              value={chosenDate}
-              mode={"date"}
-              is24Hour={true}
-              display="default"
-              onChange={onChangeDate}
-            />
-            <DateTimePicker
-              testID="timePicker"
-              value={chosenTime}
-              mode={"time"}
-              is24Hour={true}
-              display="default"
-              onChange={onChangeTime}
-            />
-            <Button title="Save" onPress={saveDateTime} />
-          </View>
-        )}
-      </View>
+      {showPicker ? (
+          <View style={styles.dateTimePickerContainer}>
+    <DateTimePicker
+      testID="datePicker"
+      value={chosenDate}
+      mode={"date"}
+      is24Hour={true}
+      display="default"
+      onChange={onChangeDate}
+    />
+    <DateTimePicker
+      testID="timePicker"
+      value={chosenTime}
+      mode={"time"}
+      is24Hour={true}
+      display="default"
+      onChange={onChangeTime}
+    />
+      <Button title="Save" onPress={saveDateTime} />
+    </View>
+) : (
+  <View>
+    <View style={styles.savedTimeContainer}>
+      <Text style={styles.savedTime}>
+        {formatToLocalDateString(savedDateTime || time)}
+      </Text>
+    </View>
+    <Button title="Select Date & Time" onPress={() => setShowPicker(true)} />
+  </View>
+)}
     </View>
   );
 }
@@ -108,7 +114,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 5,
+    marginBottom: 1,
   },
   input: {
     width: "100%",
@@ -118,4 +124,15 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 10,
   },
+  dateTimePickerContainer: {
+    flexDirection: "row", 
+  },
+  savedTimeContainer: {
+    alignItems: "center",
+    marginTop: 10,
+  },
+  savedTime: {
+    fontSize: 16,
+  },
 });
+
