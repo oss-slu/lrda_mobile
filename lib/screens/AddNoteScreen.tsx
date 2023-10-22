@@ -75,7 +75,15 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   };
 
   const addImageToEditor = (imageUri: string) => {
-    richTextRef.current?.insertImage(imageUri);
+    const customStyle = `
+      max-width: 50%;
+      height: auto; /* Maintain aspect ratio */
+      /* Additional CSS properties for sizing */
+    `;
+  
+    const imgTag = `<img src="${imageUri}" style="${customStyle}" />`;
+  
+    richTextRef.current?.insertHTML(imgTag);
   };
 
   const saveNote = async () => {
@@ -295,7 +303,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           </View>
           <View
             style={[
-              { paddingBottom: keyboardOpen ? 50 : 150 },
+              { paddingBottom: keyboardOpen ? 200 : 200 },
               { minHeight: 900 },
             ]}
           >
@@ -316,7 +324,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
                 handleScroll(position);
               }}
             />
-            <View style={{ height: keyboardOpen ? 590 : 270 }} />
+            <View style={{ height: keyboardOpen ? 400 : 90 }} />
           </View>
         </ScrollView>
       </View>

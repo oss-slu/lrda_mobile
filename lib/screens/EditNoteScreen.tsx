@@ -122,7 +122,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
 
   const addImageToEditor = (imageUri: string) => {
     const customStyle = `
-      max-width: 50%; /* Set max width to 25% */
+      max-width: 50%;
       height: auto; /* Maintain aspect ratio */
       /* Additional CSS properties for sizing */
     `;
