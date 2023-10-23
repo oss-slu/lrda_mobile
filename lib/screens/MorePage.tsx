@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import {
   View,
   Text,
@@ -9,15 +9,25 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Dimensions,
+  Switch
 } from "react-native";
 import Accordion from "@gapur/react-native-accordion";
 import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
+import { useTheme } from "../../lib/components/ThemeProvider";
 
 const user = User.getInstance();
 const { width, height } = Dimensions.get("window");
 
 export default function MorePage() {
+
+  const { theme, isDarkmode, setIsDarkmode } = useTheme();
+
+  const toggleDarkmode = useTheme().toggleDarkmode;
+  const handleToggleDarkMode = () => {
+    toggleDarkmode(); 
+  };
+
   const handleEmail = () => {
     const emailAddress = "yashkamal.bhatia@slu.edu";
     const subject = "Bug Report on 'Where's Religion?'";
@@ -30,9 +40,97 @@ export default function MorePage() {
     Linking.openURL(emailUrl);
   };
 
-  function handleSettingsPress() {
-    // Function that messes with the styling of the screens to switch between Dark and Light Mode
-  }
+  const styles = StyleSheet.create({
+    header: {
+      backgroundColor: theme.primaryColor,
+      padding: height * 0.01,
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: height * 0.04,
+    },
+    headText: {
+      fontSize: 35,
+      fontWeight: "bold",
+      color: theme.text,
+    },
+    container: {
+      flexGrow: 1,
+      justifyContent: "flex-start",
+      alignItems: "center",
+      color: theme.primaryColor,
+    },
+    textContainer: {
+      width: "100%",
+      backgroundColor: theme.primaryColor,
+    },
+    titleText: {
+      alignSelf: "center",
+      fontSize: 40,
+      fontWeight: "600",
+      marginBottom: 10,
+      color: theme.text,
+    },
+    headerContainer: {
+      width: "100%",
+      color: theme.text,
+    },
+    headerText: {
+      fontSize: 18,
+      fontWeight: "500",
+      color: theme.text,
+    },
+    text: {
+      alignSelf: "center",
+      fontSize: 16,
+      lineHeight: 28,
+      color: theme.text,
+    },
+    logout: {
+      flexDirection: "row",
+      backgroundColor: theme.logout,
+      justifyContent: "center",
+      alignItems: "center",
+      height: 50,
+      width: "80%",
+      borderRadius: 15,
+      marginTop: 60,
+      marginBottom: 100,
+    },
+    logoutText: {
+      marginLeft: 5,
+      marginRight: 10,
+      fontSize: 20,
+      fontWeight: "600",
+      maxWidth: "100%",
+      color: theme.logoutText,
+    },
+    buttonContainer: {
+      alignItems: "center",
+      marginTop: 12,
+    },
+    switch: {
+      width: "94%",
+      backgroundColor: "white",
+      padding: 12,
+      borderRadius: 10,
+      justifyContent: "space-between"
+    },
+    switchText: {
+      color: theme.text,
+      marginLeft: 9,
+      fontSize: 18,
+      fontWeight: "500",
+    },
+    switchContainer: {
+      width: "94%",
+      backgroundColor: theme.secondaryColor,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: "space-between",
+      borderRadius: 10,
+      padding: 6,
+    },
+  });
 
   return (
   <>
@@ -52,7 +150,7 @@ export default function MorePage() {
               }} />
           </View>
           <View style={styles.textContainer}>
-            <Accordion headerTitleStyle={styles.headerText} headerTitle="Resources">
+            <Accordion style={{ backgroundColor: theme.secondaryColor }} headerTitleStyle={styles.headerText} headerTitle="Resources">
               <TouchableOpacity
                 onPress={() => Linking.openURL(
                   "http://lived-religion-dev.rerum.io/deer-lr/dashboard.html"
@@ -72,15 +170,16 @@ export default function MorePage() {
                 onPress={() => handleEmail()}
               ><Text style={styles.headerText}>{"\t"}Report a Bug{"\n"}</Text></TouchableOpacity>
             </Accordion>
-            <Accordion headerTitleStyle={styles.headerText} headerTitle="Meet our Team">
-              <Text>
+            <Accordion style={{ backgroundColor: theme.secondaryColor }} headerTitleStyle={styles.headerText} headerTitle="Meet our Team">
+              <Text style={{ color: theme.text }}>
                 {'\n'}Insert Team Photo
               </Text>
-              <Text>{'\n'}Insert Team Message</Text>
+              <Text style={{ color: theme.text }}>{'\n'}Insert Team Message</Text>
             </Accordion>
-            <Accordion headerTitleStyle={styles.headerText} headerTitle="Frequently Asked Questions">
+            <Accordion style={{ backgroundColor: theme.secondaryColor }} headerTitleStyle={styles.headerText} headerTitle="Frequently Asked Questions">
               <View style={styles.headerContainer}>
                 <Accordion
+                  style={{ backgroundColor: theme.secondaryColor }}
                   headerTitleStyle={styles.headerText}
                   headerTitle="What can users do?"
                 >
@@ -92,6 +191,7 @@ export default function MorePage() {
               </View>
               <View style={styles.headerContainer}>
                 <Accordion
+                  style={{ backgroundColor: theme.secondaryColor }}
                   headerTitleStyle={styles.headerText}
                   headerTitle="Who is it for?"
                 >
@@ -103,6 +203,7 @@ export default function MorePage() {
               </View>
               <View style={styles.headerContainer}>
                 <Accordion
+                  style={{ backgroundColor: theme.secondaryColor }}
                   headerTitleStyle={styles.headerText}
                   headerTitle="What's unique?"
                 >
@@ -114,6 +215,7 @@ export default function MorePage() {
               </View>
               <View style={styles.headerContainer}>
                 <Accordion
+                  style={{ backgroundColor: theme.secondaryColor }}
                   headerTitleStyle={styles.headerText}
                   headerTitle="Our Mission"
                 >
@@ -125,6 +227,7 @@ export default function MorePage() {
               </View>
               <View style={styles.headerContainer}>
                 <Accordion
+                  style={{ backgroundColor: theme.secondaryColor }}
                   headerTitleStyle={styles.headerText}
                   headerTitle="Why use 'Where's Religion?'"
                 >
@@ -136,93 +239,25 @@ export default function MorePage() {
               </View>
             </Accordion>
             <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.button} onPress={() => handleSettingsPress()}>
-                <Text style={styles.buttonText}>Dark Mode</Text>
-              </TouchableOpacity>
+              <View style={styles.switchContainer}>
+                <Text style={styles.switchText}>Dark Mode</Text>
+                <Switch
+                  trackColor={{ false: '#767577', true: '#81b0ff' }}
+                  thumbColor={isDarkmode ? '#f5dd4b' : '#f4f3f4'}
+                  ios_backgroundColor="#3e3e3e"
+                  onValueChange={handleToggleDarkMode}
+                  value={isDarkmode}
+                />
             </View>
           </View>
-          <TouchableOpacity style={styles.logout} onPress={() => user.logout()}>
-            <Text style={styles.logoutText}>Logout</Text>
-            <Ionicons name={"log-out-outline"} size={30} color="white" />
-          </TouchableOpacity>
+          </View>
+          <View style = {{ backgroundColor: theme.primaryColor , width: '100%', alignItems: 'center'}}>
+            <TouchableOpacity style={styles.logout} onPress={() => user.logout()}>
+              <Text style={styles.logoutText}>Logout</Text>
+              <Ionicons name={"log-out-outline"} size={30} color={theme.primaryColor} />
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </SafeAreaView></>
   );
 }
-
-const styles = StyleSheet.create({
-  header: {
-    backgroundColor: "white",
-    padding: height * 0.01,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: height * 0.04,
-  },
-  headText: {
-    fontSize: 35,
-    fontWeight: "bold",
-    color: "black",
-  },
-  container: {
-    flexGrow: 1,
-    justifyContent: "flex-start",
-    alignItems: "center",
-  },
-  textContainer: {
-    marginTop: 5,
-    width: "100%",
-  },
-  titleText: {
-    alignSelf: "center",
-    fontSize: 40,
-    fontWeight: "600",
-    marginBottom: 10,
-  },
-  headerContainer: {
-    width: "100%",
-  },
-  headerText: {
-    fontSize: 18,
-    fontWeight: "500",
-  },
-  text: {
-    alignSelf: "center",
-    fontSize: 16,
-    lineHeight: 28,
-  },
-  logout: {
-    flexDirection: "row",
-    backgroundColor: "black",
-    justifyContent: "center",
-    alignItems: "center",
-    height: 50,
-    width: "80%",
-    borderRadius: 15,
-    marginTop: 60,
-    marginBottom: 100,
-  },
-  logoutText: {
-    marginLeft: 5,
-    marginRight: 10,
-    fontSize: 20,
-    fontWeight: "600",
-    maxWidth: "100%",
-    color: "white",
-  },
-  buttonContainer: {
-    alignItems: "center",
-    marginTop: 12,
-  },
-  button: {
-    width: "94%",
-    backgroundColor: "white",
-    padding: 12,
-    borderRadius: 10,
-  },
-  buttonText: {
-    color: "black",
-    marginLeft: 6,
-    fontSize: 18,
-    fontWeight: "500",
-  },
-});

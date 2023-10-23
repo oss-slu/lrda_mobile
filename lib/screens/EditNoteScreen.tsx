@@ -28,7 +28,7 @@ import {
   actions,
 } from "react-native-pell-rich-editor";
 import LoadingImage from "../components/loadingImage";
-import { NotePageStyles } from "../../styles/pages/NoteStyles";
+import NotePageStyles from "../../styles/pages/NoteStyles";
 
 const user = User.getInstance();
 
@@ -150,30 +150,30 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
 
   return (
     <View>
-      <View style={NotePageStyles.topContainer}>
+      <View style={NotePageStyles().topContainer}>
         <TouchableOpacity
-          style={NotePageStyles.topButtons}
+          style={NotePageStyles().topButtons}
           onPress={owner ? handleSaveNote : () => navigation.goBack()}
         >
           <Ionicons name="arrow-back-outline" size={30} color="white" />
         </TouchableOpacity>
         <TextInput
           placeholder="Title Field Note"
-          style={NotePageStyles.title}
+          style={NotePageStyles().title}
           value={title}
           onChangeText={setTitle}
         />
         {owner ? (
           isPublished ? (
             <TouchableOpacity
-              style={NotePageStyles.topButtons}
+              style={NotePageStyles().topButtons}
               onPress={() => setIsPublished(!isPublished)}
             >
               <Ionicons name="share" size={30} color="white" />
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
-              style={NotePageStyles.topButtons}
+              style={NotePageStyles().topButtons}
               onPress={() => setIsPublished(!isPublished)}
             >
               <Ionicons name="share-outline" size={30} color="white" />
@@ -183,7 +183,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           <View />
         )}
       </View>
-      <View style={NotePageStyles.keyContainer}>
+      <View style={NotePageStyles().keyContainer}>
         <TouchableOpacity
           onPress={() => {
             setViewMedia(!viewMedia);
@@ -193,7 +193,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             setIsTime(false);
           }}
         >
-          <Ionicons name="images-outline" size={30} color="black" />
+          <Ionicons name="images-outline" size={30} color={NotePageStyles().saveText.color} />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
@@ -204,7 +204,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             setIsTime(false);
           }}
         >
-          <Ionicons name="mic-outline" size={30} color="black" />
+          <Ionicons name="mic-outline" size={30} color={NotePageStyles().saveText.color} />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
@@ -215,7 +215,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             setIsTime(false);
           }}
         >
-          <Ionicons name="location-outline" size={30} color="black" />
+          <Ionicons name="location-outline" size={30} color={NotePageStyles().saveText.color} />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
@@ -226,7 +226,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             setIsTime(!isTime);
           }}
         >
-          <Ionicons name="time-outline" size={30} color="black" />
+          <Ionicons name="time-outline" size={30} color={NotePageStyles().saveText.color} />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
@@ -237,10 +237,10 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             setIsTime(false);
           }}
         >
-          <Ionicons name="pricetag-outline" size={30} color="black" />
+          <Ionicons name="pricetag-outline" size={30} color={NotePageStyles().saveText.color} />
         </TouchableOpacity>
       </View>
-      <View style={{ backgroundColor: "white" }}>
+      <View style={{ backgroundColor: NotePageStyles().container.backgroundColor }}>
         <PhotoScroller
           ref={photoScrollerRef}
           active={viewMedia}
@@ -258,6 +258,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         {isTime && <TimeWindow time={time} setTime={setTime} />}
       </View>
       <RichToolbar
+        style={NotePageStyles().container}
         editor={richTextRef}
         actions={[
           actions.keyboard,
@@ -271,11 +272,11 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           actions.indent,
           actions.outdent,
         ]}
-        iconTint={"#000"}
+        iconTint={NotePageStyles().saveText.color}
         selectedIconTint={"#2095F2"}
       />
 
-      <View style={NotePageStyles.container}>
+      <View style={NotePageStyles().container}>
         <ScrollView
           nestedScrollEnabled={true}
           showsVerticalScrollIndicator={false}
@@ -361,7 +362,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
                   shouldPlay={true}
                   useNativeControls={true}
                   isLooping={true}
-                  style={NotePageStyles.video}
+                  style={NotePageStyles().video}
                 />
               )}
             </View>
@@ -375,7 +376,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           >
             <RichEditor
               ref={(r) => (richTextRef.current = r)}
-              style={NotePageStyles.input}
+              style={NotePageStyles().input}
               editorStyle={{
                 contentCSSText: `
                   position: absolute; 

@@ -23,7 +23,7 @@ import {
   RichToolbar,
   actions,
 } from "react-native-pell-rich-editor";
-import { NotePageStyles } from "../../styles/pages/NoteStyles";
+import NotePageStyles from "../../styles/pages/NoteStyles";
 
 const user = User.getInstance();
 
@@ -113,34 +113,35 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
 
   return (
     <View>
-      <View style={NotePageStyles.topContainer}>
-        <TouchableOpacity style={NotePageStyles.topButtons} onPress={saveNote}>
-          <Ionicons name="arrow-back-outline" size={30} color="white" />
+      <View style={NotePageStyles().topContainer}>
+        <TouchableOpacity style={NotePageStyles().topButtons} onPress={saveNote}>
+          <Ionicons name="arrow-back-outline" size={30} color={NotePageStyles().saveText.color} />
         </TouchableOpacity>
         <TextInput
-          style={NotePageStyles.title}
+          style={NotePageStyles().title}
           placeholder="Title Field Note"
+          placeholderTextColor={NotePageStyles().title.color}
           onChangeText={(text) => setTitleText(text)}
           value={titleText}
         />
 
         {isPublished ? (
           <TouchableOpacity
-            style={NotePageStyles.topButtons}
+            style={NotePageStyles().topButtons}
             onPress={() => setIsPublished(!isPublished)}
           >
-            <Ionicons name="share" size={30} color="white" />
+            <Ionicons name="share" size={30} color={NotePageStyles().saveText.color} />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
-            style={NotePageStyles.topButtons}
+            style={NotePageStyles().topButtons}
             onPress={() => setIsPublished(!isPublished)}
           >
-            <Ionicons name="share-outline" size={30} color="white" />
+            <Ionicons name="share-outline" size={30} color={NotePageStyles().saveText.color} />
           </TouchableOpacity>
         )}
       </View>
-      <View style={NotePageStyles.keyContainer}>
+      <View style={NotePageStyles().keyContainer}>
         <TouchableOpacity
           onPress={() => {
             setViewMedia(!viewMedia);
@@ -151,7 +152,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           }}
           testID="images-icon"
         >
-          <Ionicons name="images-outline" size={30} color="black" />
+          <Ionicons name="images-outline" size={30} color={NotePageStyles().saveText.color} />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
@@ -162,7 +163,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             setIsTime(false);
           }}
         >
-          <Ionicons name="mic-outline" size={30} color="black" />
+          <Ionicons name="mic-outline" size={30} color={NotePageStyles().saveText.color} />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
@@ -173,7 +174,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             setIsTime(false);
           }}
         >
-          <Ionicons name="location-outline" size={30} color="black" />
+          <Ionicons name="location-outline" size={30} color={NotePageStyles().saveText.color} />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
@@ -184,7 +185,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             setIsTime(!isTime);
           }}
         >
-          <Ionicons name="time-outline" size={30} color="black" />
+          <Ionicons name="time-outline" size={30} color={NotePageStyles().saveText.color} />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
@@ -195,10 +196,10 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             setIsTime(false);
           }}
         >
-          <Ionicons name="pricetag-outline" size={30} color="black" />
+          <Ionicons name="pricetag-outline" size={30} color={NotePageStyles().saveText.color} />
         </TouchableOpacity>
       </View>
-      <View style={{ backgroundColor: "white" }}>
+      <View style={NotePageStyles().container }>
         <PhotoScroller active={viewMedia} newMedia={newMedia} setNewMedia={setNewMedia} insertImageToEditor={addImageToEditor} />
         {viewAudio && (
           <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
@@ -210,6 +211,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         {isTime && <TimeWindow time={time} setTime={setTime} />}
       </View>
       <RichToolbar
+        style={NotePageStyles().container}
         editor={richTextRef}
         actions={[
           actions.keyboard,
@@ -223,10 +225,10 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           actions.indent,
           actions.outdent,
         ]}
-        iconTint={"#000"}
+        iconTint={NotePageStyles().saveText.color}
         selectedIconTint={"#2095F2"}
       />
-      <View style={NotePageStyles.container}>
+      <View style={NotePageStyles().container}>
         <ScrollView
           nestedScrollEnabled={true}
           showsVerticalScrollIndicator={false}
@@ -301,7 +303,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           >
             <RichEditor
               ref={(r) => (richTextRef.current = r)}
-              style={NotePageStyles.input}
+              style={{ ...NotePageStyles().input, backgroundColor: NotePageStyles().title.color }}
               editorStyle={{
                 contentCSSText: `
                   position: absolute; 

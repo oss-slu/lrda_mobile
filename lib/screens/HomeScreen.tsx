@@ -5,6 +5,7 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
+  StyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
@@ -16,11 +17,10 @@ import { SwipeListView } from "react-native-swipe-list-view";
 import NoteSkeleton from "../components/noteSkeleton";
 import LoadingImage from "../components/loadingImage";
 import { formatToLocalDateString } from "../components/time";
-import { HomeStyles } from "../../styles/pages/HomeStyles";
-import { lightTheme, darkTheme } from "../../styles/colors";
+import { ThemeProvider, useTheme } from '../components/ThemeProvider';
+import Constants from "expo-constants";
 
 const user = User.getInstance();
-const globalTheme = lightTheme;
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -31,6 +31,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [reversed, setReversed] = useState(false);
   const [rendering, setRendering] = useState(true);
   const [userInitials, setUserInitials] = useState("N/A");
+  
+  const { theme } = useTheme();
+
   let textLength = 16;
 
   useEffect(() => {
@@ -120,15 +123,163 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     setUpdateCounter(updateCounter + 1);
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      paddingTop: Constants.statusBarHeight - 20,
+      flex: 1,
+      backgroundColor: theme.primaryColor,
+    },
+    pfpText: {
+      fontWeight: "600",
+      fontSize: 20,
+      alignSelf: "center",
+      color: theme.primaryColor,
+    },
+    shareColor: {
+      color: theme.text,
+    },
+    highlightColor: {
+      color: theme.text,
+    },
+    backColor: {
+      color: 'red',
+    },
+    userPhoto: {
+      height: 50,
+      width: 50,
+      borderRadius: 50,
+      alignContent: "center",
+      justifyContent: "center",
+      backgroundColor: theme.text,
+    },
+    noteTitle: {
+      fontSize: 20,
+      fontWeight: "600",
+      maxWidth: "100%",
+      flexShrink: 1,
+      color: theme.text,
+    },
+    noteText: {
+      marginTop: 10,
+      fontSize: 18,
+      color: theme.text,
+    },
+    emptyContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    addButton: {
+      position: "absolute",
+      bottom: 20,
+      right: 20,
+      backgroundColor: theme.text,
+      borderRadius: 50,
+      width: 50,
+      height: 50,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    topView: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 5,
+    },
+    noteContainer: {
+      justifyContent: "space-between",
+      alignItems: "center",
+      alignSelf: "center",
+      backgroundColor: theme.secondaryColor,
+      borderRadius: 20,
+      marginBottom: 10,
+      width: "98%",
+      padding: 10,
+      flexDirection: "row",
+      height: 120,
+    },
+    filtersContainer: {
+      minHeight: 30,
+      alignSelf: "center",
+      borderRadius: 20,
+      paddingHorizontal: 5,
+      maxHeight: 30,
+      marginBottom: 17,
+      zIndex: 10,
+    },
+    filters: {
+      justifyContent: "center",
+      borderColor: theme.tertiaryColor,
+      borderWidth: 2,
+      borderRadius: 30,
+      marginRight: 10,
+      paddingHorizontal: 10,
+      zIndex: 10,
+    },
+    filtersSelected: {
+      justifyContent: "center",
+      backgroundColor: theme.logout,
+      fontSize: 22,
+      borderRadius: 30,
+      marginRight: 10,
+      paddingHorizontal: 10,
+    },
+    selectedFont: {
+      fontSize: 17,
+      color: theme.logoutText,
+      fontWeight: "700",
+    },
+    filterFont: {
+      fontSize: 16,
+      fontWeight: "600",
+      color: theme.text,
+    },
+    title: {
+      fontSize: 40,
+      fontWeight: "bold",
+      lineHeight: 80,
+      color: theme.text,
+      marginLeft: 5,
+      marginBottom: "-1%",
+    },
+    backRightBtn: {
+      alignItems: "flex-end",
+      bottom: 0,
+      justifyContent: "center",
+      position: "absolute",
+      top: 0,
+      width: 75,
+      paddingRight: 17,
+    },
+    backRightBtnRight: {
+      backgroundColor: theme.primaryColor,
+      width: "52%",
+      right: 0,
+      borderTopRightRadius: 20,
+      borderBottomRightRadius: 20,
+    },
+    rowBack: {
+      alignItems: "center",
+      backgroundColor: theme.primaryColor,
+      flex: 1,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      paddingLeft: 15,
+      margin: 5,
+      marginBottom: 15,
+      borderRadius: 20,
+    },
+  });
+
   const sideMenu = (data: any, rowMap: any) => {
     return (
-      <View style={HomeStyles.rowBack} key={data.index}>
+      <View style={styles.rowBack} key={data.index}>
         <TouchableOpacity>
           <TouchableOpacity onPress={() => publishNote(data.item.id, rowMap)}>
-            <Ionicons name="share" size={30} color="black" />
+            <Ionicons name="share" size={30} color={'green'} />
           </TouchableOpacity>
         </TouchableOpacity>
-        <View style={[HomeStyles.backRightBtn, HomeStyles.backRightBtnRight]}>
+        <View style={[styles.backRightBtn, styles.backRightBtnRight]}>
           {isPrivate ? (
             <TouchableOpacity
               style={{
@@ -142,7 +293,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
               <Ionicons
                 name="trash-outline"
                 size={24}
-                color={HomeStyles.backColor.color}
+                color={styles.backColor.color}
               />
             </TouchableOpacity>
           ) : null}
@@ -225,7 +376,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       <TouchableOpacity
         key={item.id}
         activeOpacity={1}
-        style={HomeStyles.noteContainer}
+        style={styles.noteContainer}
         onPress={() =>
           navigation.navigate("EditNote", {
             note: item,
@@ -252,13 +403,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           )}
 
           <View style={{ position: "absolute", left: 120 }}>
-            <Text style={HomeStyles.noteTitle}>
+            <Text style={styles.noteTitle}>
               {item.title.length > textLength
                 ? item.title.slice(0, textLength) + "..."
                 : item.title}
             </Text>
 
-            <Text style={HomeStyles.noteText}>{showTime}</Text>
+            <Text style={styles.noteText}>{showTime}</Text>
           </View>
         </View>
         <View
@@ -273,13 +424,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             <Ionicons
               name="share"
               size={24}
-              color={HomeStyles.shareColor.color}
+              color={styles.shareColor.color}
             />
           ) : (
             <Ionicons
               name="share-outline"
               size={24}
-              color={HomeStyles.highlightColor.color}
+              color={styles.highlightColor.color}
             />
           )}
         </View>
@@ -288,8 +439,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   };
 
   return (
-    <View style={HomeStyles.container}>
-      <View style={HomeStyles.topView}>
+    <View style={styles.container}>
+      <View style={styles.topView}>
         <View
           style={{
             flexDirection: "row",
@@ -300,31 +451,31 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         >
           <TouchableOpacity
             style={[
-              HomeStyles.userPhoto,
-              { backgroundColor: HomeStyles.highlightColor.color },
+              styles.userPhoto,
+              { backgroundColor: styles.highlightColor.color },
             ]}
             onPress={() => {
               navigation.navigate("AccountPage");
             }}
           >
-            <Text style={HomeStyles.pfpText}>{userInitials}</Text>
+            <Text style={styles.pfpText}>{userInitials}</Text>
           </TouchableOpacity>
-          <Text style={HomeStyles.title}>Field Notes</Text>
-          <View style={HomeStyles.userPhoto} />
+          <Text style={styles.title}>Field Notes</Text>
+          <View style={styles.userPhoto} />
         </View>
       </View>
       <ScrollView
-        style={HomeStyles.filtersContainer}
+        style={styles.filtersContainer}
         horizontal={true}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingRight: 20 }}
       >
         <TouchableOpacity
           onPress={() => handleFilters("private")}
-          style={isPrivate ? HomeStyles.filtersSelected : HomeStyles.filters}
+          style={isPrivate ? styles.filtersSelected : styles.filters}
         >
           <Text
-            style={isPrivate ? HomeStyles.selectedFont : HomeStyles.filterFont}
+            style={isPrivate ? styles.selectedFont : styles.filterFont}
           >
             {rendering
               ? "Private"
@@ -336,10 +487,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
         <TouchableOpacity
           onPress={() => handleFilters("published")}
-          style={published ? HomeStyles.filtersSelected : HomeStyles.filters}
+          style={published ? styles.filtersSelected : styles.filters}
         >
           <Text
-            style={published ? HomeStyles.selectedFont : HomeStyles.filterFont}
+            style={published ? styles.selectedFont : styles.filterFont}
           >
             {rendering
               ? "Published"
@@ -350,17 +501,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         </TouchableOpacity>
         <TouchableOpacity
           onPress={handleReverseOrder}
-          style={HomeStyles.filters}
+          style={styles.filters}
         >
-          <Text style={HomeStyles.filterFont}>Sort by Time</Text>
+          <Text style={styles.filterFont}>Sort by Time</Text>
         </TouchableOpacity>
       </ScrollView>
       {rendering ? <NoteSkeleton /> : renderList(notes)}
       <TouchableOpacity
-        style={HomeStyles.addButton}
+        style={styles.addButton}
         onPress={() => navigation.navigate("AddNote", { refreshPage })}
       >
-        <Ionicons name="add-outline" size={24} color="white" />
+        <Ionicons name="add-outline" size={26} color={theme.primaryColor} />
       </TouchableOpacity>
     </View>
   );

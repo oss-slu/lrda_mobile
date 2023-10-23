@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { NavigationContainer } from "@react-navigation/native";
+import { DarkTheme, DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import ExploreScreen from "../screens/mapPage/ExploreScreen.js";
@@ -17,6 +17,7 @@ import OnboardingScreen from "../screens/OnboardingScreen";
 import { getItem } from "../utils/async_storage";
 import { HomeScreenProps, RootTabParamList, EditNoteProps } from "../../types";
 import * as SplashScreen from 'expo-splash-screen';
+import { useTheme } from '../components/ThemeProvider';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -52,6 +53,7 @@ const HomeStack = () => {
 
 const AppNavigator: React.FC = () => {
   const [navState, setNavState] = useState<"loading" | "onboarding" | "login" | "home">("loading");
+  const { theme } = useTheme();
 
   useEffect(() => {
     const checkOnboarding = async () => {
