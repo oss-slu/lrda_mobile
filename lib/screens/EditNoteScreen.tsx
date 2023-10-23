@@ -6,6 +6,8 @@ import {
   ScrollView,
   useWindowDimensions,
   Text,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -119,8 +121,17 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   };
 
   const addImageToEditor = (imageUri: string) => {
-    richTextRef.current?.insertImage(imageUri);
+    const customStyle = `
+      max-width: 50%;
+      height: auto; /* Maintain aspect ratio */
+      /* Additional CSS properties for sizing */
+    `;
+  
+    const imgTag = `<img src="${imageUri}" style="${customStyle}" />`;
+  
+    richTextRef.current?.insertHTML(imgTag);
   };
+  
   
 
   const handleSaveNote = async () => {
@@ -342,34 +353,11 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
                 ))}
             </ScrollView>
           </View>
-          {media[0] && (
-            <View style={{ height: 280, marginLeft: 3 }}>
-              {media[0].getType() === "image" ? (
-                <TouchableOpacity onPress={() => callGoBig(0)}>
-                  <LoadingImage
-                    imageURI={media[0].getUri()}
-                    type={"photo"}
-                    isImage={true}
-                    height={280}
-                    width={width - 6}
-                  />
-                </TouchableOpacity>
-              ) : (
-                <Video
-                  source={{ uri: media[0].getUri() }}
-                  resizeMode={ResizeMode.COVER}
-                  shouldPlay={true}
-                  useNativeControls={true}
-                  isLooping={true}
-                  style={NotePageStyles.video}
-                />
-              )}
-            </View>
-          )}
+        
 
           <View
             style={[
-              { paddingBottom: keyboardOpen ? 50 : 150 },
+              { paddingBottom: keyboardOpen ? 200 : 200 },
               { minHeight: 900 },
             ]}
           >
@@ -386,7 +374,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
               placeholder="Write your note here"
               onChange={(text) => setText(text)}
               initialContentHTML={text}
-              //at first glance I believe changes need to be made here.
               onCursorPosition={(position) => {
                 handleScroll(position);
               }}
