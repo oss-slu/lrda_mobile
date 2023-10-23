@@ -75,32 +75,7 @@ function AudioContainer({
       }
     }
   };
-  const HIGH_QUALITY = {
-    isMeteringEnabled: true,
-    android: {
-      extension: '.mp3',
-      outputFormat: Audio.RECORDING_OPTION_ANDROID_OUTPUT_FORMAT_MPEG_4,
-      audioEncoder: Audio.RECORDING_OPTION_ANDROID_AUDIO_ENCODER_AAC,
-      sampleRate: 44100,
-      numberOfChannels: 2,
-      bitRate: 128000,
-    },
-    ios: {
-      extension: '.4ma',
-      outputFormat: Audio.RECORDING_OPTION_IOS_OUTPUT_FORMAT_MPEG4AAC,
-      audioQuality: Audio.RECORDING_OPTION_IOS_AUDIO_QUALITY_MAX,
-      sampleRate: 44100,
-      numberOfChannels: 2,
-      bitRate: 128000,
-      linearPCMBitDepth: 16,
-      linearPCMIsBigEndian: false,
-      linearPCMIsFloat: false,
-    },
-  }
-  const recordingOptions = {
-    ...Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY,
-    ...HIGH_QUALITY,
-  };
+
 
   async function startRecording() {
     setIsRecording(true);
@@ -113,9 +88,7 @@ function AudioContainer({
           allowsRecordingIOS: true,
         });
         
-        const recording = new Audio.Recording();
-        await recording.prepareToRecordAsync(recordingOptions);
-        await recording.startAsync();
+        const { recording } = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
 
           setRecording(recording);
         } else {

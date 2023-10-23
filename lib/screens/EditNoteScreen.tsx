@@ -376,6 +376,12 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             <RichEditor
               ref={(r) => (richTextRef.current = r)}
               style={NotePageStyles.input}
+              editorStyle={{
+                contentCSSText: `
+                  position: absolute; 
+                  top: 0; right: 0; bottom: 0; left: 0;
+                `,
+              }}
               autoCorrect={true}
               placeholder="Write your note here"
               onChange={(text) => setText(text)}
