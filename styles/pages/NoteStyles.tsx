@@ -3,9 +3,6 @@ import { lightTheme, darkTheme } from "../colors";
 import Constants from "expo-constants";
 import { useTheme } from "../../lib/components/ThemeProvider";
 
-// build out settings for dark/light mode configuration
-// const theme = darkTheme;
-
 const NotePageStyles = () => {
   const { theme } = useTheme();
 
