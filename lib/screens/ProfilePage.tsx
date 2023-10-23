@@ -16,6 +16,7 @@ import { PhotoType, VideoType } from "../models/media_class";
 import { ImageNote, ProfilePageProps } from "../../types";
 import DataConversion from "../utils/data_conversion";
 import ApiService from "../utils/api_calls";
+import { useTheme } from "../components/ThemeProvider";
 
 const user = User.getInstance();
 
@@ -26,6 +27,7 @@ export default function ProfilePage({ navigation }: ProfilePageProps) {
   const [count, setCount] = useState(0);
   const [userInitials, setUserInitials] = useState("N/A");
   const [userName, setUser] = useState("");
+  const { theme } = useTheme();
 
   useEffect(() => {
     (async () => {
@@ -81,6 +83,92 @@ export default function ProfilePage({ navigation }: ProfilePageProps) {
 
   let role = "Administrator";
   let fieldNotes = count;
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.primaryColor,
+    },
+    text: {
+      fontFamily: "HelveticaNeue",
+      color: theme.text,
+    },
+    image: {
+      flex: 1,
+      height: undefined,
+      width: undefined,
+    },
+    profileImage: {
+      width: 200,
+      height: 200,
+      borderRadius: 100,
+      overflow: "hidden",
+    },
+    add: {
+      backgroundColor: theme.primaryColor,
+      position: "absolute",
+      bottom: 0,
+      right: 0,
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      alignItems: "center", 
+      justifyContent: "center",
+    },
+    userPhoto: {
+      backgroundColor: theme.text,
+      height: 190,
+      width: 190,
+      borderRadius: 200,
+      alignContent: "center",
+      justifyContent: "center",
+    },
+    infoContainer: {
+      alignSelf: "center",
+      alignItems: "center",
+      marginTop: 16,
+    },
+    statsContainer: {
+      flexDirection: "row",
+      alignSelf: "center",
+      marginTop: 32,
+    },
+    statsBox: {
+      alignItems: "center",
+      flex: 1,
+    },
+    subText: {
+      fontSize: 12,
+      color: theme.text,
+      textTransform: "uppercase",
+      fontWeight: "500",
+    },
+    preview: {
+      width: 200,
+      height: 200,
+    },
+    recent: {
+      marginLeft: 78,
+      marginTop: 32,
+      marginBottom: 6,
+      fontSize: 10,
+    },
+    recentItem: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      marginBottom: 16,
+    },
+    activityIndicator: {
+      backgroundColor: theme.text,
+      padding: 4,
+      height: 12,
+      width: 12,
+      borderRadius: 6,
+      marginTop: 3,
+      marginRight: 20,
+    },
+  });
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -150,88 +238,3 @@ export default function ProfilePage({ navigation }: ProfilePageProps) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#FFF",
-  },
-  text: {
-    fontFamily: "HelveticaNeue",
-    color: "#52575D",
-  },
-  image: {
-    flex: 1,
-    height: undefined,
-    width: undefined,
-  },
-  profileImage: {
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    overflow: "hidden",
-  },
-  add: {
-    backgroundColor: "#41444B",
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  userPhoto: {
-    backgroundColor: "#F4DFCD",
-    height: 190,
-    width: 190,
-    borderRadius: 200,
-    alignContent: "center",
-    justifyContent: "center",
-  },
-  infoContainer: {
-    alignSelf: "center",
-    alignItems: "center",
-    marginTop: 16,
-  },
-  statsContainer: {
-    flexDirection: "row",
-    alignSelf: "center",
-    marginTop: 32,
-  },
-  statsBox: {
-    alignItems: "center",
-    flex: 1,
-  },
-  subText: {
-    fontSize: 12,
-    color: "#AEB5BC",
-    textTransform: "uppercase",
-    fontWeight: "500",
-  },
-  preview: {
-    width: 200,
-    height: 200,
-  },
-  recent: {
-    marginLeft: 78,
-    marginTop: 32,
-    marginBottom: 6,
-    fontSize: 10,
-  },
-  recentItem: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginBottom: 16,
-  },
-  activityIndicator: {
-    backgroundColor: "#CABFAB",
-    padding: 4,
-    height: 12,
-    width: 12,
-    borderRadius: 6,
-    marginTop: 3,
-    marginRight: 20,
-  },
-});

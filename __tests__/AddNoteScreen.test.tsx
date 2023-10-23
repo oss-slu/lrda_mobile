@@ -25,6 +25,12 @@ afterAll(() => {
   moxios.uninstall();
 });
 
+jest.mock('../lib/components/ThemeProvider', () => ({
+  useTheme: () => ({
+    theme: 'mockedTheme', // Provide a mocked theme object
+  }),
+}));
+
 describe("AddNoteScreen", () => {
   it("renders without crashing", () => {
       const wrapper = shallow(<AddNoteScreen />);

@@ -7,6 +7,12 @@ import React from 'react';
 import { shallow } from "enzyme";
 import AddNoteScreen from '../lib/screens/AddNoteScreen';
 
+jest.mock('../lib/components/ThemeProvider', () => ({
+  useTheme: () => ({
+    theme: 'mockedTheme', // Provide a mocked theme object
+  }),
+}));
+
 describe("AddNoteScreen", () => {
   it("adds image to editor", () => {
     const wrapper = shallow(<AddNoteScreen />);
