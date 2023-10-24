@@ -13,6 +13,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Note } from "../../../types";
 import RenderHTML from "react-native-render-html";
+import { useTheme } from "../../components/ThemeProvider"
+import { color } from "react-native-reanimated";
 
 interface Props {
   isVisible: boolean;
@@ -26,6 +28,7 @@ const NoteDetailModal: React.FC<Props> = memo(
     const [isTextTouched, setTextTouched] = useState(true);
     const [creatorName, setCreatorName] = useState("");
     const { height, width } = useWindowDimensions();
+    const { theme } = useTheme();
 
     useEffect(() => {
       setTextTouched(true);
@@ -82,6 +85,119 @@ const NoteDetailModal: React.FC<Props> = memo(
 
     const MemoizedRenderHtml = React.memo(RenderHTML);
 
+    const styles = StyleSheet.create({
+      closeButton: {
+        position: "absolute",
+        top: 50,
+        left: 20,
+        zIndex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.5,
+        shadowRadius: 2,
+        elevation: 3,
+        borderRadius: 25,
+        backgroundColor: theme.primaryColor,
+      },
+      closeIcon: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: theme.text,
+        alignItems: "center",
+        justifyContent: "center",
+      },
+      textContainer: {
+        padding: 10,
+        paddingLeft: 15, // Indentation for the body text
+        backgroundColor: theme.primaryColor,
+        borderTopColor: theme.text,
+        borderTopWidth: 2,
+      },
+      modalTitle: {
+        fontSize: 26,
+        fontWeight: "bold",
+        marginLeft: 15, // Less indent for title
+        marginBottom: 8,
+        color: theme.text,
+      },
+      modalText: {
+        fontSize: 18,
+        lineHeight: 24,
+        marginLeft: 15, // Uniform indentation for other texts
+        color: theme.text,
+      },
+      metaDataContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginLeft: 15,
+        marginRight: 15,
+        marginBottom: 10,
+      },
+      creatorContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+      },
+      creatorIcon: {
+        fontSize: 16,
+        color: theme.text,
+      },
+      creatorText: {
+        fontSize: 16,
+        color: theme.text,
+        marginLeft: 5,
+      },
+      dateContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+      },
+      dateIcon: {
+        fontSize: 16,
+        color: theme.text,
+      },
+      dateText: {
+        fontSize: 16,
+        color: theme.text,
+        marginLeft: 5,
+      },
+      timeContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+      },
+      timeIcon: {
+        fontSize: 16,
+        color: theme.text,
+      },
+      timeText: {
+        fontSize: 16,
+        color: theme.text,
+        marginLeft: 5,
+      },
+      imageContainer: {
+        width: "100%",
+        height: 360,
+        marginBottom: 2,
+        overflow: "hidden",
+        borderColor: '#e0e0e0'
+      },
+      image: {
+        width: "100%",
+        height: "100%",
+        resizeMode: "cover",
+      },
+      separator: {
+        // Divider line style
+        height: 1,
+        width: "90%",
+        backgroundColor: "#e0e0e0",
+        marginLeft: "5%",
+        marginRight: "5%",
+        marginBottom: 20,
+      },
+    });
+
     return (
       <Modal animationType="slide" transparent={false} visible={isVisible}>
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -134,16 +250,16 @@ const NoteDetailModal: React.FC<Props> = memo(
             <Text style={styles.modalTitle}>{note?.title}</Text>
             <View style={styles.metaDataContainer}>
               <View style={styles.creatorContainer}>
-                <Ionicons name="person-circle-outline" size={18} color="#555" />
+                <Ionicons name="person-circle-outline" size={18} color={theme.text} />
                 <Text style={styles.creatorText}>{creatorName}</Text>
               </View>
               <View style={styles.dateContainer}>
-                <Ionicons name="calendar-outline" size={18} color="#555" />
+                <Ionicons name="calendar-outline" size={18} color={theme.text} />
                 <Text style={styles.dateText}>{note?.time}</Text>
               </View>
             </View>
             <View key="Tags Container" style={{flexDirection: 'row', marginHorizontal: 15,}}>
-            <Ionicons name="pricetags-outline" size={20} color="#555" style={{marginRight: 10}}/>
+            <Ionicons name="pricetags-outline" size={20} color={theme.text} style={{marginRight: 10}}/>
 
             <ScrollView
               horizontal={true}
@@ -169,7 +285,7 @@ const NoteDetailModal: React.FC<Props> = memo(
                         left: 2,
                         borderLeftWidth: 2,
                         borderBottomWidth: 2,
-                        borderColor: "#555",
+                        borderColor: theme.text,
                         justifyContent: "center",
                         alignItems: "center",
                       }}
@@ -180,7 +296,7 @@ const NoteDetailModal: React.FC<Props> = memo(
                           width: 5,
                           left: 2,
                           borderRadius: 10,
-                          backgroundColor: "#555",
+                          backgroundColor: theme.text,
                           marginRight: 5,
                         }}
                       />
@@ -189,7 +305,7 @@ const NoteDetailModal: React.FC<Props> = memo(
                       style={{
                         borderTopRightRadius: 5,
                         borderBottomRightRadius: 5,
-                        borderColor: "#555",
+                        borderColor: theme.text,
                         borderRightWidth: 2,
                         borderBottomWidth: 2,
                         borderTopWidth: 2,
@@ -209,18 +325,18 @@ const NoteDetailModal: React.FC<Props> = memo(
               style={{
                 height: 2,
                 width: "100%",
-                backgroundColor: "#555",
+                backgroundColor: theme.text,
                 marginBottom: 10,
               }}
             ></View>
             {newNote ? (
               <MemoizedRenderHtml
-                baseStyle={{ color: "#666" }}
+                baseStyle={{ color: theme.text }}
                 contentWidth={width}
                 source={htmlSource}
               />
             ) : (
-              <Text style={styles.modalText}>{note?.description}</Text>
+              <Text style={{color: theme.text}}>{note?.description}</Text>
             )}
           </ScrollView>
         </View>
@@ -230,115 +346,3 @@ const NoteDetailModal: React.FC<Props> = memo(
 );
 
 export default NoteDetailModal;
-
-const styles = StyleSheet.create({
-  closeButton: {
-    position: "absolute",
-    top: 50,
-    left: 20,
-    zIndex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 2,
-    elevation: 3,
-    borderRadius: 25,
-  },
-  closeIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#f0f0f0",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  textContainer: {
-    padding: 10,
-    paddingLeft: 15, // Indentation for the body text
-    backgroundColor: "#fafafa",
-    borderTopColor: "#e0e0e0",
-    borderTopWidth: 2,
-  },
-  modalTitle: {
-    fontSize: 26,
-    fontWeight: "bold",
-    marginLeft: 15, // Less indent for title
-    marginBottom: 8,
-    color: "#2c3e50",
-  },
-  modalText: {
-    fontSize: 18,
-    lineHeight: 24,
-    marginLeft: 15, // Uniform indentation for other texts
-    color: "#34495e",
-  },
-  metaDataContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginLeft: 15,
-    marginRight: 15,
-    marginBottom: 10,
-  },
-  creatorContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  creatorIcon: {
-    fontSize: 16,
-    color: "#555",
-  },
-  creatorText: {
-    fontSize: 16,
-    color: "#555",
-    marginLeft: 5,
-  },
-  dateContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  dateIcon: {
-    fontSize: 16,
-    color: "#555",
-  },
-  dateText: {
-    fontSize: 16,
-    color: "#555",
-    marginLeft: 5,
-  },
-  timeContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  timeIcon: {
-    fontSize: 16,
-    color: "#555",
-  },
-  timeText: {
-    fontSize: 16,
-    color: "#555",
-    marginLeft: 5,
-  },
-  imageContainer: {
-    width: "100%",
-    height: 360,
-    marginBottom: 2,
-    overflow: "hidden",
-    borderColor: '#e0e0e0'
-  },
-  image: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "cover",
-  },
-  separator: {
-    // Divider line style
-    height: 1,
-    width: "90%",
-    backgroundColor: "#e0e0e0",
-    marginLeft: "5%",
-    marginRight: "5%",
-    marginBottom: 20,
-  },
-});

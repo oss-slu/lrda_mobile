@@ -51,7 +51,6 @@ const NotePageStyles = () => {
     input: {
       flex: 1,
       borderColor: theme.secondaryColor,
-      backgroundColor: theme.primaryColor,
       fontSize: 22,
       color: theme.text,
     },

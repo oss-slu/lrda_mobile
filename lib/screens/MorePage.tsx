@@ -47,9 +47,10 @@ export default function MorePage() {
       justifyContent: "center",
       alignItems: "center",
       marginTop: height * 0.04,
+      marginBottom: -8,
     },
     headText: {
-      fontSize: 35,
+      fontSize: 32,
       fontWeight: "bold",
       color: theme.text,
     },
@@ -242,9 +243,11 @@ export default function MorePage() {
               <View style={styles.switchContainer}>
                 <Text style={styles.switchText}>Dark Mode</Text>
                 <Switch
-                  trackColor={{ false: '#767577', true: '#81b0ff' }}
-                  thumbColor={isDarkmode ? '#f5dd4b' : '#f4f3f4'}
-                  ios_backgroundColor="#3e3e3e"
+                  trackColor={{
+                    false: 'black',
+                    true: theme.text
+                  }}
+                  thumbColor={theme.primaryColor}
                   onValueChange={handleToggleDarkMode}
                   value={isDarkmode}
                 />
