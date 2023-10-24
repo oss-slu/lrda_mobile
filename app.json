@@ -28,7 +28,9 @@
         "backgroundColor": "#ffffff"
       },
       "config": {
-        "googleMapsApiKey": "AIzaSyD_hN-XNLPsze7WetHBcvvqRcHDls72Rn8"
+        "googleMaps": {
+          "apiKey" : "AIzaSyD_hN-XNLPsze7WetHBcvvqRcHDls72Rn8"
+        }
       },
       "package": "register.edu.slu.cs.oss.lrda"
     },
