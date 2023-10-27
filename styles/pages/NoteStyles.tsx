@@ -50,6 +50,7 @@ const NotePageStyles = () => {
     },
     input: {
       flex: 1,
+      backgroundColor: 'black',
       borderColor: theme.secondaryColor,
       fontSize: 22,
       color: theme.text,
@@ -77,6 +78,7 @@ const NotePageStyles = () => {
     },
     saveText: {
       color: theme.text,
+      backgroundColor: 'black',
       fontWeight: "bold",
       fontSize: 12,
     },

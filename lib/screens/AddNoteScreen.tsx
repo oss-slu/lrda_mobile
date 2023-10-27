@@ -311,7 +311,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           >
             <RichEditor
               ref={(r) => (richTextRef.current = r)}
-              style={{ backgroundColor: 'red', ...NotePageStyles().input }}
+              style={{...NotePageStyles().input }}
               editorStyle={{
                 contentCSSText: `
                   position: absolute; 
