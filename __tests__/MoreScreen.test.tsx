@@ -36,8 +36,6 @@ describe("MorePage", () => {
   });
 });
 
-
-
 /*
     it("toggles dark mode correctly", () => {
         const wrapper = shallow(<MorePage />);

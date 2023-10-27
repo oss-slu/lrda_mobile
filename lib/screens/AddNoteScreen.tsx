@@ -267,7 +267,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
                         left: 2,
                         borderLeftWidth: 2,
                         borderBottomWidth: 2,
-                        borderColor: "black",
+                        borderColor: NotePageStyles().title.color,
                         justifyContent: "center",
                         alignItems: "center",
                       }}
@@ -278,7 +278,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
                           width: 5,
                           left: 2,
                           borderRadius: 10,
-                          backgroundColor: "black",
+                          backgroundColor: NotePageStyles().title.color,
                           marginRight: 5,
                         }}
                       />
@@ -287,7 +287,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
                       style={{
                         borderTopRightRadius: 5,
                         borderBottomRightRadius: 5,
-                        borderColor: "black",
+                        borderColor: NotePageStyles().title.color,
                         borderRightWidth: 2,
                         borderBottomWidth: 2,
                         borderTopWidth: 2,
@@ -297,7 +297,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
                         marginLeft: 10,
                       }}
                     >
-                      <Text style={{ textAlign: "center" }}>{tag}</Text>
+                      <Text style={{ textAlign: "center", color: NotePageStyles().title.color }}>{tag}</Text>
                     </View>
                   </View>
                 ))}

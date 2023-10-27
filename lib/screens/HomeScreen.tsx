@@ -154,6 +154,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       alignContent: "center",
       justifyContent: "center",
       backgroundColor: theme.text,
+      marginLeft: 8,
     },
     noteTitle: {
       fontSize: 20,
@@ -256,7 +257,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       paddingRight: 17,
     },
     backRightBtnRight: {
-      backgroundColor: theme.primaryColor,
+      backgroundColor: theme.tertiaryColor,
       width: "52%",
       right: 0,
       borderTopRightRadius: 20,
@@ -264,7 +265,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     },
     rowBack: {
       alignItems: "center",
-      backgroundColor: theme.primaryColor,
+      backgroundColor: theme.tertiaryColor,
       flex: 1,
       flexDirection: "row",
       justifyContent: "space-between",

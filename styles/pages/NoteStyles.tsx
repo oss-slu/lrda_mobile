@@ -25,7 +25,7 @@ const NotePageStyles = () => {
       color: theme.text,
     },
     topButtons: {
-      backgroundColor: theme.secondaryColor,
+      backgroundColor: theme.tertiaryColor,
       borderRadius: 50,
       width: 50,
       height: 50,
@@ -34,15 +34,16 @@ const NotePageStyles = () => {
       zIndex: 99,
     },
     container: {
-      backgroundColor: theme.primaryColor,
-      overflow: "hidden",
+      backgroundColor: theme.tertiaryColor,
+      marginBottom: 4,
+      // overflow: "hidden",
     },
     title: {
       height: 45,
       width: "70%",
-      borderColor: theme.secondaryColor,
+      borderColor: theme.text,
       borderWidth: 1,
-      borderRadius: 30,
+      borderRadius: 18,
       paddingHorizontal: 10,
       textAlign: "center",
       fontSize: 30,
@@ -51,7 +52,7 @@ const NotePageStyles = () => {
     input: {
       flex: 1,
       backgroundColor: 'black',
-      borderColor: theme.secondaryColor,
+      // borderColor: theme.secondaryColor,
       fontSize: 22,
       color: theme.text,
     },
