@@ -11,10 +11,10 @@ import {
   Dimensions,
   Switch
 } from "react-native";
-import Accordion from "@gapur/react-native-accordion";
 import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
 import { useTheme } from "../../lib/components/ThemeProvider";
+import Accordion from "@gapur/react-native-accordion";
 
 const user = User.getInstance();
 const { width, height } = Dimensions.get("window");
