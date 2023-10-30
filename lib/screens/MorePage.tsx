@@ -78,6 +78,12 @@ export default function MorePage() {
       color: theme.text,
     },
     headerText: {
+      fontSize: 28,
+      fontWeight: "bold",
+      color: theme.text,
+      alignSelf: "center",
+    },
+    FAQText: {
       fontSize: 22,
       fontWeight: "bold",
       color: theme.text,
@@ -110,7 +116,7 @@ export default function MorePage() {
     },
     buttonContainer: {
       alignItems: "center",
-      marginTop: 12,
+      marginTop: 40,
     },
     switch: {
       width: "94%",
@@ -135,7 +141,14 @@ export default function MorePage() {
       padding: 6,
     },
     padding: {
-      padding: 10, // Adjust the padding value as needed
+      padding: 13, // Adjust the padding value as needed
+    },
+    whiteBox: {
+      backgroundColor: 'white',
+      padding: 20,
+      borderWidth: 1, // Add a border to create the "hollow" effect
+      borderColor: 'white', // Set the border color to match the background color
+      borderRadius: 10, // Optional: add rounded corners
     },
   });
 
@@ -158,6 +171,7 @@ export default function MorePage() {
           </View>
 
           <View style={styles.textContainer}>
+
             <Text style={styles.headerText}>Resources</Text>
             <TouchableOpacity
               onPress={() =>
@@ -198,7 +212,7 @@ export default function MorePage() {
             <View style={{padding: 5}} />
 
           {/* FAQ Section 1 */}
-          <Text style={styles.headerText}>What can users do?</Text>
+          <Text style={styles.FAQText}>What can users do?</Text>
           <Text style={styles.text}>
             Explore religious traditions, find places of worship, engage in meaningful discussions.
           </Text>
@@ -206,7 +220,7 @@ export default function MorePage() {
           <View style={styles.padding} />
 
           {/* FAQ Section 2 */}
-          <Text style={styles.headerText}>Who is it for?</Text>
+          <Text style={styles.FAQText}>Who is it for?</Text>
           <Text style={styles.text}>
             Scholars, students, believers, and the curious about the world's religions.
           </Text>
@@ -214,7 +228,7 @@ export default function MorePage() {
           <View style={styles.padding} />
 
           {/* FAQ Section 3 */}
-          <Text style={styles.headerText}>What's unique?</Text>
+          <Text style={styles.FAQText}>What's unique?</Text>
           <Text style={styles.text}>
             Provides a modern method to capture experiences using the devices that are with us every day.
           </Text>
@@ -222,7 +236,7 @@ export default function MorePage() {
           <View style={styles.padding} />
 
           {/* FAQ Section 4 */}
-          <Text style={styles.headerText}>Our Mission</Text>
+          <Text style={styles.FAQText}>Our Mission</Text>
           <Text style={styles.text}>
             Connect people of diverse religious backgrounds, beliefs, and practices.
           </Text>
@@ -230,7 +244,7 @@ export default function MorePage() {
           <View style={styles.padding} />
 
           {/* FAQ Section 5 */}
-          <Text style={styles.headerText}>Why use 'Where's Religion?'</Text>
+          <Text style={styles.FAQText}>Why use 'Where's Religion?'</Text>
           <Text style={styles.text}>
             Explore religious traditions, find places of worship, engage in meaningful discussions.
           </Text>
