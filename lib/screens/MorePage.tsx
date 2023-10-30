@@ -64,6 +64,7 @@ export default function MorePage() {
     textContainer: {
       width: "100%",
       backgroundColor: theme.primaryColor,
+      paddingTop: 15,
     },
     titleText: {
       alignSelf: "center",
@@ -77,9 +78,10 @@ export default function MorePage() {
       color: theme.text,
     },
     headerText: {
-      fontSize: 18,
-      fontWeight: "500",
+      fontSize: 22,
+      fontWeight: "bold",
       color: theme.text,
+      alignSelf: "center",
     },
     text: {
       alignSelf: "center",
@@ -132,6 +134,9 @@ export default function MorePage() {
       borderRadius: 10,
       padding: 6,
     },
+    padding: {
+      padding: 10, // Adjust the padding value as needed
+    },
   });
 
   return (
@@ -153,31 +158,6 @@ export default function MorePage() {
           </View>
 
           <View style={styles.textContainer}>
-            <View style={styles.buttonContainer}>
-              <View style={styles.switchContainer}>
-                <Text style={styles.switchText}>Dark Mode</Text>
-                <Switch
-                  key= 'Switch'
-                  trackColor={{
-                    false: 'black',
-                    true: theme.text
-                  }}
-                  thumbColor={theme.primaryColor}
-                  onValueChange={handleToggleDarkMode}
-                  value={isDarkmode}
-                />
-            </View>
-          </View>
-          </View>
-          <View style = {{ backgroundColor: theme.primaryColor , width: '100%', alignItems: 'center'}}>
-            <TouchableOpacity key='Logout' style={styles.logout} onPress={() => user.logout()}>
-              <Text style={styles.logoutText}>Logout</Text>
-              <Ionicons name={"log-out-outline"} size={30} color={theme.primaryColor} />
-            </TouchableOpacity>
-          </View>
-
-
-          <View>
             <Text style={styles.headerText}>Resources</Text>
             <TouchableOpacity
               onPress={() =>
@@ -204,13 +184,18 @@ export default function MorePage() {
               <Text style={styles.text}>Report a Bug</Text>
             </TouchableOpacity>
             
+            <View style={styles.padding} />
+
             <Text style={styles.headerText}>Meet our Team</Text>
             <Text style={styles.text}>Insert Team Photo</Text>
             <Text style={styles.text}>Insert Team Message</Text>
 
+            <View style={styles.padding} />
+
             <Text style={styles.headerText}>Frequently Asked Questions</Text>
             {/* You can use Text components for FAQ sections as well */}
-          </View>
+
+            <View style={{padding: 5}} />
 
           {/* FAQ Section 1 */}
           <Text style={styles.headerText}>What can users do?</Text>
@@ -218,11 +203,15 @@ export default function MorePage() {
             Explore religious traditions, find places of worship, engage in meaningful discussions.
           </Text>
 
+          <View style={styles.padding} />
+
           {/* FAQ Section 2 */}
           <Text style={styles.headerText}>Who is it for?</Text>
           <Text style={styles.text}>
             Scholars, students, believers, and the curious about the world's religions.
           </Text>
+
+          <View style={styles.padding} />
 
           {/* FAQ Section 3 */}
           <Text style={styles.headerText}>What's unique?</Text>
@@ -230,19 +219,46 @@ export default function MorePage() {
             Provides a modern method to capture experiences using the devices that are with us every day.
           </Text>
 
+          <View style={styles.padding} />
+
           {/* FAQ Section 4 */}
           <Text style={styles.headerText}>Our Mission</Text>
           <Text style={styles.text}>
             Connect people of diverse religious backgrounds, beliefs, and practices.
           </Text>
 
+          <View style={styles.padding} />
+
           {/* FAQ Section 5 */}
           <Text style={styles.headerText}>Why use 'Where's Religion?'</Text>
           <Text style={styles.text}>
             Explore religious traditions, find places of worship, engage in meaningful discussions.
           </Text>
+          </View>
 
-
+          <View style={styles.textContainer}>
+            <View style={styles.buttonContainer}>
+              <View style={styles.switchContainer}>
+                <Text style={styles.switchText}>Dark Mode</Text>
+                <Switch
+                  key= 'Switch'
+                  trackColor={{
+                    false: 'black',
+                    true: theme.text
+                  }}
+                  thumbColor={theme.primaryColor}
+                  onValueChange={handleToggleDarkMode}
+                  value={isDarkmode}
+                />
+            </View>
+          </View>
+          </View>
+          <View style = {{ backgroundColor: theme.primaryColor , width: '100%', alignItems: 'center'}}>
+            <TouchableOpacity key='Logout' style={styles.logout} onPress={() => user.logout()}>
+              <Text style={styles.logoutText}>Logout</Text>
+              <Ionicons name={"log-out-outline"} size={30} color={theme.primaryColor} />
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </SafeAreaView></>
   );
