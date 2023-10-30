@@ -13,8 +13,9 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
-import { useTheme } from "../../lib/components/ThemeProvider";
-import Accordion from "@gapur/react-native-accordion";
+import { useTheme } from "../components/ThemeProvider";
+
+// import Accordion from "@gapur/react-native-accordion";
 
 const user = User.getInstance();
 const { width, height } = Dimensions.get("window");
@@ -150,7 +151,104 @@ export default function MorePage() {
                 resizeMode: "cover",
               }} />
           </View>
+
           <View style={styles.textContainer}>
+            <View style={styles.buttonContainer}>
+              <View style={styles.switchContainer}>
+                <Text style={styles.switchText}>Dark Mode</Text>
+                <Switch
+                  key= 'Switch'
+                  trackColor={{
+                    false: 'black',
+                    true: theme.text
+                  }}
+                  thumbColor={theme.primaryColor}
+                  onValueChange={handleToggleDarkMode}
+                  value={isDarkmode}
+                />
+            </View>
+          </View>
+          </View>
+          <View style = {{ backgroundColor: theme.primaryColor , width: '100%', alignItems: 'center'}}>
+            <TouchableOpacity key='Logout' style={styles.logout} onPress={() => user.logout()}>
+              <Text style={styles.logoutText}>Logout</Text>
+              <Ionicons name={"log-out-outline"} size={30} color={theme.primaryColor} />
+            </TouchableOpacity>
+          </View>
+
+
+          <View>
+            <Text style={styles.headerText}>Resources</Text>
+            <TouchableOpacity
+              onPress={() =>
+                Linking.openURL("http://lived-religion-dev.rerum.io/deer-lr/dashboard.html")
+              }
+            >
+              <Text style={styles.text}>Our Website</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() =>
+                Linking.openURL("https://guides.library.upenn.edu/ethnography/DoingEthnography")
+              }
+            >
+              <Text style={styles.text}>Guide to Ethnography</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() =>
+                Linking.openURL("http://changingminds.org/explanations/research/analysis/ethnographic_coding.htm")
+              }
+            >
+              <Text style={styles.text}>Guide to Coding</Text>
+            </TouchableOpacity>
+            <TouchableOpacity key='Email' onPress={() => handleEmail()}>
+              <Text style={styles.text}>Report a Bug</Text>
+            </TouchableOpacity>
+            
+            <Text style={styles.headerText}>Meet our Team</Text>
+            <Text style={styles.text}>Insert Team Photo</Text>
+            <Text style={styles.text}>Insert Team Message</Text>
+
+            <Text style={styles.headerText}>Frequently Asked Questions</Text>
+            {/* You can use Text components for FAQ sections as well */}
+          </View>
+
+          {/* FAQ Section 1 */}
+          <Text style={styles.headerText}>What can users do?</Text>
+          <Text style={styles.text}>
+            Explore religious traditions, find places of worship, engage in meaningful discussions.
+          </Text>
+
+          {/* FAQ Section 2 */}
+          <Text style={styles.headerText}>Who is it for?</Text>
+          <Text style={styles.text}>
+            Scholars, students, believers, and the curious about the world's religions.
+          </Text>
+
+          {/* FAQ Section 3 */}
+          <Text style={styles.headerText}>What's unique?</Text>
+          <Text style={styles.text}>
+            Provides a modern method to capture experiences using the devices that are with us every day.
+          </Text>
+
+          {/* FAQ Section 4 */}
+          <Text style={styles.headerText}>Our Mission</Text>
+          <Text style={styles.text}>
+            Connect people of diverse religious backgrounds, beliefs, and practices.
+          </Text>
+
+          {/* FAQ Section 5 */}
+          <Text style={styles.headerText}>Why use 'Where's Religion?'</Text>
+          <Text style={styles.text}>
+            Explore religious traditions, find places of worship, engage in meaningful discussions.
+          </Text>
+
+
+        </ScrollView>
+      </SafeAreaView></>
+  );
+}
+
+/*  Line 155
             <Accordion style={{ backgroundColor: theme.secondaryColor }} headerTitleStyle={styles.headerText} headerTitle="Resources">
               <TouchableOpacity
                 onPress={() => Linking.openURL(
@@ -239,28 +337,5 @@ export default function MorePage() {
                 </Accordion>
               </View>
             </Accordion>
-            <View style={styles.buttonContainer}>
-              <View style={styles.switchContainer}>
-                <Text style={styles.switchText}>Dark Mode</Text>
-                <Switch
-                  trackColor={{
-                    false: 'black',
-                    true: theme.text
-                  }}
-                  thumbColor={theme.primaryColor}
-                  onValueChange={handleToggleDarkMode}
-                  value={isDarkmode}
-                />
-            </View>
-          </View>
-          </View>
-          <View style = {{ backgroundColor: theme.primaryColor , width: '100%', alignItems: 'center'}}>
-            <TouchableOpacity style={styles.logout} onPress={() => user.logout()}>
-              <Text style={styles.logoutText}>Logout</Text>
-              <Ionicons name={"log-out-outline"} size={30} color={theme.primaryColor} />
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </SafeAreaView></>
-  );
-}
+
+            */

@@ -1,10 +1,12 @@
 import React from 'react';
 import { shallow } from 'enzyme';
-import MorePage from '../lib/screens/MorePage.tsx';
+import MorePage from '../lib/screens/MorePage';
 import moxios from 'moxios';
+import { User } from '../lib/models/user_class';
+import { Linking } from 'react-native';
+import { ThemeProvider, useTheme } from '../lib/components/ThemeProvider';
+import ThemeProviderMock from './ThemeProviderMock';
 
-// Configure the manual mock for @gapur/react-native-accordion
-jest.mock('@gapur/react-native-accordion');
 
 // Mock the ThemeProvider
 jest.mock('../lib/components/ThemeProvider', () => ({
@@ -36,38 +38,39 @@ describe("MorePage", () => {
   });
 });
 
-/*
-    it("toggles dark mode correctly", () => {
-        const wrapper = shallow(<MorePage />);
-        const toggleButton = wrapper.find('Switch');
-        
-        expect(wrapper.state().isDarkMode).toBe(false);
-        
-        toggleButton.simulate('valueChange', true);
-        
-        expect(wrapper.state().isDarkMode).toBe(true);
-        expect(wrapper.instance().handleToggleDarkMode).toHaveBeenCalled();
-    });
+describe("MorePage", () => {
+  it("toggles dark mode correctly", () => {
+    const wrapper = shallow(<MorePage />);
 
+    const toggleButton = wrapper.findWhere((node) => node.key() === "Switch");
+
+    // Check if the onValueChange prop exists
+    expect(toggleButton.props().onValueChange).toBeDefined();
+  });
+
+  describe("opens email link when 'Report a Bug' is pressed", () => {
     it("opens email link when 'Report a Bug' is pressed", () => {
-        const spy = jest.spyOn(Linking, 'openURL');
-        const wrapper = shallow(<MorePage />);
-        const emailButton = wrapper.findWhere((node) => node.prop('title') === "Report a Bug");
+      const spy = jest.spyOn(Linking, 'openURL');
+      const wrapper = shallow(<MorePage />);
+      const emailButton = wrapper.findWhere((node) => node.key() === "Email");
 
-        emailButton.simulate('press');
+      emailButton.simulate('press');
 
-        expect(spy).toHaveBeenCalledWith(
-        'mailto:yashkamal.bhatia@slu.edu?subject=Bug Report on Where\'s Religion?&body=Please provide details of your issue you are facing here.'
-        );
+      expect(spy).toHaveBeenCalledWith(
+        "mailto:yashkamal.bhatia@slu.edu?subject=Bug%20Report%20on%20'Where's%20Religion%3F'&body=Please%20provide%20details%20of%20your%20issue%20you%20are%20facing%20here."
+      );
     });
+  });
 
+  describe("calls the logout function when 'Logout' is pressed", () => {
     it("calls the logout function when 'Logout' is pressed", () => {
-        const spy = jest.spyOn(User.getInstance(), 'logout');
-        const wrapper = shallow(<MorePage />);
-        const logoutButton = wrapper.findWhere((node) => node.prop('title') === "Logout");
+      const spy = jest.spyOn(User.getInstance(), 'logout');
+      const wrapper = shallow(<MorePage />);
+      const logoutButton = wrapper.findWhere((node) => node.key() === "Logout");
 
-        logoutButton.simulate('press');
+      logoutButton.simulate('press');
 
-        expect(spy).toHaveBeenCalled();
+      expect(spy).toHaveBeenCalled();
     });
-    */
+  });
+});
