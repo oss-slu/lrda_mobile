@@ -14,8 +14,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
 import { useTheme } from "../components/ThemeProvider";
-
-// import Accordion from "@gapur/react-native-accordion";
+import Accordion from "@gapur/react-native-accordion";
 
 const user = User.getInstance();
 const { width, height } = Dimensions.get("window");

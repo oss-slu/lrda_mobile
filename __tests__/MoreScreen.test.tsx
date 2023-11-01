@@ -28,7 +28,7 @@ beforeAll(() => {
 afterAll(() => {
   console.log.mockRestore();
   console.error.mockRestore();
-  moxios.uninstall();
+  // moxios.uninstall();
 });
 
 describe("MorePage", () => {
@@ -47,20 +47,20 @@ describe("MorePage", () => {
     // Check if the onValueChange prop exists
     expect(toggleButton.props().onValueChange).toBeDefined();
   });
+});
 
-  describe("opens email link when 'Report a Bug' is pressed", () => {
-    it("opens email link when 'Report a Bug' is pressed", () => {
-      const spy = jest.spyOn(Linking, 'openURL');
-      const wrapper = shallow(<MorePage />);
-      const emailButton = wrapper.findWhere((node) => node.key() === "Email");
+describe("opens email link when 'Report a Bug' is pressed", () => {
+  it("opens email link when 'Report a Bug' is pressed", () => {
+    const spy = jest.spyOn(Linking, 'openURL');
+    const wrapper = shallow(<MorePage />);
+    const emailButton = wrapper.findWhere((node) => node.key() === "Email");
 
-      emailButton.simulate('press');
+    emailButton.simulate('press');
 
-      expect(spy).toHaveBeenCalledWith(
-        "mailto:yashkamal.bhatia@slu.edu?subject=Bug%20Report%20on%20'Where's%20Religion%3F'&body=Please%20provide%20details%20of%20your%20issue%20you%20are%20facing%20here."
-      );
-    });
-  });
+    expect(spy).toHaveBeenCalledWith(
+      "mailto:yashkamal.bhatia@slu.edu?subject=Bug%20Report%20on%20'Where's%20Religion%3F'&body=Please%20provide%20details%20of%20your%20issue%20you%20are%20facing%20here."
+  );
+});
 
   describe("calls the logout function when 'Logout' is pressed", () => {
     it("calls the logout function when 'Logout' is pressed", () => {
