@@ -12,21 +12,11 @@
     },
     "production": {
       "android": {
-        "buildType": "aab"
+        "buildType": "app-bundle"
       }
     }
   },
   "submit": {
-    "production": {
-      "android": {
-        "serviceAccountKeyPath": "../grounded-pager-399120-8575f4f00514.json",
-        "track": "internal"
-      },
-      "ios": {
-        "appleId": "ykb238@icloud.com",
-        "ascAppId": "1234567890",
-        "appleTeamId": "83MZLL6Y43"
-      }
-    }
+    "production": {}
   }
 }
