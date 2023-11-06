@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AddNoteScreen renders without crashing 1`] = `ShallowWrapper {}`;
+
+exports[`LocationWindow renders without crashing 1`] = `ShallowWrapper {}`;
