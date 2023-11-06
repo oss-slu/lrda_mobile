@@ -2,7 +2,7 @@ name: App test
 
 on:
   push:
-    branches: [ main,deliverable-6,TopSpeakerBug ]
+    branches: [ main,SetTimeTest ]
   pull_request:
     branches: [ main ]
 

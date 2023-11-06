@@ -40,6 +40,7 @@ function TagWindow({
       <View key={data.item.key} style={styles.rowBack}>
         <TouchableOpacity
           onPress={() => handleDeleteTag(data.item.key.toString(), rowMap)}
+          testID={`delete-action-${data.item.key}`}
         >
           <Ionicons
             name="trash-outline"

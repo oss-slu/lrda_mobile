@@ -48,13 +48,13 @@ beforeAll(() => {
       expect(wrapper).toMatchSnapshot();
     });
   
-    it('displays the "Select Date & Time" button when not in edit mode', () => {
+    it('displays the "Select Date & Time" button when not in edit mode, and set the current time ', () => {
       const wrapper = shallow(<LocationWindow time={new Date()} setTime={() => {}} />);
       const selectButton = wrapper.find(Button);
       expect(selectButton.prop('title')).toBe('Select Date & Time');
     });
   
-    it('does not display the "Save" button when in edit mode', () => {
+    it('display the "Save" button when in edit mode, and current time saved', () => {
         const wrapper = shallow(<LocationWindow time={new Date()} setTime={() => {}} showPicker={true} />);
         const saveButton = wrapper.find(Button);
         expect(saveButton.exists()).toBe(true);
