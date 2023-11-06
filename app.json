@@ -32,7 +32,8 @@
           "apiKey" : "AIzaSyD_hN-XNLPsze7WetHBcvvqRcHDls72Rn8"
         }
       },
-      "package": "register.edu.slu.cs.oss.lrda"
+      "package": "register.edu.slu.cs.oss.lrda",
+      "buildNumber": "2"
     },
     "web": {
       "favicon": "./assets/favicon.png"
