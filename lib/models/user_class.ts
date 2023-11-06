@@ -101,7 +101,7 @@ export class User {
             this.userData = null;
             this.clearUser();
             this.notifyLoginState();
-            console.log("User logged out");
+            // console.log("User logged out");
           }
         })
         .catch((err) => {
@@ -131,7 +131,6 @@ export class User {
     return onboarded === '1';
   }
   
-
   public async getRoles(): Promise<{
     administrator: boolean;
     contributor: boolean;

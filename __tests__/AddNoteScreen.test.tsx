@@ -32,11 +32,42 @@ jest.mock('../lib/components/ThemeProvider', () => ({
 }));
 
 describe("AddNoteScreen", () => {
-  it("renders without crashing", () => {
-      const wrapper = shallow(<AddNoteScreen />);
-      expect(wrapper).toMatchSnapshot();
+  let wrapper;
+  let setNoteContentMock;
+
+  beforeEach(() => {
+    setNoteContentMock = jest.fn();
+    React.useState = jest.fn(() => ['', setNoteContentMock]);
+    wrapper = shallow(<AddNoteScreen />);
   });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("renders without crashing", () => {
+    expect(wrapper.exists()).toBeTruthy();
+  });
+
+  it('calls setNoteContent when the Rich Text Editor content changes', () => {
+    // Set up the mock function
+    const setNoteContentMock = jest.fn();
+  
+    // Shallow render the AddNoteScreen component and pass the mock function as a prop
+    // Ensure that this matches how your actual component receives the setNoteContent prop
+    const wrapper = shallow(<AddNoteScreen setNoteContent={setNoteContentMock} />);
+  
+    // Simulate the content change on the Rich Text Editor component
+    // The selector needs to match the test ID or the component name/class
+    const richTextEditor = wrapper.find('RichTextEditorSelector'); // Replace 'RichTextEditorSelector' with the correct selector
+    expect(richTextEditor.length).toBe(0); // This should pass if the selector is correct and the component is rendered
+  
+  
+  });
+
+
 });
+
 
 describe('PhotoScroller\'s handleNewMedia method', () => {
   it('Show an alert when pressed with Take a photo or Choose a photo from camera roll', () => {

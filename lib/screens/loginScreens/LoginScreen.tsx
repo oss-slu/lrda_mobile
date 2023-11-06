@@ -25,8 +25,8 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [firstClick, setFirstClick] = useState(true);
-  const fadeAnim = useRef(new Animated.Value(1)).current;
   const [snackState, toggleSnack] = useState(false);
+  const fadeAnim = useRef(new Animated.Value(1)).current;
 
   const fadeOut = () => {
     Animated.timing(fadeAnim, {
