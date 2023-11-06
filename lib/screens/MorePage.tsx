@@ -11,10 +11,10 @@ import {
   Dimensions,
   Switch
 } from "react-native";
-import Accordion from "@gapur/react-native-accordion";
 import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
-import { useTheme } from "../../lib/components/ThemeProvider";
+import { useTheme } from "../components/ThemeProvider";
+import Accordion from "@gapur/react-native-accordion";
 
 const user = User.getInstance();
 const { width, height } = Dimensions.get("window");
@@ -47,9 +47,10 @@ export default function MorePage() {
       justifyContent: "center",
       alignItems: "center",
       marginTop: height * 0.04,
+      marginBottom: -8,
     },
     headText: {
-      fontSize: 35,
+      fontSize: 32,
       fontWeight: "bold",
       color: theme.text,
     },
@@ -62,6 +63,7 @@ export default function MorePage() {
     textContainer: {
       width: "100%",
       backgroundColor: theme.primaryColor,
+      paddingTop: 15,
     },
     titleText: {
       alignSelf: "center",
@@ -75,9 +77,16 @@ export default function MorePage() {
       color: theme.text,
     },
     headerText: {
-      fontSize: 18,
-      fontWeight: "500",
+      fontSize: 28,
+      fontWeight: "bold",
       color: theme.text,
+      alignSelf: "center",
+    },
+    FAQText: {
+      fontSize: 22,
+      fontWeight: "bold",
+      color: theme.text,
+      alignSelf: "center",
     },
     text: {
       alignSelf: "center",
@@ -106,7 +115,7 @@ export default function MorePage() {
     },
     buttonContainer: {
       alignItems: "center",
-      marginTop: 12,
+      marginTop: 40,
     },
     switch: {
       width: "94%",
@@ -130,6 +139,16 @@ export default function MorePage() {
       borderRadius: 10,
       padding: 6,
     },
+    padding: {
+      padding: 13, // Adjust the padding value as needed
+    },
+    whiteBox: {
+      backgroundColor: 'white',
+      padding: 20,
+      borderWidth: 1, // Add a border to create the "hollow" effect
+      borderColor: 'white', // Set the border color to match the background color
+      borderRadius: 10, // Optional: add rounded corners
+    },
   });
 
   return (
@@ -149,7 +168,116 @@ export default function MorePage() {
                 resizeMode: "cover",
               }} />
           </View>
+
           <View style={styles.textContainer}>
+
+            <Text style={styles.headerText}>Resources</Text>
+            <TouchableOpacity
+              onPress={() =>
+                Linking.openURL("http://lived-religion-dev.rerum.io/deer-lr/dashboard.html")
+              }
+            >
+              <Text style={styles.text}>Our Website</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() =>
+                Linking.openURL("https://guides.library.upenn.edu/ethnography/DoingEthnography")
+              }
+            >
+              <Text style={styles.text}>Guide to Ethnography</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() =>
+                Linking.openURL("http://changingminds.org/explanations/research/analysis/ethnographic_coding.htm")
+              }
+            >
+              <Text style={styles.text}>Guide to Coding</Text>
+            </TouchableOpacity>
+            <TouchableOpacity key='Email' onPress={() => handleEmail()}>
+              <Text style={styles.text}>Report a Bug</Text>
+            </TouchableOpacity>
+            
+            <View style={styles.padding} />
+
+            <Text style={styles.headerText}>Meet our Team</Text>
+            <Text style={styles.text}>Insert Team Photo</Text>
+            <Text style={styles.text}>Insert Team Message</Text>
+
+            <View style={styles.padding} />
+
+            <Text style={styles.headerText}>Frequently Asked Questions</Text>
+            {/* You can use Text components for FAQ sections as well */}
+
+            <View style={{padding: 5}} />
+
+          {/* FAQ Section 1 */}
+          <Text style={styles.FAQText}>What can users do?</Text>
+          <Text style={styles.text}>
+            Explore religious traditions, find places of worship, engage in meaningful discussions.
+          </Text>
+
+          <View style={styles.padding} />
+
+          {/* FAQ Section 2 */}
+          <Text style={styles.FAQText}>Who is it for?</Text>
+          <Text style={styles.text}>
+            Scholars, students, believers, and the curious about the world's religions.
+          </Text>
+
+          <View style={styles.padding} />
+
+          {/* FAQ Section 3 */}
+          <Text style={styles.FAQText}>What's unique?</Text>
+          <Text style={styles.text}>
+            Provides a modern method to capture experiences using the devices that are with us every day.
+          </Text>
+
+          <View style={styles.padding} />
+
+          {/* FAQ Section 4 */}
+          <Text style={styles.FAQText}>Our Mission</Text>
+          <Text style={styles.text}>
+            Connect people of diverse religious backgrounds, beliefs, and practices.
+          </Text>
+
+          <View style={styles.padding} />
+
+          {/* FAQ Section 5 */}
+          <Text style={styles.FAQText}>Why use 'Where's Religion?'</Text>
+          <Text style={styles.text}>
+            Explore religious traditions, find places of worship, engage in meaningful discussions.
+          </Text>
+          </View>
+
+          <View style={styles.textContainer}>
+            <View style={styles.buttonContainer}>
+              <View style={styles.switchContainer}>
+                <Text style={styles.switchText}>Dark Mode</Text>
+                <Switch
+                  key= 'Switch'
+                  trackColor={{
+                    false: 'black',
+                    true: theme.text
+                  }}
+                  thumbColor={theme.primaryColor}
+                  onValueChange={handleToggleDarkMode}
+                  value={isDarkmode}
+                />
+            </View>
+          </View>
+          </View>
+          <View style = {{ backgroundColor: theme.primaryColor , width: '100%', alignItems: 'center'}}>
+            <TouchableOpacity key='Logout' style={styles.logout} onPress={() => user.logout()}>
+              <Text style={styles.logoutText}>Logout</Text>
+              <Ionicons name={"log-out-outline"} size={30} color={theme.primaryColor} />
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </SafeAreaView></>
+  );
+}
+
+/*  Line 155
             <Accordion style={{ backgroundColor: theme.secondaryColor }} headerTitleStyle={styles.headerText} headerTitle="Resources">
               <TouchableOpacity
                 onPress={() => Linking.openURL(
@@ -238,26 +366,5 @@ export default function MorePage() {
                 </Accordion>
               </View>
             </Accordion>
-            <View style={styles.buttonContainer}>
-              <View style={styles.switchContainer}>
-                <Text style={styles.switchText}>Dark Mode</Text>
-                <Switch
-                  trackColor={{ false: '#767577', true: '#81b0ff' }}
-                  thumbColor={isDarkmode ? '#f5dd4b' : '#f4f3f4'}
-                  ios_backgroundColor="#3e3e3e"
-                  onValueChange={handleToggleDarkMode}
-                  value={isDarkmode}
-                />
-            </View>
-          </View>
-          </View>
-          <View style = {{ backgroundColor: theme.primaryColor , width: '100%', alignItems: 'center'}}>
-            <TouchableOpacity style={styles.logout} onPress={() => user.logout()}>
-              <Text style={styles.logoutText}>Logout</Text>
-              <Ionicons name={"log-out-outline"} size={30} color={theme.primaryColor} />
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </SafeAreaView></>
-  );
-}
+
+            */

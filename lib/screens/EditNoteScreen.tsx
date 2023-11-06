@@ -132,8 +132,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     richTextRef.current?.insertHTML(imgTag);
   };
   
-  
-
   const handleSaveNote = async () => {
     try {
       const editedNote: Note = {
@@ -166,7 +164,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           style={NotePageStyles().topButtons}
           onPress={owner ? handleSaveNote : () => navigation.goBack()}
         >
-          <Ionicons name="arrow-back-outline" size={30} color="white" />
+          <Ionicons name="arrow-back-outline" size={30} color={NotePageStyles().title.color} />
         </TouchableOpacity>
         <TextInput
           placeholder="Title Field Note"
@@ -187,7 +185,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
               style={NotePageStyles().topButtons}
               onPress={() => setIsPublished(!isPublished)}
             >
-              <Ionicons name="share-outline" size={30} color="white" />
+              <Ionicons name="share-outline" size={30} color={NotePageStyles().title.color} />
             </TouchableOpacity>
           )
         ) : (
@@ -269,7 +267,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         {isTime && <TimeWindow time={time} setTime={setTime} />}
       </View>
       <RichToolbar
-        style={NotePageStyles().container}
+        style={[NotePageStyles().container]}
         editor={richTextRef}
         actions={[
           actions.keyboard,
@@ -295,12 +293,12 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           ref={scrollViewRef}
         >
           <View key="Tags Container">
-            <ScrollView
-              horizontal={true}
-              style={{ width: "100%", marginHorizontal: 10, paddingLeft: 5, marginBottom: 10, }}
-            >
-              {tags &&
-                tags.map((tag, index) => (
+            {tags.length > 0 && (
+              <ScrollView
+                horizontal={true}
+                style={{ width: "100%", marginHorizontal: 10, paddingLeft: 5, marginBottom: 10 }}
+              >
+                {tags.map((tag, index) => (
                   <View
                     key={index}
                     style={{
@@ -318,7 +316,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
                         left: 2,
                         borderLeftWidth: 2,
                         borderBottomWidth: 2,
-                        borderColor: "black",
+                        borderColor: NotePageStyles().title.color,
                         justifyContent: "center",
                         alignItems: "center",
                       }}
@@ -329,7 +327,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
                           width: 5,
                           left: 2,
                           borderRadius: 10,
-                          backgroundColor: "black",
+                          backgroundColor: NotePageStyles().title.color,
                           marginRight: 5,
                         }}
                       />
@@ -338,7 +336,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
                       style={{
                         borderTopRightRadius: 5,
                         borderBottomRightRadius: 5,
-                        borderColor: "black",
+                        borderColor: NotePageStyles().title.color,
                         borderRightWidth: 2,
                         borderBottomWidth: 2,
                         borderTopWidth: 2,
@@ -348,13 +346,14 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
                         marginLeft: 10,
                       }}
                     >
-                      <Text style={{ textAlign: "center" }}>{tag}</Text>
+                      <Text style={{ textAlign: "center", color: NotePageStyles().title.color }}>{tag}</Text>
                     </View>
                   </View>
                 ))}
-            </ScrollView>
+              </ScrollView>
+            )}
           </View>
-      
+
           <View
             style={[
               { paddingBottom: keyboardOpen ? 200 : 200 },

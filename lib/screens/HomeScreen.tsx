@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
+  Dimensions
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
@@ -19,6 +20,7 @@ import LoadingImage from "../components/loadingImage";
 import { formatToLocalDateString } from "../components/time";
 import { ThemeProvider, useTheme } from '../components/ThemeProvider';
 import Constants from "expo-constants";
+import { color } from "react-native-reanimated";
 
 const user = User.getInstance();
 
@@ -31,7 +33,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [reversed, setReversed] = useState(false);
   const [rendering, setRendering] = useState(true);
   const [userInitials, setUserInitials] = useState("N/A");
-  
+  const { width, height } = Dimensions.get("window");
+
   const { theme } = useTheme();
 
   let textLength = 16;
@@ -131,12 +134,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     },
     pfpText: {
       fontWeight: "600",
-      fontSize: 20,
+      fontSize: 14,
       alignSelf: "center",
       color: theme.primaryColor,
     },
     shareColor: {
-      color: theme.text,
+      color: 'green',
     },
     highlightColor: {
       color: theme.text,
@@ -145,12 +148,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       color: 'red',
     },
     userPhoto: {
-      height: 50,
-      width: 50,
+      height: width * 0.1,
+      width: width * 0.1,
       borderRadius: 50,
       alignContent: "center",
       justifyContent: "center",
       backgroundColor: theme.text,
+      marginLeft: 8,
     },
     noteTitle: {
       fontSize: 20,
@@ -185,6 +189,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       alignItems: "center",
       justifyContent: "space-between",
       paddingHorizontal: 5,
+      marginBottom: -10,
     },
     noteContainer: {
       justifyContent: "space-between",
@@ -204,7 +209,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       borderRadius: 20,
       paddingHorizontal: 5,
       maxHeight: 30,
-      marginBottom: 17,
+      marginBottom: 10,
       zIndex: 10,
     },
     filters: {
@@ -235,7 +240,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       color: theme.text,
     },
     title: {
-      fontSize: 40,
+      fontSize: 33,
       fontWeight: "bold",
       lineHeight: 80,
       color: theme.text,
@@ -252,7 +257,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       paddingRight: 17,
     },
     backRightBtnRight: {
-      backgroundColor: theme.primaryColor,
+      backgroundColor: theme.tertiaryColor,
       width: "52%",
       right: 0,
       borderTopRightRadius: 20,
@@ -260,7 +265,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     },
     rowBack: {
       alignItems: "center",
-      backgroundColor: theme.primaryColor,
+      backgroundColor: theme.tertiaryColor,
       flex: 1,
       flexDirection: "row",
       justifyContent: "space-between",
@@ -460,8 +465,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           >
             <Text style={styles.pfpText}>{userInitials}</Text>
           </TouchableOpacity>
-          <Text style={styles.title}>Field Notes</Text>
-          <View style={styles.userPhoto} />
+          <Text style={styles.title}>Where's Religion</Text>
+          <View style={[styles.userPhoto, {backgroundColor: theme.primaryColor}]} />
         </View>
       </View>
       <ScrollView
@@ -511,7 +516,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         style={styles.addButton}
         onPress={() => navigation.navigate("AddNote", { refreshPage })}
       >
-        <Ionicons name="add-outline" size={26} color={theme.primaryColor} />
+        <Ionicons name="add-outline" size={32} color={theme.primaryColor} style={{ fontFamily: 'Ionicons_' }} />
       </TouchableOpacity>
     </View>
   );

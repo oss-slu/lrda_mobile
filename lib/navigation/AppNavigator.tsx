@@ -53,7 +53,7 @@ const HomeStack = () => {
 
 const AppNavigator: React.FC = () => {
   const [navState, setNavState] = useState<"loading" | "onboarding" | "login" | "home">("loading");
-  const { theme } = useTheme();
+  const { theme, isDarkmode } = useTheme();
 
   useEffect(() => {
     const checkOnboarding = async () => {
@@ -80,7 +80,7 @@ const AppNavigator: React.FC = () => {
   }, []);
 
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={isDarkmode ? DarkTheme : DefaultTheme}>
       
         {navState === "onboarding" && (
           <Stack.Navigator initialRouteName="Onboarding">

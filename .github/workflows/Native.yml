@@ -2,7 +2,7 @@ name: App test
 
 on:
   push:
-    branches: [ main,SetTimeTest ]
+    branches: [ main,deliverable-6,TopSpeakerBug, 91_Darkmode2, SetTimeTest ]
   pull_request:
     branches: [ main ]
 
