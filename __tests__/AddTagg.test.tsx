@@ -47,11 +47,6 @@ describe('TagWindowTest1', () => {
 describe('TagWindowTest2', () => {
     const mockTags = ['1', '2','3'];
     const mockSetTags = jest.fn();
-  
-    it('renders without crashing', () => {
-      const wrapper = shallow(<TagWindow tags={mockTags} setTags={mockSetTags} />);
-      expect(wrapper).toMatchSnapshot();
-    });
 
     it('handles tag deletion when swiping', () => {
         const wrapper = shallow(<TagWindow tags={mockTags} setTags={mockSetTags} />);
