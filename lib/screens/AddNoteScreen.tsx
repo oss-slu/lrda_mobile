@@ -309,7 +309,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
               { minHeight: 900 },
             ]}
           >
-            <RichEditor
+            <RichEditor data-testid="RichEditor"
               ref={(r) => (richTextRef.current = r)}
               style={{ ...NotePageStyles().input, backgroundColor: NotePageStyles().title.color }}
               editorStyle={{
