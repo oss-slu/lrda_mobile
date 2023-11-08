@@ -218,7 +218,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         )}
         {isTime && <TimeWindow time={time} setTime={setTime} />}
       </View>
-      <RichToolbar
+      <RichToolbar data-testid="RichBar"
         style={NotePageStyles().container}
         editor={richTextRef}
         actions={[

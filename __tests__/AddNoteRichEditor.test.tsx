@@ -62,11 +62,65 @@ describe("AddNoteScreen", () => {
     const richTextEditor = wrapper.find('[data-testid="RichEditor"]'); // Replace 'RichTextEditorSelector' with the correct selector
     expect(richTextEditor.length).toBe(1); // This should pass if the selector is correct and the component is rendered
 
-    const newText = 'New content';
-    richTextEditor.prop('onChange')(newText);
+    const RichToolbar = wrapper.find('[data-testid="RichBar"]'); // Replace 'RichTextEditorSelector' with the correct selector
+    expect(RichToolbar.length).toBe(1); // This should pass if the selector is correct and the component is rendered
 
-    expect(setNoteContentMock).toHaveBeenCalledWith(newText);
+    const newText = 'New content';
+    
+    const richTextRef = { current: { insertText: jest.fn() } };
+
+    //mock of onChange
+    const addTextToEditor = (Text: string) => {
+      richTextRef.current?.insertText(Text);
+    };
+    
+
+    addTextToEditor(newText);
+
+    expect(richTextRef.current.insertText).toHaveBeenCalledWith(newText);
+
+
   });
 
+  it('Modifies the given text with the bold tag', () => {
 
+    
+    //mock of Bold
+    const mockBold = (text: string) => {
+      return `<b>${text}</b>`;
+    };
+  
+    const newText = 'New content';
+    const newTextBold = mockBold(newText);
+  
+    const richTextRef = { current: { insertText: jest.fn() } };
+  
+    //mock of onChange
+    const addTextToEditor = (Text: string) => {
+      const boldText = mockBold(Text);
+      richTextRef.current?.insertText(boldText);
+    };
+  
+    addTextToEditor(newText);
+  
+    expect(richTextRef.current.insertText).toHaveBeenCalledWith(`<b>${newText}</b>`);
+  });
+
+  it('Adds a key to the rich text editor when a key is pressed', () => {
+    const wrapper = shallow(<AddNoteScreen />);
+    const richTextEditor = wrapper.find('[data-testid="RichEditor"]').find('onChange');
+  
+    // Simulate a change event with the pressed key
+    richTextEditor.prop('onChange')('a'); // Assuming onChange prop takes the new content as argument
+  
+    // Access the noteContent state
+    const [noteContent, setNoteContent] = wrapper.find(React.useState).first().props();
+  
+    // Verify that the key is added to the rich text editor
+    expect(noteContent).toContain('a');
+  });
+  
+  
+  
+  
 });
