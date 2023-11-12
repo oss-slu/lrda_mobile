@@ -306,7 +306,6 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           <View
             style={[
               { paddingBottom: keyboardOpen ? 200 : 200 },
-              { minHeight: 900 },
             ]}
           >
             <RichEditor

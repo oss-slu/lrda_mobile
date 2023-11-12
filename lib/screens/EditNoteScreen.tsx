@@ -6,30 +6,22 @@ import {
   ScrollView,
   useWindowDimensions,
   Text,
+  TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import * as ImagePicker from 'expo-image-picker';
-import { TouchableOpacity } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { Note } from "../../types";
 import PhotoScroller from "../components/photoScroller";
 import { User } from "../models/user_class";
 import AudioContainer from "../components/audio";
-import { Media, AudioType, VideoType } from "../models/media_class";
+import { Media, AudioType } from "../models/media_class";
 import { EditNoteScreenProps } from "../../types";
 import ApiService from "../utils/api_calls";
 import TagWindow from "../components/tagging";
 import LocationWindow from "../components/location";
 import TimeWindow from "../components/time";
-import Constants from "expo-constants";
-import { ResizeMode, Video } from "expo-av";
-import {
-  RichEditor,
-  RichToolbar,
-  actions,
-} from "react-native-pell-rich-editor";
-import LoadingImage from "../components/loadingImage";
+import { RichEditor, RichToolbar, actions } from "react-native-pell-rich-editor";
 import NotePageStyles from "../../styles/pages/NoteStyles";
 
 const user = User.getInstance();
@@ -92,11 +84,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
 
   useEffect(() => {
     const checkOwner = async () => {
-      if (creator === (await user.getId())) {
-        setOwner(true);
-      } else {
-        setOwner(false);
-      }
+      setOwner(creator === (await user.getId()));
     };
     checkOwner();
   }, [creator]);
@@ -110,7 +98,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     }
   };
 
-  const photoScrollerRef = React.useRef<{ goBig(index: number): void } | null>(
+  const photoScrollerRef = useRef<{ goBig(index: number): void } | null>(
     null
   );
 
@@ -136,19 +124,19 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     try {
       const editedNote: Note = {
         id: note.id,
-        title: title,
-        text: text,
+        title,
+        text,
         creator: (await user.getId()) || "",
-        media: media,
+        media,
         latitude: location?.latitude.toString() || "",
         longitude: location?.longitude.toString() || "",
         audio: newAudio,
         published: isPublished,
-        time: time,
-        tags: tags,
+        time,
+        tags,
       };
 
-      const response = await ApiService.overwriteNote(editedNote);
+      await ApiService.overwriteNote(editedNote);
 
       onSave(editedNote);
       navigation.goBack();
@@ -172,7 +160,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           value={title}
           onChangeText={setTitle}
         />
-        {owner ? (
+        {owner && (
           isPublished ? (
             <TouchableOpacity
               style={NotePageStyles().topButtons}
@@ -188,64 +176,22 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
               <Ionicons name="share-outline" size={30} color={NotePageStyles().title.color} />
             </TouchableOpacity>
           )
-        ) : (
-          <View />
         )}
       </View>
       <View style={NotePageStyles().keyContainer}>
-        <TouchableOpacity
-          onPress={() => {
-            setViewMedia(!viewMedia);
-            setViewAudio(false);
-            setIsTagging(false);
-            setIsLocation(false);
-            setIsTime(false);
-          }}
-        >
+        <TouchableOpacity onPress={() => setViewMedia(!viewMedia)}>
           <Ionicons name="images-outline" size={30} color={NotePageStyles().saveText.color} />
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => {
-            setViewMedia(false);
-            setViewAudio(!viewAudio);
-            setIsTagging(false);
-            setIsLocation(false);
-            setIsTime(false);
-          }}
-        >
+        <TouchableOpacity onPress={() => setViewAudio(!viewAudio)}>
           <Ionicons name="mic-outline" size={30} color={NotePageStyles().saveText.color} />
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => {
-            setViewMedia(false);
-            setViewAudio(false);
-            setIsTagging(false);
-            setIsLocation(!isLocation);
-            setIsTime(false);
-          }}
-        >
+        <TouchableOpacity onPress={() => setIsLocation(!isLocation)}>
           <Ionicons name="location-outline" size={30} color={NotePageStyles().saveText.color} />
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => {
-            setViewMedia(false);
-            setViewAudio(false);
-            setIsTagging(false);
-            setIsLocation(false);
-            setIsTime(!isTime);
-          }}
-        >
+        <TouchableOpacity onPress={() => setIsTime(!isTime)}>
           <Ionicons name="time-outline" size={30} color={NotePageStyles().saveText.color} />
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => {
-            setViewMedia(false);
-            setViewAudio(false);
-            setIsTagging(!isTagging);
-            setIsLocation(false);
-            setIsTime(false);
-          }}
-        >
+        <TouchableOpacity onPress={() => setIsTagging(!isTagging)}>
           <Ionicons name="pricetag-outline" size={30} color={NotePageStyles().saveText.color} />
         </TouchableOpacity>
       </View>
@@ -266,121 +212,122 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         )}
         {isTime && <TimeWindow time={time} setTime={setTime} />}
       </View>
-      <RichToolbar
-        style={[NotePageStyles().container]}
-        editor={richTextRef}
-        actions={[
-          actions.keyboard,
-          actions.undo,
-          actions.redo,
-          actions.setBold,
-          actions.setItalic,
-          actions.setUnderline,
-          actions.insertBulletsList,
-          actions.blockquote,
-          actions.indent,
-          actions.outdent,
-        ]}
-        iconTint={NotePageStyles().saveText.color}
-        selectedIconTint={"#2095F2"}
-      />
-
-      <View style={NotePageStyles().container}>
-        <ScrollView
-          nestedScrollEnabled={true}
-          showsVerticalScrollIndicator={false}
-          style={{ overflow: "hidden", paddingTop: 10, paddingBottom: 100 }}
-          ref={scrollViewRef}
-        >
-          <View key="Tags Container">
-            {tags.length > 0 && (
-              <ScrollView
-                horizontal={true}
-                style={{ width: "100%", marginHorizontal: 10, paddingLeft: 5, marginBottom: 10 }}
-              >
-                {tags.map((tag, index) => (
-                  <View
-                    key={index}
-                    style={{
-                      flexDirection: "row",
-                      marginRight: 10,
-                      alignItems: "center",
-                    }}
-                  >
-                    <View
-                      style={{
-                        height: 20,
-                        width: 20,
-                        transform: [{ rotate: "45deg" }],
-                        position: "absolute",
-                        left: 2,
-                        borderLeftWidth: 2,
-                        borderBottomWidth: 2,
-                        borderColor: NotePageStyles().title.color,
-                        justifyContent: "center",
-                        alignItems: "center",
-                      }}
-                    >
-                      <View
-                        style={{
-                          height: 5,
-                          width: 5,
-                          left: 2,
-                          borderRadius: 10,
-                          backgroundColor: NotePageStyles().title.color,
-                          marginRight: 5,
-                        }}
-                      />
-                    </View>
-                    <View
-                      style={{
-                        borderTopRightRadius: 5,
-                        borderBottomRightRadius: 5,
-                        borderColor: NotePageStyles().title.color,
-                        borderRightWidth: 2,
-                        borderBottomWidth: 2,
-                        borderTopWidth: 2,
-                        paddingHorizontal: 10,
-                        justifyContent: "center",
-                        flexDirection: "row",
-                        marginLeft: 10,
-                      }}
-                    >
-                      <Text style={{ textAlign: "center", color: NotePageStyles().title.color }}>{tag}</Text>
-                    </View>
-                  </View>
-                ))}
-              </ScrollView>
-            )}
-          </View>
-
-          <View
-            style={[
-              { paddingBottom: keyboardOpen ? 200 : 200 },
-              { minHeight: 900 },
-            ]}
-          >
-            <RichEditor
-              ref={(r) => (richTextRef.current = r)}
-              style={NotePageStyles().input}
-              editorStyle={{
-                contentCSSText: `
-                  position: absolute; 
-                  top: 0; right: 0; bottom: 0; left: 0;
-                `,
-              }}
-              autoCorrect={true}
-              placeholder="Write your note here"
-              onChange={(text) => setText(text)}
-              initialContentHTML={text}
-              onCursorPosition={(position) => {
-                handleScroll(position);
-              }}
-            />
-            <View style={{ height: keyboardOpen ? 400 : 90 }} />
-          </View>
-        </ScrollView>
+      <View>
+        <RichToolbar
+          style={NotePageStyles().container}
+          editor={richTextRef}
+          actions={[
+            actions.keyboard,
+            actions.undo,
+            actions.redo,
+            actions.setBold,
+            actions.setItalic,
+            actions.setUnderline,
+            actions.insertBulletsList,
+            actions.blockquote,
+            actions.indent,
+            actions.outdent,
+          ]}
+          iconTint={NotePageStyles().saveText.color}
+          selectedIconTint="#2095F2"
+        />
       </View>
+
+      <View key="Tags Container">
+        {tags.length > 0 && (
+          <ScrollView
+            horizontal={true}
+            style={{ width: "100%", marginHorizontal: 10, paddingLeft: 5, marginBottom: 10 }}
+          >
+            {tags.map((tag, index) => (
+              <View
+                key={index}
+                style={{
+                  flexDirection: "row",
+                  marginRight: 10,
+                  alignItems: "center",
+                }}
+              >
+                <View
+                  style={{
+                    height: 20,
+                    width: 20,
+                    transform: [{ rotate: "45deg" }],
+                    position: "absolute",
+                    left: 2,
+                    borderLeftWidth: 2,
+                    borderBottomWidth: 2,
+                    borderColor: NotePageStyles().title.color,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <View
+                    style={{
+                      height: 5,
+                      width: 5,
+                      left: 2,
+                      borderRadius: 10,
+                      backgroundColor: NotePageStyles().title.color,
+                      marginRight: 5,
+                    }}
+                  />
+                </View>
+                <View
+                  style={{
+                    borderTopRightRadius: 5,
+                    borderBottomRightRadius: 5,
+                    borderColor: NotePageStyles().title.color,
+                    borderRightWidth: 2,
+                    borderBottomWidth: 2,
+                    borderTopWidth: 2,
+                    paddingHorizontal: 10,
+                    justifyContent: "center",
+                    flexDirection: "row",
+                    marginLeft: 10,
+                  }}
+                >
+                  <Text style={{ textAlign: "center", color: NotePageStyles().title.color }}>{tag}</Text>
+                </View>
+              </View>
+            ))}
+          </ScrollView>
+        )}
+      </View>
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <View style={NotePageStyles().container}>
+          <ScrollView
+            nestedScrollEnabled={true}
+            showsVerticalScrollIndicator={false}
+            style={{ overflow: "hidden" }}
+            ref={scrollViewRef}
+          >
+              <View>
+                <RichEditor
+                  ref={(r) => (richTextRef.current = r)}
+                  style={NotePageStyles().input}
+                  editorStyle={{
+                    contentCSSText: `
+                      position: absolute; 
+                      top: 0; right: 0; bottom: 0; left: 0;
+                    `,
+                  }}
+                  autoCorrect={true}
+                  placeholder="Write your note here"
+                  onChange={(text) => setText(text)}
+                  initialContentHTML={text}
+                  onCursorPosition={(position) => {
+                    handleScroll(position);
+                  }}
+                />
+                <View style={{ height: keyboardOpen ? 400 : 0 }} />
+              </View>
+          </ScrollView>
+        </View>
+      </KeyboardAvoidingView>
     </View>
   );
 };

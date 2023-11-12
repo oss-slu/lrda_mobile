@@ -37,6 +37,7 @@ const NotePageStyles = () => {
       backgroundColor: theme.tertiaryColor,
       marginBottom: 4,
       // overflow: "hidden",
+      // flex: 1, 
     },
     title: {
       height: 45,
