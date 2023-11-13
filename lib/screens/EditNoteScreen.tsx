@@ -171,6 +171,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           style={NotePageStyles().title}
           value={title}
           onChangeText={setTitle}
+          editable={false}
         />
         {owner ? (
           isPublished ? (
@@ -281,6 +282,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           actions.indent,
           actions.outdent,
         ]}
+        disabled={true}
         iconTint={NotePageStyles().saveText.color}
         selectedIconTint={"#2095F2"}
       />
@@ -376,6 +378,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
               onCursorPosition={(position) => {
                 handleScroll(position);
               }}
+              disabled={true}
             />
             <View style={{ height: keyboardOpen ? 400 : 90 }} />
           </View>
