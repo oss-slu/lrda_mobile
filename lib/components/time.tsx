@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect} from "react";
 import { View, Text, StyleSheet ,Button} from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
@@ -38,6 +38,8 @@ export default function LocationWindow({
   const [chosenDate, setChosenDate] = useState(new Date());
   const [chosenTime, setChosenTime] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
   const [savedDateTime, setSavedDateTime] = useState<null | Date>(null);
 
   useEffect(() => {
@@ -47,11 +49,13 @@ export default function LocationWindow({
   const onChangeDate = (event: any, selectedDate: any) => {
     const currentDate = selectedDate || date;
     setChosenDate(currentDate);
+    setShowDatePicker(false);
   };
 
   const onChangeTime = (event: any, selectedTime: any) => {
     const currentTime = selectedTime || date;
     setChosenTime(currentTime);
+    setShowTimePicker(false);
   };
 
   const saveDateTime = () => {
@@ -72,22 +76,26 @@ export default function LocationWindow({
       <Text style={styles.label}>Date & Time</Text>
       {showPicker ? (
           <View style={styles.dateTimePickerContainer}>
-    <DateTimePicker
-      testID="datePicker"
-      value={chosenDate}
-      mode={"date"}
-      is24Hour={true}
-      display="default"
-      onChange={onChangeDate}
-    />
-    <DateTimePicker
-      testID="timePicker"
-      value={chosenTime}
-      mode={"time"}
-      is24Hour={true}
-      display="default"
-      onChange={onChangeTime}
-    />
+    {showDatePicker && (
+            <DateTimePicker
+              testID="datePicker"
+              value={date}
+              mode="date"
+              is24Hour={true}
+              display="default"
+              onChange={onChangeDate}
+            />
+          )}
+    {showTimePicker && (
+            <DateTimePicker
+              testID="timePicker"
+              value={date}
+              mode="time"
+              is24Hour={true}
+              display="default"
+              onChange={onChangeTime}
+            />
+          )}
       <Button title="Save" onPress={saveDateTime} />
     </View>
 ) : (
@@ -97,7 +105,7 @@ export default function LocationWindow({
         {formatToLocalDateString(savedDateTime || time)}
       </Text>
     </View>
-    <Button title="Select Date & Time" onPress={() => setShowPicker(true)} />
+    <Button title="Select Date & Time" onPress={() => { setShowPicker(true); setShowDatePicker(true); setShowTimePicker(true); }} />
   </View>
 )}
     </View>
@@ -135,4 +143,3 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
-
