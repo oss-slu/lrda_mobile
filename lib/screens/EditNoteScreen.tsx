@@ -148,185 +148,185 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   return (
     <View>
       <View style={NotePageStyles().topContainer}>
-        <TouchableOpacity
-          style={NotePageStyles().topButtons}
-          onPress={owner ? handleSaveNote : () => navigation.goBack()}
-        >
-          <Ionicons name="arrow-back-outline" size={30} color={NotePageStyles().title.color} />
-        </TouchableOpacity>
-        <TextInput
-          placeholder="Title Field Note"
-          style={NotePageStyles().title}
-          value={title}
-          onChangeText={setTitle}
-        />
-        {owner && (
-          isPublished ? (
-            <TouchableOpacity
-              style={NotePageStyles().topButtons}
-              onPress={() => setIsPublished(!isPublished)}
-            >
-              <Ionicons name="share" size={30} color="white" />
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              style={NotePageStyles().topButtons}
-              onPress={() => setIsPublished(!isPublished)}
-            >
-              <Ionicons name="share-outline" size={30} color={NotePageStyles().title.color} />
-            </TouchableOpacity>
-          )
-        )}
-      </View>
+              <TouchableOpacity
+                style={NotePageStyles().topButtons}
+                onPress={owner ? handleSaveNote : () => navigation.goBack()}
+              >
+                <Ionicons name="arrow-back-outline" size={30} color={NotePageStyles().title.color} />
+              </TouchableOpacity>
+              <TextInput
+                placeholder="Title Field Note"
+                style={NotePageStyles().title}
+                value={title}
+                onChangeText={setTitle}
+              />
+              {owner && (
+                isPublished ? (
+                  <TouchableOpacity
+                    style={NotePageStyles().topButtons}
+                    onPress={() => setIsPublished(!isPublished)}
+                  >
+                    <Ionicons name="share" size={30} color="white" />
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    style={NotePageStyles().topButtons}
+                    onPress={() => setIsPublished(!isPublished)}
+                  >
+                    <Ionicons name="share-outline" size={30} color={NotePageStyles().title.color} />
+                  </TouchableOpacity>
+                )
+              )}
+        </View>
       <View style={NotePageStyles().keyContainer}>
-        <TouchableOpacity onPress={() => setViewMedia(!viewMedia)}>
-          <Ionicons name="images-outline" size={30} color={NotePageStyles().saveText.color} />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setViewAudio(!viewAudio)}>
-          <Ionicons name="mic-outline" size={30} color={NotePageStyles().saveText.color} />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setIsLocation(!isLocation)}>
-          <Ionicons name="location-outline" size={30} color={NotePageStyles().saveText.color} />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setIsTime(!isTime)}>
-          <Ionicons name="time-outline" size={30} color={NotePageStyles().saveText.color} />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setIsTagging(!isTagging)}>
-          <Ionicons name="pricetag-outline" size={30} color={NotePageStyles().saveText.color} />
-        </TouchableOpacity>
-      </View>
-      <View style={{ backgroundColor: NotePageStyles().container.backgroundColor }}>
-        <PhotoScroller
-          ref={photoScrollerRef}
-          active={viewMedia}
-          newMedia={media}
-          setNewMedia={setMedia}
-          insertImageToEditor={addImageToEditor}
-        />
-        {viewAudio && (
-          <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
-        )}
-        {isTagging && <TagWindow tags={tags} setTags={setTags} />}
-        {isLocation && (
-          <LocationWindow location={location} setLocation={setLocation} />
-        )}
-        {isTime && <TimeWindow time={time} setTime={setTime} />}
+            <TouchableOpacity onPress={() => setViewMedia(!viewMedia)}>
+              <Ionicons name="images-outline" size={30} color={NotePageStyles().saveText.color} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setViewAudio(!viewAudio)}>
+              <Ionicons name="mic-outline" size={30} color={NotePageStyles().saveText.color} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setIsLocation(!isLocation)}>
+              <Ionicons name="location-outline" size={30} color={NotePageStyles().saveText.color} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setIsTime(!isTime)}>
+              <Ionicons name="time-outline" size={30} color={NotePageStyles().saveText.color} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setIsTagging(!isTagging)}>
+              <Ionicons name="pricetag-outline" size={30} color={NotePageStyles().saveText.color} />
+            </TouchableOpacity>
+          </View>
+          <View style={{ backgroundColor: NotePageStyles().container.backgroundColor }}>
+            <PhotoScroller
+              ref={photoScrollerRef}
+              active={viewMedia}
+              newMedia={media}
+              setNewMedia={setMedia}
+              insertImageToEditor={addImageToEditor}
+            />
+            {viewAudio && (
+              <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
+            )}
+            {isTagging && <TagWindow tags={tags} setTags={setTags} />}
+            {isLocation && (
+              <LocationWindow location={location} setLocation={setLocation} />
+            )}
+            {isTime && <TimeWindow time={time} setTime={setTime} />}
       </View>
       <View>
-        <RichToolbar
-          style={NotePageStyles().container}
-          editor={richTextRef}
-          actions={[
-            actions.keyboard,
-            actions.undo,
-            actions.redo,
-            actions.setBold,
-            actions.setItalic,
-            actions.setUnderline,
-            actions.insertBulletsList,
-            actions.blockquote,
-            actions.indent,
-            actions.outdent,
-          ]}
-          iconTint={NotePageStyles().saveText.color}
-          selectedIconTint="#2095F2"
-        />
+            <RichToolbar
+              style={NotePageStyles().container}
+              editor={richTextRef}
+              actions={[
+                actions.keyboard,
+                actions.undo,
+                actions.redo,
+                actions.setBold,
+                actions.setItalic,
+                actions.setUnderline,
+                actions.insertBulletsList,
+                actions.blockquote,
+                actions.indent,
+                actions.outdent,
+              ]}
+              iconTint={NotePageStyles().saveText.color}
+              selectedIconTint="#2095F2"
+            />
       </View>
 
       <View key="Tags Container">
-        {tags.length > 0 && (
-          <ScrollView
-            horizontal={true}
-            style={{ width: "100%", marginHorizontal: 10, paddingLeft: 5, marginBottom: 10 }}
-          >
-            {tags.map((tag, index) => (
-              <View
-                key={index}
-                style={{
-                  flexDirection: "row",
-                  marginRight: 10,
-                  alignItems: "center",
-                }}
-              >
-                <View
-                  style={{
-                    height: 20,
-                    width: 20,
-                    transform: [{ rotate: "45deg" }],
-                    position: "absolute",
-                    left: 2,
-                    borderLeftWidth: 2,
-                    borderBottomWidth: 2,
-                    borderColor: NotePageStyles().title.color,
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
+              {tags.length > 0 && (
+                <ScrollView
+                  horizontal={true}
+                  style={{ width: "100%", marginHorizontal: 10, paddingLeft: 5, marginBottom: 10 }}
                 >
-                  <View
-                    style={{
-                      height: 5,
-                      width: 5,
-                      left: 2,
-                      borderRadius: 10,
-                      backgroundColor: NotePageStyles().title.color,
-                      marginRight: 5,
-                    }}
-                  />
-                </View>
-                <View
-                  style={{
-                    borderTopRightRadius: 5,
-                    borderBottomRightRadius: 5,
-                    borderColor: NotePageStyles().title.color,
-                    borderRightWidth: 2,
-                    borderBottomWidth: 2,
-                    borderTopWidth: 2,
-                    paddingHorizontal: 10,
-                    justifyContent: "center",
-                    flexDirection: "row",
-                    marginLeft: 10,
-                  }}
-                >
-                  <Text style={{ textAlign: "center", color: NotePageStyles().title.color }}>{tag}</Text>
-                </View>
-              </View>
-            ))}
-          </ScrollView>
-        )}
+                  {tags.map((tag, index) => (
+                    <View
+                      key={index}
+                      style={{
+                        flexDirection: "row",
+                        marginRight: 10,
+                        alignItems: "center",
+                      }}
+                    >
+                      <View
+                        style={{
+                          height: 20,
+                          width: 20,
+                          transform: [{ rotate: "45deg" }],
+                          position: "absolute",
+                          left: 2,
+                          borderLeftWidth: 2,
+                          borderBottomWidth: 2,
+                          borderColor: NotePageStyles().title.color,
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        <View
+                          style={{
+                            height: 5,
+                            width: 5,
+                            left: 2,
+                            borderRadius: 10,
+                            backgroundColor: NotePageStyles().title.color,
+                            marginRight: 5,
+                          }}
+                        />
+                      </View>
+                      <View
+                        style={{
+                          borderTopRightRadius: 5,
+                          borderBottomRightRadius: 5,
+                          borderColor: NotePageStyles().title.color,
+                          borderRightWidth: 2,
+                          borderBottomWidth: 2,
+                          borderTopWidth: 2,
+                          paddingHorizontal: 10,
+                          justifyContent: "center",
+                          flexDirection: "row",
+                          marginLeft: 10,
+                        }}
+                      >
+                        <Text style={{ textAlign: "center", color: NotePageStyles().title.color }}>{tag}</Text>
+                      </View>
+                    </View>
+                  ))}
+                </ScrollView>
+              )}
       </View>
 
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <View style={NotePageStyles().container}>
-          <ScrollView
-            nestedScrollEnabled={true}
-            showsVerticalScrollIndicator={false}
-            style={{ overflow: "hidden" }}
-            ref={scrollViewRef}
-          >
-              <View>
-                <RichEditor
-                  ref={(r) => (richTextRef.current = r)}
-                  style={NotePageStyles().input}
-                  editorStyle={{
-                    contentCSSText: `
-                      position: absolute; 
-                      top: 0; right: 0; bottom: 0; left: 0;
-                    `,
-                  }}
-                  autoCorrect={true}
-                  placeholder="Write your note here"
-                  onChange={(text) => setText(text)}
-                  initialContentHTML={text}
-                  onCursorPosition={(position) => {
-                    handleScroll(position);
-                  }}
-                />
-                <View style={{ height: keyboardOpen ? 400 : 0 }} />
+              <View style={NotePageStyles().container}>
+                <ScrollView
+                  nestedScrollEnabled={true}
+                  showsVerticalScrollIndicator={false}
+                  style={{ overflow: "hidden" }}
+                  ref={scrollViewRef}
+                >
+                    <View>
+                      <RichEditor
+                        ref={(r) => (richTextRef.current = r)}
+                        style={NotePageStyles().input}
+                        editorStyle={{
+                          contentCSSText: `
+                            position: absolute; 
+                            top: 0; right: 0; bottom: 0; left: 0;
+                          `,
+                        }}
+                        autoCorrect={true}
+                        placeholder="Write your note here"
+                        onChange={(text) => setText(text)}
+                        initialContentHTML={text}
+                        onCursorPosition={(position) => {
+                          handleScroll(position);
+                        }}
+                      />
+                      <View style={{ height: keyboardOpen ? 400 : 0 }} />
+                    </View>
+                </ScrollView>
               </View>
-          </ScrollView>
-        </View>
       </KeyboardAvoidingView>
     </View>
   );
