@@ -169,85 +169,94 @@ export default function MorePage() {
               }} />
           </View>
 
-          <View style={styles.textContainer}>
-
-            <Text style={styles.headerText}>Resources</Text>
-            <TouchableOpacity
-              onPress={() =>
-                Linking.openURL("http://lived-religion-dev.rerum.io/deer-lr/dashboard.html")
-              }
-            >
-              <Text style={styles.text}>Our Website</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() =>
-                Linking.openURL("https://guides.library.upenn.edu/ethnography/DoingEthnography")
-              }
-            >
-              <Text style={styles.text}>Guide to Ethnography</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() =>
-                Linking.openURL("http://changingminds.org/explanations/research/analysis/ethnographic_coding.htm")
-              }
-            >
-              <Text style={styles.text}>Guide to Coding</Text>
-            </TouchableOpacity>
-            <TouchableOpacity key='Email' onPress={() => handleEmail()}>
-              <Text style={styles.text}>Report a Bug</Text>
-            </TouchableOpacity>
-            
-            <View style={styles.padding} />
-
-            <Text style={styles.headerText}>Meet our Team</Text>
-            <Text style={styles.text}>Insert Team Photo</Text>
-            <Text style={styles.text}>Insert Team Message</Text>
-
-            <View style={styles.padding} />
-
-            <Text style={styles.headerText}>Frequently Asked Questions</Text>
-            {/* You can use Text components for FAQ sections as well */}
-
-            <View style={{padding: 5}} />
-
-          {/* FAQ Section 1 */}
-          <Text style={styles.FAQText}>What can users do?</Text>
-          <Text style={styles.text}>
-            Explore religious traditions, find places of worship, engage in meaningful discussions.
-          </Text>
-
-          <View style={styles.padding} />
-
-          {/* FAQ Section 2 */}
-          <Text style={styles.FAQText}>Who is it for?</Text>
-          <Text style={styles.text}>
-            Scholars, students, believers, and the curious about the world's religions.
-          </Text>
-
-          <View style={styles.padding} />
-
-          {/* FAQ Section 3 */}
-          <Text style={styles.FAQText}>What's unique?</Text>
-          <Text style={styles.text}>
-            Provides a modern method to capture experiences using the devices that are with us every day.
-          </Text>
-
-          <View style={styles.padding} />
-
-          {/* FAQ Section 4 */}
-          <Text style={styles.FAQText}>Our Mission</Text>
-          <Text style={styles.text}>
-            Connect people of diverse religious backgrounds, beliefs, and practices.
-          </Text>
-
-          <View style={styles.padding} />
-
-          {/* FAQ Section 5 */}
-          <Text style={styles.FAQText}>Why use 'Where's Religion?'</Text>
-          <Text style={styles.text}>
-            Explore religious traditions, find places of worship, engage in meaningful discussions.
-          </Text>
-          </View>
+          <Accordion style={{ backgroundColor: theme.secondaryColor }} headerTitleStyle={styles.headerText} headerTitle="Resources">
+              <TouchableOpacity
+                onPress={() => Linking.openURL(
+                  "http://lived-religion-dev.rerum.io/deer-lr/dashboard.html"
+                )}
+              ><Text style={styles.headerText}>{"\n"}{"\t"}Our Website{"\n"}</Text></TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => Linking.openURL(
+                  "https://guides.library.upenn.edu/ethnography/DoingEthnography"
+                )}
+              ><Text style={styles.headerText}>{"\t"}Guide to Enthnography{"\n"}</Text></TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => Linking.openURL(
+                  "http://changingminds.org/explanations/research/analysis/ethnographic_coding.htm"
+                )}
+              ><Text style={styles.headerText}>{"\t"}Guide to Coding{"\n"}</Text></TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => handleEmail()}
+              ><Text style={styles.headerText}>{"\t"}Report a Bug{"\n"}</Text></TouchableOpacity>
+            </Accordion>
+            <Accordion style={{ backgroundColor: theme.secondaryColor }} headerTitleStyle={styles.headerText} headerTitle="Meet our Team">
+              <Text style={{ color: theme.text }}>
+                {'\n'}Insert Team Photo
+              </Text>
+              <Text style={{ color: theme.text }}>{'\n'}Insert Team Message</Text>
+            </Accordion>
+            <Accordion style={{ backgroundColor: theme.secondaryColor }} headerTitleStyle={styles.headerText} headerTitle="Frequently Asked Questions">
+              <View style={styles.headerContainer}>
+                <Accordion
+                  style={{ backgroundColor: theme.secondaryColor }}
+                  headerTitleStyle={styles.headerText}
+                  headerTitle="What can users do?"
+                >
+                  <Text style={styles.text}>
+                    Explore religious traditions, find places of worship, engage in
+                    meaningful discussions.
+                  </Text>
+                </Accordion>
+              </View>
+              <View style={styles.headerContainer}>
+                <Accordion
+                  style={{ backgroundColor: theme.secondaryColor }}
+                  headerTitleStyle={styles.headerText}
+                  headerTitle="Who is it for?"
+                >
+                  <Text style={styles.text}>
+                    Scholars, students, believers, and the curious about the world's
+                    religions.
+                  </Text>
+                </Accordion>
+              </View>
+              <View style={styles.headerContainer}>
+                <Accordion
+                  style={{ backgroundColor: theme.secondaryColor }}
+                  headerTitleStyle={styles.headerText}
+                  headerTitle="What's unique?"
+                >
+                  <Text style={styles.text}>
+                    Provides a modern method to capture experiences using the
+                    devices that are with us every day.
+                  </Text>
+                </Accordion>
+              </View>
+              <View style={styles.headerContainer}>
+                <Accordion
+                  style={{ backgroundColor: theme.secondaryColor }}
+                  headerTitleStyle={styles.headerText}
+                  headerTitle="Our Mission"
+                >
+                  <Text style={styles.text}>
+                    Connect people of diverse religious backgrounds, beliefs, and
+                    practices.
+                  </Text>
+                </Accordion>
+              </View>
+              <View style={styles.headerContainer}>
+                <Accordion
+                  style={{ backgroundColor: theme.secondaryColor }}
+                  headerTitleStyle={styles.headerText}
+                  headerTitle="Why use 'Where's Religion?'"
+                >
+                  <Text style={styles.text}>
+                    Explore religious traditions, find places of worship, engage in
+                    meaningful discussions.
+                  </Text>
+                </Accordion>
+              </View>
+            </Accordion>
 
           <View style={styles.textContainer}>
             <View style={styles.buttonContainer}>
