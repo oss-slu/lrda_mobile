@@ -29,10 +29,11 @@
       },
       "config": {
         "googleMaps": {
-          "apiKey" : "AIzaSyD_hN-XNLPsze7WetHBcvvqRcHDls72Rn8"
+          "apiKey": "AIzaSyD_hN-XNLPsze7WetHBcvvqRcHDls72Rn8"
         }
       },
-      "package": "Where's Religion"
+      "package": "register.edu.slu.cs.oss.lrda",
+      "versionCode": 4
     },
     "web": {
       "favicon": "./assets/favicon.png"
