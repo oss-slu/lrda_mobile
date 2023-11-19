@@ -7,6 +7,10 @@ import {
   Keyboard,
   ScrollView,
   Text,
+  Dimensions,
+  SafeAreaView,
+  KeyboardAvoidingView,
+  Platform
 } from "react-native";
 import { Note, AddNoteScreenProps } from "../../types";
 import PhotoScroller from "../components/photoScroller";
@@ -42,6 +46,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const richTextRef = useRef<RichEditor | null>(null);
   const [isPublished, setIsPublished] = useState(false);
   const [keyboardOpen, setKeyboard] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const scrollViewRef = useRef<ScrollView | null>(null);
   const [location, setLocation] = useState<{
     latitude: number;
@@ -51,14 +56,16 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
-      () => {
+      (e) => {
         setKeyboard(true);
+        setKeyboardHeight(e.endCoordinates.height);
       }
     );
     const keyboardDidHideListener = Keyboard.addListener(
       "keyboardDidHide",
       () => {
         setKeyboard(false);
+        setKeyboardHeight(0);
       }
     );
 
@@ -70,7 +77,14 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
 
   const handleScroll = (positionY: number) => {
     if (scrollViewRef.current) {
-      scrollViewRef.current.scrollTo({ y: positionY - 100, animated: true });
+      const viewportHeight = Dimensions.get('window').height - keyboardHeight;
+  
+      const scrollToY = positionY - (viewportHeight / 2);
+  
+      scrollViewRef.current.scrollTo({
+        y: Math.max(scrollToY, 0),
+        animated: true,
+      });
     }
   };
 
@@ -120,136 +134,132 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   };
 
   return (
-    <View>
-      <View style={NotePageStyles().topContainer}>
-        <TouchableOpacity style={NotePageStyles().topButtons} onPress={saveNote}>
-          <Ionicons name="arrow-back-outline" size={30} color={NotePageStyles().saveText.color} />
-        </TouchableOpacity>
-        <TextInput
-          style={NotePageStyles().title}
-          placeholder="Title Field Note"
-          placeholderTextColor={NotePageStyles().title.color}
-          onChangeText={(text) => setTitleText(text)}
-          value={titleText}
-        />
-
-        {isPublished ? (
-          <TouchableOpacity
-            style={NotePageStyles().topButtons}
-            onPress={() => setIsPublished(!isPublished)}
-          >
-            <Ionicons name="share" size={30} color={NotePageStyles().saveText.color} />
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            style={NotePageStyles().topButtons}
-            onPress={() => setIsPublished(!isPublished)}
-          >
-            <Ionicons name="share-outline" size={30} color={NotePageStyles().saveText.color} />
-          </TouchableOpacity>
-        )}
-      </View>
-      <View style={NotePageStyles().keyContainer}>
-        <TouchableOpacity
-          onPress={() => {
-            setViewMedia(!viewMedia);
-            setViewAudio(false);
-            setIsTagging(false);
-            setIsLocation(false);
-            setIsTime(false);
-          }}
-          testID="images-icon"
-        >
-          <Ionicons name="images-outline" size={30} color={NotePageStyles().saveText.color} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => {
-            setViewMedia(false);
-            setViewAudio(!viewAudio);
-            setIsTagging(false);
-            setIsLocation(false);
-            setIsTime(false);
-          }}
-        >
-          <Ionicons name="mic-outline" size={30} color={NotePageStyles().saveText.color} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => {
-            setViewMedia(false);
-            setViewAudio(false);
-            setIsTagging(false);
-            setIsLocation(!isLocation);
-            setIsTime(false);
-          }}
-        >
-          <Ionicons name="location-outline" size={30} color={NotePageStyles().saveText.color} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => {
-            setViewMedia(false);
-            setViewAudio(false);
-            setIsTagging(false);
-            setIsLocation(false);
-            setIsTime(!isTime);
-          }}
-        >
-          <Ionicons name="time-outline" size={30} color={NotePageStyles().saveText.color} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => {
-            setViewMedia(false);
-            setViewAudio(false);
-            setIsTagging(!isTagging);
-            setIsLocation(false);
-            setIsTime(false);
-          }}
-        >
-          <Ionicons name="pricetag-outline" size={30} color={NotePageStyles().saveText.color} />
-        </TouchableOpacity>
-      </View>
-      <View style={NotePageStyles().container }>
-        <PhotoScroller active={viewMedia} newMedia={newMedia} setNewMedia={setNewMedia} insertImageToEditor={addImageToEditor} />
-        {viewAudio && (
-          <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
-        )}
-        {isTagging && <TagWindow tags={tags} setTags={setTags} />}
-        {isLocation && (
-          <LocationWindow location={location} setLocation={setLocation} />
-        )}
-        {isTime && <TimeWindow time={time} setTime={setTime} />}
-      </View>
-      <RichToolbar
-        style={NotePageStyles().container}
-        editor={richTextRef}
-        actions={[
-          actions.keyboard,
-          actions.undo,
-          actions.redo,
-          actions.setBold,
-          actions.setItalic,
-          actions.setUnderline,
-          actions.insertBulletsList,
-          actions.blockquote,
-          actions.indent,
-          actions.outdent,
-        ]}
-        iconTint={NotePageStyles().saveText.color}
-        selectedIconTint={"#2095F2"}
-      />
-      <View style={NotePageStyles().container}>
-        <ScrollView
-          nestedScrollEnabled={true}
-          showsVerticalScrollIndicator={false}
-          style={{ overflow: "hidden", paddingTop: 10, paddingBottom: 100 }}
-          ref={scrollViewRef}
-        >
-          <View key="Tags Container">
-            <ScrollView
-              horizontal={true}
-              style={{ width: "100%", marginHorizontal: 10, paddingLeft: 5, marginBottom: 10, }}
+      <SafeAreaView style={{ flex: 1 }}>
+        <View style={NotePageStyles().topContainer}>
+  
+          <View style={NotePageStyles().topButtonsContainer}>
+            <TouchableOpacity style={NotePageStyles().topButtons} onPress={saveNote}>
+              <Ionicons name="arrow-back-outline" size={30} color={NotePageStyles().saveText.color} />
+            </TouchableOpacity>
+            <TextInput
+              style={NotePageStyles().title}
+              placeholder="Title Field Note"
+              placeholderTextColor={NotePageStyles().title.color}
+              onChangeText={(text) => setTitleText(text)}
+              value={titleText}
+            />
+            {isPublished ? (
+              <TouchableOpacity
+                style={NotePageStyles().topButtons}
+                onPress={() => setIsPublished(!isPublished)}
+              >
+                <Ionicons name="share" size={30} color={NotePageStyles().saveText.color} />
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                style={NotePageStyles().topButtons}
+                onPress={() => setIsPublished(!isPublished)}
+              >
+                <Ionicons name="share-outline" size={30} color={NotePageStyles().saveText.color} />
+              </TouchableOpacity>
+            )}
+          </View>
+          <View style={NotePageStyles().keyContainer}>
+            <TouchableOpacity
+              onPress={() => {
+                setViewMedia(!viewMedia);
+                setViewAudio(false);
+                setIsTagging(false);
+                setIsLocation(false);
+                setIsTime(false);
+              }}
+              testID="images-icon"
             >
-              {tags &&
-                tags.map((tag, index) => (
+              <Ionicons name="images-outline" size={30} color={NotePageStyles().saveText.color} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                setViewMedia(false);
+                setViewAudio(!viewAudio);
+                setIsTagging(false);
+                setIsLocation(false);
+                setIsTime(false);
+              }}
+            >
+              <Ionicons name="mic-outline" size={30} color={NotePageStyles().saveText.color} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                setViewMedia(false);
+                setViewAudio(false);
+                setIsTagging(false);
+                setIsLocation(!isLocation);
+                setIsTime(false);
+              }}
+            >
+            <Ionicons name="location-outline" size={30} color={NotePageStyles().saveText.color} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                setViewMedia(false);
+                setViewAudio(false);
+                setIsTagging(false);
+                setIsLocation(false);
+                setIsTime(!isTime);
+              }}
+            >
+              <Ionicons name="time-outline" size={30} color={NotePageStyles().saveText.color} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                setViewMedia(false);
+                setViewAudio(false);
+                setIsTagging(!isTagging);
+                setIsLocation(false);
+                setIsTime(false);
+              }}
+            >
+              <Ionicons name="pricetag-outline" size={30} color={NotePageStyles().saveText.color} />
+            </TouchableOpacity>
+        </View>
+        <View style={NotePageStyles().container }>
+          <PhotoScroller active={viewMedia} newMedia={newMedia} setNewMedia={setNewMedia} insertImageToEditor={addImageToEditor} />
+          {viewAudio && (
+            <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
+          )}
+          {isTagging && <TagWindow tags={tags} setTags={setTags} />}
+          {isLocation && (
+            <LocationWindow location={location} setLocation={setLocation} />
+          )}
+          {isTime && <TimeWindow time={time} setTime={setTime} />}
+        </View>
+          <View>
+            <RichToolbar
+              style={NotePageStyles().container}
+              editor={richTextRef}
+              actions={[
+                actions.keyboard,
+                actions.undo,
+                actions.redo,
+                actions.setBold,
+                actions.setItalic,
+                actions.setUnderline,
+                actions.insertBulletsList,
+                actions.blockquote,
+                actions.indent,
+                actions.outdent,
+              ]}
+              iconTint={NotePageStyles().saveText.color}
+              selectedIconTint="#2095F2"
+            />
+          </View>
+          <View key="Tags Container">
+            {tags.length > 0 && (
+              <ScrollView
+                horizontal={true}
+                style={{ width: "100%", marginHorizontal: 10, paddingLeft: 5, marginBottom: 10 }}
+              >
+                {tags.map((tag, index) => (
                   <View
                     key={index}
                     style={{
@@ -301,38 +311,45 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
                     </View>
                   </View>
                 ))}
+              </ScrollView>
+            )}
+            </View>
+  
+        </View>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1 }}
+        >
+          <View style={NotePageStyles().container}>
+            <ScrollView
+              nestedScrollEnabled={true}
+              showsVerticalScrollIndicator={false}
+              ref={scrollViewRef}
+            >
+              <RichEditor
+                ref={(r) => (richTextRef.current = r)}
+                style={{...NotePageStyles().input }}
+                editorStyle={{
+                  contentCSSText: `
+                    position: absolute; 
+                    top: 0; right: 0; bottom: 0; left: 0;
+                    color: theme.text;
+                  `,
+                }}
+                autoCorrect={true}
+                placeholder="Write your note here"
+                onChange={(text) => setBodyText(text)}
+                initialContentHTML={bodyText}
+                onCursorPosition={(position) => {
+                  handleScroll(position);
+                }}
+              />
             </ScrollView>
           </View>
-          <View
-            style={[
-              { paddingBottom: keyboardOpen ? 200 : 200 },
-            ]}
-          >
-            <RichEditor
-              ref={(r) => (richTextRef.current = r)}
-              style={{...NotePageStyles().input }}
-              editorStyle={{
-                contentCSSText: `
-                  position: absolute; 
-                  top: 0; right: 0; bottom: 0; left: 0;
-                  color: theme.text;
-                `,
-              }}
-              autoCorrect={true}
-              placeholder="Write your note here"
-              onChange={(text) => setBodyText(text)}
-              initialContentHTML={bodyText}
-              onCursorPosition={(position) => {
-                handleScroll(position);
-              }}
-            />
-            <View style={{ height: keyboardOpen ? 400 : 90 }} />
-          </View>
-        </ScrollView>
-      </View>
-    </View>
-    
+        </KeyboardAvoidingView>
+      </SafeAreaView>
   );
+
 };
 
 export default AddNoteScreen;

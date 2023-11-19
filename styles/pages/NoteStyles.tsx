@@ -42,9 +42,6 @@ const NotePageStyles = () => {
       width: "100%",
       // overflow: "hidden",
     },
-    textEditorContainer: {
-      minHeight: 100,
-    },
     title: {
       height: 45,
       width: "70%",
