@@ -2,22 +2,25 @@ import { StyleSheet } from "react-native";
 import { lightTheme, darkTheme } from "../colors";
 import Constants from "expo-constants";
 import { useTheme } from "../../lib/components/ThemeProvider";
+import { white } from "react-native-paper/lib/typescript/styles/themes/v2/colors";
 
 const NotePageStyles = () => {
   const { theme } = useTheme();
 
   return StyleSheet.create({
     topContainer: {
+      minHeight: 140,
+    },
+    topButtonsContainer: {
       justifyContent: "space-between",
       paddingHorizontal: 5,
-      paddingTop: Constants.statusBarHeight,
+      // paddingTop: Constants.statusBarHeight,
       flexDirection: "row",
       backgroundColor: theme.primaryColor,
       alignItems: "center",
       textAlign: "center",
     },
     topText: {
-      flex: 1,
       maxWidth: "100%",
       fontWeight: "700",
       fontSize: 32,
@@ -36,8 +39,11 @@ const NotePageStyles = () => {
     container: {
       backgroundColor: theme.tertiaryColor,
       marginBottom: 4,
+      width: "100%",
       // overflow: "hidden",
-      // flex: 1, 
+    },
+    textEditorContainer: {
+      minHeight: 100,
     },
     title: {
       height: 45,
@@ -51,8 +57,7 @@ const NotePageStyles = () => {
       color: theme.text,
     },
     input: {
-      flex: 1,
-      backgroundColor: 'black',
+      backgroundColor: 'white',
       // borderColor: theme.secondaryColor,
       fontSize: 22,
       color: theme.text,
@@ -69,7 +74,6 @@ const NotePageStyles = () => {
       justifyContent: "center",
     },
     keyContainer: {
-      height: 60,
       paddingVertical: 5,
       width: "100%",
       backgroundColor: theme.primaryColor,
