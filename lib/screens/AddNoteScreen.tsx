@@ -234,7 +234,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           {isTime && <TimeWindow time={time} setTime={setTime} />}
         </View>
           <View>
-            <RichToolbar
+            <RichToolbar data-testid="RichBar"
               style={NotePageStyles().container}
               editor={richTextRef}
               actions={[
@@ -326,7 +326,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
               showsVerticalScrollIndicator={false}
               ref={scrollViewRef}
             >
-              <RichEditor
+              <RichEditor data-testid="RichEditor"
                 ref={(r) => (richTextRef.current = r)}
                 style={{...NotePageStyles().input }}
                 editorStyle={{
