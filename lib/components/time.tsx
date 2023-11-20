@@ -61,17 +61,14 @@ export default function LocationWindow({
     const currentTime = selectedTime || time;
   
     if (Platform.OS === 'android') {
-      // For Android, check if the event is dismissed
       if (event.type === 'dismissed') {
         setShowTimePicker(false); 
       } else {
         setChosenTime(currentTime);
-        // Consider introducing a delay or additional flag here
         setShowTimePicker(false); 
         setShowDatePicker(true); 
       }
     } else {
-      // For iOS, just set the chosen time
       setChosenTime(currentTime);
       setIsDateTimeSelected(true);
     }
