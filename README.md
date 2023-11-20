@@ -1,4 +1,4 @@
-# LRDA Mobile
+a# LRDA Mobile
 
 ## Overview
 LRDA Mobile is the mobile app for the Lived Religion Application (LRDA), designed to provide ethnographers with an accessible platform to share their data worldwide. Built using React Native and TypeScript, this app connects to the Rerum Website to facilitate seamless data integration.
