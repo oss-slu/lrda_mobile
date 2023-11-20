@@ -171,7 +171,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           style={NotePageStyles().title}
           value={title}
           onChangeText={setTitle}
-          editable={false}
+          editable={!owner}
         />
         {owner ? (
           isPublished ? (
@@ -202,6 +202,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             setIsLocation(false);
             setIsTime(false);
           }}
+          disabled={!owner}
         >
           <Ionicons name="images-outline" size={30} color={NotePageStyles().saveText.color} />
         </TouchableOpacity>
@@ -213,6 +214,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             setIsLocation(false);
             setIsTime(false);
           }}
+          disabled={!owner}
         >
           <Ionicons name="mic-outline" size={30} color={NotePageStyles().saveText.color} />
         </TouchableOpacity>
@@ -224,6 +226,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             setIsLocation(!isLocation);
             setIsTime(false);
           }}
+          disabled={!owner}
         >
           <Ionicons name="location-outline" size={30} color={NotePageStyles().saveText.color} />
         </TouchableOpacity>
@@ -235,6 +238,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             setIsLocation(false);
             setIsTime(!isTime);
           }}
+          disabled={!owner}
         >
           <Ionicons name="time-outline" size={30} color={NotePageStyles().saveText.color} />
         </TouchableOpacity>
@@ -246,6 +250,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             setIsLocation(false);
             setIsTime(false);
           }}
+          disabled={!owner}
         >
           <Ionicons name="pricetag-outline" size={30} color={NotePageStyles().saveText.color} />
         </TouchableOpacity>
@@ -282,7 +287,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           actions.indent,
           actions.outdent,
         ]}
-        disabled={true}
+        disabled={!owner}
         iconTint={NotePageStyles().saveText.color}
         selectedIconTint={"#2095F2"}
       />
@@ -378,7 +383,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
               onCursorPosition={(position) => {
                 handleScroll(position);
               }}
-              disabled={true}
+              disabled={!owner}
             />
             <View style={{ height: keyboardOpen ? 400 : 90 }} />
           </View>
