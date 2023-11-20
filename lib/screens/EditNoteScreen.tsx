@@ -308,8 +308,8 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       </View>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
       >
-        
         <View style={NotePageStyles().container}>
           <ScrollView
             nestedScrollEnabled={true}

@@ -42,6 +42,9 @@ const NotePageStyles = () => {
       width: "100%",
       // overflow: "hidden",
     },
+    textEditorContainer: {
+      minHeight: 100,
+    },
     title: {
       height: 45,
       width: "70%",
@@ -58,6 +61,7 @@ const NotePageStyles = () => {
       // borderColor: theme.secondaryColor,
       fontSize: 22,
       color: theme.text,
+      height: 900, 
     },
     addButton: {
       position: "absolute",
