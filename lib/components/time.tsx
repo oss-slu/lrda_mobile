@@ -49,11 +49,16 @@ export default function LocationWindow({
 
   const onChangeDate = (event: any, selectedDate: any) => {
     const currentDate = selectedDate || date;
-    setChosenDate(currentDate);
     if (Platform.OS === 'android') {
-      setShowDatePicker(false); 
-      setShowTimePicker(false); 
-      setIsDateTimeSelected(true);
+      if (event.type === 'dismissed') {
+        setShowDatePicker(false); 
+      } else {
+        setChosenDate(currentDate);
+        setShowDatePicker(false);
+        setIsDateTimeSelected(true); 
+      }
+    } else {
+      setChosenDate(currentDate);
     }
   };
 
@@ -62,15 +67,14 @@ export default function LocationWindow({
   
     if (Platform.OS === 'android') {
       if (event.type === 'dismissed') {
-        setShowTimePicker(false); 
+        setShowTimePicker(false);
       } else {
         setChosenTime(currentTime);
         setShowTimePicker(false); 
-        setShowDatePicker(true); 
+        setShowDatePicker(true);
       }
     } else {
       setChosenTime(currentTime);
-      setIsDateTimeSelected(true);
     }
   };
   
@@ -86,6 +90,10 @@ export default function LocationWindow({
     setTime(combinedDate);
     setSavedDateTime(combinedDate); 
     setShowPicker(false);
+    setShowDatePicker(false); 
+    setShowTimePicker(false);
+    setIsDateTimeSelected(false); 
+
   };
 
   return (
@@ -116,7 +124,7 @@ export default function LocationWindow({
           )}
         {isDateTimeSelected && Platform.OS === 'android' && (
         <Text style={styles.selectedDateTimeLabel}>
-          Selected: {formatToLocalDateString(new Date(chosenDate.getFullYear(), chosenDate.getMonth(), chosenDate.getDate(), chosenTime.getHours(), chosenTime.getMinutes()))}
+         Selected: {formatToLocalDateString(new Date(chosenDate.getFullYear(), chosenDate.getMonth(), chosenDate.getDate(), chosenTime.getHours(), chosenTime.getMinutes()))}
         </Text>
       )}
       <View style={styles.button}>
