@@ -93,7 +93,7 @@ export default function LocationWindow({
     <View style={styles.container}>
       <Text style={styles.label}>Date & Time</Text>
       {showPicker ? (
-          <View style={styles.dateTimePickerContainer}>
+        <View style={Platform.OS === 'ios' ? styles.IOSdateTimePickerContainer : styles.dateTimePickerContainer}>
     {showDatePicker && (
             <DateTimePicker
               testID="datePicker"
@@ -139,7 +139,7 @@ export default function LocationWindow({
 
 const styles = StyleSheet.create({
   container: {
-    height: 100,
+    height: 110,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
@@ -161,6 +161,9 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 10,
   },
+  IOSdateTimePickerContainer: {
+    flexDirection: "row", 
+  },
   dateTimePickerContainer: {
     flexDirection: "column", 
   },
@@ -173,6 +176,7 @@ const styles = StyleSheet.create({
   },
   selectedDateTimeLabel: {
     marginBottom: 10, 
+    fontSize: 16,
     textAlign: 'center',
   },
   button: {
