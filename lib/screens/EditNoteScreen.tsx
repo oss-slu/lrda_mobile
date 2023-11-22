@@ -171,7 +171,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           style={NotePageStyles().title}
           value={title}
           onChangeText={setTitle}
-          editable={!owner}
+          editable={owner}
         />
         {owner ? (
           isPublished ? (
@@ -202,7 +202,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             setIsLocation(false);
             setIsTime(false);
           }}
-          disabled={!owner}
         >
           <Ionicons name="images-outline" size={30} color={NotePageStyles().saveText.color} />
         </TouchableOpacity>
@@ -214,7 +213,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             setIsLocation(false);
             setIsTime(false);
           }}
-          disabled={!owner}
         >
           <Ionicons name="mic-outline" size={30} color={NotePageStyles().saveText.color} />
         </TouchableOpacity>
