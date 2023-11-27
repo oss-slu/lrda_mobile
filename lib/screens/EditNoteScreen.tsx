@@ -117,6 +117,18 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     }
   };
 
+  const updateBodyText = () => {
+    if (richTextRef.current) {
+      richTextRef.current.getContentHtml()
+        .then(html => {
+          setText(html); // Update the state with the latest content
+        })
+        .catch(error => {
+          console.error('Error getting content from RichEditor:', error);
+        });
+    }
+  };
+
   const addImageToEditor = (imageUri: string) => {
     const customStyle = `
       max-width: 50%;
@@ -127,6 +139,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     const imgTag = `<img src="${imageUri}" style="${customStyle}" />`;
   
     richTextRef.current?.insertHTML(imgTag);
+    updateBodyText();
   };
   
   const handleSaveNote = async () => {
