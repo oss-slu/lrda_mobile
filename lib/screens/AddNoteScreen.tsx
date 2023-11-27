@@ -316,6 +316,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             </View>
   
         </View>
+        // Need to investigate the KeyboardAvoidingView below which could be ending the rich editor early
+        
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={{ flex: 1 }}
