@@ -88,6 +88,18 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     }
   };
 
+  const updateBodyText = () => {
+    if (richTextRef.current) {
+      richTextRef.current.getContentHtml()
+        .then(html => {
+          setBodyText(html); // Update the state with the latest content
+        })
+        .catch(error => {
+          console.error('Error getting content from RichEditor:', error);
+        });
+    }
+  };
+
   const addImageToEditor = (imageUri: string) => {
     const customStyle = `
       max-width: 50%;
@@ -98,6 +110,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     const imgTag = `<img src="${imageUri}" style="${customStyle}" />`;
   
     richTextRef.current?.insertHTML(imgTag);
+    updateBodyText();
   };
 
   const saveNote = async () => {
@@ -316,7 +329,6 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             </View>
   
         </View>
-        // Need to investigate the KeyboardAvoidingView below which could be ending the rich editor early
         
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
