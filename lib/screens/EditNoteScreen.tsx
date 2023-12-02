@@ -128,7 +128,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         });
     }
   };
-
+  
   const addImageToEditor = (imageUri: string) => {
     const customStyle = `
       max-width: 50%;
@@ -136,11 +136,17 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       /* Additional CSS properties for sizing */
     `;
   
-    const imgTag = `<img src="${imageUri}" style="${customStyle}" />`;
+    // Include a non-breaking space character after the image tag
+    const imgTag = `<img src="${imageUri}" style="${customStyle}" onLoad="imageLoaded()" />&nbsp;`;
   
     richTextRef.current?.insertHTML(imgTag);
+    richTextRef.current?.insertHTML('<br>');
+
+    // So here is where I have been working on, I have tried an onLoad method for the imgTag, a new space below the image, and then also tried just updating the text state with the updateBodyText method
     updateBodyText();
   };
+  
+  
   
   const handleSaveNote = async () => {
     try {
