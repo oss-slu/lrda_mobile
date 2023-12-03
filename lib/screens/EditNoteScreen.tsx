@@ -136,15 +136,26 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       /* Additional CSS properties for sizing */
     `;
   
-    // Include a non-breaking space character after the image tag
-    const imgTag = `<img src="${imageUri}" style="${customStyle}" onLoad="imageLoaded()" />&nbsp;`;
+    // Include an extra line break character after the image tag
+    const imgTag = `<img src="${imageUri}" style="${customStyle}" />&nbsp;<br><br>`;
   
     richTextRef.current?.insertHTML(imgTag);
-    richTextRef.current?.insertHTML('<br>');
-
-    // So here is where I have been working on, I have tried an onLoad method for the imgTag, a new space below the image, and then also tried just updating the text state with the updateBodyText method
-    updateBodyText();
+  
+    // Add a delay before updating the text state
+    setTimeout(() => {
+      if (richTextRef.current) {
+        richTextRef.current.getContentHtml()
+          .then(html => {
+            setText(html); // Update the state with the latest content
+          })
+          .catch(error => {
+            console.error('Error getting content from RichEditor:', error);
+          });
+      }
+    }, 100); // Adjust the delay as needed
   };
+  
+  
   
   
   

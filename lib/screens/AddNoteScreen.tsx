@@ -107,11 +107,25 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
       /* Additional CSS properties for sizing */
     `;
   
-    const imgTag = `<img src="${imageUri}" style="${customStyle}" />`;
+    // Include an extra line break character after the image tag
+    const imgTag = `<img src="${imageUri}" style="${customStyle}" />&nbsp;<br><br>`;
   
     richTextRef.current?.insertHTML(imgTag);
-    updateBodyText();
+  
+    // Add a delay before updating the text state
+    setTimeout(() => {
+      if (richTextRef.current) {
+        richTextRef.current.getContentHtml()
+          .then(html => {
+            setBodyText(html); // Update the state with the latest content
+          })
+          .catch(error => {
+            console.error('Error getting content from RichEditor:', error);
+          });
+      }
+    }, 100); // Adjust the delay as needed
   };
+  
 
   const saveNote = async () => {
     if (titleText === "") {
