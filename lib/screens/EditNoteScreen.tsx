@@ -94,16 +94,18 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     checkOwner();
   }, [creator]);
 
-  const handleScroll = (positionY: number) => {
-    if (scrollViewRef.current) {
+  const handleScroll = (position) => {
+    if (keyboardOpen && scrollViewRef.current) {
       const viewportHeight = Dimensions.get('window').height - keyboardHeight;
-  
-      const scrollToY = positionY - (viewportHeight / 2);
-  
-      scrollViewRef.current.scrollTo({
-        y: Math.max(scrollToY, 0),
-        animated: true,
-      });
+      const cursorRelativePosition = position.relativeY;
+      const spaceBelowCursor = viewportHeight - cursorRelativePosition;
+
+      if (spaceBelowCursor < keyboardHeight) {
+        scrollViewRef.current.scrollTo({
+          y: position.absoluteY - spaceBelowCursor + keyboardHeight,
+          animated: true,
+        });
+      }
     }
   };
 
@@ -143,16 +145,10 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   
     // Add a delay before updating the text state
     setTimeout(() => {
-      if (richTextRef.current) {
-        richTextRef.current.getContentHtml()
-          .then(html => {
-            setText(html); // Update the state with the latest content
-          })
-          .catch(error => {
-            console.error('Error getting content from RichEditor:', error);
-          });
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollToEnd({ animated: true });
       }
-    }, 100); // Adjust the delay as needed
+    }, 500); // Adjust the delay as needed
   };
   
   const handleSaveNote = async () => {
@@ -356,9 +352,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
               placeholder="Write your note here"
               onChange={(text) => setText(text)}
               initialContentHTML={text}
-              onCursorPosition={(position) => {
-                handleScroll(position);
-              }}
+              onCursorPosition={handleScroll}
               disabled={!owner}
             />
           </ScrollView>
