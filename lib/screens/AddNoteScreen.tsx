@@ -48,6 +48,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [keyboardOpen, setKeyboard] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const scrollViewRef = useRef<ScrollView | null>(null);
+  const [initialLoad, setInitialLoad] = useState(true);
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -67,24 +68,30 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         setKeyboard(false);
         setKeyboardHeight(0);
       }
+      
     );
+    const timeout = setTimeout(() => {
+      setInitialLoad(false);
+    }, 1000); // Adjust delay as needed
 
     return () => {
+      clearTimeout(timeout);
       keyboardDidShowListener.remove();
       keyboardDidHideListener.remove();
     };
   }, []);
 
-  const handleScroll = (positionY: number) => {
-    if (scrollViewRef.current) {
-      const viewportHeight = Dimensions.get('window').height - keyboardHeight;
-  
-      const scrollToY = positionY - (viewportHeight / 2);
-  
-      scrollViewRef.current.scrollTo({
-        y: Math.max(scrollToY, 0),
-        animated: true,
-      });
+  const handleCursorPosition = (position) => {
+    if (scrollViewRef.current && keyboardOpen) {
+      const editorBottomY = position.absoluteY + position.height;
+      const keyboardTopY = Dimensions.get('window').height - keyboardHeight;
+
+      if (editorBottomY > keyboardTopY) {
+        scrollViewRef.current.scrollTo({
+          y: editorBottomY - keyboardTopY,
+          animated: true,
+        });
+      }
     }
   };
 
@@ -112,19 +119,19 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   
     richTextRef.current?.insertHTML(imgTag);
   
-    // Add a delay before updating the text state
-    setTimeout(() => {
-      if (richTextRef.current) {
-        richTextRef.current.getContentHtml()
-          .then(html => {
-            setBodyText(html); // Update the state with the latest content
-          })
-          .catch(error => {
-            console.error('Error getting content from RichEditor:', error);
-          });
-      }
-    }, 100); // Adjust the delay as needed
+    if (scrollViewRef.current && !initialLoad) {
+      // Adjust this timeout and calculation as necessary
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 500);
+    }
   };
+
+  // const onEditorContentSizeChange = (e) => {
+  //   if (scrollViewRef.current) {
+  //     scrollViewRef.current.scrollToEnd({ animated: true });
+  //   }
+  // };
   
 
   const saveNote = async () => {
@@ -347,13 +354,15 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={{ flex: 1 }}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 20}
         >
           <View style={NotePageStyles().container}>
             <ScrollView
               nestedScrollEnabled={true}
               showsVerticalScrollIndicator={false}
               ref={scrollViewRef}
-            >
+              contentContainerStyle={{ paddingBottom: keyboardOpen ? keyboardHeight : 20 }}
+           >
               <RichEditor data-testid="RichEditor"
                 ref={(r) => (richTextRef.current = r)}
                 style={{...NotePageStyles().input }}
@@ -368,9 +377,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
                 placeholder="Write your note here"
                 onChange={(text) => setBodyText(text)}
                 initialContentHTML={bodyText}
-                onCursorPosition={(position) => {
-                  handleScroll(position);
-                }}
+                onCursorPosition={handleCursorPosition}
               />
             </ScrollView>
           </View>
