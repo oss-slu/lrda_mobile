@@ -356,16 +356,17 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           style={{ flex: 1 }}
           keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 20}
         >
-          <View style={NotePageStyles().container}>
+          <View style={[NotePageStyles().container, { flex: 1 }]}>
             <ScrollView
               nestedScrollEnabled={true}
               showsVerticalScrollIndicator={false}
+              style={{ flex: 1 }}
               ref={scrollViewRef}
               contentContainerStyle={{ paddingBottom: keyboardOpen ? keyboardHeight : 20 }}
            >
               <RichEditor data-testid="RichEditor"
                 ref={(r) => (richTextRef.current = r)}
-                style={{...NotePageStyles().input }}
+                style={{...NotePageStyles().input, flex: 1, minHeight: 650 }}
                 editorStyle={{
                   contentCSSText: `
                     position: absolute; 
@@ -382,6 +383,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             </ScrollView>
           </View>
         </KeyboardAvoidingView>
+
+
       </SafeAreaView>
   );
 

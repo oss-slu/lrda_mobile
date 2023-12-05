@@ -155,10 +155,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     }, 100); // Adjust the delay as needed
   };
   
-  
-  
-  
-  
   const handleSaveNote = async () => {
     try {
       const editedNote: Note = {
@@ -340,15 +336,16 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
-        <View style={NotePageStyles().container}>
+        <View style={[NotePageStyles().container, { flex: 1 }]}>
           <ScrollView
             nestedScrollEnabled={true}
             showsVerticalScrollIndicator={false}
+            style={{ flex: 1 }}
             ref={scrollViewRef}
           >
             <RichEditor
               ref={(r) => (richTextRef.current = r)}
-              style={NotePageStyles().input}
+              style={{ ...NotePageStyles().input, flex: 1, minHeight: 650 }}
               editorStyle={{
                 contentCSSText: `
                   position: absolute; 
@@ -367,6 +364,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
+
     </SafeAreaView>
   );
 };
