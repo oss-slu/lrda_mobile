@@ -21,6 +21,8 @@ import { formatToLocalDateString } from "../components/time";
 import { ThemeProvider, useTheme } from '../components/ThemeProvider';
 import Constants from "expo-constants";
 import { color } from "react-native-reanimated";
+import ToastMessage from 'react-native-toast-message';
+
 
 const user = User.getInstance();
 
@@ -315,7 +317,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     deleteNoteFromAPI(data);
   };
 
-  async function publishNote(data: any, rowMap: any) {
+  const publishNote = async (data: any, rowMap: any) => {
     if (rowMap[data]) {
       rowMap[data].closeRow();
     }
@@ -333,9 +335,25 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       time: foundNote?.time || new Date(),
       tags: foundNote?.tags || [],
     };
-    await ApiService.overwriteNote(editedNote);
-    refreshPage();
-  }
+  
+    try {
+      await ApiService.overwriteNote(editedNote);
+      refreshPage();
+  
+      const toastMessage = editedNote.published
+        ? 'Note Published'
+        : 'Note Unpublished';
+  
+      ToastMessage.show({
+        type: 'success',
+        text1: toastMessage,
+        visibilityTime: 3000, // 3 seconds
+      });
+    } catch (error) {
+      console.error("Error updating note:", error);
+    }
+  };
+  
 
   const renderList = (notes: Note[]) => {
     return isPrivate ? (
