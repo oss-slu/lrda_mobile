@@ -95,16 +95,18 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     checkOwner();
   }, [creator]);
 
-  const handleScroll = (positionY: number) => {
-    if (scrollViewRef.current) {
+  const handleScroll = (position) => {
+    if (keyboardOpen && scrollViewRef.current) {
       const viewportHeight = Dimensions.get('window').height - keyboardHeight;
-  
-      const scrollToY = positionY - (viewportHeight / 2);
-  
-      scrollViewRef.current.scrollTo({
-        y: Math.max(scrollToY, 0),
-        animated: true,
-      });
+      const cursorRelativePosition = position.relativeY;
+      const spaceBelowCursor = viewportHeight - cursorRelativePosition;
+
+      if (spaceBelowCursor < keyboardHeight) {
+        scrollViewRef.current.scrollTo({
+          y: position.absoluteY - spaceBelowCursor + keyboardHeight,
+          animated: true,
+        });
+      }
     }
   };
 
@@ -127,6 +129,18 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     });
   };
 
+  const updateBodyText = () => {
+    if (richTextRef.current) {
+      richTextRef.current.getContentHtml()
+        .then(html => {
+          setText(html); // Update the state with the latest content
+        })
+        .catch(error => {
+          console.error('Error getting content from RichEditor:', error);
+        });
+    }
+  };
+  
   const addImageToEditor = (imageUri: string) => {
     const customStyle = `
       max-width: 50%;
@@ -134,9 +148,17 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       /* Additional CSS properties for sizing */
     `;
   
-    const imgTag = `<img src="${imageUri}" style="${customStyle}" />`;
+    // Include an extra line break character after the image tag
+    const imgTag = `<img src="${imageUri}" style="${customStyle}" />&nbsp;<br><br>`;
   
     richTextRef.current?.insertHTML(imgTag);
+  
+    // Add a delay before updating the text state
+    setTimeout(() => {
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollToEnd({ animated: true });
+      }
+    }, 500); // Adjust the delay as needed
   };
   
   const handleSaveNote = async () => {
@@ -321,15 +343,16 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
-        <View style={NotePageStyles().container}>
+        <View style={[NotePageStyles().container, { flex: 1 }]}>
           <ScrollView
             nestedScrollEnabled={true}
             showsVerticalScrollIndicator={false}
+            style={{ flex: 1 }}
             ref={scrollViewRef}
           >
             <RichEditor
               ref={(r) => (richTextRef.current = r)}
-              style={NotePageStyles().input}
+              style={{ ...NotePageStyles().input, flex: 1, minHeight: 650 }}
               editorStyle={{
                 contentCSSText: `
                   position: absolute; 
@@ -340,14 +363,13 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
               placeholder="Write your note here"
               onChange={(text) => setText(text)}
               initialContentHTML={text}
-              onCursorPosition={(position) => {
-                handleScroll(position);
-              }}
+              onCursorPosition={handleScroll}
               disabled={!owner}
             />
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
+
     </SafeAreaView>
   );
 };
