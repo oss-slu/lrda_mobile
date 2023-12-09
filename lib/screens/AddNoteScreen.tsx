@@ -13,6 +13,7 @@ import {
   Platform
 } from "react-native";
 import { Note, AddNoteScreenProps } from "../../types";
+import ToastMessage from 'react-native-toast-message';
 import PhotoScroller from "../components/photoScroller";
 import { User } from "../models/user_class";
 import { Ionicons } from "@expo/vector-icons";
@@ -100,6 +101,15 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     richTextRef.current?.insertHTML(imgTag);
   };
 
+  const handleShareButtonPress = () => {
+    setIsPublished(!isPublished);  // Toggle the share status
+    ToastMessage.show({
+      type: 'success',
+      text1: 'Note Published',
+      visibilityTime: 3000 // 3 seconds
+    });
+  };
+
   const saveNote = async () => {
     if (titleText === "") {
       navigation.goBack();
@@ -158,7 +168,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             ) : (
               <TouchableOpacity
                 style={NotePageStyles().topButtons}
-                onPress={() => setIsPublished(!isPublished)}
+                onPress={handleShareButtonPress}
               >
                 <Ionicons name="share-outline" size={30} color={NotePageStyles().saveText.color} />
               </TouchableOpacity>
