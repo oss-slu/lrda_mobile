@@ -118,6 +118,15 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     }
   };
 
+  const handleShareButtonPress = () => {
+    setIsPublished(!isPublished);  // Toggle the share status
+    ToastMessage.show({
+      type: 'success',
+      text1: 'Note Published',
+      visibilityTime: 3000 // 3 seconds
+    });
+  };
+
   const addImageToEditor = (imageUri: string) => {
     const customStyle = `
       max-width: 50%;
@@ -150,12 +159,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
 
       onSave(editedNote);
       navigation.goBack();
-      ToastMessage.show({
-        type: 'success',
-        text1: 'Note Published',
-        visibilityTime: 3000, // 3 seconds
-        autoHide: true,
-      });
     } catch (error) {
       console.error("Error updating the note:", error);
     }
@@ -169,6 +172,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           <TouchableOpacity
             style={NotePageStyles().topButtons}
             onPress={owner ? handleSaveNote : () => navigation.goBack()}
+            
           >
             <Ionicons name="arrow-back-outline" size={30} color={NotePageStyles().title.color} />
           </TouchableOpacity>
@@ -189,7 +193,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             ) : (
               <TouchableOpacity
                 style={NotePageStyles().topButtons}
-                onPress={() => setIsPublished(!isPublished)}
+                onPress={handleShareButtonPress}
               >
                 <Ionicons name="share-outline" size={30} color={NotePageStyles().title.color} />
               </TouchableOpacity>

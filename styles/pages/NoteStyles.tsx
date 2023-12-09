@@ -14,7 +14,7 @@ const NotePageStyles = () => {
     topButtonsContainer: {
       justifyContent: "space-between",
       paddingHorizontal: 5,
-      // paddingTop: Constants.statusBarHeight,
+      paddingTop: Constants.statusBarHeight,
       flexDirection: "row",
       backgroundColor: theme.primaryColor,
       alignItems: "center",
