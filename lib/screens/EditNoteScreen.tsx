@@ -25,6 +25,7 @@ import LocationWindow from "../components/location";
 import TimeWindow from "../components/time";
 import { RichEditor, RichToolbar, actions } from "react-native-pell-rich-editor";
 import NotePageStyles from "../../styles/pages/NoteStyles";
+import ToastMessage from 'react-native-toast-message';
 
 const user = User.getInstance();
 
@@ -119,6 +120,15 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     }
   };
 
+  const handleShareButtonPress = () => {
+    setIsPublished(!isPublished);  // Toggle the share status
+    ToastMessage.show({
+      type: 'success',
+      text1: 'Note Published',
+      visibilityTime: 3000 // 3 seconds
+    });
+  };
+
   const updateBodyText = () => {
     if (richTextRef.current) {
       richTextRef.current.getContentHtml()
@@ -184,6 +194,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           <TouchableOpacity
             style={NotePageStyles().topButtons}
             onPress={owner ? handleSaveNote : () => navigation.goBack()}
+            
           >
             <Ionicons name="arrow-back-outline" size={30} color={NotePageStyles().title.color} />
           </TouchableOpacity>
@@ -204,7 +215,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             ) : (
               <TouchableOpacity
                 style={NotePageStyles().topButtons}
-                onPress={() => setIsPublished(!isPublished)}
+                onPress={handleShareButtonPress}
               >
                 <Ionicons name="share-outline" size={30} color={NotePageStyles().title.color} />
               </TouchableOpacity>
