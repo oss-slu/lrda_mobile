@@ -20,7 +20,7 @@
       "config": {
         "googleMapsApiKey": "AIzaSyD_hN-XNLPsze7WetHBcvvqRcHDls72Rn8"
       },
-      "buildNumber": "10"
+      "buildNumber": "11"
     },
     "android": {
       "adaptiveIcon": {
@@ -33,7 +33,7 @@
         }
       },
       "package": "register.edu.slu.cs.oss.lrda",
-      "versionCode": 4
+      "versionCode": 5
     },
     "web": {
       "favicon": "./assets/favicon.png"
