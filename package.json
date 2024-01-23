@@ -34,7 +34,7 @@
     "babel-plugin-transform-inline-environment-variables": "^0.4.4",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.7",
-    "expo": "49.0.0",
+    "expo": "49.0.18",
     "expo-av": "~13.4.1",
     "expo-device": "~5.4.0",
     "expo-image-manipulator": "~11.3.0",
