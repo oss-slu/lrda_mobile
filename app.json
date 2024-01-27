@@ -32,8 +32,7 @@
           "apiKey": "AIzaSyD_hN-XNLPsze7WetHBcvvqRcHDls72Rn8"
         }
       },
-      "package": "register.edu.slu.cs.oss.lrda",
-      "versionCode": 16
+      "package": "register.edu.slu.cs.oss.lrda"
     },
     "web": {
       "favicon": "./assets/favicon.png"
