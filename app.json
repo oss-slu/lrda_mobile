@@ -2,7 +2,7 @@
   "expo": {
     "name": "Where's Religion?",
     "slug": "lrda_mobile",
-    "version": "2.0.0",
+    "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -33,7 +33,7 @@
         }
       },
       "package": "register.edu.slu.cs.oss.lrda",
-      "versionCode": 13
+      "versionCode": 15
     },
     "web": {
       "favicon": "./assets/favicon.png"
