@@ -33,7 +33,7 @@
         }
       },
       "package": "register.edu.slu.cs.oss.lrda",
-      "versionCode": 18
+      "versionCode": "19"
     },
     "web": {
       "favicon": "./assets/favicon.png"
