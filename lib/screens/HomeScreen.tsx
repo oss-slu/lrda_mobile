@@ -6,7 +6,8 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  Dimensions
+  Dimensions,
+  SafeAreaView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
@@ -21,6 +22,7 @@ import { formatToLocalDateString } from "../components/time";
 import { ThemeProvider, useTheme } from '../components/ThemeProvider';
 import Constants from "expo-constants";
 import { color } from "react-native-reanimated";
+import DropDownPicker from 'react-native-dropdown-picker';
 
 const user = User.getInstance();
 
@@ -34,6 +36,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [rendering, setRendering] = useState(true);
   const [userInitials, setUserInitials] = useState("N/A");
   const { width, height } = Dimensions.get("window");
+  const [initialItems, setInitialItems] = useState([
+    {label: 'My Entries', value: 'my_entries'},
+    {label: 'Published Entires', value: 'published_entries'},
+    {label: 'Liked Entries', value: 'liked_entries'},
+  ]);
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(initialItems[0].value);
+  const [items, setItems] = useState(initialItems);
+  const [label, setLabel] = useState(initialItems[0].label);
 
   const { theme } = useTheme();
 
@@ -109,16 +120,23 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   };
 
   const handleFilters = (name: string) => {
-    if (name == "published") {
+    if (name == "published_entries") {
       setIsPrivate(false);
       setPublished(true);
       refreshPage();
-    } else if (name == "private") {
+    } else if (name == "my_entries") {
       setIsPrivate(true);
       setPublished(false);
       refreshPage();
     }
+    else if (name == "liked_entries") {
+      // implement liked feature
+    }
   };
+
+  useEffect(() => {
+    handleFilters(value); // Call on initial render with the default value
+  }, []);
 
   const handleReverseOrder = () => {
     setNotes(notes.reverse());
@@ -189,7 +207,19 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       alignItems: "center",
       justifyContent: "space-between",
       paddingHorizontal: 5,
-      marginBottom: -10,
+      marginBottom: 0,
+      marginTop: 10,
+    },
+    dropdown: {
+      width: "100%",
+      alignItems: "center",
+      zIndex: 1000,
+      marginTop: -12,
+    },
+    horizontalLine: {
+      borderBottomColor: 'black',
+      borderBottomWidth: 1,
+      marginTop: 0,
     },
     noteContainer: {
       justifyContent: "space-between",
@@ -197,7 +227,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       alignSelf: "center",
       backgroundColor: theme.secondaryColor,
       borderRadius: 20,
-      marginBottom: 10,
+      marginTop: 10,
       width: "98%",
       padding: 10,
       flexDirection: "row",
@@ -246,6 +276,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       color: theme.text,
       marginLeft: 5,
       marginBottom: "-1%",
+      marginRight: 55,
     },
     backRightBtn: {
       alignItems: "flex-end",
@@ -271,7 +302,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       justifyContent: "space-between",
       paddingLeft: 15,
       margin: 5,
-      marginBottom: 15,
+      marginTop: 10,
       borderRadius: 20,
     },
   });
@@ -466,52 +497,50 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             <Text style={styles.pfpText}>{userInitials}</Text>
           </TouchableOpacity>
           <Text style={styles.title}>Where's Religion</Text>
-          <View style={[styles.userPhoto, {backgroundColor: theme.primaryColor}]} />
         </View>
       </View>
-      <ScrollView
-        style={styles.filtersContainer}
-        horizontal={true}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingRight: 20 }}
-      >
-        <TouchableOpacity
-          onPress={() => handleFilters("private")}
-          style={isPrivate ? styles.filtersSelected : styles.filters}
-        >
-          <Text
-            style={isPrivate ? styles.selectedFont : styles.filterFont}
-          >
-            {rendering
-              ? "Private"
-              : isPrivate
-              ? `Private (${notes.length})`
-              : "Private"}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => handleFilters("published")}
-          style={published ? styles.filtersSelected : styles.filters}
-        >
-          <Text
-            style={published ? styles.selectedFont : styles.filterFont}
-          >
-            {rendering
-              ? "Published"
-              : published
-              ? `Published (${notes.length})`
-              : "Published"}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={handleReverseOrder}
-          style={styles.filters}
-        >
-          <Text style={styles.filterFont}>Sort by Time</Text>
-        </TouchableOpacity>
-      </ScrollView>
-      {rendering ? <NoteSkeleton /> : renderList(notes)}
+      <View style={styles.dropdown}>
+        <DropDownPicker
+          open={open}
+          value={value}
+          items={items.filter(item => item.value !== value)}
+          setOpen={setOpen}
+          setValue={(callback) => {
+            const newValue = callback(value);
+            setValue(newValue); // Update the selected value state
+            handleFilters(newValue); // Call handleFilters with the new value
+          }}
+          setItems={setItems}
+          listMode="SCROLLVIEW"
+          scrollViewProps={{
+            nestedScrollEnabled: true,
+          }}
+          style={{
+            borderWidth: 0, 
+            backgroundColor: theme.primaryColor, 
+          }}
+          dropDownContainerStyle={{
+            borderWidth: 0, 
+            backgroundColor: theme.primaryColor, 
+          }}
+          placeholder={`${items.find(item => item.value === value)?.label || 'Select an option'} (${notes.length})`}
+          placeholderStyle={{
+            textAlign: 'center',
+            fontSize: 22,
+            fontWeight: 'bold',
+          }}
+          textStyle={{
+            textAlign: 'center',
+            fontSize: 22,
+            fontWeight: 'bold',
+          }}
+          showArrowIcon={false}
+        /> 
+      </View>
+      <View style={styles.horizontalLine} />
+      <View style={{}}>
+        {rendering ? <NoteSkeleton /> : renderList(notes)}
+      </View>
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => navigation.navigate("AddNote", { refreshPage })}
