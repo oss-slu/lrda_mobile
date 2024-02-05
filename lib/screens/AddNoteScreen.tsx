@@ -10,8 +10,10 @@ import {
   Dimensions,
   SafeAreaView,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  PermissionsAndroid
 } from "react-native";
+import { check, PERMISSIONS, RESULTS, request } from 'react-native-permissions';
 import { Note, AddNoteScreenProps } from "../../types";
 import ToastMessage from 'react-native-toast-message';
 import PhotoScroller from "../components/photoScroller";
@@ -144,7 +146,34 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     });
   };
 
+  const checkLocationPermission = async () => {
+    try {
+      const result = await check(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION);
+      if (result === RESULTS.GRANTED) {
+        // Location permission granted, continue with your logic
+        return true;
+      } else {
+        // Location permission not granted, request it
+        const permissionResult = await request(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION);
+        if (permissionResult === RESULTS.GRANTED) {
+          return true;
+        } else {
+          // Location permission denied, handle accordingly (show alert, etc.)
+          Alert.alert("Location permission denied", "Please grant location permission to save the note.");
+          return false;
+        }
+      }
+    } catch (error) {
+      console.error("Error checking location permission:", error);
+      return false;
+    }
+  };
+
   const saveNote = async () => {
+    const locationPermissionGranted = await checkLocationPermission();
+    if (!locationPermissionGranted) {
+      return; // Stop saving the note if location permission is not granted
+    }
     if (titleText === "") {
       navigation.goBack();
     } else if (bodyText !== "" && titleText === "") {
