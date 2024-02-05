@@ -10,10 +10,9 @@ import {
   Dimensions,
   SafeAreaView,
   KeyboardAvoidingView,
-  Platform,
-  PermissionsAndroid
+  Platform
 } from "react-native";
-import { check, PERMISSIONS, RESULTS, request } from 'react-native-permissions';
+import * as Location from 'expo-location';
 import { Note, AddNoteScreenProps } from "../../types";
 import ToastMessage from 'react-native-toast-message';
 import PhotoScroller from "../components/photoScroller";
@@ -148,20 +147,14 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
 
   const checkLocationPermission = async () => {
     try {
-      const result = await check(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION);
-      if (result === RESULTS.GRANTED) {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status === 'granted') {
         // Location permission granted, continue with your logic
         return true;
       } else {
-        // Location permission not granted, request it
-        const permissionResult = await request(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION);
-        if (permissionResult === RESULTS.GRANTED) {
-          return true;
-        } else {
-          // Location permission denied, handle accordingly (show alert, etc.)
-          Alert.alert("Location permission denied", "Please grant location permission to save the note.");
-          return false;
-        }
+        // Location permission not granted, handle accordingly (show alert, etc.)
+        Alert.alert("Location permission denied", "Please grant location permission to save the note.");
+        return false;
       }
     } catch (error) {
       console.error("Error checking location permission:", error);
@@ -171,6 +164,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
 
   const saveNote = async () => {
     const locationPermissionGranted = await checkLocationPermission();
+
     if (!locationPermissionGranted) {
       return; // Stop saving the note if location permission is not granted
     }
