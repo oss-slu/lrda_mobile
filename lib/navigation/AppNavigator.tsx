@@ -18,6 +18,7 @@ import { getItem } from "../utils/async_storage";
 import { HomeScreenProps, RootTabParamList, EditNoteProps } from "../../types";
 import * as SplashScreen from 'expo-splash-screen';
 import { useTheme } from '../components/ThemeProvider';
+import ToastMessage from 'react-native-toast-message';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -132,6 +133,7 @@ const AppNavigator: React.FC = () => {
           </Tab.Navigator>
         )
       }
+      <ToastMessage position="bottom" />
     </NavigationContainer>
   );
 };

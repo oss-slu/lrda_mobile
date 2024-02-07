@@ -24,6 +24,7 @@ import Constants from "expo-constants";
 import { color } from "react-native-reanimated";
 import DropDownPicker from 'react-native-dropdown-picker';
 
+
 const user = User.getInstance();
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
@@ -507,8 +508,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           setOpen={setOpen}
           setValue={(callback) => {
             const newValue = callback(value);
-            setValue(newValue); // Update the selected value state
-            handleFilters(newValue); // Call handleFilters with the new value
+            setValue(newValue);
+            handleFilters(newValue);
           }}
           setItems={setItems}
           listMode="SCROLLVIEW"
