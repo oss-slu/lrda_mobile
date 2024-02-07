@@ -534,7 +534,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             fontSize: 22,
             fontWeight: 'bold',
           }}
-          showArrowIcon={false}
+          showArrowIcon={true}
         /> 
       </View>
       <View style={styles.horizontalLine} />
