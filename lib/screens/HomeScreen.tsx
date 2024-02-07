@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Dimensions,
   SafeAreaView,
+  Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
@@ -21,9 +22,7 @@ import LoadingImage from "../components/loadingImage";
 import { formatToLocalDateString } from "../components/time";
 import { ThemeProvider, useTheme } from '../components/ThemeProvider';
 import Constants from "expo-constants";
-import { color } from "react-native-reanimated";
 import DropDownPicker from 'react-native-dropdown-picker';
-
 
 const user = User.getInstance();
 
@@ -40,12 +39,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [initialItems, setInitialItems] = useState([
     {label: 'My Entries', value: 'my_entries'},
     {label: 'Published Entires', value: 'published_entries'},
-    {label: 'Liked Entries', value: 'liked_entries'},
+    // {label: 'Liked Entries', value: 'liked_entries'},
   ]);
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(initialItems[0].value);
   const [items, setItems] = useState(initialItems);
-  const [label, setLabel] = useState(initialItems[0].label);
 
   const { theme } = useTheme();
 
@@ -167,8 +165,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       color: 'red',
     },
     userPhoto: {
-      height: width * 0.1,
-      width: width * 0.1,
+      height: width * 0.095,
+      width: width * 0.095,
       borderRadius: 50,
       alignContent: "center",
       justifyContent: "center",
@@ -218,9 +216,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       marginTop: -12,
     },
     horizontalLine: {
-      borderBottomColor: 'black',
-      borderBottomWidth: 1,
-      marginTop: 0,
+      borderBottomColor: theme.text,
+      borderBottomWidth: .65,
+      marginBottom: 0,
     },
     noteContainer: {
       justifyContent: "space-between",
@@ -484,6 +482,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             alignItems: "center",
             justifyContent: "space-between",
             width: "100%",
+            paddingBottom: 15,
+            paddingTop: 10,
           }}
         >
           <TouchableOpacity
@@ -497,7 +497,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           >
             <Text style={styles.pfpText}>{userInitials}</Text>
           </TouchableOpacity>
-          <Text style={styles.title}>Where's Religion</Text>
+          <Image source={require('../../assets/icon.png')} style={{width: width * 0.105, height: width * 0.105, marginEnd: width * 0.435}} />
         </View>
       </View>
       <View style={styles.dropdown}>
@@ -506,7 +506,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           value={value}
           items={items.filter(item => item.value !== value)}
           setOpen={setOpen}
-          setValue={(callback) => {
+          setValue={(callback: (arg0: string) => any) => {
             const newValue = callback(value);
             setValue(newValue);
             handleFilters(newValue);
@@ -522,26 +522,26 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           }}
           dropDownContainerStyle={{
             borderWidth: 0, 
-            backgroundColor: theme.primaryColor, 
+            backgroundColor: theme.primaryColor,
           }}
           placeholder={`${items.find(item => item.value === value)?.label || 'Select an option'} (${notes.length})`}
           placeholderStyle={{
             textAlign: 'center',
             fontSize: 22,
             fontWeight: 'bold',
+            color: theme.text,
           }}
           textStyle={{
             textAlign: 'center',
             fontSize: 22,
             fontWeight: 'bold',
+            color: theme.text,
           }}
-          showArrowIcon={true}
+          showArrowIcon={false}
         /> 
       </View>
       <View style={styles.horizontalLine} />
-      <View style={{}}>
-        {rendering ? <NoteSkeleton /> : renderList(notes)}
-      </View>
+      {rendering ? <NoteSkeleton /> : renderList(notes)}
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => navigation.navigate("AddNote", { refreshPage })}
