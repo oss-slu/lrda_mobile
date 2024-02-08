@@ -147,13 +147,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     container: {
       paddingTop: Constants.statusBarHeight - 20,
       flex: 1,
-      backgroundColor: theme.primaryColor,
+      backgroundColor: theme.homeColor,
     },
     pfpText: {
       fontWeight: "600",
       fontSize: 14,
       alignSelf: "center",
-      color: theme.primaryColor,
+      color: theme.white,
     },
     shareColor: {
       color: 'green',
@@ -170,7 +170,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       borderRadius: 50,
       alignContent: "center",
       justifyContent: "center",
-      backgroundColor: theme.text,
+      backgroundColor: theme.black,
       marginLeft: 8,
     },
     noteTitle: {
@@ -178,17 +178,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       fontWeight: "600",
       maxWidth: "100%",
       flexShrink: 1,
-      color: theme.text,
+      color: theme.black,
     },
     noteText: {
       marginTop: 10,
       fontSize: 18,
-      color: theme.text,
+      color: theme.black,
     },
     emptyContainer: {
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
+    },
+    scrollerBackgroundColor: {
+      backgroundColor: theme.white,
     },
     addButton: {
       position: "absolute",
@@ -208,6 +211,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       paddingHorizontal: 5,
       marginBottom: 0,
       marginTop: 10,
+      backgroundColor: theme.homeColor,
     },
     dropdown: {
       width: "100%",
@@ -216,21 +220,23 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       marginTop: -12,
     },
     horizontalLine: {
-      borderBottomColor: theme.text,
-      borderBottomWidth: .65,
+      borderBottomColor: theme.homeBlue,
+      borderBottomWidth: 1.8,
       marginBottom: 0,
     },
     noteContainer: {
       justifyContent: "space-between",
       alignItems: "center",
       alignSelf: "center",
-      backgroundColor: theme.secondaryColor,
-      borderRadius: 20,
-      marginTop: 10,
-      width: "98%",
-      padding: 10,
+      backgroundColor: theme.homeColor,
+      //borderRadius: 20,
+      marginTop: 1,
+      width: "100%",
+      //padding: 10,
       flexDirection: "row",
-      height: 120,
+      height: 130,
+      paddingLeft: width * 0.03,
+      paddingRight: width * 0.03,
     },
     filtersContainer: {
       minHeight: 30,
@@ -294,15 +300,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       borderBottomRightRadius: 20,
     },
     rowBack: {
+      width: "95%",
+      height: 120,
       alignItems: "center",
       backgroundColor: theme.tertiaryColor,
       flex: 1,
       flexDirection: "row",
       justifyContent: "space-between",
-      paddingLeft: 15,
-      margin: 5,
-      marginTop: 10,
+      marginTop: 14,
       borderRadius: 20,
+      padding: 10,
+      alignSelf: "center",
     },
   });
 
@@ -489,7 +497,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           <TouchableOpacity
             style={[
               styles.userPhoto,
-              { backgroundColor: styles.highlightColor.color },
+              { backgroundColor: theme.black },
             ]}
             onPress={() => {
               navigation.navigate("AccountPage");
@@ -518,36 +526,38 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           }}
           style={{
             borderWidth: 0, 
-            backgroundColor: theme.primaryColor, 
+            backgroundColor: theme.homeColor, 
           }}
           dropDownContainerStyle={{
             borderWidth: 0, 
-            backgroundColor: theme.primaryColor,
+            backgroundColor: theme.homeColor,
           }}
           placeholder={`${items.find(item => item.value === value)?.label || 'Select an option'} (${notes.length})`}
           placeholderStyle={{
             textAlign: 'center',
             fontSize: 22,
             fontWeight: 'bold',
-            color: theme.text,
+            color: theme.black,
           }}
           textStyle={{
             textAlign: 'center',
             fontSize: 22,
             fontWeight: 'bold',
-            color: theme.text,
+            color: theme.black,
           }}
-          showArrowIcon={false}
+          showArrowIcon={true}
         /> 
       </View>
       <View style={styles.horizontalLine} />
-      {rendering ? <NoteSkeleton /> : renderList(notes)}
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={() => navigation.navigate("AddNote", { refreshPage })}
-      >
-        <Ionicons name="add-outline" size={32} color={theme.primaryColor} style={{ fontFamily: 'Ionicons_' }} />
-      </TouchableOpacity>
+      <View style={styles.scrollerBackgroundColor}>
+        {rendering ? <NoteSkeleton /> : renderList(notes)}
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => navigation.navigate("AddNote", { refreshPage })}
+        >
+          <Ionicons name="add-outline" size={32} color={theme.primaryColor} style={{ fontFamily: 'Ionicons_' }} />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
