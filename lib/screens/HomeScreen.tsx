@@ -47,7 +47,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   const { theme } = useTheme();
 
-  let textLength = 20;
+  let textLength = 18;
 
   useEffect(() => {
     (async () => {
@@ -538,6 +538,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             fontSize: 22,
             fontWeight: 'bold',
             color: theme.black,
+            paddingLeft: 28,
           }}
           textStyle={{
             textAlign: 'center',
