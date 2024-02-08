@@ -47,7 +47,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   const { theme } = useTheme();
 
-  let textLength = 16;
+  let textLength = 20;
 
   useEffect(() => {
     (async () => {
@@ -174,16 +174,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       marginLeft: 8,
     },
     noteTitle: {
-      fontSize: 20,
-      fontWeight: "600",
+      fontSize: 22,
+      fontWeight: "700",
       maxWidth: "100%",
       flexShrink: 1,
-      color: theme.black,
+      color: theme.text,
     },
     noteText: {
       marginTop: 10,
       fontSize: 18,
-      color: theme.black,
+      color: theme.text,
     },
     emptyContainer: {
       flex: 1,
@@ -191,7 +191,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       alignItems: "center",
     },
     scrollerBackgroundColor: {
-      backgroundColor: theme.white,
+      backgroundColor: theme.homeGray,
+      flex: 1,
     },
     addButton: {
       position: "absolute",
@@ -220,7 +221,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       marginTop: -12,
     },
     horizontalLine: {
-      borderBottomColor: theme.homeBlue,
+      borderBottomColor: theme.text,
       borderBottomWidth: 1.8,
       marginBottom: 0,
     },
@@ -228,13 +229,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       justifyContent: "space-between",
       alignItems: "center",
       alignSelf: "center",
-      backgroundColor: theme.homeColor,
+      backgroundColor: theme.primaryColor,
       //borderRadius: 20,
       marginTop: 1,
       width: "100%",
       //padding: 10,
       flexDirection: "row",
-      height: 130,
+      height: 140,
       paddingLeft: width * 0.03,
       paddingRight: width * 0.03,
     },
@@ -293,22 +294,21 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       paddingRight: 17,
     },
     backRightBtnRight: {
-      backgroundColor: theme.tertiaryColor,
-      width: "52%",
+      backgroundColor: theme.homeGray,
+      width: "50%",
       right: 0,
-      borderTopRightRadius: 20,
-      borderBottomRightRadius: 20,
+      // borderTopRightRadius: 20,
+      // borderBottomRightRadius: 20,
     },
     rowBack: {
-      width: "95%",
-      height: 120,
+      width: "100%",
+      height: 140,
       alignItems: "center",
-      backgroundColor: theme.tertiaryColor,
+      backgroundColor: theme.homeGray,
       flex: 1,
       flexDirection: "row",
       justifyContent: "space-between",
-      marginTop: 14,
-      borderRadius: 20,
+      marginTop: 1,
       padding: 10,
       alignSelf: "center",
     },
