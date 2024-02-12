@@ -195,6 +195,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     }
     else {
       try {
+        const userLocation = await Location.getCurrentPositionAsync({});
+        const { latitude, longitude } = userLocation.coords;
         const userID = await user.getId();
         const newNote = {
           title: titleText,
@@ -202,8 +204,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           media: newMedia,
           audio: newAudio,
           creator: userID,
-          latitude: location?.latitude.toString() || "",
-          longitude: location?.longitude.toString() || "",
+          latitude: userLocation.coords.latitude.toString(),
+          longitude: userLocation.coords.longitude.toString(),
           published: isPublished,
           tags: tags,
           time: time,
