@@ -228,7 +228,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         <View style={NotePageStyles().topContainer}>
   
           <View style={NotePageStyles().topButtonsContainer}>
-            <TouchableOpacity style={NotePageStyles().topButtons} onPress={saveNote}>
+            <TouchableOpacity style={NotePageStyles().topButtons} onPress={saveNote} testID="checklocationpermission">
               <Ionicons name="arrow-back-outline" size={30} color={NotePageStyles().saveText.color} />
             </TouchableOpacity>
             <TextInput

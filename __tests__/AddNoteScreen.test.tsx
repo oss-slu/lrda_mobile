@@ -11,6 +11,7 @@ import PhotoScroller from "../lib/components/photoScroller";
 import { Media } from '../lib/models/media_class';
 import moxios from 'moxios';
 import AudioContainer from '../lib/components/audio';
+import * as Location from 'expo-location';
 
 beforeAll(() => {
   jest.spyOn(console, 'log').mockImplementation(() => {});
@@ -29,6 +30,11 @@ jest.mock('../lib/components/ThemeProvider', () => ({
   useTheme: () => ({
     theme: 'mockedTheme', // Provide a mocked theme object
   }),
+}));
+
+jest.mock('expo-location', () => ({
+  getForegroundPermissionsAsync: jest.fn(),
+  requestForegroundPermissionsAsync: jest.fn(),
 }));
 
 describe("AddNoteScreen", () => {
@@ -64,10 +70,35 @@ describe("AddNoteScreen", () => {
   
   
   });
-
-
 });
 
+describe("AddNoteScreen's checkLocationPermission method", () => {
+  it('Should show an alert when location permission is denied', async () => {
+    const wrapper = shallow(<AddNoteScreen />);
+    const button = wrapper.find('[testID="checklocationpermission"]');
+
+    // Mocking getForegroundPermissionsAsync to return denied status
+    const mockGetForegroundPermissionsAsync = jest.spyOn(Location, 'getForegroundPermissionsAsync');
+    mockGetForegroundPermissionsAsync.mockResolvedValueOnce({ status: 'denied' });
+
+    // Mocking requestForegroundPermissionsAsync to return granted status after a subsequent request
+    const mockRequestForegroundPermissionsAsync = jest.spyOn(Location, 'requestForegroundPermissionsAsync');
+    mockRequestForegroundPermissionsAsync.mockResolvedValueOnce({ status: 'granted' });
+
+    // Spy on Alert.alert to check if it's called with the correct arguments
+    const mockAlert = jest.spyOn(Alert, 'alert');
+
+    // Simulate onPress event of TouchableOpacity
+    button.props().onPress();
+    wrapper.find(TouchableOpacity).prop('onPress')();
+
+    // Expect Alert.alert to have been called with the correct arguments
+    expect(mockAlert).toHaveBeenCalledWith(
+      'Location permission denied',
+      'Please grant location permission to save the note or remove the title to not save.'
+    );
+  });
+});
 
 describe('PhotoScroller\'s handleNewMedia method', () => {
   it('Show an alert when pressed with Take a photo or Choose a photo from camera roll', () => {
@@ -76,7 +107,6 @@ describe('PhotoScroller\'s handleNewMedia method', () => {
           throw new Error('Function not implemented.');
       }} active={true} />);
       const button = wrapper.find('[testID="photoScrollerButton"]');
-
       const mockAlert = jest.spyOn(Alert, 'alert');
       button.props().onPress();
 
