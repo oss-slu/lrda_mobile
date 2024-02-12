@@ -14,7 +14,7 @@
       "android": {
         "buildType": "app-bundle"
       },
-        "autoIncrement": false
+        "autoIncrement": true
     }
   },
   "submit": {
