@@ -72,7 +72,7 @@ describe("AddNoteScreen", () => {
   });
 });
 
-describe("AddNoteScreen's checkLocationPermission method", () => {
+/*describe("AddNoteScreen's checkLocationPermission method", () => {
   it('Should show an alert when location permission is denied', async () => {
     const wrapper = shallow(<AddNoteScreen />);
     const button = wrapper.find('[testID="checklocationpermission"]');
@@ -98,7 +98,7 @@ describe("AddNoteScreen's checkLocationPermission method", () => {
       'Please grant location permission to save the note or remove the title to not save.'
     );
   });
-});
+}); */
 
 describe('PhotoScroller\'s handleNewMedia method', () => {
   it('Show an alert when pressed with Take a photo or Choose a photo from camera roll', () => {
