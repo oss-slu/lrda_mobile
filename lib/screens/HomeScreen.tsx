@@ -18,11 +18,9 @@ import { SwipeListView } from "react-native-swipe-list-view";
 import NoteSkeleton from "../components/noteSkeleton";
 import LoadingImage from "../components/loadingImage";
 import { formatToLocalDateString } from "../components/time";
-import { ThemeProvider, useTheme } from '../components/ThemeProvider';
+import { useTheme } from '../components/ThemeProvider';
 import Constants from "expo-constants";
-import { color } from "react-native-reanimated";
 import ToastMessage from 'react-native-toast-message';
-
 
 const user = User.getInstance();
 
