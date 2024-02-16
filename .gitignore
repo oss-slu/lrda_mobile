@@ -9,6 +9,8 @@ npm-debug.*
 *.mobileprovision
 *.orig.*
 web-build/
+eas.json
+grounded-pager-399120-8575f4f00514.json
 
 # macOS
 .DS_Store

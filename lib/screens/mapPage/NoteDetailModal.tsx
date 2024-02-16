@@ -14,7 +14,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { Note } from "../../../types";
 import RenderHTML from "react-native-render-html";
 import { useTheme } from "../../components/ThemeProvider"
-import { color } from "react-native-reanimated";
 
 interface Props {
   isVisible: boolean;
@@ -104,7 +103,7 @@ const NoteDetailModal: React.FC<Props> = memo(
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: theme.text,
+        backgroundColor: theme.primaryColor,
         alignItems: "center",
         justifyContent: "center",
       },
@@ -202,7 +201,7 @@ const NoteDetailModal: React.FC<Props> = memo(
       <Modal animationType="slide" transparent={false} visible={isVisible}>
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
           <View style={styles.closeIcon}>
-            <Ionicons name="close" size={30} color="#000" />
+            <Ionicons name="close" size={30} color={theme.text}/>
           </View>
         </TouchableOpacity>
 

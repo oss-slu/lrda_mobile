@@ -2,7 +2,7 @@
   "expo": {
     "name": "Where's Religion?",
     "slug": "lrda_mobile",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -16,14 +16,24 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "beta.edu.slu.cs.oss.lrda",
-      "buildNumber": "5"
+      "bundleIdentifier": "register.edu.slu.cs.oss.lrda",
+      "config": {
+        "googleMapsApiKey": ""
+      },
+      "buildNumber": "12"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "config": {
+        "googleMaps": {
+          "apiKey": ""
+        }
+      },
+      "package": "register.edu.slu.cs.oss.lrda",
+      "versionCode": 10
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -32,9 +42,11 @@
       "policy": "sdkVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/1ab6eacd-d4a8-4a10-8633-7aed1bde1cba"
+      "url": "https://u.expo.dev/801029ef-db83-4668-a97a-5adcc4c333e2"
+
+    },
+    "extra": {
+
     }
-    
-    
   }
 }
