@@ -14,7 +14,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Note } from "../../../types";
 import RenderHTML from "react-native-render-html";
-import { useTheme } from "../../components/ThemeProvider"
+import { useTheme } from "../../components/ThemeProvider";
+import ImageModal from "./ImageModal";
 
 interface Props {
   isVisible: boolean;
@@ -27,6 +28,7 @@ const NoteDetailModal: React.FC<Props> = memo(
     const [isImageTouched, setImageTouched] = useState(false);
     const [isTextTouched, setTextTouched] = useState(true);
     const [creatorName, setCreatorName] = useState("");
+    const [isModalVisible, setIsModalVisible] = useState(false);
     const { height, width } = useWindowDimensions();
     const { theme } = useTheme();
 
@@ -55,8 +57,8 @@ const NoteDetailModal: React.FC<Props> = memo(
     };
 
     const onPicturePress = () => {
-      
-    }
+      setIsModalVisible(true); // Open the PictureModal
+    };
 
     // Declare a new state variable for image loading
     const [imageLoadedState, setImageLoadedState] = useState<{
@@ -226,7 +228,7 @@ const NoteDetailModal: React.FC<Props> = memo(
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={onClose} style={styles.pictureButton}>
+        <TouchableOpacity onPress={onPicturePress} style={styles.pictureButton}>
           <View style={styles.closeIcon}>
             <Ionicons name="image" size={30} color={theme.text}/>
           </View>
@@ -335,44 +337,10 @@ const NoteDetailModal: React.FC<Props> = memo(
             )}
           </ScrollView>
         </View>
+        <ImageModal isVisible={isModalVisible} onClose={() => setIsModalVisible(false)} images={images}/>
       </Modal>
     );
   }
 );
 
 export default NoteDetailModal;
-
-
-/*
-<ScrollView
-          style={{ height: isImageTouched ? "80%" : "50%" }}
-          onTouchStart={images.length > 2 ? handleImageTouchStart : undefined}
-        >
-          {images && images.length > 0 ? (
-            images.map((image, index) => {
-              return (
-                <View key={index} style={styles.imageContainer}>
-                  {!imageLoadedState[image.uri] && (
-                    <ActivityIndicator size="large" color="#0000ff" />
-                  )}
-                  <Image
-                    source={{ uri: image.uri }}
-                    style={styles.image}
-                    onLoad={() => handleLoad(image.uri)}
-                  />
-                </View>
-              );
-            })
-          ) : (
-            <Text
-              style={{
-                alignSelf: "center",
-                justifyContent: "center",
-                marginTop: 200,
-              }}
-            >
-              No images
-            </Text>
-          )}
-        </ScrollView>
-*/
