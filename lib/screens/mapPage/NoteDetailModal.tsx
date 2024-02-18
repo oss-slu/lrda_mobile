@@ -60,6 +60,8 @@ const NoteDetailModal: React.FC<Props> = memo(
       setIsModalVisible(true); // Open the PictureModal
     };
 
+    const html = note?.description;
+
     // Declare a new state variable for image loading
     const [imageLoadedState, setImageLoadedState] = useState<{
       [key: string]: boolean;
@@ -83,11 +85,18 @@ const NoteDetailModal: React.FC<Props> = memo(
       newNote = true;
     }
 
-    const html = note?.description;
-
     const htmlSource = useMemo(() => {
       return { html };
     }, [html]);
+
+    // Define styles for images within the HTML content
+    const tagsStyles = useMemo(() => ({
+      img: {
+        width: 100, // Set image width to 100 pixels
+        height: 100, // Set image height to 100 pixels
+        resizeMode: 'cover', // Cover might not be directly applicable here, but ensures content is not distorted
+      },
+    }), []);
 
     const MemoizedRenderHtml = React.memo(RenderHTML);
 
@@ -327,11 +336,12 @@ const NoteDetailModal: React.FC<Props> = memo(
               }}
             ></View>
             {newNote ? (
-              <MemoizedRenderHtml
-                baseStyle={{ color: theme.text }}
-                contentWidth={width}
-                source={htmlSource}
-              />
+            <MemoizedRenderHtml
+              baseStyle={{ color: theme.text }}
+              contentWidth={width}
+              source={htmlSource}
+              tagsStyles={tagsStyles} // Apply custom styles to HTML tags
+            />
             ) : (
               <Text style={{color: theme.text}}>{note?.description}</Text>
             )}
