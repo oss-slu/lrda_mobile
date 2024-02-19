@@ -70,54 +70,56 @@ const PhotoScroller = forwardRef(
 
     const handleImageSelection = async (result: {
       canceled?: false;
-      assets: any;
+      assets: any[]; 
     }) => {
-      const { uri } = result.assets[0];
-      console.log("Selected image URI: ", uri);
+      for (const asset of result.assets) {
+        const { uri } = asset;
+        console.log("Selected image URI: ", uri);
 
-      if (uri.endsWith(".heic") || uri.endsWith(".HEIC")) {
-        const jpgUri = await convertHeicToJpg(uri);
-        const uploadedUrl = await uploadMedia(jpgUri, "image");
-        console.log("After URL is retrieved from upload Media ", uploadedUrl);
-        const newMediaItem = new PhotoType({
-          uuid: uuid.v4().toString(),
-          type: "image",
-          uri: uploadedUrl,
-        });
-        setNewMedia([...newMedia, newMediaItem]);
-        insertImageToEditor(uploadedUrl);
-      } else if (
-        uri.endsWith(".jpg") ||
-        uri.endsWith("png") ||
-        uri.endsWith(".jpeg")
-      ) {
-        const uploadedUrl = await uploadMedia(uri, "image");
-        console.log("After URL is retrieved from upload Media ", uploadedUrl);
-        const newMediaItem = new PhotoType({
-          uuid: uuid.v4().toString(),
-          type: "image",
-          uri: uploadedUrl,
-        });
-        setNewMedia([...newMedia, newMediaItem]);
-        if (insertImageToEditor) {
-          insertImageToEditor(uploadedUrl, 'Captured Image');
+        if (uri.endsWith(".heic") || uri.endsWith(".HEIC")) {
+          const jpgUri = await convertHeicToJpg(uri);
+          const uploadedUrl = await uploadMedia(jpgUri, "image");
+          console.log("After URL is retrieved from upload Media ", uploadedUrl);
+          const newMediaItem = new PhotoType({
+            uuid: uuid.v4().toString(),
+            type: "image",
+            uri: uploadedUrl,
+          });
+          setNewMedia ((prevMedia) => [...prevMedia, newMediaItem]);
+          insertImageToEditor(uploadedUrl);
+        } else if (
+          uri.endsWith(".jpg") ||
+          uri.endsWith("png") ||
+          uri.endsWith(".jpeg")
+        ) {
+          const uploadedUrl = await uploadMedia(uri, "image");
+          console.log("After URL is retrieved from upload Media ", uploadedUrl);
+          const newMediaItem = new PhotoType({
+            uuid: uuid.v4().toString(),
+            type: "image",
+            uri: uploadedUrl,
+          });
+          setNewMedia ((prevMedia) => [...prevMedia, newMediaItem]);
+          if (insertImageToEditor) {
+            insertImageToEditor(uploadedUrl, 'Captured Image');
+          }
+        } else if (
+          uri.endsWith(".MOV") ||
+          uri.endsWith(".mov") ||
+          uri.endsWith(".mp4")
+        ) {
+          const uploadedUrl = await uploadMedia(uri, "video");
+          const thumbnail = await getThumbnail(uri);
+          console.log("After URL is retrieved from upload Media ", uploadedUrl);
+          const newMediaItem = new VideoType({
+            uuid: uuid.v4().toString(),
+            type: "video",
+            uri: uploadedUrl,
+            thumbnail: thumbnail,
+            duration: "0:00",
+          });
+          setNewMedia ((prevMedia) => [...prevMedia, newMediaItem]);
         }
-      } else if (
-        uri.endsWith(".MOV") ||
-        uri.endsWith(".mov") ||
-        uri.endsWith(".mp4")
-      ) {
-        const uploadedUrl = await uploadMedia(uri, "video");
-        const thumbnail = await getThumbnail(uri);
-        console.log("After URL is retrieved from upload Media ", uploadedUrl);
-        const newMediaItem = new VideoType({
-          uuid: uuid.v4().toString(),
-          type: "video",
-          uri: uploadedUrl,
-          thumbnail: thumbnail,
-          duration: "0:00",
-        });
-        setNewMedia([...newMedia, newMediaItem]);
       }
     };
 
