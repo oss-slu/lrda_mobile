@@ -6,7 +6,9 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  Dimensions
+  Dimensions,
+  SafeAreaView,
+  Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
@@ -20,9 +22,7 @@ import LoadingImage from "../components/loadingImage";
 import { formatToLocalDateString } from "../components/time";
 import { ThemeProvider, useTheme } from '../components/ThemeProvider';
 import Constants from "expo-constants";
-import { color } from "react-native-reanimated";
-import ToastMessage from 'react-native-toast-message';
-
+import DropDownPicker from 'react-native-dropdown-picker';
 
 const user = User.getInstance();
 
@@ -36,10 +36,18 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [rendering, setRendering] = useState(true);
   const [userInitials, setUserInitials] = useState("N/A");
   const { width, height } = Dimensions.get("window");
+  const [initialItems, setInitialItems] = useState([
+    {label: 'My Entries', value: 'my_entries'},
+    {label: 'Published Entires', value: 'published_entries'},
+    // {label: 'Liked Entries', value: 'liked_entries'},
+  ]);
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(initialItems[0].value);
+  const [items, setItems] = useState(initialItems);
 
   const { theme } = useTheme();
 
-  let textLength = 16;
+  let textLength = 18;
 
   useEffect(() => {
     (async () => {
@@ -111,16 +119,23 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   };
 
   const handleFilters = (name: string) => {
-    if (name == "published") {
+    if (name == "published_entries") {
       setIsPrivate(false);
       setPublished(true);
       refreshPage();
-    } else if (name == "private") {
+    } else if (name == "my_entries") {
       setIsPrivate(true);
       setPublished(false);
       refreshPage();
     }
+    else if (name == "liked_entries") {
+      // implement liked feature
+    }
   };
+
+  useEffect(() => {
+    handleFilters(value); // Call on initial render with the default value
+  }, []);
 
   const handleReverseOrder = () => {
     setNotes(notes.reverse());
@@ -132,13 +147,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     container: {
       paddingTop: Constants.statusBarHeight - 20,
       flex: 1,
-      backgroundColor: theme.primaryColor,
+      backgroundColor: theme.homeColor,
     },
     pfpText: {
       fontWeight: "600",
       fontSize: 14,
       alignSelf: "center",
-      color: theme.primaryColor,
+      color: theme.white,
     },
     shareColor: {
       color: 'green',
@@ -150,17 +165,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       color: 'red',
     },
     userPhoto: {
-      height: width * 0.1,
-      width: width * 0.1,
+      height: width * 0.095,
+      width: width * 0.095,
       borderRadius: 50,
       alignContent: "center",
       justifyContent: "center",
-      backgroundColor: theme.text,
+      backgroundColor: theme.black,
       marginLeft: 8,
     },
     noteTitle: {
-      fontSize: 20,
-      fontWeight: "600",
+      fontSize: 22,
+      fontWeight: "700",
       maxWidth: "100%",
       flexShrink: 1,
       color: theme.text,
@@ -174,6 +189,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
+    },
+    scrollerBackgroundColor: {
+      backgroundColor: theme.homeGray,
+      flex: 1,
     },
     addButton: {
       position: "absolute",
@@ -191,19 +210,34 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       alignItems: "center",
       justifyContent: "space-between",
       paddingHorizontal: 5,
-      marginBottom: -10,
+      marginBottom: 0,
+      marginTop: 10,
+      backgroundColor: theme.homeColor,
+    },
+    dropdown: {
+      width: "100%",
+      alignItems: "center",
+      zIndex: 1000,
+      marginTop: -12,
+    },
+    horizontalLine: {
+      borderBottomColor: theme.text,
+      borderBottomWidth: 1.8,
+      marginBottom: 0,
     },
     noteContainer: {
       justifyContent: "space-between",
       alignItems: "center",
       alignSelf: "center",
-      backgroundColor: theme.secondaryColor,
-      borderRadius: 20,
-      marginBottom: 10,
-      width: "98%",
-      padding: 10,
+      backgroundColor: theme.primaryColor,
+      //borderRadius: 20,
+      marginTop: 1,
+      width: "100%",
+      //padding: 10,
       flexDirection: "row",
-      height: 120,
+      height: 140,
+      paddingLeft: width * 0.03,
+      paddingRight: width * 0.03,
     },
     filtersContainer: {
       minHeight: 30,
@@ -248,6 +282,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       color: theme.text,
       marginLeft: 5,
       marginBottom: "-1%",
+      marginRight: 55,
     },
     backRightBtn: {
       alignItems: "flex-end",
@@ -259,22 +294,23 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       paddingRight: 17,
     },
     backRightBtnRight: {
-      backgroundColor: theme.tertiaryColor,
-      width: "52%",
+      backgroundColor: theme.homeGray,
+      width: "50%",
       right: 0,
-      borderTopRightRadius: 20,
-      borderBottomRightRadius: 20,
+      // borderTopRightRadius: 20,
+      // borderBottomRightRadius: 20,
     },
     rowBack: {
+      width: "100%",
+      height: 140,
       alignItems: "center",
-      backgroundColor: theme.tertiaryColor,
+      backgroundColor: theme.homeGray,
       flex: 1,
       flexDirection: "row",
       justifyContent: "space-between",
-      paddingLeft: 15,
-      margin: 5,
-      marginBottom: 15,
-      borderRadius: 20,
+      marginTop: 1,
+      padding: 10,
+      alignSelf: "center",
     },
   });
 
@@ -317,7 +353,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     deleteNoteFromAPI(data);
   };
 
-  const publishNote = async (data: any, rowMap: any) => {
+  async function publishNote(data: any, rowMap: any) {
     if (rowMap[data]) {
       rowMap[data].closeRow();
     }
@@ -335,25 +371,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       time: foundNote?.time || new Date(),
       tags: foundNote?.tags || [],
     };
-  
-    try {
-      await ApiService.overwriteNote(editedNote);
-      refreshPage();
-  
-      const toastMessage = editedNote.published
-        ? 'Note Published'
-        : 'Note Unpublished';
-  
-      ToastMessage.show({
-        type: 'success',
-        text1: toastMessage,
-        visibilityTime: 3000, // 3 seconds
-      });
-    } catch (error) {
-      console.error("Error updating note:", error);
-    }
-  };
-  
+    await ApiService.overwriteNote(editedNote);
+    refreshPage();
+  }
 
   const renderList = (notes: Note[]) => {
     return isPrivate ? (
@@ -470,12 +490,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             alignItems: "center",
             justifyContent: "space-between",
             width: "100%",
+            paddingBottom: 15,
+            paddingTop: 10,
           }}
         >
           <TouchableOpacity
             style={[
               styles.userPhoto,
-              { backgroundColor: styles.highlightColor.color },
+              { backgroundColor: theme.black },
             ]}
             onPress={() => {
               navigation.navigate("AccountPage");
@@ -483,59 +505,60 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           >
             <Text style={styles.pfpText}>{userInitials}</Text>
           </TouchableOpacity>
-          <Text style={styles.title}>Where's Religion</Text>
-          <View style={[styles.userPhoto, {backgroundColor: theme.primaryColor}]} />
+          <Image source={require('../../assets/icon.png')} style={{width: width * 0.105, height: width * 0.105, marginEnd: width * 0.435}} />
         </View>
       </View>
-      <ScrollView
-        style={styles.filtersContainer}
-        horizontal={true}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingRight: 20 }}
-      >
+      <View style={styles.dropdown}>
+        <DropDownPicker
+          open={open}
+          value={value}
+          items={items.filter(item => item.value !== value)}
+          setOpen={setOpen}
+          setValue={(callback: (arg0: string) => any) => {
+            const newValue = callback(value);
+            setValue(newValue);
+            handleFilters(newValue);
+          }}
+          setItems={setItems}
+          listMode="SCROLLVIEW"
+          scrollViewProps={{
+            nestedScrollEnabled: true,
+          }}
+          style={{
+            borderWidth: 0, 
+            backgroundColor: theme.homeColor, 
+          }}
+          dropDownContainerStyle={{
+            borderWidth: 0, 
+            backgroundColor: theme.homeColor,
+          }}
+          placeholder={`${items.find(item => item.value === value)?.label || 'Select an option'} (${notes.length})`}
+          placeholderStyle={{
+            textAlign: 'center',
+            fontSize: 22,
+            fontWeight: 'bold',
+            color: theme.black,
+            paddingLeft: 28,
+          }}
+          textStyle={{
+            textAlign: 'center',
+            fontSize: 22,
+            fontWeight: 'bold',
+            color: theme.black,
+          }}
+          showArrowIcon={true}
+        /> 
+      </View>
+      <View style={styles.horizontalLine} />
+      <View style={styles.scrollerBackgroundColor}>
+        {rendering ? <NoteSkeleton /> : renderList(notes)}
         <TouchableOpacity
-          onPress={() => handleFilters("private")}
-          style={isPrivate ? styles.filtersSelected : styles.filters}
+          style={styles.addButton}
+          onPress={() => navigation.navigate("AddNote", { refreshPage })}
         >
-          <Text
-            style={isPrivate ? styles.selectedFont : styles.filterFont}
-          >
-            {rendering
-              ? "Private"
-              : isPrivate
-              ? `Private (${notes.length})`
-              : "Private"}
-          </Text>
+          <Ionicons name="add-outline" size={32} color={theme.primaryColor} style={{ fontFamily: 'Ionicons_' }} />
         </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => handleFilters("published")}
-          style={published ? styles.filtersSelected : styles.filters}
-        >
-          <Text
-            style={published ? styles.selectedFont : styles.filterFont}
-          >
-            {rendering
-              ? "Published"
-              : published
-              ? `Published (${notes.length})`
-              : "Published"}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={handleReverseOrder}
-          style={styles.filters}
-        >
-          <Text style={styles.filterFont}>Sort by Time</Text>
-        </TouchableOpacity>
-      </ScrollView>
-      {rendering ? <NoteSkeleton /> : renderList(notes)}
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={() => navigation.navigate("AddNote", { refreshPage })}
-      >
-        <Ionicons name="add-outline" size={32} color={theme.primaryColor} style={{ fontFamily: 'Ionicons_' }} />
-      </TouchableOpacity>
+      </View>
     </View>
   );
 };
