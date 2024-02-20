@@ -12,6 +12,7 @@ import {
   KeyboardAvoidingView,
   Platform
 } from "react-native";
+import * as Location from 'expo-location';
 import { Note, AddNoteScreenProps } from "../../types";
 import ToastMessage from 'react-native-toast-message';
 import PhotoScroller from "../components/photoScroller";
@@ -50,6 +51,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const scrollViewRef = useRef<ScrollView | null>(null);
   const [initialLoad, setInitialLoad] = useState(true);
+  const [promptedMissingTitle, setPromptedMissingTitle] = useState(false);
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -144,22 +146,75 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     });
   };
 
+  const checkLocationPermission = async () => {
+    try {
+      let { status } = await Location.getForegroundPermissionsAsync();
+
+      if (status !== 'granted') {
+        // Location permission not granted, request it
+        const requestResult = await Location.requestForegroundPermissionsAsync();
+
+        if (requestResult.status === 'denied') {
+          // Location permission denied after requesting, request again
+          const requestAgainResult = await Location.requestForegroundPermissionsAsync();
+          status = requestAgainResult.status;
+        }
+
+        if (status !== 'granted') {
+          // Location permission still not granted
+          Alert.alert("Location permission denied", "Please grant location permission to save the note or remove the title to not save.");
+          return false;
+        }
+      }
+
+      // Location permission already granted or granted after request
+      return true;
+    } catch (error) {
+      console.error("Error checking location permission:", error);
+      return false;
+    }
+  };
+
   const saveNote = async () => {
+    const locationPermissionGranted = await checkLocationPermission();
     if (titleText === "") {
-      navigation.goBack();
-    } else if (bodyText !== "" && titleText === "") {
-      Alert.alert("A title is necessary to save");
-    } else {
+      if (!promptedMissingTitle) {
+        setPromptedMissingTitle(true);
+        Alert.alert(
+          "Title is empty",
+          "Please enter a title to save the note, or press back again to confirm not saving the note.",
+        );
+        return;
+      } else {
+        navigation.goBack();
+        return;
+      }
+    }
+    if (!locationPermissionGranted) {
+      return; // Stop saving the note if location permission is not granted
+    }
+    else {
       try {
+        const userLocation = await Location.getCurrentPositionAsync({});
         const userID = await user.getId();
+        let latitude, longitude;
+        
+        if (Platform.OS === 'ios') {
+          latitude = location?.latitude.toString();
+          longitude = location?.longitude.toString();
+        } else if (Platform.OS === 'android') {
+          latitude = userLocation.coords.latitude.toString();
+          longitude = userLocation.coords.longitude.toString();
+        }
+        
         const newNote = {
           title: titleText,
           text: bodyText,
           media: newMedia,
           audio: newAudio,
           creator: userID,
-          latitude: location?.latitude.toString() || "",
-          longitude: location?.longitude.toString() || "",
+          latitude: latitude,
+          longitude: longitude,
           published: isPublished,
           tags: tags,
           time: time,
@@ -182,7 +237,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         <View style={NotePageStyles().topContainer}>
   
           <View style={NotePageStyles().topButtonsContainer}>
-            <TouchableOpacity style={NotePageStyles().topButtons} onPress={saveNote}>
+            <TouchableOpacity style={NotePageStyles().topButtons} onPress={saveNote} testID="checklocationpermission">
               <Ionicons name="arrow-back-outline" size={30} color={NotePageStyles().saveText.color} />
             </TouchableOpacity>
             <TextInput
