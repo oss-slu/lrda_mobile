@@ -16,6 +16,7 @@ import { Note } from "../../../types";
 import RenderHTML from "react-native-render-html";
 import { useTheme } from "../../components/ThemeProvider";
 import ImageModal from "./ImageModal";
+import VideoModal from "./VideoModal"
 
 interface Props {
   isVisible: boolean;
@@ -29,6 +30,7 @@ const NoteDetailModal: React.FC<Props> = memo(
     const [isTextTouched, setTextTouched] = useState(true);
     const [creatorName, setCreatorName] = useState("");
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isVideoVisible, setIsVideoVisible] = useState(false);
     const { height, width } = useWindowDimensions();
     const { theme } = useTheme();
 
@@ -60,6 +62,10 @@ const NoteDetailModal: React.FC<Props> = memo(
       setIsModalVisible(true); // Open the PictureModal
     };
 
+    const onVideoPress = () => {
+      setIsVideoVisible(true);
+    };
+
     const html = note?.description;
 
     // Declare a new state variable for image loading
@@ -72,6 +78,16 @@ const NoteDetailModal: React.FC<Props> = memo(
         return note.images.filter(
           (mediaItem: any) =>
             mediaItem.uri.endsWith(".jpg") || mediaItem.uri.endsWith(".png")
+        );
+      }
+      return [];
+    }, [note]);
+
+    const videos: string = useMemo(() => {
+      if (note?.videos) {
+        return note.videos.filter(
+          (mediaItem: any) =>
+            mediaItem.uri.endsWith(".MOV") || mediaItem.uri.endsWith(".mov") || mediaItem.uri.endsWith(".mp4")
         );
       }
       return [];
@@ -119,6 +135,20 @@ const NoteDetailModal: React.FC<Props> = memo(
         position: "absolute",
         top: 50,
         right: 20,
+        zIndex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.5,
+        shadowRadius: 2,
+        elevation: 3,
+        borderRadius: 25,
+        backgroundColor: theme.primaryColor,
+      },
+      videoButton: {
+        position: "absolute",
+        top: 50,
+        right: 70,
         zIndex: 1,
         alignItems: "center",
         justifyContent: "center",
@@ -243,6 +273,12 @@ const NoteDetailModal: React.FC<Props> = memo(
           </View>
         </TouchableOpacity>
 
+        <TouchableOpacity onPress={onVideoPress} style={styles.videoButton}>
+          <View style={styles.closeIcon}>
+            <Ionicons name="videocam" size={30} color={theme.text}/>
+          </View>
+        </TouchableOpacity>
+
         <View
           style={[
             styles.textContainer,
@@ -348,6 +384,7 @@ const NoteDetailModal: React.FC<Props> = memo(
           </ScrollView>
         </View>
         <ImageModal isVisible={isModalVisible} onClose={() => setIsModalVisible(false)} images={images}/>
+        <VideoModal isVisible={isVideoVisible} onClose={() => setIsVideoVisible(false)} videos={videos}/>
       </Modal>
     );
   }
