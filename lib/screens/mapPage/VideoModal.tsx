@@ -51,11 +51,11 @@ const VideoModal: React.FC<Props> = ({ isVisible, onClose, videos }) => {
             videos.map((video, index) => (
               <View key={index} style={styles.videoContainer}>
                 <Video
-                  source={{ uri: video.uri }} // Can be a URL or a local file.
+                  source={{ uri: video.uri }}
                   style={styles.video}
-                  controls={true} // Show controls
-                  resizeMode="contain" // Cover the whole screen at aspect ratio.
-                  repeat={true} // Repeat playing
+                  controls={true}
+                  resizeMode="contain"
+                  repeat={true}
                 />
               </View>
             ))
