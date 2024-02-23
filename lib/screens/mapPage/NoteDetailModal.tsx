@@ -84,8 +84,8 @@ const NoteDetailModal: React.FC<Props> = memo(
     }, [note]);
 
     const videos: string = useMemo(() => {
-      if (note?.videos) {
-        return note.videos.filter(
+      if (note?.images) {
+        return note.images.filter(
           (mediaItem: any) =>
             mediaItem.uri.endsWith(".MOV") || mediaItem.uri.endsWith(".mov") || mediaItem.uri.endsWith(".mp4")
         );

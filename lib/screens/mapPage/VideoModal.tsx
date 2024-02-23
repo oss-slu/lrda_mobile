@@ -4,15 +4,15 @@ import {
   View,
   ScrollView,
   Text,
+  Image,
   ActivityIndicator,
   StyleSheet,
   TouchableOpacity,
   Dimensions,
-  Video // Assuming you want to use a Video component
 } from 'react-native';
+import Video from 'react-native-video';
 import { useTheme } from "../../components/ThemeProvider";
 
-// Update the interface to reflect the nature of the content you are displaying
 interface VideoType {
   uri: string;
 }
@@ -20,47 +20,47 @@ interface VideoType {
 interface Props {
   isVisible: boolean;
   onClose: () => void;
-  videos: VideoType[]; // Rename images to videos for clarity
+  videos: VideoType[];
 }
 
-const { width } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 
+// Correctly destructure props and use them directly instead of internal state for visibility
 const VideoModal: React.FC<Props> = ({ isVisible, onClose, videos }) => {
-  const [videoLoadedState, setVideoLoadedState] = useState<{ [key: string]: boolean }>({});
-  const [isVideoTouched, setIsVideoTouched] = useState(false);
+  const [imageLoadedState, setImageLoadedState] = useState<{ [key: string]: boolean }>({});
+  const [isImageTouched, setIsImageTouched] = useState(false);
   const theme = useTheme(); // Assuming `useTheme` returns the current theme
 
   const handleLoad = (uri: string) => {
-    setVideoLoadedState((prev) => ({ ...prev, [uri]: true }));
+    setImageLoadedState((prev) => ({ ...prev, [uri]: true }));
   };
 
+  console.log(videos);
+
   // Define a missing handler if needed, or remove if not used
-  const handleVideoTouchStart = () => setIsVideoTouched(!isVideoTouched);
+  const handleImageTouchStart = () => setIsImageTouched(!isImageTouched);
 
   return (
     <Modal animationType="slide" transparent={false} visible={isVisible} onRequestClose={onClose}>
       <View style={styles.container}>
         <ScrollView
-          style={{ height: isVideoTouched ? "80%" : "50%" }}
-          onTouchStart={videos && videos.length > 2 ? handleVideoTouchStart : undefined}
+          style={{ height: isImageTouched ? "80%" : "50%" }}
+          onTouchStart={videos && videos.length > 2 ? handleImageTouchStart : undefined}
         >
           {videos && videos.length > 0 ? (
             videos.map((video, index) => (
               <View key={index} style={styles.videoContainer}>
-                {!videoLoadedState[video.uri] && (
-                  <ActivityIndicator size="large" color="#0000ff" />
-                )}
-                {/* You might need to use a different Video component based on your package, like react-native-video */}
                 <Video
-                  source={{ uri: video.uri }}
+                  source={{ uri: video.uri }} // Can be a URL or a local file.
                   style={styles.video}
-                  onLoad={() => handleLoad(video.uri)}
-                  // Additional props for controlling playback, etc.
+                  controls={true} // Show controls
+                  resizeMode="contain" // Cover the whole screen at aspect ratio.
+                  repeat={true} // Repeat playing
                 />
               </View>
             ))
           ) : (
-            <Text style={styles.noVideosText}>No videos</Text>
+            <Text style={styles.noVideosText}>No Videos</Text>
           )}
         </ScrollView>
 
@@ -85,8 +85,8 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   video: {
-    width: width, // You may want to adjust this to maintain the aspect ratio of your videos
-    height: width * (9 / 16), // Example aspect ratio of 16:9
+    width: width,
+    height: width,
   },
   noVideosText: {
     alignSelf: 'center',

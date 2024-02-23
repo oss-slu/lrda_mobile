@@ -81,6 +81,7 @@
     "@testing-library/react-native": "^12.2.0",
     "@types/react": "~18.2.14",
     "@types/react-native": "^0.72.2",
+    "@types/react-native-video": "^5.0.19",
     "react-test-renderer": "^18.2.0",
     "typescript": "^5.1.3"
   },
