@@ -267,13 +267,13 @@ const NoteDetailModal: React.FC<Props> = memo(
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={onPicturePress} style={styles.pictureButton}>
+        <TouchableOpacity onPress={onPicturePress} style={styles.pictureButton} testID='imageButton'>
           <View style={styles.closeIcon}>
             <Ionicons name="image" size={30} color={theme.text}/>
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={onVideoPress} style={styles.videoButton}>
+        <TouchableOpacity onPress={onVideoPress} style={styles.videoButton} testID='videoButton'>
           <View style={styles.closeIcon}>
             <Ionicons name="videocam" size={30} color={theme.text}/>
           </View>

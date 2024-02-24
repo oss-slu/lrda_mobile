@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import { useTheme } from "../../components/ThemeProvider";
 
-// Assuming `Image` type was intended to be an array of objects with a 'uri' property
 interface ImageType {
   uri: string;
 }
@@ -25,17 +24,15 @@ interface Props {
 
 const { width, height } = Dimensions.get("window");
 
-// Correctly destructure props and use them directly instead of internal state for visibility
 const ImageModal: React.FC<Props> = ({ isVisible, onClose, images }) => {
   const [imageLoadedState, setImageLoadedState] = useState<{ [key: string]: boolean }>({});
   const [isImageTouched, setIsImageTouched] = useState(false);
-  const theme = useTheme(); // Assuming `useTheme` returns the current theme
+  const theme = useTheme();
 
   const handleLoad = (uri: string) => {
     setImageLoadedState((prev) => ({ ...prev, [uri]: true }));
   };
 
-  // Define a missing handler if needed, or remove if not used
   const handleImageTouchStart = () => setIsImageTouched(!isImageTouched);
 
   return (
