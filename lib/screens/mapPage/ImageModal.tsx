@@ -35,6 +35,43 @@ const ImageModal: React.FC<Props> = ({ isVisible, onClose, images }) => {
 
   const handleImageTouchStart = () => setIsImageTouched(!isImageTouched);
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingTop: 45,
+      width: '100%',
+      backgroundColor: theme.primaryColor,
+    },
+    imageContainer: {
+      alignItems: 'center',
+      width: '100%',
+      backgroundColor: theme.primaryColor,
+    },
+    image: {
+      width: width,
+      height: width,
+    },
+    noImagesText: {
+      alignSelf: 'center',
+      justifyContent: 'center',
+      marginTop: 200,
+      color: theme.text,
+    },
+    closeButton: {
+      height: 40,
+      width: 75,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: 20,
+      backgroundColor: '#ddd',
+      padding: 10,
+      borderRadius: 5,
+      marginBottom: 30,
+    },
+  });
+
   return (
     <Modal animationType="slide" transparent={false} visible={isVisible} onRequestClose={onClose}>
       <View style={styles.container}>
@@ -67,39 +104,5 @@ const ImageModal: React.FC<Props> = ({ isVisible, onClose, images }) => {
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingTop: 45,
-    width: '100%',
-  },
-  imageContainer: {
-    alignItems: 'center',
-    width: '100%',
-  },
-  image: {
-    width: width,
-    height: width,
-  },
-  noImagesText: {
-    alignSelf: 'center',
-    justifyContent: 'center',
-    marginTop: 200,
-  },
-  closeButton: {
-    height: 40,
-    width: 75,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 20,
-    backgroundColor: '#ddd',
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 30,
-  },
-});
 
 export default ImageModal;
