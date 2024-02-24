@@ -73,8 +73,7 @@ const VideoModal: React.FC<Props> = ({ isVisible, onClose, videos }) => {
                   useNativeControls
                   resizeMode={ResizeMode.CONTAIN}
                   isLooping
-                  onPlaybackStatusUpdate={status => setStatus(() => status)}
-                />
+                  onPlaybackStatusUpdate={status => setStatus(() => status)} />
               </View>
             ))
           ) : (
@@ -101,6 +100,7 @@ const styles = StyleSheet.create({
   videoContainer: {
     alignItems: 'center',
     width: '100%',
+    paddingBottom: 1.25,
   },
   video: {
     width: width,
