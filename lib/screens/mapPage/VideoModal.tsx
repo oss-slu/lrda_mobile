@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   Modal,
   View,
@@ -9,8 +9,9 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
+  Button,
 } from 'react-native';
-import Video from 'react-native-video';
+import { Video, ResizeMode, Audio } from 'expo-av';
 import { useTheme } from "../../components/ThemeProvider";
 
 interface VideoType {
@@ -25,19 +26,35 @@ interface Props {
 
 const { width, height } = Dimensions.get("window");
 
-// Correctly destructure props and use them directly instead of internal state for visibility
 const VideoModal: React.FC<Props> = ({ isVisible, onClose, videos }) => {
   const [imageLoadedState, setImageLoadedState] = useState<{ [key: string]: boolean }>({});
   const [isImageTouched, setIsImageTouched] = useState(false);
-  const theme = useTheme(); // Assuming `useTheme` returns the current theme
+  const [status, setStatus] = React.useState({});
+  const video = React.useRef(null);
+  const theme = useTheme();
 
   const handleLoad = (uri: string) => {
     setImageLoadedState((prev) => ({ ...prev, [uri]: true }));
   };
 
+  async function configureAudioPlayback() {
+    try {
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+        allowsRecordingIOS: false,
+        staysActiveInBackground: false,
+        shouldDuckAndroid: true,
+        playThroughEarpieceAndroid: false,
+      });
+      console.log('Audio playback configured to play in silent mode.');
+    } catch (error) {
+      console.error('Failed to configure audio mode:', error);
+    }
+  }
+  configureAudioPlayback();
+
   console.log(videos);
 
-  // Define a missing handler if needed, or remove if not used
   const handleImageTouchStart = () => setIsImageTouched(!isImageTouched);
 
   return (
@@ -53,9 +70,10 @@ const VideoModal: React.FC<Props> = ({ isVisible, onClose, videos }) => {
                 <Video
                   source={{ uri: video.uri }}
                   style={styles.video}
-                  controls={true}
-                  resizeMode="contain"
-                  repeat={true}
+                  useNativeControls
+                  resizeMode={ResizeMode.CONTAIN}
+                  isLooping
+                  onPlaybackStatusUpdate={status => setStatus(() => status)}
                 />
               </View>
             ))
