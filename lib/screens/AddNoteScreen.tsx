@@ -428,7 +428,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
               style={{ flex: 1 }}
               ref={scrollViewRef}
               contentContainerStyle={{ paddingBottom: keyboardOpen ? keyboardHeight : 20 }}
-           >
+            >
               <RichEditor data-testid="RichEditor"
                 ref={(r) => (richTextRef.current = r)}
                 style={{...NotePageStyles().input, flex: 1, minHeight: 650 }}
