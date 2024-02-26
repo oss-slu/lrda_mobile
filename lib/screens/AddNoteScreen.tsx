@@ -210,8 +210,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         let latitude, longitude;
         
         if (Platform.OS === 'ios') {
-          latitude = location?.latitude.toString();
-          longitude = location?.longitude.toString();
+          latitude = userLocation.coords.latitude.toString();
+          longitude = userLocation.coords.longitude.toString();
         } else if (Platform.OS === 'android') {
           latitude = userLocation.coords.latitude.toString();
           longitude = userLocation.coords.longitude.toString();
