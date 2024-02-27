@@ -55,7 +55,7 @@ export class User {
   public async login(username: string, password: string): Promise<string> {
     try {
       const response = await fetch(
-        "http://lived-religion-dev.rerum.io/deer-lr/login",
+        "https://lived-religion-dev.rerum.io/deer-lr/login",
         {
           method: "POST",
           mode: "cors",
@@ -89,7 +89,7 @@ export class User {
 
   public async logout() {
     try {
-      await fetch("http://lived-religion-dev.rerum.io/deer-lr/logout", {
+      await fetch("https://lived-religion-dev.rerum.io/deer-lr/logout", {
         method: "POST",
         mode: "cors",
         headers: {
