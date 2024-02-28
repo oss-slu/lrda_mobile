@@ -160,6 +160,23 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       }
     }, 500); // Adjust the delay as needed
   };
+
+  const addVideoToEditor = (videoUri: string) => {
+    const customStyle = `
+      max-width: 50%;
+      height: auto;
+    `;
+  
+    const videoTag = `<video src="${videoUri}" style="${customStyle}" controls></video>&nbsp;<br><br>`;
+  
+    richTextRef.current?.insertHTML(videoTag);
+  
+    setTimeout(() => {
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollToEnd({ animated: true });
+      }
+    }, 500); // Adjust the delay as needed
+  };
   
   const handleSaveNote = async () => {
     try {
