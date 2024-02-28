@@ -130,12 +130,22 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     }
   };
 
-  // const onEditorContentSizeChange = (e) => {
-  //   if (scrollViewRef.current) {
-  //     scrollViewRef.current.scrollToEnd({ animated: true });
-  //   }
-  // };
+  const addVideoToEditor = (videoUri: string) => {
+    const customStyle = `
+      max-width: 50%;
+      height: auto;
+    `;
   
+    const videoTag = `<video src="${videoUri}" style="${customStyle}" controls></video>&nbsp;<br><br>`;
+  
+    richTextRef.current?.insertHTML(videoTag);
+  
+    setTimeout(() => {
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollToEnd({ animated: true });
+      }
+    }, 500); // Adjust the delay as needed
+  };
 
   const handleShareButtonPress = () => {
     setIsPublished(!isPublished);  // Toggle the share status
