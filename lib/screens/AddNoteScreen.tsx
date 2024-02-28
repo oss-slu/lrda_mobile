@@ -332,7 +332,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             </TouchableOpacity>
         </View>
         <View style={NotePageStyles().container }>
-          <PhotoScroller active={viewMedia} newMedia={newMedia} setNewMedia={setNewMedia} insertImageToEditor={addImageToEditor} />
+          <PhotoScroller active={viewMedia} newMedia={newMedia} setNewMedia={setNewMedia} insertImageToEditor={addImageToEditor} addVideoToEditor={addVideoToEditor}/>
           {viewAudio && (
             <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
           )}
@@ -431,7 +431,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           style={{ flex: 1 }}
           keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 20}
         >
-          <View style={[NotePageStyles().container, { flex: 1 }]}>
+          <View style={[NotePageStyles().editorContainer, { flex: 1 }]}>
             <ScrollView
               nestedScrollEnabled={true}
               showsVerticalScrollIndicator={false}
@@ -441,7 +441,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             >
               <RichEditor data-testid="RichEditor"
                 ref={(r) => (richTextRef.current = r)}
-                style={{...NotePageStyles().input, flex: 1, minHeight: 650 }}
+                style={[NotePageStyles().editor, {flex: 1, minHeight: 650 }]}
                 editorStyle={{
                   contentCSSText: `
                     position: absolute; 

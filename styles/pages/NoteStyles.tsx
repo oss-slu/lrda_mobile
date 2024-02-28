@@ -42,13 +42,26 @@ const NotePageStyles = () => {
       width: "100%",
       // overflow: "hidden",
     },
+    editorContainer: {
+      // backgroundColor: theme.tertiaryColor,
+      marginBottom: 4,
+      width: "100%",
+      // overflow: "hidden",
+    },
+    editor: {
+      backgroundColor: theme.primaryColor,
+      marginBottom: 4,
+      width: "100%",
+      color: theme.text,
+      // overflow: "hidden",
+    },
     textEditorContainer: {
       minHeight: 100,
     },
     title: {
       height: 45,
       width: "70%",
-      borderColor: theme.text,
+      borderColor: theme.primaryColor,
       borderWidth: 1,
       borderRadius: 18,
       paddingHorizontal: 10,

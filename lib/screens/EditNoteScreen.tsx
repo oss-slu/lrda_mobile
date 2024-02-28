@@ -263,6 +263,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             newMedia={media}
             setNewMedia={setMedia}
             insertImageToEditor={addImageToEditor}
+            addVideoToEditor={addVideoToEditor}
           />
           {viewAudio && (
             <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
@@ -360,7 +361,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
-        <View style={[NotePageStyles().container, { flex: 1 }]}>
+        <View style={[NotePageStyles().editorContainer, { flex: 1 }]}>
           <ScrollView
             nestedScrollEnabled={true}
             showsVerticalScrollIndicator={false}
@@ -369,7 +370,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           >
             <RichEditor
               ref={(r) => (richTextRef.current = r)}
-              style={{ ...NotePageStyles().input, flex: 1, minHeight: 650 }}
+              style={[NotePageStyles().editor, {flex: 1, minHeight: 650 }]}
               editorStyle={{
                 contentCSSText: `
                   position: absolute; 
