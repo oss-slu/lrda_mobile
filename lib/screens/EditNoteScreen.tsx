@@ -26,6 +26,7 @@ import TimeWindow from "../components/time";
 import { RichEditor, RichToolbar, actions } from "react-native-pell-rich-editor";
 import NotePageStyles from "../../styles/pages/NoteStyles";
 import ToastMessage from 'react-native-toast-message';
+import { useTheme } from "../components/ThemeProvider";
 
 const user = User.getInstance();
 
@@ -65,6 +66,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       : null
   );
   const { height, width } = useWindowDimensions();
+  const { theme } = useTheme();
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -148,10 +150,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       /* Additional CSS properties for sizing */
     `;
   
-    // Include an extra line break character after the image tag
-    const imgTag = `<img src="${imageUri}" style="${customStyle}" />&nbsp;<br><br>`;
-  
-    richTextRef.current?.insertHTML(imgTag);
+    richTextRef.current?.insertImage(imageUri);
   
     // Add a delay before updating the text state
     setTimeout(() => {
@@ -166,10 +165,8 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       max-width: 50%;
       height: auto;
     `;
-  
-    const videoTag = `<video src="${videoUri}" style="${customStyle}" controls></video>&nbsp;<br><br>`;
-  
-    richTextRef.current?.insertHTML(videoTag);
+    
+    richTextRef.current?.insertVideo(videoUri);
   
     setTimeout(() => {
       if (scrollViewRef.current) {
@@ -371,11 +368,14 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             <RichEditor
               ref={(r) => (richTextRef.current = r)}
               style={[NotePageStyles().editor, {flex: 1, minHeight: 650 }]}
-              editorStyle={{
+              editorStyle={
+              {
                 contentCSSText: `
                   position: absolute; 
                   top: 0; right: 0; bottom: 0; left: 0;
                 `,
+                backgroundColor: theme.primaryColor,
+                color: theme.text,
               }}
               autoCorrect={true}
               placeholder="Write your note here"

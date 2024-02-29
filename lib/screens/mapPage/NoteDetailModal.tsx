@@ -67,6 +67,7 @@ const NoteDetailModal: React.FC<Props> = memo(
     };
 
     const html = note?.description;
+    console.log(html);
 
     // Declare a new state variable for image loading
     const [imageLoadedState, setImageLoadedState] = useState<{

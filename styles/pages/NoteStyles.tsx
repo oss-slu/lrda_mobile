@@ -52,7 +52,7 @@ const NotePageStyles = () => {
       backgroundColor: theme.primaryColor,
       marginBottom: 4,
       width: "100%",
-      color: theme.text,
+      // color: theme.text,
       // overflow: "hidden",
     },
     textEditorContainer: {
@@ -61,7 +61,7 @@ const NotePageStyles = () => {
     title: {
       height: 45,
       width: "70%",
-      borderColor: theme.primaryColor,
+      borderColor: theme.text,
       borderWidth: 1,
       borderRadius: 18,
       paddingHorizontal: 10,

@@ -30,6 +30,7 @@ import {
   actions,
 } from "react-native-pell-rich-editor";
 import NotePageStyles from "../../styles/pages/NoteStyles";
+import { useTheme } from "../components/ThemeProvider";
 
 const user = User.getInstance();
 
@@ -56,6 +57,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     latitude: number;
     longitude: number;
   } | null>(null);
+
+  const { theme } = useTheme();
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -116,12 +119,9 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
       height: auto; /* Maintain aspect ratio */
       /* Additional CSS properties for sizing */
     `;
-  
-    // Include an extra line break character after the image tag
-    const imgTag = `<img src="${imageUri}" style="${customStyle}" />&nbsp;<br><br>`;
-  
-    richTextRef.current?.insertHTML(imgTag);
-  
+    
+    richTextRef.current?.insertImage(imageUri);  
+
     if (scrollViewRef.current && !initialLoad) {
       // Adjust this timeout and calculation as necessary
       setTimeout(() => {
@@ -135,10 +135,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
       max-width: 50%;
       height: auto;
     `;
-  
-    const videoTag = `<video src="${videoUri}" style="${customStyle}" controls></video>&nbsp;<br><br>`;
-  
-    richTextRef.current?.insertHTML(videoTag);
+    
+    richTextRef.current?.insertVideo(videoUri);
   
     setTimeout(() => {
       if (scrollViewRef.current) {
@@ -446,8 +444,9 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
                   contentCSSText: `
                     position: absolute; 
                     top: 0; right: 0; bottom: 0; left: 0;
-                    color: theme.text;
                   `,
+                  backgroundColor: theme.primaryColor,
+                  color: theme.text,
                 }}
                 autoCorrect={true}
                 placeholder="Write your note here"
