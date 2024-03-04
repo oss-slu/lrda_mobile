@@ -207,6 +207,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           longitude = userLocation.coords.longitude.toString();
         }
         
+        setTime(new Date()); //force a fresh time date grab on note save
+
         const newNote = {
           title: titleText,
           text: bodyText,
