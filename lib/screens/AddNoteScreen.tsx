@@ -16,6 +16,7 @@ import * as Location from 'expo-location';
 import { Note, AddNoteScreenProps } from "../../types";
 import ToastMessage from 'react-native-toast-message';
 import PhotoScroller from "../components/photoScroller";
+import { getThumbnail } from "../utils/S3_proxy";
 import { User } from "../models/user_class";
 import { Ionicons } from "@expo/vector-icons";
 import { Media, AudioType } from "../models/media_class";
@@ -130,6 +131,32 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     }
   };
 
+  const addVideoToEditor = async (videoUri: string) => {
+    try {
+      // Fetch the thumbnail URI
+      const thumbnailUri = await getThumbnail(videoUri);
+  
+      // Create a custom HTML block for the video with its thumbnail
+      const videoHtml = `
+        <div class="video-container">
+          <img src="${thumbnailUri}" alt="Video Thumbnail" class="video-thumbnail" onclick="this.nextElementSibling.style.display='block'; this.style.display='none'" />
+          <video src="${videoUri}" controls style="display:none" class="video-player"></video>
+        </div>
+      `;
+
+      richTextRef.current?.insertHTML(videoHtml);
+  
+      setTimeout(() => {
+        if (scrollViewRef.current) {
+          scrollViewRef.current.scrollToEnd({ animated: true });
+        }
+      }, 500); 
+    } catch (error) {
+      console.error("Error adding video with thumbnail: ", error);
+    }
+  }
+
+  /*
   const addVideoToEditor = (videoUri: string) => {
     const customStyle = `
       max-width: 50%;
@@ -144,6 +171,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
       }
     }, 500); // Adjust the delay as needed
   };
+  */
 
   const handleShareButtonPress = () => {
     setIsPublished(!isPublished);  // Toggle the share status
@@ -280,7 +308,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
                 setIsLocation(false);
                 setIsTime(false);
               }}
-              testID="images-icon"
+              data-testid="images-icon"
             >
               <Ionicons name="images-outline" size={30} color={NotePageStyles().saveText.color} />
             </TouchableOpacity>
@@ -330,7 +358,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             </TouchableOpacity>
         </View>
         <View style={NotePageStyles().container }>
-          <PhotoScroller active={viewMedia} newMedia={newMedia} setNewMedia={setNewMedia} insertImageToEditor={addImageToEditor} addVideoToEditor={addVideoToEditor}/>
+          <PhotoScroller data-testid="photoScroller" active={viewMedia} newMedia={newMedia} setNewMedia={setNewMedia} insertImageToEditor={addImageToEditor} addVideoToEditor={addVideoToEditor}/>
           {viewAudio && (
             <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
           )}
@@ -465,3 +493,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
 };
 
 export default AddNoteScreen;
+
+export function addVideoToEditor(mockVideoUri: string) {
+  throw new Error('Function not implemented.');
+}

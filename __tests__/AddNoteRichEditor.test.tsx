@@ -12,6 +12,9 @@ import { Media } from '../lib/models/media_class';
 import moxios from 'moxios';
 import AudioContainer from '../lib/components/audio';
 
+import { addVideoToEditor } from '../lib/screens/AddNoteScreen';
+import { getThumbnail } from '../lib/utils/S3_proxy';
+
 beforeAll(() => {
   jest.spyOn(console, 'log').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -30,6 +33,17 @@ jest.mock('../lib/components/ThemeProvider', () => ({
     theme: 'mockedTheme', // Provide a mocked theme object
   }),
 }));
+
+/*
+jest.mock('../lib/screens/AddNoteScreen', () => ({
+  addVideoToEditor: jest.fn(),
+}));
+
+// Ensure you also mock getThumbnail if it's from another module
+jest.mock('../lib/utils/S3_proxy', () => ({
+  getThumbnail: jest.fn(),
+}));
+*/
 
 describe("AddNoteScreen", () => {
   let wrapper;
@@ -122,6 +136,29 @@ describe("AddNoteScreen", () => {
   });
   */
   
-  
+  it("inserts video into the rich text editor", async () => {
+    const mockVideoUri = 'http://example.com/video.mp4';
+    const mockThumbnailUri = 'http://example.com/thumbnail.jpg';
+
+    // Set up your mocks with the desired behavior
+    getThumbnail.mockResolvedValue(mockThumbnailUri);
+    addVideoToEditor.mockImplementation(() => Promise.resolve()); // Assume it's async
+
+    // Assuming mockInsertHTML is a function you have access to, perhaps via global mocks
+    const mockInsertHTML = jest.fn();
+    global.richTextRef = {
+      current: {
+        insertHTML: mockInsertHTML,
+      },
+    };
+
+    // Act: Attempt to add video to editor
+    addVideoToEditor(mockVideoUri);
+
+    // Assertions
+    expect(getThumbnail).toHaveBeenCalledWith(mockVideoUri);
+    expect(addVideoToEditor).toHaveBeenCalledWith(mockVideoUri);
+    expect(mockInsertHTML).toHaveBeenCalled(); // This assumes insertHTML is called within addVideoToEditor
+  });
   
 });

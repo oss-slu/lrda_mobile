@@ -15,6 +15,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Note } from "../../types";
 import PhotoScroller from "../components/photoScroller";
+import { getThumbnail } from "../utils/S3_proxy";
 import { User } from "../models/user_class";
 import AudioContainer from "../components/audio";
 import { Media, AudioType } from "../models/media_class";
@@ -160,12 +161,33 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     }, 500); // Adjust the delay as needed
   };
 
+  async function addVideoToEditor(videoUri: string) {
+    try {
+      // Fetch the thumbnail URI
+      const thumbnailUri = await getThumbnail(videoUri);
+  
+      // Create a custom HTML block for the video with its thumbnail
+      const videoHtml = `
+        <div class="video-container">
+          <img src="${thumbnailUri}" alt="Video Thumbnail" class="video-thumbnail" onclick="this.nextElementSibling.style.display='block'; this.style.display='none'" />
+          <video src="${videoUri}" controls style="display:none" class="video-player"></video>
+        </div>
+      `;
+
+      richTextRef.current?.insertHTML(videoHtml);
+  
+      setTimeout(() => {
+        if (scrollViewRef.current) {
+          scrollViewRef.current.scrollToEnd({ animated: true });
+        }
+      }, 500); 
+    } catch (error) {
+      console.error("Error adding video with thumbnail: ", error);
+    }
+  }
+  
+  /*
   const addVideoToEditor = (videoUri: string) => {
-    const customStyle = `
-      max-width: 50%;
-      height: auto;
-    `;
-    
     richTextRef.current?.insertVideo(videoUri);
   
     setTimeout(() => {
@@ -174,7 +196,8 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       }
     }, 500); // Adjust the delay as needed
   };
-  
+  */
+
   const handleSaveNote = async () => {
     try {
       const editedNote: Note = {
@@ -208,7 +231,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           <TouchableOpacity
             style={NotePageStyles().topButtons}
             onPress={owner ? handleSaveNote : () => navigation.goBack()}
-            
           >
             <Ionicons name="arrow-back-outline" size={30} color={NotePageStyles().title.color} />
           </TouchableOpacity>
