@@ -136,11 +136,11 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
       // Fetch the thumbnail URI
       const thumbnailUri = await getThumbnail(videoUri);
   
-      // Create a custom HTML block for the video with its thumbnail
+      // Create a custom HTML block for the video with its thumbnail, including styling for the video
       const videoHtml = `
-        <div class="video-container">
-          <img src="${thumbnailUri}" alt="Video Thumbnail" class="video-thumbnail" onclick="this.nextElementSibling.style.display='block'; this.style.display='none'" />
-          <video src="${videoUri}" controls style="display:none" class="video-player"></video>
+        <div class="video-container" style="text-align: center;"> <!-- Center align the video container -->
+          <img src="${thumbnailUri}" alt="Video Thumbnail" class="video-thumbnail" onclick="this.nextElementSibling.style.display='block'; this.style.display='none';" style="width: 50%; cursor: pointer;" /> <!-- Thumbnail with 50% width -->
+          <video src="${videoUri}" controls style="width: 50%; aspect-ratio: 16 / 9; display:none;" class="video-player"></video> <!-- Video with 50% width and aspect ratio -->
         </div>
       `;
 
