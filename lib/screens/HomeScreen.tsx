@@ -23,6 +23,7 @@ import { formatToLocalDateString } from "../components/time";
 import { ThemeProvider, useTheme } from '../components/ThemeProvider';
 import Constants from "expo-constants";
 import DropDownPicker from 'react-native-dropdown-picker';
+import NoteDetailModal from "./mapPage/NoteDetailModal";
 
 const user = User.getInstance();
 
@@ -44,6 +45,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(initialItems[0].value);
   const [items, setItems] = useState(initialItems);
+  const [selectedNote, setSelectedNote] = useState<Note | undefined>(undefined);
+  const [isModalVisible, setModalVisible] = useState(false);
 
   const { theme } = useTheme();
 
@@ -420,15 +423,28 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         key={item.id}
         activeOpacity={1}
         style={styles.noteContainer}
-        onPress={() =>
-          navigation.navigate("EditNote", {
-            note: item,
-            onSave: (editedNote: Note) => {
-              updateNote(editedNote);
-              refreshPage();
-            },
-          })
-        }
+        onPress={() => {
+          if (!item.published) {
+            navigation.navigate("EditNote", {
+              note: item,
+              onSave: (editedNote: Note) => {
+                updateNote(editedNote);
+                refreshPage();
+              },
+            });
+          } else {
+            console.log(item);
+            const formattedNote = {
+              ...item,
+              time: formatToLocalDateString(new Date(item.time)),
+              description: item.text,
+              images: 
+                item.media.map((mediaItem: { uri: any; }) => ({ uri: mediaItem.uri }))
+            };
+            setSelectedNote(formattedNote);
+            setModalVisible(true);
+          }
+        }}
       >
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           {IsImage ? (
@@ -559,6 +575,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           <Ionicons name="add-outline" size={32} color={theme.primaryColor} style={{ fontFamily: 'Ionicons_' }} />
         </TouchableOpacity>
       </View>
+
+      <NoteDetailModal 
+        isVisible={isModalVisible} 
+        onClose={() => setModalVisible(false)} 
+        note={selectedNote} 
+      />
+
     </View>
   );
 };

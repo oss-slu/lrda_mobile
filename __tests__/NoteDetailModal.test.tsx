@@ -18,4 +18,20 @@ describe("NoteDetailModal", () => {
     const wrapper = shallow(<NoteDetailModal />);
     expect(wrapper).toMatchSnapshot();
   });
+
+  it("should respond to image button press", () => {
+    const wrapper = shallow(<NoteDetailModal />);
+    const imageButton = wrapper.findWhere(node => node.prop('testID') === 'imageButton').first();
+    expect(imageButton.exists()).toBe(true); // Ensure the button exists
+
+    imageButton.props().onPress();
+  });
+
+  it("should respond to video button press", () => {
+    const wrapper = shallow(<NoteDetailModal />);
+    const videoButton = wrapper.findWhere(node => node.prop('testID') === 'videoButton').first();
+    expect(videoButton.exists()).toBe(true); // Ensure the button exists
+
+    videoButton.props().onPress();
+  });
 });

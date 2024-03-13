@@ -9,11 +9,14 @@ import {
   TouchableOpacity,
   Image,
   useWindowDimensions,
+  SafeAreaView
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Note } from "../../../types";
 import RenderHTML from "react-native-render-html";
-import { useTheme } from "../../components/ThemeProvider"
+import { useTheme } from "../../components/ThemeProvider";
+import ImageModal from "./ImageModal";
+import VideoModal from "./VideoModal"
 
 interface Props {
   isVisible: boolean;
@@ -26,6 +29,8 @@ const NoteDetailModal: React.FC<Props> = memo(
     const [isImageTouched, setImageTouched] = useState(false);
     const [isTextTouched, setTextTouched] = useState(true);
     const [creatorName, setCreatorName] = useState("");
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isVideoVisible, setIsVideoVisible] = useState(false);
     const { height, width } = useWindowDimensions();
     const { theme } = useTheme();
 
@@ -53,6 +58,16 @@ const NoteDetailModal: React.FC<Props> = memo(
       setImageTouched(false);
     };
 
+    const onPicturePress = () => {
+      setIsModalVisible(true); // Open the PictureModal
+    };
+
+    const onVideoPress = () => {
+      setIsVideoVisible(true);
+    };
+
+    const html = note?.description;
+
     // Declare a new state variable for image loading
     const [imageLoadedState, setImageLoadedState] = useState<{
       [key: string]: boolean;
@@ -68,6 +83,16 @@ const NoteDetailModal: React.FC<Props> = memo(
       return [];
     }, [note]);
 
+    const videos: string = useMemo(() => {
+      if (note?.images) {
+        return note.images.filter(
+          (mediaItem: any) =>
+            mediaItem.uri.endsWith(".MOV") || mediaItem.uri.endsWith(".mov") || mediaItem.uri.endsWith(".mp4")
+        );
+      }
+      return [];
+    }, [note]);
+
     const handleLoad = (uri: string) => {
       setImageLoadedState((prev) => ({ ...prev, [uri]: true }));
     };
@@ -76,11 +101,18 @@ const NoteDetailModal: React.FC<Props> = memo(
       newNote = true;
     }
 
-    const html = note?.description;
-
     const htmlSource = useMemo(() => {
       return { html };
     }, [html]);
+
+    // Define styles for images within the HTML content
+    const tagsStyles = useMemo(() => ({
+      img: {
+        width: 100, // Set image width to 100 pixels
+        height: 100, // Set image height to 100 pixels
+        resizeMode: 'cover', // Cover might not be directly applicable here, but ensures content is not distorted
+      },
+    }), []);
 
     const MemoizedRenderHtml = React.memo(RenderHTML);
 
@@ -89,6 +121,34 @@ const NoteDetailModal: React.FC<Props> = memo(
         position: "absolute",
         top: 50,
         left: 20,
+        zIndex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.5,
+        shadowRadius: 2,
+        elevation: 3,
+        borderRadius: 25,
+        backgroundColor: theme.primaryColor,
+      },
+      pictureButton: {
+        position: "absolute",
+        top: 50,
+        right: 20,
+        zIndex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.5,
+        shadowRadius: 2,
+        elevation: 3,
+        borderRadius: 25,
+        backgroundColor: theme.primaryColor,
+      },
+      videoButton: {
+        position: "absolute",
+        top: 50,
+        right: 70,
         zIndex: 1,
         alignItems: "center",
         justifyContent: "center",
@@ -113,6 +173,8 @@ const NoteDetailModal: React.FC<Props> = memo(
         backgroundColor: theme.primaryColor,
         borderTopColor: theme.text,
         borderTopWidth: 2,
+        flex: 1,
+        paddingTop: 100,
       },
       modalTitle: {
         fontSize: 26,
@@ -205,37 +267,18 @@ const NoteDetailModal: React.FC<Props> = memo(
           </View>
         </TouchableOpacity>
 
-        <ScrollView
-          style={{ height: isImageTouched ? "80%" : "50%" }}
-          onTouchStart={images.length > 2 ? handleImageTouchStart : undefined}
-        >
-          {images && images.length > 0 ? (
-            images.map((image, index) => {
-              return (
-                <View key={index} style={styles.imageContainer}>
-                  {!imageLoadedState[image.uri] && (
-                    <ActivityIndicator size="large" color="#0000ff" />
-                  )}
-                  <Image
-                    source={{ uri: image.uri }}
-                    style={styles.image}
-                    onLoad={() => handleLoad(image.uri)}
-                  />
-                </View>
-              );
-            })
-          ) : (
-            <Text
-              style={{
-                alignSelf: "center",
-                justifyContent: "center",
-                marginTop: 200,
-              }}
-            >
-              No images
-            </Text>
-          )}
-        </ScrollView>
+        <TouchableOpacity onPress={onPicturePress} style={styles.pictureButton} testID='imageButton'>
+          <View style={styles.closeIcon}>
+            <Ionicons name="image" size={30} color={theme.text}/>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={onVideoPress} style={styles.videoButton} testID='videoButton'>
+          <View style={styles.closeIcon}>
+            <Ionicons name="videocam" size={30} color={theme.text}/>
+          </View>
+        </TouchableOpacity>
+
         <View
           style={[
             styles.textContainer,
@@ -245,7 +288,6 @@ const NoteDetailModal: React.FC<Props> = memo(
           ]}
           onTouchStart={handleTextTouchStart}
         >
-          <ScrollView>
             <Text style={styles.modalTitle}>{note?.title}</Text>
             <View style={styles.metaDataContainer}>
               <View style={styles.creatorContainer}>
@@ -318,8 +360,9 @@ const NoteDetailModal: React.FC<Props> = memo(
                     </View>
                   </View>
                 ))}
-            </ScrollView>
-          </View>
+              </ScrollView>
+            </View>
+          <ScrollView>
             <View
               style={{
                 height: 2,
@@ -329,16 +372,19 @@ const NoteDetailModal: React.FC<Props> = memo(
               }}
             ></View>
             {newNote ? (
-              <MemoizedRenderHtml
-                baseStyle={{ color: theme.text }}
-                contentWidth={width}
-                source={htmlSource}
-              />
+            <MemoizedRenderHtml
+              baseStyle={{ color: theme.text }}
+              contentWidth={width}
+              source={htmlSource}
+              tagsStyles={tagsStyles} // Apply custom styles to HTML tags
+            />
             ) : (
               <Text style={{color: theme.text}}>{note?.description}</Text>
             )}
           </ScrollView>
         </View>
+        <ImageModal isVisible={isModalVisible} onClose={() => setIsModalVisible(false)} images={images}/>
+        <VideoModal isVisible={isVideoVisible} onClose={() => setIsVideoVisible(false)} videos={videos}/>
       </Modal>
     );
   }

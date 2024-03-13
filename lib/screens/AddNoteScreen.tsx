@@ -178,20 +178,30 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const saveNote = async () => {
     const locationPermissionGranted = await checkLocationPermission();
     if (titleText === "") {
-      if (!promptedMissingTitle) {
-        setPromptedMissingTitle(true);
-        Alert.alert(
-          "Title is empty",
-          "Please enter a title to save the note, or press back again to confirm not saving the note.",
-        );
-        return;
-      } else {
-        navigation.goBack();
-        return;
-      }
+      Alert.alert(
+        "Title is empty",
+        "Please enter a title to save the note.",
+      );
+      return;
     }
     if (!locationPermissionGranted) {
-      return; // Stop saving the note if location permission is not granted
+      Alert.alert(
+        "Delete Note",
+        "Location permissions required to save. Are you sure you want to delete this note?",
+        [
+          {
+            text: "Cancel",
+            onPress: () => console.log("Cancel Pressed"),
+            style: "cancel"
+          },
+          {
+            text: "Delete",
+            onPress: () => navigation.goBack()
+          }
+        ],
+        { cancelable: false }
+      );
+      return;
     }
     else {
       try {
@@ -200,8 +210,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         let latitude, longitude;
         
         if (Platform.OS === 'ios') {
-          latitude = location?.latitude.toString();
-          longitude = location?.longitude.toString();
+          latitude = userLocation.coords.latitude.toString();
+          longitude = userLocation.coords.longitude.toString();
         } else if (Platform.OS === 'android') {
           latitude = userLocation.coords.latitude.toString();
           longitude = userLocation.coords.longitude.toString();
@@ -428,7 +438,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
               style={{ flex: 1 }}
               ref={scrollViewRef}
               contentContainerStyle={{ paddingBottom: keyboardOpen ? keyboardHeight : 20 }}
-           >
+            >
               <RichEditor data-testid="RichEditor"
                 ref={(r) => (richTextRef.current = r)}
                 style={{...NotePageStyles().input, flex: 1, minHeight: 650 }}
