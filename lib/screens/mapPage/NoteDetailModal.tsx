@@ -14,6 +14,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Note } from "../../../types";
 import RenderHTML from "react-native-render-html";
+import Video from 'react-native-video';
+import RendererRegistry, { defaultHTMLElementModels, HTMLContentModel, TNode } from 'react-native-render-html';
 import { useTheme } from "../../components/ThemeProvider";
 import ImageModal from "./ImageModal";
 import VideoModal from "./VideoModal"
@@ -114,6 +116,23 @@ const NoteDetailModal: React.FC<Props> = memo(
         resizeMode: 'cover', // Cover might not be directly applicable here, but ensures content is not distorted
       },
     }), []);
+
+    const CustomVideoPlayer: React.FC<VideoPlayerProps> = ({ src }) => {
+      return <Video source={{ uri: src }} style={{ width: 300, height: 300 }} controls />;
+    };
+    
+    const customRenderers = {
+      video: (props: { tnode: { attributes: { src: any; }; }; }) => {
+        const src = props.tnode.attributes.src;
+        return <CustomVideoPlayer src={src} />;
+      },
+    };
+    
+    const customHTMLElementModels = {
+      video: defaultHTMLElementModels.video.extend({
+        contentModel: HTMLContentModel.none,
+      }),
+    };
 
     const MemoizedRenderHtml = React.memo(RenderHTML);
 
@@ -372,16 +391,27 @@ const NoteDetailModal: React.FC<Props> = memo(
                 marginBottom: 10,
               }}
             ></View>
-            {newNote ? (
-            <MemoizedRenderHtml
-              baseStyle={{ color: theme.text }}
-              contentWidth={width}
-              source={htmlSource}
-              tagsStyles={tagsStyles} // Apply custom styles to HTML tags
+            {
+              newNote ? (
+                <MemoizedRenderHtml
+                  baseStyle={{ color: theme.text }}
+                  contentWidth={width}
+                  source={htmlSource}
+                  tagsStyles={tagsStyles} // Apply custom styles to HTML tags
+                  renderers={customRenderers}
+                  customHTMLElementModels={customHTMLElementModels}
+                />
+              ) : (
+                <Text style={{ color: theme.text }}>{note?.description}</Text>
+              )
+            }
+            <RenderHTML
+              contentWidth={useWindowDimensions().width}
+              source={{ html: note?.description || '' }}
+              renderers={customRenderers}
+              customHTMLElementModels={customHTMLElementModels}
             />
-            ) : (
-              <Text style={{color: theme.text}}>{note?.description}</Text>
-            )}
+            
           </ScrollView>
         </View>
         <ImageModal isVisible={isModalVisible} onClose={() => setIsModalVisible(false)} images={images}/>

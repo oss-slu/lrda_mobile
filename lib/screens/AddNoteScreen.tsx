@@ -136,12 +136,17 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
       // Fetch the thumbnail URI
       const thumbnailUri = await getThumbnail(videoUri);
   
-      // Create a custom HTML block for the video with its thumbnail, including styling for the video
       const videoHtml = `
-        <div class="video-container" style="text-align: center;"> <!-- Center align the video container -->
-          <img src="${thumbnailUri}" alt="Video Thumbnail" class="video-thumbnail" onclick="this.nextElementSibling.style.display='block'; this.style.display='none';" style="width: 50%; cursor: pointer;" /> <!-- Thumbnail with 50% width -->
-          <video src="${videoUri}" controls style="width: 50%; aspect-ratio: 16 / 9; display:none;" class="video-player"></video> <!-- Video with 50% width and aspect ratio -->
-        </div>
+        <video width="320" height="240" controls poster="${thumbnailUri}" id="videoElement">
+          <source src="${videoUri}" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+        <script>
+          document.getElementById('videoElement').addEventListener('play', function(e) {
+            // Assuming you have a way to send a message to your React Native environment
+            window.ReactNativeWebView.postMessage('videoPlayed');
+          });
+        </script>
       `;
 
       richTextRef.current?.insertHTML(videoHtml);
@@ -155,23 +160,6 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
       console.error("Error adding video with thumbnail: ", error);
     }
   }
-
-  /*
-  const addVideoToEditor = (videoUri: string) => {
-    const customStyle = `
-      max-width: 50%;
-      height: auto;
-    `;
-    
-    richTextRef.current?.insertVideo(videoUri);
-  
-    setTimeout(() => {
-      if (scrollViewRef.current) {
-        scrollViewRef.current.scrollToEnd({ animated: true });
-      }
-    }, 500); // Adjust the delay as needed
-  };
-  */
 
   const handleShareButtonPress = () => {
     setIsPublished(!isPublished);  // Toggle the share status
