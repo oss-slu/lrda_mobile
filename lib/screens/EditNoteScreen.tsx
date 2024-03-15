@@ -151,7 +151,10 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       /* Additional CSS properties for sizing */
     `;
   
-    richTextRef.current?.insertImage(imageUri);
+    // Include an extra line break character after the image tag
+    const imgTag = `<img src="${imageUri}" style="${customStyle}" />&nbsp;<br><br>`;
+  
+    richTextRef.current?.insertHTML(imgTag);
   
     // Add a delay before updating the text state
     setTimeout(() => {

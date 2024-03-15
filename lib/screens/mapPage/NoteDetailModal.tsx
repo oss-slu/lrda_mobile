@@ -68,6 +68,23 @@ const NoteDetailModal: React.FC<Props> = memo(
       setIsVideoVisible(true);
     };
 
+    const tagsStyles = {
+      img: {
+        maxWidth: '10',
+        height: '10',
+      },
+    };
+
+    const customRenderers = {
+      img: ({tnode}) => {
+        // Access attributes from tnode
+        const { src, alt } = tnode.attributes;
+        const imageSize = { width: width, height: width }; // Fixed size for all images
+    
+        return <Image source={{ uri: src }} style={imageSize} accessibilityLabel={alt} />;
+      },
+    };
+
     const html = note?.description;
     console.log(html);
 
@@ -108,25 +125,18 @@ const NoteDetailModal: React.FC<Props> = memo(
       return { html };
     }, [html]);
 
-    // Define styles for images within the HTML content
-    const tagsStyles = useMemo(() => ({
-      img: {
-        width: 100, // Set image width to 100 pixels
-        height: 100, // Set image height to 100 pixels
-        resizeMode: 'cover', // Cover might not be directly applicable here, but ensures content is not distorted
-      },
-    }), []);
-
     const CustomVideoPlayer: React.FC<VideoPlayerProps> = ({ src }) => {
       return <Video source={{ uri: src }} style={{ width: 300, height: 300 }} controls />;
     };
     
+    /*
     const customRenderers = {
       video: (props: { tnode: { attributes: { src: any; }; }; }) => {
         const src = props.tnode.attributes.src;
         return <CustomVideoPlayer src={src} />;
       },
     };
+    */
     
     const customHTMLElementModels = {
       video: defaultHTMLElementModels.video.extend({
@@ -397,7 +407,7 @@ const NoteDetailModal: React.FC<Props> = memo(
                   baseStyle={{ color: theme.text }}
                   contentWidth={width}
                   source={htmlSource}
-                  tagsStyles={tagsStyles} // Apply custom styles to HTML tags
+                  tagsStyles={tagsStyles}
                   renderers={customRenderers}
                   customHTMLElementModels={customHTMLElementModels}
                 />

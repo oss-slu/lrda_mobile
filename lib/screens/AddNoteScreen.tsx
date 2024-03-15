@@ -120,9 +120,12 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
       height: auto; /* Maintain aspect ratio */
       /* Additional CSS properties for sizing */
     `;
-    
-    richTextRef.current?.insertImage(imageUri);  
-
+  
+    // Include an extra line break character after the image tag
+    const imgTag = `<img src="${imageUri}" style="${customStyle}" />&nbsp;<br><br>`;
+  
+    richTextRef.current?.insertHTML(imgTag);
+  
     if (scrollViewRef.current && !initialLoad) {
       // Adjust this timeout and calculation as necessary
       setTimeout(() => {
