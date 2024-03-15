@@ -405,13 +405,6 @@ const NoteDetailModal: React.FC<Props> = memo(
                 <Text style={{ color: theme.text }}>{note?.description}</Text>
               )
             }
-            <RenderHTML
-              contentWidth={useWindowDimensions().width}
-              source={{ html: note?.description || '' }}
-              renderers={customRenderers}
-              customHTMLElementModels={customHTMLElementModels}
-            />
-            
           </ScrollView>
         </View>
         <ImageModal isVisible={isModalVisible} onClose={() => setIsModalVisible(false)} images={images}/>

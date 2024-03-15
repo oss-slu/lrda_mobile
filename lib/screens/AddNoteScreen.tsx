@@ -141,14 +141,17 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           <source src="${videoUri}" type="video/mp4">
           Your browser does not support the video tag.
         </video>
+        <p><a href="${videoUri}" target="_blank">${videoUri}</a></p> <!-- Make the URI clickable -->
         <script>
           document.getElementById('videoElement').addEventListener('play', function(e) {
+            // Preventing the rich text editor from gaining focus when the video is played
+            e.preventDefault();
             // Assuming you have a way to send a message to your React Native environment
             window.ReactNativeWebView.postMessage('videoPlayed');
           });
         </script>
       `;
-
+  
       richTextRef.current?.insertHTML(videoHtml);
   
       setTimeout(() => {
