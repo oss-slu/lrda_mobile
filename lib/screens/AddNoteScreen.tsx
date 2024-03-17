@@ -85,9 +85,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   }, []);
 
   useEffect(() => {
-    if (!location?.latitude && !location?.longitude) {
-      grabLocation();
-    }
+    checkLocationPermission();
   }, []);
 
   const grabLocation = async () => {
@@ -160,25 +158,34 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const checkLocationPermission = async () => {
     try {
       let { status } = await Location.getForegroundPermissionsAsync();
-
+  
       if (status !== 'granted') {
         // Location permission not granted, request it
         const requestResult = await Location.requestForegroundPermissionsAsync();
-
+  
         if (requestResult.status === 'denied') {
-          // Location permission denied after requesting, request again
-          const requestAgainResult = await Location.requestForegroundPermissionsAsync();
-          status = requestAgainResult.status;
-        }
-
-        if (status !== 'granted') {
-          // Location permission still not granted
-          Alert.alert("Location permission denied", "Please grant location permission to save the note or remove the title to not save.");
+          // Location permission denied after requesting, show alert and return false
+          Alert.alert(
+            "Location permission denied",
+            "Please grant location permission to save the note or remove the title to not save.",
+            [
+              {
+                text: "Delete Note",
+                onPress: () => navigation.goBack(), // Delete the note and go back
+                style: "destructive",
+              },
+              { text: "OK", onPress: () => console.log("OK Pressed") },
+            ],
+            { cancelable: false }
+          );
           return false;
         }
+  
+        // Location permission not yet granted
+        return false;
       }
-
-      // Location permission already granted or granted after request
+  
+      // Location permission already granted
       return true;
     } catch (error) {
       console.error("Error checking location permission:", error);
@@ -189,29 +196,22 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const saveNote = async () => {
     const locationPermissionGranted = await checkLocationPermission();
     if (titleText === "") {
-      if (!promptedMissingTitle) {
-        setPromptedMissingTitle(true);
-        Alert.alert(
-          "Title is empty",
-          "Please enter a title to save the note, or press back again to confirm not saving the note.",
-        );
-        return;
-      } else {
-        navigation.goBack();
-        return;
-      }
+      navigation.goBack();
+      return;
     }
     if (!locationPermissionGranted) {
       return; // Stop saving the note if location permission is not granted
-    }
-    else {
+    } else {
       try {
         const userID = await user.getId();
-        const latitude = location?.latitude.toString();
-        const longitude = location?.longitude.toString();
-        
-        setTime(new Date()); //force a fresh time date grab on note save
-
+  
+        // Grab user's current location
+        const userLocation = await Location.getCurrentPositionAsync({});
+        const latitude = userLocation.coords.latitude.toString();
+        const longitude = userLocation.coords.longitude.toString();
+  
+        setTime(new Date()); // force a fresh time date grab on note save
+  
         const newNote = {
           title: titleText,
           text: bodyText,
@@ -225,10 +225,10 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           time: time,
         };
         const response = await ApiService.writeNewNote(newNote);
-
+  
         const obj = await response.json();
         const id = obj["@id"];
-
+  
         route.params.refreshPage();
         navigation.goBack();
       } catch (error) {
@@ -236,6 +236,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
       }
     }
   };
+  
+  
 
   return (
       <SafeAreaView style={{ flex: 1 }}>
