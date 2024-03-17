@@ -42,7 +42,7 @@ const OnboardingScreen = ({ navigation }) => {
           backgroundColor: '#87ceeb',
           image: (
             <Video
-              source={require('../../assets/videos/v3.mp4')}
+              source={require('../../assets/videos/v3_1.mp4')}
               style={{ width, height }}
               resizeMode="cover"
               shouldPlay
@@ -68,7 +68,7 @@ const OnboardingScreen = ({ navigation }) => {
           backgroundColor: '#ffe135',
           image: (
             <Video
-              source={require('../../assets/videos/v4.mp4')}
+              source={require('../../assets/videos/v4_1.mp4')}
               style={{ width, height }}
               resizeMode="cover"
               shouldPlay
@@ -94,7 +94,7 @@ const OnboardingScreen = ({ navigation }) => {
           backgroundColor: '#90ee90',
           image: (
             <Video
-              source={require('../../assets/videos/v5.mp4')}
+              source={require('../../assets/videos/v5_1.mp4')}
               style={{ width, height}}
               resizeMode="cover"
               shouldPlay
