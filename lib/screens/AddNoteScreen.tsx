@@ -167,7 +167,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           // Location permission denied after requesting, show alert and return false
           Alert.alert(
             "Location permission denied",
-            "Please grant location permission to save the note or remove the title to not save.",
+            "Please grant location permission to save the note.",
             [
               {
                 text: "Delete Note",
@@ -194,11 +194,20 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   };
 
   const saveNote = async () => {
-    const locationPermissionGranted = await checkLocationPermission();
-    if (titleText === "") {
-      navigation.goBack();
+    if (titleText.trim() === "") {
+      Alert.alert(
+        "Empty Title",
+        "Please enter a title to save the note or delete the note.",
+        [
+          { text: "Delete Note", onPress: () => navigation.goBack() },
+          { text: "OK", onPress: () => console.log("OK Pressed") }
+        ],
+        { cancelable: false }
+      );
       return;
     }
+  
+    const locationPermissionGranted = await checkLocationPermission();
     if (!locationPermissionGranted) {
       return; // Stop saving the note if location permission is not granted
     } else {
@@ -236,6 +245,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
       }
     }
   };
+
   
   
 
