@@ -73,7 +73,7 @@ export default function LocationWindow({
     location?.longitude?.toString() || ""
   );
   const [distanceFromEvent, setDistanceFromEvent] = useState<string>("");
-  const [isLocationShown, setIsLocationShown] = useState(false);
+  const [isLocationShown, setIsLocationShown] = useState(true);
 
   useEffect(() => {
     const updateDistance = async () => {
@@ -134,15 +134,6 @@ export default function LocationWindow({
       }
     }
     setIsLocationShown((prev) => !prev);
-  };
-
-  const getDistance = async () => {
-    const lat1 = location?.latitude || 0;
-    const lon1 = location?.longitude || 0;
-    const currentLocation = await getLocation();
-    const lat2 = currentLocation?.coords.latitude || 0;
-    const lon2 = currentLocation?.coords.longitude || 0;
-    return getDistanceFrom(lat1, lon1, lat2, lon2);
   };
 
   return (

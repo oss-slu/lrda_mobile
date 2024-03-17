@@ -84,6 +84,24 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!location?.latitude && !location?.longitude) {
+      grabLocation();
+    }
+  }, []);
+
+  const grabLocation = async () => {
+    try {
+      const userLocation = await Location.getCurrentPositionAsync({});
+      setLocation({
+        latitude: userLocation.coords.latitude,
+        longitude: userLocation.coords.longitude,
+      });
+    } catch (error) {
+      console.error("Error grabbing location:", error);
+    }
+  };
+
   const handleCursorPosition = (position) => {
     if (scrollViewRef.current && keyboardOpen) {
       const editorBottomY = position.absoluteY + position.height;
@@ -129,13 +147,6 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
       }, 500);
     }
   };
-
-  // const onEditorContentSizeChange = (e) => {
-  //   if (scrollViewRef.current) {
-  //     scrollViewRef.current.scrollToEnd({ animated: true });
-  //   }
-  // };
-  
 
   const handleShareButtonPress = () => {
     setIsPublished(!isPublished);  // Toggle the share status
@@ -195,17 +206,9 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     }
     else {
       try {
-        const userLocation = await Location.getCurrentPositionAsync({});
         const userID = await user.getId();
-        let latitude, longitude;
-        
-        if (Platform.OS === 'ios') {
-          latitude = location?.latitude.toString();
-          longitude = location?.longitude.toString();
-        } else if (Platform.OS === 'android') {
-          latitude = userLocation.coords.latitude.toString();
-          longitude = userLocation.coords.longitude.toString();
-        }
+        const latitude = location?.latitude.toString();
+        const longitude = location?.longitude.toString();
         
         setTime(new Date()); //force a fresh time date grab on note save
 
