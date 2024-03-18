@@ -31,11 +31,13 @@ const PhotoScroller = forwardRef(
       setNewMedia,
       active,
       insertImageToEditor,
+      addVideoToEditor,
     }: {
       newMedia: Media[];
       setNewMedia: React.Dispatch<React.SetStateAction<Media[]>>;
       active: Boolean;
       insertImageToEditor: Function;
+      addVideoToEditor: Function;
     },
     ref
   ) => {
@@ -118,6 +120,7 @@ const PhotoScroller = forwardRef(
           duration: "0:00",
         });
         setNewMedia([...newMedia, newMediaItem]);
+        addVideoToEditor(uploadedUrl);
       }
     };
 
