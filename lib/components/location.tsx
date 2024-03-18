@@ -27,12 +27,12 @@ async function getLocation() {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
       console.log("Permission to access location was denied");
-      return null; // Return null to indicate that location access is denied
+      return null;
     }
     return await Location.getCurrentPositionAsync({});
   } catch (error) {
     console.error("Error getting location:", error);
-    return null; // Return null to indicate an error occurred while getting location
+    return null;
   }
 }
 
@@ -73,6 +73,7 @@ export default function LocationWindow({
     location?.longitude?.toString() || ""
   );
   const [distanceFromEvent, setDistanceFromEvent] = useState<string>("");
+  const [isLocationShown, setIsLocationShown] = useState(true);
 
   useEffect(() => {
     const updateDistance = async () => {
@@ -103,33 +104,36 @@ export default function LocationWindow({
     setLongitude(location?.longitude?.toString() || "");
   }, [location]);
 
-  const setShownLocation = async () => {
-    try {
-      let userLocation = await getLocation();
-  
-      if (userLocation?.coords?.latitude !== undefined && userLocation?.coords?.longitude !== undefined) {
-        setLocation({
-          latitude: userLocation.coords.latitude,
-          longitude: userLocation.coords.longitude,
-        });
-  
-        setLatitude(userLocation.coords.latitude.toString());
-        setLongitude(userLocation.coords.longitude.toString());
-      } else {
-        console.log("Location data is not available.");
+  const toggleLocationVisibility = async () => {
+    if (isLocationShown) {
+      // Hide Location
+      setLocation({
+        latitude: 0,
+        longitude: 0,
+      });
+      setLatitude("0");
+      setLongitude("0");
+    } else {
+      // Show Location
+      try {
+        let userLocation = await getLocation();
+    
+        if (userLocation?.coords?.latitude !== undefined && userLocation?.coords?.longitude !== undefined) {
+          setLocation({
+            latitude: userLocation.coords.latitude,
+            longitude: userLocation.coords.longitude,
+          });
+    
+          setLatitude(userLocation.coords.latitude.toString());
+          setLongitude(userLocation.coords.longitude.toString());
+        } else {
+          console.log("Location data is not available.");
+        }
+      } catch (error) {
+        console.error("Error setting location:", error);
       }
-    } catch (error) {
-      console.error("Error setting location:", error);
     }
-  };
-  
-  const getDistance = async () => {
-    const lat1 = location?.latitude || 0;
-    const lon1 = location?.longitude || 0;
-    const currentLocation = await getLocation();
-    const lat2 = currentLocation?.coords.latitude || 0;
-    const lon2 = currentLocation?.coords.longitude || 0;
-    return getDistanceFrom(lat1, lon1, lat2, lon2);
+    setIsLocationShown((prev) => !prev);
   };
 
   return (
@@ -151,7 +155,10 @@ export default function LocationWindow({
         value={latitude}
         onChangeText={handleLatitudeChange}
       />
-      <Button title="Use Current Location" onPress={setShownLocation} />
+      <Button
+        title={isLocationShown ? "Hide Location" : "Show Location"}
+        onPress={toggleLocationVisibility}
+      />
     </View>
   );
 }
