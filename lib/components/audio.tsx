@@ -9,8 +9,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { AudioType } from "../models/media_class";
 import Slider from "@react-native-community/slider";
-// Checkout Audio for expo av!
-import { Audio} from "expo-av";
+import { Audio } from "expo-av";
 import uuid from "react-native-uuid";
 import { uploadAudio } from "../utils/S3_proxy";
 
@@ -38,7 +37,9 @@ function AudioContainer({
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [sliderValues, setSliderValues] = useState<number[]>([]);
   const [pausedPosition, setPausedPosition] = useState<number | null>(null);
-  const [pausedAudioIndex, setPausedAudioIndex] = useState<number | null>(null);
+  const [pausedAudioIndex, setPausedAudioIndex] = useState<number | null>(
+    null
+  );
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -76,7 +77,6 @@ function AudioContainer({
     }
   };
 
-
   async function startRecording() {
     setIsRecording(true);
     try {
@@ -87,22 +87,24 @@ function AudioContainer({
           playsInSilentModeIOS: true,
           allowsRecordingIOS: true,
         });
-        
-        const { recording } = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
 
-          setRecording(recording);
-        } else {
-          alert("Please grant permission to app to access microphone");
-        }
-      } catch (err) {
-        console.error("Failed to start recording", err);
+        const { recording } = await Audio.Recording.createAsync(
+          Audio.RecordingOptionsPresets.HIGH_QUALITY
+        );
+
+        setRecording(recording);
+      } else {
+        alert("Please grant permission to the app to access the microphone");
       }
       console.log("Start recording");
+    } catch (err) {
+      console.error("Failed to start recording", err);
     }
+  }
 
-   async function stopRecording() {
+  async function stopRecording() {
     setIsRecording(false);
-    
+
     await Audio.setAudioModeAsync({
       allowsRecordingIOS: false,
       playsInSilentModeIOS: true,
@@ -144,7 +146,7 @@ function AudioContainer({
       console.error("Failed to stop recording", err);
     }
   }
-  
+
   async function playAudio(index: number) {
     console.log("entered audio player");
     const current = newAudio[index];
@@ -160,9 +162,8 @@ function AudioContainer({
       const newPlayer = new Audio.Sound();
 
       console.log("play uri===", current.getUri());
-      await newPlayer.loadAsync({ uri:current.getUri() });
+      await newPlayer.loadAsync({ uri: current.getUri() });
       newPlayer.setOnPlaybackStatusUpdate((status) => {
-
         setIsLoaded(status.isLoaded);
 
         if (status.didJustFinish) {
@@ -262,23 +263,25 @@ function AudioContainer({
           width: "100%",
         }}
       >
-        <Ionicons name={"mic-outline"} size={60} color="#111111" />
+        {isRecording ? (
+          <Ionicons name={"mic-outline"} size={60} color="red" />
+        ) : (
+          <Ionicons name={"mic-outline"} size={60} color="#111111" />
+        )}
         <Text style={{ fontSize: 24, fontWeight: "600" }}>Recordings</Text>
         {isRecording ? (
-
-          <TouchableOpacity 
-            onPress={ () => stopRecording() }
+          <TouchableOpacity
+            onPress={() => stopRecording()}
             testID="stopRecordingButton"
           >
-          <Ionicons name={"stop-circle-outline"} size={45} color="#111111" />
+            <Ionicons name={"stop-circle-outline"} size={45} color="#111111" />
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity 
-            onPress={ () => startRecording() }
+          <TouchableOpacity
+            onPress={() => startRecording()}
             testID="startRecordingButton"
           >
             <Ionicons name={"radio-button-on-outline"} size={45} color="red" />
-
           </TouchableOpacity>
         )}
       </View>
@@ -334,7 +337,7 @@ function AudioContainer({
                   <Ionicons name={"pause-outline"} size={25} color="#111111" />
                 </TouchableOpacity>
               ) : (
-                <TouchableOpacity onPress={() => playAudio(index)}testID="playButton">
+                <TouchableOpacity onPress={() => playAudio(index)} testID="playButton">
                   <Ionicons name={"play-outline"} size={25} color="#111111" />
                 </TouchableOpacity>
               )}

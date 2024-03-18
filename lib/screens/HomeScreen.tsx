@@ -441,6 +441,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
               images: 
                 item.media.map((mediaItem: { uri: any; }) => ({ uri: mediaItem.uri }))
             };
+            console.log(formattedNote.description);
             setSelectedNote(formattedNote);
             setModalVisible(true);
           }

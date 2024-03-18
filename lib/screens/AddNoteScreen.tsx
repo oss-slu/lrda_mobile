@@ -16,6 +16,7 @@ import * as Location from 'expo-location';
 import { Note, AddNoteScreenProps } from "../../types";
 import ToastMessage from 'react-native-toast-message';
 import PhotoScroller from "../components/photoScroller";
+import { getThumbnail } from "../utils/S3_proxy";
 import { User } from "../models/user_class";
 import { Ionicons } from "@expo/vector-icons";
 import { Media, AudioType } from "../models/media_class";
@@ -30,6 +31,7 @@ import {
   actions,
 } from "react-native-pell-rich-editor";
 import NotePageStyles from "../../styles/pages/NoteStyles";
+import { useTheme } from "../components/ThemeProvider";
 
 const user = User.getInstance();
 
@@ -57,6 +59,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     longitude: number;
   } | null>(null);
 
+  const { theme } = useTheme();
+
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -83,6 +87,22 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
       keyboardDidHideListener.remove();
     };
   }, []);
+
+  useEffect(() => {
+    checkLocationPermission();
+  }, []);
+
+  const grabLocation = async () => {
+    try {
+      const userLocation = await Location.getCurrentPositionAsync({});
+      setLocation({
+        latitude: userLocation.coords.latitude,
+        longitude: userLocation.coords.longitude,
+      });
+    } catch (error) {
+      console.error("Error grabbing location:", error);
+    }
+  };
 
   const handleCursorPosition = (position) => {
     if (scrollViewRef.current && keyboardOpen) {
@@ -130,12 +150,38 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     }
   };
 
-  // const onEditorContentSizeChange = (e) => {
-  //   if (scrollViewRef.current) {
-  //     scrollViewRef.current.scrollToEnd({ animated: true });
-  //   }
-  // };
+  const addVideoToEditor = async (videoUri: string) => {
+    try {
+      // Fetch the thumbnail URI
+      const thumbnailUri = await getThumbnail(videoUri);
   
+      const videoHtml = `
+        <video width="320" height="240" controls poster="${thumbnailUri}" id="videoElement">
+          <source src="${videoUri}" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+        <p><a href="${videoUri}" target="_blank">${videoUri}</a></p> <!-- Make the URI clickable -->
+        <script>
+          document.getElementById('videoElement').addEventListener('play', function(e) {
+            // Preventing the rich text editor from gaining focus when the video is played
+            e.preventDefault();
+            // Assuming you have a way to send a message to your React Native environment
+            window.ReactNativeWebView.postMessage('videoPlayed');
+          });
+        </script>
+      `;
+  
+      richTextRef.current?.insertHTML(videoHtml);
+  
+      setTimeout(() => {
+        if (scrollViewRef.current) {
+          scrollViewRef.current.scrollToEnd({ animated: true });
+        }
+      }, 500); 
+    } catch (error) {
+      console.error("Error adding video with thumbnail: ", error);
+    }
+  }
 
   const handleShareButtonPress = () => {
     setIsPublished(!isPublished);  // Toggle the share status
@@ -149,25 +195,34 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const checkLocationPermission = async () => {
     try {
       let { status } = await Location.getForegroundPermissionsAsync();
-
+  
       if (status !== 'granted') {
         // Location permission not granted, request it
         const requestResult = await Location.requestForegroundPermissionsAsync();
-
+  
         if (requestResult.status === 'denied') {
-          // Location permission denied after requesting, request again
-          const requestAgainResult = await Location.requestForegroundPermissionsAsync();
-          status = requestAgainResult.status;
-        }
-
-        if (status !== 'granted') {
-          // Location permission still not granted
-          Alert.alert("Location permission denied", "Please grant location permission to save the note or remove the title to not save.");
+          // Location permission denied after requesting, show alert and return false
+          Alert.alert(
+            "Location permission denied",
+            "Please grant location permission to save the note.",
+            [
+              {
+                text: "Delete Note",
+                onPress: () => navigation.goBack(), // Delete the note and go back
+                style: "destructive",
+              },
+              { text: "OK", onPress: () => console.log("OK Pressed") },
+            ],
+            { cancelable: false }
+          );
           return false;
         }
+  
+        // Location permission not yet granted
+        return false;
       }
-
-      // Location permission already granted or granted after request
+  
+      // Location permission already granted
       return true;
     } catch (error) {
       console.error("Error checking location permission:", error);
@@ -176,47 +231,33 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   };
 
   const saveNote = async () => {
-    const locationPermissionGranted = await checkLocationPermission();
-    if (titleText === "") {
+    if (titleText.trim() === "") {
       Alert.alert(
-        "Title is empty",
-        "Please enter a title to save the note.",
-      );
-      return;
-    }
-    if (!locationPermissionGranted) {
-      Alert.alert(
-        "Delete Note",
-        "Location permissions required to save. Are you sure you want to delete this note?",
+        "Empty Title",
+        "Please enter a title to save the note or delete the note.",
         [
-          {
-            text: "Cancel",
-            onPress: () => console.log("Cancel Pressed"),
-            style: "cancel"
-          },
-          {
-            text: "Delete",
-            onPress: () => navigation.goBack()
-          }
+          { text: "Delete Note", onPress: () => navigation.goBack() },
+          { text: "OK", onPress: () => console.log("OK Pressed") }
         ],
         { cancelable: false }
       );
       return;
     }
-    else {
+  
+    const locationPermissionGranted = await checkLocationPermission();
+    if (!locationPermissionGranted) {
+      return; // Stop saving the note if location permission is not granted
+    } else {
       try {
-        const userLocation = await Location.getCurrentPositionAsync({});
         const userID = await user.getId();
-        let latitude, longitude;
-        
-        if (Platform.OS === 'ios') {
-          latitude = userLocation.coords.latitude.toString();
-          longitude = userLocation.coords.longitude.toString();
-        } else if (Platform.OS === 'android') {
-          latitude = userLocation.coords.latitude.toString();
-          longitude = userLocation.coords.longitude.toString();
-        }
-        
+  
+        // Grab user's current location
+        const userLocation = await Location.getCurrentPositionAsync({});
+        const latitude = userLocation.coords.latitude.toString();
+        const longitude = userLocation.coords.longitude.toString();
+  
+        setTime(new Date()); // force a fresh time date grab on note save
+  
         const newNote = {
           title: titleText,
           text: bodyText,
@@ -230,10 +271,10 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           time: time,
         };
         const response = await ApiService.writeNewNote(newNote);
-
+  
         const obj = await response.json();
         const id = obj["@id"];
-
+  
         route.params.refreshPage();
         navigation.goBack();
       } catch (error) {
@@ -241,6 +282,9 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
       }
     }
   };
+
+  
+  
 
   return (
       <SafeAreaView style={{ flex: 1 }}>
@@ -282,7 +326,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
                 setIsLocation(false);
                 setIsTime(false);
               }}
-              testID="images-icon"
+              data-testid="images-icon"
             >
               <Ionicons name="images-outline" size={30} color={NotePageStyles().saveText.color} />
             </TouchableOpacity>
@@ -332,7 +376,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             </TouchableOpacity>
         </View>
         <View style={NotePageStyles().container }>
-          <PhotoScroller active={viewMedia} newMedia={newMedia} setNewMedia={setNewMedia} insertImageToEditor={addImageToEditor} />
+          <PhotoScroller data-testid="photoScroller" active={viewMedia} newMedia={newMedia} setNewMedia={setNewMedia} insertImageToEditor={addImageToEditor} addVideoToEditor={addVideoToEditor}/>
           {viewAudio && (
             <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
           )}
@@ -431,7 +475,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           style={{ flex: 1 }}
           keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 20}
         >
-          <View style={[NotePageStyles().container, { flex: 1 }]}>
+          <View style={[NotePageStyles().editorContainer, { flex: 1 }]}>
             <ScrollView
               nestedScrollEnabled={true}
               showsVerticalScrollIndicator={false}
@@ -441,13 +485,14 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             >
               <RichEditor data-testid="RichEditor"
                 ref={(r) => (richTextRef.current = r)}
-                style={{...NotePageStyles().input, flex: 1, minHeight: 650 }}
+                style={[NotePageStyles().editor, {flex: 1, minHeight: 650 }]}
                 editorStyle={{
                   contentCSSText: `
                     position: absolute; 
                     top: 0; right: 0; bottom: 0; left: 0;
-                    color: theme.text;
                   `,
+                  backgroundColor: theme.primaryColor,
+                  color: theme.text,
                 }}
                 autoCorrect={true}
                 placeholder="Write your note here"
@@ -466,3 +511,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
 };
 
 export default AddNoteScreen;
+
+export function addVideoToEditor(mockVideoUri: string) {
+  throw new Error('Function not implemented.');
+}
