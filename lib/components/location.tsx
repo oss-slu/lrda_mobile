@@ -148,12 +148,14 @@ export default function LocationWindow({
         style={styles.input}
         value={longitude}
         onChangeText={handleLongitudeChange}
+        editable={false}
       />
       <Text style={styles.label}>Latitude</Text>
       <TextInput
         style={styles.input}
         value={latitude}
         onChangeText={handleLatitudeChange}
+        editable={false}
       />
       <Button
         title={isLocationShown ? "Hide Location" : "Show Location"}

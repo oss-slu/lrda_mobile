@@ -1,65 +1,34 @@
-import React, { useState, useRef, useEffect } from "react";
-import {
-  Animated,
-  Easing,
-  View,
-  Text,
-  StyleSheet,
-  Dimensions,
-  TouchableOpacity,
-} from "react-native";
-import Onboarding from "react-native-onboarding-swiper";
-import LottieView from "lottie-react-native";
-import { setItem } from "../utils/async_storage";
+import React from 'react';
+import { StyleSheet, Dimensions, TouchableOpacity, Text } from 'react-native';
+import Onboarding from 'react-native-onboarding-swiper';
+import { Video } from 'expo-av';
+import { setItem } from '../utils/async_storage';
 
-const { width, height } = Dimensions.get("window");
+const { width, height } = Dimensions.get('window');
 
-type OnboardingProps = {
-  navigation: any;
-};
-
-const OnboardingScreen: React.FC<OnboardingProps> = ({ navigation }) => {
+const OnboardingScreen = ({ navigation }) => {
   const handleDone = () => {
-    navigation.navigate("Login");
-    setItem("onboarded", "1");
+    navigation.navigate('Login');
+    setItem('onboarded', '1');
   };
 
-  const doneButton = ({ ...props }) => {
-    return (
-      <TouchableOpacity style={styles.doneButton} {...props}>
-        <Text style={styles.doneButtonText}>Done</Text>
-      </TouchableOpacity>
-    );
-  };
+  const doneButton = ({ ...props }) => (
+    <TouchableOpacity style={styles.doneButton} {...props}>
+      <Text style={styles.doneButtonText}>Done</Text>
+    </TouchableOpacity>
+  );
 
-  const skipButton = ({ ...props }) => {
-    return (
-      <TouchableOpacity style={styles.skipButton} {...props}>
-        <Text style={styles.buttonText}>Skip</Text>
-      </TouchableOpacity>
-    );
-  };
+  const skipButton = ({ ...props }) => (
+    <TouchableOpacity style={styles.skipButton} {...props}>
+      <Text style={styles.buttonText}>Skip</Text>
+    </TouchableOpacity>
+  );
 
-  const nextButton = ({ ...props }) => {
-    return (
-      <TouchableOpacity style={styles.nextButton} {...props}>
-        <Text style={styles.buttonText}>Next</Text>
-      </TouchableOpacity>
-    );
-  };
-
-  const [lottieProgress] = useState(new Animated.Value(0));
-
-  useEffect(() => {
-    Animated.loop(
-      Animated.timing(lottieProgress, {
-        toValue: 1,
-        duration: 5000,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      })
-    ).start();
-  }, []);
+  const nextButton = ({ ...props }) => (
+    <TouchableOpacity style={styles.nextButton} {...props}>
+      <Text style={styles.buttonText}>Next</Text>
+    </TouchableOpacity>
+  );
 
   return (
     <Onboarding
@@ -68,49 +37,71 @@ const OnboardingScreen: React.FC<OnboardingProps> = ({ navigation }) => {
       DoneButtonComponent={doneButton}
       SkipButtonComponent={skipButton}
       NextButtonComponent={nextButton}
-      titleStyles={styles.title}
-      subTitleStyles={styles.subtitle}
-      containerStyles={{ paddingHorizontal: 15 }}
       pages={[
         {
-          backgroundColor: "#a7f3d0",
+          backgroundColor: '#87ceeb',
           image: (
-            <LottieView
-              progress={lottieProgress}
-              style={{ width: width * 0.5, height: width }}
-              source={require("../../assets/animations/achieve.json")}
-              renderMode={"SOFTWARE"}
+            <Video
+              source={require('../../assets/videos/v3_1.mp4')}
+              style={{ width, height }}
+              resizeMode="cover"
+              shouldPlay
+              isLooping
+              isMuted={true}
             />
           ),
-          title: "The Ethnographer's Companion",
-          subtitle:
-            "Seamlessly integrate audio, video, and images into your notes to create rich, multi-dimensional observations.",
         },
         {
-          backgroundColor: "#fef3c7",
+          backgroundColor: '#ff7f50',
           image: (
-            <LottieView
-              progress={lottieProgress}
-              style={{ width: width * 0.3, height: width }}
-              source={require("../../assets/animations/work.json")}
+            <Video
+              source={require('../../assets/videos/v1.mp4')}
+              style={{ width, height }}
+              resizeMode="cover"
+              shouldPlay
+              isLooping
+              isMuted={true}
             />
           ),
-          title: "Privacy Meets Collaboration",
-          subtitle:
-            "Maintain control over your sensitive data while sharing insights with fellow researchers worldwide.",
         },
         {
-          backgroundColor: "#a78bfa",
+          backgroundColor: '#ffe135',
           image: (
-            <LottieView
-              progress={lottieProgress}
-              style={{ width: width * 0.3, height: width, marginLeft: 25 }}
-              source={require("../../assets/animations/boost.json")}
+            <Video
+              source={require('../../assets/videos/v4_1.mp4')}
+              style={{ width, height }}
+              resizeMode="cover"
+              shouldPlay
+              isLooping
+              isMuted={true}
             />
           ),
-          title: "A World of Ethnographic Insight",
-          subtitle:
-            "Explore diverse perspectives through a rich collection of shared ethnographic notes.",
+        },
+        {
+          backgroundColor: '#ffa280',
+          image: (
+            <Video
+              source={require('../../assets/videos/v2.mp4')}
+              style={{ width, height }}
+              resizeMode="cover"
+              shouldPlay
+              isLooping
+              isMuted={true}
+            />
+          ),
+        },
+        {
+          backgroundColor: '#90ee90',
+          image: (
+            <Video
+              source={require('../../assets/videos/v5_2.mp4')}
+              style={{ width, height}}
+              resizeMode="cover"
+              shouldPlay
+              isLooping
+              isMuted={true}
+            />
+          ),
         },
       ]}
       transitionAnimationDuration={300}
@@ -121,75 +112,49 @@ const OnboardingScreen: React.FC<OnboardingProps> = ({ navigation }) => {
 const styles = StyleSheet.create({
   title: {
     fontSize: 24,
-    fontWeight: "bold",
-    color: "#333",
-    textAlign: "center",
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    color: "#666",
-    textAlign: "center",
-    paddingHorizontal: 10, // To prevent the text from touching the screen edge
+    color: '#666',
+    textAlign: 'center',
+    paddingHorizontal: 10,
   },
   skipButton: {
     paddingVertical: 10,
     paddingHorizontal: 20,
-    backgroundColor: "#ccc", // Light grey
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 5, // Shadow for Android
+    backgroundColor: '#ccc',
     borderRadius: 30,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   nextButton: {
     paddingVertical: 10,
     paddingHorizontal: 20,
-    backgroundColor: "#4A90E2", // Same blue as doneButton
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 5, // Shadow for Android
+    backgroundColor: '#4A90E2',
     borderRadius: 30,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  buttonText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "white",
-    paddingHorizontal: 20,
-  },
-  lottie: {
-    width: width * 0.9,
-    height: width,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   doneButton: {
     paddingVertical: 10,
     paddingHorizontal: 20,
-    backgroundColor: "#4A90E2", // A shade of blue
-    borderRadius: 30, // Rounded corners
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 5, // Shadow for Android
-    alignItems: "center", // Aligning text in the center
-    justifyContent: "center", // Aligning text in the center
+    backgroundColor: '#4A90E2',
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   doneButtonText: {
-    color: "white", // White text color
-    fontWeight: "bold", // Bold font
-    fontSize: 16, // Font size
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
 
