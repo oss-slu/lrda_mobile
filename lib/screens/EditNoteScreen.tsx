@@ -198,8 +198,11 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   }
   
   const handleSaveNote = async () => {
+    // Displaying uninteractable alert
+    Alert.alert("Please wait", "Updating the note, please wait...");
+  
     try {
-      const editedNote: Note = {
+      const editedNote = {
         id: note.id,
         title,
         text,
@@ -212,15 +215,16 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         time,
         tags,
       };
-
+  
       await ApiService.overwriteNote(editedNote);
-
+  
       onSave(editedNote);
       navigation.goBack();
     } catch (error) {
       console.error("Error updating the note:", error);
     }
   };
+  
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
