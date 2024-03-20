@@ -15,59 +15,45 @@ export default function LoadingImage({
   imageURI,
   type,
   isImage,
-  height = 100,
-  width = 100,
 }: LoadingImageProps) {
   const [isLoading, setIsLoading] = useState(true);
+  const [dimensions, setDimensions] = useState({ width: 100, height: 100 }); // Default dimensions
+
+  const handleImageLoaded = (event: { nativeEvent: { source: { width: any; height: any; }; }; }) => {
+    const { width, height } = event.nativeEvent.source;
+    setIsLoading(false);
+    setDimensions({ width, height });
+  }
 
   if (isImage && imageURI !== "") {
     return (
       <View
         style={{
-          width: width,
-          height: height,
+          ...dimensions,
           justifyContent: "center",
           alignItems: "center",
         }}
       >
         {isLoading && (
           <Placeholder
-            style={{ top: width / 2 }}
             Animation={Progressive}
             Left={() => (
-              <PlaceholderMedia size={width} style={{ borderRadius: 10 }} />
+              <PlaceholderMedia size={Math.min(dimensions.width, dimensions.height)} style={{ borderRadius: 10 }} />
             )}
           />
         )}
-        {type === "video" ? (
-          <View
-            style={{
-              width: width,
-              height: height,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Image
-              style={[styles.preview, { width: width, height: height }]}
-              source={{ uri: imageURI }}
-              onLoadEnd={() => setIsLoading(false)}
-            />
-            <View style={styles.playUnderlay}>
-              <Ionicons
-                name="play-outline"
-                size={24}
-                color="#dfe5e8"
-                style={styles.icon}
-              />
-            </View>
-          </View>
-        ) : (
-          <View>
-            <Image
-              style={[styles.preview, { width: width, height: height }]}
-              source={{ uri: imageURI }}
-              onLoadEnd={() => setIsLoading(false)}
+        <Image
+          style={[styles.preview, dimensions]}
+          source={{ uri: imageURI }}
+          onLoad={handleImageLoaded}
+        />
+        {type === "video" && (
+          <View style={[styles.playUnderlay, { width: 30, height: 30 }]}>
+            <Ionicons
+              name="play-outline"
+              size={24}
+              color="#fff"
+              style={styles.icon}
             />
           </View>
         )}
@@ -77,23 +63,21 @@ export default function LoadingImage({
     return (
       <View
         style={{
-          width: width,
-          height: height,
+          ...dimensions,
           justifyContent: "center",
           alignItems: "center",
         }}
       >
         {isLoading && (
           <Placeholder
-            style={{ top: width / 2 }}
             Animation={Progressive}
             Left={() => (
-              <PlaceholderMedia size={width} style={{ borderRadius: 10 }} />
+              <PlaceholderMedia size={Math.min(dimensions.width, dimensions.height)} style={{ borderRadius: 10 }} />
             )}
           />
         )}
         <Image
-          style={[styles.preview, { width: width, height: height }]}
+          style={[styles.preview, dimensions]}
           source={require("./public/noPreview.png")}
           onLoadEnd={() => setIsLoading(false)}
         />
@@ -105,21 +89,16 @@ export default function LoadingImage({
 const styles = StyleSheet.create({
   preview: {
     borderRadius: 10,
-    alignContent: "center",
-    alignSelf: "center",
   },
   icon: {
     position: "absolute",
     alignSelf: "center",
-    marginLeft: 10,
-    marginTop: 2,
   },
   playUnderlay: {
-    width: 30,
-    height: 30,
     borderRadius: 30,
     backgroundColor: "rgba(5,5,5,0.5)",
     position: "absolute",
-    alignSelf: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
