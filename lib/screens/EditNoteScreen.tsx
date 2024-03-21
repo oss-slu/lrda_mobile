@@ -147,24 +147,49 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     }
   };
   
-  const addImageToEditor = (imageUri: string) => {
+  const shimmerStyle = `
+    @keyframes shimmer {
+      0% { background-position: -20px; }
+      100% { background-position: 100%; }
+    }
+    .shimmer {
+      display: inline-block;
+      background: #f6f7f8;
+      background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+      background-repeat: no-repeat;
+      background-size: 80px 104px;
+      animation: shimmer 1s linear infinite;
+      width: 100%; /* Adjust based on your needs */
+      height: 150px; /* Adjust based on your needs or aspect ratio */
+    }
+  `;
+
+  const addImageToEditor = (imageUri: string, placeholderId: any) => {
     const customStyle = `
       max-width: 50%;
       height: auto; /* Maintain aspect ratio */
       /* Additional CSS properties for sizing */
     `;
+    
+    // Load the image first outside the editor, then replace the placeholder
+    const image = new Image();
+    image.onload = () => {
+      // Once the image is loaded, replace the placeholder with this img tag
+      const imgTag = `<img src="${imageUri}" style="${customStyle}" />`;
+      const script = `document.getElementById('${placeholderId}').outerHTML = '${imgTag}';`;
+      
+      richTextRef.current?.insertHTML(script); // Or any method to execute script within the editor
+    };
+    image.src = imageUri;
+  };
+
+  const addShimmerEffectPlaceholder = () => {
+    const shimmerPlaceholderId = `image-placeholder-${Date.now()}`; // Unique ID for the placeholder
+    const shimmerDiv = `<div id="${shimmerPlaceholderId}" class="shimmer"></div>&nbsp;<br><br>`;
   
-    // Include an extra line break character after the image tag
-    const imgTag = `<img src="${imageUri}" style="${customStyle}" />&nbsp;<br><br>`;
+    richTextRef.current?.insertHTML(shimmerDiv);
   
-    richTextRef.current?.insertHTML(imgTag);
-  
-    // Add a delay before updating the text state
-    setTimeout(() => {
-      if (scrollViewRef.current) {
-        scrollViewRef.current.scrollToEnd({ animated: true });
-      }
-    }, 500); // Adjust the delay as needed
+    return shimmerPlaceholderId;
   };
 
   const addVideoToEditor = async (videoUri: string) => {

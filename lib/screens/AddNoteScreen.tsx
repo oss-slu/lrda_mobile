@@ -221,7 +221,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
       }
     }
     if (!locationPermissionGranted) {
-      return; // Stop saving the note if location permission is not granted
+      return; 
     }
     else {
       Alert.alert("Please wait", "Please wait while the note saves");
