@@ -7,22 +7,32 @@ interface LoadingImageProps {
   imageURI: string;
   type: string;
   isImage: boolean;
-  height?: number;
-  width?: number;
+  useCustomDimensions?: boolean,
+  customWidth?: number;
+  customHeight?: number;
 }
 
 export default function LoadingImage({
   imageURI,
   type,
   isImage,
+  useCustomDimensions = false,
+  customWidth = 100,
+  customHeight = 100,
+
 }: LoadingImageProps) {
   const [isLoading, setIsLoading] = useState(true);
-  const [dimensions, setDimensions] = useState({ width: 100, height: 100 }); // Default dimensions
+  const initialDimensions = useCustomDimensions
+    ? { width: customWidth, height: customHeight }
+    : { width: 100, height: 100 };
+  const [dimensions, setDimensions] = useState(initialDimensions);
 
   const handleImageLoaded = (event: { nativeEvent: { source: { width: any; height: any; }; }; }) => {
-    const { width, height } = event.nativeEvent.source;
+    if (!useCustomDimensions) {
+      const { width, height } = event.nativeEvent.source;
+      setDimensions({ width, height });
+    }
     setIsLoading(false);
-    setDimensions({ width, height });
   }
 
   if (isImage && imageURI !== "") {

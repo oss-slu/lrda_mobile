@@ -224,7 +224,6 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
       return; // Stop saving the note if location permission is not granted
     }
     else {
-      // Displaying uninteractable alert
       Alert.alert("Please wait", "Please wait while the note saves");
       
       try {
@@ -264,7 +263,6 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
       }
     }
   };
-  
 
   return (
       <SafeAreaView style={{ flex: 1 }}>
