@@ -19,7 +19,6 @@ export default function LoadingImage({
   useCustomDimensions = false,
   customWidth = 100,
   customHeight = 100,
-
 }: LoadingImageProps) {
   const [isLoading, setIsLoading] = useState(true);
   const initialDimensions = useCustomDimensions

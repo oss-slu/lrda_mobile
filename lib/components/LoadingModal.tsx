@@ -9,8 +9,7 @@ const LoadingModal = ({ visible }) => (
   >
     <View style={styles.centeredView}>
       <View style={styles.modalView}>
-        <Text>Please wait</Text>
-        <Text>Updating the note, please wait...</Text>
+        <Text>Please wait, saving changes to the note</Text>
       </View>
     </View>
   </Modal>

@@ -171,20 +171,18 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       /* Additional CSS properties for sizing */
     `;
     
-    // Load the image first outside the editor, then replace the placeholder
     const image = new Image();
     image.onload = () => {
-      // Once the image is loaded, replace the placeholder with this img tag
       const imgTag = `<img src="${imageUri}" style="${customStyle}" />`;
       const script = `document.getElementById('${placeholderId}').outerHTML = '${imgTag}';`;
       
-      richTextRef.current?.insertHTML(script); // Or any method to execute script within the editor
+      richTextRef.current?.insertHTML(script);
     };
     image.src = imageUri;
   };
 
   const addShimmerEffectPlaceholder = () => {
-    const shimmerPlaceholderId = `image-placeholder-${Date.now()}`; // Unique ID for the placeholder
+    const shimmerPlaceholderId = `image-placeholder-${Date.now()}`;
     const shimmerDiv = `<div id="${shimmerPlaceholderId}" class="shimmer"></div>&nbsp;<br><br>`;
   
     richTextRef.current?.insertHTML(shimmerDiv);
@@ -194,7 +192,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
 
   const addVideoToEditor = async (videoUri: string) => {
     try {
-      // Fetch the thumbnail URI
       const thumbnailUri = await getThumbnail(videoUri);
   
       const videoHtml = `
@@ -316,6 +313,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             setNewMedia={setMedia}
             insertImageToEditor={addImageToEditor}
             addVideoToEditor={addVideoToEditor}
+            addShimmer={addShimmerEffectPlaceholder}
           />
           {viewAudio && (
             <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
