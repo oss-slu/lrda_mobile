@@ -32,6 +32,7 @@ import {
 } from "react-native-pell-rich-editor";
 import NotePageStyles from "../../styles/pages/NoteStyles";
 import { useTheme } from "../components/ThemeProvider";
+import LoadingModal from "../components/LoadingModal";
 
 const user = User.getInstance();
 
@@ -53,6 +54,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const scrollViewRef = useRef<ScrollView | null>(null);
   const [initialLoad, setInitialLoad] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [promptedMissingTitle, setPromptedMissingTitle] = useState(false);
   const [location, setLocation] = useState<{
     latitude: number;
@@ -88,22 +90,6 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     };
   }, []);
 
-  useEffect(() => {
-    checkLocationPermission();
-  }, []);
-
-  const grabLocation = async () => {
-    try {
-      const userLocation = await Location.getCurrentPositionAsync({});
-      setLocation({
-        latitude: userLocation.coords.latitude,
-        longitude: userLocation.coords.longitude,
-      });
-    } catch (error) {
-      console.error("Error grabbing location:", error);
-    }
-  };
-
   const handleCursorPosition = (position) => {
     if (scrollViewRef.current && keyboardOpen) {
       const editorBottomY = position.absoluteY + position.height;
@@ -130,24 +116,49 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     }
   };
 
-  const addImageToEditor = (imageUri: string) => {
+  const shimmerStyle = `
+    @keyframes shimmer {
+      0% { background-position: -20px; }
+      100% { background-position: 100%; }
+    }
+    .shimmer {
+      display: inline-block;
+      background: #f6f7f8;
+      background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+      background-repeat: no-repeat;
+      background-size: 80px 104px;
+      animation: shimmer 1s linear infinite;
+      width: 100%; /* Adjust based on your needs */
+      height: 150px; /* Adjust based on your needs or aspect ratio */
+    }
+  `;
+
+  const addImageToEditor = (imageUri: string, placeholderId: any) => {
     const customStyle = `
       max-width: 50%;
       height: auto; /* Maintain aspect ratio */
       /* Additional CSS properties for sizing */
     `;
+    
+    // Load the image first outside the editor, then replace the placeholder
+    const image = new Image();
+    image.onload = () => {
+      // Once the image is loaded, replace the placeholder with this img tag
+      const imgTag = `<img src="${imageUri}" style="${customStyle}" />`;
+      const script = `document.getElementById('${placeholderId}').outerHTML = '${imgTag}';`;
+      
+      richTextRef.current?.insertHTML(script); // Or any method to execute script within the editor
+    };
+    image.src = imageUri;
+  };
+
+  const addShimmerEffectPlaceholder = () => {
+    const shimmerPlaceholderId = `image-placeholder-${Date.now()}`; // Unique ID for the placeholder
+    const shimmerDiv = `<div id="${shimmerPlaceholderId}" class="shimmer"></div>&nbsp;<br><br>`;
   
-    // Include an extra line break character after the image tag
-    const imgTag = `<img src="${imageUri}" style="${customStyle}" />&nbsp;<br><br>`;
+    richTextRef.current?.insertHTML(shimmerDiv);
   
-    richTextRef.current?.insertHTML(imgTag);
-  
-    if (scrollViewRef.current && !initialLoad) {
-      // Adjust this timeout and calculation as necessary
-      setTimeout(() => {
-        scrollViewRef.current?.scrollToEnd({ animated: true });
-      }, 500);
-    }
+    return shimmerPlaceholderId;
   };
 
   const addVideoToEditor = async (videoUri: string) => {
@@ -195,34 +206,25 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const checkLocationPermission = async () => {
     try {
       let { status } = await Location.getForegroundPermissionsAsync();
-  
+
       if (status !== 'granted') {
         // Location permission not granted, request it
         const requestResult = await Location.requestForegroundPermissionsAsync();
-  
+
         if (requestResult.status === 'denied') {
-          // Location permission denied after requesting, show alert and return false
-          Alert.alert(
-            "Location permission denied",
-            "Please grant location permission to save the note.",
-            [
-              {
-                text: "Delete Note",
-                onPress: () => navigation.goBack(), // Delete the note and go back
-                style: "destructive",
-              },
-              { text: "OK", onPress: () => console.log("OK Pressed") },
-            ],
-            { cancelable: false }
-          );
+          // Location permission denied after requesting, request again
+          const requestAgainResult = await Location.requestForegroundPermissionsAsync();
+          status = requestAgainResult.status;
+        }
+
+        if (status !== 'granted') {
+          // Location permission still not granted
+          Alert.alert("Location permission denied", "Please grant location permission to save the note or remove the title to not save.");
           return false;
         }
-  
-        // Location permission not yet granted
-        return false;
       }
-  
-      // Location permission already granted
+
+      // Location permission already granted or granted after request
       return true;
     } catch (error) {
       console.error("Error checking location permission:", error);
@@ -231,33 +233,39 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   };
 
   const saveNote = async () => {
-    if (titleText.trim() === "") {
-      Alert.alert(
-        "Empty Title",
-        "Please enter a title to save the note or delete the note.",
-        [
-          { text: "Delete Note", onPress: () => navigation.goBack() },
-          { text: "OK", onPress: () => console.log("OK Pressed") }
-        ],
-        { cancelable: false }
-      );
-      return;
-    }
-  
     const locationPermissionGranted = await checkLocationPermission();
+    if (titleText === "") {
+      if (!promptedMissingTitle) {
+        setPromptedMissingTitle(true);
+        Alert.alert(
+          "Title is empty",
+          "Please enter a title to save the note, or press back again to confirm not saving the note.",
+        );
+        return;
+      } else {
+        navigation.goBack();
+        return;
+      }
+    }
     if (!locationPermissionGranted) {
-      return; // Stop saving the note if location permission is not granted
-    } else {
+      return; 
+    }
+    else {
+      setIsUpdating(true);
+
       try {
-        const userID = await user.getId();
-  
-        // Grab user's current location
         const userLocation = await Location.getCurrentPositionAsync({});
-        const latitude = userLocation.coords.latitude.toString();
-        const longitude = userLocation.coords.longitude.toString();
-  
-        setTime(new Date()); // force a fresh time date grab on note save
-  
+        const userID = await user.getId();
+        let latitude, longitude;
+        
+        if (Platform.OS === 'ios') {
+          latitude = location?.latitude.toString();
+          longitude = location?.longitude.toString();
+        } else if (Platform.OS === 'android') {
+          latitude = userLocation.coords.latitude.toString();
+          longitude = userLocation.coords.longitude.toString();
+        }
+        
         const newNote = {
           title: titleText,
           text: bodyText,
@@ -279,12 +287,11 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         navigation.goBack();
       } catch (error) {
         console.error("An error occurred while creating the note:", error);
+      } finally {
+        setIsUpdating(false); 
       }
     }
   };
-
-  
-  
 
   return (
       <SafeAreaView style={{ flex: 1 }}>
@@ -504,7 +511,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           </View>
         </KeyboardAvoidingView>
 
-
+        <LoadingModal visible={isUpdating} />
       </SafeAreaView>
   );
 

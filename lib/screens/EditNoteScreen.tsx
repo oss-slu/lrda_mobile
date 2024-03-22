@@ -10,7 +10,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
-  Dimensions
+  Dimensions,
+  Alert
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Note } from "../../types";
@@ -28,6 +29,7 @@ import { RichEditor, RichToolbar, actions } from "react-native-pell-rich-editor"
 import NotePageStyles from "../../styles/pages/NoteStyles";
 import ToastMessage from 'react-native-toast-message';
 import { useTheme } from "../components/ThemeProvider";
+import LoadingModal from "../components/LoadingModal";
 
 const user = User.getInstance();
 
@@ -55,6 +57,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const [isLocation, setIsLocation] = useState(false);
   const richTextRef = useRef<RichEditor | null>(null);
   const [isTime, setIsTime] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -144,29 +147,51 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     }
   };
   
-  const addImageToEditor = (imageUri: string) => {
+  const shimmerStyle = `
+    @keyframes shimmer {
+      0% { background-position: -20px; }
+      100% { background-position: 100%; }
+    }
+    .shimmer {
+      display: inline-block;
+      background: #f6f7f8;
+      background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+      background-repeat: no-repeat;
+      background-size: 80px 104px;
+      animation: shimmer 1s linear infinite;
+      width: 100%; /* Adjust based on your needs */
+      height: 150px; /* Adjust based on your needs or aspect ratio */
+    }
+  `;
+
+  const addImageToEditor = (imageUri: string, placeholderId: any) => {
     const customStyle = `
       max-width: 50%;
       height: auto; /* Maintain aspect ratio */
       /* Additional CSS properties for sizing */
     `;
+    
+    const image = new Image();
+    image.onload = () => {
+      const imgTag = `<img src="${imageUri}" style="${customStyle}" />`;
+      const script = `document.getElementById('${placeholderId}').outerHTML = '${imgTag}';`;
+      
+      richTextRef.current?.insertHTML(script);
+    };
+    image.src = imageUri;
+  };
+
+  const addShimmerEffectPlaceholder = () => {
+    const shimmerPlaceholderId = `image-placeholder-${Date.now()}`;
+    const shimmerDiv = `<div id="${shimmerPlaceholderId}" class="shimmer"></div>&nbsp;<br><br>`;
   
-    // Include an extra line break character after the image tag
-    const imgTag = `<img src="${imageUri}" style="${customStyle}" />&nbsp;<br><br>`;
+    richTextRef.current?.insertHTML(shimmerDiv);
   
-    richTextRef.current?.insertHTML(imgTag);
-  
-    // Add a delay before updating the text state
-    setTimeout(() => {
-      if (scrollViewRef.current) {
-        scrollViewRef.current.scrollToEnd({ animated: true });
-      }
-    }, 500); // Adjust the delay as needed
+    return shimmerPlaceholderId;
   };
 
   const addVideoToEditor = async (videoUri: string) => {
     try {
-      // Fetch the thumbnail URI
       const thumbnailUri = await getThumbnail(videoUri);
   
       const videoHtml = `
@@ -198,29 +223,35 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   }
   
   const handleSaveNote = async () => {
+    setIsUpdating(true);
+  
     try {
-      const editedNote: Note = {
+      const editedNote = {
         id: note.id,
-        title,
-        text,
+        title: title,
+        text: text,
         creator: (await user.getId()) || "",
-        media,
+        media: media,
         latitude: location?.latitude.toString() || "",
         longitude: location?.longitude.toString() || "",
         audio: newAudio,
         published: isPublished,
-        time,
-        tags,
+        time: time,
+        tags: tags,
       };
-
+  
       await ApiService.overwriteNote(editedNote);
-
+  
       onSave(editedNote);
+  
       navigation.goBack();
     } catch (error) {
       console.error("Error updating the note:", error);
+    } finally {
+      setIsUpdating(false); 
     }
   };
+  
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -282,6 +313,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             setNewMedia={setMedia}
             insertImageToEditor={addImageToEditor}
             addVideoToEditor={addVideoToEditor}
+            addShimmer={addShimmerEffectPlaceholder}
           />
           {viewAudio && (
             <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
@@ -408,7 +440,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
-
+      <LoadingModal visible={isUpdating} />
     </SafeAreaView>
   );
 };

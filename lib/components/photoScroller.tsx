@@ -32,12 +32,14 @@ const PhotoScroller = forwardRef(
       active,
       insertImageToEditor,
       addVideoToEditor,
+      addShimmer,
     }: {
       newMedia: Media[];
       setNewMedia: React.Dispatch<React.SetStateAction<Media[]>>;
       active: Boolean;
       insertImageToEditor: Function;
       addVideoToEditor: Function;
+      addShimmer: Function;
     },
     ref
   ) => {
@@ -87,7 +89,8 @@ const PhotoScroller = forwardRef(
           uri: uploadedUrl,
         });
         setNewMedia([...newMedia, newMediaItem]);
-        insertImageToEditor(uploadedUrl);
+        const placeholderId = addShimmer();
+        insertImageToEditor(uploadedUrl, placeholderId);
       } else if (
         uri.endsWith(".jpg") ||
         uri.endsWith("png") ||
@@ -102,7 +105,8 @@ const PhotoScroller = forwardRef(
         });
         setNewMedia([...newMedia, newMediaItem]);
         if (insertImageToEditor) {
-          insertImageToEditor(uploadedUrl, 'Captured Image');
+          const placeholderId = addShimmer();
+          insertImageToEditor(uploadedUrl, placeholderId);
         }
       } else if (
         uri.endsWith(".MOV") ||
