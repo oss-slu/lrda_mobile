@@ -92,6 +92,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     checkLocationPermission();
   }, []);
 
+  const [isLocationShown, setIsLocationShown] = useState(true);
+
   const grabLocation = async () => {
     try {
       const userLocation = await Location.getCurrentPositionAsync({});
@@ -190,6 +192,59 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
       text1: 'Note Published',
       visibilityTime: 3000 // 3 seconds
     });
+  };
+
+  const [latitude, setLatitude] = useState(
+    location?.latitude?.toString() || ""
+  );
+  const [longitude, setLongitude] = useState(
+    location?.longitude?.toString() || ""
+  );
+
+  async function getLocation() {
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
+        return null;
+      }
+      return await Location.getCurrentPositionAsync({});
+    } catch (error) {
+      console.error("Error getting location:", error);
+      return null;
+    }
+  }
+
+  const toggleLocationVisibility = async () => {
+    if (isLocationShown) {
+      // Hide Location
+      setLocation({
+        latitude: 0,
+        longitude: 0,
+      });
+      setLatitude("0");
+      setLongitude("0");
+    } else {
+      // Show Location
+      try {
+        let userLocation = await getLocation();
+    
+        if (userLocation?.coords?.latitude !== undefined && userLocation?.coords?.longitude !== undefined) {
+          setLocation({
+            latitude: userLocation.coords.latitude,
+            longitude: userLocation.coords.longitude,
+          });
+    
+          setLatitude(userLocation.coords.latitude.toString());
+          setLongitude(userLocation.coords.longitude.toString());
+        } else {
+          console.log("Location data is not available.");
+        }
+      } catch (error) {
+        console.error("Error setting location:", error);
+      }
+    }
+    setIsLocationShown((prev) => !prev);
   };
 
   const checkLocationPermission = async () => {
@@ -346,8 +401,9 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
                 setViewMedia(false);
                 setViewAudio(false);
                 setIsTagging(false);
-                setIsLocation(!isLocation);
+                //setIsLocation(!isLocation);
                 setIsTime(false);
+
               }}
             >
             <Ionicons name="location-outline" size={30} color={NotePageStyles().saveText.color} />
