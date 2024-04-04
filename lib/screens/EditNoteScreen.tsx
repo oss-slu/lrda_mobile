@@ -26,6 +26,7 @@ import TagWindow from "../components/tagging";
 import LocationWindow from "../components/location";
 import TimeWindow from "../components/time";
 import { RichEditor, RichToolbar, actions } from "react-native-pell-rich-editor";
+import TenTapEditor from "10tap-editor";
 import NotePageStyles from "../../styles/pages/NoteStyles";
 import ToastMessage from 'react-native-toast-message';
 import { useTheme } from "../components/ThemeProvider";
@@ -55,6 +56,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const [keyboardOpen, setKeyboard] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isLocation, setIsLocation] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
   const richTextRef = useRef<RichEditor | null>(null);
   const [isTime, setIsTime] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -87,6 +89,9 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         setKeyboardHeight(0);
       }
     );
+    const timeout = setTimeout(() => {
+      setInitialLoad(false);
+    }, 1000); // Adjust delay as needed
 
     return () => {
       keyboardDidShowListener.remove();
@@ -146,48 +151,25 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         });
     }
   };
-  
-  const shimmerStyle = `
-    @keyframes shimmer {
-      0% { background-position: -20px; }
-      100% { background-position: 100%; }
-    }
-    .shimmer {
-      display: inline-block;
-      background: #f6f7f8;
-      background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
-      background-repeat: no-repeat;
-      background-size: 80px 104px;
-      animation: shimmer 1s linear infinite;
-      width: 100%; /* Adjust based on your needs */
-      height: 150px; /* Adjust based on your needs or aspect ratio */
-    }
-  `;
 
-  const addImageToEditor = (imageUri: string, placeholderId: any) => {
+  const addImageToEditor = (imageUri: string) => {
     const customStyle = `
       max-width: 50%;
       height: auto; /* Maintain aspect ratio */
       /* Additional CSS properties for sizing */
     `;
-    
-    const image = new Image();
-    image.onload = () => {
-      const imgTag = `<img src="${imageUri}" style="${customStyle}" />`;
-      const script = `document.getElementById('${placeholderId}').outerHTML = '${imgTag}';`;
-      
-      richTextRef.current?.insertHTML(script);
-    };
-    image.src = imageUri;
-  };
-
-  const addShimmerEffectPlaceholder = () => {
-    const shimmerPlaceholderId = `image-placeholder-${Date.now()}`;
-    const shimmerDiv = `<div id="${shimmerPlaceholderId}" class="shimmer"></div>&nbsp;<br><br>`;
   
-    richTextRef.current?.insertHTML(shimmerDiv);
+    // Include an extra line break character after the image tag
+    const imgTag = `<img src="${imageUri}" style="${customStyle}" />&nbsp;<br><br>`;
   
-    return shimmerPlaceholderId;
+    richTextRef.current?.insertHTML(imgTag);
+  
+    if (scrollViewRef.current && !initialLoad) {
+      // Adjust this timeout and calculation as necessary
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 500);
+    }
   };
 
   const addVideoToEditor = async (videoUri: string) => {
@@ -313,7 +295,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             setNewMedia={setMedia}
             insertImageToEditor={addImageToEditor}
             addVideoToEditor={addVideoToEditor}
-            addShimmer={addShimmerEffectPlaceholder}
           />
           {viewAudio && (
             <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />

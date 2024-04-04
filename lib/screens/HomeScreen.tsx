@@ -20,8 +20,9 @@ import { SwipeListView } from "react-native-swipe-list-view";
 import NoteSkeleton from "../components/noteSkeleton";
 import LoadingImage from "../components/loadingImage";
 import { formatToLocalDateString } from "../components/time";
-import { ThemeProvider, useTheme } from '../components/ThemeProvider';
+import { useTheme } from '../components/ThemeProvider';
 import Constants from "expo-constants";
+import ToastMessage from 'react-native-toast-message';
 import DropDownPicker from 'react-native-dropdown-picker';
 import NoteDetailModal from "./mapPage/NoteDetailModal";
 
