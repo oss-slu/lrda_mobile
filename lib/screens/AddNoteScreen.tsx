@@ -37,6 +37,8 @@ const user = User.getInstance();
 
 const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [titleText, setTitleText] = useState("");
+  const [isSaveButtonEnabled, setIsSaveButtonEnabled] = useState(true);
+  const [untitledNumber, setUntitledNumber] = useState("0");
   const [bodyText, setBodyText] = useState("");
   const [newMedia, setNewMedia] = useState<Media[]>([]);
   const [newAudio, setNewAudio] = useState<AudioType[]>([]);
@@ -61,7 +63,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   } | null>(null);
 
   const { theme } = useTheme();
-
+  
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -92,6 +94,13 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   useEffect(() => {
     checkLocationPermission();
   }, []);
+
+  useEffect(() => {
+    const { untitledNumber } = route.params;
+    if (untitledNumber) {
+      setUntitledNumber(untitledNumber.toString());
+    }
+  }, [route.params]);
 
   const [isLocationShown, setIsLocationShown] = useState(true);
 
@@ -288,7 +297,13 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   };
 
   const saveNote = async () => {
-    if (titleText.trim() === "") {
+    setIsSaveButtonEnabled(false);
+    let finalTitle = titleText.trim();
+    if (finalTitle === "") {
+      finalTitle = `Untitled ${untitledNumber}`;
+    }
+
+    if (finalTitle.trim() === "") {
       Alert.alert(
         "Empty Title",
         "Please enter a title to save the note or delete the note.",
@@ -316,7 +331,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         setTime(new Date()); // force a fresh time date grab on note save
   
         const newNote = {
-          title: titleText,
+          title: finalTitle,
           text: bodyText,
           media: newMedia,
           audio: newAudio,
@@ -338,6 +353,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         console.error("An error occurred while creating the note:", error);
       }
     }
+    setIsSaveButtonEnabled(true);
   };
 
   
@@ -348,7 +364,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         <View style={NotePageStyles().topContainer}>
   
           <View style={NotePageStyles().topButtonsContainer}>
-            <TouchableOpacity style={NotePageStyles().topButtons} onPress={saveNote} testID="checklocationpermission">
+            <TouchableOpacity style={NotePageStyles().topButtons} disabled={!isSaveButtonEnabled} onPress={saveNote} testID="checklocationpermission">
               <Ionicons name="arrow-back-outline" size={30} color={NotePageStyles().saveText.color} />
             </TouchableOpacity>
             <TextInput

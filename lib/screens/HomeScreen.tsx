@@ -146,6 +146,21 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     setUpdateCounter(updateCounter + 1);
   };
 
+  const findNextUntitledNumber = (notes : Note[]) => {
+    let maxNumber = 0;
+    notes.forEach((note) => {
+      const match = note.title.match(/^Untitled (\d+)$/);
+      if (match) {
+        const number = parseInt(match[1]);
+        if (number > maxNumber) {
+          maxNumber = number;
+        }
+      }
+    });
+    return maxNumber + 1;
+  };
+  
+
   const styles = StyleSheet.create({
     container: {
       paddingTop: Constants.statusBarHeight - 20,
@@ -571,7 +586,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         {rendering ? <NoteSkeleton /> : renderList(notes)}
         <TouchableOpacity
           style={styles.addButton}
-          onPress={() => navigation.navigate("AddNote", { refreshPage })}
+          onPress={() => {
+            const untitledNumber = findNextUntitledNumber(notes);
+            navigation.navigate("AddNote", { untitledNumber, refreshPage });
+          }}
         >
           <Ionicons name="add-outline" size={32} color={theme.primaryColor} style={{ fontFamily: 'Ionicons_' }} />
         </TouchableOpacity>
