@@ -28,6 +28,8 @@ import { RichEditor, RichToolbar, actions } from "react-native-pell-rich-editor"
 import NotePageStyles from "../../styles/pages/NoteStyles";
 import ToastMessage from 'react-native-toast-message';
 import { useTheme } from "../components/ThemeProvider";
+import * as Location from 'expo-location';
+
 
 const user = User.getInstance();
 
@@ -53,6 +55,10 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const [keyboardOpen, setKeyboard] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isLocation, setIsLocation] = useState(false);
+  const [isLocationShown, setIsLocationShown] = useState(true);
+  const [isLocationIconPressed, setIsLocationIconPressed] = useState(
+    !((note.latitude === "0" && note.longitude === "0") || (!note.latitude && !note.longitude))
+  );  
   const richTextRef = useRef<RichEditor | null>(null);
   const [isTime, setIsTime] = useState(false);
   const [location, setLocation] = useState<{
@@ -113,6 +119,13 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     }
   };
 
+  const [latitude, setLatitude] = useState(
+    location?.latitude?.toString() || ""
+  );
+  const [longitude, setLongitude] = useState(
+    location?.longitude?.toString() || ""
+  );
+
   const photoScrollerRef = useRef<{ goBig(index: number): void } | null>(
     null
   );
@@ -122,6 +135,20 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       photoScrollerRef.current.goBig(index);
     }
   };
+
+  async function getLocation() {
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
+        return null;
+      }
+      return await Location.getCurrentPositionAsync({});
+    } catch (error) {
+      console.error("Error getting location:", error);
+      return null;
+    }
+  }
 
   const handleShareButtonPress = () => {
     setIsPublished(!isPublished);  // Toggle the share status
@@ -196,6 +223,38 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       console.error("Error adding video with thumbnail: ", error);
     }
   }
+  const toggleLocationVisibility = async () => {
+    if (isLocationShown) {
+      // Hide Location
+      setLocation({
+        latitude: 0,
+        longitude: 0,
+      });
+      setLatitude("0");
+      setLongitude("0");
+    } else {
+      // Show Location
+      try {
+        let userLocation = await getLocation();
+    
+        if (userLocation?.coords?.latitude !== undefined && userLocation?.coords?.longitude !== undefined) {
+          setLocation({
+            latitude: userLocation.coords.latitude,
+            longitude: userLocation.coords.longitude,
+          });
+    
+          setLatitude(userLocation.coords.latitude.toString());
+          setLongitude(userLocation.coords.longitude.toString());
+        } else {
+          console.log("Location data is not available.");
+        }
+      } catch (error) {
+        console.error("Error setting location:", error);
+      }
+    }
+    setIsLocationShown((prev) => !prev);
+    setIsLocationIconPressed((prev) => !prev);
+  };
   
   const handleSaveNote = async () => {
     try {
@@ -264,8 +323,8 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           <TouchableOpacity onPress={() => setViewAudio(!viewAudio)}>
             <Ionicons name="mic-outline" size={30} color={NotePageStyles().saveText.color} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => setIsLocation(!isLocation)}>
-            <Ionicons name="location-outline" size={30} color={NotePageStyles().saveText.color} />
+          <TouchableOpacity onPress={() => toggleLocationVisibility()}>
+            <Ionicons name="location-outline" size={30} color={isLocationIconPressed ? "red" : NotePageStyles().saveText.color} />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setIsTime(!isTime)}>
             <Ionicons name="time-outline" size={30} color={NotePageStyles().saveText.color} />

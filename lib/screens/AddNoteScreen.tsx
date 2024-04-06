@@ -54,6 +54,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const scrollViewRef = useRef<ScrollView | null>(null);
   const [initialLoad, setInitialLoad] = useState(true);
   const [promptedMissingTitle, setPromptedMissingTitle] = useState(false);
+  const [isLocationIconPressed, setIsLocationIconPressed] = useState(false);
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -245,6 +246,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
       }
     }
     setIsLocationShown((prev) => !prev);
+    setIsLocationIconPressed((prev) => !prev);
   };
 
   const checkLocationPermission = async () => {
@@ -308,8 +310,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   
         // Grab user's current location
         const userLocation = await Location.getCurrentPositionAsync({});
-        const latitude = userLocation.coords.latitude.toString();
-        const longitude = userLocation.coords.longitude.toString();
+        const latitudeToSave = location ? location.latitude.toString() : "0";
+        const longitudeToSave = location ? location.longitude.toString() : "0";
   
         setTime(new Date()); // force a fresh time date grab on note save
   
@@ -319,8 +321,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           media: newMedia,
           audio: newAudio,
           creator: userID,
-          latitude: latitude,
-          longitude: longitude,
+          latitude: latitudeToSave,
+          longitude: longitudeToSave,
           published: isPublished,
           tags: tags,
           time: time,
@@ -402,11 +404,12 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
                 setViewAudio(false);
                 setIsTagging(false);
                 //setIsLocation(!isLocation);
+                toggleLocationVisibility();
                 setIsTime(false);
 
               }}
             >
-            <Ionicons name="location-outline" size={30} color={NotePageStyles().saveText.color} />
+            <Ionicons name="location-outline" size={30} color={isLocationIconPressed ? "red" : NotePageStyles().saveText.color} />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
