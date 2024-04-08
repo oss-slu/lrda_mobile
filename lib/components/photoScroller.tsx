@@ -30,14 +30,10 @@ const PhotoScroller = forwardRef(
       newMedia,
       setNewMedia,
       active,
-      insertImageToEditor,
-      addVideoToEditor,
     }: {
       newMedia: Media[];
       setNewMedia: React.Dispatch<React.SetStateAction<Media[]>>;
       active: Boolean;
-      insertImageToEditor: Function;
-      addVideoToEditor: Function;
     },
     ref
   ) => {

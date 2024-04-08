@@ -108,6 +108,11 @@ const NotePageStyles = () => {
       justifyContent: "center",
       alignSelf: "center",
     },
+    keyboardAvoidingView: {
+      position: 'absolute',
+      width: '100%',
+      bottom: 0,
+    },
   });
 };
 

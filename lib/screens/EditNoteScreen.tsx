@@ -24,7 +24,7 @@ import ApiService from "../utils/api_calls";
 import TagWindow from "../components/tagging";
 import LocationWindow from "../components/location";
 import TimeWindow from "../components/time";
-import { RichEditor, RichToolbar, actions } from "react-native-pell-rich-editor";
+import { RichText, Toolbar, useEditorBridge } from '@10play/tentap-editor';
 import NotePageStyles from "../../styles/pages/NoteStyles";
 import ToastMessage from 'react-native-toast-message';
 import { useTheme } from "../components/ThemeProvider";
@@ -55,7 +55,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const [keyboardOpen, setKeyboard] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isLocation, setIsLocation] = useState(false);
-  const richTextRef = useRef<RichEditor | null>(null);
   const [isTime, setIsTime] = useState(false);
   const [location, setLocation] = useState<{
     latitude: number;
@@ -70,6 +69,12 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   );
   const { height, width } = useWindowDimensions();
   const { theme } = useTheme();
+
+  const editor = useEditorBridge({
+    autofocus: true,
+    avoidIosKeyboard: true,
+    initialContent: "Start Here!",
+  });
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -100,21 +105,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     checkOwner();
   }, [creator]);
 
-  const handleScroll = (position) => {
-    if (keyboardOpen && scrollViewRef.current) {
-      const viewportHeight = Dimensions.get('window').height - keyboardHeight;
-      const cursorRelativePosition = position.relativeY;
-      const spaceBelowCursor = viewportHeight - cursorRelativePosition;
-
-      if (spaceBelowCursor < keyboardHeight) {
-        scrollViewRef.current.scrollTo({
-          y: position.absoluteY - spaceBelowCursor + keyboardHeight,
-          animated: true,
-        });
-      }
-    }
-  };
-
   const photoScrollerRef = useRef<{ goBig(index: number): void } | null>(
     null
   );
@@ -133,71 +123,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       visibilityTime: 3000 // 3 seconds
     });
   };
-
-  const updateBodyText = () => {
-    if (richTextRef.current) {
-      richTextRef.current.getContentHtml()
-        .then(html => {
-          setText(html); // Update the state with the latest content
-        })
-        .catch(error => {
-          console.error('Error getting content from RichEditor:', error);
-        });
-    }
-  };
-  
-  const addImageToEditor = (imageUri: string) => {
-    const customStyle = `
-      max-width: 50%;
-      height: auto; /* Maintain aspect ratio */
-      /* Additional CSS properties for sizing */
-    `;
-  
-    // Include an extra line break character after the image tag
-    const imgTag = `<img src="${imageUri}" style="${customStyle}" />&nbsp;<br><br>`;
-  
-    richTextRef.current?.insertHTML(imgTag);
-  
-    // Add a delay before updating the text state
-    setTimeout(() => {
-      if (scrollViewRef.current) {
-        scrollViewRef.current.scrollToEnd({ animated: true });
-      }
-    }, 500); // Adjust the delay as needed
-  };
-
-  const addVideoToEditor = async (videoUri: string) => {
-    try {
-      // Fetch the thumbnail URI
-      const thumbnailUri = await getThumbnail(videoUri);
-  
-      const videoHtml = `
-        <video width="320" height="240" controls poster="${thumbnailUri}" id="videoElement">
-          <source src="${videoUri}" type="video/mp4">
-          Your browser does not support the video tag.
-        </video>
-        <p><a href="${videoUri}" target="_blank">${videoUri}</a></p> <!-- Make the URI clickable -->
-        <script>
-          document.getElementById('videoElement').addEventListener('play', function(e) {
-            // Preventing the rich text editor from gaining focus when the video is played
-            e.preventDefault();
-            // Assuming you have a way to send a message to your React Native environment
-            window.ReactNativeWebView.postMessage('videoPlayed');
-          });
-        </script>
-      `;
-  
-      richTextRef.current?.insertHTML(videoHtml);
-  
-      setTimeout(() => {
-        if (scrollViewRef.current) {
-          scrollViewRef.current.scrollToEnd({ animated: true });
-        }
-      }, 500); 
-    } catch (error) {
-      console.error("Error adding video with thumbnail: ", error);
-    }
-  }
   
   const handleSaveNote = async () => {
     try {
@@ -282,8 +207,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             active={viewMedia}
             newMedia={media}
             setNewMedia={setMedia}
-            insertImageToEditor={addImageToEditor}
-            addVideoToEditor={addVideoToEditor}
           />
           {viewAudio && (
             <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
@@ -293,26 +216,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             <LocationWindow location={location} setLocation={setLocation} />
           )}
           {isTime && <TimeWindow time={time} setTime={setTime} />}
-        </View>
-        <View>
-          <RichToolbar
-            style={NotePageStyles().container}
-            editor={richTextRef}
-            actions={[
-              actions.keyboard,
-              actions.undo,
-              actions.redo,
-              actions.setBold,
-              actions.setItalic,
-              actions.setUnderline,
-              actions.insertBulletsList,
-              actions.blockquote,
-              actions.indent,
-              actions.outdent,
-            ]}
-            iconTint={NotePageStyles().saveText.color}
-            selectedIconTint="#2095F2"
-          />
         </View>
         <View key="Tags Container">
           {tags.length > 0 && (
@@ -377,39 +280,16 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           </View>
 
       </View>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
-      >
-        <View style={[NotePageStyles().editorContainer, { flex: 1 }]}>
-          <ScrollView
-            nestedScrollEnabled={true}
-            showsVerticalScrollIndicator={false}
-            style={{ flex: 1 }}
-            ref={scrollViewRef}
+        <RichText 
+          editor={editor} 
+         //onChange={(text: React.SetStateAction<string>) => setText(text)}
+        />
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={NotePageStyles().keyboardAvoidingView}
           >
-            <RichEditor
-              ref={(r) => (richTextRef.current = r)}
-              style={[NotePageStyles().editor, {flex: 1, minHeight: 650 }]}
-              editorStyle={
-              {
-                contentCSSText: `
-                  position: absolute; 
-                  top: 0; right: 0; bottom: 0; left: 0;
-                `,
-                backgroundColor: theme.primaryColor,
-                color: theme.text,
-              }}
-              autoCorrect={true}
-              placeholder="Write your note here"
-              onChange={(text) => setText(text)}
-              initialContentHTML={text}
-              onCursorPosition={handleScroll}
-              disabled={!owner}
-            />
-          </ScrollView>
-        </View>
-      </KeyboardAvoidingView>
+            <Toolbar editor={editor} />
+          </KeyboardAvoidingView>
 
     </SafeAreaView>
   );
