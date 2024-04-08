@@ -29,6 +29,8 @@ import NotePageStyles from "../../styles/pages/NoteStyles";
 import ToastMessage from 'react-native-toast-message';
 import { useTheme } from "../components/ThemeProvider";
 
+// 10Tap!
+
 const user = User.getInstance();
 
 const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
