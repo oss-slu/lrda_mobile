@@ -102,7 +102,7 @@ const PhotoScroller = forwardRef(
         });
         setNewMedia([...newMedia, newMediaItem]);
         if (insertImageToEditor) {
-          insertImageToEditor(uploadedUrl, 'Captured Image');
+          insertImageToEditor(uploadedUrl);
         }
       } else if (
         uri.endsWith(".MOV") ||
