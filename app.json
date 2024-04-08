@@ -17,12 +17,20 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "register.edu.slu.cs.oss.lrda",
+      "config": {
+        "googleMapsApiKey": ""
+      },
       "buildNumber": "12"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "config": {
+        "googleMaps": {
+          "apiKey": ""
+        }
       },
       "package": "register.edu.slu.cs.oss.lrda",
       "versionCode": 1
