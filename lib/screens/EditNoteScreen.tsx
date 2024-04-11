@@ -55,13 +55,13 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const [keyboardOpen, setKeyboard] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isLocation, setIsLocation] = useState(false);
-  const [isLocationShown, setIsLocationShown] = useState(true);
-  const [isLocationIconPressed, setIsLocationIconPressed] = useState(
-    !((note.latitude === "0" && note.longitude === "0") || (!note.latitude && !note.longitude))
-  );  
+  let [isLocationShown, setIsLocationShown] = useState(
+    note.latitude === "0" && note.longitude === "0" );
+  let [isLocationIconPressed, setIsLocationIconPressed] = useState(
+    note.latitude === "0" && note.longitude === "0" );
   const richTextRef = useRef<RichEditor | null>(null);
   const [isTime, setIsTime] = useState(false);
-  const [location, setLocation] = useState<{
+  let [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
   } | null>(
@@ -72,6 +72,8 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         }
       : null
   );
+  console.log(note.latitude);
+  console.log(note.longitude);
   const { height, width } = useWindowDimensions();
   const { theme } = useTheme();
 
@@ -258,14 +260,18 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   
   const handleSaveNote = async () => {
     try {
+      let userLocation = await getLocation();
+      const finalLatitude = !isLocationShown ? userLocation?.coords.latitude.toString() || "" : "0";
+      const finalLongitude = !isLocationShown ? userLocation?.coords.longitude.toString() || "" : "0";
+
       const editedNote: Note = {
         id: note.id,
         title,
         text,
         creator: (await user.getId()) || "",
         media,
-        latitude: location?.latitude.toString() || "",
-        longitude: location?.longitude.toString() || "",
+        latitude: finalLatitude,
+        longitude: finalLongitude,
         audio: newAudio,
         published: isPublished,
         time,

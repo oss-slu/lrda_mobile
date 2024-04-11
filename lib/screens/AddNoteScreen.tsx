@@ -57,7 +57,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [initialLoad, setInitialLoad] = useState(true);
   const [promptedMissingTitle, setPromptedMissingTitle] = useState(false);
   const [isLocationIconPressed, setIsLocationIconPressed] = useState(false);
-  const [location, setLocation] = useState<{
+  let [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
@@ -325,8 +325,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   
         // Grab user's current location
         const userLocation = await Location.getCurrentPositionAsync({});
-        const latitudeToSave = location ? location.latitude.toString() : "0";
-        const longitudeToSave = location ? location.longitude.toString() : "0";
+        const latitudeToSave = location ? location.latitude.toString() : userLocation.coords.latitude.toString();
+        const longitudeToSave = location ? location.longitude.toString() : userLocation.coords.longitude.toString();
   
         setTime(new Date()); // force a fresh time date grab on note save
   
