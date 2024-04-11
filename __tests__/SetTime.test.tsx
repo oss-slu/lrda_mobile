@@ -36,7 +36,12 @@ beforeAll(() => {
   
   describe("AddNoteScreen", () => {
     it("renders without crashing", () => {
-        const wrapper = shallow(<AddNoteScreen />);
+      const routeMock = {
+        params: {
+          untitledNumber: 1 // or any other value that makes sense for your tests
+        }
+      };
+        const wrapper = shallow(<AddNoteScreen route ={routeMock} />);
         expect(wrapper).toMatchSnapshot();
     });
   });

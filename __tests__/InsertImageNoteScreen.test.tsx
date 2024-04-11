@@ -15,7 +15,12 @@ jest.mock('../lib/components/ThemeProvider', () => ({
 
 describe("AddNoteScreen", () => {
   it("adds image to editor", () => {
-    const wrapper = shallow(<AddNoteScreen />);
+    const routeMock = {
+      params: {
+        untitledNumber: 1 // or any other value that makes sense for your tests
+      }
+    };
+    const wrapper = shallow(<AddNoteScreen route={routeMock}/>);
 
     // Mock richTextRef
     const richTextRef = { current: { insertImage: jest.fn() } };
