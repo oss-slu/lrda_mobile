@@ -32,6 +32,7 @@ import {
 } from "react-native-pell-rich-editor";
 import NotePageStyles from "../../styles/pages/NoteStyles";
 import { useTheme } from "../components/ThemeProvider";
+import LoadingModal from "../components/LoadingModal";
 
 const user = User.getInstance();
 
@@ -55,6 +56,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const scrollViewRef = useRef<ScrollView | null>(null);
   const [initialLoad, setInitialLoad] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [promptedMissingTitle, setPromptedMissingTitle] = useState(false);
   const [isLocationIconPressed, setIsLocationIconPressed] = useState(false);
   let [location, setLocation] = useState<{
@@ -261,34 +263,25 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const checkLocationPermission = async () => {
     try {
       let { status } = await Location.getForegroundPermissionsAsync();
-  
+
       if (status !== 'granted') {
         // Location permission not granted, request it
         const requestResult = await Location.requestForegroundPermissionsAsync();
-  
+
         if (requestResult.status === 'denied') {
-          // Location permission denied after requesting, show alert and return false
-          Alert.alert(
-            "Location permission denied",
-            "Please grant location permission to save the note.",
-            [
-              {
-                text: "Delete Note",
-                onPress: () => navigation.goBack(), // Delete the note and go back
-                style: "destructive",
-              },
-              { text: "OK", onPress: () => console.log("OK Pressed") },
-            ],
-            { cancelable: false }
-          );
+          // Location permission denied after requesting, request again
+          const requestAgainResult = await Location.requestForegroundPermissionsAsync();
+          status = requestAgainResult.status;
+        }
+
+        if (status !== 'granted') {
+          // Location permission still not granted
+          Alert.alert("Location permission denied", "Please grant location permission to save the note or remove the title to not save.");
           return false;
         }
-  
-        // Location permission not yet granted
-        return false;
       }
-  
-      // Location permission already granted
+
+      // Location permission already granted or granted after request
       return true;
     } catch (error) {
       console.error("Error checking location permission:", error);
@@ -315,15 +308,13 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
       );
       return;
     }
-  
-    const locationPermissionGranted = await checkLocationPermission();
     if (!locationPermissionGranted) {
-      return; // Stop saving the note if location permission is not granted
-    } else {
+      return; 
+    }
+    else {
+      setIsUpdating(true);
+
       try {
-        const userID = await user.getId();
-  
-        // Grab user's current location
         const userLocation = await Location.getCurrentPositionAsync({});
         const latitudeToSave = location ? location.latitude.toString() : userLocation.coords.latitude.toString();
         const longitudeToSave = location ? location.longitude.toString() : userLocation.coords.longitude.toString();
@@ -351,13 +342,12 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         navigation.goBack();
       } catch (error) {
         console.error("An error occurred while creating the note:", error);
+      } finally {
+        setIsUpdating(false); 
       }
     }
     setIsSaveButtonEnabled(true);
   };
-
-  
-  
 
   return (
       <SafeAreaView style={{ flex: 1 }}>
@@ -579,7 +569,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           </View>
         </KeyboardAvoidingView>
 
-
+        <LoadingModal visible={isUpdating} />
       </SafeAreaView>
   );
 
