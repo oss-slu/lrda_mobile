@@ -26,7 +26,6 @@ import TagWindow from "../components/tagging";
 import LocationWindow from "../components/location";
 import TimeWindow from "../components/time";
 import { RichEditor, RichToolbar, actions } from "react-native-pell-rich-editor";
-import TenTapEditor from "10tap-editor";
 import NotePageStyles from "../../styles/pages/NoteStyles";
 import ToastMessage from 'react-native-toast-message';
 import { useTheme } from "../components/ThemeProvider";
@@ -106,6 +105,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     checkOwner();
   }, [creator]);
 
+  /*
   const handleScroll = (position) => {
     if (keyboardOpen && scrollViewRef.current) {
       const viewportHeight = Dimensions.get('window').height - keyboardHeight;
@@ -120,6 +120,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       }
     }
   };
+  */
 
   const photoScrollerRef = useRef<{ goBig(index: number): void } | null>(
     null
@@ -386,41 +387,39 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             </ScrollView>
           )}
           </View>
-
       </View>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
+        style={{ flex: 1 }} // Full height
+        behavior={Platform.OS === "ios" ? "padding" : "padding"} 
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20} 
       >
-        <View style={[NotePageStyles().editorContainer, { flex: 1 }]}>
-          <ScrollView
-            nestedScrollEnabled={true}
-            showsVerticalScrollIndicator={false}
-            style={{ flex: 1 }}
-            ref={scrollViewRef}
-          >
-            <RichEditor
-              ref={(r) => (richTextRef.current = r)}
-              style={[NotePageStyles().editor, {flex: 1, minHeight: 650 }]}
-              editorStyle={
-              {
-                contentCSSText: `
-                  position: absolute; 
-                  top: 0; right: 0; bottom: 0; left: 0;
-                `,
-                backgroundColor: theme.primaryColor,
-                color: theme.text,
-              }}
-              autoCorrect={true}
-              placeholder="Write your note here"
-              onChange={(text) => setText(text)}
-              initialContentHTML={text}
-              onCursorPosition={handleScroll}
-              disabled={!owner}
-            />
-          </ScrollView>
-        </View>
+        <ScrollView
+          nestedScrollEnabled={true}
+          showsVerticalScrollIndicator={false} 
+          style={{ flex: 1 }}
+          ref={scrollViewRef} 
+        >
+          <RichEditor
+            ref={richTextRef}  
+            style={{ flex: 1 }} 
+            editorStyle={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              bottom: 0,
+              left: 0,
+              backgroundColor: theme.primaryColor,
+              color: theme.text,
+            }}
+            autoCorrect={true} 
+            placeholder="Write your note here" 
+            onChange={setText}
+            initialContentHTML={text}
+            disabled={!owner}
+          />
+        </ScrollView>
       </KeyboardAvoidingView>
+
       <LoadingModal visible={isUpdating} />
     </SafeAreaView>
   );
