@@ -59,6 +59,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const richTextRef = useRef<RichEditor | null>(null);
   const [isTime, setIsTime] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [editorHeight, setEditorHeight] = useState('100%');
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -99,6 +100,11 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   }, []);
 
   useEffect(() => {
+    updateEditorHeight();
+    // Optionally set up an event listener for window resizing or orientation changes
+  }, [/* dependencies such as the content itself or screen size changes */]);
+
+  useEffect(() => {
     const checkOwner = async () => {
       setOwner(creator === (await user.getId()));
     };
@@ -117,6 +123,21 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           y: position.absoluteY - spaceBelowCursor + keyboardHeight,
           animated: true,
         });
+      }
+    }
+  };
+  */
+
+  /*
+  const updateEditorHeight = () => {
+    if (richTextRef.current) {
+      const contentHeight = richTextRef.current.getContentHeight();
+      const screenHeight = Dimensions.get('window').height;
+
+      if (contentHeight > screenHeight) {
+        setEditorHeight(contentHeight);
+      } else {
+        setEditorHeight('100%');
       }
     }
   };
@@ -154,24 +175,23 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   };
 
   const addImageToEditor = (imageUri: string) => {
-    const customStyle = `
-      max-width: 50%;
-      height: auto; /* Maintain aspect ratio */
-      /* Additional CSS properties for sizing */
-    `;
-  
-    // Include an extra line break character after the image tag
-    const imgTag = `<img src="${imageUri}" style="${customStyle}" />&nbsp;<br><br>`;
-  
-    richTextRef.current?.insertHTML(imgTag);
-  
+    const customStyle = {
+        maxWidth: '50%',
+        height: 'auto'
+    };
+
+    // Assuming insertImage is a method that inserts an image and then you can manually
+    // add HTML content to ensure new line and cursor position
+    const imgHtml = `<img src="${imageUri}" style="max-width: 50%; height: auto;"><br><br>`;
+    richTextRef.current?.insertHTML(imgHtml);
+
     if (scrollViewRef.current && !initialLoad) {
-      // Adjust this timeout and calculation as necessary
-      setTimeout(() => {
-        scrollViewRef.current?.scrollToEnd({ animated: true });
-      }, 500);
+        setTimeout(() => {
+            scrollViewRef.current?.scrollToEnd({ animated: true });
+        }, 500);
     }
-  };
+};
+
 
   const addVideoToEditor = async (videoUri: string) => {
     try {
@@ -393,33 +413,29 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         behavior={Platform.OS === "ios" ? "padding" : "padding"} 
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20} 
       >
-        <ScrollView
-          nestedScrollEnabled={true}
-          showsVerticalScrollIndicator={false} 
-          style={{ flex: 1 }}
-          ref={scrollViewRef} 
-        >
-          <RichEditor
-            ref={richTextRef}  
-            style={{ flex: 1 }} 
-            editorStyle={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              bottom: 0,
-              left: 0,
-              backgroundColor: theme.primaryColor,
-              color: theme.text,
-            }}
-            autoCorrect={true} 
-            placeholder="Write your note here" 
-            onChange={setText}
-            initialContentHTML={text}
-            disabled={!owner}
-          />
-        </ScrollView>
+          <ScrollView
+            nestedScrollEnabled={true}
+            showsVerticalScrollIndicator={false}
+            ref={scrollViewRef}
+          >
+            <RichEditor
+              ref={richTextRef}
+              style={[NotePageStyles().editor, { minHeight: 2500 }]}
+              editorStyle={{
+                backgroundColor: theme.primaryColor,
+                color: theme.text,
+              }}
+              autoCorrect={true}
+              placeholder="Write your note here"
+              onChange={(text) => {
+                setText(text);
+                // updateEditorHeight();  // Update height whenever text changes
+              }}
+              initialContentHTML={text}
+              disabled={!owner}
+            />
+          </ScrollView>
       </KeyboardAvoidingView>
-
       <LoadingModal visible={isUpdating} />
     </SafeAreaView>
   );
