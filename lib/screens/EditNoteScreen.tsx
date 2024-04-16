@@ -28,6 +28,7 @@ import { RichEditor, RichToolbar, actions } from "react-native-pell-rich-editor"
 import NotePageStyles from "../../styles/pages/NoteStyles";
 import ToastMessage from 'react-native-toast-message';
 import { useTheme } from "../components/ThemeProvider";
+import LoadingModal from "../components/LoadingModal";
 
 const user = User.getInstance();
 
@@ -55,6 +56,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const [isLocation, setIsLocation] = useState(false);
   const richTextRef = useRef<RichEditor | null>(null);
   const [isTime, setIsTime] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -198,27 +200,32 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   }
   
   const handleSaveNote = async () => {
+    setIsUpdating(true);
+  
     try {
-      const editedNote: Note = {
+      const editedNote = {
         id: note.id,
-        title,
-        text,
+        title: title,
+        text: text,
         creator: (await user.getId()) || "",
-        media,
+        media: media,
         latitude: location?.latitude.toString() || "",
         longitude: location?.longitude.toString() || "",
         audio: newAudio,
         published: isPublished,
-        time,
-        tags,
+        time: time,
+        tags: tags,
       };
-
+  
       await ApiService.overwriteNote(editedNote);
-
+  
       onSave(editedNote);
+  
       navigation.goBack();
     } catch (error) {
       console.error("Error updating the note:", error);
+    } finally {
+      setIsUpdating(false); 
     }
   };
 
@@ -408,7 +415,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
-
+      <LoadingModal visible={isUpdating} />
     </SafeAreaView>
   );
 };

@@ -32,6 +32,7 @@ import {
 } from "react-native-pell-rich-editor";
 import NotePageStyles from "../../styles/pages/NoteStyles";
 import { useTheme } from "../components/ThemeProvider";
+import LoadingModal from "../components/LoadingModal";
 
 const user = User.getInstance();
 
@@ -54,6 +55,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const scrollViewRef = useRef<ScrollView | null>(null);
   const [initialLoad, setInitialLoad] = useState(true);
   const [promptedMissingTitle, setPromptedMissingTitle] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -231,33 +233,39 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   };
 
   const saveNote = async () => {
-    if (titleText.trim() === "") {
-      Alert.alert(
-        "Empty Title",
-        "Please enter a title to save the note or delete the note.",
-        [
-          { text: "Delete Note", onPress: () => navigation.goBack() },
-          { text: "OK", onPress: () => console.log("OK Pressed") }
-        ],
-        { cancelable: false }
-      );
-      return;
-    }
-  
     const locationPermissionGranted = await checkLocationPermission();
+    if (titleText === "") {
+      if (!promptedMissingTitle) {
+        setPromptedMissingTitle(true);
+        Alert.alert(
+          "Title is empty",
+          "Please enter a title to save the note, or press back again to confirm not saving the note.",
+        );
+        return;
+      } else {
+        navigation.goBack();
+        return;
+      }
+    }
     if (!locationPermissionGranted) {
-      return; // Stop saving the note if location permission is not granted
-    } else {
+      return; 
+    }
+    else {
+      setIsUpdating(true);
+
       try {
-        const userID = await user.getId();
-  
-        // Grab user's current location
         const userLocation = await Location.getCurrentPositionAsync({});
-        const latitude = userLocation.coords.latitude.toString();
-        const longitude = userLocation.coords.longitude.toString();
-  
-        setTime(new Date()); // force a fresh time date grab on note save
-  
+        const userID = await user.getId();
+        let latitude, longitude;
+        
+        if (Platform.OS === 'ios') {
+          latitude = location?.latitude.toString();
+          longitude = location?.longitude.toString();
+        } else if (Platform.OS === 'android') {
+          latitude = userLocation.coords.latitude.toString();
+          longitude = userLocation.coords.longitude.toString();
+        }
+        
         const newNote = {
           title: titleText,
           text: bodyText,
@@ -279,12 +287,11 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         navigation.goBack();
       } catch (error) {
         console.error("An error occurred while creating the note:", error);
+      } finally {
+        setIsUpdating(false); 
       }
     }
   };
-
-  
-  
 
   return (
       <SafeAreaView style={{ flex: 1 }}>
@@ -503,15 +510,9 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             </ScrollView>
           </View>
         </KeyboardAvoidingView>
-
-
-      </SafeAreaView>
+      <LoadingModal visible={isUpdating} />
+    </SafeAreaView>
   );
-
 };
 
 export default AddNoteScreen;
-
-export function addVideoToEditor(mockVideoUri: string) {
-  throw new Error('Function not implemented.');
-}
