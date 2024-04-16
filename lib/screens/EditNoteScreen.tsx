@@ -26,7 +26,6 @@ import TagWindow from "../components/tagging";
 import LocationWindow from "../components/location";
 import TimeWindow from "../components/time";
 import { RichEditor, RichToolbar, actions } from "react-native-pell-rich-editor";
-import TenTapEditor from "10tap-editor";
 import NotePageStyles from "../../styles/pages/NoteStyles";
 import ToastMessage from 'react-native-toast-message';
 import { useTheme } from "../components/ThemeProvider";
@@ -37,7 +36,6 @@ const user = User.getInstance();
 const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   route,
   navigation,
-  insertImageToEditor,
 }) => {
   const { note, onSave } = route.params;
   const [title, setTitle] = useState(note.title);
@@ -60,6 +58,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const richTextRef = useRef<RichEditor | null>(null);
   const [isTime, setIsTime] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [editorHeight, setEditorHeight] = useState(300);
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -106,7 +105,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     checkOwner();
   }, [creator]);
 
-  const handleScroll = (position) => {
+  const handleScroll = (position: { relativeY: any; absoluteY: number; }) => {
     if (keyboardOpen && scrollViewRef.current) {
       const viewportHeight = Dimensions.get('window').height - keyboardHeight;
       const cursorRelativePosition = position.relativeY;
@@ -120,6 +119,14 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       }
     }
   };
+
+  const handleCursorPosition = (cursorPosition: { y: number; }) => {
+    scrollViewRef.current?.scrollTo({
+      y: cursorPosition.y - 30,  // Adjust '30' based on your needs
+      animated: true
+    });
+  };
+
 
   const photoScrollerRef = useRef<{ goBig(index: number): void } | null>(
     null
@@ -153,22 +160,18 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   };
 
   const addImageToEditor = (imageUri: string) => {
-    const customStyle = `
-      max-width: 50%;
-      height: auto; /* Maintain aspect ratio */
-      /* Additional CSS properties for sizing */
-    `;
-  
-    // Include an extra line break character after the image tag
-    const imgTag = `<img src="${imageUri}" style="${customStyle}" />&nbsp;<br><br>`;
-  
-    richTextRef.current?.insertHTML(imgTag);
-  
+    const customStyle = {
+        maxWidth: '50%',
+        height: 'auto'
+    };
+
+    const imgHtml = `<img src="${imageUri}" style="max-width: 50%; height: auto;"><br><br>`;
+    richTextRef.current?.insertHTML(imgHtml);
+
     if (scrollViewRef.current && !initialLoad) {
-      // Adjust this timeout and calculation as necessary
-      setTimeout(() => {
-        scrollViewRef.current?.scrollToEnd({ animated: true });
-      }, 500);
+        setTimeout(() => {
+            scrollViewRef.current?.scrollToEnd({ animated: true });
+        }, 500);
     }
   };
 
@@ -179,14 +182,11 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       const videoHtml = `
         <video width="320" height="240" controls poster="${thumbnailUri}" id="videoElement">
           <source src="${videoUri}" type="video/mp4">
-          Your browser does not support the video tag.
         </video>
         <p><a href="${videoUri}" target="_blank">${videoUri}</a></p> <!-- Make the URI clickable -->
         <script>
           document.getElementById('videoElement').addEventListener('play', function(e) {
-            // Preventing the rich text editor from gaining focus when the video is played
             e.preventDefault();
-            // Assuming you have a way to send a message to your React Native environment
             window.ReactNativeWebView.postMessage('videoPlayed');
           });
         </script>
@@ -236,7 +236,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#161A1D' }}>
       <View style={NotePageStyles().topContainer}>
 
         <View style={NotePageStyles().topButtonsContainer}>
@@ -386,44 +386,42 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             </ScrollView>
           )}
           </View>
-
       </View>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
-      >
-        <View style={[NotePageStyles().editorContainer, { flex: 1 }]}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }} // Full height
+          behavior={Platform.OS === "ios" ? "padding" : "padding"} 
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20} 
+        >
           <ScrollView
             nestedScrollEnabled={true}
             showsVerticalScrollIndicator={false}
-            style={{ flex: 1 }}
             ref={scrollViewRef}
+            // useContainer={true}
           >
             <RichEditor
-              ref={(r) => (richTextRef.current = r)}
-              style={[NotePageStyles().editor, {flex: 1, minHeight: 650 }]}
-              editorStyle={
-              {
+              ref={richTextRef}  
+              style={[NotePageStyles().editor, { minHeight: 10000 }]}
+              editorStyle={{
                 contentCSSText: `
-                  position: absolute; 
+                  position: absolute;
                   top: 0; right: 0; bottom: 0; left: 0;
                 `,
                 backgroundColor: theme.primaryColor,
                 color: theme.text,
               }}
-              autoCorrect={true}
-              placeholder="Write your note here"
-              onChange={(text) => setText(text)}
+              autoCorrect={true} 
+              placeholder="Write your note here" 
+              onChange={setText}
               initialContentHTML={text}
-              onCursorPosition={handleScroll}
               disabled={!owner}
+              // onCursorPosition={handleCursorPosition}
             />
           </ScrollView>
-        </View>
-      </KeyboardAvoidingView>
-      <LoadingModal visible={isUpdating} />
+        </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
 
 export default EditNoteScreen;
+
+// <LoadingModal visible={isUpdating} />
