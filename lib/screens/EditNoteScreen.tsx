@@ -36,7 +36,6 @@ const user = User.getInstance();
 const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   route,
   navigation,
-  insertImageToEditor,
 }) => {
   const { note, onSave } = route.params;
   const [title, setTitle] = useState(note.title);
@@ -59,7 +58,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const richTextRef = useRef<RichEditor | null>(null);
   const [isTime, setIsTime] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [editorHeight, setEditorHeight] = useState('100%');
+  const [editorHeight, setEditorHeight] = useState(300);
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -100,19 +99,13 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   }, []);
 
   useEffect(() => {
-    updateEditorHeight();
-    // Optionally set up an event listener for window resizing or orientation changes
-  }, [/* dependencies such as the content itself or screen size changes */]);
-
-  useEffect(() => {
     const checkOwner = async () => {
       setOwner(creator === (await user.getId()));
     };
     checkOwner();
   }, [creator]);
 
-  /*
-  const handleScroll = (position) => {
+  const handleScroll = (position: { relativeY: any; absoluteY: number; }) => {
     if (keyboardOpen && scrollViewRef.current) {
       const viewportHeight = Dimensions.get('window').height - keyboardHeight;
       const cursorRelativePosition = position.relativeY;
@@ -126,22 +119,14 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       }
     }
   };
-  */
 
-  /*
-  const updateEditorHeight = () => {
-    if (richTextRef.current) {
-      const contentHeight = richTextRef.current.getContentHeight();
-      const screenHeight = Dimensions.get('window').height;
-
-      if (contentHeight > screenHeight) {
-        setEditorHeight(contentHeight);
-      } else {
-        setEditorHeight('100%');
-      }
-    }
+  const handleCursorPosition = (cursorPosition: { y: number; }) => {
+    scrollViewRef.current?.scrollTo({
+      y: cursorPosition.y - 30,  // Adjust '30' based on your needs
+      animated: true
+    });
   };
-  */
+
 
   const photoScrollerRef = useRef<{ goBig(index: number): void } | null>(
     null
@@ -180,8 +165,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         height: 'auto'
     };
 
-    // Assuming insertImage is a method that inserts an image and then you can manually
-    // add HTML content to ensure new line and cursor position
     const imgHtml = `<img src="${imageUri}" style="max-width: 50%; height: auto;"><br><br>`;
     richTextRef.current?.insertHTML(imgHtml);
 
@@ -190,8 +173,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             scrollViewRef.current?.scrollToEnd({ animated: true });
         }, 500);
     }
-};
-
+  };
 
   const addVideoToEditor = async (videoUri: string) => {
     try {
@@ -200,14 +182,11 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       const videoHtml = `
         <video width="320" height="240" controls poster="${thumbnailUri}" id="videoElement">
           <source src="${videoUri}" type="video/mp4">
-          Your browser does not support the video tag.
         </video>
         <p><a href="${videoUri}" target="_blank">${videoUri}</a></p> <!-- Make the URI clickable -->
         <script>
           document.getElementById('videoElement').addEventListener('play', function(e) {
-            // Preventing the rich text editor from gaining focus when the video is played
             e.preventDefault();
-            // Assuming you have a way to send a message to your React Native environment
             window.ReactNativeWebView.postMessage('videoPlayed');
           });
         </script>
@@ -257,7 +236,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#161A1D' }}>
       <View style={NotePageStyles().topContainer}>
 
         <View style={NotePageStyles().topButtonsContainer}>
@@ -408,37 +387,41 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           )}
           </View>
       </View>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }} // Full height
-        behavior={Platform.OS === "ios" ? "padding" : "padding"} 
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20} 
-      >
+        <KeyboardAvoidingView
+          style={{ flex: 1 }} // Full height
+          behavior={Platform.OS === "ios" ? "padding" : "padding"} 
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20} 
+        >
           <ScrollView
             nestedScrollEnabled={true}
             showsVerticalScrollIndicator={false}
             ref={scrollViewRef}
+            // useContainer={true}
           >
             <RichEditor
-              ref={richTextRef}
-              style={[NotePageStyles().editor, { minHeight: 2500 }]}
+              ref={richTextRef}  
+              style={[NotePageStyles().editor, { minHeight: 10000 }]}
               editorStyle={{
+                contentCSSText: `
+                  position: absolute;
+                  top: 0; right: 0; bottom: 0; left: 0;
+                `,
                 backgroundColor: theme.primaryColor,
                 color: theme.text,
               }}
-              autoCorrect={true}
-              placeholder="Write your note here"
-              onChange={(text) => {
-                setText(text);
-                // updateEditorHeight();  // Update height whenever text changes
-              }}
+              autoCorrect={true} 
+              placeholder="Write your note here" 
+              onChange={setText}
               initialContentHTML={text}
               disabled={!owner}
+              // onCursorPosition={handleCursorPosition}
             />
           </ScrollView>
-      </KeyboardAvoidingView>
-      <LoadingModal visible={isUpdating} />
+        </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
 
 export default EditNoteScreen;
+
+// <LoadingModal visible={isUpdating} />

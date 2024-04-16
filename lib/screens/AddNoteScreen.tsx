@@ -269,7 +269,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   };
 
   return (
-      <SafeAreaView style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#161A1D' }}>
         <View style={NotePageStyles().topContainer}>
   
           <View style={NotePageStyles().topButtonsContainer}>
