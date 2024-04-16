@@ -10,7 +10,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
-  Dimensions
+  Dimensions,
+  Alert
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Note } from "../../types";
@@ -25,6 +26,7 @@ import TagWindow from "../components/tagging";
 import LocationWindow from "../components/location";
 import TimeWindow from "../components/time";
 import { RichEditor, RichToolbar, actions } from "react-native-pell-rich-editor";
+import TenTapEditor from "10tap-editor";
 import NotePageStyles from "../../styles/pages/NoteStyles";
 import ToastMessage from 'react-native-toast-message';
 import { useTheme } from "../components/ThemeProvider";
@@ -54,6 +56,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const [keyboardOpen, setKeyboard] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isLocation, setIsLocation] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
   const richTextRef = useRef<RichEditor | null>(null);
   const [isTime, setIsTime] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -86,6 +89,9 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         setKeyboardHeight(0);
       }
     );
+    const timeout = setTimeout(() => {
+      setInitialLoad(false);
+    }, 1000); // Adjust delay as needed
 
     return () => {
       keyboardDidShowListener.remove();
@@ -145,7 +151,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         });
     }
   };
-  
+
   const addImageToEditor = (imageUri: string) => {
     const customStyle = `
       max-width: 50%;
@@ -158,17 +164,16 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   
     richTextRef.current?.insertHTML(imgTag);
   
-    // Add a delay before updating the text state
-    setTimeout(() => {
-      if (scrollViewRef.current) {
-        scrollViewRef.current.scrollToEnd({ animated: true });
-      }
-    }, 500); // Adjust the delay as needed
+    if (scrollViewRef.current && !initialLoad) {
+      // Adjust this timeout and calculation as necessary
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 500);
+    }
   };
 
   const addVideoToEditor = async (videoUri: string) => {
     try {
-      // Fetch the thumbnail URI
       const thumbnailUri = await getThumbnail(videoUri);
   
       const videoHtml = `
@@ -228,6 +233,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       setIsUpdating(false); 
     }
   };
+  
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
