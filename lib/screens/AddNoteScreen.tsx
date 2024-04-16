@@ -511,10 +511,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           </View>
         </KeyboardAvoidingView>
       <LoadingModal visible={isUpdating} />
-
-      </SafeAreaView>
+    </SafeAreaView>
   );
-
 };
 
 export default AddNoteScreen;
