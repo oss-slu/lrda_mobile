@@ -106,6 +106,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     }
   };
 
+  /*
   const handleCursorPosition = (position) => {
     if (scrollViewRef.current && keyboardOpen) {
       const editorBottomY = position.absoluteY + position.height;
@@ -117,6 +118,18 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           animated: true,
         });
       }
+    }
+  };
+  */
+
+  const handleScroll = (position) => {
+    const additionalOffset = 80;
+    const offsetPosition = position - additionalOffset;
+
+    if (offsetPosition > 0) {
+      scrollViewRef.current?.scrollTo({ y: offsetPosition, animated: true });
+    } else {
+      scrollViewRef.current?.scrollTo({ y: 0, animated: true });
     }
   };
 
@@ -478,37 +491,34 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         </View>
         
         <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={{ flex: 1 }}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 20}
+          style={{ flex: 1 }} // Full height
+          behavior={Platform.OS === "ios" ? "padding" : "padding"} 
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20} 
         >
-          <View style={[NotePageStyles().editorContainer, { flex: 1 }]}>
-            <ScrollView
-              nestedScrollEnabled={true}
-              showsVerticalScrollIndicator={false}
-              style={{ flex: 1 }}
-              ref={scrollViewRef}
-              contentContainerStyle={{ paddingBottom: keyboardOpen ? keyboardHeight : 20 }}
-            >
-              <RichEditor data-testid="RichEditor"
-                ref={(r) => (richTextRef.current = r)}
-                style={[NotePageStyles().editor, {flex: 1, minHeight: 650 }]}
-                editorStyle={{
-                  contentCSSText: `
-                    position: absolute; 
-                    top: 0; right: 0; bottom: 0; left: 0;
-                  `,
-                  backgroundColor: theme.primaryColor,
-                  color: theme.text,
-                }}
-                autoCorrect={true}
-                placeholder="Write your note here"
-                onChange={(text) => setBodyText(text)}
-                initialContentHTML={bodyText}
-                onCursorPosition={handleCursorPosition}
-              />
-            </ScrollView>
-          </View>
+          <ScrollView
+            nestedScrollEnabled={true}
+            showsVerticalScrollIndicator={false}
+            style={{ flex: 1 }}
+            ref={scrollViewRef}
+          >
+            <RichEditor data-testid="RichEditor"
+              ref={(r) => (richTextRef.current = r)}
+              style={[NotePageStyles().editor, {flex: 1, minHeight: 3500 }]}
+              editorStyle={{
+                contentCSSText: `
+                  position: absolute; 
+                  top: 0; right: 0; bottom: 0; left: 0;
+                `,
+                backgroundColor: theme.primaryColor,
+                color: theme.text,
+              }}
+              autoCorrect={true}
+              placeholder="Write your note here"
+              onChange={(text) => setBodyText(text)}
+              initialContentHTML={bodyText}
+              onCursorPosition={handleScroll}
+            />
+          </ScrollView>
         </KeyboardAvoidingView>
       <LoadingModal visible={isUpdating} />
     </SafeAreaView>

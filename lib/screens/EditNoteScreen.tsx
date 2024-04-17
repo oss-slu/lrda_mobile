@@ -57,6 +57,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const richTextRef = useRef<RichEditor | null>(null);
   const [isTime, setIsTime] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [cursorPosition, setCursorPosition] = useState(0);
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -100,21 +101,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     checkOwner();
   }, [creator]);
 
-  const handleScroll = (position) => {
-    if (keyboardOpen && scrollViewRef.current) {
-      const viewportHeight = Dimensions.get('window').height - keyboardHeight;
-      const cursorRelativePosition = position.relativeY;
-      const spaceBelowCursor = viewportHeight - cursorRelativePosition;
-
-      if (spaceBelowCursor < keyboardHeight) {
-        scrollViewRef.current.scrollTo({
-          y: position.absoluteY - spaceBelowCursor + keyboardHeight,
-          animated: true,
-        });
-      }
-    }
-  };
-
   const photoScrollerRef = useRef<{ goBig(index: number): void } | null>(
     null
   );
@@ -126,19 +112,30 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   };
 
   const handleShareButtonPress = () => {
-    setIsPublished(!isPublished);  // Toggle the share status
+    setIsPublished(!isPublished);
     ToastMessage.show({
       type: 'success',
       text1: 'Note Published',
-      visibilityTime: 3000 // 3 seconds
+      visibilityTime: 3000 
     });
+  };
+
+  const handleScroll = (position) => {
+    const additionalOffset = 80;
+    const offsetPosition = position - additionalOffset;
+
+    if (offsetPosition > 0) {
+      scrollViewRef.current?.scrollTo({ y: offsetPosition, animated: true });
+    } else {
+      scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+    }
   };
 
   const updateBodyText = () => {
     if (richTextRef.current) {
       richTextRef.current.getContentHtml()
         .then(html => {
-          setText(html); // Update the state with the latest content
+          setText(html); 
         })
         .catch(error => {
           console.error('Error getting content from RichEditor:', error);
@@ -383,37 +380,36 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
 
       </View>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
+        style={{ flex: 1 }} // Full height
+        behavior={Platform.OS === "ios" ? "padding" : "padding"} 
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20} 
       >
-        <View style={[NotePageStyles().editorContainer, { flex: 1 }]}>
-          <ScrollView
-            nestedScrollEnabled={true}
-            showsVerticalScrollIndicator={false}
-            style={{ flex: 1 }}
-            ref={scrollViewRef}
-          >
-            <RichEditor
-              ref={(r) => (richTextRef.current = r)}
-              style={[NotePageStyles().editor, {flex: 1, minHeight: 650 }]}
-              editorStyle={
-              {
-                contentCSSText: `
-                  position: absolute; 
-                  top: 0; right: 0; bottom: 0; left: 0;
-                `,
-                backgroundColor: theme.primaryColor,
-                color: theme.text,
-              }}
-              autoCorrect={true}
-              placeholder="Write your note here"
-              onChange={(text) => setText(text)}
-              initialContentHTML={text}
-              onCursorPosition={handleScroll}
-              disabled={!owner}
-            />
-          </ScrollView>
-        </View>
+        <ScrollView
+          nestedScrollEnabled={true}
+          showsVerticalScrollIndicator={false}
+          style={{ flex: 1 }}
+          ref={scrollViewRef}
+        >
+          <RichEditor
+            ref={(r) => (richTextRef.current = r)}
+            style={[NotePageStyles().editor, {flex: 1, minHeight: 3500 }]}
+            editorStyle={
+            {
+              contentCSSText: `
+                position: absolute; 
+                top: 0; right: 0; bottom: 0; left: 0;
+              `,
+              backgroundColor: theme.primaryColor,
+              color: theme.text,
+            }}
+            autoCorrect={true}
+            placeholder="Write your note here"
+            onChange={(text) => setText(text)}
+            initialContentHTML={text}
+            onCursorPosition={handleScroll}
+            disabled={!owner}
+          />
+        </ScrollView>
       </KeyboardAvoidingView>
       <LoadingModal visible={isUpdating} />
     </SafeAreaView>
