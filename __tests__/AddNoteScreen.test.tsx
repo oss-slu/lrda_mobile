@@ -43,8 +43,13 @@ describe("AddNoteScreen", () => {
 
   beforeEach(() => {
     setNoteContentMock = jest.fn();
+    const routeMock = {
+      params: {
+        untitledNumber: 1
+      }
+    };
     React.useState = jest.fn(() => ['', setNoteContentMock]);
-    wrapper = shallow(<AddNoteScreen />);
+    wrapper = shallow(<AddNoteScreen route={routeMock} />);
   });
 
   afterEach(() => {
@@ -58,10 +63,15 @@ describe("AddNoteScreen", () => {
   it('calls setNoteContent when the Rich Text Editor content changes', () => {
     // Set up the mock function
     const setNoteContentMock = jest.fn();
+    const routeMock = {
+      params: {
+        untitledNumber: 1
+      }
+    };
   
     // Shallow render the AddNoteScreen component and pass the mock function as a prop
     // Ensure that this matches how your actual component receives the setNoteContent prop
-    const wrapper = shallow(<AddNoteScreen setNoteContent={setNoteContentMock} />);
+    const wrapper = shallow(<AddNoteScreen route= {routeMock} setNoteContent={setNoteContentMock} />);
   
     // Simulate the content change on the Rich Text Editor component
     // The selector needs to match the test ID or the component name/class
