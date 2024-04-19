@@ -10,8 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
-  Dimensions,
-  Alert
+  Dimensions
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Note } from "../../types";
@@ -26,7 +25,6 @@ import TagWindow from "../components/tagging";
 import LocationWindow from "../components/location";
 import TimeWindow from "../components/time";
 import { RichEditor, RichToolbar, actions } from "react-native-pell-rich-editor";
-import TenTapEditor from "10tap-editor";
 import NotePageStyles from "../../styles/pages/NoteStyles";
 import ToastMessage from 'react-native-toast-message';
 import { useTheme } from "../components/ThemeProvider";
@@ -94,9 +92,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         setKeyboardHeight(0);
       }
     );
-    const timeout = setTimeout(() => {
-      setInitialLoad(false);
-    }, 1000); // Adjust delay as needed
 
     return () => {
       keyboardDidShowListener.remove();
@@ -177,7 +172,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         });
     }
   };
-
+  
   const addImageToEditor = (imageUri: string) => {
     const customStyle = `
       max-width: 50%;
@@ -190,16 +185,17 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   
     richTextRef.current?.insertHTML(imgTag);
   
-    if (scrollViewRef.current && !initialLoad) {
-      // Adjust this timeout and calculation as necessary
-      setTimeout(() => {
-        scrollViewRef.current?.scrollToEnd({ animated: true });
-      }, 500);
-    }
+    // Add a delay before updating the text state
+    setTimeout(() => {
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollToEnd({ animated: true });
+      }
+    }, 500); // Adjust the delay as needed
   };
 
   const addVideoToEditor = async (videoUri: string) => {
     try {
+      // Fetch the thumbnail URI
       const thumbnailUri = await getThumbnail(videoUri);
   
       const videoHtml = `
@@ -263,8 +259,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   };
   
   const handleSaveNote = async () => {
-    setIsUpdating(true);
-  
     try {
       let userLocation = await getLocation();
       const finalLatitude = !isLocationShown ? userLocation?.coords.latitude.toString() || "" : "0";
@@ -272,30 +266,26 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
 
       const editedNote: Note = {
         id: note.id,
-        title: title,
-        text: text,
+        title,
+        text,
         creator: (await user.getId()) || "",
         media,
         latitude: finalLatitude,
         longitude: finalLongitude,
         audio: newAudio,
         published: isPublished,
-        time: time,
-        tags: tags,
+        time,
+        tags,
       };
-  
+
       await ApiService.overwriteNote(editedNote);
-  
+
       onSave(editedNote);
-  
       navigation.goBack();
     } catch (error) {
       console.error("Error updating the note:", error);
-    } finally {
-      setIsUpdating(false); 
     }
   };
-  
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -483,7 +473,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
-      <LoadingModal visible={isUpdating} />
+
     </SafeAreaView>
   );
 };
