@@ -38,6 +38,8 @@ const user = User.getInstance();
 
 const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [titleText, setTitleText] = useState("");
+  const [isSaveButtonEnabled, setIsSaveButtonEnabled] = useState(true);
+  const [untitledNumber, setUntitledNumber] = useState("0");
   const [bodyText, setBodyText] = useState("");
   const [newMedia, setNewMedia] = useState<Media[]>([]);
   const [newAudio, setNewAudio] = useState<AudioType[]>([]);
@@ -56,13 +58,14 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const [initialLoad, setInitialLoad] = useState(true);
   const [promptedMissingTitle, setPromptedMissingTitle] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [location, setLocation] = useState<{
+  const [isLocationIconPressed, setIsLocationIconPressed] = useState(false);
+  let [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
 
   const { theme } = useTheme();
-
+  
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -93,6 +96,15 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   useEffect(() => {
     checkLocationPermission();
   }, []);
+
+  useEffect(() => {
+    const { untitledNumber } = route.params;
+    if (untitledNumber) {
+      setUntitledNumber(untitledNumber.toString());
+    }
+  }, [route.params]);
+
+  const [isLocationShown, setIsLocationShown] = useState(true);
 
   const grabLocation = async () => {
     try {
@@ -194,6 +206,60 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     });
   };
 
+  const [latitude, setLatitude] = useState(
+    location?.latitude?.toString() || ""
+  );
+  const [longitude, setLongitude] = useState(
+    location?.longitude?.toString() || ""
+  );
+
+  async function getLocation() {
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
+        return null;
+      }
+      return await Location.getCurrentPositionAsync({});
+    } catch (error) {
+      console.error("Error getting location:", error);
+      return null;
+    }
+  }
+
+  const toggleLocationVisibility = async () => {
+    if (isLocationShown) {
+      // Hide Location
+      setLocation({
+        latitude: 0,
+        longitude: 0,
+      });
+      setLatitude("0");
+      setLongitude("0");
+    } else {
+      // Show Location
+      try {
+        let userLocation = await getLocation();
+    
+        if (userLocation?.coords?.latitude !== undefined && userLocation?.coords?.longitude !== undefined) {
+          setLocation({
+            latitude: userLocation.coords.latitude,
+            longitude: userLocation.coords.longitude,
+          });
+    
+          setLatitude(userLocation.coords.latitude.toString());
+          setLongitude(userLocation.coords.longitude.toString());
+        } else {
+          console.log("Location data is not available.");
+        }
+      } catch (error) {
+        console.error("Error setting location:", error);
+      }
+    }
+    setIsLocationShown((prev) => !prev);
+    setIsLocationIconPressed((prev) => !prev);
+  };
+
   const checkLocationPermission = async () => {
     try {
       let { status } = await Location.getForegroundPermissionsAsync();
@@ -234,18 +300,23 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
 
   const saveNote = async () => {
     const locationPermissionGranted = await checkLocationPermission();
-    if (titleText === "") {
-      if (!promptedMissingTitle) {
-        setPromptedMissingTitle(true);
-        Alert.alert(
-          "Title is empty",
-          "Please enter a title to save the note, or press back again to confirm not saving the note.",
-        );
-        return;
-      } else {
-        navigation.goBack();
-        return;
-      }
+    setIsSaveButtonEnabled(false);
+    let finalTitle = titleText.trim();
+    if (finalTitle === "") {
+      finalTitle = `Untitled ${untitledNumber}`;
+    }
+
+    if (finalTitle.trim() === "") {
+      Alert.alert(
+        "Empty Title",
+        "Please enter a title to save the note or delete the note.",
+        [
+          { text: "Delete Note", onPress: () => navigation.goBack() },
+          { text: "OK", onPress: () => console.log("OK Pressed") }
+        ],
+        { cancelable: false }
+      );
+      return;
     }
     if (!locationPermissionGranted) {
       return; 
@@ -254,26 +325,21 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
       setIsUpdating(true);
 
       try {
-        const userLocation = await Location.getCurrentPositionAsync({});
         const userID = await user.getId();
-        let latitude, longitude;
-        
-        if (Platform.OS === 'ios') {
-          latitude = location?.latitude.toString();
-          longitude = location?.longitude.toString();
-        } else if (Platform.OS === 'android') {
-          latitude = userLocation.coords.latitude.toString();
-          longitude = userLocation.coords.longitude.toString();
-        }
-        
+        const userLocation = await Location.getCurrentPositionAsync({});
+        const latitudeToSave = location ? location.latitude.toString() : userLocation.coords.latitude.toString();
+        const longitudeToSave = location ? location.longitude.toString() : userLocation.coords.longitude.toString();
+  
+        setTime(new Date()); // force a fresh time date grab on note save
+  
         const newNote = {
-          title: titleText,
+          title: finalTitle,
           text: bodyText,
           media: newMedia,
           audio: newAudio,
           creator: userID,
-          latitude: latitude,
-          longitude: longitude,
+          latitude: latitudeToSave,
+          longitude: longitudeToSave,
           published: isPublished,
           tags: tags,
           time: time,
@@ -291,6 +357,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         setIsUpdating(false); 
       }
     }
+    setIsSaveButtonEnabled(true);
   };
 
   return (
@@ -298,7 +365,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         <View style={NotePageStyles().topContainer}>
   
           <View style={NotePageStyles().topButtonsContainer}>
-            <TouchableOpacity style={NotePageStyles().topButtons} onPress={saveNote} testID="checklocationpermission">
+            <TouchableOpacity style={NotePageStyles().topButtons} disabled={!isSaveButtonEnabled} onPress={saveNote} testID="checklocationpermission">
               <Ionicons name="arrow-back-outline" size={30} color={NotePageStyles().saveText.color} />
             </TouchableOpacity>
             <TextInput
@@ -353,11 +420,13 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
                 setViewMedia(false);
                 setViewAudio(false);
                 setIsTagging(false);
-                setIsLocation(!isLocation);
+                //setIsLocation(!isLocation);
+                toggleLocationVisibility();
                 setIsTime(false);
+
               }}
             >
-            <Ionicons name="location-outline" size={30} color={NotePageStyles().saveText.color} />
+            <Ionicons name="location-outline" size={30} color={isLocationIconPressed ? "red" : NotePageStyles().saveText.color} />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
