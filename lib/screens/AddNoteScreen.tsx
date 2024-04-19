@@ -299,6 +299,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   };
 
   const saveNote = async () => {
+    const locationPermissionGranted = await checkLocationPermission();
     setIsSaveButtonEnabled(false);
     let finalTitle = titleText.trim();
     if (finalTitle === "") {
@@ -324,6 +325,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
       setIsUpdating(true);
 
       try {
+        const userID = await user.getId();
         const userLocation = await Location.getCurrentPositionAsync({});
         const latitudeToSave = location ? location.latitude.toString() : userLocation.coords.latitude.toString();
         const longitudeToSave = location ? location.longitude.toString() : userLocation.coords.longitude.toString();
