@@ -28,6 +28,7 @@ import { RichEditor, RichToolbar, actions } from "react-native-pell-rich-editor"
 import NotePageStyles from "../../styles/pages/NoteStyles";
 import ToastMessage from 'react-native-toast-message';
 import { useTheme } from "../components/ThemeProvider";
+import LoadingModal from "../components/LoadingModal";
 import * as Location from 'expo-location';
 
 
@@ -61,6 +62,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     note.latitude === "0" && note.longitude === "0" );
   const richTextRef = useRef<RichEditor | null>(null);
   const [isTime, setIsTime] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   let [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -259,6 +261,8 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   };
   
   const handleSaveNote = async () => {
+    setIsUpdating(true);
+  
     try {
       let userLocation = await getLocation();
       const finalLatitude = !isLocationShown ? userLocation?.coords.latitude.toString() || "" : "0";
@@ -266,24 +270,27 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
 
       const editedNote: Note = {
         id: note.id,
-        title,
-        text,
+        title: title,
+        text: text,
         creator: (await user.getId()) || "",
         media,
         latitude: finalLatitude,
         longitude: finalLongitude,
         audio: newAudio,
         published: isPublished,
-        time,
-        tags,
+        time: time,
+        tags: tags,
       };
-
+  
       await ApiService.overwriteNote(editedNote);
-
+  
       onSave(editedNote);
+  
       navigation.goBack();
     } catch (error) {
       console.error("Error updating the note:", error);
+    } finally {
+      setIsUpdating(false); 
     }
   };
 
@@ -473,7 +480,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
-
+      <LoadingModal visible={isUpdating} />
     </SafeAreaView>
   );
 };

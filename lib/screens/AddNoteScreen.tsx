@@ -32,6 +32,7 @@ import {
 } from "react-native-pell-rich-editor";
 import NotePageStyles from "../../styles/pages/NoteStyles";
 import { useTheme } from "../components/ThemeProvider";
+import LoadingModal from "../components/LoadingModal";
 
 const user = User.getInstance();
 
@@ -56,6 +57,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
   const scrollViewRef = useRef<ScrollView | null>(null);
   const [initialLoad, setInitialLoad] = useState(true);
   const [promptedMissingTitle, setPromptedMissingTitle] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [isLocationIconPressed, setIsLocationIconPressed] = useState(false);
   let [location, setLocation] = useState<{
     latitude: number;
@@ -315,15 +317,13 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
       );
       return;
     }
-  
-    const locationPermissionGranted = await checkLocationPermission();
     if (!locationPermissionGranted) {
-      return; // Stop saving the note if location permission is not granted
-    } else {
+      return; 
+    }
+    else {
+      setIsUpdating(true);
+
       try {
-        const userID = await user.getId();
-  
-        // Grab user's current location
         const userLocation = await Location.getCurrentPositionAsync({});
         const latitudeToSave = location ? location.latitude.toString() : userLocation.coords.latitude.toString();
         const longitudeToSave = location ? location.longitude.toString() : userLocation.coords.longitude.toString();
@@ -351,13 +351,12 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         navigation.goBack();
       } catch (error) {
         console.error("An error occurred while creating the note:", error);
+      } finally {
+        setIsUpdating(false); 
       }
     }
     setIsSaveButtonEnabled(true);
   };
-
-  
-  
 
   return (
       <SafeAreaView style={{ flex: 1 }}>
@@ -578,15 +577,9 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
             </ScrollView>
           </View>
         </KeyboardAvoidingView>
-
-
-      </SafeAreaView>
+      <LoadingModal visible={isUpdating} />
+    </SafeAreaView>
   );
-
 };
 
 export default AddNoteScreen;
-
-export function addVideoToEditor(mockVideoUri: string) {
-  throw new Error('Function not implemented.');
-}
