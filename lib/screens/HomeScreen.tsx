@@ -20,8 +20,9 @@ import { SwipeListView } from "react-native-swipe-list-view";
 import NoteSkeleton from "../components/noteSkeleton";
 import LoadingImage from "../components/loadingImage";
 import { formatToLocalDateString } from "../components/time";
-import { ThemeProvider, useTheme } from '../components/ThemeProvider';
+import { useTheme } from '../components/ThemeProvider';
 import Constants from "expo-constants";
+import ToastMessage from 'react-native-toast-message';
 import DropDownPicker from 'react-native-dropdown-picker';
 import NoteDetailModal from "./mapPage/NoteDetailModal";
 
@@ -145,6 +146,21 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     setReversed(!reversed);
     setUpdateCounter(updateCounter + 1);
   };
+
+  const findNextUntitledNumber = (notes : Note[]) => {
+    let maxNumber = 0;
+    notes.forEach((note) => {
+      const match = note.title.match(/^Untitled (\d+)$/);
+      if (match) {
+        const number = parseInt(match[1]);
+        if (number > maxNumber) {
+          maxNumber = number;
+        }
+      }
+    });
+    return maxNumber + 1;
+  };
+  
 
   const styles = StyleSheet.create({
     container: {
@@ -454,6 +470,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                 imageURI={ImageURI}
                 type={ImageType}
                 isImage={true}
+                useCustomDimensions={true}
+                customWidth={100}
+                customHeight={100}
               />
             </View>
           ) : (
@@ -571,7 +590,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         {rendering ? <NoteSkeleton /> : renderList(notes)}
         <TouchableOpacity
           style={styles.addButton}
-          onPress={() => navigation.navigate("AddNote", { refreshPage })}
+          onPress={() => {
+            const untitledNumber = findNextUntitledNumber(notes);
+            navigation.navigate("AddNote", { untitledNumber, refreshPage });
+          }}
         >
           <Ionicons name="add-outline" size={32} color={theme.primaryColor} style={{ fontFamily: 'Ionicons_' }} />
         </TouchableOpacity>
