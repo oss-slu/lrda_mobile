@@ -13,6 +13,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { Snackbar } from "react-native-paper";
 import { User } from "../../models/user_class";
 import { removeItem } from "../../utils/async_storage";
+import auth0 from '../../auth0/auth0.js';
 
 const user = User.getInstance();
 
@@ -59,28 +60,65 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
     })();
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      try {
+        // Check if a session already exists
+        const session = await auth0.auth.getSession();
+        if (session) {
+          navigation.navigate("HomeTab", { screen: "Home" });
+        }
+      } catch (error) {
+        console.log("Failed to get session:", error);
+      }
+    })();
+  }, []);
+
   const handleGoRegister = () => {
     navigation.navigate("Register");
   };
 
   const onDismissSnackBar = () => toggleSnack(false);
 
+  // const handleLogin = async () => {
+  //   if (username === "" || password === "") {
+  //     toggleSnack(!snackState);
+  //   } else {
+  //     try {
+  //       const status = await user.login(username, password);
+  //       console.log("Login status:", status); // Log the login status
+  //       const userId = await user.getId();
+  //       console.log("User ID after login:", userId); // Log the user ID
+  //       if (status == "success") {
+  //         setUsername("");
+  //         setPassword("");
+  //       }
+  //     } catch (error) {
+  //       toggleSnack(true);
+  //     }
+  //   }
+  // };
+
   const handleLogin = async () => {
-    if (username === "" || password === "") {
-      toggleSnack(!snackState);
-    } else {
-      try {
-        const status = await user.login(username, password);
-        console.log("Login status:", status); // Log the login status
-        const userId = await user.getId();
-        console.log("User ID after login:", userId); // Log the user ID
-        if (status == "success") {
-          setUsername("");
-          setPassword("");
-        }
-      } catch (error) {
-        toggleSnack(true);
-      }
+    try {
+      await auth0.webAuth.authorize({
+        scope: 'openid profile email'
+      });
+      // On successful login, navigate to the home screen
+      navigation.navigate("HomeTab", { screen: "Home" });
+    } catch (error) {
+      console.log("Authentication error:", error);
+      toggleSnack(true); // Optionally show an error message
+    }
+  };
+  
+  const handleLogout = async () => {
+    try {
+      await auth0.webAuth.clearSession({});
+      console.log("Logged out successfully");
+      // Additional cleanup or navigation can be performed here
+    } catch (error) {
+      console.log("Logout failed:", error);
     }
   };
 

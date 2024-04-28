@@ -17,20 +17,12 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "register.edu.slu.cs.oss.lrda",
-      "config": {
-        "googleMapsApiKey": ""
-      },
       "buildNumber": "12"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      },
-      "config": {
-        "googleMaps": {
-          "apiKey": ""
-        }
       },
       "package": "register.edu.slu.cs.oss.lrda",
       "versionCode": 1
@@ -42,11 +34,20 @@
       "policy": "sdkVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/801029ef-db83-4668-a97a-5adcc4c333e2"
-
+      "url": "https://u.expo.dev/86ab2744-3978-4375-95c3-ff3918037148"
     },
     "extra": {
-
-    }
+      "eas": {
+        "projectId": "86ab2744-3978-4375-95c3-ff3918037148"
+      }
+    },
+    "plugins": [
+      [
+        "react-native-auth0",
+        {
+          "domain": "cubap.auth0.com"
+        }
+      ]
+    ]
   }
 }
