@@ -66,6 +66,8 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   const onDismissSnackBar = () => toggleSnack(false);
 
   const handleLogin = async () => {
+    // This is the login function that needs to be changed
+
     if (username === "" || password === "") {
       toggleSnack(!snackState);
     } else {
