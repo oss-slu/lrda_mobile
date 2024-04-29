@@ -60,6 +60,7 @@ export class User {
           method: "POST",
           mode: "cors",
           cache: "no-cache",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json;charset=utf-8",
           },
