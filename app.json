@@ -47,6 +47,14 @@
     },
     "extra": {
 
-    }
+    },
+    "plugins": [
+      [
+        "react-native-auth0",
+        {
+          "domain": "cubap.auth0.com"
+        }
+      ]
+    ]
   }
 }

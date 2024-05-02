@@ -15,6 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
 import { useTheme } from "../components/ThemeProvider";
 import Accordion from "@gapur/react-native-accordion";
+import {useAuth0, Auth0Provider} from 'react-native-auth0';
 
 const user = User.getInstance();
 const { width, height } = Dimensions.get("window");
@@ -22,6 +23,7 @@ const { width, height } = Dimensions.get("window");
 export default function MorePage() {
 
   const { theme, isDarkmode, setIsDarkmode } = useTheme();
+  const {clearSession} = useAuth0();
 
   const toggleDarkmode = useTheme().toggleDarkmode;
   const handleToggleDarkMode = () => {
@@ -38,6 +40,14 @@ export default function MorePage() {
     )}&body=${encodeURIComponent(body)}`;
 
     Linking.openURL(emailUrl);
+  };
+
+  const onLogoutPress = async () => {
+    try {
+        await clearSession();
+    } catch (e) {
+        console.log(e);
+    }
   };
 
   const styles = StyleSheet.create({
@@ -254,7 +264,7 @@ export default function MorePage() {
           </View>
           </View>
           <View style = {{ backgroundColor: theme.primaryColor , width: '100%', alignItems: 'center'}}>
-            <TouchableOpacity key='Logout' style={styles.logout} onPress={() => user.logout()}>
+            <TouchableOpacity key='Logout' style={styles.logout} onPress={onLogoutPress}/*{() => user.logout()}*/>
               <Text style={styles.logoutText}>Logout</Text>
               <Ionicons name={"log-out-outline"} size={30} color={theme.primaryColor} />
             </TouchableOpacity>
