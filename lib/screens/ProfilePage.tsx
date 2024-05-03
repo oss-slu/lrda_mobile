@@ -29,7 +29,6 @@ export default function ProfilePage({ navigation }: ProfilePageProps) {
   const [userInitials, setUserInitials] = useState("N/A");
   const [userName, setUser] = useState("");
   const { theme } = useTheme();
-  const {userAuth, error} = useAuth0();
 
   useEffect(() => {
     (async () => {
