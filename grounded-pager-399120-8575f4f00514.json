@@ -1,12 +1,1 @@
-{
-  "type": "service_account",
-  "project_id": "grounded-pager-399120",
-  "private_key_id": "8575f4f00514569dfec3c0eebcbbc4504b1a0d94",
-  "client_email": "where-s-religion@grounded-pager-399120.iam.gserviceaccount.com",
-  "client_id": "100787133320962237457",
-  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-  "token_uri": "https://oauth2.googleapis.com/token",
-  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/where-s-religion%40grounded-pager-399120.iam.gserviceaccount.com",
-  "universe_domain": "googleapis.com"
-}
+
