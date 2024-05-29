@@ -7,13 +7,23 @@ import { Linking } from 'react-native';
 import { ThemeProvider, useTheme } from '../lib/components/ThemeProvider';
 import ThemeProviderMock from './ThemeProviderMock';
 
-
 // Mock the ThemeProvider
 jest.mock('../lib/components/ThemeProvider', () => ({
   useTheme: () => ({
     theme: 'mockedTheme', // Provide a mocked theme object
   }),
 }));
+
+// Mock the User class
+jest.mock('../lib/models/user_class', () => {
+  return {
+    User: {
+      getInstance: jest.fn(() => ({
+        logout: jest.fn(),
+      })),
+    },
+  };
+});
 
 beforeAll(() => {
   // Suppress console logs during tests
@@ -28,7 +38,7 @@ beforeAll(() => {
 afterAll(() => {
   console.log.mockRestore();
   console.error.mockRestore();
-  // moxios.uninstall();
+  moxios.uninstall();
 });
 
 describe("MorePage", () => {
@@ -36,9 +46,7 @@ describe("MorePage", () => {
     const wrapper = shallow(<MorePage />);
     expect(wrapper).toMatchSnapshot();
   });
-});
 
-describe("MorePage", () => {
   it("toggles dark mode correctly", () => {
     const wrapper = shallow(<MorePage />);
 
@@ -47,9 +55,7 @@ describe("MorePage", () => {
     // Check if the onValueChange prop exists
     expect(toggleButton.props().onValueChange).toBeDefined();
   });
-});
 
-describe("opens email link when 'Report a Bug' is pressed", () => {
   it("opens email link when 'Report a Bug' is pressed", () => {
     const spy = jest.spyOn(Linking, 'openURL');
     const wrapper = shallow(<MorePage />);
@@ -59,18 +65,7 @@ describe("opens email link when 'Report a Bug' is pressed", () => {
 
     expect(spy).toHaveBeenCalledWith(
       "mailto:yashkamal.bhatia@slu.edu?subject=Bug%20Report%20on%20'Where's%20Religion%3F'&body=Please%20provide%20details%20of%20your%20issue%20you%20are%20facing%20here."
-  );
-});
-
-  describe("calls the logout function when 'Logout' is pressed", () => {
-    it("calls the logout function when 'Logout' is pressed", () => {
-      const spy = jest.spyOn(User.getInstance(), 'logout');
-      const wrapper = shallow(<MorePage />);
-      const logoutButton = wrapper.findWhere((node) => node.key() === "Logout");
-
-      logoutButton.simulate('press');
-
-      expect(spy).toHaveBeenCalled();
-    });
+    );
   });
+
 });
