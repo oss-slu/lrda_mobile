@@ -13,6 +13,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { Snackbar } from "react-native-paper";
 import { User } from "../../models/user_class";
 import { removeItem } from "../../utils/async_storage";
+import {useAuth0, Auth0Provider} from 'react-native-auth0';
 
 const user = User.getInstance();
 
@@ -27,6 +28,8 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   const [firstClick, setFirstClick] = useState(true);
   const [snackState, toggleSnack] = useState(false);
   const fadeAnim = useRef(new Animated.Value(1)).current;
+  const {authorize} = useAuth0();
+  const {clearSession} = useAuth0();
 
   const fadeOut = () => {
     Animated.timing(fadeAnim, {
@@ -94,82 +97,92 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
     }
   };
 
+  const onLoginPress = async () => {
+    try {
+        await authorize();
+    } catch (e) {
+        console.log(e);
+    }
+  };
+
   return (
-    <KeyboardAwareScrollView
-      contentContainerStyle={styles.container}
-      style={{ backgroundColor: "#F4DFCD" }}
-    >
-      <ImageBackground
-        source={require("../../../assets/splash.jpg")}
-        style={styles.imageBackground}
+    <Auth0Provider domain={"{yourDomain}"} clientId={"{yourClientId}"}>
+      <KeyboardAwareScrollView
+        contentContainerStyle={styles.container}
+        style={{ backgroundColor: "#F4DFCD" }}
       >
-        <Snackbar
-          visible={snackState}
-          onDismiss={onDismissSnackBar}
-          style={{
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "white",
-          }}
+        <ImageBackground
+          source={require("../../../assets/splash.jpg")}
+          style={styles.imageBackground}
         >
-          <Text style={{ textAlign: "center" }}>Invalid User Credentials</Text>
-        </Snackbar>
-        {firstClick ? (
-          <TouchableOpacity
-            activeOpacity={1}
-            style={styles.title}
-            onPress={fadeOut}
+          <Snackbar
+            visible={snackState}
+            onDismiss={onDismissSnackBar}
+            style={{
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "white",
+            }}
           >
-            <Animated.Text style={[styles.logo, { opacity: fadeAnim }]}>
-              Where's {"\n"} Religion?
-            </Animated.Text>
-          </TouchableOpacity>
-        ) : (
-          <View style={styles.loginBox}>
-            <Text style={[styles.logo, { marginBottom: 50 }]}>Login</Text>
-            <View style={styles.inputView}>
-              <TextInput
-                style={styles.inputText}
-                placeholder="Username..."
-                placeholderTextColor="#003f5c"
-                value={username}
-                onChangeText={(text) => setUsername(text)}
-                onSubmitEditing={handleLogin}
-              />
+            <Text style={{ textAlign: "center" }}>Invalid User Credentials</Text>
+          </Snackbar>
+          {firstClick ? (
+            <TouchableOpacity
+              activeOpacity={1}
+              style={styles.title}
+              onPress={fadeOut}
+            >
+              <Animated.Text style={[styles.logo, { opacity: fadeAnim }]}>
+                Where's {"\n"} Religion?
+              </Animated.Text>
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.loginBox}>
+              <Text style={[styles.logo, { marginBottom: 50 }]}>Login</Text>
+              <View style={styles.inputView}>
+                <TextInput
+                  style={styles.inputText}
+                  placeholder="Username..."
+                  placeholderTextColor="#003f5c"
+                  value={username}
+                  onChangeText={(text) => setUsername(text)}
+                  onSubmitEditing={handleLogin}
+                />
+              </View>
+              <View style={styles.inputView}>
+                <TextInput
+                  secureTextEntry
+                  style={styles.inputText}
+                  placeholder="Password..."
+                  placeholderTextColor="#003f5c"
+                  value={password}
+                  onChangeText={(text) => setPassword(text)}
+                  onSubmitEditing={handleLogin}
+                />
+              </View>
+              <TouchableOpacity>
+                <Text style={styles.forgot}>Forgot Password?</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress= {onLoginPress}/*{handleLogin}*/  style={styles.buttons}>
+                <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
+                  Login
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.buttons} onPress={handleGoRegister}>
+                <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
+                  Register
+                </Text>
+              </TouchableOpacity>
+              {/* <TouchableOpacity onPress={clearOnboarding} style={styles.buttons}>
+                <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
+                  Clear Onboarding
+                </Text>
+              </TouchableOpacity> */}
             </View>
-            <View style={styles.inputView}>
-              <TextInput
-                secureTextEntry
-                style={styles.inputText}
-                placeholder="Password..."
-                placeholderTextColor="#003f5c"
-                value={password}
-                onChangeText={(text) => setPassword(text)}
-                onSubmitEditing={handleLogin}
-              />
-            </View>
-            <TouchableOpacity>
-              <Text style={styles.forgot}>Forgot Password?</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleLogin} style={styles.buttons}>
-              <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
-                Login
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.buttons} onPress={handleGoRegister}>
-              <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
-                Register
-              </Text>
-            </TouchableOpacity>
-            {/* <TouchableOpacity onPress={clearOnboarding} style={styles.buttons}>
-              <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
-                Clear Onboarding
-              </Text>
-            </TouchableOpacity> */}
-          </View>
-        )}
-      </ImageBackground>
-    </KeyboardAwareScrollView>
+          )}
+        </ImageBackground>
+      </KeyboardAwareScrollView>
+    </Auth0Provider>
   );
 };
 
