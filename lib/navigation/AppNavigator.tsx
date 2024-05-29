@@ -106,7 +106,7 @@ const AppNavigator: React.FC = () => {
               options={{
                 headerShown: false,
                 tabBarIcon: ({ color, size }) => (
-                  <Ionicons name="ios-pencil" color={color} size={size} />
+                  <Ionicons name="pencil" color={color} size={size} />
                 ),
               }}
             />
@@ -116,7 +116,7 @@ const AppNavigator: React.FC = () => {
               options={{
                 headerShown: false,
                 tabBarIcon: ({ color, size }) => (
-                  <Ionicons name="ios-map" color={color} size={size} />
+                  <Ionicons name="map" color={color} size={size} />
                 ),
               }}
             />
