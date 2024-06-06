@@ -47,6 +47,7 @@
     "expo-status-bar": "~1.12.1",
     "expo-updates": "~0.25.11",
     "expo-video-thumbnails": "~8.0.0",
+    "firebase": "^10.12.2",
     "jest": "^29.7.0",
     "jest-expo": "~51.0.1",
     "lottie-ios": "3.4.1",
