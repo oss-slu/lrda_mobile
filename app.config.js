@@ -45,7 +45,13 @@ export default {
       url: "https://u.expo.dev/801029ef-db83-4668-a97a-5adcc4c333e2"
     },
     extra: {
-      apiKey: process.env.API_KEY
+      apiKey: process.env.API_KEY,
+      authDomain: process.env.AUTH_DOMAIN,
+      projectId: process.env.PROJECT_ID,
+      storageBucket: process.env.STORAGE_BUCKET,
+      messagingSenderId: process.env.MESSAGING_SENDER_ID,
+      appId: process.env.APP_ID,
+      measurementId: process.env.MEASUREMENT_ID,
     },
     plugins: [
       ["react-native-auth0", { domain: "cubap.auth0.com" }]
