@@ -9,9 +9,10 @@ import {
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Snackbar } from "react-native-paper";
-import { User } from "../../models/user_class";
-
-const user = User.getInstance();
+import { auth } from "../../config"; 
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import ApiService from "../../utils/api_calls";
+import { validateEmail, validatePassword } from "../../utils/validation";
 
 type RegisterProps = {
   navigation: any;
@@ -19,42 +20,103 @@ type RegisterProps = {
 };
 
 const RegistrationScreen: React.FC<RegisterProps> = ({ navigation, route }) => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
-  const [snackState, toggleSnack] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [snackState, setSnackState] = useState(false);
+  const [snackMessage, setSnackMessage] = useState("");
 
   const handleRegister = async () => {
-    if (username === "" || password === "" || email === "") {
-      toggleSnack(true);
-    } else {
-      // We need to add registration logic here
+    const emailError = validateEmail(email);
+    if (emailError) {
+      setSnackMessage(emailError);
+      setSnackState(true);
+      return;
+    }
+
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      setSnackMessage(passwordError);
+      setSnackState(true);
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setSnackMessage("Passwords do not match");
+      setSnackState(true);
+      return;
+    }
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Create user data in the API
+      const userData = {
+        "@id": user.uid,
+        name: `${firstName} ${lastName}`,
+        roles: {
+          administrator: false,
+          contributor: true,
+        },
+      };
+
+      const response = await ApiService.createUserData(userData);
+
+      if (response.status !== 200) {
+        setSnackMessage("Failed to create user data in API");
+        setSnackState(true);
+        return;
+      }
+
+      setSnackMessage("Signup successful!");
+      setSnackState(true);
+
+      navigation.navigate("Login"); 
+    } catch (error) {
+      setSnackMessage(`Signup failed: ${error}`);
+      setSnackState(true);
     }
   };
 
-  const onDismissSnackBar = () => toggleSnack(false);
+  const onDismissSnackBar = () => setSnackState(false);
 
   return (
-    <KeyboardAwareScrollView contentContainerStyle={styles.container}
-      style={{backgroundColor: '#F4DFCD'}}
-    >
-      <ImageBackground
-        source={require("../../../assets/splash.jpg")}
-        style={styles.imageBackground}
-      >
-       <Snackbar
-        visible={snackState}
-        onDismiss={onDismissSnackBar}
-        style={{
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: "white",
-        }}
-      >
-        <Text style={{ textAlign: "center" }}>All fields are required!</Text>
-      </Snackbar>
+    <KeyboardAwareScrollView contentContainerStyle={styles.container} style={{ backgroundColor: '#F4DFCD' }}>
+      <ImageBackground source={require("../../../assets/splash.jpg")} style={styles.imageBackground}>
+        <Snackbar
+          visible={snackState}
+          onDismiss={onDismissSnackBar}
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "white",
+          }}
+        >
+          <Text style={{ textAlign: "center" }}>{snackMessage}</Text>
+        </Snackbar>
         <View style={styles.loginBox}>
           <Text style={[styles.logo, { marginBottom: 50 }]}>Register</Text>
+          <View style={styles.inputView}>
+            <TextInput
+              style={styles.inputText}
+              placeholder="First Name..."
+              placeholderTextColor="#003f5c"
+              value={firstName}
+              onChangeText={(text) => setFirstName(text)}
+            />
+          </View>
+          <View style={styles.inputView}>
+            <TextInput
+              style={styles.inputText}
+              placeholder="Last Name..."
+              placeholderTextColor="#003f5c"
+              value={lastName}
+              onChangeText={(text) => setLastName(text)}
+            />
+          </View>
           <View style={styles.inputView}>
             <TextInput
               style={styles.inputText}
@@ -66,21 +128,22 @@ const RegistrationScreen: React.FC<RegisterProps> = ({ navigation, route }) => {
           </View>
           <View style={styles.inputView}>
             <TextInput
-              style={styles.inputText}
-              placeholder="Username..."
-              placeholderTextColor="#003f5c"
-              value={username}
-              onChangeText={(text) => setUsername(text)}
-            />
-          </View>
-          <View style={styles.inputView}>
-            <TextInput
               secureTextEntry
               style={styles.inputText}
               placeholder="Password..."
               placeholderTextColor="#003f5c"
               value={password}
               onChangeText={(text) => setPassword(text)}
+            />
+          </View>
+          <View style={styles.inputView}>
+            <TextInput
+              secureTextEntry
+              style={styles.inputText}
+              placeholder="Confirm Password..."
+              placeholderTextColor="#003f5c"
+              value={confirmPassword}
+              onChangeText={(text) => setConfirmPassword(text)}
             />
           </View>
           <TouchableOpacity onPress={handleRegister} style={styles.buttons}>
