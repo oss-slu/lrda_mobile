@@ -18,7 +18,7 @@ export default {
       supportsTablet: true,
       bundleIdentifier: "register.edu.slu.cs.oss.lrda",
       config: {
-        googleMapsApiKey: process.env.API_KEY
+        googleMapsApiKey: process.env.MAP_API_KEY
       },
       buildNumber: "12"
     },
@@ -29,7 +29,7 @@ export default {
       },
       config: {
         googleMaps: {
-          apiKey: process.env.API_KEY
+          apiKey: process.env.MAP_API_KEY
         }
       },
       package: "register.edu.slu.cs.oss.lrda",
