@@ -29,8 +29,11 @@ const RegistrationScreen: React.FC<RegisterProps> = ({ navigation, route }) => {
   const [snackMessage, setSnackMessage] = useState("");
 
   const handleRegister = async () => {
+    console.log('Register button pressed');
+
     const emailError = validateEmail(email);
     if (emailError) {
+      console.log('Email validation error:', emailError);
       setSnackMessage(emailError);
       setSnackState(true);
       return;
@@ -38,20 +41,24 @@ const RegistrationScreen: React.FC<RegisterProps> = ({ navigation, route }) => {
 
     const passwordError = validatePassword(password);
     if (passwordError) {
+      console.log('Password validation error:', passwordError);
       setSnackMessage(passwordError);
       setSnackState(true);
       return;
     }
 
     if (password !== confirmPassword) {
+      console.log('Passwords do not match');
       setSnackMessage("Passwords do not match");
       setSnackState(true);
       return;
     }
 
     try {
+      console.log('Creating user with email:', email);
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
+      console.log('User created successfully:', user.uid);
 
       // Create user data in the API
       const userData = {
@@ -63,20 +70,24 @@ const RegistrationScreen: React.FC<RegisterProps> = ({ navigation, route }) => {
         },
       };
 
+      console.log('Creating user data in API:', userData);
       const response = await ApiService.createUserData(userData);
 
       if (response.status !== 200) {
+        console.log('Failed to create user data in API:', response.status);
         setSnackMessage("Failed to create user data in API");
         setSnackState(true);
         return;
       }
 
+      console.log('Signup successful');
       setSnackMessage("Signup successful!");
       setSnackState(true);
 
       navigation.navigate("Login"); 
     } catch (error) {
-      setSnackMessage(`Signup failed: ${error}`);
+      console.log('Signup failed:', error);
+      setSnackMessage(`Signup failed: ${error.message}`);
       setSnackState(true);
     }
   };
