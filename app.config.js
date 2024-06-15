@@ -45,7 +45,7 @@ export default {
       url: "https://u.expo.dev/801029ef-db83-4668-a97a-5adcc4c333e2"
     },
     extra: {
-      apiKey: process.env.API_KEY,
+      apiKey: process.env.FIREBASE_API_KEY,
       authDomain: process.env.AUTH_DOMAIN,
       projectId: process.env.PROJECT_ID,
       storageBucket: process.env.STORAGE_BUCKET,
