@@ -163,11 +163,11 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
                   Login
                 </Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.buttons} onPress={handleGoRegister}>
+              {/* <TouchableOpacity style={styles.buttons} onPress={handleGoRegister}>
                 <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
                   Register
                 </Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
               {/* <TouchableOpacity onPress={clearOnboarding} style={styles.buttons}>
                 <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
                   Clear Onboarding
