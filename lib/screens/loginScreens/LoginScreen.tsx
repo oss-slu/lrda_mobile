@@ -84,10 +84,9 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
     }
   };
 
-  // this is simply for dev purposes and should be commented out in production
   const clearOnboarding = async () => {
     try {
-      await removeItem("onboarded"); // Replace 'onboarded' with the correct key if different
+      await removeItem("onboarded"); 
       console.log("Onboarding key cleared!");
     } catch (error) {
       console.error("Failed to clear the onboarding key.", error);
