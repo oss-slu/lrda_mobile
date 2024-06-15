@@ -11,6 +11,8 @@ npm-debug.*
 web-build/
 eas.json
 grounded-pager-399120-8575f4f00514.json
+grounded-*
+
 .env
 
 # macOS
