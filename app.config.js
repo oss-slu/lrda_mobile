@@ -20,7 +20,7 @@ export default {
       config: {
         googleMapsApiKey: process.env.API_KEY
       },
-      buildNumber: "12"
+      buildNumber: "13"
     },
     android: {
       adaptiveIcon: {
@@ -45,7 +45,9 @@ export default {
       url: "https://u.expo.dev/801029ef-db83-4668-a97a-5adcc4c333e2"
     },
     extra: {
-      apiKey: process.env.API_KEY
+      eas: {
+        projectId: "801029ef-db83-4668-a97a-5adcc4c333e2"
+      },
     },
   }
 };
