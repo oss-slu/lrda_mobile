@@ -47,8 +47,5 @@ export default {
     extra: {
       apiKey: process.env.API_KEY
     },
-    plugins: [
-      ["react-native-auth0", { domain: "cubap.auth0.com" }]
-    ]
   }
 };
