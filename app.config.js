@@ -42,7 +42,7 @@ export default {
       policy: "sdkVersion"
     },
     updates: {
-      url: "https://u.expo.dev/801029ef-db83-4668-a97a-5adcc4c333e2"
+      url: "https://u.expo.dev/622ba56f-88f9-440e-af87-280abce3b1e8"
     },
     extra: {
       apiKey: process.env.FIREBASE_API_KEY,
@@ -52,6 +52,10 @@ export default {
       messagingSenderId: process.env.MESSAGING_SENDER_ID,
       appId: process.env.APP_ID,
       measurementId: process.env.MEASUREMENT_ID,
+      "eas": {
+        "projectId": "622ba56f-88f9-440e-af87-280abce3b1e8"
+      },
     },
+   
   }
 };
