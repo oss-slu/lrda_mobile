@@ -1,0 +1,52 @@
+diff --git a/node_modules/react-native-webview/apple/RCTConvert+WKDataDetectorTypes.h b/node_modules/react-native-webview/apple/RCTConvert+WKDataDetectorTypes.h
+new file mode 100644
+index 0000000..8ba640a
+--- /dev/null
++++ b/node_modules/react-native-webview/apple/RCTConvert+WKDataDetectorTypes.h
+@@ -0,0 +1,11 @@
++#import <WebKit/WebKit.h>
++
++#import <React/RCTConvert.h>
++
++#if TARGET_OS_IPHONE
++@interface RCTConvert (WKDataDetectorTypes)
++
+++ (WKDataDetectorTypes)WKDataDetectorTypes:(id)json;
++
++@end
++#endif // TARGET_OS_IPHONE
+\ No newline at end of file
+diff --git a/node_modules/react-native-webview/apple/RCTConvert+WKDataDetectorTypes.m b/node_modules/react-native-webview/apple/RCTConvert+WKDataDetectorTypes.m
+new file mode 100644
+index 0000000..975c2ea
+--- /dev/null
++++ b/node_modules/react-native-webview/apple/RCTConvert+WKDataDetectorTypes.m
+@@ -0,0 +1,27 @@
++#import <WebKit/WebKit.h>
++
++#import <React/RCTConvert.h>
++
++#if TARGET_OS_IPHONE
++
++@implementation RCTConvert (WKDataDetectorTypes)
++
++RCT_MULTI_ENUM_CONVERTER(
++     WKDataDetectorTypes,
++     (@{
++       @"none" : @(WKDataDetectorTypeNone),
++       @"phoneNumber" : @(WKDataDetectorTypePhoneNumber),
++       @"link" : @(WKDataDetectorTypeLink),
++       @"address" : @(WKDataDetectorTypeAddress),
++       @"calendarEvent" : @(WKDataDetectorTypeCalendarEvent),
++       @"trackingNumber" : @(WKDataDetectorTypeTrackingNumber),
++       @"flightNumber" : @(WKDataDetectorTypeFlightNumber),
++       @"lookupSuggestion" : @(WKDataDetectorTypeLookupSuggestion),
++       @"all" : @(WKDataDetectorTypeAll),
++     }),
++     WKDataDetectorTypeNone,
++     unsignedLongLongValue)
++
++@end
++
++#endif // TARGET_OS_IPHONE
+\ No newline at end of file
