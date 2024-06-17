@@ -1,11 +1,9 @@
 diff --git a/node_modules/react-native-webview/apple/RCTConvert+WKDataDetectorTypes.h b/node_modules/react-native-webview/apple/RCTConvert+WKDataDetectorTypes.h
 new file mode 100644
-index 0000000..8ba640a
+index 0000000..84a179f
 --- /dev/null
 +++ b/node_modules/react-native-webview/apple/RCTConvert+WKDataDetectorTypes.h
-@@ -0,0 +1,11 @@
-+#import <WebKit/WebKit.h>
-+
+@@ -0,0 +1,9 @@
 +#import <React/RCTConvert.h>
 +
 +#if TARGET_OS_IPHONE
