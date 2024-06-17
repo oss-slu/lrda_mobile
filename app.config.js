@@ -44,6 +44,7 @@ export default {
     updates: {
       url: "https://u.expo.dev/622ba56f-88f9-440e-af87-280abce3b1e8"
     },
+    crashReporter: true, // Add this line to enable crash reporting
     extra: {
       apiKey: process.env.FIREBASE_API_KEY,
       authDomain: process.env.AUTH_DOMAIN,
@@ -56,6 +57,5 @@ export default {
         "projectId": "622ba56f-88f9-440e-af87-280abce3b1e8"
       },
     },
-   
   }
 };
