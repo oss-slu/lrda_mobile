@@ -74,7 +74,7 @@
     "react-native-uuid": "^2.0.2",
     "react-native-vector-icons": "^10.1.0",
     "react-native-video": "^6.2.0",
-    "react-native-webview": "13.8.6",
+    "react-native-webview": "^13.10.3",
     "rn-placeholder": "^3.0.3"
   },
   "devDependencies": {
