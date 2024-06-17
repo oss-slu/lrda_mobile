@@ -179,8 +179,8 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
           document.getElementById('videoElement').addEventListener('play', function(e) {
             // Preventing the rich text editor from gaining focus when the video is played
             e.preventDefault();
-            // Assuming you have a way to send a message to your React Native environment
-            window.ReactNativeWebView.postMessage('videoPlayed');
+            
+            
           });
         </script>
       `;
