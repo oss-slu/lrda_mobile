@@ -20,7 +20,7 @@ export default {
       config: {
         googleMapsApiKey: process.env.MAP_API_KEY
       },
-      buildNumber: "13"
+      buildNumber: "15"
     },
     android: {
       adaptiveIcon: {
@@ -53,9 +53,9 @@ export default {
       messagingSenderId: process.env.MESSAGING_SENDER_ID,
       appId: process.env.APP_ID,
       measurementId: process.env.MEASUREMENT_ID,
-      "eas": {
-        "projectId": "622ba56f-88f9-440e-af87-280abce3b1e8"
-      },
+      eas: {
+        projectId: "801029ef-db83-4668-a97a-5adcc4c333e2"
+      }
     },
   }
 };

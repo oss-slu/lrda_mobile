@@ -3,16 +3,18 @@ new file mode 100644
 index 0000000..84a179f
 --- /dev/null
 +++ b/node_modules/react-native-webview/apple/RCTConvert+WKDataDetectorTypes.h
-@@ -0,0 +1,9 @@
-+#import <React/RCTConvert.h>
+@@ -0,0 +1,11 @@
++ #import <WebKit/WebKit.h>
 +
-+#if TARGET_OS_IPHONE
-+@interface RCTConvert (WKDataDetectorTypes)
++ #import <React/RCTConvert.h>
 +
-++ (WKDataDetectorTypes)WKDataDetectorTypes:(id)json;
++ #if TARGET_OS_IPHONE
++ @interface RCTConvert (WKDataDetectorTypes)
 +
-+@end
-+#endif // TARGET_OS_IPHONE
++ + (WKDataDetectorTypes)WKDataDetectorTypes:(id)json;
++
++ @end
++ #endif // TARGET_OS_IPHONE
 \ No newline at end of file
 diff --git a/node_modules/react-native-webview/apple/RCTConvert+WKDataDetectorTypes.m b/node_modules/react-native-webview/apple/RCTConvert+WKDataDetectorTypes.m
 new file mode 100644
@@ -20,15 +22,15 @@ index 0000000..975c2ea
 --- /dev/null
 +++ b/node_modules/react-native-webview/apple/RCTConvert+WKDataDetectorTypes.m
 @@ -0,0 +1,27 @@
-+#import <WebKit/WebKit.h>
++ #import <WebKit/WebKit.h>
 +
-+#import <React/RCTConvert.h>
++ #import <React/RCTConvert.h>
 +
-+#if TARGET_OS_IPHONE
++ #if TARGET_OS_IPHONE
 +
-+@implementation RCTConvert (WKDataDetectorTypes)
++ @implementation RCTConvert (WKDataDetectorTypes)
 +
-+RCT_MULTI_ENUM_CONVERTER(
++ RCT_MULTI_ENUM_CONVERTER(
 +     WKDataDetectorTypes,
 +     (@{
 +       @"none" : @(WKDataDetectorTypeNone),
@@ -44,7 +46,7 @@ index 0000000..975c2ea
 +     WKDataDetectorTypeNone,
 +     unsignedLongLongValue)
 +
-+@end
++ @end
 +
-+#endif // TARGET_OS_IPHONE
++ #endif // TARGET_OS_IPHONE
 \ No newline at end of file
