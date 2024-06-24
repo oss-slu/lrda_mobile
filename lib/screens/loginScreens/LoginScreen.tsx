@@ -1,3 +1,5 @@
+// LoginScreen.tsx
+
 import React, { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
@@ -11,6 +13,8 @@ import {
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import * as SplashScreen from "expo-splash-screen";
 import { Snackbar } from "react-native-paper";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../config";  // Import the Firebase auth
 import { User } from "../../models/user_class";
 import { removeItem } from "../../utils/async_storage";
 
@@ -51,7 +55,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
       const userId = await user.getId();
       if (userId !== null) {
         setTimeout(() => {
-          navigation.navigate("HomeTab", { screen: "Home" });
+          navigation.navigate("HomeTab");  // Navigate to the HomeTab
         }, 1000);
       }
 
@@ -70,15 +74,15 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
       toggleSnack(!snackState);
     } else {
       try {
-        const status = await user.login(username, password);
-        console.log("Login status:", status); // Log the login status
-        const userId = await user.getId();
-        console.log("User ID after login:", userId); // Log the user ID
-        if (status == "success") {
-          setUsername("");
-          setPassword("");
-        }
+        const userCredential = await signInWithEmailAndPassword(auth, username, password);
+        const user = userCredential.user;
+        console.log("Login status: success");
+        console.log("User ID after login:", user.uid);
+        setUsername("");
+        setPassword("");
+        navigation.navigate("HomeTab");  // Navigate to the HomeTab
       } catch (error) {
+        console.error("Login failed:", error);
         toggleSnack(true);
       }
     }
@@ -137,7 +141,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
               <View style={styles.inputView}>
                 <TextInput
                   style={styles.inputText}
-                  placeholder="Username..."
+                  placeholder="Email..."
                   placeholderTextColor="#003f5c"
                   value={username}
                   onChangeText={(text) => setUsername(text)}
@@ -158,21 +162,11 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
               <TouchableOpacity>
                 <Text style={styles.forgot}>Forgot Password?</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress= {onLoginPress}/*{handleLogin}*/  style={styles.buttons}>
+              <TouchableOpacity onPress={onLoginPress} style={styles.buttons}>
                 <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
                   Login
                 </Text>
               </TouchableOpacity>
-              {/* <TouchableOpacity style={styles.buttons} onPress={handleGoRegister}>
-                <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
-                  Register
-                </Text>
-              </TouchableOpacity> */}
-              {/* <TouchableOpacity onPress={clearOnboarding} style={styles.buttons}>
-                <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
-                  Clear Onboarding
-                </Text>
-              </TouchableOpacity> */}
             </View>
           )}
         </ImageBackground>

@@ -36,7 +36,7 @@
     "babel-plugin-transform-inline-environment-variables": "^0.4.4",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.8",
-    "expo": "51.0.14",
+    "expo": "51.0.9",
     "expo-av": "^14.0.5",
     "expo-constants": "~16.0.2",
     "expo-device": "~6.0.2",
@@ -64,7 +64,7 @@
     "react-native-image-picker": "^7.1.2",
     "react-native-image-viewing": "^0.2.2",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
-    "react-native-maps": "1.15.6",
+    "react-native-maps": "1.14.0",
     "react-native-onboarding-swiper": "^1.2.0",
     "react-native-paper": "^5.12.3",
     "react-native-pell-rich-editor": "^1.9.0",
@@ -76,7 +76,7 @@
     "react-native-uuid": "^2.0.2",
     "react-native-vector-icons": "^10.1.0",
     "react-native-video": "^6.2.0",
-    "react-native-webview": "13.10.3",
+    "react-native-webview": "13.8.5",
     "rn-placeholder": "^3.0.3"
   },
   "devDependencies": {
