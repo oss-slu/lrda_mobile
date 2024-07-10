@@ -13,7 +13,6 @@ import * as SplashScreen from "expo-splash-screen";
 import { Snackbar } from "react-native-paper";
 import { User } from "../../models/user_class";
 import { removeItem } from "../../utils/async_storage";
-import {useAuth0, Auth0Provider} from 'react-native-auth0';
 
 const user = User.getInstance();
 
@@ -28,8 +27,6 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   const [firstClick, setFirstClick] = useState(true);
   const [snackState, toggleSnack] = useState(false);
   const fadeAnim = useRef(new Animated.Value(1)).current;
-  const {authorize} = useAuth0();
-  const {clearSession} = useAuth0();
 
   const fadeOut = () => {
     Animated.timing(fadeAnim, {
@@ -99,14 +96,13 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
 
   const onLoginPress = async () => {
     try {
-        await authorize();
+        await handleLogin();
     } catch (e) {
         console.log(e);
     }
   };
 
   return (
-    <Auth0Provider domain={"{yourDomain}"} clientId={"{yourClientId}"}>
       <KeyboardAwareScrollView
         contentContainerStyle={styles.container}
         style={{ backgroundColor: "#F4DFCD" }}
@@ -182,7 +178,6 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
           )}
         </ImageBackground>
       </KeyboardAwareScrollView>
-    </Auth0Provider>
   );
 };
 
