@@ -27,6 +27,7 @@
     "@react-navigation/bottom-tabs": "^6.5.20",
     "@react-navigation/native": "^6.1.17",
     "@react-navigation/stack": "^6.3.29",
+    "@reduxjs/toolkit": "^2.2.7",
     "@types/enzyme-adapter-react-16": "^1.0.9",
     "@types/mocha": "^10.0.6",
     "@types/moxios": "^0.4.17",
@@ -77,6 +78,7 @@
     "react-native-vector-icons": "^10.1.0",
     "react-native-video": "^6.2.0",
     "react-native-webview": "13.8.5",
+    "react-redux": "^9.1.2",
     "rn-placeholder": "^3.0.3"
   },
   "devDependencies": {

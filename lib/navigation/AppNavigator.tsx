@@ -17,6 +17,9 @@ import { getItem } from "../utils/async_storage";
 import * as SplashScreen from 'expo-splash-screen';
 import { useTheme } from '../components/ThemeProvider';
 import ToastMessage from 'react-native-toast-message';
+import { useSelector, useDispatch} from "react-redux";
+import { RootState } from "../../redux/store/store";
+import { setNavState } from "../../redux/slice/navigationSlice";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -49,20 +52,22 @@ const HomeStack = () => {
 };
 
 const AppNavigator: React.FC = () => {
-  const [navState, setNavState] = useState<"loading" | "onboarding" | "login" | "home">("loading");
+  // const [navState, setNavState] = useState<"loading" | "onboarding" | "login" | "home">("loading");
   const { theme, isDarkmode } = useTheme();
-
+  const dispatch = useDispatch();
+  const navState = useSelector((state: RootState) => state.navigation.navState);
+  console.log(" inside AppNavigator ", navState, user)
   useEffect(() => {
     const checkOnboarding = async () => {
       const onboarded = await getItem("onboarded");
       const userId = await user.getId();
 
       if (onboarded === "1" && userId) {
-        setNavState("home");
+        dispatch(setNavState("home"));
       } else if (onboarded === "1") {
-        setNavState("login");
+        dispatch(setNavState("login"));
       } else {
-        setNavState("onboarding");
+        dispatch(setNavState("onboarding"));
       }
       await SplashScreen.hideAsync();
     };

@@ -17,6 +17,9 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../config";  // Import the Firebase auth
 import { User } from "../../models/user_class";
 import { removeItem } from "../../utils/async_storage";
+import { useSelector, useDispatch } from 'react-redux';
+import { setNavState } from "../../../redux/slice/navigationSlice";
+import { RootState } from "../../../redux/store/store";
 
 const user = User.getInstance();
 
@@ -31,6 +34,8 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   const [firstClick, setFirstClick] = useState(true);
   const [snackState, toggleSnack] = useState(false);
   const fadeAnim = useRef(new Animated.Value(1)).current;
+  const navState = useSelector((state: RootState) => state.navigation.navState);
+  const dispatch = useDispatch()
 
   const fadeOut = () => {
     Animated.timing(fadeAnim, {
@@ -48,6 +53,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
     return () => clearTimeout(timer);
   }, []);
 
+  console.log("in login page the redux value is ", navState)
   useEffect(() => {
     (async () => {
       await SplashScreen.preventAutoHideAsync();
@@ -55,6 +61,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
       const userId = await user.getId();
       if (userId !== null) {
         setTimeout(() => {
+          dispatch(setNavState('home'));
           navigation.navigate("HomeTab");  // Navigate to the HomeTab
         }, 1000);
       }
@@ -78,6 +85,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
         const user = userCredential.user;
         console.log("Login status: success");
         console.log("User ID after login:", user.uid);
+        dispatch(setNavState('home'));
         setUsername("");
         setPassword("");
         navigation.navigate("HomeTab");  // Navigate to the HomeTab
