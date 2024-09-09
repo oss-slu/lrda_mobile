@@ -46,16 +46,18 @@ export default class ApiService {
    * @returns {Promise<UserData | null>} The user data.
    */
     static async fetchUserData(uid: string): Promise<UserData | null> {
+      console.log("called fetchuserdata method")
       try {
+        console.log("inside fetchuserdata method ")
         const url = "https://lived-religion-dev.rerum.io/deer-lr/query";
         const headers = {
           "Content-Type": "application/json",
         };
-        const body = {
-          type: "user",
-          creator: uid,
-        };
-  
+        const body = { 
+          "@type": "Agent", 
+          "uid": uid }
+        ;
+        console.log("")
         const response = await fetch(url, {
           method: "POST",
           headers,
@@ -63,6 +65,7 @@ export default class ApiService {
         });
   
         const data = await response.json();
+        console.log("in fetch-User-Data met rhod", data[0])
         return data.length ? data[0] : null;
       } catch (error) {
         console.error("Error fetching user data:", error);

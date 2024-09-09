@@ -15,6 +15,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
 import { useTheme } from "../components/ThemeProvider";
 import Accordion from "@gapur/react-native-accordion";
+import { useDispatch, UseDispatch } from "react-redux";
+
 
 const user = User.getInstance();
 const { width, height } = Dimensions.get("window");
@@ -24,6 +26,10 @@ export default function MorePage() {
   const { theme, isDarkmode, setIsDarkmode } = useTheme();
 
   const toggleDarkmode = useTheme().toggleDarkmode;
+
+  //updated by karthik
+  const dispatch = useDispatch();
+
   const handleToggleDarkMode = () => {
     toggleDarkmode(); 
   };
@@ -42,7 +48,8 @@ export default function MorePage() {
 
   const onLogoutPress = async () => {
     try {
-        await user.logout();
+        //passing redux dispatch to logout method of user_class
+        await user.logout(dispatch);
     } catch (e) {
         console.log(e);
     }

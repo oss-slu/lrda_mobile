@@ -56,7 +56,7 @@ const AppNavigator: React.FC = () => {
   const { theme, isDarkmode } = useTheme();
   const dispatch = useDispatch();
   const navState = useSelector((state: RootState) => state.navigation.navState);
-  console.log(" inside AppNavigator ", navState, user)
+  
   useEffect(() => {
     const checkOnboarding = async () => {
       const onboarded = await getItem("onboarded");
