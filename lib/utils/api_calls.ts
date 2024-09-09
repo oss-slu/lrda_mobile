@@ -54,7 +54,10 @@ export default class ApiService {
           "Content-Type": "application/json",
         };
         const body = { 
-          "@type": "Agent", 
+          "$or": [
+            { "@type": "Agent", "uid": uid },
+            { "@type": "foaf:Agent", "uid": uid }
+          ],
           "uid": uid }
         ;
         console.log("")
