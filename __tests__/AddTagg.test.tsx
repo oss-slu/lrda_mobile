@@ -1,58 +1,45 @@
-import Enzyme, { shallow } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import TagWindow from '../lib/components/tagging';
-import moxios from 'moxios';
 
-
-Enzyme.configure({ adapter: new Adapter() });
-
-
-beforeAll(() => {
-    jest.spyOn(console, 'log').mockImplementation(() => {});
-    jest.spyOn(console, 'error').mockImplementation(() => {});
-    moxios.install();
-  });
-  
-  afterAll(() => {
-    console.log.mockRestore();
-    console.error.mockRestore();
-    moxios.uninstall();
-  });
-  
-  jest.mock('../lib/components/ThemeProvider', () => ({
-    useTheme: () => ({
-      theme: 'mockedTheme', 
-    }),
-  }));
-  
 describe('TagWindowTest1', () => {
   const mockTags = ['Tag1', 'Tag2', 'Tag3'];
   const mockSetTags = jest.fn();
 
   it('renders without crashing', () => {
-    const wrapper = shallow(<TagWindow tags={mockTags} setTags={mockSetTags} />);
-    expect(wrapper).toMatchSnapshot();
+    const { toJSON } = render(<TagWindow tags={mockTags} setTags={mockSetTags} />);
+    expect(toJSON()).toMatchSnapshot();
   });
 
   it('displays input field and tags list', () => {
-    const wrapper = shallow(<TagWindow tags={mockTags} setTags={mockSetTags} />);
-    expect(wrapper.find('TextInput').exists()).toBe(true);
-    expect(wrapper.find('SwipeListView').exists()).toBe(true);
+    const { getByTestId, getAllByText } = render(<TagWindow tags={mockTags} setTags={mockSetTags} />);
+    
+    // Check if the input field exists
+    expect(getByTestId('tag-input')).toBeTruthy();
+
+    // Check if tags are displayed
+    mockTags.forEach(tag => {
+      expect(getAllByText(tag).length).toBeGreaterThan(0);
+    });
   });
-  
 });
 
-  
 describe('TagWindowTest2', () => {
-    const mockTags = ['1', '2','3'];
-    const mockSetTags = jest.fn();
+  const mockTags = ['Tag1', 'Tag2', 'Tag3'];
+  const mockSetTags = jest.fn();
 
-    it('handles tag deletion when swiping', () => {
-        const wrapper = shallow(<TagWindow tags={mockTags} setTags={mockSetTags} />);
-        const swipeListView = wrapper.find('SwipeListView');
-        swipeListView.props().onRightAction('0', {});    
-        expect(mockSetTags).toHaveBeenCalledWith(['2','3']);
-      });
+  it('handles tag deletion when swiping', async () => {
+    const { getByTestId, getAllByText } = render(<TagWindow tags={mockTags} setTags={mockSetTags} />);
+
+    // Simulate a swipe to delete the first tag
+    const swipeListView = getByTestId('swipe-list');
+
+    // Trigger row open, simulating a swipe to delete the first tag (Tag1)
+    fireEvent(swipeListView, 'onRowOpen', '0');
+
+    // Wait for the mockSetTags to be called with the updated tags
+    await waitFor(() => {
+      expect(mockSetTags).toHaveBeenCalledWith(['Tag2', 'Tag3']);
     });
-  
+  });
+});

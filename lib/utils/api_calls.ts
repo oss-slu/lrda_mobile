@@ -57,8 +57,7 @@ export default class ApiService {
           "$or": [
             { "@type": "Agent", "uid": uid },
             { "@type": "foaf:Agent", "uid": uid }
-          ],
-          "uid": uid }
+          ]}
         ;
         console.log("")
         const response = await fetch(url, {

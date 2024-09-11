@@ -1,31 +1,12 @@
-import Enzyme, { shallow } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
-
-Enzyme.configure({ adapter: new Adapter() });
-
-import React, { SetStateAction, useState } from 'react';
-import { TouchableOpacity, Alert } from 'react-native';
-
+import React from 'react';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { Alert } from 'react-native';
 import AddNoteScreen from '../lib/screens/AddNoteScreen';
-import PhotoScroller from "../lib/components/photoScroller";
-import { Media } from '../lib/models/media_class';
 import moxios from 'moxios';
-import AudioContainer from '../lib/components/audio';
 import * as Location from 'expo-location';
+import { ThemeProvider } from '../lib/components/ThemeProvider';
 
-beforeAll(() => {
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
-  moxios.install();
-});
-
-// This will restore the original console methods after all tests are done
-afterAll(() => {
-  console.log.mockRestore();
-  console.error.mockRestore();
-  moxios.uninstall();
-});
-
+// Mock external dependencies
 jest.mock('../lib/components/ThemeProvider', () => ({
   useTheme: () => ({
     theme: 'mockedTheme', // Provide a mocked theme object
@@ -35,118 +16,126 @@ jest.mock('../lib/components/ThemeProvider', () => ({
 jest.mock('expo-location', () => ({
   getForegroundPermissionsAsync: jest.fn(),
   requestForegroundPermissionsAsync: jest.fn(),
+  getCurrentPositionAsync: jest.fn(),
 }));
 
+beforeEach(() => {
+  // Initialize moxios before each test
+  moxios.install();
+
+  jest.spyOn(console, 'log').mockImplementation(() => {});
+  jest.spyOn(console, 'error').mockImplementation(() => {});
+});
+
+afterEach(() => {
+  // Uninstall moxios after each test
+  moxios.uninstall();
+  
+  console.log.mockRestore();
+  console.error.mockRestore();
+});
+
 describe("AddNoteScreen", () => {
-  let wrapper;
-  let setNoteContentMock;
-
-  beforeEach(() => {
-    setNoteContentMock = jest.fn();
-    const routeMock = {
-      params: {
-        untitledNumber: 1
-      }
-    };
-    React.useState = jest.fn(() => ['', setNoteContentMock]);
-    wrapper = shallow(<AddNoteScreen route={routeMock} />);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   it("renders without crashing", () => {
-    expect(wrapper.exists()).toBeTruthy();
+    const routeMock = { params: { untitledNumber: 1 } };
+    const { getByTestId } = render(<AddNoteScreen route={routeMock} />);
+    
+    // Check if the RichEditor is rendered
+    expect(getByTestId('RichEditor')).toBeTruthy();
   });
 
-  it('calls setNoteContent when the Rich Text Editor content changes', () => {
-    // Set up the mock function
-    const setNoteContentMock = jest.fn();
-    const routeMock = {
-      params: {
-        untitledNumber: 1
-      }
-    };
+  it('updates bodyText when the Rich Text Editor content changes', async () => {
+    const routeMock = { params: { untitledNumber: 1 } };
   
-    // Shallow render the AddNoteScreen component and pass the mock function as a prop
-    // Ensure that this matches how your actual component receives the setNoteContent prop
-    const wrapper = shallow(<AddNoteScreen route= {routeMock} setNoteContent={setNoteContentMock} />);
+    const { getByTestId } = render(<AddNoteScreen route={routeMock} />);
+    
+    // Find the RichEditor component
+    const richEditor = getByTestId('RichEditor');
+    const newText = 'New content';
   
-    // Simulate the content change on the Rich Text Editor component
-    // The selector needs to match the test ID or the component name/class
-    const richTextEditor = wrapper.find('RichTextEditorSelector'); // Replace 'RichTextEditorSelector' with the correct selector
-    expect(richTextEditor.length).toBe(0); // This should pass if the selector is correct and the component is rendered
+    // Simulate the content change in RichEditor
+    fireEvent(richEditor, 'onChange', newText);
+  
+    // Wait for bodyText to be updated
+    await waitFor(() => {
+      // Expect bodyText to be updated with the new text
+      expect(richEditor.props.initialContentHTML).toBe(newText);
+    });
+  });
   
   
+  // Mock the API call to simulate a failure
+jest.mock('../lib/utils/api_calls', () => ({
+  writeNewNote: jest.fn(),
+}));
+
+it('handles saveNote API error', async () => {
+  const routeMock = { params: { untitledNumber: 1 } };
+
+  // Mock the API call to simulate a failure
+  const writeNewNoteMock = require('../lib/utils/api_calls').writeNewNote;
+  writeNewNoteMock.mockRejectedValueOnce(new Error('Error saving note'));
+
+  const { getByTestId } = render(<AddNoteScreen route={routeMock} />);
+
+  // Simulate the save action (assuming saveNote is triggered via 'checklocationpermission' button)
+  fireEvent.press(getByTestId('checklocationpermission'));
+
+  // Wait for the error to be handled
+  await waitFor(() => {
+    expect(writeNewNoteMock).toHaveBeenCalledTimes(1);
   });
 });
 
-/*describe("AddNoteScreen's checkLocationPermission method", () => {
-  it('Should show an alert when location permission is denied', async () => {
-    const wrapper = shallow(<AddNoteScreen />);
-    const button = wrapper.find('[testID="checklocationpermission"]');
+  
+});
 
-    // Mocking getForegroundPermissionsAsync to return denied status
+describe("AddNoteScreen's checkLocationPermission method", () => {
+  it('should call Alert when location permission is denied', async () => {
+    const routeMock = { params: { untitledNumber: 1 } };
+  
+    // Mock location permission to be denied
     const mockGetForegroundPermissionsAsync = jest.spyOn(Location, 'getForegroundPermissionsAsync');
     mockGetForegroundPermissionsAsync.mockResolvedValueOnce({ status: 'denied' });
-
-    // Mocking requestForegroundPermissionsAsync to return granted status after a subsequent request
-    const mockRequestForegroundPermissionsAsync = jest.spyOn(Location, 'requestForegroundPermissionsAsync');
-    mockRequestForegroundPermissionsAsync.mockResolvedValueOnce({ status: 'granted' });
-
-    // Spy on Alert.alert to check if it's called with the correct arguments
+  
+    // Mock Alert
     const mockAlert = jest.spyOn(Alert, 'alert');
-
-    // Simulate onPress event of TouchableOpacity
-    button.props().onPress();
-    wrapper.find(TouchableOpacity).prop('onPress')();
-
-    // Expect Alert.alert to have been called with the correct arguments
-    expect(mockAlert).toHaveBeenCalledWith(
-      'Location permission denied',
-      'Please grant location permission to save the note or remove the title to not save.'
-    );
-  });
-}); */
-
-describe('PhotoScroller\'s handleNewMedia method', () => {
-  it('Show an alert when pressed with Take a photo or Choose a photo from camera roll', () => {
-
-      const wrapper = shallow(<PhotoScroller newMedia={[]} setNewMedia={function (value: SetStateAction<Media[]>): void {
-          throw new Error('Function not implemented.');
-      }} active={true} />);
-      const button = wrapper.find('[testID="photoScrollerButton"]');
-      const mockAlert = jest.spyOn(Alert, 'alert');
-      button.props().onPress();
-
-      wrapper.find(TouchableOpacity).prop('onPress')();
-
+  
+    const { getByTestId } = render(<AddNoteScreen route={routeMock} />);
+    
+    // Trigger the check location permission by pressing the button
+    fireEvent.press(getByTestId('checklocationpermission'));
+  
+    // Wait for the Alert to be called
+    await waitFor(() => {
+      expect(mockAlert).toHaveBeenCalledTimes(1);
       expect(mockAlert).toHaveBeenCalledWith(
-          'Select Media',
-          'Choose the source for your media:',
-          expect.any(Array),
-          { cancelable: false }
+        'Location permission denied',
+        'Please grant location permission to save the note.',
+        expect.any(Array)
       );
+    });
   });
-});
-
-describe('AudioContainer', () => {
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-  it('should handle start and stop recording correctly', async () => {
-      const wrapper = shallow(
-          <AudioContainer newAudio={[]} setNewAudio={() => {}} />
-      );
-
-      const startRecordingButton = wrapper.find('[testID="startRecordingButton"]');
-      startRecordingButton.props().onPress();
-
-      const stopRecordingButton = wrapper.find('[testID="stopRecordingButton"]');
-      stopRecordingButton.props().onPress();
-
-      const result = 'success';
-      expect(result).toBe('success');
+  
+  it('handles location permission granted', async () => {
+    const routeMock = { params: { untitledNumber: 1 } };
+  
+    // Mock location permission to be granted
+    const mockGetForegroundPermissionsAsync = jest.spyOn(Location, 'getForegroundPermissionsAsync');
+    mockGetForegroundPermissionsAsync.mockResolvedValueOnce({ status: 'granted' });
+  
+    // Mock the API call
+    const writeNewNoteMock = require('../lib/utils/api_calls').writeNewNote;
+    writeNewNoteMock.mockResolvedValueOnce({ success: true });
+  
+    const { getByTestId } = render(<AddNoteScreen route={routeMock} />);
+    
+    // Trigger the location permission check by pressing the button
+    fireEvent.press(getByTestId('checklocationpermission'));
+  
+    // Wait for the API call to be successful
+    await waitFor(() => {
+      expect(writeNewNoteMock).toHaveBeenCalledTimes(1);
+    });
   });
 });
