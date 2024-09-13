@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Platform,
   View,
@@ -9,6 +9,7 @@ import {
   Dimensions,
   SafeAreaView,
   Image,
+  TextInput,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
@@ -254,7 +255,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       width: "100%",
       //padding: 10,
       flexDirection: "row",
-      height: 140,
+      height: 185,
       paddingLeft: width * 0.03,
       paddingRight: width * 0.03,
     },
@@ -331,6 +332,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       padding: 10,
       alignSelf: "center",
     },
+    seachBar:{
+      backgroundColor: theme.homeColor,
+      borderRadius: 20,
+      fontSize: 22,
+      padding: 20,
+      margin: 10,
+      color: theme.text,
+    },
   });
 
   const sideMenu = (data: any, rowMap: any) => {
@@ -395,9 +404,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   }
 
   const renderList = (notes: Note[]) => {
+    const filteredNotes = searchQuery
+    ? notes.filter(note => {
+        const lowerCaseQuery = searchQuery.toLowerCase();
+        const noteTime = new Date(note.time);
+        const formattedTime = formatDate(noteTime);
+        return (
+          note.title.toLowerCase().includes(lowerCaseQuery) || formattedTime.includes(lowerCaseQuery)
+        );
+      })
+    : notes;
+    
     return isPrivate ? (
       <SwipeListView
-        data={notes}
+        data={filteredNotes}
         renderItem={renderItem}
         renderHiddenItem={sideMenu}
         leftActivationValue={160}
@@ -412,7 +432,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       />
     ) : (
       <SwipeListView
-        data={notes}
+        data={filteredNotes}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
       />
@@ -517,7 +537,33 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     );
   };
 
+  //Part of searchbar:
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
+  const formatDate = (date: Date) => {
+    const day = date.getDate().toString();
+    const month = (date.getMonth() + 1).toString(); // Months are zero-based
+    const year = date.getFullYear();
+    return `${month}/${day}/${year}`;
+  };
+
+  const filteredNotes = useMemo(() => {
+    return notes.filter(note => {
+      const noteTime = new Date(note.time);
+      const formattedTime = formatDate(noteTime);
+      
+      return note.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+             formattedTime.includes(searchQuery.toLowerCase());
+    });
+  }, [notes, searchQuery]);
+
+
+
   return (
+ 
     <View style={styles.container}>
       <View style={styles.topView}>
         <View
@@ -544,6 +590,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           <Image source={require('../../assets/icon.png')} style={{width: width * 0.105, height: width * 0.105, marginEnd: width * 0.435}} />
         </View>
       </View>
+        <TextInput
+          placeholder="Search notes.."
+          onChangeText={handleSearch}
+          style= {styles.seachBar}
+        />
       <View style={styles.dropdown}>
         <DropDownPicker
           open={open}
@@ -568,7 +619,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             borderWidth: 0, 
             backgroundColor: theme.homeColor,
           }}
-          placeholder={`${items.find(item => item.value === value)?.label || 'Select an option'} (${notes.length})`}
+          placeholder={`${items.find(item => item.value === value)?.label || 'Select an option'} (${filteredNotes.length})`}
           placeholderStyle={{
             textAlign: 'center',
             fontSize: 22,
