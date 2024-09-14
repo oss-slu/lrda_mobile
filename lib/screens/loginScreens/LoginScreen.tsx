@@ -120,6 +120,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
     <KeyboardAwareScrollView
       contentContainerStyle={styles.container}
       style={{ backgroundColor: "#F4DFCD" }}
+      keyboardShouldPersistTaps="handled"
     >
       <ImageBackground
         source={require("../../../assets/splash.jpg")}
