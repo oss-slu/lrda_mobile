@@ -238,7 +238,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       width: "100%",
       alignItems: "center",
       zIndex: 1000,
-      marginTop: -12,
+      marginTop: -13,
     },
     horizontalLine: {
       borderBottomColor: theme.text,
@@ -335,10 +335,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     seachBar:{
       backgroundColor: theme.homeColor,
       borderRadius: 20,
-      fontSize: 22,
+      fontSize: 18,
       padding: 20,
-      margin: 10,
+      margin: 20,
       color: theme.text,
+      borderWidth: 3,
+    
     },
   });
 
@@ -590,11 +592,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           <Image source={require('../../assets/icon.png')} style={{width: width * 0.105, height: width * 0.105, marginEnd: width * 0.435}} />
         </View>
       </View>
-        <TextInput
-          placeholder="Search notes.."
-          onChangeText={handleSearch}
-          style= {styles.seachBar}
-        />
+       
       <View style={styles.dropdown}>
         <DropDownPicker
           open={open}
@@ -636,6 +634,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           showArrowIcon={true}
         /> 
       </View>
+      <TextInput
+          placeholder="Search notes.."
+          onChangeText={handleSearch}
+          style= {styles.seachBar}
+        />
       <View style={styles.horizontalLine} />
       <View style={styles.scrollerBackgroundColor}>
         {rendering ? <NoteSkeleton /> : renderList(notes)}
