@@ -97,8 +97,8 @@ const ImageModal: React.FC<Props> = ({ isVisible, onClose, images }) => {
           )}
         </ScrollView>
 
-        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-          <Text>Close</Text>
+        <TouchableOpacity style={styles.closeButton} onPress={onClose} testID='image-component' >
+          <Text testID='close-button'>Close</Text>
         </TouchableOpacity>
       </View>
     </Modal>

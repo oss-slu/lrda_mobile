@@ -2,6 +2,21 @@ import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import TagWindow from '../lib/components/tagging';
 
+beforeEach(() => {
+  // Clear mocks before each test
+  jest.clearAllMocks();
+
+  // Mock console methods to avoid unnecessary log outputs in tests
+  jest.spyOn(console, 'log').mockImplementation(() => {});
+  jest.spyOn(console, 'error').mockImplementation(() => {});
+});
+
+afterEach(() => {
+  // Restore the original console methods
+  console.log.mockRestore();
+  console.error.mockRestore();
+});
+
 describe('TagWindowTest1', () => {
   const mockTags = ['Tag1', 'Tag2', 'Tag3'];
   const mockSetTags = jest.fn();

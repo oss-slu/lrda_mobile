@@ -10,16 +10,27 @@ jest.mock('../lib/components/ThemeProvider', () => ({
   }),
 }));
 
-beforeAll(() => {
+beforeEach(() => {
+   // Clear mocks before each test
+   jest.clearAllMocks();
+
   jest.spyOn(console, 'log').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
+  jest.spyOn(console, 'warn').mockImplementation(() => {});
+  jest.spyOn(console, 'warn').mockImplementation((message) => {
+    if (!message.includes('Toolbar has no editor')) {
+      console.warn(message);
+    }
+  });
   moxios.install();
 });
 
-afterAll(() => {
+afterEach(() => {
   console.log.mockRestore();
   console.error.mockRestore();
+  console.warn.mockRestore();
   moxios.uninstall();
+
 });
 
 describe("AddNoteScreen", () => {
