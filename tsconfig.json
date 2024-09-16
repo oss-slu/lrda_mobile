@@ -1,11 +1,18 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": ["dom", "es6"],
+    "lib": [
+      "dom",
+      "es6"
+    ],
     "jsx": "react",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true
   },
-  "types": ["jest", "@testing-library/jest-dom"]
+  "types": [
+    "jest",
+    "@testing-library/jest-dom"
+  ],
+  "extends": "expo/tsconfig.base"
 }

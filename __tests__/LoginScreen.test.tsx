@@ -4,7 +4,7 @@ import { Provider } from 'react-redux';
 import { SafeAreaProvider } from 'react-native-safe-area-context'; // Make sure to import SafeAreaProvider
 import configureStore from 'redux-mock-store';
 import LoginScreen from '../lib/screens/loginScreens/LoginScreen';
-
+import moxios from 'moxios'
 // Create a mock store
 const mockStore = configureStore([]);
 const store = mockStore({
@@ -20,17 +20,14 @@ beforeEach(() => {
   jest.spyOn(console, 'log').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
   jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(console, 'warn').mockImplementation((message) => {
-    if (!message.includes('Toolbar has no editor')) {
-      console.warn(message);
-    }
-  });
+  moxios.install()
 });
 
 afterEach(() => {
   console.log.mockRestore();
   console.error.mockRestore();
   console.warn.mockRestore(); // Restore console.warn after the tests
+  moxios.uninstall()
 });
 
 describe('LoginScreen', () => {
