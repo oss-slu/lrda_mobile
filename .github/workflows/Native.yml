@@ -2,7 +2,7 @@ name: App test
 
 on:
   push:
-    branches: [ main,onboarding_change ]
+    branches: [ main,Home-screen-navigation-issue ]
   pull_request:
     branches: [ main ]
 
