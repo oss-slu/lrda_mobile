@@ -1,3 +1,4 @@
+import { UserData } from "../../types";
 /**
  * Provides methods for interacting with the API to fetch, create, update, and delete notes.
  */
@@ -38,6 +39,65 @@ export default class ApiService {
       throw error;
     }
   }
+
+    /**
+   * Fetches user data from the API based on UID.
+   * @param {string} uid - The UID of the user.
+   * @returns {Promise<UserData | null>} The user data.
+   */
+    static async fetchUserData(uid: string): Promise<UserData | null> {
+      console.log("called fetchuserdata method")
+      try {
+        console.log("inside fetchuserdata method ")
+        const url = "https://lived-religion-dev.rerum.io/deer-lr/query";
+        const headers = {
+          "Content-Type": "application/json",
+        };
+        const body = { 
+          "$or": [
+            { "@type": "Agent", "uid": uid },
+            { "@type": "foaf:Agent", "uid": uid }
+          ]}
+        ;
+        console.log("")
+        const response = await fetch(url, {
+          method: "POST",
+          headers,
+          body: JSON.stringify(body),
+        });
+  
+        const data = await response.json();
+        console.log("in fetch-User-Data met rhod", data[0])
+        return data.length ? data[0] : null;
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        return null;
+      }
+    }
+  
+    /**
+     * Creates user data in the API.
+     * @param {UserData} userData - The user data to be created.
+     * @returns {Promise<Response>} The response from the API.
+     */
+    static async createUserData(userData: UserData) {
+      try {
+        const response = await fetch("https://lived-religion-dev.rerum.io/deer-lr/create", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            type: "user",
+            ...userData,
+          }),
+        });
+        return response;
+      } catch (error) {
+        console.error("Error creating user data:", error);
+        throw error;
+      }
+    }
   
   /**
    * Deletes a note from the API.

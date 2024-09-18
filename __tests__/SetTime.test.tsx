@@ -1,67 +1,48 @@
-import Enzyme, { shallow } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
-
-Enzyme.configure({ adapter: new Adapter() });
-
 import React from 'react';
+import { render, fireEvent } from '@testing-library/react-native';
+import LocationWindow from '../lib/components/time';
 import { Button } from 'react-native';
-import AddNoteScreen from '../lib/screens/AddNoteScreen';
-import moxios from 'moxios';
-import LocationWindow from "../lib/components/time";
 
+// Mock ThemeProvider
+jest.mock('../lib/components/ThemeProvider', () => ({
+  useTheme: () => ({
+    theme: 'mockedTheme',
+  }),
+}));
 
-beforeAll(() => {
-    jest.spyOn(console, 'log').mockImplementation(() => {});
-    jest.spyOn(console, 'error').mockImplementation(() => {});
-    moxios.install();
-  });
-  
-  afterAll(() => {
-    console.log.mockRestore();
-    console.error.mockRestore();
-    moxios.uninstall();
-  });
-  
-  jest.mock('../lib/components/ThemeProvider', () => ({
-    useTheme: () => ({
-      theme: 'mockedTheme', 
-    }),
-  }));
+jest.mock('@react-native-community/datetimepicker', () => {
+  const { View } = require('react-native');
+  return (props) => <View testID={props.testID} />;
+});
 
-  jest.mock("@react-native-community/datetimepicker", () => {
-    const { View } = require("react-native");
-    return (props) => <View testID={props.testID} />;
-  });
-  
-  
-  describe("AddNoteScreen", () => {
-    it("renders without crashing", () => {
-      const routeMock = {
-        params: {
-          untitledNumber: 1
-        }
-      };
-        const wrapper = shallow(<AddNoteScreen route={routeMock} />);
-        expect(wrapper).toMatchSnapshot();
-    });
+describe('LocationWindow', () => {
+  it('renders without crashing', () => {
+    const { toJSON } = render(<LocationWindow time={new Date()} setTime={() => {}} />);
+    expect(toJSON()).toMatchSnapshot();
   });
 
+  it('displays the "Select Date & Time" button when not in edit mode', () => {
+    const { getByText } = render(<LocationWindow time={new Date()} setTime={() => {}} />);
 
-  describe('LocationWindow', () => {
-    it('renders without crashing', () => {
-      const wrapper = shallow(<LocationWindow time={new Date()} setTime={() => {}} />);
-      expect(wrapper).toMatchSnapshot();
-    });
-  
-    it('displays the "Select Date & Time" button when not in edit mode, and set the current time ', () => {
-      const wrapper = shallow(<LocationWindow time={new Date()} setTime={() => {}} />);
-      const selectButton = wrapper.find(Button);
-      expect(selectButton.prop('title')).toBe('Select Date & Time');
-    });
-  
-    it('display the "Save" button when in edit mode, and current time saved', () => {
-        const wrapper = shallow(<LocationWindow time={new Date()} setTime={() => {}} showPicker={true} />);
-        const saveButton = wrapper.find(Button);
-        expect(saveButton.exists()).toBe(true);
-      });
+    // Verify that the "Select Date & Time" button is displayed
+    const selectButton = getByText('Select Date & Time');
+    expect(selectButton).toBeTruthy();
   });
+
+  it('shows the "Save" button when date & time picker is active', () => {
+    const { getByText, getByTestId } = render(
+      <LocationWindow time={new Date()} setTime={() => {}} />
+    );
+
+    // Trigger the display of date & time pickers
+    const selectButton = getByText('Select Date & Time');
+    fireEvent.press(selectButton); // This should display the pickers
+
+    // Now the "Save" button should be visible
+    const saveButton = getByTestId('Save');
+    expect(saveButton).toBeTruthy();
+
+    // Simulate the button press
+    fireEvent.press(saveButton);
+  });
+});

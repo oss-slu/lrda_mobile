@@ -1,41 +1,63 @@
-import Enzyme from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
-
-Enzyme.configure({ adapter: new Adapter() });
-
 import React from 'react';
-import { shallow } from "enzyme";
+import { render } from '@testing-library/react-native';
 import AddNoteScreen from '../lib/screens/AddNoteScreen';
+import * as Location from 'expo-location';
+import moxios from 'moxios';
 
+// Mock the ThemeProvider
 jest.mock('../lib/components/ThemeProvider', () => ({
   useTheme: () => ({
     theme: 'mockedTheme', // Provide a mocked theme object
   }),
 }));
 
-describe("AddNoteScreen", () => {
-  it("adds image to editor", () => {
+// Mock expo-location properly
+jest.mock('expo-location', () => ({
+  getForegroundPermissionsAsync: jest.fn(),
+  requestForegroundPermissionsAsync: jest.fn(),
+  getCurrentPositionAsync: jest.fn(),
+}));
+
+// Silence console logs and errors to avoid noise in test runs
+beforeEach(() => {
+  jest.spyOn(console, 'log').mockImplementation(() => {});
+  jest.spyOn(console, 'error').mockImplementation(() => {});
+  moxios.install();
+});
+
+afterEach(() => {
+  console.log.mockRestore();
+  console.error.mockRestore();
+  moxios.uninstall();
+});
+
+describe('AddNoteScreen', () => {
+  it('adds image to editor', () => {
     const routeMock = {
       params: {
-        untitledNumber: 1
-      }
+        untitledNumber: 1,
+      },
     };
-    const wrapper = shallow(<AddNoteScreen route={routeMock}/>);
 
-    // Mock richTextRef
+    // Render the component
+    const { getByTestId } = render(<AddNoteScreen route={routeMock as any} />);
+
+    // Mock richTextRef and its insertImage function
     const richTextRef = { current: { insertImage: jest.fn() } };
 
-    //hard code copy paste of function
+    // Add the addImageToEditor function, replicating the logic from the component
     const addImageToEditor = (imageUri: string) => {
       richTextRef.current?.insertImage(imageUri);
     };
+
     // Mock image URI
     const imageUri = '__tests__/TestResources/TestImage.jpg';
 
     // Call addImageToEditor function
     addImageToEditor(imageUri);
 
-    // Verify that the function was called with the correct argument
+    // Verify that insertImage was called with the correct argument
     expect(richTextRef.current.insertImage).toHaveBeenCalledWith(imageUri);
   });
 });
+

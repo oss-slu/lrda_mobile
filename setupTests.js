@@ -1,13 +1,8 @@
-import { NativeModules } from 'react-native';
-import { configure } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+// setupTests.js
+import '@testing-library/jest-native/extend-expect'; // Provides useful matchers like toBeInTheDocument for React Native components
 
-configure({ adapter: new Adapter() });
-
-// // Mock NativeModules
-// jest.mock('NativeModules', () => ({
-//   ...NativeModules,
-//   UIManager: {
-//     RCTView: () => {},
-//   },
-// }));
+// Mock Firebase Auth globally for all tests
+jest.mock('firebase/auth', () => ({
+  initializeAuth: jest.fn(),
+  getReactNativePersistence: jest.fn(() => jest.fn()),
+}));
