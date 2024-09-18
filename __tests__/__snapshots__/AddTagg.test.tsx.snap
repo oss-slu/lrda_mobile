@@ -1,3 +1,708 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`TagWindowTest1 renders without crashing 1`] = `ShallowWrapper {}`;
+exports[`TagWindowTest1 renders without crashing 1`] = `
+<View
+  style={
+    {
+      "marginBottom": 10,
+      "minHeight": 100,
+    }
+  }
+>
+  <TextInput
+    onChangeText={[Function]}
+    onSubmitEditing={[Function]}
+    placeholder="Your Tag Here"
+    style={
+      {
+        "backgroundColor": "white",
+        "borderBottomWidth": 2,
+        "borderRadius": 30,
+        "fontSize": 18,
+        "fontWeight": "500",
+        "height": 40,
+        "justifyContent": "center",
+        "textAlign": "center",
+        "width": "100%",
+      }
+    }
+    testID="tag-input"
+    value=""
+  />
+  <RCTScrollView
+    closeOnRowBeginSwipe={false}
+    closeOnRowOpen={true}
+    closeOnRowPress={true}
+    closeOnScroll={true}
+    data={
+      [
+        {
+          "key": "0",
+          "tag": "Tag1",
+        },
+        {
+          "key": "1",
+          "tag": "Tag2",
+        },
+        {
+          "key": "2",
+          "tag": "Tag3",
+        },
+      ]
+    }
+    directionalDistanceChangeThreshold={2}
+    disableHiddenLayoutCalculation={false}
+    disableLeftSwipe={false}
+    disableRightSwipe={false}
+    getItem={[Function]}
+    getItemCount={[Function]}
+    keyExtractor={[Function]}
+    leftActivationValue={160}
+    leftOpenValue={75}
+    onContentSizeChange={[Function]}
+    onLayout={[Function]}
+    onMomentumScrollBegin={[Function]}
+    onMomentumScrollEnd={[Function]}
+    onRowOpen={[Function]}
+    onScroll={[Function]}
+    onScrollBeginDrag={[Function]}
+    onScrollEndDrag={[Function]}
+    previewFirstRow={false}
+    previewRepeat={false}
+    previewRepeatDelay={1000}
+    recalculateHiddenLayout={false}
+    removeClippedSubviews={false}
+    renderHiddenItem={[Function]}
+    renderItem={[Function]}
+    rightActivationValue={-160}
+    rightOpenValue={-75}
+    scrollEnabled={false}
+    scrollEventThrottle={0.0001}
+    stickyHeaderIndices={[]}
+    stopLeftSwipe={175}
+    stopRightSwipe={-175}
+    swipeToClosePercent={50}
+    swipeToOpenPercent={50}
+    swipeToOpenVelocityContribution={0}
+    testID="swipe-list"
+    useAnimatedList={false}
+    useNativeDriver={true}
+    viewabilityConfigCallbackPairs={[]}
+  >
+    <View>
+      <View
+        onFocusCapture={[Function]}
+        onLayout={[Function]}
+        style={null}
+      >
+        <View
+          style={{}}
+        >
+          <View
+            style={
+              [
+                {
+                  "bottom": 0,
+                  "left": 0,
+                  "overflow": "hidden",
+                  "position": "absolute",
+                  "right": 0,
+                  "top": 0,
+                  "zIndex": 1,
+                },
+                {
+                  "height": 0,
+                  "width": 0,
+                },
+              ]
+            }
+          >
+            <View
+              leftActionActivated={false}
+              leftActionState={false}
+              rightActionActivated={false}
+              rightActionState={false}
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "red",
+                  "flex": 1,
+                  "flexDirection": "row",
+                  "justifyContent": "space-between",
+                  "paddingHorizontal": 15,
+                  "paddingVertical": 1,
+                }
+              }
+              swipeAnimatedValue={0}
+            >
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "opacity": 1,
+                  }
+                }
+                testID="delete-action-0"
+              >
+                <Text />
+              </View>
+            </View>
+          </View>
+          <View
+            collapsable={false}
+            manipulationModes={
+              [
+                "translateX",
+              ]
+            }
+            onLayout={[Function]}
+            onMoveShouldSetResponder={[Function]}
+            onMoveShouldSetResponderCapture={[Function]}
+            onResponderEnd={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderReject={[Function]}
+            onResponderRelease={[Function]}
+            onResponderStart={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            onStartShouldSetResponderCapture={[Function]}
+            style={
+              {
+                "transform": [
+                  {
+                    "translateX": 0,
+                  },
+                ],
+                "zIndex": 2,
+              }
+            }
+          >
+            <View
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": undefined,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={false}
+              collapsable={false}
+              focusable={true}
+              onClick={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                {
+                  "opacity": 1,
+                }
+              }
+            >
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={false}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "white",
+                    "flex": 1,
+                    "flexDirection": "row",
+                    "justifyContent": "center",
+                    "opacity": 1,
+                    "paddingVertical": 1,
+                  }
+                }
+              >
+                <Text
+                  style={
+                    {
+                      "fontSize": 18,
+                      "fontWeight": "500",
+                    }
+                  }
+                >
+                  Tag1
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      </View>
+      <View
+        onFocusCapture={[Function]}
+        onLayout={[Function]}
+        style={null}
+      >
+        <View
+          style={{}}
+        >
+          <View
+            style={
+              [
+                {
+                  "bottom": 0,
+                  "left": 0,
+                  "overflow": "hidden",
+                  "position": "absolute",
+                  "right": 0,
+                  "top": 0,
+                  "zIndex": 1,
+                },
+                {
+                  "height": 0,
+                  "width": 0,
+                },
+              ]
+            }
+          >
+            <View
+              leftActionActivated={false}
+              leftActionState={false}
+              rightActionActivated={false}
+              rightActionState={false}
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "red",
+                  "flex": 1,
+                  "flexDirection": "row",
+                  "justifyContent": "space-between",
+                  "paddingHorizontal": 15,
+                  "paddingVertical": 1,
+                }
+              }
+              swipeAnimatedValue={0}
+            >
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "opacity": 1,
+                  }
+                }
+                testID="delete-action-1"
+              >
+                <Text />
+              </View>
+            </View>
+          </View>
+          <View
+            collapsable={false}
+            manipulationModes={
+              [
+                "translateX",
+              ]
+            }
+            onLayout={[Function]}
+            onMoveShouldSetResponder={[Function]}
+            onMoveShouldSetResponderCapture={[Function]}
+            onResponderEnd={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderReject={[Function]}
+            onResponderRelease={[Function]}
+            onResponderStart={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            onStartShouldSetResponderCapture={[Function]}
+            style={
+              {
+                "transform": [
+                  {
+                    "translateX": 0,
+                  },
+                ],
+                "zIndex": 2,
+              }
+            }
+          >
+            <View
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": undefined,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={false}
+              collapsable={false}
+              focusable={true}
+              onClick={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                {
+                  "opacity": 1,
+                }
+              }
+            >
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={false}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "white",
+                    "flex": 1,
+                    "flexDirection": "row",
+                    "justifyContent": "center",
+                    "opacity": 1,
+                    "paddingVertical": 1,
+                  }
+                }
+              >
+                <Text
+                  style={
+                    {
+                      "fontSize": 18,
+                      "fontWeight": "500",
+                    }
+                  }
+                >
+                  Tag2
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      </View>
+      <View
+        onFocusCapture={[Function]}
+        onLayout={[Function]}
+        style={null}
+      >
+        <View
+          style={{}}
+        >
+          <View
+            style={
+              [
+                {
+                  "bottom": 0,
+                  "left": 0,
+                  "overflow": "hidden",
+                  "position": "absolute",
+                  "right": 0,
+                  "top": 0,
+                  "zIndex": 1,
+                },
+                {
+                  "height": 0,
+                  "width": 0,
+                },
+              ]
+            }
+          >
+            <View
+              leftActionActivated={false}
+              leftActionState={false}
+              rightActionActivated={false}
+              rightActionState={false}
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "red",
+                  "flex": 1,
+                  "flexDirection": "row",
+                  "justifyContent": "space-between",
+                  "paddingHorizontal": 15,
+                  "paddingVertical": 1,
+                }
+              }
+              swipeAnimatedValue={0}
+            >
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "opacity": 1,
+                  }
+                }
+                testID="delete-action-2"
+              >
+                <Text />
+              </View>
+            </View>
+          </View>
+          <View
+            collapsable={false}
+            manipulationModes={
+              [
+                "translateX",
+              ]
+            }
+            onLayout={[Function]}
+            onMoveShouldSetResponder={[Function]}
+            onMoveShouldSetResponderCapture={[Function]}
+            onResponderEnd={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderReject={[Function]}
+            onResponderRelease={[Function]}
+            onResponderStart={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            onStartShouldSetResponderCapture={[Function]}
+            style={
+              {
+                "transform": [
+                  {
+                    "translateX": 0,
+                  },
+                ],
+                "zIndex": 2,
+              }
+            }
+          >
+            <View
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": undefined,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={false}
+              collapsable={false}
+              focusable={true}
+              onClick={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                {
+                  "opacity": 1,
+                }
+              }
+            >
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={false}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "white",
+                    "flex": 1,
+                    "flexDirection": "row",
+                    "justifyContent": "center",
+                    "opacity": 1,
+                    "paddingVertical": 1,
+                  }
+                }
+              >
+                <Text
+                  style={
+                    {
+                      "fontSize": 18,
+                      "fontWeight": "500",
+                    }
+                  }
+                >
+                  Tag3
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      </View>
+    </View>
+  </RCTScrollView>
+</View>
+`;

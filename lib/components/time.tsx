@@ -128,7 +128,7 @@ export default function LocationWindow({
         </Text>
       )}
       <View style={styles.button}>
-       <Button title="Save" onPress={saveDateTime}/>
+       <Button title="Save" onPress={saveDateTime}testID="Save"/>
       </View>
     </View>
 ) : (

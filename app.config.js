@@ -18,9 +18,9 @@ export default {
       supportsTablet: true,
       bundleIdentifier: "register.edu.slu.cs.oss.lrda",
       config: {
-        googleMapsApiKey: process.env.API_KEY
+        googleMapsApiKey: process.env.MAP_API_KEY
       },
-      buildNumber: "12"
+      buildNumber: "15"
     },
     android: {
       adaptiveIcon: {
@@ -29,7 +29,7 @@ export default {
       },
       config: {
         googleMaps: {
-          apiKey: process.env.API_KEY
+          apiKey: process.env.MAP_API_KEY
         }
       },
       package: "register.edu.slu.cs.oss.lrda",
@@ -42,11 +42,18 @@ export default {
       policy: "sdkVersion"
     },
     updates: {
-      url: "https://u.expo.dev/801029ef-db83-4668-a97a-5adcc4c333e2"
+      url: "https://u.expo.dev/622ba56f-88f9-440e-af87-280abce3b1e8"
     },
+    crashReporter: true, // Add this line to enable crash reporting
     extra: {
+      apiKey: process.env.FIREBASE_API_KEY,
+      authDomain: process.env.AUTH_DOMAIN,
+      projectId: process.env.PROJECT_ID,
+      storageBucket: process.env.STORAGE_BUCKET,
+      messagingSenderId: process.env.MESSAGING_SENDER_ID,
+      appId: process.env.APP_ID,
+      measurementId: process.env.MEASUREMENT_ID,
       eas: {
-        projectId: "801029ef-db83-4668-a97a-5adcc4c333e2"
       }
     },
   }

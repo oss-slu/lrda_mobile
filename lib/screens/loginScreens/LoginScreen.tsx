@@ -1,3 +1,5 @@
+// LoginScreen.tsx
+
 import React, { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
@@ -11,8 +13,14 @@ import {
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import * as SplashScreen from "expo-splash-screen";
 import { Snackbar } from "react-native-paper";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../config";  // Import the Firebase auth
 import { User } from "../../models/user_class";
 import { removeItem } from "../../utils/async_storage";
+import { useSelector, useDispatch } from 'react-redux';
+import { setNavState } from "../../../redux/slice/navigationSlice";
+import { RootState } from "../../../redux/store/store";
+import { Keyboard } from "react-native";
 
 const user = User.getInstance();
 
@@ -27,6 +35,9 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   const [firstClick, setFirstClick] = useState(true);
   const [snackState, toggleSnack] = useState(false);
   const fadeAnim = useRef(new Animated.Value(1)).current;
+  const navState = useSelector((state: RootState) => state.navigation.navState);
+  const dispatch = useDispatch()
+
 
   const fadeOut = () => {
     Animated.timing(fadeAnim, {
@@ -44,17 +55,11 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
     return () => clearTimeout(timer);
   }, []);
 
+  console.log("in login page the redux value is ", navState)
+
   useEffect(() => {
     (async () => {
       await SplashScreen.preventAutoHideAsync();
-
-      const userId = await user.getId();
-      if (userId !== null) {
-        setTimeout(() => {
-          navigation.navigate("HomeTab", { screen: "Home" });
-        }, 1000);
-      }
-
       await SplashScreen.hideAsync();
     })();
   }, []);
@@ -66,28 +71,39 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   const onDismissSnackBar = () => toggleSnack(false);
 
   const handleLogin = async () => {
+
     if (username === "" || password === "") {
       toggleSnack(!snackState);
     } else {
+
+      // changes made by karthik 
+
       try {
-        const status = await user.login(username, password);
-        console.log("Login status:", status); // Log the login status
-        const userId = await user.getId();
-        console.log("User ID after login:", userId); // Log the user ID
+        const status = await user.login(username, password)
         if (status == "success") {
-          setUsername("");
-          setPassword("");
+          const userId = await user.getId();
+          // console.log("in login page, Inside the is statement of success ", userId)
+          if (userId !== null) {
+              setUsername("")
+              setPassword("")
+              setTimeout(() => {
+              dispatch(setNavState('home'));
+              navigation.navigate("HomeTab");  // Navigate to the HomeTab
+            }, 1000);
+          }
         }
-      } catch (error) {
-        toggleSnack(true);
       }
+      catch (error) {
+        console.log("login failed :", error);
+        toggleSnack(true)
+      }
+
     }
   };
 
-  // this is simply for dev purposes and should be commented out in production
   const clearOnboarding = async () => {
     try {
-      await removeItem("onboarded"); // Replace 'onboarded' with the correct key if different
+      await removeItem("onboarded");
       console.log("Onboarding key cleared!");
     } catch (error) {
       console.error("Failed to clear the onboarding key.", error);
@@ -96,88 +112,81 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
 
   const onLoginPress = async () => {
     try {
-        await handleLogin();
+      await handleLogin();
+
     } catch (e) {
-        console.log(e);
+      console.log(e);
     }
   };
 
   return (
-      <KeyboardAwareScrollView
-        contentContainerStyle={styles.container}
-        style={{ backgroundColor: "#F4DFCD" }}
+    <KeyboardAwareScrollView
+      contentContainerStyle={styles.container}
+      style={{ backgroundColor: "#F4DFCD" }}
+    >
+      <ImageBackground
+        source={require("../../../assets/splash.jpg")}
+        style={styles.imageBackground}
       >
-        <ImageBackground
-          source={require("../../../assets/splash.jpg")}
-          style={styles.imageBackground}
+        <Snackbar
+          visible={snackState}
+          onDismiss={onDismissSnackBar}
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "white",
+          }}
         >
-          <Snackbar
-            visible={snackState}
-            onDismiss={onDismissSnackBar}
-            style={{
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "white",
-            }}
+          <Text style={{ textAlign: "center" }}>Invalid User Credentials</Text>
+        </Snackbar>
+        {firstClick ? (
+          <TouchableOpacity
+            activeOpacity={1}
+            style={styles.title}
+            onPress={fadeOut}
           >
-            <Text style={{ textAlign: "center" }}>Invalid User Credentials</Text>
-          </Snackbar>
-          {firstClick ? (
-            <TouchableOpacity
-              activeOpacity={1}
-              style={styles.title}
-              onPress={fadeOut}
-            >
-              <Animated.Text style={[styles.logo, { opacity: fadeAnim }]}>
-                Where's {"\n"} Religion?
-              </Animated.Text>
-            </TouchableOpacity>
-          ) : (
-            <View style={styles.loginBox}>
-              <Text style={[styles.logo, { marginBottom: 50 }]}>Login</Text>
-              <View style={styles.inputView}>
-                <TextInput
-                  style={styles.inputText}
-                  placeholder="Username..."
-                  placeholderTextColor="#003f5c"
-                  value={username}
-                  onChangeText={(text) => setUsername(text)}
-                  onSubmitEditing={handleLogin}
-                />
-              </View>
-              <View style={styles.inputView}>
-                <TextInput
-                  secureTextEntry
-                  style={styles.inputText}
-                  placeholder="Password..."
-                  placeholderTextColor="#003f5c"
-                  value={password}
-                  onChangeText={(text) => setPassword(text)}
-                  onSubmitEditing={handleLogin}
-                />
-              </View>
-              <TouchableOpacity>
-                <Text style={styles.forgot}>Forgot Password?</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress= {onLoginPress}/*{handleLogin}*/  style={styles.buttons}>
-                <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
-                  Login
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.buttons} onPress={handleGoRegister}>
-                <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
-                  Register
-                </Text>
-              </TouchableOpacity>
-              {/* <TouchableOpacity onPress={clearOnboarding} style={styles.buttons}>
-                <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
-                  Clear Onboarding
-                </Text>
-              </TouchableOpacity> */}
+            <Animated.Text style={[styles.logo, { opacity: fadeAnim }]}>
+              Where's {"\n"} Religion?
+            </Animated.Text>
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.loginBox}>
+            <Text style={[styles.logo, { marginBottom: 50 }]}>Login</Text>
+            <View style={styles.inputView}>
+              <TextInput
+                style={styles.inputText}
+                placeholder="Email..."
+                placeholderTextColor="#003f5c"
+                value={username}
+                onChangeText={(text) => setUsername(text)}
+                onSubmitEditing={handleLogin}
+              />
             </View>
-          )}
-        </ImageBackground>
-      </KeyboardAwareScrollView>
+
+            <View style={styles.inputView}>
+              <TextInput
+                secureTextEntry
+                style={styles.inputText}
+                placeholder="Password..."
+                placeholderTextColor="#003f5c"
+                value={password}
+                onChangeText={(text) => setPassword(text)}
+                onSubmitEditing={handleLogin}
+              />
+            </View>
+            <TouchableOpacity>
+              <Text style={styles.forgot}>Forgot Password?</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={onLoginPress} style={styles.buttons}>
+              <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
+                Login
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </ImageBackground>
+    </KeyboardAwareScrollView>
+
   );
 };
 
