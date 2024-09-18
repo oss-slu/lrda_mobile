@@ -21,6 +21,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setNavState } from "../../../redux/slice/navigationSlice";
 import { RootState } from "../../../redux/store/store";
 import { Keyboard } from "react-native";
+
 const user = User.getInstance();
 
 type LoginProps = {
@@ -36,6 +37,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const navState = useSelector((state: RootState) => state.navigation.navState);
   const dispatch = useDispatch()
+
 
   const fadeOut = () => {
     Animated.timing(fadeAnim, {
@@ -111,6 +113,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   const onLoginPress = async () => {
     try {
       await handleLogin();
+
     } catch (e) {
       console.log(e);
     }
@@ -160,6 +163,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
                 onSubmitEditing={handleLogin}
               />
             </View>
+
             <View style={styles.inputView}>
               <TextInput
                 secureTextEntry
@@ -183,6 +187,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
         )}
       </ImageBackground>
     </KeyboardAwareScrollView>
+
   );
 };
 

@@ -1,3 +1,520 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`NoteDetailModal renders without crashing 1`] = `ShallowWrapper {}`;
+exports[`NoteDetailModal renders without crashing 1`] = `
+<Modal
+  animationType="slide"
+  hardwareAccelerated={false}
+  transparent={false}
+  visible={true}
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    onClick={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "#ffffff",
+        "borderRadius": 25,
+        "elevation": 3,
+        "justifyContent": "center",
+        "left": 20,
+        "opacity": 1,
+        "position": "absolute",
+        "shadowOffset": {
+          "height": 2,
+          "width": 0,
+        },
+        "shadowOpacity": 0.5,
+        "shadowRadius": 2,
+        "top": 50,
+        "zIndex": 1,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "backgroundColor": "#ffffff",
+          "borderRadius": 20,
+          "height": 40,
+          "justifyContent": "center",
+          "width": 40,
+        }
+      }
+    >
+      <Text />
+    </View>
+  </View>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    onClick={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "#ffffff",
+        "borderRadius": 25,
+        "elevation": 3,
+        "justifyContent": "center",
+        "opacity": 1,
+        "position": "absolute",
+        "right": 20,
+        "shadowOffset": {
+          "height": 2,
+          "width": 0,
+        },
+        "shadowOpacity": 0.5,
+        "shadowRadius": 2,
+        "top": 50,
+        "zIndex": 1,
+      }
+    }
+    testID="imageButton"
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "backgroundColor": "#ffffff",
+          "borderRadius": 20,
+          "height": 40,
+          "justifyContent": "center",
+          "width": 40,
+        }
+      }
+    >
+      <Text />
+    </View>
+  </View>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    onClick={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "#ffffff",
+        "borderRadius": 25,
+        "elevation": 3,
+        "justifyContent": "center",
+        "opacity": 1,
+        "position": "absolute",
+        "right": 70,
+        "shadowOffset": {
+          "height": 2,
+          "width": 0,
+        },
+        "shadowOpacity": 0.5,
+        "shadowRadius": 2,
+        "top": 50,
+        "zIndex": 1,
+      }
+    }
+    testID="videoButton"
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "backgroundColor": "#ffffff",
+          "borderRadius": 20,
+          "height": 40,
+          "justifyContent": "center",
+          "width": 40,
+        }
+      }
+    >
+      <Text />
+    </View>
+  </View>
+  <View
+    onTouchStart={[Function]}
+    style={
+      [
+        {
+          "backgroundColor": "#ffffff",
+          "borderTopColor": "#000000",
+          "borderTopWidth": 2,
+          "flex": 1,
+          "padding": 10,
+          "paddingLeft": 15,
+          "paddingTop": 100,
+        },
+        {
+          "height": "60%",
+        },
+      ]
+    }
+  >
+    <Text
+      style={
+        {
+          "color": "#000000",
+          "fontSize": 26,
+          "fontWeight": "bold",
+          "marginBottom": 8,
+          "marginLeft": 15,
+        }
+      }
+    >
+      Test Note Title
+    </Text>
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "justifyContent": "space-between",
+          "marginBottom": 10,
+          "marginLeft": 15,
+          "marginRight": 15,
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+          }
+        }
+      >
+        <Text />
+        <Text
+          style={
+            {
+              "color": "#000000",
+              "fontSize": 16,
+              "marginLeft": 5,
+            }
+          }
+        />
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+          }
+        }
+      >
+        <Text />
+        <Text
+          style={
+            {
+              "color": "#000000",
+              "fontSize": 16,
+              "marginLeft": 5,
+            }
+          }
+        >
+          2023-09-10
+        </Text>
+      </View>
+    </View>
+    <View
+      style={
+        {
+          "flexDirection": "row",
+          "marginHorizontal": 15,
+        }
+      }
+    >
+      <Text />
+      <RCTScrollView
+        horizontal={true}
+        showsHorizontalScrollIndicator={false}
+        style={
+          {
+            "marginBottom": 10,
+            "paddingLeft": 5,
+            "width": "100%",
+          }
+        }
+      >
+        <View>
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "marginRight": 10,
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "borderBottomWidth": 2,
+                  "borderColor": "#000000",
+                  "borderLeftWidth": 2,
+                  "height": 20,
+                  "justifyContent": "center",
+                  "left": 2,
+                  "position": "absolute",
+                  "transform": [
+                    {
+                      "rotate": "45deg",
+                    },
+                  ],
+                  "width": 20,
+                }
+              }
+            >
+              <View
+                style={
+                  {
+                    "backgroundColor": "#000000",
+                    "borderRadius": 10,
+                    "height": 5,
+                    "left": 2,
+                    "marginRight": 5,
+                    "width": 5,
+                  }
+                }
+              />
+            </View>
+            <View
+              style={
+                {
+                  "borderBottomRightRadius": 5,
+                  "borderBottomWidth": 2,
+                  "borderColor": "#000000",
+                  "borderRightWidth": 2,
+                  "borderTopRightRadius": 5,
+                  "borderTopWidth": 2,
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                  "marginLeft": 10,
+                  "paddingHorizontal": 10,
+                }
+              }
+            >
+              <Text
+                style={
+                  {
+                    "color": "#000000",
+                    "fontSize": 16,
+                    "marginLeft": 5,
+                  }
+                }
+              >
+                test-tag-1
+              </Text>
+            </View>
+          </View>
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "marginRight": 10,
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "borderBottomWidth": 2,
+                  "borderColor": "#000000",
+                  "borderLeftWidth": 2,
+                  "height": 20,
+                  "justifyContent": "center",
+                  "left": 2,
+                  "position": "absolute",
+                  "transform": [
+                    {
+                      "rotate": "45deg",
+                    },
+                  ],
+                  "width": 20,
+                }
+              }
+            >
+              <View
+                style={
+                  {
+                    "backgroundColor": "#000000",
+                    "borderRadius": 10,
+                    "height": 5,
+                    "left": 2,
+                    "marginRight": 5,
+                    "width": 5,
+                  }
+                }
+              />
+            </View>
+            <View
+              style={
+                {
+                  "borderBottomRightRadius": 5,
+                  "borderBottomWidth": 2,
+                  "borderColor": "#000000",
+                  "borderRightWidth": 2,
+                  "borderTopRightRadius": 5,
+                  "borderTopWidth": 2,
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                  "marginLeft": 10,
+                  "paddingHorizontal": 10,
+                }
+              }
+            >
+              <Text
+                style={
+                  {
+                    "color": "#000000",
+                    "fontSize": 16,
+                    "marginLeft": 5,
+                  }
+                }
+              >
+                test-tag-2
+              </Text>
+            </View>
+          </View>
+        </View>
+      </RCTScrollView>
+    </View>
+    <RCTScrollView>
+      <View>
+        <View
+          style={
+            {
+              "backgroundColor": "#000000",
+              "height": 2,
+              "marginBottom": 10,
+              "width": "100%",
+            }
+          }
+        />
+        <View
+          style={
+            [
+              {},
+              undefined,
+              undefined,
+            ]
+          }
+          testID="html"
+        >
+          <View
+            style={
+              [
+                {},
+                undefined,
+                undefined,
+              ]
+            }
+            testID="body"
+          >
+            <View
+              style={
+                [
+                  {},
+                  undefined,
+                  undefined,
+                ]
+              }
+              testID="div"
+            >
+              <Text
+                allowFontScaling={true}
+                selectable={false}
+                style={
+                  [
+                    {
+                      "color": "#000000",
+                      "fontSize": 14,
+                    },
+                    undefined,
+                    undefined,
+                  ]
+                }
+              >
+                Test Note Description
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+    </RCTScrollView>
+  </View>
+</Modal>
+`;

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -18,39 +18,25 @@ function TagWindow({
 }) {
   const [inputText, setInputText] = useState("");
 
-  let data = tags?.map((tag: string, index: number) => {
-    return {
-      key: index,
-      tag: tag,
-    };
-  }) || [];
+  let data =
+    tags?.map((tag: string, index: number) => {
+      return {
+        key: index.toString(),
+        tag: tag,
+      };
+    }) || [];
 
-  const handleDeleteTag = (rowKey: string, rowMap: any) => {
-    if (rowMap[rowKey]) {
-      rowMap[rowKey].closeRow();
-    }
-    const index = data.findIndex((item) => item.key.toString() === rowKey);
-    const newTagList = [...tags];
-    newTagList.splice(index, 1);
+  const handleDeleteTag = (rowKey: string) => {
+    const newTagList = tags.filter((_, index) => index.toString() !== rowKey);
     setTags(newTagList);
   };
 
-  const renderHidden = (data: any, rowMap: any) => {
+  const renderHiddenItem = (data: any, rowMap: any) => {
     return (
-      <View key={data.item.key} style={styles.rowBack}>
+      <View style={styles.rowBack}>
         <TouchableOpacity
-          onPress={() => handleDeleteTag(data.item.key.toString(), rowMap)}
+          onPress={() => handleDeleteTag(data.item.key)}
           testID={`delete-action-${data.item.key}`}
-        >
-          <Ionicons
-            name="trash-outline"
-            size={24}
-            color="#111111"
-            style={{ alignSelf: "center" }}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => handleDeleteTag(data.item.key.toString(), rowMap)}
         >
           <Ionicons
             name="trash-outline"
@@ -63,57 +49,41 @@ function TagWindow({
     );
   };
 
-  const updateTag = ({ item }: { item: { key: number; tag: string } }) => {
-    const newTagList = [...tags];
-    newTagList.splice(item.key, 1);
-    setTags(newTagList);
-    setInputText(item.tag);
-  };
-
-  const renderText = ({ item }: { item: { key: number; tag: string } }) => {
-    return (
-      <TouchableOpacity
-        activeOpacity={1}
-        key={item.key}
-        style={styles.rowFront}
-        onPress={() => updateTag({ item })}
-      >
-        <Text style={styles.text}>{item.tag}</Text>
-      </TouchableOpacity>
-    );
-  };
+  const renderItem = ({ item }: { item: { key: string; tag: string } }) => (
+    <TouchableOpacity activeOpacity={1} style={styles.rowFront}>
+      <Text style={styles.text}>{item.tag}</Text>
+    </TouchableOpacity>
+  );
 
   return (
-    <View style={{marginBottom: 10, minHeight: 100}}>
+    <View style={{ marginBottom: 10, minHeight: 100 }}>
       <TextInput
+        testID="tag-input"
         style={styles.textBox}
         value={inputText}
         onChangeText={setInputText}
         placeholder="Your Tag Here"
         onSubmitEditing={() => {
-          if(inputText != '')
-            if(tags){
-              setTags([...tags, inputText]);
-            } else{
-              setTags([inputText]);
-            }
+          if (inputText !== '') {
+            setTags([...tags, inputText]);
             setInputText("");
-        }}        
+          }
+        }}
       />
       <SwipeListView
+        testID="swipe-list"
         data={data}
         scrollEnabled={false}
-        renderItem={renderText}
-        renderHiddenItem={renderHidden}
-        keyExtractor={(item) => item.key.toString()}
+        renderItem={renderItem}
+        renderHiddenItem={renderHiddenItem}
+        keyExtractor={(item) => item.key}
         leftActivationValue={160}
         rightActivationValue={-160}
         leftOpenValue={75}
         rightOpenValue={-75}
         stopLeftSwipe={175}
         stopRightSwipe={-175}
-        onRightAction={(rowKey, rowMap) => handleDeleteTag(rowKey, rowMap)}
-        onLeftAction={(rowKey, rowMap) => handleDeleteTag(rowKey, rowMap)}
+        onRowOpen={(rowKey) => handleDeleteTag(rowKey)}
       />
     </View>
   );
