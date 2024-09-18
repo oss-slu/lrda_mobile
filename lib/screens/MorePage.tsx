@@ -16,6 +16,8 @@ import { User } from "../models/user_class";
 import { useTheme } from "../components/ThemeProvider";
 import { useDispatch } from "react-redux";
 
+
+
 const user = User.getInstance();
 const { width, height } = Dimensions.get("window");
 
@@ -25,6 +27,7 @@ export default function MorePage() {
 
   // Use the Redux dispatch for logging out
   const dispatch = useDispatch();
+
 
   const handleToggleDarkMode = () => {
     if (toggleDarkmode) {
@@ -46,7 +49,9 @@ export default function MorePage() {
 
   const onLogoutPress = async () => {
     try {
+
       await user.logout(dispatch);
+
     } catch (e) {
       console.log(e);
     }
@@ -265,94 +270,5 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
 });
-/*  Line 155
-            <Accordion style={{ backgroundColor: theme.secondaryColor }} headerTitleStyle={styles.headerText} headerTitle="Resources">
-              <TouchableOpacity
-                onPress={() => Linking.openURL(
-                  "http://lived-religion-dev.rerum.io/deer-lr/dashboard.html"
-                )}
-              ><Text style={styles.headerText}>{"\n"}{"\t"}Our Website{"\n"}</Text></TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => Linking.openURL(
-                  "https://guides.library.upenn.edu/ethnography/DoingEthnography"
-                )}
-              ><Text style={styles.headerText}>{"\t"}Guide to Enthnography{"\n"}</Text></TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => Linking.openURL(
-                  "http://changingminds.org/explanations/research/analysis/ethnographic_coding.htm"
-                )}
-              ><Text style={styles.headerText}>{"\t"}Guide to Coding{"\n"}</Text></TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => handleEmail()}
-              ><Text style={styles.headerText}>{"\t"}Report a Bug{"\n"}</Text></TouchableOpacity>
-            </Accordion>
-            <Accordion style={{ backgroundColor: theme.secondaryColor }} headerTitleStyle={styles.headerText} headerTitle="Meet our Team">
-              <Text style={{ color: theme.text }}>
-                {'\n'}Insert Team Photo
-              </Text>
-              <Text style={{ color: theme.text }}>{'\n'}Insert Team Message</Text>
-            </Accordion>
-            <Accordion style={{ backgroundColor: theme.secondaryColor }} headerTitleStyle={styles.headerText} headerTitle="Frequently Asked Questions">
-              <View style={styles.headerContainer}>
-                <Accordion
-                  style={{ backgroundColor: theme.secondaryColor }}
-                  headerTitleStyle={styles.headerText}
-                  headerTitle="What can users do?"
-                >
-                  <Text style={styles.text}>
-                    Explore religious traditions, find places of worship, engage in
-                    meaningful discussions.
-                  </Text>
-                </Accordion>
-              </View>
-              <View style={styles.headerContainer}>
-                <Accordion
-                  style={{ backgroundColor: theme.secondaryColor }}
-                  headerTitleStyle={styles.headerText}
-                  headerTitle="Who is it for?"
-                >
-                  <Text style={styles.text}>
-                    Scholars, students, believers, and the curious about the world's
-                    religions.
-                  </Text>
-                </Accordion>
-              </View>
-              <View style={styles.headerContainer}>
-                <Accordion
-                  style={{ backgroundColor: theme.secondaryColor }}
-                  headerTitleStyle={styles.headerText}
-                  headerTitle="What's unique?"
-                >
-                  <Text style={styles.text}>
-                    Provides a modern method to capture experiences using the
-                    devices that are with us every day.
-                  </Text>
-                </Accordion>
-              </View>
-              <View style={styles.headerContainer}>
-                <Accordion
-                  style={{ backgroundColor: theme.secondaryColor }}
-                  headerTitleStyle={styles.headerText}
-                  headerTitle="Our Mission"
-                >
-                  <Text style={styles.text}>
-                    Connect people of diverse religious backgrounds, beliefs, and
-                    practices.
-                  </Text>
-                </Accordion>
-              </View>
-              <View style={styles.headerContainer}>
-                <Accordion
-                  style={{ backgroundColor: theme.secondaryColor }}
-                  headerTitleStyle={styles.headerText}
-                  headerTitle="Why use 'Where's Religion?'"
-                >
-                  <Text style={styles.text}>
-                    Explore religious traditions, find places of worship, engage in
-                    meaningful discussions.
-                  </Text>
-                </Accordion>
-              </View>
-            </Accordion>
 
-            */
+          
