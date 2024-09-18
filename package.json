@@ -12,6 +12,7 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
+    "@10play/tentap-editor": "^0.5.21",
     "@gapur/react-native-accordion": "^1.0.7",
     "@react-native-async-storage/async-storage": "^2.0.0",
     "@react-native-community/datetimepicker": "8.0.1",
