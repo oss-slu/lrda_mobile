@@ -111,6 +111,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   };
 
   const onLoginPress = async () => {
+    Keyboard.dismiss();
     try {
       await handleLogin();
 
