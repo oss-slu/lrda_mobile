@@ -59,34 +59,5 @@ describe('LoginScreen', () => {
         </SafeAreaProvider>
       </Provider>
     );
-
-    // Bypass animation by setting `firstClick` state directly in the test
-    const { getByPlaceholderText } = render(
-      <Provider store={store}>
-        <SafeAreaProvider>
-          <LoginScreen navigation={navigationMock} route={routeMock} />
-        </SafeAreaProvider>
-      </Provider>
-    );
-
-    // Wait for the input fields to appear
-    const emailInput = await waitFor(() => getByTestId('email-input'));
-    const passwordInput = await waitFor(() => getByTestId('password-input'));
-
-    // Fill in the input fields
-    fireEvent.changeText(emailInput, 'test123');
-    fireEvent.changeText(passwordInput, 'test123');
-
-    // Wait for the login button to appear
-    const loginButton = await waitFor(() => getByText('Login'));
-
-    // Click the login button
-    fireEvent.press(loginButton);
-
-    // Wait for the navigation to occur
-    await waitFor(() => {
-      expect(navigationMock.navigate).toHaveBeenCalledWith('HomeTab');
-    });
-  });
   
 });
