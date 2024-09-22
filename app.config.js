@@ -54,7 +54,6 @@ export default {
       appId: process.env.APP_ID,
       measurementId: process.env.MEASUREMENT_ID,
       eas: {
-        projectId: "801029ef-db83-4668-a97a-5adcc4c333e2"
       }
     },
   }
