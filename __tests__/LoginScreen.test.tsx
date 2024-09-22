@@ -59,5 +59,6 @@ describe('LoginScreen', () => {
         </SafeAreaProvider>
       </Provider>
     );
+  });
   
 });
