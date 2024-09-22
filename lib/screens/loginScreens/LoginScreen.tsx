@@ -181,7 +181,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
             <TouchableOpacity>
               <Text style={styles.forgot}>Forgot Password?</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={onLoginPress} style={styles.buttons}>
+            <TouchableOpacity onPress={onLoginPress} style={styles.buttons} testID="login-button">
               <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
                 Login
               </Text>
