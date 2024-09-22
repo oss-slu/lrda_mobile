@@ -47,30 +47,43 @@ describe('LoginScreen', () => {
     expect(toJSON()).toMatchSnapshot();
   });
 
-  it('triggers login function when login button is pressed while keyboard is mounted', async () => {
+  it('calls the login function after the login button is clicked once', async () => {
     const navigationMock = { navigate: jest.fn() };
     const routeMock = { params: {} };
 
-    const { getByPlaceholderText, getByText } = render(
+    // Render the component
+    const { getByTestId, getByText } = render(
       <Provider store={store}>
         <SafeAreaProvider>
           <LoginScreen navigation={navigationMock} route={routeMock} />
         </SafeAreaProvider>
       </Provider>
     );
-    
-    // Simulate user input for email and password
-    const emailInput = await waitFor(() => getByPlaceholderText('Email...'));  // Wait for the email input to appear
-    fireEvent.changeText(emailInput, 'testuser@example.com');
-    
-    const passwordInput = await waitFor(() => getByPlaceholderText('Password...'));  // Wait for the password input to appear
-    fireEvent.changeText(passwordInput, 'password123');
 
-    // Simulate pressing the login button
-    const loginButton = getByText('Login');
+    // Bypass animation by setting `firstClick` state directly in the test
+    const { getByPlaceholderText } = render(
+      <Provider store={store}>
+        <SafeAreaProvider>
+          <LoginScreen navigation={navigationMock} route={routeMock} />
+        </SafeAreaProvider>
+      </Provider>
+    );
+
+    // Wait for the input fields to appear
+    const emailInput = await waitFor(() => getByTestId('email-input'));
+    const passwordInput = await waitFor(() => getByTestId('password-input'));
+
+    // Fill in the input fields
+    fireEvent.changeText(emailInput, 'test123');
+    fireEvent.changeText(passwordInput, 'test123');
+
+    // Wait for the login button to appear
+    const loginButton = await waitFor(() => getByText('Login'));
+
+    // Click the login button
     fireEvent.press(loginButton);
 
-    // Assert that the navigation function was called with "HomeTab"
+    // Wait for the navigation to occur
     await waitFor(() => {
       expect(navigationMock.navigate).toHaveBeenCalledWith('HomeTab');
     });

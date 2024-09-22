@@ -162,6 +162,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
                 value={username}
                 onChangeText={(text) => setUsername(text)}
                 onSubmitEditing={handleLogin}
+                testID="email-input"
               />
             </View>
 
@@ -174,6 +175,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
                 value={password}
                 onChangeText={(text) => setPassword(text)}
                 onSubmitEditing={handleLogin}
+                testID="password-input"
               />
             </View>
             <TouchableOpacity>
