@@ -12,8 +12,6 @@ export class User {
   private userData: UserData | null = null;
   private callback: ((isLoggedIn: boolean) => void) | null = null;
 
-  
-
   public static getInstance(): User {
     if (!User.instance) {
       User.instance = new User();
@@ -61,52 +59,15 @@ export class User {
 
   public async login(username: string, password: string): Promise<string> {
     try {
-
-    
-
-      // const response = await fetch(
-      //   "https://lived-religion-dev.rerum.io/deer-lr/login",
-      //   {
-      //     method: "POST",
-      //     mode: "cors",
-      //     cache: "no-cache",
-      //     headers: {
-      //       "Content-Type": "application/json;charset=utf-8",
-      //     },
-      //     body: JSON.stringify({
-      //       username: username,
-      //       password: password,
-      //     }),
-      //   }
-      // );
-
-
-      // if (response.ok) {
-      //   const data = await response.json();
-      //   this.userData = data;
-      //   if (this.userData !== null) {
-      //     await this.persistUser(this.userData);
-      //   }
-      //   this.notifyLoginState();
-      //   console.log("From userClass, Data ***************************==>>************************************ ", this.userData)
-      //   return "success";
-      // } else {
-      //   throw new Error("There was a server error logging in.");
-      // }
-
       const userCredential = await signInWithEmailAndPassword(auth, username, password);
       const user = userCredential.user;
-      // const token = await user.getIdToken();
-      // console.log("user id is ", user.uid)
        const userData = await ApiService.fetchUserData(user.uid)
 
        if (userData) {
          this.userData = userData;
          console.log("user data ", userData)
          await this.persistUser(userData);
-       
        }
-      
        this.notifyLoginState();
       
        return "success";
@@ -131,8 +92,6 @@ export class User {
             dispatch(setNavState("login"))
             this.clearUser();
             this.notifyLoginState();
-
-            // console.log("User logged out");
           }
         })
         .catch((err) => {

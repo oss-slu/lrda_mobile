@@ -18,3 +18,6 @@ grounded-*
 # macOS
 .DS_Store
 yarn.lock
+
+# Ignore unused code file
+UnUsedCode.tsx

@@ -52,7 +52,7 @@ const HomeStack = () => {
 };
 
 const AppNavigator: React.FC = () => {
-  // const [navState, setNavState] = useState<"loading" | "onboarding" | "login" | "home">("loading");
+
   const { theme, isDarkmode } = useTheme();
   const dispatch = useDispatch();
   const navState = useSelector((state: RootState) => state.navigation.navState);

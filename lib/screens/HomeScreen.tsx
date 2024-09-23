@@ -316,8 +316,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       backgroundColor: theme.homeGray,
       width: "50%",
       right: 0,
-      // borderTopRightRadius: 20,
-      // borderBottomRightRadius: 20,
     },
     rowBack: {
       width: "100%",

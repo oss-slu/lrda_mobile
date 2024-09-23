@@ -13,14 +13,11 @@ import {
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import * as SplashScreen from "expo-splash-screen";
 import { Snackbar } from "react-native-paper";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../config";  // Import the Firebase auth
 import { User } from "../../models/user_class";
 import { removeItem } from "../../utils/async_storage";
 import { useSelector, useDispatch } from 'react-redux';
 import { setNavState } from "../../../redux/slice/navigationSlice";
 import { RootState } from "../../../redux/store/store";
-import { Keyboard } from "react-native";
 
 const user = User.getInstance();
 
@@ -55,8 +52,6 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
     return () => clearTimeout(timer);
   }, []);
 
-  console.log("in login page the redux value is ", navState)
-
   useEffect(() => {
     (async () => {
       await SplashScreen.preventAutoHideAsync();
@@ -64,25 +59,17 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
     })();
   }, []);
 
-  const handleGoRegister = () => {
-    navigation.navigate("Register");
-  };
-
   const onDismissSnackBar = () => toggleSnack(false);
 
   const handleLogin = async () => {
-
     if (username === "" || password === "") {
       toggleSnack(!snackState);
-    } else {
-
-      // changes made by karthik 
-
+    } 
+    else {
       try {
         const status = await user.login(username, password)
         if (status == "success") {
           const userId = await user.getId();
-          // console.log("in login page, Inside the is statement of success ", userId)
           if (userId !== null) {
               setUsername("")
               setPassword("")
@@ -98,15 +85,6 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
         toggleSnack(true)
       }
 
-    }
-  };
-
-  const clearOnboarding = async () => {
-    try {
-      await removeItem("onboarded");
-      console.log("Onboarding key cleared!");
-    } catch (error) {
-      console.error("Failed to clear the onboarding key.", error);
     }
   };
 
