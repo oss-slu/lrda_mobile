@@ -1,3 +1,141 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ImageModal renders without crashing 1`] = `ShallowWrapper {}`;
+exports[`ImageModal renders without crashing 1`] = `
+<Modal
+  animationType="slide"
+  hardwareAccelerated={false}
+  onRequestClose={[Function]}
+  transparent={false}
+  visible={true}
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": undefined,
+        "flex": 1,
+        "justifyContent": "center",
+        "paddingTop": 45,
+        "width": "100%",
+      }
+    }
+  >
+    <RCTScrollView
+      style={
+        {
+          "height": "50%",
+        }
+      }
+    >
+      <View>
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "backgroundColor": undefined,
+              "width": "100%",
+            }
+          }
+        >
+          <ActivityIndicator
+            color="#0000ff"
+            size="large"
+          />
+          <Image
+            onLoad={[Function]}
+            source={
+              {
+                "uri": "https://example.com/image1.jpg",
+              }
+            }
+            style={
+              {
+                "height": 750,
+                "width": 750,
+              }
+            }
+          />
+        </View>
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "backgroundColor": undefined,
+              "width": "100%",
+            }
+          }
+        >
+          <ActivityIndicator
+            color="#0000ff"
+            size="large"
+          />
+          <Image
+            onLoad={[Function]}
+            source={
+              {
+                "uri": "https://example.com/image2.jpg",
+              }
+            }
+            style={
+              {
+                "height": 750,
+                "width": 750,
+              }
+            }
+          />
+        </View>
+      </View>
+    </RCTScrollView>
+    <View
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onClick={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignItems": "center",
+          "backgroundColor": "#ddd",
+          "borderRadius": 5,
+          "height": 40,
+          "justifyContent": "center",
+          "marginBottom": 30,
+          "marginTop": 20,
+          "opacity": 1,
+          "padding": 10,
+          "width": 75,
+        }
+      }
+      testID="image-component"
+    >
+      <Text
+        testID="close-button"
+      >
+        Close
+      </Text>
+    </View>
+  </View>
+</Modal>
+`;

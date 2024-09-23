@@ -54,8 +54,10 @@ export default class ApiService {
           "Content-Type": "application/json",
         };
         const body = { 
-          "@type": "Agent", 
-          "uid": uid }
+          "$or": [
+            { "@type": "Agent", "uid": uid },
+            { "@type": "foaf:Agent", "uid": uid }
+          ]}
         ;
         console.log("")
         const response = await fetch(url, {

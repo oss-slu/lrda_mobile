@@ -13,22 +13,21 @@ import {
   Platform
 } from "react-native";
 import * as Location from 'expo-location';
-import { Note, AddNoteScreenProps } from "../../types";
 import ToastMessage from 'react-native-toast-message';
-import PhotoScroller from "../components/photoScroller";
-import { getThumbnail } from "../utils/S3_proxy";
-import { User } from "../models/user_class";
 import { Ionicons } from "@expo/vector-icons";
 import { Media, AudioType } from "../models/media_class";
-import AudioContainer from "../components/audio";
+import { getThumbnail } from "../utils/S3_proxy";
+import { User } from "../models/user_class";
 import ApiService from "../utils/api_calls";
+import PhotoScroller from "../components/photoScroller";
+import AudioContainer from "../components/audio";
 import TagWindow from "../components/tagging";
 import LocationWindow from "../components/location";
 import TimeWindow from "../components/time";
 import {
   RichEditor,
   RichToolbar,
-  actions,
+  actions
 } from "react-native-pell-rich-editor";
 import NotePageStyles from "../../styles/pages/NoteStyles";
 import { useTheme } from "../components/ThemeProvider";
@@ -36,36 +35,31 @@ import LoadingModal from "../components/LoadingModal";
 
 const user = User.getInstance();
 
-const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
+const AddNoteScreen = ({ navigation, route }) => {
   const [titleText, setTitleText] = useState("");
   const [isSaveButtonEnabled, setIsSaveButtonEnabled] = useState(true);
   const [untitledNumber, setUntitledNumber] = useState("0");
   const [bodyText, setBodyText] = useState("");
-  const [newMedia, setNewMedia] = useState<Media[]>([]);
-  const [newAudio, setNewAudio] = useState<AudioType[]>([]);
-  const [tags, setTags] = useState<string[]>([]);
+  const [newMedia, setNewMedia] = useState([]);
+  const [newAudio, setNewAudio] = useState([]);
+  const [tags, setTags] = useState([]);
   const [time, setTime] = useState(new Date());
   const [viewMedia, setViewMedia] = useState(false);
   const [viewAudio, setViewAudio] = useState(false);
   const [isTagging, setIsTagging] = useState(false);
   const [isLocation, setIsLocation] = useState(false);
   const [isTime, setIsTime] = useState(false);
-  const richTextRef = useRef<RichEditor | null>(null);
+  const richTextRef = useRef(null);
   const [isPublished, setIsPublished] = useState(false);
   const [keyboardOpen, setKeyboard] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const scrollViewRef = useRef<ScrollView | null>(null);
+  const scrollViewRef = useRef(null);
   const [initialLoad, setInitialLoad] = useState(true);
-  const [promptedMissingTitle, setPromptedMissingTitle] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isLocationIconPressed, setIsLocationIconPressed] = useState(false);
-  let [location, setLocation] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
-
+  let [location, setLocation] = useState(null);
   const { theme } = useTheme();
-  
+
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -80,11 +74,10 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
         setKeyboard(false);
         setKeyboardHeight(0);
       }
-      
     );
     const timeout = setTimeout(() => {
       setInitialLoad(false);
-    }, 1000); // Adjust delay as needed
+    }, 1000);
 
     return () => {
       clearTimeout(timeout);
@@ -103,8 +96,6 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
       setUntitledNumber(untitledNumber.toString());
     }
   }, [route.params]);
-
-  const [isLocationShown, setIsLocationShown] = useState(true);
 
   const grabLocation = async () => {
     try {
@@ -136,7 +127,7 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     if (richTextRef.current) {
       richTextRef.current.getContentHtml()
         .then(html => {
-          setBodyText(html); // Update the state with the latest content
+          setBodyText(html);
         })
         .catch(error => {
           console.error('Error getting content from RichEditor:', error);
@@ -144,153 +135,91 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
     }
   };
 
-  const addImageToEditor = (imageUri: string) => {
-    const customStyle = `
-      max-width: 50%;
-      height: auto; /* Maintain aspect ratio */
-      /* Additional CSS properties for sizing */
-    `;
-  
-    // Include an extra line break character after the image tag
-    const imgTag = `<img src="${imageUri}" style="${customStyle}" />&nbsp;<br><br>`;
-  
+  const addImageToEditor = (imageUri) => {
+    const imgTag = `<img src="${imageUri}" style="max-width: 50%; height: auto;" />&nbsp;<br><br>`;
     richTextRef.current?.insertHTML(imgTag);
-  
+
     if (scrollViewRef.current && !initialLoad) {
-      // Adjust this timeout and calculation as necessary
       setTimeout(() => {
         scrollViewRef.current?.scrollToEnd({ animated: true });
       }, 500);
     }
   };
 
-  const addVideoToEditor = async (videoUri: string) => {
+  const addVideoToEditor = async (videoUri) => {
     try {
-      // Fetch the thumbnail URI
       const thumbnailUri = await getThumbnail(videoUri);
-  
       const videoHtml = `
-        <video width="320" height="240" controls poster="${thumbnailUri}" id="videoElement">
+        <video width="320" height="240" controls poster="${thumbnailUri}">
           <source src="${videoUri}" type="video/mp4">
           Your browser does not support the video tag.
         </video>
-        <p><a href="${videoUri}" target="_blank">${videoUri}</a></p> <!-- Make the URI clickable -->
-        <script>
-          document.getElementById('videoElement').addEventListener('play', function(e) {
-            // Preventing the rich text editor from gaining focus when the video is played
-            e.preventDefault();
-            
-            
-          });
-        </script>
+        <p><a href="${videoUri}" target="_blank">${videoUri}</a></p>
       `;
-  
       richTextRef.current?.insertHTML(videoHtml);
-  
+
       setTimeout(() => {
         if (scrollViewRef.current) {
           scrollViewRef.current.scrollToEnd({ animated: true });
         }
-      }, 500); 
+      }, 500);
     } catch (error) {
       console.error("Error adding video with thumbnail: ", error);
     }
-  }
+  };
 
   const handleShareButtonPress = () => {
-    setIsPublished(!isPublished);  // Toggle the share status
+    setIsPublished(!isPublished);
     ToastMessage.show({
       type: 'success',
       text1: 'Note Published',
-      visibilityTime: 3000 // 3 seconds
+      visibilityTime: 3000
     });
   };
 
-  const [latitude, setLatitude] = useState(
-    location?.latitude?.toString() || ""
-  );
-  const [longitude, setLongitude] = useState(
-    location?.longitude?.toString() || ""
-  );
-
-  async function getLocation() {
-    try {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        console.log("Permission to access location was denied");
-        return null;
-      }
-      return await Location.getCurrentPositionAsync({});
-    } catch (error) {
-      console.error("Error getting location:", error);
-      return null;
-    }
-  }
-
   const toggleLocationVisibility = async () => {
-    if (isLocationShown) {
-      // Hide Location
-      setLocation({
-        latitude: 0,
-        longitude: 0,
-      });
-      setLatitude("0");
-      setLongitude("0");
+    if (isLocationIconPressed) {
+      setLocation({ latitude: 0, longitude: 0 });
+      setIsLocationIconPressed(false);
     } else {
-      // Show Location
       try {
-        let userLocation = await getLocation();
-    
-        if (userLocation?.coords?.latitude !== undefined && userLocation?.coords?.longitude !== undefined) {
+        let userLocation = await Location.getCurrentPositionAsync({});
+        if (userLocation) {
           setLocation({
             latitude: userLocation.coords.latitude,
             longitude: userLocation.coords.longitude,
           });
-    
-          setLatitude(userLocation.coords.latitude.toString());
-          setLongitude(userLocation.coords.longitude.toString());
-        } else {
-          console.log("Location data is not available.");
         }
+        setIsLocationIconPressed(true);
       } catch (error) {
-        console.error("Error setting location:", error);
+        console.error("Error fetching location:", error);
       }
     }
-    setIsLocationShown((prev) => !prev);
-    setIsLocationIconPressed((prev) => !prev);
   };
 
   const checkLocationPermission = async () => {
     try {
       let { status } = await Location.getForegroundPermissionsAsync();
-  
       if (status !== 'granted') {
-        // Location permission not granted, request it
         const requestResult = await Location.requestForegroundPermissionsAsync();
-  
         if (requestResult.status === 'denied') {
-          // Location permission denied after requesting, show alert and return false
           Alert.alert(
             "Location permission denied",
             "Please grant location permission to save the note.",
             [
               {
                 text: "Delete Note",
-                onPress: () => navigation.goBack(), // Delete the note and go back
+                onPress: () => navigation.goBack(),
                 style: "destructive",
               },
-              { text: "OK", onPress: () => console.log("OK Pressed") },
+              { text: "OK" }
             ],
             { cancelable: false }
           );
           return false;
         }
-  
-        // Location permission not yet granted
         return false;
       }
-  
-      // Location permission already granted
       return true;
     } catch (error) {
       console.error("Error checking location permission:", error);
@@ -300,285 +229,115 @@ const AddNoteScreen: React.FC<AddNoteScreenProps> = ({ navigation, route }) => {
 
   const saveNote = async () => {
     const locationPermissionGranted = await checkLocationPermission();
-    setIsSaveButtonEnabled(false);
-    let finalTitle = titleText.trim();
-    if (finalTitle === "") {
-      finalTitle = `Untitled ${untitledNumber}`;
-    }
+    if (!locationPermissionGranted) return;
 
-    if (finalTitle.trim() === "") {
-      Alert.alert(
-        "Empty Title",
-        "Please enter a title to save the note or delete the note.",
-        [
-          { text: "Delete Note", onPress: () => navigation.goBack() },
-          { text: "OK", onPress: () => console.log("OK Pressed") }
-        ],
-        { cancelable: false }
-      );
+    setIsSaveButtonEnabled(false);
+    let finalTitle = titleText.trim() || `Untitled ${untitledNumber}`;
+    if (!finalTitle) {
+      Alert.alert("Empty Title", "Please enter a title to save the note or delete the note.");
+      setIsSaveButtonEnabled(true);
       return;
     }
-    if (!locationPermissionGranted) {
-      return; 
-    }
-    else {
-      setIsUpdating(true);
 
-      try {
-        const userID = await user.getId();
-        const userLocation = await Location.getCurrentPositionAsync({});
-        const latitudeToSave = location ? location.latitude.toString() : userLocation.coords.latitude.toString();
-        const longitudeToSave = location ? location.longitude.toString() : userLocation.coords.longitude.toString();
-  
-        setTime(new Date()); // force a fresh time date grab on note save
-  
-        const newNote = {
-          title: finalTitle,
-          text: bodyText,
-          media: newMedia,
-          audio: newAudio,
-          creator: userID,
-          latitude: latitudeToSave,
-          longitude: longitudeToSave,
-          published: isPublished,
-          tags: tags,
-          time: time,
-        };
-        const response = await ApiService.writeNewNote(newNote);
-  
-        const obj = await response.json();
-        const id = obj["@id"];
-  
-        route.params.refreshPage();
-        navigation.goBack();
-      } catch (error) {
-        console.error("An error occurred while creating the note:", error);
-      } finally {
-        setIsUpdating(false); 
-      }
+    setIsUpdating(true);
+    try {
+      const userID = await user.getId();
+      const userLocation = await Location.getCurrentPositionAsync({});
+      const latitudeToSave = location?.latitude?.toString() || userLocation.coords.latitude.toString();
+      const longitudeToSave = location?.longitude?.toString() || userLocation.coords.longitude.toString();
+
+      const newNote = {
+        title: finalTitle,
+        text: bodyText,
+        media: newMedia,
+        audio: newAudio,
+        creator: userID,
+        latitude: latitudeToSave,
+        longitude: longitudeToSave,
+        published: isPublished,
+        tags,
+        time: new Date(),
+      };
+
+      const response = await ApiService.writeNewNote(newNote);
+      const obj = await response.json();
+      route.params.refreshPage();
+      navigation.goBack();
+    } catch (error) {
+      console.error("An error occurred while creating the note:", error);
+    } finally {
+      setIsUpdating(false);
+      setIsSaveButtonEnabled(true);
     }
-    setIsSaveButtonEnabled(true);
   };
 
   return (
-      <SafeAreaView style={{ flex: 1 }}>
-        <View style={NotePageStyles().topContainer}>
-  
-          <View style={NotePageStyles().topButtonsContainer}>
-            <TouchableOpacity style={NotePageStyles().topButtons} disabled={!isSaveButtonEnabled} onPress={saveNote} testID="checklocationpermission">
-              <Ionicons name="arrow-back-outline" size={30} color={NotePageStyles().saveText.color} />
-            </TouchableOpacity>
-            <TextInput
-              style={NotePageStyles().title}
-              placeholder="Title Field Note"
-              placeholderTextColor={NotePageStyles().title.color}
-              onChangeText={(text) => setTitleText(text)}
-              value={titleText}
-            />
-            {isPublished ? (
-              <TouchableOpacity
-                style={NotePageStyles().topButtons}
-                onPress={() => setIsPublished(!isPublished)}
-              >
-                <Ionicons name="share" size={30} color={NotePageStyles().saveText.color} />
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity
-                style={NotePageStyles().topButtons}
-                onPress={handleShareButtonPress}
-              >
-                <Ionicons name="share-outline" size={30} color={NotePageStyles().saveText.color} />
-              </TouchableOpacity>
-            )}
-          </View>
-          <View style={NotePageStyles().keyContainer}>
-            <TouchableOpacity
-              onPress={() => {
-                setViewMedia(!viewMedia);
-                setViewAudio(false);
-                setIsTagging(false);
-                setIsLocation(false);
-                setIsTime(false);
-              }}
-              data-testid="images-icon"
-            >
-              <Ionicons name="images-outline" size={30} color={NotePageStyles().saveText.color} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                setViewMedia(false);
-                setViewAudio(!viewAudio);
-                setIsTagging(false);
-                setIsLocation(false);
-                setIsTime(false);
-              }}
-            >
-              <Ionicons name="mic-outline" size={30} color={NotePageStyles().saveText.color} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                setViewMedia(false);
-                setViewAudio(false);
-                setIsTagging(false);
-                //setIsLocation(!isLocation);
-                toggleLocationVisibility();
-                setIsTime(false);
-
-              }}
-            >
-            <Ionicons name="location-outline" size={30} color={isLocationIconPressed ? "red" : NotePageStyles().saveText.color} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                setViewMedia(false);
-                setViewAudio(false);
-                setIsTagging(false);
-                setIsLocation(false);
-                setIsTime(!isTime);
-              }}
-            >
-              <Ionicons name="time-outline" size={30} color={NotePageStyles().saveText.color} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                setViewMedia(false);
-                setViewAudio(false);
-                setIsTagging(!isTagging);
-                setIsLocation(false);
-                setIsTime(false);
-              }}
-            >
-              <Ionicons name="pricetag-outline" size={30} color={NotePageStyles().saveText.color} />
-            </TouchableOpacity>
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={NotePageStyles().topContainer}>
+        <View style={NotePageStyles().topButtonsContainer}>
+          <TouchableOpacity style={NotePageStyles().topButtons} disabled={!isSaveButtonEnabled} onPress={saveNote} testID="checklocationpermission">
+            <Ionicons name="arrow-back-outline" size={30} color={NotePageStyles().saveText.color} />
+          </TouchableOpacity>
+          <TextInput
+           testID="tag-input"
+            style={NotePageStyles().title}
+            placeholder="Title Field Note"
+            placeholderTextColor={NotePageStyles().title.color}
+            onChangeText={setTitleText}
+            value={titleText}
+          />
+          <TouchableOpacity style={NotePageStyles().topButtons} onPress={handleShareButtonPress}>
+            <Ionicons name={isPublished ? "share" : "share-outline"} size={30} color={NotePageStyles().saveText.color} />
+          </TouchableOpacity>
         </View>
-        <View style={NotePageStyles().container }>
-          <PhotoScroller data-testid="photoScroller" active={viewMedia} newMedia={newMedia} setNewMedia={setNewMedia} insertImageToEditor={addImageToEditor} addVideoToEditor={addVideoToEditor}/>
-          {viewAudio && (
-            <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
-          )}
+        <View style={NotePageStyles().keyContainer}>
+          <TouchableOpacity onPress={() => { setViewMedia(!viewMedia); setViewAudio(false); }} testID="images-icon">
+            <Ionicons name="images-outline" size={30} color={NotePageStyles().saveText.color} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => { setViewMedia(false); setViewAudio(!viewAudio); }}>
+            <Ionicons name="mic-outline" size={30} color={NotePageStyles().saveText.color} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={toggleLocationVisibility}>
+            <Ionicons name="location-outline" size={30} color={isLocationIconPressed ? "red" : NotePageStyles().saveText.color} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => { setIsTime(!isTime); }}>
+            <Ionicons name="time-outline" size={30} color={NotePageStyles().saveText.color} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => { setIsTagging(!isTagging); }}>
+            <Ionicons name="pricetag-outline" size={30} color={NotePageStyles().saveText.color} />
+          </TouchableOpacity>
+        </View>
+        <View style={NotePageStyles().container}>
+          <PhotoScroller active={viewMedia} newMedia={newMedia} setNewMedia={setNewMedia} insertImageToEditor={addImageToEditor} addVideoToEditor={addVideoToEditor} />
+          {viewAudio && <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />}
           {isTagging && <TagWindow tags={tags} setTags={setTags} />}
-          {isLocation && (
-            <LocationWindow location={location} setLocation={setLocation} />
-          )}
+          {isLocation && <LocationWindow location={location} setLocation={setLocation} />}
           {isTime && <TimeWindow time={time} setTime={setTime} />}
         </View>
-          <View>
-            <RichToolbar data-testid="RichBar"
-              style={NotePageStyles().container}
-              editor={richTextRef}
-              actions={[
-                actions.keyboard,
-                actions.undo,
-                actions.redo,
-                actions.setBold,
-                actions.setItalic,
-                actions.setUnderline,
-                actions.insertBulletsList,
-                actions.blockquote,
-                actions.indent,
-                actions.outdent,
-              ]}
-              iconTint={NotePageStyles().saveText.color}
-              selectedIconTint="#2095F2"
+        <RichToolbar
+          editor={richTextRef}
+          actions={[actions.setBold, actions.setItalic, actions.setUnderline, actions.insertBulletsList, actions.blockquote, actions.indent, actions.outdent]}
+          iconTint={NotePageStyles().saveText.color}
+          selectedIconTint="#2095F2"
+          style={NotePageStyles().container}
+        />
+      </View>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }} keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 20}>
+        <View style={[NotePageStyles().editorContainer, { flex: 1 }]}>
+          <ScrollView ref={scrollViewRef} style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: keyboardOpen ? keyboardHeight : 20 }}>
+            <RichEditor
+              ref={richTextRef}
+              style={[NotePageStyles().editor, { flex: 1, minHeight: 650 }]}
+              editorStyle={{ backgroundColor: theme.primaryColor, color: theme.text }}
+              placeholder="Write your note here"
+              onChange={(text) => setBodyText(text)}
+              initialContentHTML={bodyText}
+              onCursorPosition={handleCursorPosition}
+              testID="RichEditor"
             />
-          </View>
-          <View key="Tags Container">
-            {tags.length > 0 && (
-              <ScrollView
-                horizontal={true}
-                style={{ width: "100%", marginHorizontal: 10, paddingLeft: 5, marginBottom: 10 }}
-              >
-                {tags.map((tag, index) => (
-                  <View
-                    key={index}
-                    style={{
-                      flexDirection: "row",
-                      marginRight: 10,
-                      alignItems: "center",
-                    }}
-                  >
-                    <View
-                      style={{
-                        height: 20,
-                        width: 20,
-                        transform: [{ rotate: "45deg" }],
-                        position: "absolute",
-                        left: 2,
-                        borderLeftWidth: 2,
-                        borderBottomWidth: 2,
-                        borderColor: NotePageStyles().title.color,
-                        justifyContent: "center",
-                        alignItems: "center",
-                      }}
-                    >
-                      <View
-                        style={{
-                          height: 5,
-                          width: 5,
-                          left: 2,
-                          borderRadius: 10,
-                          backgroundColor: NotePageStyles().title.color,
-                          marginRight: 5,
-                        }}
-                      />
-                    </View>
-                    <View
-                      style={{
-                        borderTopRightRadius: 5,
-                        borderBottomRightRadius: 5,
-                        borderColor: NotePageStyles().title.color,
-                        borderRightWidth: 2,
-                        borderBottomWidth: 2,
-                        borderTopWidth: 2,
-                        paddingHorizontal: 10,
-                        justifyContent: "center",
-                        flexDirection: "row",
-                        marginLeft: 10,
-                      }}
-                    >
-                      <Text style={{ textAlign: "center", color: NotePageStyles().title.color }}>{tag}</Text>
-                    </View>
-                  </View>
-                ))}
-              </ScrollView>
-            )}
-            </View>
-  
+          </ScrollView>
         </View>
-        
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={{ flex: 1 }}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 20}
-        >
-          <View style={[NotePageStyles().editorContainer, { flex: 1 }]}>
-            <ScrollView
-              nestedScrollEnabled={true}
-              showsVerticalScrollIndicator={false}
-              style={{ flex: 1 }}
-              ref={scrollViewRef}
-              contentContainerStyle={{ paddingBottom: keyboardOpen ? keyboardHeight : 20 }}
-            >
-              <RichEditor data-testid="RichEditor"
-                ref={(r) => (richTextRef.current = r)}
-                style={[NotePageStyles().editor, {flex: 1, minHeight: 650 }]}
-                editorStyle={{
-                  contentCSSText: `
-                    position: absolute; 
-                    top: 0; right: 0; bottom: 0; left: 0;
-                  `,
-                  backgroundColor: theme.primaryColor,
-                  color: theme.text,
-                }}
-                autoCorrect={true}
-                placeholder="Write your note here"
-                onChange={(text) => setBodyText(text)}
-                initialContentHTML={bodyText}
-                onCursorPosition={handleCursorPosition}
-              />
-            </ScrollView>
-          </View>
-        </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
       <LoadingModal visible={isUpdating} />
     </SafeAreaView>
   );
