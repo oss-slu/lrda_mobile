@@ -111,6 +111,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   };
 
   const onLoginPress = async () => {
+    Keyboard.dismiss();
     try {
       await handleLogin();
 
@@ -123,6 +124,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
     <KeyboardAwareScrollView
       contentContainerStyle={styles.container}
       style={{ backgroundColor: "#F4DFCD" }}
+      keyboardShouldPersistTaps="handled"
     >
       <ImageBackground
         source={require("../../../assets/splash.jpg")}
@@ -160,6 +162,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
                 value={username}
                 onChangeText={(text) => setUsername(text)}
                 onSubmitEditing={handleLogin}
+                testID="email-input"
               />
             </View>
 
@@ -172,12 +175,13 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
                 value={password}
                 onChangeText={(text) => setPassword(text)}
                 onSubmitEditing={handleLogin}
+                testID="password-input"
               />
             </View>
             <TouchableOpacity>
               <Text style={styles.forgot}>Forgot Password?</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={onLoginPress} style={styles.buttons}>
+            <TouchableOpacity onPress={onLoginPress} style={styles.buttons} testID="login-button">
               <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
                 Login
               </Text>

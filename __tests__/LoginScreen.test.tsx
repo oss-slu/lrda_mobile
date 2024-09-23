@@ -1,10 +1,11 @@
 import React from 'react';
-import { render } from '@testing-library/react-native';
+import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
 import { SafeAreaProvider } from 'react-native-safe-area-context'; // Make sure to import SafeAreaProvider
 import configureStore from 'redux-mock-store';
 import LoginScreen from '../lib/screens/loginScreens/LoginScreen';
 import moxios from 'moxios'
+import { shallow } from 'enzyme';
 // Create a mock store
 const mockStore = configureStore([]);
 const store = mockStore({
@@ -45,4 +46,25 @@ describe('LoginScreen', () => {
 
     expect(toJSON()).toMatchSnapshot();
   });
+
+  it('renders input fields', async () => {
+    const navigationMock = { navigate: jest.fn() };
+    const routeMock = { params: {} };
+
+    const { queryByTestId } = render(
+      <Provider store={store}>
+        <SafeAreaProvider>
+          <LoginScreen navigation={navigationMock} route={routeMock} />
+        </SafeAreaProvider>
+      </Provider>
+    );
+
+    // Simulate input and login button press 
+    const email = queryByTestId('email-input');
+    const password = queryByTestId('password-input');
+    const loginButton = queryByTestId('login-button');
+
+
+  });
+  
 });
