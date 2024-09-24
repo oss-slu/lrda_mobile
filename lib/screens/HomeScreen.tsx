@@ -635,6 +635,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         /> 
       </View>
       <TextInput
+          testID="searchBar"
           placeholder="Search notes.."
           onChangeText={handleSearch}
           style= {styles.seachBar}
