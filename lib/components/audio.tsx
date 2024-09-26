@@ -4,19 +4,17 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  TextInput,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import Slider from "@react-native-community/slider";
 import { Audio } from "expo-av";
 import uuid from "react-native-uuid";
-import { uploadAudio } from "../utils/S3_proxy";  // Import the uploadAudio utility
+import { uploadAudio } from "../utils/S3_proxy";  // Assuming you have a function to upload the audio
 import { AudioType } from "../models/media_class";  // Assuming AudioType is correctly defined
 
 type AudioContainerProps = {
   newAudio: AudioType[];
   setNewAudio: React.Dispatch<React.SetStateAction<AudioType[]>>;
-  insertAudioToEditor: (audioUri: string) => void;  // Function to insert audio into the editor
+  insertAudioToEditor: (audioUri: string) => void;
 };
 
 const AudioContainer = ({ newAudio, setNewAudio, insertAudioToEditor }: AudioContainerProps) => {
@@ -54,12 +52,12 @@ const AudioContainer = ({ newAudio, setNewAudio, insertAudioToEditor }: AudioCon
 
         const uri = recording.getURI();
         if (uri) {
-          const uploadedUri = await uploadAudio(uri);  // Upload audio to S3
+          const uploadedUri = await uploadAudio(uri);  // Upload audio to your storage
           const newRecording = new AudioType({
             uuid: uuid.v4().toString(),
             type: "audio",
             uri: uploadedUri,
-            duration: "00:30",  // Assuming a 30-second audio, replace with real duration
+            duration: "00:30",  // Assuming a 30-second audio
             name: `Recording ${newAudio.length + 1}`,
           });
 
