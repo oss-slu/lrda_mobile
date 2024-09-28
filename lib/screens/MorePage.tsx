@@ -57,10 +57,11 @@ export default function MorePage() {
     }
   };
 
+
   return (
     <>
-      <View style={styles.header}>
-        <Text style={styles.headText}>Where's Religion</Text>
+      <View style={[styles.header, { backgroundColor: theme.background }]}>
+        <Text style={[styles.headText, { color: theme.text }]}>Where's Religion</Text>
       </View>
       <SafeAreaView>
         <ScrollView contentContainerStyle={styles.container}>
@@ -72,7 +73,7 @@ export default function MorePage() {
           </View>
 
           <View>
-            <Text style={styles.headerText}>Resources</Text>
+            <Text style={[styles.headerText, { color: theme.text }]}>Resources</Text>
             <TouchableOpacity
               onPress={() =>
                 Linking.openURL(
@@ -80,7 +81,7 @@ export default function MorePage() {
                 )
               }
             >
-              <Text style={styles.text}>Our Website</Text>
+              <Text style={[styles.text, { color: theme.text }]}>Our Website</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() =>
@@ -89,7 +90,7 @@ export default function MorePage() {
                 )
               }
             >
-              <Text style={styles.text}>Guide to Ethnography</Text>
+              <Text style={[styles.text, { color: theme.text }]}>Guide to Ethnography</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() =>
@@ -98,53 +99,53 @@ export default function MorePage() {
                 )
               }
             >
-              <Text style={styles.text}>Guide to Coding</Text>
+              <Text style={[styles.text, { color: theme.text }]}>Guide to Coding</Text>
             </TouchableOpacity>
             <TouchableOpacity key="Email" onPress={handleEmail}>
-              <Text style={styles.text}>Report a Bug</Text>
+              <Text style={[styles.text, { color: theme.text }]}>Report a Bug</Text>
             </TouchableOpacity>
 
-            <Text style={styles.headerText}>Meet our Team</Text>
-            <Text style={styles.text}>Insert Team Photo</Text>
-            <Text style={styles.text}>Insert Team Message</Text>
+            <Text style={[styles.headerText, { color: theme.text }]}>Meet our Team</Text>
+            <Text style={[styles.text, { color: theme.text }]}>Insert Team Photo</Text>
+            <Text style={[styles.text, { color: theme.text }]}>Insert Team Message</Text>
 
-            <Text style={styles.headerText}>Frequently Asked Questions</Text>
+            <Text style={[styles.headerText, { color: theme.text }]}>Frequently Asked Questions</Text>
           </View>
 
-          <Text style={styles.headerText}>What can users do?</Text>
-          <Text style={styles.text}>
+          <Text style={[styles.headerText, { color: theme.text }]}>What can users do?</Text>
+          <Text style={[styles.text, { color: theme.text }]}>
             Explore religious traditions, find places of worship, engage in
             meaningful discussions.
           </Text>
 
-          <Text style={styles.headerText}>Who is it for?</Text>
-          <Text style={styles.text}>
+          <Text style={[styles.headerText, { color: theme.text }]}>Who is it for?</Text>
+          <Text style={[styles.text, { color: theme.text }]}>
             Scholars, students, believers, and the curious about the world's
             religions.
           </Text>
 
-          <Text style={styles.headerText}>What's unique?</Text>
-          <Text style={styles.text}>
+          <Text style={[styles.headerText, { color: theme.text }]}>What's unique?</Text>
+          <Text style={[styles.text, { color: theme.text }]}>
             Provides a modern method to capture experiences using the devices
             that are with us every day.
           </Text>
 
-          <Text style={styles.headerText}>Our Mission</Text>
-          <Text style={styles.text}>
+          <Text style={[styles.headerText, { color: theme.text }]}>Our Mission</Text>
+          <Text style={[styles.text, { color: theme.text }]}>
             Connect people of diverse religious backgrounds, beliefs, and
             practices.
           </Text>
 
-          <Text style={styles.headerText}>Why use 'Where's Religion?'</Text>
-          <Text style={styles.text}>
+          <Text style={[styles.headerText, { color: theme.text }]}>Why use 'Where's Religion?'</Text>
+          <Text style={[styles.text, { color: theme.text }]}>
             Explore religious traditions, find places of worship, engage in
             meaningful discussions.
           </Text>
 
           <View style={styles.textContainer}>
             <View style={styles.buttonContainer}>
-              <View style={styles.switchContainer}>
-                <Text style={styles.switchText}>Dark Mode</Text>
+              <View style={[styles.switchContainer, { backgroundColor: theme.background }]}>
+                <Text style={[styles.switchText, { color: theme.text }]}>Dark Mode</Text>
                 <Switch
                   testID="dark-mode-switch"
                   trackColor={{
@@ -158,13 +159,13 @@ export default function MorePage() {
               </View>
             </View>
           </View>
-          <View style={styles.logoutContainer}>
+          <View style={[styles.logoutContainer, {backgroundColor : theme.background}]}>
             <TouchableOpacity
               key="Logout"
               style={styles.logout}
               onPress={onLogoutPress}
             >
-              <Text style={styles.logoutText}>Logout</Text>
+              <Text style={[styles.logoutText, { color: theme.primaryColor }]}>Logout</Text>
               <Ionicons
                 name={"log-out-outline"}
                 size={30}
