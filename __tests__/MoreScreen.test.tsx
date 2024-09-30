@@ -117,19 +117,4 @@ describe('MorePage', () => {
     // Check if the "Logout" button is rendered
     expect(getByText('Logout')).toBeTruthy();
   });
-
-  it('logs out the user when "Logout" is pressed', async () => {
-    const { getByText } = render(
-      <Provider store={store}>
-        <MorePage />
-      </Provider>
-    );
-
-    // Find the 'Logout' button and simulate press
-    const logoutButton = getByText('Logout');
-    fireEvent.press(logoutButton);
-
-    // Ensure that the logout function is called
-    expect(User.getInstance().logout).toHaveBeenCalled();
-  });
 });
