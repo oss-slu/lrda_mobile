@@ -1,15 +1,27 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
 import configureStore from 'redux-mock-store';
 import MorePage from '../lib/screens/MorePage';
 import moxios from 'moxios';
 import { User } from '../lib/models/user_class';
 import { Linking } from 'react-native';
+import { useTheme } from '../lib/components/ThemeProvider';
 
-// Mock the ThemeProvider
+// Create a mock Redux store
+const mockStore = configureStore([]);
+const store = mockStore({
+  navigation: {
+    navState: 'more', // Add mock navigation state if needed
+  },
+  theme: {
+    darkMode: false, // Add mock theme state if needed
+  },
+});
+
+// Mock the ThemeProvider with spies
 jest.mock('../lib/components/ThemeProvider', () => ({
-  useTheme: () => ({
+  useTheme: jest.fn(() => ({
     theme: {
       primaryColor: '#ffffff',
       text: '#000000',
@@ -17,9 +29,9 @@ jest.mock('../lib/components/ThemeProvider', () => ({
       logout: '#ff0000',
       logoutText: '#ffffff',
     },
-    isDarkmode: false, // Mock initial state for dark mode
+    isDarkmode: false, // Initial value of isDarkmode
     toggleDarkmode: jest.fn(), // Mock the toggleDarkmode function
-  }),
+  })),
 }));
 
 // Mock the User class
@@ -31,17 +43,6 @@ jest.mock('../lib/models/user_class', () => {
       })),
     },
   };
-});
-
-// Create a mock Redux store
-const mockStore = configureStore([]);
-const store = mockStore({
-  navigation: {
-    navState: 'more', // Add mock navigation state if needed
-  },
-  theme: {
-    darkMode: false, // Add mock theme state if needed
-  },
 });
 
 beforeAll(() => {
@@ -104,5 +105,31 @@ describe('MorePage', () => {
     expect(spy).toHaveBeenCalledWith(
       "mailto:yashkamal.bhatia@slu.edu?subject=Bug%20Report%20on%20'Where's%20Religion%3F'&body=Please%20provide%20details%20of%20your%20issue%20you%20are%20facing%20here."
     );
+  });
+
+  it('renders the "Logout" button', () => {
+    const { getByText } = render(
+      <Provider store={store}>
+        <MorePage />
+      </Provider>
+    );
+
+    // Check if the "Logout" button is rendered
+    expect(getByText('Logout')).toBeTruthy();
+  });
+
+  it('logs out the user when "Logout" is pressed', async () => {
+    const { getByText } = render(
+      <Provider store={store}>
+        <MorePage />
+      </Provider>
+    );
+
+    // Find the 'Logout' button and simulate press
+    const logoutButton = getByText('Logout');
+    fireEvent.press(logoutButton);
+
+    // Ensure that the logout function is called
+    expect(User.getInstance().logout).toHaveBeenCalled();
   });
 });
