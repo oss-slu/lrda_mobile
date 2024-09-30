@@ -1,29 +1,25 @@
-import React, { useState, useEffect } from "react";
-import {
-  Platform,
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-  Dimensions,
-  SafeAreaView,
-  Image,
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import Constants from "expo-constants";
+import React, { useEffect, useState } from "react";
+import {
+  Dimensions,
+  Image,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from "react-native";
+import DropDownPicker from 'react-native-dropdown-picker';
+import { SwipeListView } from "react-native-swipe-list-view";
+import { HomeScreenProps, Note } from "../../types";
+import { useTheme } from '../components/ThemeProvider';
+import LoadingImage from "../components/loadingImage";
+import NoteSkeleton from "../components/noteSkeleton";
+import { formatToLocalDateString } from "../components/time";
 import { User } from "../models/user_class";
-import { Note } from "../../types";
-import { HomeScreenProps } from "../../types";
 import ApiService from "../utils/api_calls";
 import DataConversion from "../utils/data_conversion";
-import { SwipeListView } from "react-native-swipe-list-view";
-import NoteSkeleton from "../components/noteSkeleton";
-import LoadingImage from "../components/loadingImage";
-import { formatToLocalDateString } from "../components/time";
-import { useTheme } from '../components/ThemeProvider';
-import Constants from "expo-constants";
-import ToastMessage from 'react-native-toast-message';
-import DropDownPicker from 'react-native-dropdown-picker';
 import NoteDetailModal from "./mapPage/NoteDetailModal";
 
 const user = User.getInstance();

@@ -24,7 +24,7 @@ export const colors = {
     black: '#161A1D',
     scrollerColor: '#161A1D',
     text: '#F7F8F9',
-    logout: '#DCDFE4', 
+    logout: '#DCDFE4',
     logoutText: '#22272B',
   },
 };
