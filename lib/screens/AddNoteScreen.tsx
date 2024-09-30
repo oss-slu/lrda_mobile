@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,
+  Keyboard,
 } from "react-native";
 import * as Location from 'expo-location';
 import ToastMessage from 'react-native-toast-message';
@@ -25,6 +26,7 @@ import { RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
 import NotePageStyles from "../../styles/pages/NoteStyles";
 import { useTheme } from "../components/ThemeProvider";
 import LoadingModal from "../components/LoadingModal";
+import { TouchableWithoutFeedback } from "react-native";
 
 const user = User.getInstance();
 
@@ -153,11 +155,16 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
     }
   };
 
+  
+
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+   
+    <SafeAreaView style={{ flex: 1}}>
+      <View style={{flex: 1}}>
       {/* Top Section with Buttons and Title */}
-      <View style={NotePageStyles().topContainer}>
-        <View style={NotePageStyles().topButtonsContainer}>
+     
+      <View style={[NotePageStyles().topContainer,]}>
+        <View style={[NotePageStyles().topButtonsContainer]}>
           {/* Back Button */}
           <TouchableOpacity
             style={NotePageStyles().topButtons}
@@ -195,6 +202,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
               size={30}
               color={NotePageStyles().saveText.color}
             />
+            
           </TouchableOpacity>
 
           {/* Title Input */}
@@ -221,7 +229,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
         </View>
 
         {/* Toolbar Icons */}
-        <View style={NotePageStyles().keyContainer}>
+        <View style={[NotePageStyles().keyContainer]}>
           <TouchableOpacity onPress={() => setViewMedia(!viewMedia)}>
             <Ionicons
               name="images-outline"
@@ -263,6 +271,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
           </TouchableOpacity>
         </View>
       </View>
+     
 
       {/* Display Media, Audio, Tags, Location, Time */}
       <View style={NotePageStyles().container}>
@@ -289,34 +298,36 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 20}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
       >
-        <ScrollView
-          ref={scrollViewRef}
-          style={{ flex: 1 }}
-          contentContainerStyle={{ paddingBottom: 60 }} // Enough space for toolbar
-          keyboardShouldPersistTaps="handled"
-        >
+       
+          <View style={[NotePageStyles().richTextContainer]}>
           <RichText
             editor={editor}
             placeholder="Write something..."
-            style={[NotePageStyles().editor, { flex: 1, minHeight: 200 }]}
+            style={[NotePageStyles().editor, {backgroundColor: Platform.OS == "android" && "white"}]}
           />
-        </ScrollView>
-
+          </View>
+       
         {/* Toolbar placed at the bottom */}
-        <Toolbar
-          editor={editor}
-          style={NotePageStyles().container}
-          actions={['bold', 'italic', 'underline', 'bullet_list', 'blockquote', 'indent', 'outdent']}
-        />
+        <View style={[NotePageStyles().toolBar]}>
+          <Toolbar
+            editor={editor}
+            style={NotePageStyles().container}
+            actions={['bold', 'italic', 'underline', 'bullet_list', 'blockquote', 'indent', 'outdent', 'close_keyboard' ]}
+          />
+        </View>
+
+
       </KeyboardAvoidingView>
 
       <LoadingModal visible={isUpdating} />
+      </View>
     </SafeAreaView>
+
   );
 };
 
 export default AddNoteScreen;
 
-             
+

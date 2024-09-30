@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 import { lightTheme, darkTheme } from "../colors";
 import Constants from "expo-constants";
 import { useTheme } from "../../lib/components/ThemeProvider";
@@ -104,6 +104,20 @@ const NotePageStyles = () => {
       height: "100%",
       justifyContent: "center",
       alignSelf: "center",
+    },
+
+    //editor styles
+    richTextContainer: {
+      height: Platform.OS == "android"? "90%" : "100%" 
+    },
+    //tool bar styles
+    toolBar: {
+      height: 50
+    },
+    closeKeyboardButton: {
+      padding: 10,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
   });
 };
