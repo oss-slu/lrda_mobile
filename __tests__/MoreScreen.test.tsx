@@ -106,7 +106,6 @@ describe('MorePage', () => {
       "mailto:yashkamal.bhatia@slu.edu?subject=Bug%20Report%20on%20'Where's%20Religion%3F'&body=Please%20provide%20details%20of%20your%20issue%20you%20are%20facing%20here."
     );
   });
-
   it('renders the "Logout" button', () => {
     const { getByText } = render(
       <Provider store={store}>
