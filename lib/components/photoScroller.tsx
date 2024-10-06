@@ -349,6 +349,7 @@ const PhotoScroller = forwardRef(
                   backgroundColor: "rgb(240,240,240)",
                   justifyContent: "center",
                 },
+                styles.addButton
               ]}
               onPress={handleNewMedia}
             >
@@ -382,7 +383,7 @@ export default PhotoScroller;
 const styles = StyleSheet.create({
   container: {
     marginBottom: 100,
-    marginTop: 30,
+    marginTop: 50,
     height: 110,
   },
   addButton: {
@@ -392,12 +393,14 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     marginRight: 10,
+    marginTop: 5,    // Add this to align with media items
   },
   mediaContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap', // Allows items to wrap when they overflow
     justifyContent: 'space-between', // Evenly distributes items
     marginBottom: 10, // Adds spacing at the bottom
+    marginTop: 5,
   },
   mediaItem: {
     width: 100, // You can adjust these values
