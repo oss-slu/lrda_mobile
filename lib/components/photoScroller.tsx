@@ -161,26 +161,61 @@ const PhotoScroller = forwardRef(
       setPlaying(true);
     };
 
-    const renderItem = ({ item: media, getIndex, drag }) => {
+    const renderItem = ({
+      item: media,
+      getIndex,
+      drag,
+    }: {
+      item: Media;
+      getIndex: Function;
+      drag: () => void;
+    }) => {
       const index = getIndex();
+      const key = `media-${index}`;
       const mediaItem = media;
-      const ImageType = mediaItem.getType();
-      const ImageURI = ImageType === 'image' ? mediaItem.getUri() : (mediaItem as VideoType).getThumbnail();
-    
+      const ImageType = mediaItem?.getType();
+      let ImageURI = "";
+      let IsImage = false;
+      if (ImageType === "image") {
+        ImageURI = mediaItem.getUri();
+        IsImage = true;
+      } else if (ImageType === "video") {
+        ImageURI = (mediaItem as VideoType).getThumbnail();
+        IsImage = true;
+      }
       return (
-        <View key={index} style={styles.mediaContainer}>
-          <TouchableOpacity style={PhotoStyles.trash} onPress={() => handleDeleteMedia(index)}>
-            <Ionicons name="close-outline" size={15} color="white" />
+        <View key={key}>
+          <TouchableOpacity
+            style={PhotoStyles.trash}
+            onPress={() => handleDeleteMedia(index)}
+          >
+            <Ionicons
+              name="close-outline"
+              size={15}
+              color="white"
+            />
           </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.5} onLongPress={drag} delayLongPress={100} onPress={() => goBig(index)}>
+          <TouchableOpacity
+            activeOpacity={0.5}
+            onLongPress={drag}
+            delayLongPress={100}
+            onPress={() => goBig(index)}
+          >
             <View style={styles.mediaItem}>
-              <LoadingImage imageURI={ImageURI} type={ImageType} isImage={ImageType === 'image'} />
+              {IsImage ? (
+                <LoadingImage
+                  imageURI={ImageURI}
+                  type={ImageType}
+                  isImage={true}
+                />
+              ) : (
+                <LoadingImage imageURI={""} type={ImageType} isImage={false} />
+              )}
             </View>
           </TouchableOpacity>
         </View>
       );
     };
-    
 
     const handleNewMedia = async () => {
       Alert.alert(
@@ -349,7 +384,6 @@ const PhotoScroller = forwardRef(
                   backgroundColor: "rgb(240,240,240)",
                   justifyContent: "center",
                 },
-                styles.addButton
               ]}
               onPress={handleNewMedia}
             >
@@ -381,31 +415,9 @@ const PhotoScroller = forwardRef(
 export default PhotoScroller;
 
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: 100,
-    marginTop: 50,
-    height: 110,
-  },
-  addButton: {
-    backgroundColor: "rgb(240,240,240)",
-    justifyContent: "center",
-    alignItems: "center",
-    width: 100,
-    height: 100,
-    marginRight: 10,
-    marginTop: 5,    // Add this to align with media items
-  },
-  mediaContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap', // Allows items to wrap when they overflow
-    justifyContent: 'space-between', // Evenly distributes items
-    marginBottom: 10, // Adds spacing at the bottom
-    marginTop: 5,
-  },
   mediaItem: {
     width: 100, // You can adjust these values
     height: 100,
     marginRight: 5, // Spacing between images
   },
 });
-
