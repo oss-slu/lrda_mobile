@@ -159,20 +159,35 @@ export default function MorePage() {
               </View>
             </View>
           </View>
-          <View style={[styles.logoutContainer, {backgroundColor : theme.background}]}>
-            <TouchableOpacity
-              key="Logout"
-              style={styles.logout}
-              onPress={onLogoutPress}
-            >
-              <Text style={[styles.logoutText, { color: theme.primaryColor }]}>Logout</Text>
-              <Ionicons
-                name={"log-out-outline"}
-                size={30}
-                color={theme.primaryColor}
-              />
-            </TouchableOpacity>
-          </View>
+          <View style={[styles.logoutContainer, { backgroundColor: theme.background }]}>
+  <TouchableOpacity
+    key="Logout"
+    style={[
+      styles.logout,
+      {
+        backgroundColor: isDarkmode ? 'white' : 'black',
+      },
+    ]}
+    onPress={onLogoutPress}
+  >
+    <Text
+      style={[
+        styles.logoutText,
+        {
+          color: isDarkmode ? 'black' : 'white',
+        },
+      ]}
+    >
+      Logout
+    </Text>
+    <Ionicons
+      name={"log-out-outline"}
+      size={30}
+      color={isDarkmode ? 'black' : 'white'}
+    />
+  </TouchableOpacity>
+</View>
+
         </ScrollView>
       </SafeAreaView>
     </>
