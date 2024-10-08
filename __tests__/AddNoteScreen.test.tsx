@@ -3,6 +3,8 @@ import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import AddNoteScreen from '../lib/screens/AddNoteScreen';
 import * as Location from 'expo-location';
+import { Provider } from 'react-redux';
+import { store } from '../redux/store/store';
 
 // Mock external dependencies
 jest.mock('../lib/components/ThemeProvider', () => ({
@@ -89,8 +91,15 @@ describe('AddNoteScreen', () => {
       expect(mockWriteNewNote).toHaveBeenCalledTimes(0); // Adjust expected to 0
     });
   });
-  
-  
+
+  it('renders the title input field', () => {
+    const routeMock = { params: { untitledNumber: 1 } };
+    const { getByPlaceholderText } = render(<AddNoteScreen route={routeMock as any} />);
+
+    // Check if the title input is rendered
+    expect(getByPlaceholderText('Title Field Note')).toBeTruthy();
+
+  });
   
 });
 

@@ -201,14 +201,7 @@ const PhotoScroller = forwardRef(
             delayLongPress={100}
             onPress={() => goBig(index)}
           >
-            <View
-              style={{
-                alignSelf: "center",
-                height: 100,
-                width: 100,
-                marginRight: index === newMedia.length - 1 ? 10 : 0,
-              }}
-            >
+            <View style={styles.mediaItem}>
               {IsImage ? (
                 <LoadingImage
                   imageURI={ImageURI}
@@ -420,3 +413,11 @@ const PhotoScroller = forwardRef(
 );
 
 export default PhotoScroller;
+
+const styles = StyleSheet.create({
+  mediaItem: {
+    width: 100, // You can adjust these values
+    height: 100,
+    marginRight: 5, // Spacing between images
+  },
+});
