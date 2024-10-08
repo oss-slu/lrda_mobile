@@ -40,7 +40,7 @@ afterEach(() => {
   console.error.mockRestore();
 });
 
-describe('AddNoteScreen', () => {
+describe('HomeScreen', () => {
   it('renders without crashing', () => {
     const routeMock = { params: { untitledNumber: 1 } };
     const { getByTestId } = render(<HomeScreen route={routeMock as any} />);
