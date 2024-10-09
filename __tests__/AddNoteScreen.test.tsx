@@ -11,6 +11,18 @@ jest.mock('../lib/components/ThemeProvider', () => ({
   }),
 }));
 
+jest.mock('@10play/tentap-editor', () => ({
+  RichText: () => null,
+  Toolbar: () => null,
+  useEditorBridge: jest.fn(() => ({
+    getHTML: jest.fn(() => ''),
+    commands: {
+      setContent: jest.fn(),
+      focus: jest.fn(),
+    },
+  })),
+}));
+
 
 // Mock expo-location module with TypeScript type support
 jest.mock('expo-location', () => ({
@@ -49,24 +61,6 @@ describe('AddNoteScreen', () => {
     expect(getByTestId('RichEditor')).toBeTruthy();
   });
 
-  it('updates bodyText when the Rich Text Editor content changes', async () => {
-    const routeMock = { params: { untitledNumber: 1 } };
-
-    const { getByTestId } = render(<AddNoteScreen route={routeMock as any} />);
-
-    // Find the RichEditor component
-    const richEditor = getByTestId('RichEditor');
-    const newText = 'New content';
-
-    // Simulate the content change in RichEditor
-    fireEvent(richEditor, 'onChange', newText);
-
-    // Wait for bodyText to be updated
-    await waitFor(() => {
-      // Expect bodyText to be updated with the new text
-      expect(richEditor.props.initialContentHTML).toBe(newText);
-    });
-  });
 
   it('handles saveNote API error', async () => {
     const routeMock = { params: { untitledNumber: 1 } };

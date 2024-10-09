@@ -10,6 +10,18 @@ jest.mock('../lib/components/ThemeProvider', () => ({
   }),
 }));
 
+jest.mock('@10play/tentap-editor', () => ({
+  RichText: () => null,
+  Toolbar: () => null,
+  useEditorBridge: jest.fn(() => ({
+    getHTML: jest.fn(() => ''),
+    commands: {
+      setContent: jest.fn(),
+      focus: jest.fn(),
+    },
+  })),
+}));
+
 beforeEach(() => {
    // Clear mocks before each test
    jest.clearAllMocks();

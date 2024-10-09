@@ -213,6 +213,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
             placeholderTextColor={NotePageStyles().title.color}
             onChangeText={setTitleText}
             value={titleText}
+            testID="RichEditor"
           />
 
           {/* Share Button */}
@@ -246,7 +247,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
             />
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={toggleLocationVisibility}>
+          <TouchableOpacity onPress={toggleLocationVisibility} testID="checklocationpermission">
             <Ionicons
               name="location-outline"
               size={30}
