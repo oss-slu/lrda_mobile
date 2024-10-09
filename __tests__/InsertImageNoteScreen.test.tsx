@@ -11,6 +11,18 @@ jest.mock('../lib/components/ThemeProvider', () => ({
   }),
 }));
 
+jest.mock('@10play/tentap-editor', () => ({
+  RichText: () => null,
+  Toolbar: () => null,
+  useEditorBridge: jest.fn(() => ({
+    getHTML: jest.fn(() => ''),
+    commands: {
+      setContent: jest.fn(),
+      focus: jest.fn(),
+    },
+  })),
+}));
+
 // Mock expo-location properly
 jest.mock('expo-location', () => ({
   getForegroundPermissionsAsync: jest.fn(),

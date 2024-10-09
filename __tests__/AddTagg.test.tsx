@@ -17,6 +17,18 @@ afterEach(() => {
   console.error.mockRestore();
 });
 
+jest.mock('@10play/tentap-editor', () => ({
+  RichText: () => null,
+  Toolbar: () => null,
+  useEditorBridge: jest.fn(() => ({
+    getHTML: jest.fn(() => ''),
+    commands: {
+      setContent: jest.fn(),
+      focus: jest.fn(),
+    },
+  })),
+}));
+
 describe('TagWindowTest1', () => {
   const mockTags = ['Tag1', 'Tag2', 'Tag3'];
   const mockSetTags = jest.fn();

@@ -97,7 +97,10 @@ const AppNavigator: React.FC = () => {
         </Stack.Navigator>
       )}
       {navState === "home" && (
-        <Tab.Navigator screenOptions={{ tabBarShowLabel: false }}>
+        <Tab.Navigator screenOptions={{ 
+          tabBarShowLabel: false,
+          tabBarHideOnKeyboard: true,
+        }}>
           <Tab.Screen
             name="HomeTab"
             component={HomeStack}

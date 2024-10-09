@@ -1,8 +1,7 @@
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 import { lightTheme, darkTheme } from "../colors";
 import Constants from "expo-constants";
 import { useTheme } from "../../lib/components/ThemeProvider";
-import { white } from "react-native-paper/lib/typescript/styles/themes/v2/colors";
 
 const NotePageStyles = () => {
   const { theme } = useTheme();
@@ -40,23 +39,23 @@ const NotePageStyles = () => {
       backgroundColor: theme.tertiaryColor,
       marginBottom: 4,
       width: "100%",
-      // overflow: "hidden",
     },
     editorContainer: {
-      // backgroundColor: theme.tertiaryColor,
       marginBottom: 4,
       width: "100%",
-      // overflow: "hidden",
+      backgroundColor: theme.primaryColor, // Ensure it matches the overall theme
     },
     editor: {
-      backgroundColor: theme.primaryColor,
+      backgroundColor: theme.tertiaryColor,
       marginBottom: 4,
       width: "100%",
-      // color: theme.text,
-      // overflow: "hidden",
+      minHeight: 200, // Adjust for better visibility
+      color: theme.text, // Ensure text is visible
+      padding: 10, // Add padding for better input experience
     },
     textEditorContainer: {
-      minHeight: 100,
+      minHeight: 300, // Set a minimum height for the editor
+      flex: 1, // Ensure the editor takes up available space
     },
     title: {
       height: 45,
@@ -66,12 +65,11 @@ const NotePageStyles = () => {
       borderRadius: 18,
       paddingHorizontal: 10,
       textAlign: "center",
-      fontSize: 30,
+      fontSize: 24, // Slightly smaller than 30 for better mobile readability
       color: theme.text,
     },
     input: {
       backgroundColor: 'white',
-      // borderColor: theme.secondaryColor,
       fontSize: 22,
       color: theme.text,
       height: 900, 
@@ -98,15 +96,28 @@ const NotePageStyles = () => {
     },
     saveText: {
       color: theme.text,
-      backgroundColor: 'black',
       fontWeight: "bold",
-      fontSize: 12,
+      fontSize: 14,
     },
     video: {
       width: "100%",
       height: "100%",
       justifyContent: "center",
       alignSelf: "center",
+    },
+
+    //editor styles
+    richTextContainer: {
+      height: Platform.OS == "android"? "90%" : "100%" 
+    },
+    //tool bar styles
+    toolBar: {
+      height: 50
+    },
+    closeKeyboardButton: {
+      padding: 10,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
   });
 };

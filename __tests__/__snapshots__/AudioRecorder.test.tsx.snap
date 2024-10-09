@@ -65,22 +65,10 @@ exports[`AudioContainer renders without crashing 1`] = `
           "opacity": 1,
         }
       }
-      testID="startRecordingButton"
     >
       <Text />
     </View>
   </View>
-  <View
-    style={
-      {
-        "backgroundColor": "darkGrey",
-        "borderRadius": 30,
-        "height": 5,
-        "marginBottom": 10,
-        "width": "95%",
-      }
-    }
-  />
   <View
     style={
       {
