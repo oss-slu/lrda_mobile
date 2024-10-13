@@ -24,15 +24,17 @@ import ApiService from "../utils/api_calls";
 import TagWindow from "../components/tagging";
 import LocationWindow from "../components/location";
 import TimeWindow from "../components/time";
-import { RichEditor, RichToolbar, actions } from "react-native-pell-rich-editor";
 import NotePageStyles from "../../styles/pages/NoteStyles";
 import ToastMessage from 'react-native-toast-message';
 import { useTheme } from "../components/ThemeProvider";
 import LoadingModal from "../components/LoadingModal";
 import * as Location from 'expo-location';
+import { Toolbar, RichText, DEFAULT_TOOLBAR_ITEMS, useEditorBridge, EditorBridge } from '@10play/tentap-editor'; // Importing from @10play/tentap-editor
+
 
 
 const user = User.getInstance();
+const editor = useEditorBridge() as EditorBridge & { getContentHtml: () => Promise<string> };
 
 const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   route,
@@ -58,9 +60,11 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const [isLocation, setIsLocation] = useState(false);
   let [isLocationShown, setIsLocationShown] = useState(
     note.latitude === "0" && note.longitude === "0" );
+
   let [isLocationIconPressed, setIsLocationIconPressed] = useState(
     note.latitude === "0" && note.longitude === "0" );
-  const richTextRef = useRef<RichEditor | null>(null);
+
+    
   const [isTime, setIsTime] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   let [location, setLocation] = useState<{
@@ -78,6 +82,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   console.log(note.longitude);
   const { height, width } = useWindowDimensions();
   const { theme } = useTheme();
+
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -163,14 +168,15 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     });
   };
 
+  
   const updateBodyText = () => {
-    if (richTextRef.current) {
-      richTextRef.current.getContentHtml()
+    if (editor) { // Ensure editorRef is used correctly
+      editor.getContentHtml()
         .then(html => {
           setText(html); // Update the state with the latest content
         })
         .catch(error => {
-          console.error('Error getting content from RichEditor:', error);
+          console.error('Error getting content from RichText:', error);
         });
     }
   };
@@ -364,23 +370,9 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           {isTime && <TimeWindow time={time} setTime={setTime} />}
         </View>
         <View>
-          <RichToolbar
-            style={NotePageStyles().container}
-            editor={richTextRef}
-            actions={[
-              actions.keyboard,
-              actions.undo,
-              actions.redo,
-              actions.setBold,
-              actions.setItalic,
-              actions.setUnderline,
-              actions.insertBulletsList,
-              actions.blockquote,
-              actions.indent,
-              actions.outdent,
-            ]}
-            iconTint={NotePageStyles().saveText.color}
-            selectedIconTint="#2095F2"
+        <Toolbar // Adding Toolbar just before the RichText editor
+            items={DEFAULT_TOOLBAR_ITEMS}
+            editor={editor}
           />
         </View>
         <View key="Tags Container">
@@ -457,24 +449,9 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             style={{ flex: 1 }}
             ref={scrollViewRef}
           >
-            <RichEditor
-              ref={(r) => (richTextRef.current = r)}
-              style={[NotePageStyles().editor, {flex: 1, minHeight: 650 }]}
-              editorStyle={
-              {
-                contentCSSText: `
-                  position: absolute; 
-                  top: 0; right: 0; bottom: 0; left: 0;
-                `,
-                backgroundColor: theme.primaryColor,
-                color: theme.text,
-              }}
-              autoCorrect={true}
-              placeholder="Write your note here"
-              onChange={(text) => setText(text)}
-              initialContentHTML={text}
-              onCursorPosition={handleScroll}
-              disabled={!owner}
+            <RichText
+              editor={editor}
+              style={styles.richEditor}
             />
           </ScrollView>
         </View>
@@ -483,5 +460,31 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     </SafeAreaView>
   );
 };
+
+const styles = ({
+  toolbarContainer: {
+    paddingBottom: 10,
+    paddingHorizontal: 10,
+    borderTopWidth: 1,
+    borderColor: '#ccc',
+  },
+  fullScreen: {
+    flex: 1,
+  },
+  editorContainer: {
+    flex: 1,
+    width: '100%',
+  },
+  richEditor: {
+    flex: 1,
+    padding: 16,
+    margin: 1,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    minHeight: 400, // Adjusted minHeight to make it bigger
+  },
+});
+
 
 export default EditNoteScreen;
