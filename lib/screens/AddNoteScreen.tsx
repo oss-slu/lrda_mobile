@@ -90,18 +90,20 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
 
   const addVideoToEditor = async (videoUri: string) => {
     try {
-      const thumbnailUri = await getThumbnail(videoUri);
-      const videoTag = `
-        <video width="320" height="240" controls poster="${thumbnailUri}">
-          <source src="${videoUri}" type="video/mp4">
-          Your browser does not support the video tag.
-        </video>`;
-      editor.commands.setContent(editor.getHTML() + videoTag);
+      // Append the video to the existing content
+      editor.setImage(videoUri);
+  
+      editor.injectCSS(`
+        video {
+          width: 100px !important;
+          height: 100px !important;
+        }
+      `);
     } catch (error) {
-      console.error("Error adding video: ", error);
+      console.error("Error adding video:", error);
     }
   };
-
+  
   const insertAudioToEditor = (audioUri: string) => {
     const audioTag = `<audio controls src="${audioUri}"></audio>`;
     editor.commands.setContent(editor.getHTML() + audioTag);
