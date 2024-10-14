@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react-native';
 import React from 'react';
-import ExploreScreen from '../ExploreScreen';
+import ExploreScreen from '../lib/screens/mapPage/ExploreScreen';
 
 describe('ExploreScreen Map Marker Tests', () => {
   const mockMarkers = [
@@ -21,7 +21,7 @@ describe('ExploreScreen Map Marker Tests', () => {
   ];
 
   it('renders markers with correct coordinates', () => {
-    const { getByTestId } = render(<ExploreScreen markers={mockMarkers} />);
+    const { getByTestId } = render(<ExploreScreen marker={mockMarkers} />);
 
     mockMarkers.forEach((marker, index) => {
       const markerElement = getByTestId(`marker-${index}`);
