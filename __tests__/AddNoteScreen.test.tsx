@@ -63,6 +63,14 @@ describe('AddNoteScreen', () => {
     expect(getByTestId('RichEditor')).toBeTruthy();
   });
 
+  it('renders the save button', () => {
+    const routeMock = { params: { untitledNumber: 1 } };
+    const { getByTestId } = render(<AddNoteScreen route={routeMock as any} />);
+
+    // Check if the save button is rendered
+    expect(getByTestId('checklocationpermission')).toBeTruthy();
+  });
+
 
   it('handles saveNote API error', async () => {
     const routeMock = { params: { untitledNumber: 1 } };
@@ -141,7 +149,6 @@ describe("AddNoteScreen's checkLocationPermission method", () => {
     await waitFor(() => {
       expect(mockWriteNewNote).toHaveBeenCalledTimes(0); // Adjust expected to 0
     });
-  });
-  
+  });  
   
 });
