@@ -30,6 +30,8 @@ import ToastMessage from 'react-native-toast-message';
 import { useTheme } from "../components/ThemeProvider";
 import LoadingModal from "../components/LoadingModal";
 import * as Location from 'expo-location';
+import { RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
+
 
 
 const user = User.getInstance();
@@ -63,6 +65,9 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const richTextRef = useRef<RichEditor | null>(null);
   const [isTime, setIsTime] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [bodyText, setBodyText] = useState<string>("");
+  const editor = useEditorBridge({ initialContent: bodyText || "", autofocus: true });
+
   let [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -363,26 +368,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           )}
           {isTime && <TimeWindow time={time} setTime={setTime} />}
         </View>
-        <View>
-          <RichToolbar
-            style={NotePageStyles().container}
-            editor={richTextRef}
-            actions={[
-              actions.keyboard,
-              actions.undo,
-              actions.redo,
-              actions.setBold,
-              actions.setItalic,
-              actions.setUnderline,
-              actions.insertBulletsList,
-              actions.blockquote,
-              actions.indent,
-              actions.outdent,
-            ]}
-            iconTint={NotePageStyles().saveText.color}
-            selectedIconTint="#2095F2"
-          />
-        </View>
+    
         <View key="Tags Container">
           {tags.length > 0 && (
             <ScrollView
@@ -457,25 +443,22 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             style={{ flex: 1 }}
             ref={scrollViewRef}
           >
-            <RichEditor
-              ref={(r) => (richTextRef.current = r)}
-              style={[NotePageStyles().editor, {flex: 1, minHeight: 650 }]}
-              editorStyle={
-              {
-                contentCSSText: `
-                  position: absolute; 
-                  top: 0; right: 0; bottom: 0; left: 0;
-                `,
-                backgroundColor: theme.primaryColor,
-                color: theme.text,
-              }}
-              autoCorrect={true}
-              placeholder="Write your note here"
-              onChange={(text) => setText(text)}
-              initialContentHTML={text}
-              onCursorPosition={handleScroll}
-              disabled={!owner}
-            />
+         <View style={[NotePageStyles().richTextContainer]}>
+          <RichText
+            editor={editor}
+            placeholder="Write something..."
+            style={[NotePageStyles().editor, {backgroundColor: Platform.OS == "android" && "white"}]}
+          />
+          </View>
+       
+        {/* Toolbar placed at the bottom */}
+        <View style={[NotePageStyles().toolBar]}>
+          <Toolbar
+            editor={editor}
+            style={NotePageStyles().container}
+            actions={['bold', 'italic', 'underline', 'bullet_list', 'blockquote', 'indent', 'outdent', 'close_keyboard' ]}
+          />
+        </View>
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
