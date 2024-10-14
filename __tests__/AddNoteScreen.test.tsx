@@ -1,8 +1,8 @@
+import { fireEvent, render, waitFor } from '@testing-library/react-native';
+import * as Location from 'expo-location';
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import AddNoteScreen from '../lib/screens/AddNoteScreen';
-import * as Location from 'expo-location';
 
 // Mock external dependencies
 jest.mock('../lib/components/ThemeProvider', () => ({
@@ -141,4 +141,23 @@ describe("AddNoteScreen's checkLocationPermission method", () => {
   });
   
   
+});
+
+describe('AddNoteScreen image insertion', () => {
+  it('inserts an image into the editor as a block-level element with 100x100 size', async () => {
+    const routeMock = { params: { untitledNumber: 1 } };
+    const { getByTestId } = render(<AddNoteScreen route={routeMock as any} navigation={undefined} />);
+    const imageUri = 'mocked-image-uri.jpg';
+    fireEvent.press(getByTestId('images-icon'));
+    const richEditor = getByTestId('RichEditor');
+    fireEvent(richEditor, 'onChange', <img src={imageUri} style={{ width: '100px', height: '100px', display: 'block' }} />);
+
+    await waitFor(() => {
+      expect(richEditor.props.initialContentHTML).toContain(<img src={imageUri} style={{ width: '100px', height: '100px', display: 'block' }} />);
+    });
+
+    await waitFor(() => {
+      expect(richEditor.props.initialContentHTML).toContain(<br></br>);
+    });
+  });
 });

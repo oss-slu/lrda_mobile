@@ -1,37 +1,35 @@
-import React, { useEffect, useState, useRef } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import * as Location from 'expo-location';
+import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
-  View,
+  Dimensions,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
   TextInput,
   TouchableOpacity,
-  Keyboard,
-  ScrollView,
-  Text,
-  Dimensions,
-  SafeAreaView,
-  KeyboardAvoidingView,
-  Platform
+  View
 } from "react-native";
-import * as Location from 'expo-location';
-import ToastMessage from 'react-native-toast-message';
-import { Ionicons } from "@expo/vector-icons";
-import { Media, AudioType } from "../models/media_class";
-import { getThumbnail } from "../utils/S3_proxy";
-import { User } from "../models/user_class";
-import ApiService from "../utils/api_calls";
-import PhotoScroller from "../components/photoScroller";
-import AudioContainer from "../components/audio";
-import TagWindow from "../components/tagging";
-import LocationWindow from "../components/location";
-import TimeWindow from "../components/time";
 import {
   RichEditor,
   RichToolbar,
   actions
 } from "react-native-pell-rich-editor";
+import ToastMessage from 'react-native-toast-message';
 import NotePageStyles from "../../styles/pages/NoteStyles";
-import { useTheme } from "../components/ThemeProvider";
+import AudioContainer from "../components/audio";
 import LoadingModal from "../components/LoadingModal";
+import LocationWindow from "../components/location";
+import PhotoScroller from "../components/photoScroller";
+import TagWindow from "../components/tagging";
+import { useTheme } from "../components/ThemeProvider";
+import TimeWindow from "../components/time";
+import { User } from "../models/user_class";
+import ApiService from "../utils/api_calls";
+import { getThumbnail } from "../utils/S3_proxy";
 
 const user = User.getInstance();
 
@@ -136,7 +134,7 @@ const AddNoteScreen = ({ navigation, route }) => {
   };
 
   const addImageToEditor = (imageUri) => {
-    const imgTag = `<img src="${imageUri}" style="max-width: 50%; height: auto;" />&nbsp;<br><br>`;
+    const imgTag = `<img src="${imageUri}" style="width: 100px; height: 100px; display: block; margin: 10px 0;" />&nbsp;<br><br>`;
     richTextRef.current?.insertHTML(imgTag);
 
     if (scrollViewRef.current && !initialLoad) {
