@@ -66,7 +66,25 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const [isTime, setIsTime] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [bodyText, setBodyText] = useState<string>("");
+  const {  isDarkmode, toggleDarkmode, theme } = useTheme();
   const editor = useEditorBridge({ initialContent: bodyText || "", autofocus: true });
+
+  // Define the dynamic CSS for text color based on isDarkmode
+  const textColorCSS = `
+    p, span, div {
+      color: ${theme.text} !important;
+    }
+    * {
+      color: ${theme.text} !important;
+    }
+  `;
+
+  // Inject and update the CSS in the editor whenever dark mode changes
+  useEffect(() => {
+    if (editor) {
+      editor.injectCSS(textColorCSS, 'text-color-style');
+    }
+  }, [isDarkmode, editor]);  
 
   let [location, setLocation] = useState<{
     latitude: number;
@@ -82,7 +100,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   console.log(note.latitude);
   console.log(note.longitude);
   const { height, width } = useWindowDimensions();
-  const { theme } = useTheme();
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -450,8 +467,9 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             style={[NotePageStyles().editor, {backgroundColor: Platform.OS == "android" && "white"}]}
           />
           </View>
-       
-        {/* Toolbar placed at the bottom */}
+ 
+          </ScrollView>
+        </View>
         <View style={[NotePageStyles().toolBar]}>
           <Toolbar
             editor={editor}
@@ -459,12 +477,28 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             actions={['bold', 'italic', 'underline', 'bullet_list', 'blockquote', 'indent', 'outdent', 'close_keyboard' ]}
           />
         </View>
-          </ScrollView>
-        </View>
       </KeyboardAvoidingView>
       <LoadingModal visible={isUpdating} />
     </SafeAreaView>
   );
 };
 
+const styles = ({
+ 
+  richTextContainer: {
+    flex: 1,
+  },
+  editor: {
+    flex: 1,
+    padding: 10, // Adjust padding as needed
+  },
+  toolbarContainer: {
+    borderTopWidth: 1, // Add border at the top to separate from the editor
+    borderTopColor: '#ccc',
+    backgroundColor: 'white', // Or use theme.background for dynamic background
+  },
+  toolbar: {
+    height: 600, // Adjust height as needed
+  },
+});
 export default EditNoteScreen;
