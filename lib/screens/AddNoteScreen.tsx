@@ -53,9 +53,9 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
 
   // Add a guard check before calling editor.commands.focus()
   useEffect(() => {
-    if (editor?.commands?.focus) {
+    if (editor?.focus) {
       const timeout = setTimeout(() => {
-        editor.commands.focus();
+        editor.focus();
       }, 500);
       return () => clearTimeout(timeout);
     }
@@ -90,15 +90,19 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
 
   const addVideoToEditor = async (videoUri: string) => {
     try {
-      // Append the video to the existing content
-      editor.setImage(videoUri);
+      // Get the current HTML content in the editor
+      const currentHTML = await editor.getHTML();
   
-      editor.injectCSS(`
-        video {
-          width: 100px !important;
-          height: 100px !important;
-        }
-      `);
+      // Construct the video HTML tag with full width and block-level display
+      const videoTag = `
+        <div style="width: 100%; display: block; margin-bottom: 16px;">
+          <img src="${videoUri}" style="width: 100%; height: auto;" />
+        </div>
+      `;
+  
+      // Insert the video tag into the editor content with a newline after it
+      editor.setContent(currentHTML + videoTag + '<p><br/></p>');  // Ensure text after video starts on a new line
+  
     } catch (error) {
       console.error("Error adding video:", error);
     }
