@@ -53,9 +53,9 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
 
   // Add a guard check before calling editor.commands.focus()
   useEffect(() => {
-    if (editor?.commands?.focus) {
+    if (editor?.focus) {
       const timeout = setTimeout(() => {
-        editor.commands.focus();
+        editor.focus();
       }, 500);
       return () => clearTimeout(timeout);
     }
@@ -90,18 +90,24 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
 
   const addVideoToEditor = async (videoUri: string) => {
     try {
-      const thumbnailUri = await getThumbnail(videoUri);
+      // Get the current HTML content in the editor
+      const currentHTML = await editor.getHTML();
+  
+      // Construct the video HTML tag with full width and block-level display
       const videoTag = `
-        <video width="320" height="240" controls poster="${thumbnailUri}">
-          <source src="${videoUri}" type="video/mp4">
-          Your browser does not support the video tag.
-        </video>`;
-      editor.commands.setContent(editor.getHTML() + videoTag);
+        <div style="width: 100%; display: block; margin-bottom: 16px;">
+          <img src="${videoUri}" style="width: 100%; height: auto;" />
+        </div>
+      `;
+  
+      // Insert the video tag into the editor content with a newline after it
+      editor.setContent(currentHTML + videoTag + '<p><br/></p>');  // Ensure text after video starts on a new line
+  
     } catch (error) {
-      console.error("Error adding video: ", error);
+      console.error("Error adding video:", error);
     }
   };
-
+  
   const insertAudioToEditor = (audioUri: string) => {
     const audioTag = `<audio controls src="${audioUri}"></audio>`;
     editor.commands.setContent(editor.getHTML() + audioTag);
