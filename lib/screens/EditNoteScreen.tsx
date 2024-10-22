@@ -12,6 +12,8 @@ import {
   SafeAreaView,
   Dimensions
 } from "react-native";
+import {  StyleSheet } from "react-native";
+
 import { Ionicons } from "@expo/vector-icons";
 import { Note } from "../../types";
 import PhotoScroller from "../components/photoScroller";
@@ -78,6 +80,45 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       color: ${theme.text} !important;
     }
   `;
+  const exampleStyles = StyleSheet.create({
+    fullScreen: {
+      flex: 1,
+      backgroundColor: theme.primaryColor, // Match the background color of your screen
+    },
+    richTextContainer: {
+      flex: 1, // Use full available height for RichText component
+      justifyContent: 'center',
+      paddingHorizontal: 10, // Add some padding horizontally
+      backgroundColor: theme.primaryColor, // Apply black background to the entire container
+      color : theme.tertiaryColor,
+    },
+    richText: {
+      flex: 1,
+      minHeight: '100%', // Ensure it takes full height available
+      padding: 10,
+      borderWidth: 1,
+      borderColor: theme.tertiaryColor,
+      color: theme.tertiaryColor, // Set text color to white for dark mode
+    },
+    editor: {
+      backgroundColor: theme.tertiaryColor,
+      marginBottom: 4,
+      width: "100%",
+      minHeight: 200, // Adjust for better visibility
+      color: theme.text, // Ensure text is visible
+      padding: 10, // Add padding for better input experience
+    },
+    editorContainer: {
+      marginBottom: 4,
+      width: "100%",
+      backgroundColor: theme.primaryColor, // Ensure it matches the overall theme
+    },
+    toolbar: {
+      height: 50, // Fixed height for the toolbar at the bottom
+      backgroundColor: '#333', // Ensure the toolbar has a background color
+    },
+  });
+  
 
   // Inject and update the CSS in the editor whenever dark mode changes
   useEffect(() => {
@@ -449,56 +490,28 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           </View>
 
       </View>
+      <SafeAreaView style={exampleStyles.fullScreen}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={exampleStyles.fullScreen}
       >
-        <View style={[NotePageStyles().editorContainer, { flex: 1 }]}>
-          <ScrollView
-            nestedScrollEnabled={true}
-            showsVerticalScrollIndicator={false}
-            style={{ flex: 1 }}
-            ref={scrollViewRef}
-          >
-         <View style={[NotePageStyles().richTextContainer]}>
-          <RichText
-            editor={editor}
+        <View style={exampleStyles.richTextContainer}>
+          <RichText 
+            editor={editor} 
             placeholder="Write something..."
-            style={[NotePageStyles().editor, {backgroundColor: Platform.OS == "android" && "white"}]}
-          />
-          </View>
- 
-          </ScrollView>
-        </View>
-        <View style={[NotePageStyles().toolBar]}>
-          <Toolbar
-            editor={editor}
-            style={NotePageStyles().container}
-            actions={['bold', 'italic', 'underline', 'bullet_list', 'blockquote', 'indent', 'outdent', 'close_keyboard' ]}
+            style={[exampleStyles.editor, {backgroundColor: Platform.OS == "android" && "white"}]} // Apply styling here
           />
         </View>
+        <Toolbar editor={editor} style={exampleStyles.toolbar} />
       </KeyboardAvoidingView>
+    </SafeAreaView>
       <LoadingModal visible={isUpdating} />
     </SafeAreaView>
   );
 };
 
-const styles = ({
- 
-  richTextContainer: {
-    flex: 1,
-  },
-  editor: {
-    flex: 1,
-    padding: 10, // Adjust padding as needed
-  },
-  toolbarContainer: {
-    borderTopWidth: 1, // Add border at the top to separate from the editor
-    borderTopColor: '#ccc',
-    backgroundColor: 'white', // Or use theme.background for dynamic background
-  },
-  toolbar: {
-    height: 600, // Adjust height as needed
-  },
-});
+
+
+
+
 export default EditNoteScreen;
