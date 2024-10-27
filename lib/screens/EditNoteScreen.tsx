@@ -216,6 +216,7 @@ const EditNoteScreen = ({ route, navigation }) => {
         </ScrollView>
         <LoadingModal visible={isUpdating} />
       </KeyboardAvoidingView>
+
     </SafeAreaView>
   );
 };
