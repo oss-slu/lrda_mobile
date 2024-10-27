@@ -163,11 +163,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     return maxNumber + 1;
   };
 
-  const toggleSearchBar = () => {
-    setIsSearchVisible(!isSearchVisible);
-};
-  
-
   const styles = StyleSheet.create({
     container: {
       paddingTop: Constants.statusBarHeight - 20,
