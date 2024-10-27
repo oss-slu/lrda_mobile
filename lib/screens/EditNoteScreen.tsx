@@ -155,6 +155,11 @@ const EditNoteScreen = ({ route, navigation }) => {
     }
   };
 
+  if (isDarkmode && editor) {
+    editor.injectCSS(textColorCSS, 'text-color-style');
+    console.log("text color will be: #F7F8F9 from IF state");
+  }
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
