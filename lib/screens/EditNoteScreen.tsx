@@ -96,11 +96,11 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       ...Platform.select({  
         android: {
           flex: 1,
-          backgroundColor: theme.tertiaryColor, // Match the background color of your screen
+          backgroundColor: theme.primaryColor, // Match the background color of your screen
         },
         ios: {
           flex: 1,
-          backgroundColor: theme.tertiaryColor, // Match the background color of your screen
+          backgroundColor: theme.primaryColor, // Match the background color of your screen
         },
       }),
     },
@@ -177,8 +177,8 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   
       ...Platform.select({
         android: {
-          height: 80, // Fixed height for the toolbar at the bottom
-          backgroundColor: '#333', // Ensure the toolbar has a background color
+          height: 60, // Fixed height for the toolbar at the bottom
+          backgroundColor: theme.tertiaryColor, // Ensure the toolbar has a background color
         },
         ios: {
           height: 50, // Fixed height for the toolbar at the bottom
@@ -429,6 +429,21 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     editor.injectCSS(textColorCSS, 'text-color-style');
     console.log("text color will be: #F7F8F9 from IF state");
   }
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener("keyboardDidShow", () => {
+      setIsKeyboardVisible(true);
+    });
+    const keyboardDidHideListener = Keyboard.addListener("keyboardDidHide", () => {
+      setIsKeyboardVisible(false);
+    });
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
+
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -566,20 +581,33 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       </View>
       <SafeAreaView style={exampleStyles.fullScreen}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'height' : 'padding'}
+        behavior={Platform.OS === 'android' ? 'height' : 'padding'}
         style={exampleStyles.fullScreen}
-      >
-
-        
+      >      
         <View style={exampleStyles.richTextContainer}>
           <RichText 
             editor={editor} 
-            style={[exampleStyles.editor, {backgroundColor: Platform.OS == "android" && theme.tertiaryColor}]} // Apply styling here
+            style={[exampleStyles.editor, {backgroundColor: Platform.OS == "android" && theme.primaryColor}]} // Apply styling here
           />
-               
-        </View>
-       
    
+          </View>
+          
+  <View
+    style={{
+      height: 50, // Set a compact height that’s not too small
+      backgroundColor: theme.primaryColor, // Match the background color of the screen
+      justifyContent: 'center',
+      paddingVertical:0, // Minimal vertical padding for compactness
+      paddingHorizontal: 0, // Adjust as needed to control horizontal space
+      overflow: 'hidden', // Ensure no extra space
+      marginTop: 50
+      
+    }}
+  >
+    <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
+  </View>
+
+
       </KeyboardAvoidingView>
 
     </SafeAreaView>
