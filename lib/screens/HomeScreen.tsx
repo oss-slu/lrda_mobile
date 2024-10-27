@@ -49,6 +49,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [items, setItems] = useState(initialItems);
   const [selectedNote, setSelectedNote] = useState<Note | undefined>(undefined);
   const [isModalVisible, setModalVisible] = useState(false);
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
 
   const { theme } = useTheme();
 
@@ -161,6 +162,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     });
     return maxNumber + 1;
   };
+
+  const toggleSearchBar = () => {
+    setIsSearchVisible(!isSearchVisible);
+};
   
 
   const styles = StyleSheet.create({
@@ -332,7 +337,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       padding: 10,
       alignSelf: "center",
     },
-    seachBar:{
+    searchBar:{
       backgroundColor: theme.homeColor,
       borderRadius: 20,
       fontSize: 18,
@@ -589,7 +594,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           >
             <Text style={styles.pfpText}>{userInitials}</Text>
           </TouchableOpacity>
-          <Image source={require('../../assets/icon.png')} style={{width: width * 0.105, height: width * 0.105, marginEnd: width * 0.435}} />
+          <Image source={require('../../assets/icon.png')} style={{width: width * 0.105, height: width * 0.105, marginEnd: width * 0.025}} />
+          <TouchableOpacity onPress={() => setIsSearchVisible(!isSearchVisible)}>
+            <Ionicons
+              name={isSearchVisible ? "close-outline" : "search-outline"} // Switch between "X" and search icon
+              size={36}
+              color={theme.text}
+            />
+          </TouchableOpacity>
         </View>
       </View>
        
@@ -634,12 +646,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           showArrowIcon={true}
         /> 
       </View>
+      {isSearchVisible && (
       <TextInput
-          testID="searchBar"
-          placeholder="Search notes.."
-          onChangeText={handleSearch}
-          style= {styles.seachBar}
+        testID="searchBar"
+        placeholder="Search notes..."
+        onChangeText={handleSearch}
+        style={styles.searchBar}
         />
+      )}
+
       <View style={styles.horizontalLine} />
       <View style={styles.scrollerBackgroundColor}>
         {rendering ? <NoteSkeleton /> : renderList(notes)}

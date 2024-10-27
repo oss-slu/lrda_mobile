@@ -4,23 +4,33 @@ exports[`MorePage renders correctly 1`] = `
 [
   <View
     style={
-      {
-        "alignItems": "center",
-        "backgroundColor": "#ffffff",
-        "justifyContent": "center",
-        "marginBottom": -8,
-        "marginTop": 53.36,
-        "padding": 13.34,
-      }
+      [
+        {
+          "alignItems": "center",
+          "backgroundColor": "#ffffff",
+          "justifyContent": "center",
+          "marginBottom": -8,
+          "marginTop": 53.36,
+          "padding": 13.34,
+        },
+        {
+          "backgroundColor": undefined,
+        },
+      ]
     }
   >
     <Text
       style={
-        {
-          "color": "#000000",
-          "fontSize": 32,
-          "fontWeight": "bold",
-        }
+        [
+          {
+            "color": "#000000",
+            "fontSize": 32,
+            "fontWeight": "bold",
+          },
+          {
+            "color": "#000000",
+          },
+        ]
       }
     >
       Where's Religion
@@ -60,12 +70,17 @@ exports[`MorePage renders correctly 1`] = `
         <View>
           <Text
             style={
-              {
-                "alignSelf": "center",
-                "color": "#000000",
-                "fontSize": 28,
-                "fontWeight": "bold",
-              }
+              [
+                {
+                  "alignSelf": "center",
+                  "color": "#000000",
+                  "fontSize": 28,
+                  "fontWeight": "bold",
+                },
+                {
+                  "color": "#000000",
+                },
+              ]
             }
           >
             Resources
@@ -106,12 +121,17 @@ exports[`MorePage renders correctly 1`] = `
           >
             <Text
               style={
-                {
-                  "alignSelf": "center",
-                  "color": "#000000",
-                  "fontSize": 16,
-                  "lineHeight": 28,
-                }
+                [
+                  {
+                    "alignSelf": "center",
+                    "color": "#000000",
+                    "fontSize": 16,
+                    "lineHeight": 28,
+                  },
+                  {
+                    "color": "#000000",
+                  },
+                ]
               }
             >
               Our Website
@@ -153,12 +173,17 @@ exports[`MorePage renders correctly 1`] = `
           >
             <Text
               style={
-                {
-                  "alignSelf": "center",
-                  "color": "#000000",
-                  "fontSize": 16,
-                  "lineHeight": 28,
-                }
+                [
+                  {
+                    "alignSelf": "center",
+                    "color": "#000000",
+                    "fontSize": 16,
+                    "lineHeight": 28,
+                  },
+                  {
+                    "color": "#000000",
+                  },
+                ]
               }
             >
               Guide to Ethnography
@@ -200,12 +225,17 @@ exports[`MorePage renders correctly 1`] = `
           >
             <Text
               style={
-                {
-                  "alignSelf": "center",
-                  "color": "#000000",
-                  "fontSize": 16,
-                  "lineHeight": 28,
-                }
+                [
+                  {
+                    "alignSelf": "center",
+                    "color": "#000000",
+                    "fontSize": 16,
+                    "lineHeight": 28,
+                  },
+                  {
+                    "color": "#000000",
+                  },
+                ]
               }
             >
               Guide to Coding
@@ -247,12 +277,17 @@ exports[`MorePage renders correctly 1`] = `
           >
             <Text
               style={
-                {
-                  "alignSelf": "center",
-                  "color": "#000000",
-                  "fontSize": 16,
-                  "lineHeight": 28,
-                }
+                [
+                  {
+                    "alignSelf": "center",
+                    "color": "#000000",
+                    "fontSize": 16,
+                    "lineHeight": 28,
+                  },
+                  {
+                    "color": "#000000",
+                  },
+                ]
               }
             >
               Report a Bug
@@ -260,48 +295,68 @@ exports[`MorePage renders correctly 1`] = `
           </View>
           <Text
             style={
-              {
-                "alignSelf": "center",
-                "color": "#000000",
-                "fontSize": 28,
-                "fontWeight": "bold",
-              }
+              [
+                {
+                  "alignSelf": "center",
+                  "color": "#000000",
+                  "fontSize": 28,
+                  "fontWeight": "bold",
+                },
+                {
+                  "color": "#000000",
+                },
+              ]
             }
           >
             Meet our Team
           </Text>
           <Text
             style={
-              {
-                "alignSelf": "center",
-                "color": "#000000",
-                "fontSize": 16,
-                "lineHeight": 28,
-              }
+              [
+                {
+                  "alignSelf": "center",
+                  "color": "#000000",
+                  "fontSize": 16,
+                  "lineHeight": 28,
+                },
+                {
+                  "color": "#000000",
+                },
+              ]
             }
           >
             Insert Team Photo
           </Text>
           <Text
             style={
-              {
-                "alignSelf": "center",
-                "color": "#000000",
-                "fontSize": 16,
-                "lineHeight": 28,
-              }
+              [
+                {
+                  "alignSelf": "center",
+                  "color": "#000000",
+                  "fontSize": 16,
+                  "lineHeight": 28,
+                },
+                {
+                  "color": "#000000",
+                },
+              ]
             }
           >
             Insert Team Message
           </Text>
           <Text
             style={
-              {
-                "alignSelf": "center",
-                "color": "#000000",
-                "fontSize": 28,
-                "fontWeight": "bold",
-              }
+              [
+                {
+                  "alignSelf": "center",
+                  "color": "#000000",
+                  "fontSize": 28,
+                  "fontWeight": "bold",
+                },
+                {
+                  "color": "#000000",
+                },
+              ]
             }
           >
             Frequently Asked Questions
@@ -309,120 +364,170 @@ exports[`MorePage renders correctly 1`] = `
         </View>
         <Text
           style={
-            {
-              "alignSelf": "center",
-              "color": "#000000",
-              "fontSize": 28,
-              "fontWeight": "bold",
-            }
+            [
+              {
+                "alignSelf": "center",
+                "color": "#000000",
+                "fontSize": 28,
+                "fontWeight": "bold",
+              },
+              {
+                "color": "#000000",
+              },
+            ]
           }
         >
           What can users do?
         </Text>
         <Text
           style={
-            {
-              "alignSelf": "center",
-              "color": "#000000",
-              "fontSize": 16,
-              "lineHeight": 28,
-            }
+            [
+              {
+                "alignSelf": "center",
+                "color": "#000000",
+                "fontSize": 16,
+                "lineHeight": 28,
+              },
+              {
+                "color": "#000000",
+              },
+            ]
           }
         >
           Explore religious traditions, find places of worship, engage in meaningful discussions.
         </Text>
         <Text
           style={
-            {
-              "alignSelf": "center",
-              "color": "#000000",
-              "fontSize": 28,
-              "fontWeight": "bold",
-            }
+            [
+              {
+                "alignSelf": "center",
+                "color": "#000000",
+                "fontSize": 28,
+                "fontWeight": "bold",
+              },
+              {
+                "color": "#000000",
+              },
+            ]
           }
         >
           Who is it for?
         </Text>
         <Text
           style={
-            {
-              "alignSelf": "center",
-              "color": "#000000",
-              "fontSize": 16,
-              "lineHeight": 28,
-            }
+            [
+              {
+                "alignSelf": "center",
+                "color": "#000000",
+                "fontSize": 16,
+                "lineHeight": 28,
+              },
+              {
+                "color": "#000000",
+              },
+            ]
           }
         >
           Scholars, students, believers, and the curious about the world's religions.
         </Text>
         <Text
           style={
-            {
-              "alignSelf": "center",
-              "color": "#000000",
-              "fontSize": 28,
-              "fontWeight": "bold",
-            }
+            [
+              {
+                "alignSelf": "center",
+                "color": "#000000",
+                "fontSize": 28,
+                "fontWeight": "bold",
+              },
+              {
+                "color": "#000000",
+              },
+            ]
           }
         >
           What's unique?
         </Text>
         <Text
           style={
-            {
-              "alignSelf": "center",
-              "color": "#000000",
-              "fontSize": 16,
-              "lineHeight": 28,
-            }
+            [
+              {
+                "alignSelf": "center",
+                "color": "#000000",
+                "fontSize": 16,
+                "lineHeight": 28,
+              },
+              {
+                "color": "#000000",
+              },
+            ]
           }
         >
           Provides a modern method to capture experiences using the devices that are with us every day.
         </Text>
         <Text
           style={
-            {
-              "alignSelf": "center",
-              "color": "#000000",
-              "fontSize": 28,
-              "fontWeight": "bold",
-            }
+            [
+              {
+                "alignSelf": "center",
+                "color": "#000000",
+                "fontSize": 28,
+                "fontWeight": "bold",
+              },
+              {
+                "color": "#000000",
+              },
+            ]
           }
         >
           Our Mission
         </Text>
         <Text
           style={
-            {
-              "alignSelf": "center",
-              "color": "#000000",
-              "fontSize": 16,
-              "lineHeight": 28,
-            }
+            [
+              {
+                "alignSelf": "center",
+                "color": "#000000",
+                "fontSize": 16,
+                "lineHeight": 28,
+              },
+              {
+                "color": "#000000",
+              },
+            ]
           }
         >
           Connect people of diverse religious backgrounds, beliefs, and practices.
         </Text>
         <Text
           style={
-            {
-              "alignSelf": "center",
-              "color": "#000000",
-              "fontSize": 28,
-              "fontWeight": "bold",
-            }
+            [
+              {
+                "alignSelf": "center",
+                "color": "#000000",
+                "fontSize": 28,
+                "fontWeight": "bold",
+              },
+              {
+                "color": "#000000",
+              },
+            ]
           }
         >
           Why use 'Where's Religion?'
         </Text>
         <Text
           style={
-            {
-              "alignSelf": "center",
-              "color": "#000000",
-              "fontSize": 16,
-              "lineHeight": 28,
-            }
+            [
+              {
+                "alignSelf": "center",
+                "color": "#000000",
+                "fontSize": 16,
+                "lineHeight": 28,
+              },
+              {
+                "color": "#000000",
+              },
+            ]
           }
         >
           Explore religious traditions, find places of worship, engage in meaningful discussions.
@@ -445,25 +550,35 @@ exports[`MorePage renders correctly 1`] = `
           >
             <View
               style={
-                {
-                  "alignItems": "center",
-                  "backgroundColor": "#f0f0f0",
-                  "borderRadius": 10,
-                  "flexDirection": "row",
-                  "justifyContent": "space-between",
-                  "padding": 6,
-                  "width": "94%",
-                }
+                [
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#f0f0f0",
+                    "borderRadius": 10,
+                    "flexDirection": "row",
+                    "justifyContent": "space-between",
+                    "padding": 6,
+                    "width": "94%",
+                  },
+                  {
+                    "backgroundColor": undefined,
+                  },
+                ]
               }
             >
               <Text
                 style={
-                  {
-                    "color": "#000000",
-                    "fontSize": 18,
-                    "fontWeight": "500",
-                    "marginLeft": 9,
-                  }
+                  [
+                    {
+                      "color": "#000000",
+                      "fontSize": 18,
+                      "fontWeight": "500",
+                      "marginLeft": 9,
+                    },
+                    {
+                      "color": "#000000",
+                    },
+                  ]
                 }
               >
                 Dark Mode
@@ -490,11 +605,16 @@ exports[`MorePage renders correctly 1`] = `
         </View>
         <View
           style={
-            {
-              "alignItems": "center",
-              "backgroundColor": "#ffffff",
-              "width": "100%",
-            }
+            [
+              {
+                "alignItems": "center",
+                "backgroundColor": "#ffffff",
+                "width": "100%",
+              },
+              {
+                "backgroundColor": undefined,
+              },
+            ]
           }
         >
           <View
@@ -528,7 +648,7 @@ exports[`MorePage renders correctly 1`] = `
             style={
               {
                 "alignItems": "center",
-                "backgroundColor": "#ff0000",
+                "backgroundColor": "black",
                 "borderRadius": 15,
                 "flexDirection": "row",
                 "height": 50,
@@ -542,13 +662,18 @@ exports[`MorePage renders correctly 1`] = `
           >
             <Text
               style={
-                {
-                  "color": "#ffffff",
-                  "fontSize": 20,
-                  "fontWeight": "600",
-                  "marginLeft": 5,
-                  "marginRight": 10,
-                }
+                [
+                  {
+                    "color": "#ffffff",
+                    "fontSize": 20,
+                    "fontWeight": "600",
+                    "marginLeft": 5,
+                    "marginRight": 10,
+                  },
+                  {
+                    "color": "white",
+                  },
+                ]
               }
             >
               Logout
