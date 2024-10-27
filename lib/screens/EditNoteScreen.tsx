@@ -32,7 +32,7 @@ import ToastMessage from 'react-native-toast-message';
 import { useTheme } from "../components/ThemeProvider";
 import LoadingModal from "../components/LoadingModal";
 import * as Location from 'expo-location';
-import { RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
+import { DEFAULT_TOOLBAR_ITEMS, RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
 
 
 
@@ -69,7 +69,16 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const [isUpdating, setIsUpdating] = useState(false);
   const [bodyText, setBodyText] = useState<string>("");
   const {  isDarkmode, toggleDarkmode, theme } = useTheme();
-  const editor = useEditorBridge({ initialContent: bodyText || "", autofocus: true });
+  const [refreshEditor, setRefreshEditor] = useState(false);
+
+  // Pass the appropriate theme based on dark mode status
+  const editor = useEditorBridge({
+    initialContent: bodyText || "",
+    autofocus: true,
+  });
+  
+
+
 
   // Define the dynamic CSS for text color based on isDarkmode
   const textColorCSS = `
@@ -80,52 +89,112 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       color: ${theme.text} !important;
     }
   `;
+
+  
   const exampleStyles = StyleSheet.create({
     fullScreen: {
-      flex: 1,
-      backgroundColor: theme.primaryColor, // Match the background color of your screen
+      ...Platform.select({  
+        android: {
+          flex: 1,
+          backgroundColor: theme.tertiaryColor, // Match the background color of your screen
+        },
+        ios: {
+          flex: 1,
+          backgroundColor: theme.tertiaryColor, // Match the background color of your screen
+        },
+      }),
     },
     richTextContainer: {
       flex: 1, // Use full available height for RichText component
       justifyContent: 'center',
       paddingHorizontal: 10, // Add some padding horizontally
       backgroundColor: theme.primaryColor, // Apply black background to the entire container
-      color : theme.tertiaryColor,
+      color: theme.tertiaryColor,
+      ...Platform.select({
+        android: {
+          flex: 1, // Use full available height for RichText component
+          justifyContent: 'center',
+          paddingHorizontal: 10, // Add some padding horizontally
+          backgroundColor: theme.primaryColor, // Apply black background to the entire container
+          color: theme.tertiaryColor,
+        },
+
+      }),
     },
-    richText: {
+    richText: {  
+
       flex: 1,
       minHeight: '100%', // Ensure it takes full height available
       padding: 10,
       borderWidth: 1,
-      borderColor: theme.tertiaryColor,
-      color: theme.tertiaryColor, // Set text color to white for dark mode
+      borderColor: theme.primaryColor,
+      color: theme.text, // Set text color to white for dark mode
+      ...Platform.select({
+        android: {
+          flex: 1,
+          minHeight: '100%', // Ensure it takes full height available
+          padding: 2,
+          borderWidth: 1,
+          borderColor: theme.primaryColor,
+          color: theme.primaryColor, // Set text color to white for dark mode
+        },
+
+      }),
     },
-    editor: {
-      backgroundColor: theme.tertiaryColor,
-      marginBottom: 4,
-      width: "100%",
-      minHeight: 200, // Adjust for better visibility
-      color: theme.text, // Ensure text is visible
-      padding: 10, // Add padding for better input experience
+    editor: {   
+          backgroundColor: theme.primaryColor,
+          marginBottom: 4,
+          width: "100%",
+          minHeight: 200, // Adjust for better visibility
+          color: theme.text, // Ensure text is visible
+          padding: 10, // Add padding for better input experience
+      ...Platform.select({
+        android: {
+          backgroundColor: theme.primaryColor, // Ensure consistent background color on Android
+          color: theme.text, // Ensure consistent text color on Android
+          marginBottom: 4,
+          width: "100%",
+          minHeight: 200, // Adjust for better visibility
+          padding: 10, // Add padding for better input experience
+        },
+      }),
     },
     editorContainer: {
-      marginBottom: 4,
+      backgroundColor: theme.primaryColor, // Ensure consistent background color on iOS
+      marginBottom: 1,
       width: "100%",
-      backgroundColor: theme.primaryColor, // Ensure it matches the overall theme
+      ...Platform.select({
+        android: {
+          backgroundColor: theme.primaryColor, // Ensure consistent background color on Android
+          marginBottom: 1,
+          width: "100%",
+        },
+      }),
     },
     toolbar: {
       height: 50, // Fixed height for the toolbar at the bottom
       backgroundColor: '#333', // Ensure the toolbar has a background color
+  
+      ...Platform.select({
+        android: {
+          height: 80, // Fixed height for the toolbar at the bottom
+          backgroundColor: '#333', // Ensure the toolbar has a background color
+        },
+        ios: {
+          height: 50, // Fixed height for the toolbar at the bottom
+          backgroundColor: '#333', // Ensure the toolbar has a background color
+        },
+      }),
     },
   });
-  
-
-  // Inject and update the CSS in the editor whenever dark mode changes
+    
   useEffect(() => {
     if (editor) {
       editor.injectCSS(textColorCSS, 'text-color-style');
+      console.log("text color will be: " , theme.text);
     }
-  }, [isDarkmode, editor]);  
+  }, [isDarkmode, editor, theme]);  
+
 
   let [location, setLocation] = useState<{
     latitude: number;
@@ -356,6 +425,11 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     }
   };
 
+  if (isDarkmode && editor) {
+    editor.injectCSS(textColorCSS, 'text-color-style');
+    console.log("text color will be: #F7F8F9 from IF state");
+  }
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={NotePageStyles().topContainer}>
@@ -492,23 +566,26 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       </View>
       <SafeAreaView style={exampleStyles.fullScreen}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'height' : 'padding'}
         style={exampleStyles.fullScreen}
       >
+
+        
         <View style={exampleStyles.richTextContainer}>
           <RichText 
             editor={editor} 
-            placeholder="Write something..."
             style={[exampleStyles.editor, {backgroundColor: Platform.OS == "android" && "white"}]} // Apply styling here
           />
+               
         </View>
-        <Toolbar editor={editor} style={exampleStyles.toolbar} />
+        <Toolbar editor={editor}  />
       </KeyboardAvoidingView>
     </SafeAreaView>
       <LoadingModal visible={isUpdating} />
     </SafeAreaView>
   );
 };
+
 
 
 
