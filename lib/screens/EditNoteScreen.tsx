@@ -574,12 +574,14 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
         <View style={exampleStyles.richTextContainer}>
           <RichText 
             editor={editor} 
-            style={[exampleStyles.editor, {backgroundColor: Platform.OS == "android" && "white"}]} // Apply styling here
+            style={[exampleStyles.editor, {backgroundColor: Platform.OS == "android" && theme.tertiaryColor}]} // Apply styling here
           />
                
         </View>
-        <Toolbar editor={editor}  />
+       
+   
       </KeyboardAvoidingView>
+
     </SafeAreaView>
       <LoadingModal visible={isUpdating} />
     </SafeAreaView>
