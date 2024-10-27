@@ -597,6 +597,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           <Image source={require('../../assets/icon.png')} style={{width: width * 0.105, height: width * 0.105, marginEnd: width * 0.025}} />
           <TouchableOpacity onPress={() => setIsSearchVisible(!isSearchVisible)}>
             <Ionicons
+              testID="searchButton"
               name={isSearchVisible ? "close-outline" : "search-outline"} // Switch between "X" and search icon
               size={36}
               color={theme.text}
