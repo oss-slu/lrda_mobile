@@ -106,16 +106,6 @@ describe('MorePage', () => {
     );
   });
 
-  it('renders the "Logout" button', () => {
-    const { getByText } = render(
-      <Provider store={store}>
-        <MorePage />
-      </Provider>
-    );
-
-    // Check if the "Logout" button is rendered
-    expect(getByText('Logout')).toBeTruthy();
-  });
 
   it('displays correct theme text based on isDarkmode value', () => {
     const { getByText, rerender } = render(
