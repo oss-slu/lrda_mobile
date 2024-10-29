@@ -7,7 +7,7 @@ export default class ApiService {
    * Fetches messages from the API.
    * @param {boolean} global - Indicates whether to fetch global messages or user-specific messages.
    * @param {boolean} published
-   * @param {string} userId - The ID of the user for user-specific messages.
+   * @param {string} uId - The ID of the user for user-specific messages.
    * @returns {Promise<any[]>} The array of messages fetched from the API.
    */
   static async fetchMessages(global: boolean, published: boolean, userId: string): Promise<any[]> {
@@ -34,7 +34,6 @@ export default class ApiService {
       });
   
       const data = await response.json();
-      console.log(data)
       return data;
     } catch (error) {
       console.error("Error fetching messages:", error);

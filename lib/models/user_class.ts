@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { UserData } from "../../types";
 import { getItem } from "../utils/async_storage";
-import { signInWithEmailAndPassword, onAuthStateChanged,signOut } from "firebase/auth";
+import { signInWithEmailAndPassword, onAuthStateChanged,signOut, getAuth } from "firebase/auth";
 import { auth } from "../config/firebase";
 import ApiService from "../utils/api_calls";
 import { setNavState } from "../../redux/slice/navigationSlice";
@@ -131,8 +131,11 @@ export class User {
     }
   }
 
-  public async logout(auth: any, dispatch: any) {
+  public async logout(dispatch: any) {
     try {
+      // Initialize the auth instance using getAuth
+      const auth = getAuth();
+  
       // Call Firebase's signOut method
       await signOut(auth);
   
@@ -143,7 +146,7 @@ export class User {
   
       // Remove the auth token from AsyncStorage
       await AsyncStorage.removeItem('authToken');
-      // If using SecureStore:
+      // If using SecureStore instead, uncomment the line below
       // await SecureStore.deleteItemAsync('authToken');
   
       // Dispatch navigation state to move to the login screen or logged-out state
@@ -152,10 +155,9 @@ export class User {
       console.log("User successfully logged out");
     } catch (error) {
       console.error("Error during Firebase logout", error);
-      // You can add additional error handling here, like showing an error message to the user
+      // Additional error handling can be added here
     }
   }
-
   public async getId(): Promise<string | null> {
     if (!this.userData) {
       this.userData = await this.loadUser();

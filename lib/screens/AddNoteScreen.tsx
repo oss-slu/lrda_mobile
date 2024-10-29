@@ -64,6 +64,21 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
       setIsLocation(false);
     } else {
       try {
+        // Check if foreground location permission is granted
+        const { status } = await Location.getForegroundPermissionsAsync();
+        
+        // If not granted, request it
+        if (status !== 'granted') {
+          const { status: requestStatus } = await Location.requestForegroundPermissionsAsync();
+          
+          // If permission is still not granted, show an alert and exit
+          if (requestStatus !== 'granted') {
+            Alert.alert("Location permission denied", "Please enable location permissions to use this feature.");
+            return;
+          }
+        }
+  
+        // Fetch the user's location now that permissions are ensured
         const userLocation = await Location.getCurrentPositionAsync({});
         if (userLocation) {
           setLocation({
@@ -74,10 +89,11 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
         }
       } catch (error) {
         console.error("Error fetching location:", error);
+        Alert.alert("Error", "Failed to retrieve location. Please try again.");
       }
     }
   };
-
+  
   const addImageToEditor = (imageUri: string) => {
     const imgTag = `<img src="${imageUri}" style="max-width: 100%; height: auto;" />`;
     editor.commands.setContent(editor.getHTML() + imgTag);
@@ -115,6 +131,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
 
   const saveNote = async () => {
     setIsUpdating(true);  // Show loading indicator during save
+    setIsSaveButtonEnabled(true);
 
     try {
       const userLocation = await Location.getCurrentPositionAsync({});
@@ -226,7 +243,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
           <View style={NotePageStyles().richTextContainer}>
             <RichText
               editor={editor}
-              placeholder="Write something..."
+              placeholder="Write Content Here..."
               style={[NotePageStyles().editor, { backgroundColor: Platform.OS === "android" ? "white" : undefined }]}
             />
           </View>
