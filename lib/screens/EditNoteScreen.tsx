@@ -172,17 +172,22 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       }),
     },
     toolbar: {
-      height: 50, // Fixed height for the toolbar at the bottom
+      height: 40, // Fixed height for the toolbar at the bottom
       backgroundColor: '#333', // Ensure the toolbar has a background color
   
       ...Platform.select({
         android: {
-          height: 60, // Fixed height for the toolbar at the bottom
+          height: 70, // Fixed height for the toolbar at the bottom
           backgroundColor: theme.tertiaryColor, // Ensure the toolbar has a background color
+          overflow: 'hidden', // Ensure no extra space
+          marginTop: 50
         },
         ios: {
           height: 50, // Fixed height for the toolbar at the bottom
-          backgroundColor: '#333', // Ensure the toolbar has a background color
+          backgroundColor: theme.primaryColor, 
+          overflow: 'hidden', // Ensure no extra space
+          marginTop: 50
+
         },
       }),
     },
@@ -591,24 +596,19 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           />
    
           </View>
+
+          <View style={[exampleStyles.toolbar]}>
+          <Toolbar
+            editor={editor}
+            items={DEFAULT_TOOLBAR_ITEMS}
+          />
+        </View>
           
-  <View
-    style={{
-      height: 50, // Set a compact height that’s not too small
-      backgroundColor: theme.primaryColor, // Match the background color of the screen
-      justifyContent: 'center',
-      paddingVertical:0, // Minimal vertical padding for compactness
-      paddingHorizontal: 0, // Adjust as needed to control horizontal space
-      overflow: 'hidden', // Ensure no extra space
-      marginTop: 50
-      
-    }}
-  >
-    <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
-  </View>
+        <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
 
 
       </KeyboardAvoidingView>
+
 
     </SafeAreaView>
       <LoadingModal visible={isUpdating} />

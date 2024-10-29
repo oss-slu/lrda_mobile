@@ -112,7 +112,7 @@ const NotePageStyles = () => {
     },
     //tool bar styles
     toolBar: {
-      height: 50
+      height: 100
     },
     closeKeyboardButton: {
       padding: 10,
