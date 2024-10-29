@@ -3,13 +3,11 @@ import {
   Platform,
   View,
   Text,
-  ScrollView,
   TouchableOpacity,
-  StyleSheet,
   Dimensions,
-  SafeAreaView,
   Image,
   TextInput,
+  StyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
@@ -23,9 +21,9 @@ import LoadingImage from "../components/loadingImage";
 import { formatToLocalDateString } from "../components/time";
 import { useTheme } from '../components/ThemeProvider';
 import Constants from "expo-constants";
-import ToastMessage from 'react-native-toast-message';
 import DropDownPicker from 'react-native-dropdown-picker';
 import NoteDetailModal from "./mapPage/NoteDetailModal";
+import ToastMessage from 'react-native-toast-message';
 
 const user = User.getInstance();
 
@@ -38,11 +36,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [reversed, setReversed] = useState(false);
   const [rendering, setRendering] = useState(true);
   const [userInitials, setUserInitials] = useState("N/A");
-  const { width, height } = Dimensions.get("window");
+  const { width } = Dimensions.get("window");
   const [initialItems, setInitialItems] = useState([
-    {label: 'My Entries', value: 'my_entries'},
-    {label: 'Published Entires', value: 'published_entries'},
-    // {label: 'Liked Entries', value: 'liked_entries'},
+    { label: 'My Entries', value: 'my_entries' },
+    { label: 'Published Entries', value: 'published_entries' },
   ]);
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(initialItems[0].value);
@@ -100,6 +97,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       setRendering(false);
     } catch (error) {
       console.error("Error fetching messages:", error);
+      ToastMessage.show({
+        type: 'error',
+        text1: 'Error fetching messages',
+        text2: error.message,
+      });
     }
   };
 
@@ -119,6 +121,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       }
     } catch (error) {
       console.error("Error deleting note:", error);
+      ToastMessage.show({
+        type: 'error',
+        text1: 'Error deleting note',
+        text2: error.message,
+      });
       return false;
     }
   };
@@ -133,13 +140,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       setPublished(false);
       refreshPage();
     }
-    else if (name == "liked_entries") {
-      // implement liked feature
-    }
   };
 
   useEffect(() => {
-    handleFilters(value); // Call on initial render with the default value
+    handleFilters(value);
   }, []);
 
   const handleReverseOrder = () => {
@@ -148,7 +152,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     setUpdateCounter(updateCounter + 1);
   };
 
-  const findNextUntitledNumber = (notes : Note[]) => {
+  const findNextUntitledNumber = (notes: Note[]) => {
     let maxNumber = 0;
     notes.forEach((note) => {
       const match = note.title.match(/^Untitled (\d+)$/);
@@ -161,198 +165,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     });
     return maxNumber + 1;
   };
-  
-
-  const styles = StyleSheet.create({
-    container: {
-      paddingTop: Constants.statusBarHeight - 20,
-      flex: 1,
-      backgroundColor: theme.homeColor,
-    },
-    pfpText: {
-      fontWeight: "600",
-      fontSize: 14,
-      alignSelf: "center",
-      color: theme.white,
-    },
-    shareColor: {
-      color: 'green',
-    },
-    highlightColor: {
-      color: theme.text,
-    },
-    backColor: {
-      color: 'red',
-    },
-    userPhoto: {
-      height: width * 0.095,
-      width: width * 0.095,
-      borderRadius: 50,
-      alignContent: "center",
-      justifyContent: "center",
-      backgroundColor: theme.black,
-      marginLeft: 8,
-    },
-    noteTitle: {
-      fontSize: 22,
-      fontWeight: "700",
-      maxWidth: "100%",
-      flexShrink: 1,
-      color: theme.text,
-    },
-    noteText: {
-      marginTop: 10,
-      fontSize: 18,
-      color: theme.text,
-    },
-    emptyContainer: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    scrollerBackgroundColor: {
-      backgroundColor: theme.homeGray,
-      flex: 1,
-    },
-    addButton: {
-      position: "absolute",
-      bottom: 20,
-      right: 20,
-      backgroundColor: theme.text,
-      borderRadius: 50,
-      width: 50,
-      height: 50,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    topView: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      paddingHorizontal: 5,
-      marginBottom: 0,
-      marginTop: 10,
-      backgroundColor: theme.homeColor,
-    },
-    dropdown: {
-      width: "100%",
-      alignItems: "center",
-      zIndex: 1000,
-      marginTop: -13,
-    },
-    horizontalLine: {
-      borderBottomColor: theme.text,
-      borderBottomWidth: 1.8,
-      marginBottom: 0,
-    },
-    noteContainer: {
-      justifyContent: "space-between",
-      alignItems: "center",
-      alignSelf: "center",
-      backgroundColor: theme.primaryColor,
-      //borderRadius: 20,
-      marginTop: 1,
-      width: "100%",
-      //padding: 10,
-      flexDirection: "row",
-      height: 185,
-      paddingLeft: width * 0.03,
-      paddingRight: width * 0.03,
-    },
-    filtersContainer: {
-      minHeight: 30,
-      alignSelf: "center",
-      borderRadius: 20,
-      paddingHorizontal: 5,
-      maxHeight: 30,
-      marginBottom: 10,
-      zIndex: 10,
-    },
-    filters: {
-      justifyContent: "center",
-      borderColor: theme.tertiaryColor,
-      borderWidth: 2,
-      borderRadius: 30,
-      marginRight: 10,
-      paddingHorizontal: 10,
-      zIndex: 10,
-    },
-    filtersSelected: {
-      justifyContent: "center",
-      backgroundColor: theme.logout,
-      fontSize: 22,
-      borderRadius: 30,
-      marginRight: 10,
-      paddingHorizontal: 10,
-    },
-    selectedFont: {
-      fontSize: 17,
-      color: theme.logoutText,
-      fontWeight: "700",
-    },
-    filterFont: {
-      fontSize: 16,
-      fontWeight: "600",
-      color: theme.text,
-    },
-    title: {
-      fontSize: 33,
-      fontWeight: "bold",
-      lineHeight: 80,
-      color: theme.text,
-      marginLeft: 5,
-      marginBottom: "-1%",
-      marginRight: 55,
-    },
-    backRightBtn: {
-      alignItems: "flex-end",
-      bottom: 0,
-      justifyContent: "center",
-      position: "absolute",
-      top: 0,
-      width: 75,
-      paddingRight: 17,
-    },
-    backRightBtnRight: {
-      backgroundColor: theme.homeGray,
-      width: "50%",
-      right: 0,
-      // borderTopRightRadius: 20,
-      // borderBottomRightRadius: 20,
-    },
-    rowBack: {
-      width: "100%",
-      height: 140,
-      alignItems: "center",
-      backgroundColor: theme.homeGray,
-      flex: 1,
-      flexDirection: "row",
-      justifyContent: "space-between",
-      marginTop: 1,
-      padding: 10,
-      alignSelf: "center",
-    },
-    seachBar:{
-      backgroundColor: theme.homeColor,
-      borderRadius: 20,
-      fontSize: 18,
-      padding: 20,
-      margin: 20,
-      color: theme.text,
-      borderWidth: 3,
-    
-    },
-  });
 
   const sideMenu = (data: any, rowMap: any) => {
     return (
-      <View style={styles.rowBack} key={data.index}>
+      <View style={styles(theme, width).rowBack} key={data.index}>
         <TouchableOpacity>
           <TouchableOpacity onPress={() => publishNote(data.item.id, rowMap)}>
             <Ionicons name="share" size={30} color={'green'} />
           </TouchableOpacity>
         </TouchableOpacity>
-        <View style={[styles.backRightBtn, styles.backRightBtnRight]}>
+        <View style={[styles(theme, width).backRightBtn, styles(theme, width).backRightBtnRight]}>
           {isPrivate ? (
             <TouchableOpacity
               style={{
@@ -366,7 +188,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
               <Ionicons
                 name="trash-outline"
                 size={24}
-                color={styles.backColor.color}
+                color={styles(theme, width).backColor.color}
               />
             </TouchableOpacity>
           ) : null}
@@ -407,7 +229,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   const renderList = (notes: Note[]) => {
     const filteredNotes = searchQuery
-    ? notes.filter(note => {
+      ? notes.filter(note => {
         const lowerCaseQuery = searchQuery.toLowerCase();
         const noteTime = new Date(note.time);
         const formattedTime = formatDate(noteTime);
@@ -415,8 +237,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           note.title.toLowerCase().includes(lowerCaseQuery) || formattedTime.includes(lowerCaseQuery)
         );
       })
-    : notes;
-    
+      : notes;
+
     return isPrivate ? (
       <SwipeListView
         data={filteredNotes}
@@ -460,7 +282,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       <TouchableOpacity
         key={item.id}
         activeOpacity={1}
-        style={styles.noteContainer}
+        style={styles(theme, width).noteContainer}
         onPress={() => {
           if (!item.published) {
             navigation.navigate("EditNote", {
@@ -471,15 +293,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
               },
             });
           } else {
-            console.log(item);
             const formattedNote = {
               ...item,
               time: formatToLocalDateString(new Date(item.time)),
               description: item.text,
-              images: 
+              images:
                 item.media.map((mediaItem: { uri: any; }) => ({ uri: mediaItem.uri }))
             };
-            console.log(formattedNote.description);
             setSelectedNote(formattedNote);
             setModalVisible(true);
           }
@@ -504,13 +324,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           )}
 
           <View style={{ position: "absolute", left: 120 }}>
-            <Text style={styles.noteTitle}>
+            <Text style={styles(theme, width).noteTitle}>
               {item.title.length > textLength
                 ? item.title.slice(0, textLength) + "..."
                 : item.title}
             </Text>
 
-            <Text style={styles.noteText}>{showTime}</Text>
+            <Text style={styles(theme, width).noteText}>{showTime}</Text>
           </View>
         </View>
         <View
@@ -525,13 +345,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             <Ionicons
               name="share"
               size={24}
-              color={styles.shareColor.color}
+              color={styles(theme, width).shareColor.color}
             />
           ) : (
             <Ionicons
               name="share-outline"
               size={24}
-              color={styles.highlightColor.color}
+              color={styles(theme, width).highlightColor.color}
             />
           )}
         </View>
@@ -539,7 +359,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     );
   };
 
-  //Part of searchbar:
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearch = (query: string) => {
@@ -547,7 +366,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   };
   const formatDate = (date: Date) => {
     const day = date.getDate().toString();
-    const month = (date.getMonth() + 1).toString(); // Months are zero-based
+    const month = (date.getMonth() + 1).toString();
     const year = date.getFullYear();
     return `${month}/${day}/${year}`;
   };
@@ -556,18 +375,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     return notes.filter(note => {
       const noteTime = new Date(note.time);
       const formattedTime = formatDate(noteTime);
-      
-      return note.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-             formattedTime.includes(searchQuery.toLowerCase());
+
+      return note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        formattedTime.includes(searchQuery.toLowerCase());
     });
   }, [notes, searchQuery]);
 
-
-
   return (
- 
-    <View style={styles.container}>
-      <View style={styles.topView}>
+    <View style={styles(theme, width).container}>
+      <View style={styles(theme, width).topView}>
         <View
           style={{
             flexDirection: "row",
@@ -580,20 +396,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         >
           <TouchableOpacity
             style={[
-              styles.userPhoto,
+              styles(theme, width).userPhoto,
               { backgroundColor: theme.black },
             ]}
             onPress={() => {
               navigation.navigate("AccountPage");
             }}
           >
-            <Text style={styles.pfpText}>{userInitials}</Text>
+            <Text style={styles(theme, width).pfpText}>{userInitials}</Text>
           </TouchableOpacity>
-          <Image source={require('../../assets/icon.png')} style={{width: width * 0.105, height: width * 0.105, marginEnd: width * 0.435}} />
+          <Image source={require('../../assets/icon.png')} style={{ width: width * 0.105, height: width * 0.105, marginEnd: width * 0.435 }} />
         </View>
       </View>
-       
-      <View style={styles.dropdown}>
+
+      <View style={styles(theme, width).dropdown}>
         <DropDownPicker
           open={open}
           value={value}
@@ -610,11 +426,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             nestedScrollEnabled: true,
           }}
           style={{
-            borderWidth: 0, 
-            backgroundColor: theme.homeColor, 
+            borderWidth: 0,
+            backgroundColor: theme.homeColor,
           }}
           dropDownContainerStyle={{
-            borderWidth: 0, 
+            borderWidth: 0,
             backgroundColor: theme.homeColor,
           }}
           placeholder={`${items.find(item => item.value === value)?.label || 'Select an option'} (${filteredNotes.length})`}
@@ -632,19 +448,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
             color: theme.black,
           }}
           showArrowIcon={true}
-        /> 
+        />
       </View>
       <TextInput
-          testID="searchBar"
-          placeholder="Search notes.."
-          onChangeText={handleSearch}
-          style= {styles.seachBar}
-        />
-      <View style={styles.horizontalLine} />
-      <View style={styles.scrollerBackgroundColor}>
+        testID="searchBar"
+        placeholder="Search notes.."
+        onChangeText={handleSearch}
+        style={styles(theme, width).seachBar}
+        placeholderTextColor={theme.gray}
+      />
+      <View style={styles(theme, width).horizontalLine} />
+      <View style={styles(theme, width).scrollerBackgroundColor}>
         {rendering ? <NoteSkeleton /> : renderList(notes)}
         <TouchableOpacity
-          style={styles.addButton}
+          style={styles(theme, width).addButton}
           onPress={() => {
             const untitledNumber = findNextUntitledNumber(notes);
             navigation.navigate("AddNote", { untitledNumber, refreshPage });
@@ -654,14 +471,139 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         </TouchableOpacity>
       </View>
 
-      <NoteDetailModal 
-        isVisible={isModalVisible} 
-        onClose={() => setModalVisible(false)} 
-        note={selectedNote} 
+      <NoteDetailModal
+        isVisible={isModalVisible}
+        onClose={() => setModalVisible(false)}
+        note={selectedNote}
       />
-
     </View>
   );
 };
+
+const styles = (theme, width) => StyleSheet.create({
+  container: {
+    paddingTop: Constants.statusBarHeight - 20,
+    flex: 1,
+    backgroundColor: theme.homeColor,
+  },
+  pfpText: {
+    fontWeight: "600",
+    fontSize: 14,
+    alignSelf: "center",
+    color: theme.white,
+  },
+  shareColor: {
+    color: 'green',
+  },
+  highlightColor: {
+    color: theme.text,
+  },
+  backColor: {
+    color: 'red',
+  },
+  userPhoto: {
+    height: width * 0.095,
+    width: width * 0.095,
+    borderRadius: 50,
+    alignContent: "center",
+    justifyContent: "center",
+    backgroundColor: theme.black,
+    marginLeft: 8,
+  },
+  noteTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+    maxWidth: "100%",
+    flexShrink: 1,
+    color: theme.text,
+  },
+  noteText: {
+    marginTop: 10,
+    fontSize: 18,
+    color: theme.text,
+  },
+  scrollerBackgroundColor: {
+    backgroundColor: theme.homeGray,
+    flex: 1,
+  },
+  addButton: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+    backgroundColor: theme.text,
+    borderRadius: 50,
+    width: 50,
+    height: 50,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  topView: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 5,
+    marginBottom: 0,
+    marginTop: 10,
+    backgroundColor: theme.homeColor,
+  },
+  dropdown: {
+    width: "100%",
+    alignItems: "center",
+    zIndex: 1000,
+    marginTop: -13,
+  },
+  horizontalLine: {
+    borderBottomColor: theme.text,
+    borderBottomWidth: 1.8,
+    marginBottom: 0,
+  },
+  noteContainer: {
+    justifyContent: "space-between",
+    alignItems: "center",
+    alignSelf: "center",
+    backgroundColor: theme.primaryColor,
+    marginTop: 1,
+    width: "100%",
+    flexDirection: "row",
+    height: 185,
+    paddingLeft: width * 0.03,
+    paddingRight: width * 0.03,
+  },
+  seachBar: {
+    backgroundColor: theme.homeColor,
+    borderRadius: 20,
+    fontSize: 18,
+    padding: 20,
+    margin: 20,
+    color: theme.text,
+    borderWidth: 3,
+  },
+  rowBack: {
+    width: "100%",
+    height: 140,
+    alignItems: "center",
+    backgroundColor: theme.homeGray,
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 1,
+    padding: 10,
+    alignSelf: "center",
+  },
+  backRightBtn: {
+    alignItems: "flex-end",
+    bottom: 0,
+    justifyContent: "center",
+    position: "absolute",
+    top: 0,
+    width: 75,
+    paddingRight: 17,
+  },
+  backRightBtnRight: {
+    backgroundColor: theme.homeGray,
+    width: "50%",
+    right: 0,
+  },
+});
 
 export default HomeScreen;

@@ -1,8 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { UserData } from "../../types";
 import { getItem } from "../utils/async_storage";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../config";
+import { signInWithEmailAndPassword, onAuthStateChanged,signOut } from "firebase/auth";
+import { auth } from "../config/firebase";
 import ApiService from "../utils/api_calls";
 import { setNavState } from "../../redux/slice/navigationSlice";
 
@@ -12,6 +12,9 @@ export class User {
   private userData: UserData | null = null;
   private callback: ((isLoggedIn: boolean) => void) | null = null;
 
+  private constructor() {
+    this.initializeUser();
+  }
   
 
   public static getInstance(): User {
@@ -59,87 +62,97 @@ export class User {
     }
   }
 
-  public async login(username: string, password: string): Promise<string> {
+  private async initializeUser() {
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // User is signed in.
+        const userData = await ApiService.fetchUserData(user.uid);
+        if (userData) {
+          this.userData = userData;
+          this.persistUser(userData);
+        }
+        this.notifyLoginState();
+      } else {
+        // User is signed out.
+        this.userData = null;
+        this.clearUser();
+        this.notifyLoginState();
+      }
+    });
+  }
+
+  public async login(email: string, password: string): Promise<string> {
     try {
-
-    
-
-      // const response = await fetch(
-      //   "https://lived-religion-dev.rerum.io/deer-lr/login",
-      //   {
-      //     method: "POST",
-      //     mode: "cors",
-      //     cache: "no-cache",
-      //     headers: {
-      //       "Content-Type": "application/json;charset=utf-8",
-      //     },
-      //     body: JSON.stringify({
-      //       username: username,
-      //       password: password,
-      //     }),
-      //   }
-      // );
-
-
-      // if (response.ok) {
-      //   const data = await response.json();
-      //   this.userData = data;
-      //   if (this.userData !== null) {
-      //     await this.persistUser(this.userData);
-      //   }
-      //   this.notifyLoginState();
-      //   console.log("From userClass, Data ***************************==>>************************************ ", this.userData)
-      //   return "success";
-      // } else {
-      //   throw new Error("There was a server error logging in.");
-      // }
-
-      const userCredential = await signInWithEmailAndPassword(auth, username, password);
+      console.log("Attempting to sign in...");
+  
+      // Firebase sign-in method
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      // const token = await user.getIdToken();
-      // console.log("user id is ", user.uid)
-       const userData = await ApiService.fetchUserData(user.uid)
-
-       if (userData) {
-         this.userData = userData;
-         console.log("user data ", userData)
-         await this.persistUser(userData);
-       
-       }
+  
+      console.log(`Firebase sign-in successful. User UID: ${user.uid}`);
+  
+      // Retrieve Firebase ID token
+      const token = await user.getIdToken();
+      console.log(`Login token received: ${token}`);
+  
+      // Store the token in AsyncStorage (similar to localStorage)
+      await AsyncStorage.setItem('authToken', token);
+      console.log("Auth token saved in AsyncStorage");
+  
+      // Optionally, you can use SecureStore for sensitive data:
+      // await SecureStore.setItemAsync('authToken', token);
+      // console.log("Auth token saved in SecureStore");
+  
+      // Fetch user data based on the user ID
+      const userData = await ApiService.fetchUserData(user.uid);
       
-       this.notifyLoginState();
-      
-       return "success";
+      if (userData) {
+        // Store the user data in the class
+        this.userData = userData;
+        console.log("Fetched user data: ", userData);
+  
+        // Persist user data locally, if needed
+        await this.persistUser(userData);
+        console.log("User data persisted locally");
+      } else {
+        console.log("No user data found");
+      }
+  
+      // Notify app about login state change
+      this.notifyLoginState();
+      console.log("Login state updated");
+  
+      // Successfully logged in
+      return "success";
     } catch (error) {
-      console.log(error);
+      console.error("Login error: ", error);
+      // Reject the promise with the error message
       return Promise.reject(error);
     }
   }
 
-  public async logout(dispatch: any) {
+  public async logout(auth: any, dispatch: any) {
     try {
-      await fetch("https://lived-religion-dev.rerum.io/deer-lr/logout", {
-        method: "POST",
-        mode: "cors",
-        headers: {
-          "Content-Type": "text/plain",
-        },
-      })
-        .then((response) => {
-          if (response.ok) {
-            this.userData = null;
-            dispatch(setNavState("login"))
-            this.clearUser();
-            this.notifyLoginState();
-
-            // console.log("User logged out");
-          }
-        })
-        .catch((err) => {
-          return err;
-        });
+      // Call Firebase's signOut method
+      await signOut(auth);
+  
+      // Clear user data from your app's state
+      this.userData = null;
+      this.clearUser();
+      this.notifyLoginState();
+  
+      // Remove the auth token from AsyncStorage
+      await AsyncStorage.removeItem('authToken');
+      // If using SecureStore:
+      // await SecureStore.deleteItemAsync('authToken');
+  
+      // Dispatch navigation state to move to the login screen or logged-out state
+      dispatch(setNavState("login"));
+  
+      console.log("User successfully logged out");
     } catch (error) {
-      console.log("User did not succesfully log out");
+      console.error("Error during Firebase logout", error);
+      // You can add additional error handling here, like showing an error message to the user
     }
   }
 
@@ -147,7 +160,7 @@ export class User {
     if (!this.userData) {
       this.userData = await this.loadUser();
     }
-    return this.userData?.["@id"] ?? null;
+    return this.userData?.["uid"] ?? null;
   }
 
   public async getName(): Promise<string | null> {

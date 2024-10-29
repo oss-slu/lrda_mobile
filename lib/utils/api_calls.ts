@@ -6,6 +6,7 @@ export default class ApiService {
   /**
    * Fetches messages from the API.
    * @param {boolean} global - Indicates whether to fetch global messages or user-specific messages.
+   * @param {boolean} published
    * @param {string} userId - The ID of the user for user-specific messages.
    * @returns {Promise<any[]>} The array of messages fetched from the API.
    */
@@ -21,7 +22,7 @@ export default class ApiService {
       if (global) {
         body = { type: "message" };
       } else if (published) {
-        body = { type: "message", published: true };
+        body = { type: "message", published: true, creator: userId};
       } else {
         body = { type: "message", creator: userId };
       }
@@ -33,6 +34,7 @@ export default class ApiService {
       });
   
       const data = await response.json();
+      console.log(data)
       return data;
     } catch (error) {
       console.error("Error fetching messages:", error);
@@ -45,21 +47,21 @@ export default class ApiService {
    * @param {string} uid - The UID of the user.
    * @returns {Promise<UserData | null>} The user data.
    */
-    static async fetchUserData(uid: string): Promise<UserData | null> {
-      console.log("called fetchuserdata method")
+  static async fetchUserData(uid: string): Promise<UserData | null> {
       try {
-        console.log("inside fetchuserdata method ")
         const url = "https://lived-religion-dev.rerum.io/deer-lr/query";
         const headers = {
           "Content-Type": "application/json",
         };
-        const body = { 
+        const body = {
           "$or": [
             { "@type": "Agent", "uid": uid },
             { "@type": "foaf:Agent", "uid": uid }
-          ]}
-        ;
-        console.log("")
+          ]
+        };
+  
+        console.log(`Querying for user data with UID: ${uid}`);
+  
         const response = await fetch(url, {
           method: "POST",
           headers,
@@ -67,7 +69,7 @@ export default class ApiService {
         });
   
         const data = await response.json();
-        console.log("in fetch-User-Data met rhod", data[0])
+        console.log(`User Data:`, data);
         return data.length ? data[0] : null;
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -88,7 +90,7 @@ export default class ApiService {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            type: "user",
+            "@type": "Agent",
             ...userData,
           }),
         });
