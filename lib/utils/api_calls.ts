@@ -59,6 +59,40 @@ static async fetchMessages(
     throw error;
   }
 }
+  /**
+   * Fetches user data from the API based on UID.
+   * @param {string} uid - The UID of the user.
+   * @returns {Promise<UserData | null>} The user data.
+   */
+  static async fetchUserData(uid: string): Promise<UserData | null> {
+    try {
+      const url = "https://lived-religion-dev.rerum.io/deer-lr/query";
+      const headers = {
+        "Content-Type": "application/json",
+      };
+      const body = {
+        "$or": [
+          { "@type": "Agent", "uid": uid },
+          { "@type": "foaf:Agent", "uid": uid }
+        ]
+      };
+
+      console.log(`Querying for user data with UID: ${uid}`);
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(body),
+      });
+
+      const data = await response.json();
+      console.log(`User Data:`, data);
+      return data.length ? data[0] : null;
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      return null;
+    }
+  }
 
 
   /**

@@ -78,7 +78,11 @@
     "react-native-webview": "13.8.6",
     "react-redux": "^9.1.2",
     "redux-mock-store": "^1.5.4",
-    "rn-placeholder": "^3.0.3"
+    "rn-placeholder": "^3.0.3",
+    "metro":"~0.80.8",
+    "metro-config":"~0.80.8",
+    "metro-resolver":"~0.80.8"
+
   },
   "devDependencies": {
     "@babel/core": "^7.24.7",

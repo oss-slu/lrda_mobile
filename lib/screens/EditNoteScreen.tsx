@@ -16,7 +16,7 @@ import { getThumbnail } from "../utils/S3_proxy";
 import { User } from "../models/user_class";
 import AudioContainer from "../components/audio";
 import { Media, AudioType } from "../models/media_class";
-import { EditNoteScreenProps } from "../../types";
+import { EditNoteScreenProps, Note } from "../../types";
 import ApiService from "../utils/api_calls";
 import TagWindow from "../components/tagging";
 import LocationWindow from "../components/location";
@@ -30,23 +30,33 @@ import * as Location from "expo-location";
 
 const user = User.getInstance();
 
-const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
-  route,
-  navigation,
-}) => {
-  const { note, onSave } = route.params;
+// Utility function to format the note
+const formatNote = (note) => ({
+  id: note.id || "",
+  title: note.title || "Untitled",
+  text: typeof note.text === "string" ? note.text : "",
+  time: note.time ? new Date(note.time) : new Date(),
+  creator: note.creator || "",
+  latitude: note.latitude || "0",
+  longitude: note.longitude || "0",
+  media: note.media || [],
+  audio: note.audio || [],
+  published: note.published || false,
+  tags: note.tags || [],
+});
 
-  // Parse the time param to a Date object if it's in string format
-  const initialTime = note.time ? new Date(note.time) : new Date();
+const EditNoteScreen: React.FC<EditNoteScreenProps> = ({ route, navigation }) => {
+  const { note, onSave } = route.params;
+  const formattedNote = formatNote(note);
 
   // State management for all note properties
-  const [title, setTitle] = useState(note.title || "");
-  const [time, setTime] = useState(initialTime);
-  const [tags, setTags] = useState(note.tags || []);
-  const [media, setMedia] = useState<Media[]>(note.media || []);
-  const [newAudio, setNewAudio] = useState<AudioType[]>(note.audio || []);
-  const [isPublished, setIsPublished] = useState(note.published || false);
-  const [creator, setCreator] = useState(note.creator || "");
+  const [title, setTitle] = useState(formattedNote.title);
+  const [time, setTime] = useState(formattedNote.time);
+  const [tags, setTags] = useState(formattedNote.tags);
+  const [media, setMedia] = useState<Media[]>(formattedNote.media);
+  const [newAudio, setNewAudio] = useState<AudioType[]>(formattedNote.audio);
+  const [isPublished, setIsPublished] = useState(formattedNote.published);
+  const [creator, setCreator] = useState(formattedNote.creator);
   const [owner, setOwner] = useState(false);
   const [viewMedia, setViewMedia] = useState(false);
   const [viewAudio, setViewAudio] = useState(false);
@@ -55,17 +65,17 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isLocation, setIsLocation] = useState(false);
   const [isLocationShown, setIsLocationShown] = useState(
-    note.latitude === "0" && note.longitude === "0"
+    formattedNote.latitude === "0" && formattedNote.longitude === "0"
   );
   const [isLocationIconPressed, setIsLocationIconPressed] = useState(
-    note.latitude === "0" && note.longitude === "0"
+    formattedNote.latitude === "0" && formattedNote.longitude === "0"
   );
   const [isTime, setIsTime] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
   const locationRef = useRef({
-    latitude: parseFloat(note.latitude || "0"),
-    longitude: parseFloat(note.longitude || "0"),
+    latitude: parseFloat(formattedNote.latitude),
+    longitude: parseFloat(formattedNote.longitude),
   });
 
   const scrollViewRef = useRef<ScrollView | null>(null);
@@ -73,25 +83,19 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const { theme } = useTheme();
 
   const editor = useEditorBridge({
-    initialContent: note.text || "",
+    initialContent: formattedNote.text,
     autofocus: false,
   });
 
   useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
-      "keyboardDidShow",
-      (e) => {
-        setKeyboard(true);
-        setKeyboardHeight(e.endCoordinates.height);
-      }
-    );
-    const keyboardDidHideListener = Keyboard.addListener(
-      "keyboardDidHide",
-      () => {
-        setKeyboard(false);
-        setKeyboardHeight(0);
-      }
-    );
+    const keyboardDidShowListener = Keyboard.addListener("keyboardDidShow", (e) => {
+      setKeyboard(true);
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+    const keyboardDidHideListener = Keyboard.addListener("keyboardDidHide", () => {
+      setKeyboard(false);
+      setKeyboardHeight(0);
+    });
 
     return () => {
       keyboardDidShowListener.remove();
@@ -99,7 +103,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     };
   }, []);
 
-  // Ownership check using async function
   useEffect(() => {
     const checkOwner = async () => {
       const userId = await user.getId();
@@ -182,13 +185,11 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     }
   };
 
-  // Image insertion function for editor
   const addImageToEditor = (imageUri: string) => {
     const imgTag = `<img src="${imageUri}" style="max-width: 100%; height: auto;" />`;
     editor.commands.setContent(editor.getHTML() + imgTag);
   };
 
-  // Video insertion function for editor
   const addVideoToEditor = async (videoUri: string) => {
     try {
       const thumbnailUri = await getThumbnail(videoUri);
