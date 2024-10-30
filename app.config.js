@@ -4,7 +4,7 @@ export default {
   expo: {
     name: "Where's Religion?",
     slug: "lrda_mobile",
-    version: "1.0.6",
+    version: "1.0.5",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -41,9 +41,7 @@ export default {
     runtimeVersion: {
       policy: "sdkVersion"
     },
-    updates: {
-      url: "https://u.expo.dev/622ba56f-88f9-440e-af87-280abce3b1e8"
-    },
+    
     crashReporter: true, // Add this line to enable crash reporting
     extra: {
       apiKey: process.env.FIREBASE_API_KEY,
@@ -54,7 +52,9 @@ export default {
       appId: process.env.APP_ID,
       measurementId: process.env.MEASUREMENT_ID,
       eas: {
+        "projectId": "801029ef-db83-4668-a97a-5adcc4c333e2"
       }
     },
+   
   }
 };
