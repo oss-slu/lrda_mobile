@@ -130,34 +130,52 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
   };
 
   const saveNote = async () => {
+    console.log("Back button pressed - saveNote function invoked.");
     setIsUpdating(true);  // Show loading indicator during save
     setIsSaveButtonEnabled(true);
 
     try {
+      console.log("Fetching user location...");
       const userLocation = await Location.getCurrentPositionAsync({});
       const finalLocation = userLocation ? userLocation.coords : { latitude: 0, longitude: 0 };
 
+      const textContent = await editor.getHTML(); // Get text content as a string
+
+      // Fetch the user UID
+      const uid = await user.getId();
+      console.log("User UID:", uid);
+
+      // Construct payload including uid as creator
       const newNote = {
         title: titleText || "Untitled",
-        text: editor.getHTML(),
-        media: newMedia,
-        audio: newAudio,
-        tags,
-        time,
+        text: textContent,
+        media: newMedia || [],
+        audio: newAudio || [],
+        tags: tags || [],
         latitude: finalLocation.latitude.toString(),
         longitude: finalLocation.longitude.toString(),
         published: isPublished,
+        time: new Date(time).toISOString(),
+        creator: uid,  // Include UID in payload
       };
 
-      await ApiService.writeNewNote(newNote);
-      route.params.refreshPage();  // Refresh the parent page if needed
-      navigation.goBack();  // Navigate back after saving the note
+      console.log("API payload:", newNote);
+
+      const response = await ApiService.writeNewNote(newNote);
+      const responseData = await response.json();
+      console.log("API response:", responseData);
+
+      console.log("API call successful - Note saved.");
+      route.params.refreshPage();
+      navigation.goBack();
     } catch (error) {
       console.error("Error saving the note:", error);
     } finally {
-      setIsUpdating(false);  // Hide loading indicator after save
+      setIsUpdating(false);
+      console.log("Exiting saveNote function.");
     }
   };
+
 
   return (
     <SafeAreaView style={{ flex: 1 }}>

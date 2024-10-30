@@ -8,11 +8,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
-  Dimensions,
   StyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Note } from "../../types";
 import PhotoScroller from "../components/photoScroller";
 import { getThumbnail } from "../utils/S3_proxy";
 import { User } from "../models/user_class";
@@ -23,7 +21,7 @@ import ApiService from "../utils/api_calls";
 import TagWindow from "../components/tagging";
 import LocationWindow from "../components/location";
 import TimeWindow from "../components/time";
-import { RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor"; // Correct editor import
+import { RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
 import NotePageStyles from "../../styles/pages/NoteStyles";
 import ToastMessage from "react-native-toast-message";
 import { useTheme } from "../components/ThemeProvider";
@@ -37,47 +35,46 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   navigation,
 }) => {
   const { note, onSave } = route.params;
-  const [title, setTitle] = useState(note.title);
-  const [time, setTime] = useState(note.time);
-  const [tags, setTags] = useState(note.tags);
-  const [media, setMedia] = useState<Media[]>(note.media);
-  const [newAudio, setNewAudio] = useState<AudioType[]>(note.audio);
-  const [isPublished, setIsPublished] = useState(note.published);
-  const [creator, setCreator] = useState(note.creator);
+
+  // Parse the time param to a Date object if it's in string format
+  const initialTime = note.time ? new Date(note.time) : new Date();
+
+  // State management for all note properties
+  const [title, setTitle] = useState(note.title || "");
+  const [time, setTime] = useState(initialTime);
+  const [tags, setTags] = useState(note.tags || []);
+  const [media, setMedia] = useState<Media[]>(note.media || []);
+  const [newAudio, setNewAudio] = useState<AudioType[]>(note.audio || []);
+  const [isPublished, setIsPublished] = useState(note.published || false);
+  const [creator, setCreator] = useState(note.creator || "");
   const [owner, setOwner] = useState(false);
-  const scrollViewRef = useRef<ScrollView | null>(null);
   const [viewMedia, setViewMedia] = useState(false);
   const [viewAudio, setViewAudio] = useState(false);
   const [isTagging, setIsTagging] = useState(false);
   const [keyboardOpen, setKeyboard] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isLocation, setIsLocation] = useState(false);
-  let [isLocationShown, setIsLocationShown] = useState(
+  const [isLocationShown, setIsLocationShown] = useState(
     note.latitude === "0" && note.longitude === "0"
   );
-  let [isLocationIconPressed, setIsLocationIconPressed] = useState(
+  const [isLocationIconPressed, setIsLocationIconPressed] = useState(
     note.latitude === "0" && note.longitude === "0"
   );
-  const { height, width } = Dimensions.get("window");
-  const { theme } = useTheme();
   const [isTime, setIsTime] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  let [location, setLocation] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(
-    note.latitude && note.longitude
-      ? {
-          latitude: parseFloat(note.latitude),
-          longitude: parseFloat(note.longitude),
-        }
-      : null
-  );
 
-  // Rich text editor setup
+  const locationRef = useRef({
+    latitude: parseFloat(note.latitude || "0"),
+    longitude: parseFloat(note.longitude || "0"),
+  });
+
+  const scrollViewRef = useRef<ScrollView | null>(null);
+  const photoScrollerRef = useRef<{ goBig(index: number): void } | null>(null);
+  const { theme } = useTheme();
+
   const editor = useEditorBridge({
-    initialContent: note.text || "", // Set initial content from the note
-    autofocus: false, // Prevent autofocus to avoid conflicts
+    initialContent: note.text || "",
+    autofocus: false,
   });
 
   useEffect(() => {
@@ -102,36 +99,14 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     };
   }, []);
 
+  // Ownership check using async function
   useEffect(() => {
     const checkOwner = async () => {
-      setOwner(creator === (await user.getId()));
+      const userId = await user.getId();
+      setOwner(creator === userId);
     };
     checkOwner();
   }, [creator]);
-
-  const handleScroll = (position) => {
-    if (keyboardOpen && scrollViewRef.current) {
-      const viewportHeight = height - keyboardHeight;
-      const cursorRelativePosition = position.relativeY;
-      const spaceBelowCursor = viewportHeight - cursorRelativePosition;
-
-      if (spaceBelowCursor < keyboardHeight) {
-        scrollViewRef.current.scrollTo({
-          y: position.absoluteY - spaceBelowCursor + keyboardHeight,
-          animated: true,
-        });
-      }
-    }
-  };
-
-  const [latitude, setLatitude] = useState(
-    location?.latitude?.toString() || ""
-  );
-  const [longitude, setLongitude] = useState(
-    location?.longitude?.toString() || ""
-  );
-
-  const photoScrollerRef = useRef<{ goBig(index: number): void } | null>(null);
 
   const callGoBig = (index: number) => {
     if (photoScrollerRef.current) {
@@ -153,62 +128,16 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     }
   }
 
-  const handleShareButtonPress = () => {
-    setIsPublished(!isPublished); // Toggle the share status
-    ToastMessage.show({
-      type: "success",
-      text1: "Note Published",
-      visibilityTime: 3000, // 3 seconds
-    });
-  };
-
-  const addImageToEditor = (imageUri: string) => {
-    const imgTag = `<img src="${imageUri}" style="max-width: 100%; height: auto;" />`;
-    editor.commands.setContent(editor.getHTML() + imgTag); // Adding image to the editor content
-  };
-
-  const addVideoToEditor = async (videoUri: string) => {
-    try {
-      const thumbnailUri = await getThumbnail(videoUri);
-      const videoTag = `
-        <video width="320" height="240" controls poster="${thumbnailUri}">
-          <source src="${videoUri}" type="video/mp4">
-          Your browser does not support the video tag.
-        </video>`;
-      editor.commands.setContent(editor.getHTML() + videoTag); // Adding video to the editor content
-    } catch (error) {
-      console.error("Error adding video: ", error);
-    }
-  };
-
   const toggleLocationVisibility = async () => {
     if (isLocationShown) {
-      setLocation({
-        latitude: 0,
-        longitude: 0,
-      });
-      setLatitude("0");
-      setLongitude("0");
+      locationRef.current = null;
     } else {
-      try {
-        let userLocation = await getLocation();
-
-        if (
-          userLocation?.coords?.latitude !== undefined &&
-          userLocation?.coords?.longitude !== undefined
-        ) {
-          setLocation({
-            latitude: userLocation.coords.latitude,
-            longitude: userLocation.coords.longitude,
-          });
-
-          setLatitude(userLocation.coords.latitude.toString());
-          setLongitude(userLocation.coords.longitude.toString());
-        } else {
-          console.log("Location data is not available.");
-        }
-      } catch (error) {
-        console.error("Error setting location:", error);
+      const userLocation = await getLocation();
+      if (userLocation) {
+        locationRef.current = {
+          latitude: userLocation.coords.latitude,
+          longitude: userLocation.coords.longitude,
+        };
       }
     }
     setIsLocationShown((prev) => !prev);
@@ -219,37 +148,58 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     setIsUpdating(true);
 
     try {
-      let userLocation = await getLocation();
-      const finalLatitude = !isLocationShown
-        ? userLocation?.coords.latitude.toString() || ""
-        : "0";
-      const finalLongitude = !isLocationShown
-        ? userLocation?.coords.longitude.toString() || ""
-        : "0";
+      const userId = await user.getId();
+      const textContent = await editor.getHTML();
+
+      const formattedTags = tags.map((tag) => ({
+        label: tag.label,
+        origin: tag.origin || "user",
+      }));
 
       const editedNote: Note = {
         id: note.id,
-        title: title,
-        text: editor.getHTML(), // Getting the latest content from the editor
-        creator: (await user.getId()) || "",
+        title,
+        text: textContent,
+        creator: userId,
         media,
-        latitude: finalLatitude,
-        longitude: finalLongitude,
+        latitude: locationRef.current?.latitude.toString() || "0",
+        longitude: locationRef.current?.longitude.toString() || "0",
         audio: newAudio,
         published: isPublished,
-        time: time,
-        tags: tags,
+        time,
+        tags: formattedTags,
       };
 
+      console.log("Formatted Note for API:", editedNote);
+
       await ApiService.overwriteNote(editedNote);
-
       onSave(editedNote);
-
       navigation.goBack();
     } catch (error) {
       console.error("Error updating the note:", error);
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  // Image insertion function for editor
+  const addImageToEditor = (imageUri: string) => {
+    const imgTag = `<img src="${imageUri}" style="max-width: 100%; height: auto;" />`;
+    editor.commands.setContent(editor.getHTML() + imgTag);
+  };
+
+  // Video insertion function for editor
+  const addVideoToEditor = async (videoUri: string) => {
+    try {
+      const thumbnailUri = await getThumbnail(videoUri);
+      const videoTag = `
+        <video width="320" height="240" controls poster="${thumbnailUri}">
+          <source src="${videoUri}" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>`;
+      editor.commands.setContent(editor.getHTML() + videoTag);
+    } catch (error) {
+      console.error("Error adding video: ", error);
     }
   };
 
@@ -284,7 +234,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             ) : (
               <TouchableOpacity
                 style={NotePageStyles().topButtons}
-                onPress={handleShareButtonPress}
+                onPress={() => setIsPublished(!isPublished)}
               >
                 <Ionicons
                   name="share-outline"
@@ -310,7 +260,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
               color={NotePageStyles().saveText.color}
             />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => toggleLocationVisibility()}>
+          <TouchableOpacity onPress={toggleLocationVisibility}>
             <Ionicons
               name="location-outline"
               size={30}
@@ -346,7 +296,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           )}
           {isTagging && <TagWindow tags={tags} setTags={setTags} />}
           {isLocation && (
-            <LocationWindow location={location} setLocation={setLocation} />
+            <LocationWindow location={locationRef.current} setLocation={(loc) => (locationRef.current = loc)} />
           )}
           {isTime && <TimeWindow time={time} setTime={setTime} />}
         </View>
@@ -367,7 +317,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
                 editor={editor}
                 placeholder="Write your note here"
                 style={{
-                  minHeight: 400, // Ensure the editor has enough space to display
+                  minHeight: 400,
                   backgroundColor: theme.primaryColor,
                   color: theme.text,
                   padding: 10,
@@ -404,7 +354,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
 const styles = StyleSheet.create({
   editorContainer: {
     flex: 1,
-    minHeight: 400, // Ensures that the editor has a visible area
+    minHeight: 400,
   },
 });
 

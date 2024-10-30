@@ -15,10 +15,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { Note } from "../../../types";
 import RenderHTML from "react-native-render-html";
 import Video from 'react-native-video';
-import RendererRegistry, { defaultHTMLElementModels, HTMLContentModel, TNode } from 'react-native-render-html';
+import ApiService from "../../utils/api_calls";  // Import ApiService here
 import { useTheme } from "../../components/ThemeProvider";
 import ImageModal from "./ImageModal";
-import VideoModal from "./VideoModal"
+import VideoModal from "./VideoModal";
 
 interface Props {
   isVisible: boolean;
@@ -39,14 +39,18 @@ const NoteDetailModal: React.FC<Props> = memo(
     useEffect(() => {
       setTextTouched(true);
       if (note?.creator) {
-        fetch(note.creator)
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.name) {
-              setCreatorName(data.name);
-            }
+        console.log("Fetching creator data for ID:", note.creator);
+
+        ApiService.fetchCreatorName(note.creator)
+          .then((name) => {
+            setCreatorName(name);
           })
-          .catch((err) => console.error("Error fetching creator: ", err));
+          .catch((err) => {
+            console.error("Error fetching creator name:", err);
+            setCreatorName("Unknown Creator");
+          });
+      } else {
+        setCreatorName("Creator not available");
       }
     }, [note]);
 
@@ -70,81 +74,51 @@ const NoteDetailModal: React.FC<Props> = memo(
 
     const tagsStyles = {
       img: {
-        maxWidth: '10',
-        height: '10',
+        maxWidth: '100%',
+        height: 'auto',
       },
     };
 
     const customRenderers = {
-      img: ({tnode}) => {
-        // Access attributes from tnode
+      img: ({ tnode }) => {
         const { src, alt } = tnode.attributes;
-        const imageSize = { width: width, height: width }; // Fixed size for all images
+        const imageSize = { width: width, height: width };
     
         return <Image source={{ uri: src }} style={imageSize} accessibilityLabel={alt} />;
       },
     };
 
-    const html = note?.description;
-    console.log(html);
-
-    // Declare a new state variable for image loading
-    const [imageLoadedState, setImageLoadedState] = useState<{
-      [key: string]: boolean;
-    }>({});
-
-    const images: string = useMemo(() => {
-      if (note?.images) {
-        return note.images.filter(
-          (mediaItem: any) =>
-            mediaItem.uri.endsWith(".jpg") || mediaItem.uri.endsWith(".png")
-        );
-      }
-      return [];
-    }, [note]);
-
-    const videos: string = useMemo(() => {
-      if (note?.images) {
-        return note.images.filter(
-          (mediaItem: any) =>
-            mediaItem.uri.endsWith(".MOV") || mediaItem.uri.endsWith(".mov") || mediaItem.uri.endsWith(".mp4")
-        );
-      }
-      return [];
-    }, [note]);
-
-    const handleLoad = (uri: string) => {
-      setImageLoadedState((prev) => ({ ...prev, [uri]: true }));
-    };
-    let newNote = false;
-    if (note?.description && note.description.includes("<div>")) {
-      newNote = true;
-    }
+    const html = typeof note?.description === "string" ? note.description : "";
+    const newNote = html.includes("<div>");
 
     const htmlSource = useMemo(() => {
       return { html };
     }, [html]);
 
-    const CustomVideoPlayer: React.FC<VideoPlayerProps> = ({ src }) => {
-      return <Video source={{ uri: src }} style={{ width: 300, height: 300 }} controls />;
-    };
-    
-    /*
-    const customRenderers = {
-      video: (props: { tnode: { attributes: { src: any; }; }; }) => {
-        const src = props.tnode.attributes.src;
-        return <CustomVideoPlayer src={src} />;
-      },
-    };
-    */
-    
-    const customHTMLElementModels = {
-      video: defaultHTMLElementModels.video.extend({
-        contentModel: HTMLContentModel.none,
-      }),
-    };
+    const images = useMemo(() => {
+      if (note?.images) {
+        return note.images.filter(
+          (mediaItem) => mediaItem.uri.endsWith(".jpg") || mediaItem.uri.endsWith(".png")
+        );
+      }
+      return [];
+    }, [note]);
 
-    const MemoizedRenderHtml = React.memo(RenderHTML);
+    const videos = useMemo(() => {
+      if (note?.images) {
+        return note.images.filter(
+          (mediaItem) =>
+            mediaItem.uri.endsWith(".MOV") ||
+            mediaItem.uri.endsWith(".mov") ||
+            mediaItem.uri.endsWith(".mp4")
+        );
+      }
+      return [];
+    }, [note]);
+
+    const CustomVideoPlayer = ({ src }) => (
+      <Video source={{ uri: src }} style={{ width: 300, height: 300 }} controls />
+    );
 
     const styles = StyleSheet.create({
       closeButton: {
@@ -199,7 +173,7 @@ const NoteDetailModal: React.FC<Props> = memo(
       },
       textContainer: {
         padding: 10,
-        paddingLeft: 15, // Indentation for the body text
+        paddingLeft: 15,
         backgroundColor: theme.primaryColor,
         borderTopColor: theme.text,
         borderTopWidth: 2,
@@ -209,14 +183,14 @@ const NoteDetailModal: React.FC<Props> = memo(
       modalTitle: {
         fontSize: 26,
         fontWeight: "bold",
-        marginLeft: 15, // Less indent for title
+        marginLeft: 15,
         marginBottom: 8,
         color: theme.text,
       },
       modalText: {
         fontSize: 18,
         lineHeight: 24,
-        marginLeft: 15, // Uniform indentation for other texts
+        marginLeft: 15,
         color: theme.text,
       },
       metaDataContainer: {
@@ -253,19 +227,6 @@ const NoteDetailModal: React.FC<Props> = memo(
         color: theme.text,
         marginLeft: 5,
       },
-      timeContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-      },
-      timeIcon: {
-        fontSize: 16,
-        color: theme.text,
-      },
-      timeText: {
-        fontSize: 16,
-        color: theme.text,
-        marginLeft: 5,
-      },
       imageContainer: {
         width: "100%",
         height: 360,
@@ -279,7 +240,6 @@ const NoteDetailModal: React.FC<Props> = memo(
         resizeMode: "cover",
       },
       separator: {
-        // Divider line style
         height: 1,
         width: "90%",
         backgroundColor: "#e0e0e0",
@@ -293,19 +253,19 @@ const NoteDetailModal: React.FC<Props> = memo(
       <Modal animationType="slide" transparent={false} visible={isVisible}>
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
           <View style={styles.closeIcon}>
-            <Ionicons name="close" size={30} color={theme.text}/>
+            <Ionicons name="close" size={30} color={theme.text} />
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={onPicturePress} style={styles.pictureButton} testID='imageButton'>
+        <TouchableOpacity onPress={onPicturePress} style={styles.pictureButton}>
           <View style={styles.closeIcon}>
-            <Ionicons name="image" size={30} color={theme.text}/>
+            <Ionicons name="image" size={30} color={theme.text} />
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={onVideoPress} style={styles.videoButton} testID='videoButton'>
+        <TouchableOpacity onPress={onVideoPress} style={styles.videoButton}>
           <View style={styles.closeIcon}>
-            <Ionicons name="videocam" size={30} color={theme.text}/>
+            <Ionicons name="videocam" size={30} color={theme.text} />
           </View>
         </TouchableOpacity>
 
@@ -318,107 +278,34 @@ const NoteDetailModal: React.FC<Props> = memo(
           ]}
           onTouchStart={handleTextTouchStart}
         >
-            <Text style={styles.modalTitle}>{note?.title}</Text>
-            <View style={styles.metaDataContainer}>
-              <View style={styles.creatorContainer}>
-                <Ionicons name="person-circle-outline" size={18} color={theme.text} />
-                <Text style={styles.creatorText}>{creatorName}</Text>
-              </View>
-              <View style={styles.dateContainer}>
-                <Ionicons name="calendar-outline" size={18} color={theme.text} />
-                <Text style={styles.dateText}>{note?.time}</Text>
-              </View>
+          <Text style={styles.modalTitle}>{note?.title}</Text>
+          <View style={styles.metaDataContainer}>
+            <View style={styles.creatorContainer}>
+              <Ionicons name="person-circle-outline" size={18} color={theme.text} />
+              <Text style={styles.creatorText}>{creatorName}</Text>
             </View>
-            <View key="Tags Container" style={{flexDirection: 'row', marginHorizontal: 15,}}>
-            <Ionicons name="pricetags-outline" size={20} color={theme.text} style={{marginRight: 10}}/>
-
-            <ScrollView
-              horizontal={true}
-              showsHorizontalScrollIndicator={false}
-              style={{ width: "100%", paddingLeft: 5, marginBottom: 10, }}
-            >
-              {note?.tags &&
-                note.tags.map((tag, index) => (
-                  <View
-                    key={index}
-                    style={{
-                      flexDirection: "row",
-                      marginRight: 10,
-                      alignItems: "center",
-                    }}
-                  >
-                    <View
-                      style={{
-                        height: 20,
-                        width: 20,
-                        transform: [{ rotate: "45deg" }],
-                        position: "absolute",
-                        left: 2,
-                        borderLeftWidth: 2,
-                        borderBottomWidth: 2,
-                        borderColor: theme.text,
-                        justifyContent: "center",
-                        alignItems: "center",
-                      }}
-                    >
-                      <View
-                        style={{
-                          height: 5,
-                          width: 5,
-                          left: 2,
-                          borderRadius: 10,
-                          backgroundColor: theme.text,
-                          marginRight: 5,
-                        }}
-                      />
-                    </View>
-                    <View
-                      style={{
-                        borderTopRightRadius: 5,
-                        borderBottomRightRadius: 5,
-                        borderColor: theme.text,
-                        borderRightWidth: 2,
-                        borderBottomWidth: 2,
-                        borderTopWidth: 2,
-                        paddingHorizontal: 10,
-                        justifyContent: "center",
-                        flexDirection: "row",
-                        marginLeft: 10,
-                      }}
-                    >
-                      <Text style={styles.creatorText}>{tag}</Text>
-                    </View>
-                  </View>
-                ))}
-              </ScrollView>
+            <View style={styles.dateContainer}>
+              <Ionicons name="calendar-outline" size={18} color={theme.text} />
+              <Text style={styles.dateText}>{note?.time}</Text>
             </View>
+          </View>
           <ScrollView>
-            <View
-              style={{
-                height: 2,
-                width: "100%",
-                backgroundColor: theme.text,
-                marginBottom: 10,
-              }}
-            ></View>
-            {
-              newNote ? (
-                <MemoizedRenderHtml
-                  baseStyle={{ color: theme.text }}
-                  contentWidth={width}
-                  source={htmlSource}
-                  tagsStyles={tagsStyles}
-                  renderers={customRenderers}
-                  customHTMLElementModels={customHTMLElementModels}
-                />
-              ) : (
-                <Text style={{ color: theme.text }}>{note?.description}</Text>
-              )
-            }
+            {newNote ? (
+              <RenderHTML
+                baseStyle={{ color: theme.text }}
+                contentWidth={width}
+                source={htmlSource}
+                tagsStyles={tagsStyles}
+                renderers={customRenderers}
+              />
+            ) : (
+              <Text style={{ color: theme.text }}>{note?.description}</Text>
+            )}
           </ScrollView>
         </View>
-        <ImageModal isVisible={isModalVisible} onClose={() => setIsModalVisible(false)} images={images}/>
-        <VideoModal isVisible={isVideoVisible} onClose={() => setIsVideoVisible(false)} videos={videos}/>
+
+        <ImageModal isVisible={isModalVisible} onClose={() => setIsModalVisible(false)} images={images} />
+        <VideoModal isVisible={isVideoVisible} onClose={() => setIsVideoVisible(false)} videos={videos} />
       </Modal>
     );
   }
