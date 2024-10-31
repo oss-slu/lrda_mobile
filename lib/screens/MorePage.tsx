@@ -145,7 +145,7 @@ export default function MorePage() {
           <View style={styles.textContainer}>
             <View style={styles.buttonContainer}>
               <View style={[styles.switchContainer, { backgroundColor: theme.background }]}>
-                <Text style={[styles.switchText, isDarkmode ? styles.darkModeText : styles.lightModeText]}>{isDarkmode ? "Dark Mode" : "Light Mode"}</Text>
+                <Text style={[styles.switchText, {color: theme.text}]}>{isDarkmode ? "Dark Mode" : "Light Mode"}</Text>
                 <Switch
                   testID="dark-mode-switch"
                   trackColor={{

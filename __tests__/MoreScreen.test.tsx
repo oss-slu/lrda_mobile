@@ -106,7 +106,6 @@ describe('MorePage', () => {
     );
   });
 
-
   it('displays correct theme text based on isDarkmode value', () => {
     const { getByText, rerender } = render(
       <Provider store={store}>
