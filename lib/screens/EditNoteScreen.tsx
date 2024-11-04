@@ -53,7 +53,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const [isPublished, setIsPublished] = useState(note.published);
   const [creator, setCreator] = useState(note.creator);
   const [owner, setOwner] = useState(false);
-  const scrollViewRef = useRef<ScrollView | null>(null);
+  //const scrollViewRef = useRef<ScrollView | null>(null);
   const [viewMedia, setViewMedia] = useState(false);
   const [viewAudio, setViewAudio] = useState(false);
   const [isTagging, setIsTagging] = useState(false);
@@ -178,7 +178,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       ...Platform.select({
         android: {
           height: 70, // Fixed height for the toolbar at the bottom
-          backgroundColor: theme.tertiaryColor, // Ensure the toolbar has a background color
+          backgroundColor: theme.primaryColor, // Ensure the toolbar has a background color
           overflow: 'hidden', // Ensure no extra space
           marginTop: 50
         },
@@ -196,7 +196,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   useEffect(() => {
     if (editor) {
       editor.injectCSS(textColorCSS, 'text-color-style');
-      console.log("text color will be: " , theme.text);
     }
   }, [isDarkmode, editor, theme]);  
 
@@ -244,7 +243,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     };
     checkOwner();
   }, [creator]);
-
+/*
   const handleScroll = (position) => {
     if (keyboardOpen && scrollViewRef.current) {
       const viewportHeight = Dimensions.get('window').height - keyboardHeight;
@@ -259,7 +258,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       }
     }
   };
-
+*/
   const [latitude, setLatitude] = useState(
     location?.latitude?.toString() || ""
   );
@@ -432,7 +431,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
 
   if (isDarkmode && editor) {
     editor.injectCSS(textColorCSS, 'text-color-style');
-    console.log("text color will be: #F7F8F9 from IF state");
   }
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   useEffect(() => {
@@ -603,10 +601,13 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
             items={DEFAULT_TOOLBAR_ITEMS}
           />
         </View>
-          
-        <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
 
-
+      {Platform.OS === 'ios' && (
+      <Toolbar
+        editor={editor}
+        items={DEFAULT_TOOLBAR_ITEMS}
+      />
+    )}
       </KeyboardAvoidingView>
 
 
