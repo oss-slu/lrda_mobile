@@ -157,7 +157,6 @@ const EditNoteScreen = ({ route, navigation }) => {
 
   if (isDarkmode && editor) {
     editor.injectCSS(textColorCSS, 'text-color-style');
-    console.log("text color will be: #F7F8F9 from IF state");
   }
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   useEffect(() => {
