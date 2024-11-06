@@ -12,6 +12,8 @@ import {
   SafeAreaView,
   Dimensions
 } from "react-native";
+import {  StyleSheet } from "react-native";
+
 import { Ionicons } from "@expo/vector-icons";
 import { Note } from "../../types";
 import PhotoScroller from "../components/photoScroller";
@@ -30,6 +32,8 @@ import ToastMessage from 'react-native-toast-message';
 import { useTheme } from "../components/ThemeProvider";
 import LoadingModal from "../components/LoadingModal";
 import * as Location from 'expo-location';
+import { DEFAULT_TOOLBAR_ITEMS, RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
+
 
 
 const user = User.getInstance();
@@ -49,7 +53,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const [isPublished, setIsPublished] = useState(note.published);
   const [creator, setCreator] = useState(note.creator);
   const [owner, setOwner] = useState(false);
-  const scrollViewRef = useRef<ScrollView | null>(null);
+  //const scrollViewRef = useRef<ScrollView | null>(null);
   const [viewMedia, setViewMedia] = useState(false);
   const [viewAudio, setViewAudio] = useState(false);
   const [isTagging, setIsTagging] = useState(false);
@@ -63,6 +67,139 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   const richTextRef = useRef<RichEditor | null>(null);
   const [isTime, setIsTime] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [bodyText, setBodyText] = useState<string>("");
+  const {  isDarkmode, toggleDarkmode, theme } = useTheme();
+  const [refreshEditor, setRefreshEditor] = useState(false);
+
+  // Pass the appropriate theme based on dark mode status
+  const editor = useEditorBridge({
+    initialContent: bodyText || "",
+    autofocus: true,
+  });
+  
+
+
+
+  // Define the dynamic CSS for text color based on isDarkmode
+  const textColorCSS = `
+    p, span, div {
+      color: ${theme.text} !important;
+    }
+    * {
+      color: ${theme.text} !important;
+    }
+  `;
+
+  
+  const exampleStyles = StyleSheet.create({
+    fullScreen: {
+      ...Platform.select({  
+        android: {
+          flex: 1,
+          backgroundColor: theme.primaryColor, // Match the background color of your screen
+        },
+        ios: {
+          flex: 1,
+          backgroundColor: theme.primaryColor, // Match the background color of your screen
+        },
+      }),
+    },
+    richTextContainer: {
+      flex: 1, // Use full available height for RichText component
+      justifyContent: 'center',
+      paddingHorizontal: 10, // Add some padding horizontally
+      backgroundColor: theme.primaryColor, // Apply black background to the entire container
+      color: theme.tertiaryColor,
+      ...Platform.select({
+        android: {
+          flex: 1, // Use full available height for RichText component
+          justifyContent: 'center',
+          paddingHorizontal: 10, // Add some padding horizontally
+          backgroundColor: theme.primaryColor, // Apply black background to the entire container
+          color: theme.tertiaryColor,
+        },
+
+      }),
+    },
+    richText: {  
+
+      flex: 1,
+      minHeight: '100%', // Ensure it takes full height available
+      padding: 10,
+      borderWidth: 1,
+      borderColor: theme.primaryColor,
+      color: theme.text, // Set text color to white for dark mode
+      ...Platform.select({
+        android: {
+          flex: 1,
+          minHeight: '100%', // Ensure it takes full height available
+          padding: 2,
+          borderWidth: 1,
+          borderColor: theme.primaryColor,
+          color: theme.primaryColor, // Set text color to white for dark mode
+        },
+
+      }),
+    },
+    editor: {   
+          backgroundColor: theme.primaryColor,
+          marginBottom: 4,
+          width: "100%",
+          minHeight: 200, // Adjust for better visibility
+          color: theme.text, // Ensure text is visible
+          padding: 10, // Add padding for better input experience
+      ...Platform.select({
+        android: {
+          backgroundColor: theme.primaryColor, // Ensure consistent background color on Android
+          color: theme.text, // Ensure consistent text color on Android
+          marginBottom: 4,
+          width: "100%",
+          minHeight: 200, // Adjust for better visibility
+          padding: 10, // Add padding for better input experience
+        },
+      }),
+    },
+    editorContainer: {
+      backgroundColor: theme.primaryColor, // Ensure consistent background color on iOS
+      marginBottom: 1,
+      width: "100%",
+      ...Platform.select({
+        android: {
+          backgroundColor: theme.primaryColor, // Ensure consistent background color on Android
+          marginBottom: 1,
+          width: "100%",
+        },
+      }),
+    },
+    toolbar: {
+      height: 40, // Fixed height for the toolbar at the bottom
+      backgroundColor: '#333', // Ensure the toolbar has a background color
+  
+      ...Platform.select({
+        android: {
+          height: 70, // Fixed height for the toolbar at the bottom
+          backgroundColor: theme.primaryColor, // Ensure the toolbar has a background color
+          overflow: 'hidden', // Ensure no extra space
+          marginTop: 50
+        },
+        ios: {
+          height: 50, // Fixed height for the toolbar at the bottom
+          backgroundColor: theme.primaryColor, 
+          overflow: 'hidden', // Ensure no extra space
+          marginTop: 50
+
+        },
+      }),
+    },
+  });
+    
+  useEffect(() => {
+    if (editor) {
+      editor.injectCSS(textColorCSS, 'text-color-style');
+    }
+  }, [isDarkmode, editor, theme]);  
+
+
   let [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -77,7 +214,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
   console.log(note.latitude);
   console.log(note.longitude);
   const { height, width } = useWindowDimensions();
-  const { theme } = useTheme();
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -107,7 +243,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     };
     checkOwner();
   }, [creator]);
-
+/*
   const handleScroll = (position) => {
     if (keyboardOpen && scrollViewRef.current) {
       const viewportHeight = Dimensions.get('window').height - keyboardHeight;
@@ -122,7 +258,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
       }
     }
   };
-
+*/
   const [latitude, setLatitude] = useState(
     location?.latitude?.toString() || ""
   );
@@ -293,6 +429,25 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
     }
   };
 
+  if (isDarkmode && editor) {
+    editor.injectCSS(textColorCSS, 'text-color-style');
+  }
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener("keyboardDidShow", () => {
+      setIsKeyboardVisible(true);
+    });
+    const keyboardDidHideListener = Keyboard.addListener("keyboardDidHide", () => {
+      setIsKeyboardVisible(false);
+    });
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
+
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={NotePageStyles().topContainer}>
@@ -363,26 +518,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           )}
           {isTime && <TimeWindow time={time} setTime={setTime} />}
         </View>
-        <View>
-          <RichToolbar
-            style={NotePageStyles().container}
-            editor={richTextRef}
-            actions={[
-              actions.keyboard,
-              actions.undo,
-              actions.redo,
-              actions.setBold,
-              actions.setItalic,
-              actions.setUnderline,
-              actions.insertBulletsList,
-              actions.blockquote,
-              actions.indent,
-              actions.outdent,
-            ]}
-            iconTint={NotePageStyles().saveText.color}
-            selectedIconTint="#2095F2"
-          />
-        </View>
+    
         <View key="Tags Container">
           {tags.length > 0 && (
             <ScrollView
@@ -446,42 +582,44 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({
           </View>
 
       </View>
+      <SafeAreaView style={exampleStyles.fullScreen}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
-      >
-        <View style={[NotePageStyles().editorContainer, { flex: 1 }]}>
-          <ScrollView
-            nestedScrollEnabled={true}
-            showsVerticalScrollIndicator={false}
-            style={{ flex: 1 }}
-            ref={scrollViewRef}
-          >
-            <RichEditor
-              ref={(r) => (richTextRef.current = r)}
-              style={[NotePageStyles().editor, {flex: 1, minHeight: 650 }]}
-              editorStyle={
-              {
-                contentCSSText: `
-                  position: absolute; 
-                  top: 0; right: 0; bottom: 0; left: 0;
-                `,
-                backgroundColor: theme.primaryColor,
-                color: theme.text,
-              }}
-              autoCorrect={true}
-              placeholder="Write your note here"
-              onChange={(text) => setText(text)}
-              initialContentHTML={text}
-              onCursorPosition={handleScroll}
-              disabled={!owner}
-            />
-          </ScrollView>
+        behavior={Platform.OS === 'android' ? 'height' : 'padding'}
+        style={exampleStyles.fullScreen}
+      >      
+        <View style={exampleStyles.richTextContainer}>
+          <RichText 
+            editor={editor} 
+            style={[exampleStyles.editor, {backgroundColor: Platform.OS == "android" && theme.primaryColor}]} // Apply styling here
+          />
+   
+          </View>
+
+          <View style={[exampleStyles.toolbar]}>
+          <Toolbar
+            editor={editor}
+            items={DEFAULT_TOOLBAR_ITEMS}
+          />
         </View>
+
+      {Platform.OS === 'ios' && (
+      <Toolbar
+        editor={editor}
+        items={DEFAULT_TOOLBAR_ITEMS}
+      />
+    )}
       </KeyboardAvoidingView>
+
+
+    </SafeAreaView>
       <LoadingModal visible={isUpdating} />
     </SafeAreaView>
   );
 };
+
+
+
+
+
 
 export default EditNoteScreen;

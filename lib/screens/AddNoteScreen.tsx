@@ -298,14 +298,14 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
         style={{ flex: 1 }}
         keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
       >
-      
-          <View style={[NotePageStyles().richTextContainer]}>
+          <View style={[NotePageStyles().richTextContainer]} testID="TenTapEditor">
           <RichText
             editor={editor}
             placeholder="Write something..."
             style={[NotePageStyles().editor, {backgroundColor: Platform.OS == "android" && "white"}]}
 
           />
+           
           </View>
        
         {/* Toolbar placed at the bottom */}

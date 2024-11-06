@@ -41,12 +41,24 @@ afterEach(() => {
 });
 
 describe('HomeScreen', () => {
-  it('renders without crashing', () => {
+  it('renders toggle search bar', async () => {
     const routeMock = { params: { untitledNumber: 1 } };
     const { getByTestId } = render(<HomeScreen route={routeMock as any} />);
+  
+    const toggleButton = await waitFor(() => getByTestId('searchButton'));
+    expect(toggleButton).toBeTruthy();
+  });
 
-    // Check if the RichEditor is rendered
-    expect(getByTestId('searchBar')).toBeTruthy();
+  it('toggle search bar visibility', async () => {
+    const routeMock = { params: { untitledNumber: 1 } };
+    const { getByTestId } = render(<HomeScreen route={routeMock as any} />);
+  
+    const toggleButton = await waitFor(() => getByTestId('searchButton'));
+    fireEvent.press(toggleButton);
+  
+    const searchBar = await waitFor(() => getByTestId('searchBar'));
+    expect(searchBar).toBeTruthy();
   });
 
 });
+

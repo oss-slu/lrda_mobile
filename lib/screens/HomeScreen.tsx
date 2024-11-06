@@ -49,6 +49,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [items, setItems] = useState(initialItems);
   const [selectedNote, setSelectedNote] = useState<Note | undefined>(undefined);
   const [isModalVisible, setModalVisible] = useState(false);
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { theme } = useTheme();
 
@@ -161,7 +163,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     });
     return maxNumber + 1;
   };
-  
 
   const styles = StyleSheet.create({
     container: {
@@ -332,7 +333,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       padding: 10,
       alignSelf: "center",
     },
-    seachBar:{
+    searchBar:{
       backgroundColor: theme.homeColor,
       borderRadius: 20,
       fontSize: 18,
@@ -539,12 +540,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     );
   };
 
-  //Part of searchbar:
-  const [searchQuery, setSearchQuery] = useState("");
-
   const handleSearch = (query: string) => {
     setSearchQuery(query);
   };
+
   const formatDate = (date: Date) => {
     const day = date.getDate().toString();
     const month = (date.getMonth() + 1).toString(); // Months are zero-based
@@ -562,10 +561,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     });
   }, [notes, searchQuery]);
 
-
+  // Reset search query when toggling search visibility
+  const resetSearchQuery = () => {
+    if(isSearchVisible){
+      setSearchQuery('');
+    }
+  };
 
   return (
- 
     <View style={styles.container}>
       <View style={styles.topView}>
         <View
@@ -589,7 +592,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           >
             <Text style={styles.pfpText}>{userInitials}</Text>
           </TouchableOpacity>
-          <Image source={require('../../assets/icon.png')} style={{width: width * 0.105, height: width * 0.105, marginEnd: width * 0.435}} />
+          <Image source={require('../../assets/icon.png')} style={{width: width * 0.105, height: width * 0.105, marginEnd: width * 0.025}} />
+          <TouchableOpacity 
+            onPress={() => {
+              setIsSearchVisible(!isSearchVisible);
+              resetSearchQuery(); // Reset search query when toggling search visibility              
+            }}
+          >
+            <Ionicons
+              testID="searchButton"
+              name={isSearchVisible ? "close-outline" : "search-outline"} // Switch between "X" and search icon
+              size={36}
+              color={theme.black}
+            />
+          </TouchableOpacity>
         </View>
       </View>
        
@@ -634,12 +650,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           showArrowIcon={true}
         /> 
       </View>
+      {isSearchVisible && (
       <TextInput
-          testID="searchBar"
-          placeholder="Search notes.."
-          onChangeText={handleSearch}
-          style= {styles.seachBar}
+        testID="searchBar"
+        placeholder="Search notes..."
+        onChangeText={handleSearch}
+        style={styles.searchBar}
         />
+      )}
+
       <View style={styles.horizontalLine} />
       <View style={styles.scrollerBackgroundColor}>
         {rendering ? <NoteSkeleton /> : renderList(notes)}
