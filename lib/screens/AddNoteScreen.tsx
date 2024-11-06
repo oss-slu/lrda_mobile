@@ -161,9 +161,15 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
   
 
   const insertAudioToEditor = (audioUri: string) => {
-    const audioTag = `<audio controls src="${audioUri}"></audio>`;
-    editor.setContent(editor.getHTML() + audioTag);
+    if (editor?.setLink) {
+      const linkWithSpacing = `${audioUri}<br><br>`; // Add line breaks after the URL for spacing
+      editor.setContent(linkWithSpacing); // Insert URL with extra spacing
+      editor.setLink({ href: audioUri}); // Set URL as clickable link, if possible
+    } else {
+      console.error("Editor instance is not available.");
+    }
   };
+  
 
   const handleShareButtonPress = async () => {
     setIsPublished(!isPublished);
