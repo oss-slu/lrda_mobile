@@ -8,8 +8,11 @@ import {
   Keyboard,
   Platform,
   KeyboardAvoidingView,
+  Modal,
+  Text,
+  StyleSheet
 } from "react-native";
-import { WebViewMessageEvent } from 'react-native-webview';
+import { WebViewMessageEvent } from "react-native-webview";
 import * as Location from 'expo-location';
 import ToastMessage from 'react-native-toast-message';
 import { Ionicons } from "@expo/vector-icons";
@@ -27,6 +30,8 @@ import NotePageStyles, { customImageCSS } from "../../styles/pages/NoteStyles";
 import { useTheme } from "../components/ThemeProvider";
 import LoadingModal from "../components/LoadingModal";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { Video } from "expo-av";
+import { Link } from "@react-navigation/native";
 
 const user = User.getInstance();
 
@@ -47,12 +52,14 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
   const [location, setLocation] = useState<{ latitude: number, longitude: number } | null>(null);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [isVideoModalVisible, setIsVideoModalVisible] = useState<boolean>(false);
-  const [videoUri, setVideoUri] = useState<string | null>(null); // Store the URI of the video to be played
+  const [videoUri, setVideoUri] = useState<string | null>(null);
 
   const editor = useEditorBridge({
     initialContent: bodyText || "",
     autofocus: true,
+    avoidIosKeyboard: true,
   });
+  
   const { theme } = useTheme();
   const titleTextRef = useRef<TextInput>(null);
   const scrollViewRef = useRef<KeyboardAwareScrollView>(null);
@@ -120,54 +127,35 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
     }
   };
 
-  const addVideoToEditor = async (
-    videoUri: string,
-    editor: { setContent: (content: string) => void; getHTML: () => Promise<string> },
-    scrollViewRef: React.RefObject<ScrollView>
-  ) => {
-      if (editor && editor.setContent) {
-          console.log("Inserting video thumbnail with URI:", videoUri);
-          try {
-              const thumbnailUri = await getThumbnail(videoUri);
-              const currentContent = await editor.getHTML();
+  const addVideoToEditor = (videoUri: string) => {
+    if (editor?.setLink) {
+      const linkWithSpacing = `${videoUri}<br><br>`; // Add line breaks after the URL for spacing
+      editor.setContent(linkWithSpacing); // Insert URL with extra spacing
+      editor.setLink({ href: videoUri}); // Set URL as clickable link, if possible
+    } else {
+      console.error("Editor instance is not available.");
+    }
+  };
   
-              // Generate a unique ID for the thumbnail for event listener attachment
-              const thumbnailId = `video-thumbnail-${Date.now()}`;
-              const videoThumbnail = `
-                <img id="${thumbnailId}" src="${thumbnailUri}" 
-                     style="max-width: 200px; max-height: 200px; object-fit: cover; cursor: pointer;" /><br/>`;
-  
-              // Update the editor content with the new thumbnail
-              const newContent = currentContent + videoThumbnail;
-              editor.setContent(newContent);
-              editor.focus();
-  
-              // Wait for the content to render, then attach the click event listener
-              setTimeout(() => {
-                  const thumbnailElement = document.getElementById(thumbnailId);
-                  if (thumbnailElement) {
-                      thumbnailElement.addEventListener("click", () => {
-                          // Send the video URI message to the WebView
-                          if (typeof window.ReactNativeWebView !== "undefined") {
-                              window.ReactNativeWebView.postMessage(videoUri);
-                          } else {
-                              console.warn("ReactNativeWebView not found. This may not be running in a React Native environment.");
-                          }
-                      });
-                  }
-  
-                  // Scroll to the end of the ScrollView, if available
-                  if (scrollViewRef.current) {
-                      scrollViewRef.current.scrollToCursor({ animated: true });
-                  }
-              }, 100);
-  
-          } catch (error) {
-              console.error("Error adding video thumbnail:", error);
-          }
-      } else {
-          console.error("Editor or setContent method is not available.");
+
+
+  // Function to detect and handle link clicks to open the video player modal
+  const handleEditorLinkClick = async () => {
+    const content = await editor.getHTML();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(content, "text/html");
+    const links = doc.querySelectorAll("a");
+
+    links.forEach((link) => {
+      const url = link.getAttribute("href");
+      if (url) {
+        link.addEventListener("click", (event) => {
+          event.preventDefault(); // Prevents navigation
+          setVideoUri(url); // Set URL to open in the video player modal
+          setIsVideoModalVisible(true); // Open the modal
+        });
       }
+    });
   };
 
   
@@ -298,7 +286,11 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
               <RichText
                 editor={editor}
                 placeholder="Write Content Here..."
-                style={[NotePageStyles().editor, { backgroundColor: Platform.OS === "android" ? "white" : undefined }]}
+                style={[
+                  NotePageStyles().editor,
+                  { backgroundColor: Platform.OS === "android" ? "white" : undefined },
+                ]}
+                onChange={handleEditorLinkClick} // Listen for content changes to detect link clicks
               />
             </View>
             <View style={NotePageStyles().toolBar}>
@@ -310,6 +302,30 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
             </View>
           </View>
         </KeyboardAwareScrollView>
+          {/* Video Player Modal */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={isVideoModalVisible}
+          onRequestClose={() => setIsVideoModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              {videoUri && (
+                <Video
+                  source={{ uri: videoUri }}
+                  useNativeControls
+                  resizeMode="contain"
+                  style={styles.videoPlayer}
+                />
+              )}
+              <TouchableOpacity onPress={() => setIsVideoModalVisible(false)}>
+                <Text style={styles.closeButton}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
         <LoadingModal visible={isUpdating} />
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -317,3 +333,27 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
 };
 
 export default AddNoteScreen;
+
+const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "90%",
+    padding: 20,
+    backgroundColor: "white",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  videoPlayer: {
+    width: "100%",
+    height: 200,
+  },
+  closeButton: {
+    color: "blue",
+    marginTop: 20,
+  },
+});
