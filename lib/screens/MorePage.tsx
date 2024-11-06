@@ -142,11 +142,11 @@ export default function MorePage() {
             meaningful discussions.
           </Text>
 
-          {/* use theme object in theme.text to apply colors to text */}
           <View style={styles.textContainer}>
             <View style={styles.buttonContainer}>
               <View style={[styles.switchContainer, { backgroundColor: theme.background }]}>
-                <Text style={[styles.switchText, {color: theme.text}]}>{isDarkmode ? "Dark Mode" : "Light Mode"}</Text> 
+                <Text style={[styles.switchText, {color: theme.text}]}>{isDarkmode ? "Dark Mode" : "Light Mode"}</Text>
+                {/* Use theme object in theme.primaryColor to apply colors to the switch */}
                 <Switch
                   testID="dark-mode-switch"
                   trackColor={{
@@ -287,10 +287,10 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   lightModeText: {
-    color: '#000000',
+    color: '#000000', /* making sure color black is specified with color code */
   },
   darkModeText: {
-    color: '#ffffff',
+    color: '#ffffff', /* same with black */
   }
 });
 
