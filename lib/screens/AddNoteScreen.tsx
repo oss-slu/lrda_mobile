@@ -25,7 +25,7 @@ import AudioContainer from "../components/audio";
 import TagWindow from "../components/tagging";
 import LocationWindow from "../components/location";
 import TimeWindow from "../components/time";
-import { RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
+import { DEFAULT_TOOLBAR_ITEMS, RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
 import NotePageStyles, { customImageCSS } from "../../styles/pages/NoteStyles";
 import { useTheme } from "../components/ThemeProvider";
 import LoadingModal from "../components/LoadingModal";
@@ -127,48 +127,42 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
     }
   };
 
-  const addVideoToEditor = (videoUri: string) => {
-    if (editor?.setLink) {
-      const linkWithSpacing = `${videoUri}<br><br>`; // Add line breaks after the URL for spacing
-      editor.setContent(linkWithSpacing); // Insert URL with extra spacing
-      editor.setLink({ href: videoUri}); // Set URL as clickable link, if possible
-    } else {
-      console.error("Editor instance is not available.");
-    }
-  };
-  
-
-
-  // Function to detect and handle link clicks to open the video player modal
-  const handleEditorLinkClick = async () => {
-    const content = await editor.getHTML();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(content, "text/html");
-    const links = doc.querySelectorAll("a");
-
-    links.forEach((link) => {
-      const url = link.getAttribute("href");
-      if (url) {
-        link.addEventListener("click", (event) => {
-          event.preventDefault(); // Prevents navigation
-          setVideoUri(url); // Set URL to open in the video player modal
-          setIsVideoModalVisible(true); // Open the modal
-        });
+  const addVideoToEditor = async (videoUri: string) => {
+    if (editor?.setContent && editor?.getHTML) {
+      try {
+        // Get the current content from the editor
+        const currentContent = await editor.getHTML();
+        // Create the new video link with line breaks for spacing
+        const videoLink = `${currentContent}<a href="${videoUri}">${videoUri}</a><br>`;
+        // Set the combined content back to the editor
+        editor.setContent(videoLink);
+        editor.focus();
+      } catch (error) {
+        console.error("Error adding video link to editor:", error);
       }
-    });
-  };
-
-  
-
-  const insertAudioToEditor = (audioUri: string) => {
-    if (editor?.setLink) {
-      const linkWithSpacing = `${audioUri}<br><br>`; // Add line breaks after the URL for spacing
-      editor.setContent(linkWithSpacing); // Insert URL with extra spacing
-      editor.setLink({ href: audioUri}); // Set URL as clickable link, if possible
     } else {
       console.error("Editor instance is not available.");
     }
   };
+  
+  const insertAudioToEditor = async (audioUri: string) => {
+    if (editor?.setContent && editor?.getHTML) {
+      try {
+        // Get the current content from the editor
+        const currentContent = await editor.getHTML();
+        // Create the new audio link with line breaks for spacing
+        const audioLink = `${currentContent}<a href="${audioUri}">${audioUri}</a><br>`;
+        // Set the combined content back to the editor
+        editor.setContent(audioLink);
+        editor.focus();
+      } catch (error) {
+        console.error("Error adding audio link to editor:", error);
+      }
+    } else {
+      console.error("Editor instance is not available.");
+    }
+  };
+  
   
 
   const handleShareButtonPress = async () => {
@@ -190,11 +184,12 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
       const userLocation = await Location.getCurrentPositionAsync({});
       const finalLocation = userLocation ? userLocation.coords : { latitude: 0, longitude: 0 };
       const textContent = await editor.getHTML();
+      const sanitizedContent = textContent.replace(/<\/?p>/g, ''); // removes <p> tags from content
       const uid = await user.getId();
 
       const newNote = {
         title: titleText || "Untitled",
-        text: textContent,
+        text: sanitizedContent,
         media: newMedia || [],
         audio: newAudio || [],
         tags: tags || [],
@@ -296,16 +291,21 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
                   NotePageStyles().editor,
                   { backgroundColor: Platform.OS === "android" ? "white" : undefined },
                 ]}
-                onChange={handleEditorLinkClick} // Listen for content changes to detect link clicks
               />
             </View>
             <View style={NotePageStyles().toolBar}>
-              <Toolbar
-                editor={editor}
-                style={NotePageStyles().container}
-                actions={['bold', 'italic', 'underline', 'bullet_list', 'blockquote', 'indent', 'outdent', 'close_keyboard']}
-              />
-            </View>
+            <Toolbar
+            editor={editor}
+            items={DEFAULT_TOOLBAR_ITEMS}
+          />
+        </View>
+      {Platform.OS === 'ios' && (
+      <Toolbar
+        editor={editor}
+        items={DEFAULT_TOOLBAR_ITEMS}
+
+      />
+    )}
           </View>
         </KeyboardAwareScrollView>
           {/* Video Player Modal */}

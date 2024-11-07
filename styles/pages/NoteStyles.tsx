@@ -54,9 +54,16 @@ const NotePageStyles = () => {
       width: "100%",
     },
     editorContainer: {
-      marginBottom: 4,
+      marginBottom: 1,
       width: "100%",
       backgroundColor: theme.primaryColor, // Ensure it matches the overall theme
+      ...Platform.select({
+        android: {
+          marginBottom: 1,
+          backgroundColor: theme.primaryColor,
+          width: "100%",
+        },
+      }),
     },
     editor: {
       backgroundColor: theme.tertiaryColor,
@@ -65,6 +72,16 @@ const NotePageStyles = () => {
       minHeight: 200, // Adjust for better visibility
       color: theme.text,
       padding: 10,
+      ...Platform.select({  // Adjust for better visibility
+        android: {
+          backgroundColor: theme.primaryColor,
+          color: theme.text,
+          marginBottom: 4,
+          width: "100%",
+          minHeight: 200,
+          padding: 10,
+        },
+      }),
     },
 
    // Define this image style
@@ -132,11 +149,26 @@ const NotePageStyles = () => {
       height: Platform.OS == "android"? "90%" : "100%" 
     },
     //tool bar styles
-    toolBar: {
-      height: 50,
-      position:'relative',
-      bottom: Platform.OS=='ios'? 20:0 && Platform.OS =='android'? 20:0,
+    toolbar: {
+      height: 40, // Fixed height for the toolbar at the bottom
+      backgroundColor: '#333', // Ensure the toolbar has a background color
+  
+      ...Platform.select({
+        android: {
+          height: 70, // Fixed height for the toolbar at the bottom
+          backgroundColor: theme.primaryColor, // Ensure the toolbar has a background color
+          overflow: 'hidden', // Ensure no extra space
+          marginTop: 50
+        },
+        ios: {
+          height: 50, // Fixed height for the toolbar at the bottom
+          backgroundColor: theme.primaryColor, 
+          overflow: 'hidden', // Ensure no extra space
+          marginTop: 50
+        },
+      }),
     },
+
     closeKeyboardButton: {
       padding: 10,
       justifyContent: 'center',
