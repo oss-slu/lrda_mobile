@@ -22,7 +22,7 @@ import TagWindow from "../components/tagging";
 import LocationWindow from "../components/location";
 import TimeWindow from "../components/time";
 import { RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
-import NotePageStyles from "../../styles/pages/NoteStyles";
+import NotePageStyles, { customImageCSS } from "../../styles/pages/NoteStyles";
 import ToastMessage from "react-native-toast-message";
 import { useTheme } from "../components/ThemeProvider";
 import LoadingModal from "../components/LoadingModal";
@@ -64,6 +64,8 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({ route, navigation }) =>
   const [keyboardOpen, setKeyboard] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isLocation, setIsLocation] = useState(false);
+  const [isVideoModalVisible, setIsVideoModalVisible] = useState<boolean>(false);
+  const [videoUri, setVideoUri] = useState<string | null>(null);
   const [isLocationShown, setIsLocationShown] = useState(
     formattedNote.latitude === "0" && formattedNote.longitude === "0"
   );
@@ -85,6 +87,7 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({ route, navigation }) =>
   const editor = useEditorBridge({
     initialContent: formattedNote.text,
     autofocus: false,
+    avoidIosKeyboard:true
   });
 
   useEffect(() => {
@@ -111,11 +114,11 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({ route, navigation }) =>
     checkOwner();
   }, [creator]);
 
-  const callGoBig = (index: number) => {
-    if (photoScrollerRef.current) {
-      photoScrollerRef.current.goBig(index);
+  useEffect(() => {
+    if (editor) {
+      editor.injectCSS(customImageCSS);
     }
-  };
+  }, [editor]);
 
   async function getLocation() {
     try {
@@ -185,24 +188,68 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({ route, navigation }) =>
     }
   };
 
-  const addImageToEditor = (imageUri: string) => {
-    const imgTag = `<img src="${imageUri}" style="max-width: 100%; height: auto;" />`;
-    editor.commands.setContent(editor.getHTML() + imgTag);
-  };
+  const addImageToEditor = async (imageUri: string) => {
+    if (editor && editor.setContent) {
+      console.log("Inserting image with URI at cursor:", imageUri);
+      try {
+        const currentContent = await editor.getHTML();
+        const imageTag = `<img src="${imageUri}" style="max-width: 200px; max-height: 200px; object-fit: cover;" /><br />`;
+        const newContent = currentContent + imageTag;
+        editor.setContent(newContent);
+        editor.focus();
 
-  const addVideoToEditor = async (videoUri: string) => {
-    try {
-      const thumbnailUri = await getThumbnail(videoUri);
-      const videoTag = `
-        <video width="320" height="240" controls poster="${thumbnailUri}">
-          <source src="${videoUri}" type="video/mp4">
-          Your browser does not support the video tag.
-        </video>`;
-      editor.commands.setContent(editor.getHTML() + videoTag);
-    } catch (error) {
-      console.error("Error adding video: ", error);
+
+      } catch (error) {
+        console.error("Error retrieving editor content:", error);
+      }
+    } else {
+      console.error("Editor or setContent method is not available.");
     }
   };
+
+  const addVideoToEditor = (videoUri: string) => {
+    if (editor?.setLink) {
+      const linkWithSpacing = `${videoUri}<br><br>`; // Add line breaks after the URL for spacing
+      editor.setContent(linkWithSpacing); // Insert URL with extra spacing
+      editor.setLink({ href: videoUri}); // Set URL as clickable link, if possible
+    } else {
+      console.error("Editor instance is not available.");
+    }
+  };
+  
+
+
+  // Function to detect and handle link clicks to open the video player modal
+  const handleEditorLinkClick = async () => {
+    const content = await editor.getHTML();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(content, "text/html");
+    const links = doc.querySelectorAll("a");
+
+    links.forEach((link) => {
+      const url = link.getAttribute("href");
+      if (url) {
+        link.addEventListener("click", (event) => {
+          event.preventDefault(); // Prevents navigation
+          setVideoUri(url); // Set URL to open in the video player modal
+          setIsVideoModalVisible(true); // Open the modal
+        });
+      }
+    });
+  };
+
+  
+
+  const insertAudioToEditor = (audioUri: string) => {
+    if (editor?.setLink) {
+      const linkWithSpacing = `${audioUri}<br><br>`; // Add line breaks after the URL for spacing
+      editor.setContent(linkWithSpacing); // Insert URL with extra spacing
+      editor.setLink({ href: audioUri}); // Set URL as clickable link, if possible
+    } else {
+      console.error("Editor instance is not available.");
+    }
+  };
+  
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -268,13 +315,6 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({ route, navigation }) =>
               color={isLocationIconPressed ? "red" : NotePageStyles().saveText.color}
             />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => setIsTime(!isTime)}>
-            <Ionicons
-              name="time-outline"
-              size={30}
-              color={NotePageStyles().saveText.color}
-            />
-          </TouchableOpacity>
           <TouchableOpacity onPress={() => setIsTagging(!isTagging)}>
             <Ionicons
               name="pricetag-outline"
@@ -293,8 +333,12 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({ route, navigation }) =>
             addVideoToEditor={addVideoToEditor}
           />
           {viewAudio && (
-            <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} />
-          )}
+                <AudioContainer
+                  newAudio={newAudio}
+                  setNewAudio={setNewAudio}
+                  insertAudioToEditor={insertAudioToEditor}
+                />
+              )}
           {isTagging && <TagWindow tags={tags} setTags={setTags} />}
           {isLocation && (
             <LocationWindow location={locationRef.current} setLocation={(loc) => (locationRef.current = loc)} />
@@ -316,13 +360,12 @@ const EditNoteScreen: React.FC<EditNoteScreenProps> = ({ route, navigation }) =>
             >
               <RichText
                 editor={editor}
-                placeholder="Write your note here"
-                style={{
-                  minHeight: 400,
-                  backgroundColor: theme.primaryColor,
-                  color: theme.text,
-                  padding: 10,
-                }}
+                placeholder="Write Content Here..."
+                style={[
+                  NotePageStyles().editor,
+                  { backgroundColor: Platform.OS === "android" ? "white" : undefined },
+                ]}
+                onChange={handleEditorLinkClick} // Listen for content changes to detect link clicks
               />
             </ScrollView>
           </View>
