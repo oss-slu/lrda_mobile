@@ -30,39 +30,44 @@ const AudioContainer = ({ newAudio, setNewAudio, insertAudioToEditor }: AudioCon
           playsInSilentModeIOS: true,
           allowsRecordingIOS: true,
         });
-
+  
         const { recording } = await Audio.Recording.createAsync(
           Audio.RecordingOptionsPresets.HIGH_QUALITY
         );
-
+  
         setRecording(recording);
       } else {
         alert("Please grant permission to access the microphone");
       }
     } catch (err) {
       console.error("Failed to start recording", err);
+      setIsRecording(false); // Reset recording state if there’s an error
     }
   }
-
+  
   async function stopRecording() {
     setIsRecording(false);
     try {
       if (recording) {
         await recording.stopAndUnloadAsync();
-
+  
         const uri = recording.getURI();
+        setRecording(null); // Clear the recording reference to avoid overwriting
+  
         if (uri) {
-          const uploadedUri = await uploadAudio(uri);  // Upload audio to your storage
+          const uploadedUri = await uploadAudio(uri); // Upload audio to your storage
+  
+          // Create a new audio object with unique ID and add it to the newAudio array
           const newRecording = new AudioType({
             uuid: uuid.v4().toString(),
             type: "audio",
             uri: uploadedUri,
-            duration: "00:30",  // Assuming a 30-second audio
+            duration: "00:30", // Assuming a 30-second audio
             name: `Recording ${newAudio.length + 1}`,
           });
-
-          setNewAudio([...newAudio, newRecording]);
-
+  
+          setNewAudio((prevAudio) => [...prevAudio, newRecording]);
+  
           // Insert the uploaded audio into the editor
           insertAudioToEditor(uploadedUri);
         }
@@ -71,6 +76,7 @@ const AudioContainer = ({ newAudio, setNewAudio, insertAudioToEditor }: AudioCon
       console.error("Failed to stop recording", err);
     }
   }
+  
 
   return (
     <View style={styles.container}>
