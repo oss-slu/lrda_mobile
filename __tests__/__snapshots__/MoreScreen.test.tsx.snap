@@ -581,7 +581,7 @@ exports[`MorePage renders correctly 1`] = `
                   ]
                 }
               >
-                Dark Mode
+                Light Mode
               </Text>
               <RCTSwitch
                 accessibilityRole="switch"

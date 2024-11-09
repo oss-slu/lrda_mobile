@@ -1,32 +1,30 @@
-import React, { useEffect, useState, useRef } from "react";
+import { RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
+import { Ionicons } from "@expo/vector-icons";
+import * as Location from 'expo-location';
+import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
-  View,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
-  Keyboard,
+  SafeAreaView,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native";
-import * as Location from 'expo-location';
 import ToastMessage from 'react-native-toast-message';
-import { Ionicons } from "@expo/vector-icons";
-import { Media, AudioType } from "../models/media_class";
-import { getThumbnail } from "../utils/S3_proxy";
+import NotePageStyles from "../../styles/pages/NoteStyles";
+import AudioContainer from "../components/audio";
+import LoadingModal from "../components/LoadingModal";
+import LocationWindow from "../components/location";
+import PhotoScroller from "../components/photoScroller";
+import TagWindow from "../components/tagging";
+import { useTheme } from "../components/ThemeProvider";
+import TimeWindow from "../components/time";
+import { AudioType, Media } from "../models/media_class";
 import { User } from "../models/user_class";
 import ApiService from "../utils/api_calls";
-import PhotoScroller from "../components/photoScroller";
-import AudioContainer from "../components/audio";
-import TagWindow from "../components/tagging";
-import LocationWindow from "../components/location";
-import TimeWindow from "../components/time";
-import { RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
-import NotePageStyles from "../../styles/pages/NoteStyles";
-import { useTheme } from "../components/ThemeProvider";
-import LoadingModal from "../components/LoadingModal";
-import { TouchableWithoutFeedback } from "react-native";
+import { getThumbnail } from "../utils/S3_proxy";
 
 const user = User.getInstance();
 
@@ -53,9 +51,9 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
 
   // Add a guard check before calling editor.commands.focus()
   useEffect(() => {
-    if (editor?.commands?.focus) {
+    if (editor?.focus) {
       const timeout = setTimeout(() => {
-        editor.commands.focus();
+        editor.focus();
       }, 500);
       return () => clearTimeout(timeout);
     }
@@ -84,8 +82,9 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
   };
 
   const addImageToEditor = (imageUri: string) => {
-    const imgTag = `<img src="${imageUri}" style="max-width: 100%; height: auto;" />`;
-    editor.commands.setContent(editor.getHTML() + imgTag);
+    const imgTag = 
+    `<img src="${imageUri}" class="note-image" style="width: 100px !important; height: 100px !important; display: block; margin: 10px 0;" />`;
+    editor.setContent(editor.getHTML() + imgTag);
   };
 
   const addVideoToEditor = async (videoUri: string) => {
@@ -96,7 +95,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
           <source src="${videoUri}" type="video/mp4">
           Your browser does not support the video tag.
         </video>`;
-      editor.commands.setContent(editor.getHTML() + videoTag);
+      editor.setContent(editor.getHTML() + videoTag);
     } catch (error) {
       console.error("Error adding video: ", error);
     }
@@ -104,7 +103,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
 
   const insertAudioToEditor = (audioUri: string) => {
     const audioTag = `<audio controls src="${audioUri}"></audio>`;
-    editor.commands.setContent(editor.getHTML() + audioTag);
+    editor.setContent(editor.getHTML() + audioTag);
   };
 
   const handleShareButtonPress = () => {
@@ -158,11 +157,9 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
   
 
   return (
-   
     <SafeAreaView style={{ flex: 1}}>
       <View style={{flex: 1}}>
       {/* Top Section with Buttons and Title */}
-     
       <View style={[NotePageStyles().topContainer,]}>
         <View style={[NotePageStyles().topButtonsContainer]}>
           {/* Back Button */}
@@ -301,12 +298,12 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
         style={{ flex: 1 }}
         keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
       >
-       
           <View style={[NotePageStyles().richTextContainer]} testID="TenTapEditor">
           <RichText
             editor={editor}
             placeholder="Write something..."
             style={[NotePageStyles().editor, {backgroundColor: Platform.OS == "android" && "white"}]}
+
           />
            
           </View>
