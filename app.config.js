@@ -19,6 +19,7 @@ export default {
       bundleIdentifier: "register.edu.slu.cs.oss.lrda",
       config: {
         googleMapsApiKey: process.env.MAP_API_KEY
+        
       },
       buildNumber: "2"
     },
