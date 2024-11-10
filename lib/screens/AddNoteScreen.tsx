@@ -13,28 +13,18 @@ import {
   KeyboardAvoidingView,
 } from "react-native";
 import { WebViewMessageEvent } from 'react-native-webview';
-import * as Location from 'expo-location';
 import ToastMessage from 'react-native-toast-message';
-import NotePageStyles from "../../styles/pages/NoteStyles";
-import AudioContainer from "../components/audio";
 import LoadingModal from "../components/LoadingModal";
 import LocationWindow from "../components/location";
-import PhotoScroller from "../components/photoScroller";
 import TagWindow from "../components/tagging";
 import { useTheme } from "../components/ThemeProvider";
-import TimeWindow from "../components/time";
 import { AudioType, Media } from "../models/media_class";
 import { User } from "../models/user_class";
 import ApiService from "../utils/api_calls";
 import PhotoScroller from "../components/photoScroller";
 import AudioContainer from "../components/audio";
-import TagWindow from "../components/tagging";
-import LocationWindow from "../components/location";
 import TimeWindow from "../components/time";
-import { RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
 import NotePageStyles, { customImageCSS } from "../../styles/pages/NoteStyles";
-import { useTheme } from "../components/ThemeProvider";
-import LoadingModal from "../components/LoadingModal";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useNavigation } from "@react-navigation/native";
 
@@ -182,24 +172,23 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
       }
   };
 
-// Function to insert a clickable audio link
-const insertAudioToEditor = async (audioUri: string) => {
-  if (editor && editor.setContent && editor.getHTML) {
-    console.log("Inserting audio link with URI:", audioUri);
-    try {
-      const currentContent = await editor.getHTML();
-      const audioLinkHTML = `<a href="${audioUri}" target="_blank">Play Audio</a><br />`;
-      const newContent = currentContent + audioLinkHTML;
-      appNavigation.navigate("AudioPlayer", { audioUri });
-      editor.setContent(newContent);
-      editor.focus();
-    } catch (error) {
-      console.error("Error inserting audio link into editor content:", error);
+  const insertAudioToEditor = async (audioUri: string) => {
+    if (editor?.setContent && editor?.getHTML) {
+      try {
+        // Get the current content from the editor
+        const currentContent = await editor.getHTML();
+        // Create the new audio link with line breaks for spacing
+        const audioLink = `${currentContent}<a href="${audioUri}">${audioUri}</a><br>`;
+        // Set the combined content back to the editor
+        editor.setContent(audioLink);
+        editor.focus();
+      } catch (error) {
+        console.error("Error adding audio link to editor:", error);
+      }
+    } else {
+      console.error("Editor instance is not available.");
     }
-  } else {
-    console.error("Editor or setContent method is not available.");
-  }
-};
+  };
 
   const handleShareButtonPress = async () => {
     setIsPublished(!isPublished);
