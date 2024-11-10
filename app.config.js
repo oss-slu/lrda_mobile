@@ -4,7 +4,7 @@ export default {
   expo: {
     name: "Where's Religion?",
     slug: "lrda_mobile",
-    version: "1.0.3",
+    version: "1.0.2",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
