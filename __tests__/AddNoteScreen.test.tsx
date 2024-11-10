@@ -60,7 +60,7 @@ describe('AddNoteScreen', () => {
     const { getByTestId } = render(<AddNoteScreen route={routeMock as any} />);
 
     // Check if the RichEditor is rendered
-    expect(getByTestId('RichEditor')).toBeTruthy();
+    expect(getByTestId('TenTapEditor')).toBeTruthy();
   });
 
 

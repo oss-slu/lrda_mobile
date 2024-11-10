@@ -1,20 +1,20 @@
-import React, { useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import React from "react";
 import {
-  View,
-  Text,
-  ScrollView,
+  Dimensions,
   Image,
   Linking,
-  TouchableOpacity,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
-  Dimensions,
-  Switch
+  Switch,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { User } from "../models/user_class";
-import { useTheme } from "../components/ThemeProvider";
 import { useDispatch } from "react-redux";
+import { useTheme } from "../components/ThemeProvider";
+import { User } from "../models/user_class";
 
 
 
@@ -145,7 +145,8 @@ export default function MorePage() {
           <View style={styles.textContainer}>
             <View style={styles.buttonContainer}>
               <View style={[styles.switchContainer, { backgroundColor: theme.background }]}>
-                <Text style={[styles.switchText, { color: theme.text }]}>Dark Mode</Text>
+                <Text style={[styles.switchText, {color: theme.text}]}>{isDarkmode ? "Dark Mode" : "Light Mode"}</Text>
+                {/* Use theme object in theme.primaryColor to apply colors to the switch */}
                 <Switch
                   testID="dark-mode-switch"
                   trackColor={{
@@ -285,6 +286,12 @@ const styles = StyleSheet.create({
     height: undefined,
     resizeMode: "cover",
   },
+  lightModeText: {
+    color: '#000000', /* making sure color black is specified with color code */
+  },
+  darkModeText: {
+    color: '#ffffff', /* same with black */
+  }
 });
 
           

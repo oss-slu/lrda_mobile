@@ -1,4 +1,7 @@
-import React, { useEffect, useState, useRef } from "react";
+import { RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
+import { Ionicons } from "@expo/vector-icons";
+import * as Location from 'expo-location';
+import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
   View,
@@ -12,9 +15,15 @@ import {
 import { WebViewMessageEvent } from 'react-native-webview';
 import * as Location from 'expo-location';
 import ToastMessage from 'react-native-toast-message';
-import { Ionicons } from "@expo/vector-icons";
-import { Media, AudioType } from "../models/media_class";
-import { getThumbnail } from "../utils/S3_proxy";
+import NotePageStyles from "../../styles/pages/NoteStyles";
+import AudioContainer from "../components/audio";
+import LoadingModal from "../components/LoadingModal";
+import LocationWindow from "../components/location";
+import PhotoScroller from "../components/photoScroller";
+import TagWindow from "../components/tagging";
+import { useTheme } from "../components/ThemeProvider";
+import TimeWindow from "../components/time";
+import { AudioType, Media } from "../models/media_class";
 import { User } from "../models/user_class";
 import ApiService from "../utils/api_calls";
 import PhotoScroller from "../components/photoScroller";
