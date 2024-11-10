@@ -4,7 +4,7 @@ export default {
   expo: {
     name: "Where's Religion?",
     slug: "lrda_mobile",
-    version: "1.0.4",
+    version: "1.0.3",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -21,7 +21,7 @@ export default {
         googleMapsApiKey: process.env.MAP_API_KEY
         
       },
-      buildNumber: "3"
+      buildNumber: "1"
     },
     android: {
       adaptiveIcon: {
