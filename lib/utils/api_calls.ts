@@ -95,44 +95,51 @@ static async fetchMessages(
   }
 
 
-  /**
-   * Fetches the name of the creator by querying the API with the given creatorId.
-   * @param {string} creatorId - The UID of the creator.
-   * @returns {Promise<string>} The name of the creator.
-   */
-  static async fetchCreatorName(creatorId: string): Promise<string> {
-    try {
-      const url = "https://lived-religion-dev.rerum.io/deer-lr/query";
-      const headers = {
-        "Content-Type": "application/json",
-      };
-      const body = {
-        "$or": [
-          { "@type": "Agent", "uid": creatorId },
-          { "@type": "foaf:Agent", "uid": creatorId }
-        ]
-      };
+ /**
+ * Fetches the name of the creator by querying the API with the given creatorId.
+ * @param {string} creatorId - The UID of the creator.
+ * @returns {Promise<string>} The name of the creator.
+ */
+static async fetchCreatorName(creatorId: string): Promise<string> {
+  try {
+    const url = "https://lived-religion-dev.rerum.io/deer-lr/query";
+    const headers = {
+      "Content-Type": "application/json",
+    };
+    const body = {
+      "$or": [
+        { "@type": "Agent", "uid": creatorId },
+        { "@type": "foaf:Agent", "uid": creatorId }
+      ]
+    };
 
-      console.log(`Querying with UID: ${creatorId}`);
+    console.log(`Querying with UID: ${creatorId}`);
 
-      const response = await fetch(url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(body),
-      });
+    const response = await fetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(body),
+    });
 
-      const data = await response.json();
-      console.log(`Data:`, data);
-      if (data.length && data[0].name) {
-        return data[0].name;
-      } else {
-        throw new Error("Creator not found or no name attribute.");
-      }
-    } catch (error) {
-      console.error(`Error fetching creator name:`, error, creatorId);
-      throw error;
+    const data = await response.json();
+    console.log(`Received data:`, data);
+
+    // Check if data is a non-empty array and contains a name attribute
+    if (Array.isArray(data) && data.length > 0 && data[0].name) {
+      return data[0].name;
+    } else if (Array.isArray(data) && data.length > 0) {
+      console.warn(`Creator found but 'name' attribute is missing for UID: ${creatorId}`);
+      return "Unknown Creator";
+    } else {
+      console.warn(`Creator not found for UID: ${creatorId}`);
+      return "Creator not available";
     }
+  } catch (error) {
+    console.error(`Error fetching creator name:`, error, creatorId);
+    return "Error retrieving creator";
   }
+}
+
   
     /**
      * Creates user data in the API.
