@@ -24,7 +24,9 @@
         "PROJECT_ID": "lrda-75cf4",
         "STORAGE_BUCKET": "lrda-75cf4.appspot.com",
         "MESSAGING_SENDER_ID": "840259501846",
-        "APP_ID": "1:840259501846:web:7bda1da9535d6f746a1a37"
+        "APP_ID": "1:840259501846:web:7bda1da9535d6f746a1a37",
+        "API_BASE_URL": "https://lived-religion-dev.rerum.io/deer-lr/"
+        
       }
     }
   },

@@ -50,34 +50,76 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
   const [isTime, setIsTime] = useState<boolean>(false);
   const [isPublished, setIsPublished] = useState<boolean>(false);
   const [location, setLocation] = useState<{ latitude: number, longitude: number } | null>(null);
+  const [locationButtonColor, setLocationButtonColor] = useState<string>("#000"); // Default color
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [isVideoModalVisible, setIsVideoModalVisible] = useState<boolean>(false);
   const [videoUri, setVideoUri] = useState<string | null>(null);
 
   const editor = useEditorBridge({
     initialContent: bodyText || "",
-    autofocus: true,
     avoidIosKeyboard: true,
   });
   
   const { theme } = useTheme();
   const titleTextRef = useRef<TextInput>(null);
   const scrollViewRef = useRef<KeyboardAwareScrollView>(null);
-
-  useEffect(() => {
-    if (editor?.focus) {
-      const timeout = setTimeout(() => {
-        editor.focus();
-      }, 500);
-      return () => clearTimeout(timeout);
-    }
-  }, [editor]);
+  
 
   useEffect(() => {
     if (editor) {
       editor.injectCSS(customImageCSS);
     }
   }, [editor]);
+
+  const setLocationToZero = () => {
+    setLocation({ latitude: 0, longitude: 0 });
+    setLocationButtonColor("red");
+    console.log("Location set to (0, 0) due to permission denial or manual setting.");
+  };
+
+  const fetchCurrentLocation = async () => {
+    console.log("Requesting location permission...");
+    const { status } = await Location.requestForegroundPermissionsAsync();
+
+    if (status === 'granted') {
+      console.log("Location permission granted. Fetching current location...");
+      try {
+        const userLocation = await Location.getCurrentPositionAsync({});
+        console.log("User location fetched:", userLocation.coords);
+        setLocation({
+          latitude: userLocation.coords.latitude,
+          longitude: userLocation.coords.longitude,
+        });
+        setLocationButtonColor("#000"); // Reset icon color to default
+      } catch (error) {
+        console.error("Error fetching location:", error);
+        Alert.alert("Error", "Failed to retrieve location.");
+      }
+    } else {
+      console.log("Location permission denied. Setting location to (0, 0).");
+      setLocationToZero();
+    }
+  };
+
+  const toggleLocation = () => {
+    if (location && location.latitude === 0 && location.longitude === 0) {
+      console.log("Re-fetching current location...");
+      fetchCurrentLocation();
+    } else {
+      setLocationToZero();
+    }
+  };
+
+  // Automatically check location on component mount
+  useEffect(() => {
+    fetchCurrentLocation();
+  }, []);
+  // Toggle location to (0, 0) when the location button is pressed
+  const toggleLocationToZero = () => {
+    setLocationToZero();
+  };
+
+  
 
   const toggleLocationVisibility = async () => {
     if (isLocation) {
@@ -221,8 +263,9 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
           ref={scrollViewRef}
           contentContainerStyle={{ flexGrow: 1 }}
           enableOnAndroid={true}
-          extraScrollHeight={Platform.OS === 'ios' ? 150 : 0}
+          extraScrollHeight={Platform.OS === 'ios' ? 80 : 0}
           keyboardOpeningTime={0}
+          keyboardShouldPersistTaps="handled" 
         >
           <View style={{ flex: 1 }}>
             <View style={NotePageStyles().topContainer}>
@@ -237,6 +280,12 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
                   placeholderTextColor={NotePageStyles().title.color}
                   onChangeText={setTitleText}
                   value={titleText}
+                  onFocus={() => {
+                    // Remove focus from the editor when the title is being edited
+                    if (editor?.blur) {
+                      editor.blur();
+                    }
+                  }}
                 />
                 <TouchableOpacity style={NotePageStyles().topButtons} onPress={handleShareButtonPress}>
                   <Ionicons
@@ -253,9 +302,9 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
                 <TouchableOpacity onPress={() => setViewAudio(!viewAudio)}>
                   <Ionicons name="mic-outline" size={30} color={NotePageStyles().saveText.color} />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={toggleLocationVisibility}>
-                  <Ionicons name="location-outline" size={30} color={NotePageStyles().saveText.color} />
-                </TouchableOpacity>
+                <TouchableOpacity onPress={toggleLocation}>
+                <Ionicons name="location-outline" size={30} color={locationButtonColor} />
+              </TouchableOpacity>
                 <TouchableOpacity onPress={() => setIsTime(!isTime)}>
                   <Ionicons name="time-outline" size={30} color={NotePageStyles().saveText.color} />
                 </TouchableOpacity>
