@@ -2,10 +2,18 @@ import { Platform, StyleSheet } from "react-native";
 import { lightTheme, darkTheme } from "../colors";
 import Constants from "expo-constants";
 import { useTheme } from "../../lib/components/ThemeProvider";
-
+// Define custom CSS as a separate string
+// In NotePageStyles.ts
+export const customImageCSS = `
+  .ProseMirror img {
+    max-width: 200px !important;
+    max-height: 200px !important;
+    object-fit: cover !important;
+    display: inline-block; /* Ensure images don't expand to fit container width */
+  }
+`;
 const NotePageStyles = () => {
   const { theme } = useTheme();
-
   return StyleSheet.create({
     topContainer: {
       minHeight: 140,
@@ -50,9 +58,15 @@ const NotePageStyles = () => {
       marginBottom: 4,
       width: "100%",
       minHeight: 200, // Adjust for better visibility
-      color: theme.text, // Ensure text is visible
-      padding: 10, // Add padding for better input experience
+      color: theme.text,
+      padding: 10,
     },
+   // Define this image style
+   editorImage: {
+    width: 50,
+    height: 50,
+    resizeMode: 'cover', // Ensures the image keeps its aspect ratio
+  },
     textEditorContainer: {
       minHeight: 300, // Set a minimum height for the editor
       flex: 1, // Ensure the editor takes up available space
@@ -105,14 +119,15 @@ const NotePageStyles = () => {
       justifyContent: "center",
       alignSelf: "center",
     },
-
     //editor styles
     richTextContainer: {
       height: Platform.OS == "android"? "90%" : "100%" 
     },
     //tool bar styles
     toolBar: {
-      height: 50
+      height: 50,
+      position:'relative',
+      bottom: Platform.OS=='ios'? 20:0 && Platform.OS =='android'? 20:0,
     },
     closeKeyboardButton: {
       padding: 10,
@@ -121,5 +136,4 @@ const NotePageStyles = () => {
     },
   });
 };
-
 export default NotePageStyles;

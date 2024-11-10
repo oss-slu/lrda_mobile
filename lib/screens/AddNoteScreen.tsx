@@ -83,9 +83,23 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
     }
   };
 
-  const addImageToEditor = (imageUri: string) => {
-    const imgTag = `<img src="${imageUri}" style="max-width: 100%; height: auto;" />`;
-    editor.commands.setContent(editor.getHTML() + imgTag);
+  const addImageToEditor = async (imageUri: string) => {
+    if (editor && editor.setContent) {
+      console.log("Inserting image with URI at cursor:", imageUri);
+      try {
+        const currentContent = await editor.getHTML();
+        const imageTag = `<img src="${imageUri}" style="max-width: 200px; max-height: 200px; object-fit: cover;" /><br />`;
+        const newContent = currentContent + imageTag;
+        editor.setContent(newContent);
+        editor.focus();
+
+
+      } catch (error) {
+        console.error("Error retrieving editor content:", error);
+      }
+    } else {
+      console.error("Editor or setContent method is not available.");
+    }
   };
 
   const addVideoToEditor = async (videoUri: string) => {
