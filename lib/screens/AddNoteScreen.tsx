@@ -49,7 +49,6 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [isVideoModalVisible, setIsVideoModalVisible] = useState<boolean>(false);
   const [videoUri, setVideoUri] = useState<string | null>(null); // Store the URI of the video to be played
-
   const editor = useEditorBridge({
     initialContent: bodyText || "",
     autofocus: true,
@@ -182,7 +181,7 @@ const insertAudioToEditor = async (audioUri: string) => {
       const currentContent = await editor.getHTML();
       const audioLinkHTML = `<a href="${audioUri}" target="_blank">Play Audio</a><br />`;
       const newContent = currentContent + audioLinkHTML;
-
+      appNavigation.navigate("AudioPlayer", { audioUri });
       editor.setContent(newContent);
       editor.focus();
     } catch (error) {
