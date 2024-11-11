@@ -323,7 +323,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
               <LoadingImage
                 imageURI={resolvedImageURI}
                 type={ImageType}
-                isImage={Boolean(ImageURI)}
+                isImage={true}
                 useCustomDimensions={true}
                 customWidth={100}
                 customHeight={100}

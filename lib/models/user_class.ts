@@ -159,6 +159,7 @@ export class User {
       console.error("Error during Firebase logout", error);
     }
   }
+
   public async getId(): Promise<string | null> {
     if (!this.userData) {
       this.userData = await this.loadUser();
