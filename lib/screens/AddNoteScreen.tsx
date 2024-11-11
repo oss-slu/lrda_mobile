@@ -168,20 +168,19 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
         displayErrorInEditor(`Error inserting image: ${error.message}`);
       }
     };
-  
-
-  // Function to add a video
-  const addVideoToEditor = async (videoUri: string) => {
-    try {
-      const currentContent = await editor.getHTML();
-      const videoLink = `${currentContent}<a href="${videoUri}">${videoUri}</a><br>`;
-      editor.setContent(videoLink);
-      editor.focus();
-    } catch (error) {
-      console.error("Error adding video:", error);
-      displayErrorInEditor(`Error adding video: ${error.message}`);
-    }
-  };
+    
+    const addVideoToEditor = async (videoUri: string) => {
+      try {
+        const currentContent = await editor.getHTML();
+        const videoLink = `${currentContent}<a href="${videoUri}">${videoUri}</a><br>`;
+        editor.setContent(videoLink);
+        editor.focus();
+      } catch (error) {
+        console.error("Error adding video:", error);
+        displayErrorInEditor(`Error adding video: ${error.message}`);
+      }
+    };
+    
 
   
     // Function to add audio
@@ -313,6 +312,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
                 setNewMedia={setNewMedia}
                 insertImageToEditor={insertImageToEditor}
                 addVideoToEditor={addVideoToEditor}
+                displayErrorInEditor={displayErrorInEditor}
               />
               {viewAudio && (
                 <AudioContainer
