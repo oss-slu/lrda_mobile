@@ -2,6 +2,8 @@ import { UserData } from "../../types";
 /**
  * Provides methods for interacting with the API to fetch, create, update, and delete notes.
  */
+const API_BASE_URL = process.env.API_BASE_URL || "https://lived-religion-dev.rerum.io/deer-lr/";
+
 export default class ApiService {
   /**
  * Fetches messages from the API, with optional pagination.
@@ -22,8 +24,7 @@ static async fetchMessages(
   allResults: any[] = []
 ): Promise<any[]> {
   try {
-    const url = `https://lived-religion-dev.rerum.io/deer-lr/query?limit=${limit}&skip=${skip}`;
-
+    const url = `${API_BASE_URL}query?limit=${limit}&skip=${skip}`;
     const headers = {
       "Content-Type": "application/json",
     };
@@ -66,7 +67,7 @@ static async fetchMessages(
    */
   static async fetchUserData(uid: string): Promise<UserData | null> {
     try {
-      const url = "https://lived-religion-dev.rerum.io/deer-lr/query";
+      const url = `${API_BASE_URL}query`
       const headers = {
         "Content-Type": "application/json",
       };
@@ -95,44 +96,51 @@ static async fetchMessages(
   }
 
 
-  /**
-   * Fetches the name of the creator by querying the API with the given creatorId.
-   * @param {string} creatorId - The UID of the creator.
-   * @returns {Promise<string>} The name of the creator.
-   */
-  static async fetchCreatorName(creatorId: string): Promise<string> {
-    try {
-      const url = "https://lived-religion-dev.rerum.io/deer-lr/query";
-      const headers = {
-        "Content-Type": "application/json",
-      };
-      const body = {
-        "$or": [
-          { "@type": "Agent", "uid": creatorId },
-          { "@type": "foaf:Agent", "uid": creatorId }
-        ]
-      };
+ /**
+ * Fetches the name of the creator by querying the API with the given creatorId.
+ * @param {string} creatorId - The UID of the creator.
+ * @returns {Promise<string>} The name of the creator.
+ */
+static async fetchCreatorName(creatorId: string): Promise<string> {
+  try {
+    const url = `${API_BASE_URL}query`
+    const headers = {
+      "Content-Type": "application/json",
+    };
+    const body = {
+      "$or": [
+        { "@type": "Agent", "uid": creatorId },
+        { "@type": "foaf:Agent", "uid": creatorId }
+      ]
+    };
 
-      console.log(`Querying with UID: ${creatorId}`);
+    console.log(`Querying with UID: ${creatorId}`);
 
-      const response = await fetch(url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(body),
-      });
+    const response = await fetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(body),
+    });
 
-      const data = await response.json();
-      console.log(`Data:`, data);
-      if (data.length && data[0].name) {
-        return data[0].name;
-      } else {
-        throw new Error("Creator not found or no name attribute.");
-      }
-    } catch (error) {
-      console.error(`Error fetching creator name:`, error, creatorId);
-      throw error;
+    const data = await response.json();
+    console.log(`Received data:`, data);
+
+    // Check if data is a non-empty array and contains a name attribute
+    if (Array.isArray(data) && data.length > 0 && data[0].name) {
+      return data[0].name;
+    } else if (Array.isArray(data) && data.length > 0) {
+      console.warn(`Creator found but 'name' attribute is missing for UID: ${creatorId}`);
+      return "Unknown Creator";
+    } else {
+      console.warn(`Creator not found for UID: ${creatorId}`);
+      return "Creator not available";
     }
+  } catch (error) {
+    console.error(`Error fetching creator name:`, error, creatorId);
+    return "Error retrieving creator";
   }
+}
+
   
     /**
      * Creates user data in the API.
@@ -141,7 +149,7 @@ static async fetchMessages(
      */
     static async createUserData(userData: UserData) {
       try {
-        const response = await fetch("https://lived-religion-dev.rerum.io/deer-lr/create", {
+        const response = await fetch(`${API_BASE_URL}create`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -166,7 +174,7 @@ static async fetchMessages(
    */
   static async deleteNoteFromAPI(id: string, userId: string): Promise<boolean> {
     try {
-      const url = "https://lived-religion-dev.rerum.io/deer-lr/delete";
+      const url = `${API_BASE_URL}delete`;
       const headers = {
         "Content-Type": "text/plain; charset=utf-8",
       };
@@ -199,7 +207,7 @@ static async fetchMessages(
    * @returns {Promise<Response>} The response from the API.
    */
   static async writeNewNote(note: any) {
-    return fetch("https://lived-religion-dev.rerum.io/deer-lr/create", {
+    return fetch(`${API_BASE_URL}/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -226,7 +234,7 @@ static async fetchMessages(
    * @returns {Promise<Response>} The response from the API.
    */
   static async overwriteNote(note: any) {
-    return await fetch("https://lived-religion-dev.rerum.io/deer-lr/overwrite", {
+    return await fetch(`${API_BASE_URL}overwrite`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -250,7 +258,7 @@ static async fetchMessages(
 
   static async searchMessages(query: string): Promise<any[]> {
     try {
-      const url = "https://lived-religion-dev.rerum.io/deer-lr/query";
+      const url = `${API_BASE_URL}query`;
       const headers = {
         "Content-Type": "application/json",
       };

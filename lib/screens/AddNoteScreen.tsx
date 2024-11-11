@@ -50,34 +50,76 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
   const [isTime, setIsTime] = useState<boolean>(false);
   const [isPublished, setIsPublished] = useState<boolean>(false);
   const [location, setLocation] = useState<{ latitude: number, longitude: number } | null>(null);
+  const [locationButtonColor, setLocationButtonColor] = useState<string>("#000"); // Default color
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [isVideoModalVisible, setIsVideoModalVisible] = useState<boolean>(false);
   const [videoUri, setVideoUri] = useState<string | null>(null);
 
   const editor = useEditorBridge({
     initialContent: bodyText || "",
-    autofocus: true,
     avoidIosKeyboard: true,
   });
   
   const { theme } = useTheme();
   const titleTextRef = useRef<TextInput>(null);
   const scrollViewRef = useRef<KeyboardAwareScrollView>(null);
-
-  useEffect(() => {
-    if (editor?.focus) {
-      const timeout = setTimeout(() => {
-        editor.focus();
-      }, 500);
-      return () => clearTimeout(timeout);
-    }
-  }, [editor]);
+  
 
   useEffect(() => {
     if (editor) {
       editor.injectCSS(customImageCSS);
     }
   }, [editor]);
+
+  const setLocationToZero = () => {
+    setLocation({ latitude: 0, longitude: 0 });
+    setLocationButtonColor("red");
+    console.log("Location set to (0, 0) due to permission denial or manual setting.");
+  };
+
+  const fetchCurrentLocation = async () => {
+    console.log("Requesting location permission...");
+    const { status } = await Location.requestForegroundPermissionsAsync();
+
+    if (status === 'granted') {
+      console.log("Location permission granted. Fetching current location...");
+      try {
+        const userLocation = await Location.getCurrentPositionAsync({});
+        console.log("User location fetched:", userLocation.coords);
+        setLocation({
+          latitude: userLocation.coords.latitude,
+          longitude: userLocation.coords.longitude,
+        });
+        setLocationButtonColor("#000"); // Reset icon color to default
+      } catch (error) {
+        console.error("Error fetching location:", error);
+        Alert.alert("Error", "Failed to retrieve location.");
+      }
+    } else {
+      console.log("Location permission denied. Setting location to (0, 0).");
+      setLocationToZero();
+    }
+  };
+
+  const toggleLocation = () => {
+    if (location && location.latitude === 0 && location.longitude === 0) {
+      console.log("Re-fetching current location...");
+      fetchCurrentLocation();
+    } else {
+      setLocationToZero();
+    }
+  };
+
+  // Automatically check location on component mount
+  useEffect(() => {
+    fetchCurrentLocation();
+  }, []);
+  // Toggle location to (0, 0) when the location button is pressed
+  const toggleLocationToZero = () => {
+    setLocationToZero();
+  };
+
+  
 
   const toggleLocationVisibility = async () => {
     if (isLocation) {
@@ -107,61 +149,53 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
       }
     }
   };
+    // Function to display an error message inside the editor
+    const displayErrorInEditor = async (errorMessage) => {
+      const currentContent = await editor.getHTML();
+      const errorTag = `<p style="color: red; font-weight: bold;">${errorMessage}</p><br />`;
+      editor.setContent(currentContent + errorTag);
+      editor.focus();
+    };
 
-  const insertImageToEditor = async (imageUri: string) => {
-    if (editor && editor.setContent) {
-      console.log("Inserting image with URI at cursor:", imageUri);
+    const insertImageToEditor = async (imageUri: string) => {
       try {
         const currentContent = await editor.getHTML();
         const imageTag = `<img src="${imageUri}" style="max-width: 200px; max-height: 200px; object-fit: cover;" /><br />`;
-        const newContent = currentContent + imageTag;
-        editor.setContent(newContent);
+        editor.setContent(currentContent + imageTag);
         editor.focus();
-
-
       } catch (error) {
-        console.error("Error retrieving editor content:", error);
+        console.error("Error inserting image:", error);
+        displayErrorInEditor(`Error inserting image: ${error.message}`);
       }
-    } else {
-      console.error("Editor or setContent method is not available.");
-    }
-  };
-
-  const addVideoToEditor = async (videoUri: string) => {
-    if (editor?.setContent && editor?.getHTML) {
+    };
+    
+    const addVideoToEditor = async (videoUri: string) => {
       try {
-        // Get the current content from the editor
         const currentContent = await editor.getHTML();
-        // Create the new video link with line breaks for spacing
         const videoLink = `${currentContent}<a href="${videoUri}">${videoUri}</a><br>`;
-        // Set the combined content back to the editor
         editor.setContent(videoLink);
         editor.focus();
       } catch (error) {
-        console.error("Error adding video link to editor:", error);
+        console.error("Error adding video:", error);
+        displayErrorInEditor(`Error adding video: ${error.message}`);
       }
-    } else {
-      console.error("Editor instance is not available.");
-    }
-  };
+    };
+    
+
   
-  const insertAudioToEditor = async (audioUri: string) => {
-    if (editor?.setContent && editor?.getHTML) {
+    // Function to add audio
+    const insertAudioToEditor = async (audioUri: string) => {
       try {
-        // Get the current content from the editor
         const currentContent = await editor.getHTML();
-        // Create the new audio link with line breaks for spacing
         const audioLink = `${currentContent}<a href="${audioUri}">${audioUri}</a><br>`;
-        // Set the combined content back to the editor
         editor.setContent(audioLink);
         editor.focus();
       } catch (error) {
-        console.error("Error adding audio link to editor:", error);
+        console.error("Error adding audio:", error);
+        displayErrorInEditor(`Error adding audio: ${error.message}`);
       }
-    } else {
-      console.error("Editor instance is not available.");
-    }
-  };
+    };
+  
   
   
 
@@ -221,8 +255,9 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
           ref={scrollViewRef}
           contentContainerStyle={{ flexGrow: 1 }}
           enableOnAndroid={true}
-          extraScrollHeight={Platform.OS === 'ios' ? 150 : 0}
+          extraScrollHeight={Platform.OS === 'ios' ? 80 : 0}
           keyboardOpeningTime={0}
+          keyboardShouldPersistTaps="handled" 
         >
           <View style={{ flex: 1 }}>
             <View style={NotePageStyles().topContainer}>
@@ -237,6 +272,12 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
                   placeholderTextColor={NotePageStyles().title.color}
                   onChangeText={setTitleText}
                   value={titleText}
+                  onFocus={() => {
+                    // Remove focus from the editor when the title is being edited
+                    if (editor?.blur) {
+                      editor.blur();
+                    }
+                  }}
                 />
                 <TouchableOpacity style={NotePageStyles().topButtons} onPress={handleShareButtonPress}>
                   <Ionicons
@@ -253,9 +294,9 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
                 <TouchableOpacity onPress={() => setViewAudio(!viewAudio)}>
                   <Ionicons name="mic-outline" size={30} color={NotePageStyles().saveText.color} />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={toggleLocationVisibility}>
-                  <Ionicons name="location-outline" size={30} color={NotePageStyles().saveText.color} />
-                </TouchableOpacity>
+                <TouchableOpacity onPress={toggleLocation}>
+                <Ionicons name="location-outline" size={30} color={locationButtonColor} />
+              </TouchableOpacity>
                 <TouchableOpacity onPress={() => setIsTime(!isTime)}>
                   <Ionicons name="time-outline" size={30} color={NotePageStyles().saveText.color} />
                 </TouchableOpacity>
@@ -271,6 +312,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
                 setNewMedia={setNewMedia}
                 insertImageToEditor={insertImageToEditor}
                 addVideoToEditor={addVideoToEditor}
+                displayErrorInEditor={displayErrorInEditor}
               />
               {viewAudio && (
                 <AudioContainer
