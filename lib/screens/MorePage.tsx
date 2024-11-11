@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -8,7 +8,8 @@ import {
   SafeAreaView,
   StyleSheet,
   Dimensions,
-  Switch
+  Switch,
+  Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
@@ -50,60 +51,103 @@ export default function MorePage() {
         <Text style={[styles.headText, { color: theme.text }]}>About</Text>
       </View>
       <SafeAreaView>
-        <ScrollView contentContainerStyle={styles.container}>
+        <ScrollView contentContainerStyle={[styles.container, { paddingBottom: 140 }]}>
+          {/* About Section Content */}
           <View style={styles.textContainer}>
             <Text style={styles.titleText}>Where’s Religion?</Text>
+            <Text style={styles.bodyText}>Where’s Religion? is an open-source mobile and desktop web application...</Text>
+            <Text style={styles.bodyText}>Being a tool that initiates engaged learning and in-person experience...</Text>
+            <Text style={styles.bodyText}>Initiated in 2018, the Where’s Religion? is a keystone outcome...</Text>
+          </View>
 
-            <Text style={styles.bodyText}>
-              Where’s Religion? is an open-source mobile and desktop web application developed by humanities faculty and IT professionals at Saint Louis University that supports in-person research, remote data entry, media sharing, and mapping...
-            </Text>
-            
-            <Text style={styles.bodyText}>
-              We believe that it is time for our research methodologies in the humanities to catch up with the multisensory realities of human experience and that creating a platform for collecting, organizing, and sharing images, videos, and sounds...
-            </Text>
-            
-            <Text style={styles.bodyText}>
-              Being a tool that initiates engaged learning and in-person experience, we seek to build greater recognition of social dynamics and social context in American public life...
-            </Text>
-            
-            <Text style={styles.bodyText}>
-              Initiated in 2018, the Where’s Religion? is a keystone outcome of the Lived Religion in the Digital Age project at Saint Louis University...
-            </Text>
-
-            <View style={styles.buttonContainer}>
-              <View style={[styles.switchContainer, { backgroundColor: theme.background }]}>
-                <Text style={[styles.switchText, { color: theme.text }]}>Dark Mode</Text>
-                <Switch
-                  testID="dark-mode-switch"
-                  trackColor={{
-                    false: "black",
-                    true: theme.text,
-                  }}
-                  thumbColor={theme.primaryColor}
-                  onValueChange={handleToggleDarkMode}
-                  value={isDarkmode}
-                />
+          {/* Initiative Team Section */}
+          <View style={styles.initiativeTeamSection}>
+            <Text style={styles.initiativeTeamTitle}>The Saint Louis University Team</Text>
+            <View style={styles.initiativeTeamMembers}>
+              <View style={styles.initiativeMemberContainer}>
+                <Image source={require('../../assets/Rachel.jpg')} style={styles.teamImage} />
+                <Text style={styles.initiativeMemberName}>Rachel Lindsey</Text>
+                <Text style={styles.initiativeMemberRole}>Co-Director</Text>
+              </View>
+              <View style={styles.initiativeMemberContainer}>
+                <Image source={require('../../assets/Pauline.jpg')} style={styles.teamImage} />
+                <Text style={styles.initiativeMemberName}>Pauline Lee</Text>
+                <Text style={styles.initiativeMemberRole}>Co-Director</Text>
+              </View>
+            </View>
+            <View style={styles.initiativeTeamMembers}>
+              <View style={styles.initiativeMemberContainer}>
+                <Image source={require('../../assets/Adam.jpg')} style={styles.teamImage} />
+                <Text style={styles.initiativeMemberName}>Adam Park</Text>
+                <Text style={styles.initiativeMemberRole}>Associate Director</Text>
               </View>
             </View>
           </View>
 
-          <View style={[styles.logoutContainer, { backgroundColor: theme.background }]}>
+          {/* Development Team Section */}
+          <View style={styles.teamSection}>
+            <Text style={styles.teamTitle}>The Development Team</Text>
+            <View style={styles.teamMembersRow}>
+              <View style={styles.teamMemberContainer}>
+                <Image source={require('../../assets/Patrick.jpg')} style={styles.teamImage} />
+                <Text style={styles.teamName}>Patrick Cuba</Text>
+                <Text style={styles.teamRole}>IT Architect</Text>
+              </View>
+              <View style={styles.teamMemberContainer}>
+                <Image source={require('../../assets/Bryan.jpg')} style={styles.teamImage} />
+                <Text style={styles.teamName}>Bryan Haberberger</Text>
+                <Text style={styles.teamRole}>Full Stack Developer</Text>
+              </View>
+            </View>
+            <View style={styles.teamMembersRow}>
+              <View style={styles.teamMemberContainer}>
+                <Image source={require('../../assets/Yash.jpg')} style={styles.teamImage} />
+                <Text style={styles.teamName}>Yash Bhatia</Text>
+                <Text style={styles.teamRole}>Software Engineer</Text>
+              </View>
+              <View style={styles.teamMemberContainer}>
+                <Image source={require('../../assets/Izak.jpg')} style={styles.teamImage} />
+                <Text style={styles.teamName}>Izak Robles</Text>
+                <Text style={styles.teamRole}>Developer</Text>
+              </View>
+            </View>
+            <View style={styles.teamMembersRow}>
+              <View style={styles.teamMemberContainer}>
+                <Image source={require('../../assets/Stuart.jpg')} style={styles.teamImage} />
+                <Text style={styles.teamName}>Stuart Ray</Text>
+                <Text style={styles.teamRole}>Developer</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Dark Mode and Logout at the End of ScrollView */}
+          <View style={styles.bottomContainer}>
+            <View style={[styles.switchContainer, { backgroundColor: theme.background }]}>
+              <Text style={[styles.switchText, { color: theme.text }]}>Dark Mode</Text>
+              <Switch
+                testID="dark-mode-switch"
+                trackColor={{
+                  false: "black",
+                  true: theme.text,
+                }}
+                thumbColor={theme.primaryColor}
+                onValueChange={handleToggleDarkMode}
+                value={isDarkmode}
+              />
+            </View>
+
             <TouchableOpacity
               key="Logout"
               style={[
                 styles.logout,
-                {
-                  backgroundColor: isDarkmode ? "white" : "black",
-                },
+                { backgroundColor: isDarkmode ? "white" : "black" },
               ]}
               onPress={onLogoutPress}
             >
               <Text
                 style={[
                   styles.logoutText,
-                  {
-                    color: isDarkmode ? "black" : "white",
-                  },
+                  { color: isDarkmode ? "black" : "white" },
                 ]}
               >
                 Logout
@@ -122,84 +166,51 @@ export default function MorePage() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    paddingVertical: height * 0.02,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#ffffff",
+  header: { paddingVertical: height * 0.02, justifyContent: "center", alignItems: "center" },
+  headText: { fontSize: 32, fontWeight: "bold", paddingTop: 40 },
+  container: { flexGrow: 1, alignItems: "center", paddingHorizontal: 20 },
+  textContainer: { width: "100%", alignItems: "center", marginTop: 20 },
+  titleText: { fontSize: 28, fontWeight: "600", textAlign: "center", marginBottom: 20 },
+  bodyText: { fontSize: 16, lineHeight: 24, textAlign: "justify", marginBottom: 15, paddingHorizontal: 10 },
+
+  // Team Section
+  teamSection: { width: "100%", padding: 20, alignItems: "center" },
+  teamTitle: { fontSize: 24, fontWeight: "bold", marginBottom: 16 },
+  teamMembersRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    marginBottom: 16,
   },
-  headText: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#000000",
-    paddingTop: 40,
-  },
-  container: {
-    flexGrow: 1,
-    justifyContent: "flex-start",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingBottom: 40, 
-  },
-  textContainer: {
-    width: "100%",
-    alignItems: "center",
+  teamMemberContainer: { alignItems: 'center', width: '45%' },
+  teamImage: { width: 80, height: 80, borderRadius: 40, marginBottom: 8 },
+  teamName: { fontSize: 16, fontWeight: "bold", textAlign: "center" },
+  teamRole: { fontSize: 14, textAlign: "center" },
+
+  // Initiative Team Section
+  initiativeTeamSection: { width: "100%", padding: 20, alignItems: "center" },
+  initiativeTeamTitle: { fontSize: 24, fontWeight: "bold", marginBottom: 16 },
+  initiativeTeamMembers: { flexDirection: "row", justifyContent: "space-around", width: "100%", marginBottom: 16 },
+  initiativeMemberContainer: { alignItems: "center", width: "45%" },
+  initiativeMemberName: { fontSize: 16, fontWeight: "bold", textAlign: "center" },
+  initiativeMemberRole: { fontSize: 14, textAlign: "center" },
+
+  // Bottom Container for Dark Mode and Logout
+  bottomContainer: {
+    width: '100%',
+    alignItems: 'center',
     marginTop: 20,
   },
-  titleText: {
-    fontSize: 28,
-    fontWeight: "600",
-    textAlign: "center",
-    color: "#000000",
-    marginBottom: 20,
-  },
-  bodyText: {
-    fontSize: 16,
-    lineHeight: 24,
-    textAlign: "justify",
-    color: "#000000",
-    marginBottom: 15,
-    paddingHorizontal: 10,
-  },
-  logout: {
-    flexDirection: "row",
-    backgroundColor: "#ff0000",
-    justifyContent: "center",
-    alignItems: "center",
-    height: 50,
-    width: "80%",
-    borderRadius: 15,
-    marginTop: 40,
-    marginBottom: 100,
-  },
-  logoutText: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#ffffff",
-    marginRight: 10,
-  },
-  buttonContainer: {
-    alignItems: "center",
-    marginTop: 40,
-  },
   switchContainer: {
-    width: "94%",
-    backgroundColor: "#f0f0f0",
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
-    borderRadius: 10,
-    padding: 6,
-  },
-  switchText: {
-    color: "#000000",
-    marginLeft: 9,
-    fontSize: 18,
-    fontWeight: "500",
-  },
-  logoutContainer: {
-    backgroundColor: "#ffffff",
-    width: "100%",
     alignItems: "center",
+    width: "90%",
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 10,
   },
+  switchText: { fontSize: 18, fontWeight: "500" },
+  logout: { flexDirection: "row", justifyContent: "center", alignItems: "center", height: 50, width: "90%", borderRadius: 15 },
+  logoutText: { fontSize: 20, fontWeight: "600", marginRight: 10 },
 });
