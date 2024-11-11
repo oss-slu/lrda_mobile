@@ -26,7 +26,8 @@ import Constants from "expo-constants";
 import ToastMessage from 'react-native-toast-message';
 import DropDownPicker from 'react-native-dropdown-picker';
 import NoteDetailModal from "./mapPage/NoteDetailModal";
-
+import Tooltip from 'react-native-walkthrough-tooltip';
+import { Button } from "react-native-paper";
 const user = User.getInstance();
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
@@ -51,8 +52,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-
   const { theme } = useTheme();
+  const [hasOnboarded, setHasOnboarded] = useState(false);
+  const [tooltipVisible, setTooltipVisible] = useState(true);
+  const [addNoteTooltipVisible, setAddNoteTooltipVisible] = useState(false);
+  const [dropDownTip, setDropDownTip] = useState(false);
 
   let textLength = 18;
 
@@ -169,6 +173,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       paddingTop: Constants.statusBarHeight - 20,
       flex: 1,
       backgroundColor: theme.homeColor,
+    },
+    gotItButton: {
+      marginTop: 8, // Reduced from 10 to 8
+      padding: 8, // Reduced from 10 to 8
+      backgroundColor: theme.homeColor,
+      borderRadius: 5,
+    },
+    gotItButtonText: {
+      color: theme.text,
+      textAlign: 'center',
+    },
+    tooltipWrapper: {
+      alignSelf: 'flex-end', // Align the tooltip to the right
+      marginRight: 20, // Adjust this value as needed to move the tooltip to the right
     },
     pfpText: {
       fontWeight: "600",
@@ -290,6 +308,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       fontSize: 17,
       color: theme.logoutText,
       fontWeight: "700",
+    },
+    buttonText:{
+      fontSize: 16,
+      color: theme.text,
+      fontWeight: "600",
     },
     filterFont: {
       fontSize: 16,
@@ -568,119 +591,207 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     }
   };
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.topView}>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            width: "100%",
-            paddingBottom: 15,
-            paddingTop: 10,
-          }}
-        >
-          <TouchableOpacity
-            style={[
-              styles.userPhoto,
-              { backgroundColor: theme.black },
-            ]}
-            onPress={() => {
-              navigation.navigate("AccountPage");
+  
+  const checkOnboarding = async () => {
+      const user = await User.getInstance();
+      const userData = await user.loadUser();
+      //setHasOnboarded(onboarded);
+      console.log("user onboarding:", JSON.stringify(userData, null, 2));
+    };
+
+    checkOnboarding();
+
+
+
+
+    return (
+      <View style={styles.container}>
+        <View style={styles.topView}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+              paddingBottom: 15,
+              paddingTop: 10,
             }}
           >
-            <Text style={styles.pfpText}>{userInitials}</Text>
-          </TouchableOpacity>
-          <Image source={require('../../assets/icon.png')} style={{width: width * 0.105, height: width * 0.105, marginEnd: width * 0.025}} />
-          <TouchableOpacity 
-            onPress={() => {
-              setIsSearchVisible(!isSearchVisible);
-              resetSearchQuery(); // Reset search query when toggling search visibility              
-            }}
-          >
-            <Ionicons
-              testID="searchButton"
-              name={isSearchVisible ? "close-outline" : "search-outline"} // Switch between "X" and search icon
-              size={36}
-              color={theme.black}
-            />
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.userPhoto,
+                { backgroundColor: theme.black },
+              ]}
+              onPress={() => {
+                navigation.navigate("AccountPage");
+              }}
+            >
+              <Text style={styles.pfpText}>{userInitials}</Text>
+            </TouchableOpacity>
+            <Image source={require('../../assets/icon.png')} style={{width: width * 0.105, height: width * 0.105, marginEnd: width * 0.025}} />
+    
+            <View>
+            <Tooltip
+              isVisible={tooltipVisible}
+              content={
+                <View>
+                  <Text style = {styles.buttonText}>Search Entries Here!</Text>
+                  <Button
+                    style={styles.gotItButton}
+                    onPress={() => {
+                      setTooltipVisible(false);
+                      setAddNoteTooltipVisible(true);
+                    }}
+                  >
+                    <Text style={styles.gotItButtonText}>Got it!</Text>
+                  </Button>
+                </View>
+              }
+              placement="bottom"
+              onClose={() => {
+                setTooltipVisible(false);
+                setAddNoteTooltipVisible(true);
+              }}
+            >
+    
+                <TouchableOpacity 
+                  onPress={() => {
+                    setIsSearchVisible(!isSearchVisible);
+                    resetSearchQuery();              
+                  }}
+                >
+                  <Ionicons
+                    testID="searchButton"
+                    name={isSearchVisible ? "close-outline" : "search-outline"}
+                    size={36}
+                    color={theme.black}
+                  />
+                </TouchableOpacity>
+           </Tooltip>
+            </View>
+          </View>
         </View>
-      </View>
-       
-      <View style={styles.dropdown}>
-        <DropDownPicker
-          open={open}
-          value={value}
-          items={items.filter(item => item.value !== value)}
-          setOpen={setOpen}
-          setValue={(callback: (arg0: string) => any) => {
-            const newValue = callback(value);
-            setValue(newValue);
-            handleFilters(newValue);
-          }}
-          setItems={setItems}
-          listMode="SCROLLVIEW"
-          scrollViewProps={{
-            nestedScrollEnabled: true,
-          }}
-          style={{
-            borderWidth: 0, 
-            backgroundColor: theme.homeColor, 
-          }}
-          dropDownContainerStyle={{
-            borderWidth: 0, 
-            backgroundColor: theme.homeColor,
-          }}
-          placeholder={`${items.find(item => item.value === value)?.label || 'Select an option'} (${filteredNotes.length})`}
-          placeholderStyle={{
-            textAlign: 'center',
-            fontSize: 22,
-            fontWeight: 'bold',
-            color: theme.black,
-            paddingLeft: 28,
-          }}
-          textStyle={{
-            textAlign: 'center',
-            fontSize: 22,
-            fontWeight: 'bold',
-            color: theme.black,
-          }}
-          showArrowIcon={true}
-        /> 
-      </View>
-      {isSearchVisible && (
-      <TextInput
-        testID="searchBar"
-        placeholder="Search notes..."
-        onChangeText={handleSearch}
-        style={styles.searchBar}
+    
+        <View style={styles.dropdown}>
+        <Tooltip
+          isVisible={dropDownTip}
+          content={
+            <View>
+              <Text style = {styles.buttonText}>Switch between private and published entries here!</Text>
+              <Button
+                    style={styles.gotItButton}
+                    onPress={() => setDropDownTip(false)}
+                  >
+                    <Text style={styles.gotItButtonText}>Got it!</Text>
+                  </Button>
+            </View>
+          }
+          placement="bottom"
+          arrowSize={{ width: 10, height: 10 }} // Adjust arrow size for better alignment
+          onClose={() => setDropDownTip(false)}
+          showChildInTooltip={false}>
+          <DropDownPicker
+            open={open}
+            value={value}
+            items={items.filter(item => item.value !== value)}
+            setOpen={setOpen}
+            setValue={(callback: (arg0: string) => any) => {
+              const newValue = callback(value);
+              setValue(newValue);
+              handleFilters(newValue);
+            }}
+            setItems={setItems}
+            listMode="SCROLLVIEW"
+            scrollViewProps={{
+              nestedScrollEnabled: true,
+            }}
+            style={{
+              borderWidth: 0, 
+              backgroundColor: theme.homeColor, 
+            }}
+            dropDownContainerStyle={{
+              borderWidth: 0, 
+              backgroundColor: theme.homeColor,
+            }}
+            placeholder={`${items.find(item => item.value === value)?.label || 'Select an option'} (${filteredNotes.length})`}
+            placeholderStyle={{
+              textAlign: 'center',
+              fontSize: 22,
+              fontWeight: 'bold',
+              color: theme.black,
+              paddingLeft: 28,
+            }}
+            textStyle={{
+              textAlign: 'center',
+              fontSize: 22,
+              fontWeight: 'bold',
+              color: theme.black,
+            }}
+            showArrowIcon={true}
+          /> 
+        </Tooltip>
+
+        </View>
+    
+        {isSearchVisible && (
+          <TextInput
+            testID="searchBar"
+            placeholder="Search notes..."
+            onChangeText={handleSearch}
+            style={styles.searchBar}
+          />
+        )}
+    
+        <View style={styles.horizontalLine} />
+        <View style={styles.scrollerBackgroundColor}>
+          {rendering ? <NoteSkeleton /> : renderList(notes)}
+    
+
+          <View >
+      
+              <TouchableOpacity
+                style={styles.addButton}
+                onPress={() => {
+                  const untitledNumber = findNextUntitledNumber(notes);
+                  navigation.navigate("AddNote", { untitledNumber, refreshPage });
+                }}
+              >
+         <Tooltip
+              isVisible={addNoteTooltipVisible}
+              content={
+                <View>
+                  <Text style = {styles.buttonText}>You can add a new note here</Text>
+                  <Button
+                    style={styles.gotItButton}
+                    onPress={() => {
+                      setAddNoteTooltipVisible(false);
+                      setDropDownTip(true);
+                    }}
+                  >
+                    <Text style={styles.gotItButtonText}>Got it!</Text>
+                  </Button>
+                </View>
+              }
+              placement="top"
+              arrowSize={{ width: 10, height: 10 }} // Adjust arrow size for better alignment
+   
+              showChildInTooltip={false}
+            >
+              <Ionicons name="add-outline" size={32} color={theme.primaryColor} />
+            </Tooltip>
+              </TouchableOpacity>
+          
+          </View>
+</View>
+    
+        <NoteDetailModal 
+          isVisible={isModalVisible} 
+          onClose={() => setModalVisible(false)} 
+          note={selectedNote} 
         />
-      )}
-
-      <View style={styles.horizontalLine} />
-      <View style={styles.scrollerBackgroundColor}>
-        {rendering ? <NoteSkeleton /> : renderList(notes)}
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => {
-            const untitledNumber = findNextUntitledNumber(notes);
-            navigation.navigate("AddNote", { untitledNumber, refreshPage });
-          }}
-        >
-          <Ionicons name="add-outline" size={32} color={theme.primaryColor} style={{ fontFamily: 'Ionicons_' }} />
-        </TouchableOpacity>
       </View>
-
-      <NoteDetailModal 
-        isVisible={isModalVisible} 
-        onClose={() => setModalVisible(false)} 
-        note={selectedNote} 
-      />
-
-    </View>
-  );
+    );
+    
 };
 
 export default HomeScreen;

@@ -39,7 +39,7 @@ export class User {
     }
   }
 
-  private async loadUser(): Promise<UserData | null> {
+  public async loadUser(): Promise<UserData | null> {
     try {
       const value = await AsyncStorage.getItem("userData");
       if (value !== null) {
