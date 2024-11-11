@@ -149,61 +149,54 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
       }
     }
   };
+    // Function to display an error message inside the editor
+    const displayErrorInEditor = async (errorMessage) => {
+      const currentContent = await editor.getHTML();
+      const errorTag = `<p style="color: red; font-weight: bold;">${errorMessage}</p><br />`;
+      editor.setContent(currentContent + errorTag);
+      editor.focus();
+    };
 
-  const insertImageToEditor = async (imageUri: string) => {
-    if (editor && editor.setContent) {
-      console.log("Inserting image with URI at cursor:", imageUri);
+    const insertImageToEditor = async (imageUri: string) => {
       try {
         const currentContent = await editor.getHTML();
         const imageTag = `<img src="${imageUri}" style="max-width: 200px; max-height: 200px; object-fit: cover;" /><br />`;
-        const newContent = currentContent + imageTag;
-        editor.setContent(newContent);
-        editor.focus();
-
-
-      } catch (error) {
-        console.error("Error retrieving editor content:", error);
-      }
-    } else {
-      console.error("Editor or setContent method is not available.");
-    }
-  };
-
-  const addVideoToEditor = async (videoUri: string) => {
-    if (editor?.setContent && editor?.getHTML) {
-      try {
-        // Get the current content from the editor
-        const currentContent = await editor.getHTML();
-        // Create the new video link with line breaks for spacing
-        const videoLink = `${currentContent}<a href="${videoUri}">${videoUri}</a><br>`;
-        // Set the combined content back to the editor
-        editor.setContent(videoLink);
+        editor.setContent(currentContent + imageTag);
         editor.focus();
       } catch (error) {
-        console.error("Error adding video link to editor:", error);
+        console.error("Error inserting image:", error);
+        displayErrorInEditor(`Error inserting image: ${error.message}`);
       }
-    } else {
-      console.error("Editor instance is not available.");
-    }
-  };
+    };
   
-  const insertAudioToEditor = async (audioUri: string) => {
-    if (editor?.setContent && editor?.getHTML) {
+
+  // Function to add a video
+  const addVideoToEditor = async (videoUri: string) => {
+    try {
+      const currentContent = await editor.getHTML();
+      const videoLink = `${currentContent}<a href="${videoUri}">${videoUri}</a><br>`;
+      editor.setContent(videoLink);
+      editor.focus();
+    } catch (error) {
+      console.error("Error adding video:", error);
+      displayErrorInEditor(`Error adding video: ${error.message}`);
+    }
+  };
+
+  
+    // Function to add audio
+    const insertAudioToEditor = async (audioUri: string) => {
       try {
-        // Get the current content from the editor
         const currentContent = await editor.getHTML();
-        // Create the new audio link with line breaks for spacing
         const audioLink = `${currentContent}<a href="${audioUri}">${audioUri}</a><br>`;
-        // Set the combined content back to the editor
         editor.setContent(audioLink);
         editor.focus();
       } catch (error) {
-        console.error("Error adding audio link to editor:", error);
+        console.error("Error adding audio:", error);
+        displayErrorInEditor(`Error adding audio: ${error.message}`);
       }
-    } else {
-      console.error("Editor instance is not available.");
-    }
-  };
+    };
+  
   
   
 
