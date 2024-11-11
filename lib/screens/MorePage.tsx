@@ -54,32 +54,53 @@ export default function MorePage() {
         <ScrollView contentContainerStyle={[styles.container, { paddingBottom: 140 }]}>
           {/* About Section Content */}
           <View style={styles.textContainer}>
-            <Text style={styles.titleText}>Where’s Religion?</Text>
-            <Text style={styles.bodyText}>Where’s Religion? is an open-source mobile and desktop web application...</Text>
-            <Text style={styles.bodyText}>Being a tool that initiates engaged learning and in-person experience...</Text>
-            <Text style={styles.bodyText}>Initiated in 2018, the Where’s Religion? is a keystone outcome...</Text>
+            <Text style={styles.titleText}>What is Where’s Religion?</Text>
+            <Text style={styles.bodyText}>Where’s Religion? is an open-source application developed by humanities faculty and IT professionals at Saint Louis University that supports in-person research, remote data entry, media sharing, and mapping. The app is designed to facilitate a more robust public understanding of religion through rigorous scholarly methods. Our conviction is that the study of religion must account for the wide range of embodied experiences, improvised practices, material cultures, and shared spaces that humans inhabit. Through a research methodology that moves beyond analysis of sacred texts, creeds, and official teachings, Where’s Religion? provides a platform to diversify the data we study and to advance the study of religion we all encounter in everyday life.</Text>
+            <Text style={styles.bodyText}>Where’s Religion? is a keystone outcome of the Center on Lived Religion at Saint Louis University. We have received external support from the Henry Luce Foundation ($400,000 in 2018 and $470,000 in 2022), and internal support from the College of Arts & Sciences, the Office for the Vice President for Research and the Research Computing Group, Open Source with SLU, the Walter J. Ong, S.J., Center for Digital Humanities, and the CREST Research Center (Culture, Religion, Ethics, Science, Technology).</Text>
           </View>
 
           {/* Initiative Team Section */}
           <View style={styles.initiativeTeamSection}>
-            <Text style={styles.initiativeTeamTitle}>The Saint Louis University Team</Text>
+            <Text style={styles.initiativeTeamTitle}>The Saint Louis University Where's Religion Team</Text>
             <View style={styles.initiativeTeamMembers}>
+            <View style={styles.teamMemberContainer}>
+  {Image.resolveAssetSource(require('../../assets/Rachel.jpg')).uri ? (
+    <Image source={require('../../assets/Rachel.jpg')} style={styles.teamImage} />
+  ) : (
+    <Text>Image not available</Text>
+  )}
+  <Text style={styles.teamName}>Rachel Lindsey</Text>
+  <Text style={styles.teamRole}>Director of Center on Lived Religion</Text>
+</View>
+
               <View style={styles.initiativeMemberContainer}>
-                <Image source={require('../../assets/Rachel.jpg')} style={styles.teamImage} />
-                <Text style={styles.initiativeMemberName}>Rachel Lindsey</Text>
-                <Text style={styles.initiativeMemberRole}>Co-Director</Text>
-              </View>
-              <View style={styles.initiativeMemberContainer}>
-                <Image source={require('../../assets/Pauline.jpg')} style={styles.teamImage} />
-                <Text style={styles.initiativeMemberName}>Pauline Lee</Text>
-                <Text style={styles.initiativeMemberRole}>Co-Director</Text>
+              {Image.resolveAssetSource(require('../../assets/Adam.jpg')).uri ? (
+    <Image source={require('../../assets/Adam.jpg')} style={styles.teamImage} />
+  ) : (
+    <Text>Image not available</Text>
+  )}
+                <Text style={styles.initiativeMemberName}>Adam Park</Text>
+                <Text style={styles.initiativeMemberRole}>Associate Director of Research (COLR)</Text>
               </View>
             </View>
             <View style={styles.initiativeTeamMembers}>
               <View style={styles.initiativeMemberContainer}>
-                <Image source={require('../../assets/Adam.jpg')} style={styles.teamImage} />
-                <Text style={styles.initiativeMemberName}>Adam Park</Text>
-                <Text style={styles.initiativeMemberRole}>Associate Director</Text>
+              {Image.resolveAssetSource(require('../../assets/Pauline.jpg')).uri ? (
+    <Image source={require('../../assets/Pauline.jpg')} style={styles.teamImage} />
+  ) : (
+    <Text>Image not available</Text>
+  )}
+                <Text style={styles.initiativeMemberName}>Pauline Lee</Text>
+                <Text style={styles.initiativeMemberRole}>Assiciate Director of Public Humanities (COLR)</Text>
+              </View>
+              <View style={styles.teamMemberContainer}>
+              {Image.resolveAssetSource(require('../../assets/Yash.jpg')).uri ? (
+    <Image source={require('../../assets/Yash.jpg')} style={styles.teamImage} />
+  ) : (
+    <Text>Image not available</Text>
+  )}
+                <Text style={styles.teamName}>Yash Bhatia</Text>
+                <Text style={styles.teamRole}>Software Engineer and Tech Lead </Text>
               </View>
             </View>
           </View>
@@ -89,32 +110,41 @@ export default function MorePage() {
             <Text style={styles.teamTitle}>The Development Team</Text>
             <View style={styles.teamMembersRow}>
               <View style={styles.teamMemberContainer}>
-                <Image source={require('../../assets/Patrick.jpg')} style={styles.teamImage} />
+              {Image.resolveAssetSource(require('../../assets/Patrick.jpg')).uri ? (
+    <Image source={require('../../assets/Patrick.jpg')} style={styles.teamImage} />
+  ) : (
+    <Text>Image not available</Text>
+  )}
                 <Text style={styles.teamName}>Patrick Cuba</Text>
                 <Text style={styles.teamRole}>IT Architect</Text>
               </View>
               <View style={styles.teamMemberContainer}>
-                <Image source={require('../../assets/Bryan.jpg')} style={styles.teamImage} />
+              {Image.resolveAssetSource(require('../../assets/Bryan.jpg')).uri ? (
+    <Image source={require('../../assets/Bryan.jpg')} style={styles.teamImage} />
+  ) : (
+    <Text>Image not available</Text>
+  )}
                 <Text style={styles.teamName}>Bryan Haberberger</Text>
                 <Text style={styles.teamRole}>Full Stack Developer</Text>
               </View>
             </View>
             <View style={styles.teamMembersRow}>
               <View style={styles.teamMemberContainer}>
-                <Image source={require('../../assets/Yash.jpg')} style={styles.teamImage} />
-                <Text style={styles.teamName}>Yash Bhatia</Text>
-                <Text style={styles.teamRole}>Software Engineer</Text>
-              </View>
-              <View style={styles.teamMemberContainer}>
-                <Image source={require('../../assets/Izak.jpg')} style={styles.teamImage} />
-                <Text style={styles.teamName}>Izak Robles</Text>
+              {Image.resolveAssetSource(require('../../assets/Stuart.jpg')).uri ? (
+    <Image source={require('../../assets/Stuart.jpg')} style={styles.teamImage} />
+  ) : (
+    <Text>Image not available</Text>
+  )}
+                <Text style={styles.teamName}>Stuart Ray</Text>
                 <Text style={styles.teamRole}>Developer</Text>
               </View>
-            </View>
-            <View style={styles.teamMembersRow}>
               <View style={styles.teamMemberContainer}>
-                <Image source={require('../../assets/Stuart.jpg')} style={styles.teamImage} />
-                <Text style={styles.teamName}>Stuart Ray</Text>
+              {Image.resolveAssetSource(require('../../assets/Izak.jpg')).uri ? (
+    <Image source={require('../../assets/Izak.jpg')} style={styles.teamImage} />
+  ) : (
+    <Text>Image not available</Text>
+  )}
+                <Text style={styles.teamName}>Izak Robles</Text>
                 <Text style={styles.teamRole}>Developer</Text>
               </View>
             </View>

@@ -67,6 +67,8 @@ const NotePageStyles = () => {
     },
     editor: {
       backgroundColor: theme.tertiaryColor,
+      flex: 1,
+      paddingBottom: 50, // Space for the toolbar
       marginBottom: 4,
       width: "100%",
       minHeight: 200, // Adjust for better visibility
@@ -148,27 +150,27 @@ const NotePageStyles = () => {
     richTextContainer: {
       height: Platform.OS == "android"? "90%" : "100%" 
     },
-    //tool bar styles
     toolbar: {
-      height: 40, // Fixed height for the toolbar at the bottom
-      backgroundColor: '#333', // Ensure the toolbar has a background color
-  
+      position: 'absolute', // Keep toolbar at the bottom of the screen
+      bottom: 0, // Align toolbar with the bottom edge
+      width: '100%', // Full-width toolbar
+      height: 50, // Adjusted height for better usability
+      backgroundColor: theme.primaryColor, // Ensure it matches the theme
+      justifyContent: 'center', // Center items in the toolbar
+      paddingHorizontal: 10,
+      zIndex: 10, // Ensure it stays above other elements
+
       ...Platform.select({
         android: {
-          height: 70, // Fixed height for the toolbar at the bottom
-          backgroundColor: theme.primaryColor, // Ensure the toolbar has a background color
-          overflow: 'hidden', // Ensure no extra space
-          marginTop: 50
+          height: 70,
+          backgroundColor: theme.primaryColor,
         },
         ios: {
-          height: 50, // Fixed height for the toolbar at the bottom
-          backgroundColor: theme.primaryColor, 
-          overflow: 'hidden', // Ensure no extra space
-          marginTop: 50
+          height: 50,
+          backgroundColor: theme.primaryColor,
         },
       }),
     },
-
     closeKeyboardButton: {
       padding: 10,
       justifyContent: 'center',

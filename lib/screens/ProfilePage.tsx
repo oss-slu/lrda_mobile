@@ -211,10 +211,6 @@ export default function ProfilePage({ navigation }: ProfilePageProps) {
             </Text>
             <Text style={[styles.text, styles.subText]}>Images</Text>
           </View>
-          <View style={styles.statsBox}>
-            <Text style={[styles.text, { fontSize: 24 }]}>{"< Year "}</Text>
-            <Text style={[styles.text, styles.subText]}>Age</Text>
-          </View>
         </View>
 
         <View style={{ marginTop: 32, width: "100%" }}>

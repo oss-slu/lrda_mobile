@@ -314,9 +314,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           {IsImage ? (
             <View style={{ height: 100, width: 100 }}>
               <LoadingImage
-                imageURI={ImageURI}
+                imageURI={ImageURI || require("../../assets/placeholder-image.png")}
                 type={ImageType}
-                isImage={true}
+                isImage={Boolean(ImageURI)}
                 useCustomDimensions={true}
                 customWidth={100}
                 customHeight={100}

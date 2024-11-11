@@ -54,6 +54,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [isVideoModalVisible, setIsVideoModalVisible] = useState<boolean>(false);
   const [videoUri, setVideoUri] = useState<string | null>(null);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   const editor = useEditorBridge({
     initialContent: bodyText || "",
@@ -63,7 +64,30 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
   const { theme } = useTheme();
   const titleTextRef = useRef<TextInput>(null);
   const scrollViewRef = useRef<KeyboardAwareScrollView>(null);
+
+  useEffect(()=>{
+        // Listen for keyboard events to show/hide toolbar
+        const showKeyboardListener = Keyboard.addListener('keyboardDidShow', () => {
+          setKeyboardVisible(true);
+        });
+        const hideKeyboardListener = Keyboard.addListener('keyboardDidHide', () => {
+          setKeyboardVisible(false);
+        });
+        return () => {
+          showKeyboardListener.remove();
+          hideKeyboardListener.remove();
+        };
+      }, []);
+    
   
+      const customToolbarItems = [
+        ...DEFAULT_TOOLBAR_ITEMS,
+        {
+          icon: () => <Ionicons name="close" size={24} color={theme.text} />, // Close keyboard icon
+          onPress: () => Keyboard.dismiss(), // Dismiss the keyboard when tapped
+          id: 'closeKeyboard', // Unique ID for this toolbar item
+        },
+      ];
 
   useEffect(() => {
     if (editor) {
@@ -302,7 +326,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
                 ]}
               />
             </View>
-            <View style={NotePageStyles().toolBar}>
+            <View style={NotePageStyles().toolbar}>
             <Toolbar
             editor={editor}
             items={DEFAULT_TOOLBAR_ITEMS}
