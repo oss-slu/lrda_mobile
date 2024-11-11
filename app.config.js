@@ -46,15 +46,16 @@ export default {
     },
     crashReporter: true, // Add this line to enable crash reporting
     extra: {
-      apiKey: process.env.FIREBASE_API_KEY,
-      authDomain: process.env.AUTH_DOMAIN,
-      projectId: process.env.PROJECT_ID,
-      storageBucket: process.env.STORAGE_BUCKET,
-      messagingSenderId: process.env.MESSAGING_SENDER_ID,
-      appId: process.env.APP_ID,
-      measurementId: process.env.MEASUREMENT_ID,
-      apiBaseUrl: process.env.API_BASE_URL, // Added to pass API_BASE_URL
-      measurementId:process.env.MEASUREMENT_ID,
+      MAPS_API_KEY: process.env.FIREBASE_API_KEY,
+      AUTH_DOMAIN: process.env.AUTH_DOMAIN,
+      PROJECT_ID: process.env.PROJECT_ID,
+      STORAGE_BUCKET: process.env.STORAGE_BUCKET,
+      MESSAGING_SENDER_ID: process.env.MESSAGING_SENDER_ID,
+      APP_ID: process.env.APP_ID,
+      MEASUREMENT_ID: process.env.MEASUREMENT_ID,
+      API_BASE_URL: process.env.API_BASE_URL, // Added to pass API_BASE_URL
+      MEASUREMENT_ID:process.env.MEASUREMENT_ID,
+      S3_PROXY_PREFIX:process.env.S3_PROXY_PREFIX,
       eas: {
         "projectId": "801029ef-db83-4668-a97a-5adcc4c333e2"
       }
