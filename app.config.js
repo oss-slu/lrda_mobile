@@ -20,7 +20,7 @@ export default {
       config: {
         googleMapsApiKey: process.env.MAP_API_KEY
       },
-      buildNumber: "4"
+      buildNumber: "5"
     },
     android: {
       adaptiveIcon: {

@@ -23,7 +23,8 @@
 "MESSAGING_SENDER_ID":"840259501846",
 "APP_ID":"1:840259501846:web:7bda1da9535d6f746a1a37",
 "API_BASE_URL": "https://lived-religion-dev.rerum.io/deer-lr/",
-"MEASUREMENT_ID": "G-Z4NM1MFGPS"
+"MEASUREMENT_ID": "G-Z4NM1MFGPS",
+"S3_PROXY_PREFIX" : "http://s3-proxy.rerum.io/S3/"
 
       }
     }

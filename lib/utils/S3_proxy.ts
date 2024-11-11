@@ -4,7 +4,7 @@ import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import * as FileSystem from "expo-file-system";
 
 // const S3_PROXY_PREFIX = "http://99.7.218.98:8080/S3/";
-const S3_PROXY_PREFIX = "http://s3-proxy.rerum.io/S3/";
+const S3_PROXY_PREFIX = process.env.S3_PROXY_PREFIX || "http://s3-proxy.rerum.io/S3/";
 
 let attempts = 0;
 
