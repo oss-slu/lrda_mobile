@@ -119,36 +119,6 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
     setLocationToZero();
   };
 
-  
-
-  const toggleLocationVisibility = async () => {
-    if (isLocation) {
-      setLocation({ latitude: 0, longitude: 0 });
-      setIsLocation(false);
-    } else {
-      try {
-        const { status } = await Location.getForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          const { status: requestStatus } = await Location.requestForegroundPermissionsAsync();
-          if (requestStatus !== 'granted') {
-            Alert.alert("Location permission denied", "Please enable location permissions to use this feature.");
-            return;
-          }
-        }
-        const userLocation = await Location.getCurrentPositionAsync({});
-        if (userLocation) {
-          setLocation({
-            latitude: userLocation.coords.latitude,
-            longitude: userLocation.coords.longitude,
-          });
-          setIsLocation(true);
-        }
-      } catch (error) {
-        console.error("Error fetching location:", error);
-        Alert.alert("Error", "Failed to retrieve location. Please try again.");
-      }
-    }
-  };
     // Function to display an error message inside the editor
     const displayErrorInEditor = async (errorMessage) => {
       const currentContent = await editor.getHTML();
@@ -230,7 +200,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
         latitude: finalLocation.latitude.toString(),
         longitude: finalLocation.longitude.toString(),
         published: isPublished,
-        time: new Date(time).toISOString(),
+        time: new Date().toISOString(), // Automatically grabs current time
         creator: uid,
       };
 
@@ -244,6 +214,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
       setIsUpdating(false);
     }
   };
+
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -297,9 +268,6 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
                 <TouchableOpacity onPress={toggleLocation}>
                 <Ionicons name="location-outline" size={30} color={locationButtonColor} />
               </TouchableOpacity>
-                <TouchableOpacity onPress={() => setIsTime(!isTime)}>
-                  <Ionicons name="time-outline" size={30} color={NotePageStyles().saveText.color} />
-                </TouchableOpacity>
                 <TouchableOpacity onPress={() => setIsTagging(!isTagging)}>
                   <Ionicons name="pricetag-outline" size={30} color={NotePageStyles().saveText.color} />
                 </TouchableOpacity>
@@ -312,7 +280,6 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
                 setNewMedia={setNewMedia}
                 insertImageToEditor={insertImageToEditor}
                 addVideoToEditor={addVideoToEditor}
-                displayErrorInEditor={displayErrorInEditor}
               />
               {viewAudio && (
                 <AudioContainer
