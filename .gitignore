@@ -16,3 +16,4 @@ grounded-*
 # macOS
 .DS_Store
 yarn.lock
+android
