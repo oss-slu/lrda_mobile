@@ -9,8 +9,9 @@ import {
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Snackbar } from "react-native-paper";
-import { auth } from "../../config"; 
+import { auth, db } from "../../config/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc, Timestamp } from "firebase/firestore";
 import ApiService from "../../utils/api_calls";
 import { validateEmail, validatePassword } from "../../utils/validation";
 
@@ -19,7 +20,7 @@ type RegisterProps = {
   route: any;
 };
 
-const RegistrationScreen: React.FC<RegisterProps> = ({ navigation, route }) => {
+const RegistrationScreen: React.FC<RegisterProps> = ({ navigation }) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -52,18 +53,33 @@ const RegistrationScreen: React.FC<RegisterProps> = ({ navigation, route }) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
+      
+      // Combine firstName and lastName for name field
+      const fullName = `${firstName} ${lastName}`;
 
-      // Create user data in the API
-      const userData = {
+      // Firestore user data creation
+      const firestoreData = {
+        uid: user.uid,
+        email,
+        name: fullName,
+        roles: {
+          administrator: false,
+          contributor: true,
+        },
+        createdAt: Timestamp.now(),
+      };
+      await setDoc(doc(db, "users", user.uid), firestoreData);
+
+      // API user data creation
+      const apiData = {
         "@id": user.uid,
-        name: `${firstName} ${lastName}`,
+        name: fullName,
         roles: {
           administrator: false,
           contributor: true,
         },
       };
-
-      const response = await ApiService.createUserData(userData);
+      const response = await ApiService.createUserData(apiData);
 
       if (response.status !== 200) {
         setSnackMessage("Failed to create user data in API");
@@ -74,7 +90,7 @@ const RegistrationScreen: React.FC<RegisterProps> = ({ navigation, route }) => {
       setSnackMessage("Signup successful!");
       setSnackState(true);
 
-      navigation.navigate("Login"); 
+      navigation.navigate("Login");
     } catch (error) {
       setSnackMessage(`Signup failed: ${error}`);
       setSnackState(true);

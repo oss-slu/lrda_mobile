@@ -1,8 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { UserData } from "../../types";
 import { getItem } from "../utils/async_storage";
-import { signInWithEmailAndPassword, onAuthStateChanged,signOut, getAuth } from "firebase/auth";
-import { auth } from "../config/firebase";
+import { signInWithEmailAndPassword, onAuthStateChanged, signOut, getAuth } from "firebase/auth";
+import { auth, db } from "../config/firebase"; // Import Firestore database
+import { doc, getDoc } from "firebase/firestore"; // Firestore imports
 import ApiService from "../utils/api_calls";
 import { setNavState } from "../../redux/slice/navigationSlice";
 
@@ -15,7 +16,6 @@ export class User {
   private constructor() {
     this.initializeUser();
   }
-  
 
   public static getInstance(): User {
     if (!User.instance) {
@@ -65,15 +65,26 @@ export class User {
   private async initializeUser() {
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // User is signed in.
+        // First, try to fetch user data from the API
         const userData = await ApiService.fetchUserData(user.uid);
+        
         if (userData) {
+          // If found in the API, set user data and persist it
           this.userData = userData;
           this.persistUser(userData);
+        } else {
+          // If not found in the API, try Firestore
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            this.userData = userDoc.data() as UserData;
+            this.persistUser(this.userData);
+          } else {
+            console.log("User not found in API or Firestore.");
+          }
         }
         this.notifyLoginState();
       } else {
-        // User is signed out.
+        // User is signed out
         this.userData = null;
         this.clearUser();
         this.notifyLoginState();
@@ -95,88 +106,94 @@ export class User {
       const token = await user.getIdToken();
       console.log(`Login token received: ${token}`);
   
-      // Store the token in AsyncStorage (similar to localStorage)
+      // Store the token in AsyncStorage
       await AsyncStorage.setItem('authToken', token);
       console.log("Auth token saved in AsyncStorage");
   
-      // Optionally, you can use SecureStore for sensitive data:
-      // await SecureStore.setItemAsync('authToken', token);
-      // console.log("Auth token saved in SecureStore");
-  
-      // Fetch user data based on the user ID
+      // Attempt to fetch user data from the API, falling back on Firestore if necessary
       const userData = await ApiService.fetchUserData(user.uid);
       
       if (userData) {
-        // Store the user data in the class
+        // If user data is found in the API
         this.userData = userData;
-        console.log("Fetched user data: ", userData);
-  
-        // Persist user data locally, if needed
-        await this.persistUser(userData);
-        console.log("User data persisted locally");
+        console.log("User data found in API:", userData);
       } else {
-        console.log("No user data found");
+        // If not found in the API, try fetching from Firestore
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          this.userData = userDoc.data() as UserData;
+          console.log("User data found in Firestore:", this.userData);
+        } else {
+          console.log("User data not found in Firestore or API.");
+        }
       }
   
-      // Notify app about login state change
-      this.notifyLoginState();
-      console.log("Login state updated");
-  
-      // Successfully logged in
+      // Persist user data and update login state
+      if (this.userData) {
+        await this.persistUser(this.userData);
+        console.log("User data persisted locally");
+        this.notifyLoginState();
+      }
+
       return "success";
     } catch (error) {
       console.error("Login error: ", error);
-      // Reject the promise with the error message
       return Promise.reject(error);
     }
   }
 
   public async logout(dispatch: any) {
     try {
-      // Initialize the auth instance using getAuth
       const auth = getAuth();
-  
-      // Call Firebase's signOut method
       await signOut(auth);
   
-      // Clear user data from your app's state
       this.userData = null;
       this.clearUser();
       this.notifyLoginState();
   
-      // Remove the auth token from AsyncStorage
       await AsyncStorage.removeItem('authToken');
-      // If using SecureStore instead, uncomment the line below
-      // await SecureStore.deleteItemAsync('authToken');
   
-      // Dispatch navigation state to move to the login screen or logged-out state
       dispatch(setNavState("login"));
-  
       console.log("User successfully logged out");
     } catch (error) {
       console.error("Error during Firebase logout", error);
-      // Additional error handling can be added here
     }
   }
+
   public async getId(): Promise<string | null> {
     if (!this.userData) {
       this.userData = await this.loadUser();
     }
-    return this.userData?.["uid"] ?? null;
+    // Return `uid` if available, else fallback to `@id`
+    return this.userData ? (this.userData["uid"] ?? this.userData["@id"]) : null;
   }
+
 
   public async getName(): Promise<string | null> {
     if (!this.userData) {
+      // Load user data from AsyncStorage if not already loaded
       this.userData = await this.loadUser();
     }
-    return this.userData?.name ?? null;
+  
+    // Handle both naming structures
+    if (this.userData) {
+      // Check if the name is a single string or separate fields
+      if ('name' in this.userData) {
+        return this.userData.name; // API format
+      } else if ('firstName' in this.userData && 'lastName' in this.userData) {
+        return `${this.userData.firstName} ${this.userData.lastName}`; // Firestore format
+      }
+    }
+  
+    return null; // No valid name found
   }
+  
 
   public async hasOnboarded(): Promise<boolean> {
     const onboarded = await getItem('onboarded');
     return onboarded === '1';
   }
-  
+
   public async getRoles(): Promise<{
     administrator: boolean;
     contributor: boolean;

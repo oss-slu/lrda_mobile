@@ -1,4 +1,7 @@
+import { doc, getDoc } from "firebase/firestore";
 import { UserData } from "../../types";
+import { db } from "../config/firebase";
+
 /**
  * Provides methods for interacting with the API to fetch, create, update, and delete notes.
  */
@@ -60,61 +63,38 @@ static async fetchMessages(
     throw error;
   }
 }
-  /**
-   * Fetches user data from the API based on UID.
+ /**
+   * Fetches user data from Firestore first, then the API if Firestore data is not found.
    * @param {string} uid - The UID of the user.
    * @returns {Promise<UserData | null>} The user data.
    */
-  static async fetchUserData(uid: string): Promise<UserData | null> {
-    try {
-      const url = `${API_BASE_URL}query`
-      const headers = {
-        "Content-Type": "application/json",
-      };
-      const body = {
-        "$or": [
-          { "@type": "Agent", "uid": uid },
-          { "@type": "foaf:Agent", "uid": uid }
-        ]
-      };
-
-      console.log(`Querying for user data with UID: ${uid}`);
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(body),
-      });
-
-      const data = await response.json();
-      console.log(`User Data:`, data);
-      return data.length ? data[0] : null;
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      return null;
-    }
-  }
-
-
- /**
- * Fetches the name of the creator by querying the API with the given creatorId.
- * @param {string} creatorId - The UID of the creator.
- * @returns {Promise<string>} The name of the creator.
- */
-static async fetchCreatorName(creatorId: string): Promise<string> {
+ static async fetchUserData(uid: string): Promise<UserData | null> {
   try {
-    const url = `${API_BASE_URL}query`
+    // Step 1: Attempt to retrieve data from Firestore
+    const userDocRef = doc(db, "users", uid); // Assume users collection
+    const userDoc = await getDoc(userDocRef);
+
+    if (userDoc.exists()) {
+      const firestoreData = userDoc.data() as UserData;
+      console.log("User data retrieved from Firestore:", firestoreData);
+      return firestoreData; // Return data from Firestore as UserData
+    } else {
+      console.log("No user data found in Firestore, using API fallback.");
+    }
+    
+    // Step 2: Fall back to API call if Firestore has no data
+    const url = `${API_BASE_URL}query`;
     const headers = {
       "Content-Type": "application/json",
     };
     const body = {
       "$or": [
-        { "@type": "Agent", "uid": creatorId },
-        { "@type": "foaf:Agent", "uid": creatorId }
-      ]
+        { "@type": "Agent", "uid": uid },
+        { "@type": "foaf:Agent", "uid": uid },
+      ],
     };
 
-    console.log(`Querying with UID: ${creatorId}`);
+    console.log(`Querying API for user data with UID: ${uid}`);
 
     const response = await fetch(url, {
       method: "POST",
@@ -123,23 +103,78 @@ static async fetchCreatorName(creatorId: string): Promise<string> {
     });
 
     const data = await response.json();
-    console.log(`Received data:`, data);
+    console.log("User data from API:", data);
 
-    // Check if data is a non-empty array and contains a name attribute
-    if (Array.isArray(data) && data.length > 0 && data[0].name) {
-      return data[0].name;
-    } else if (Array.isArray(data) && data.length > 0) {
-      console.warn(`Creator found but 'name' attribute is missing for UID: ${creatorId}`);
+    // Convert API response to UserData type if it exists
+    return data.length ? (data[0] as UserData) : null;
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    return null;
+  }
+}
+
+
+
+
+/**
+ * Fetches the name of the creator by querying the API and Firestore with the given creatorId.
+ * @param {string} creatorId - The UID of the creator.
+ * @returns {Promise<string>} The name of the creator.
+ */
+static async fetchCreatorName(creatorId: string): Promise<string> {
+  try {
+    // Step 1: Query the API with creatorId
+    const apiUrl = `${API_BASE_URL}query`;
+    const headers = { "Content-Type": "application/json" };
+    const body = {
+      "$or": [
+        { "@type": "Agent", "uid": creatorId },
+        { "@type": "foaf:Agent", "uid": creatorId }
+      ]
+    };
+
+    console.log(`Querying API with UID: ${creatorId}`);
+
+    const apiResponse = await fetch(apiUrl, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(body),
+    });
+
+    const apiData = await apiResponse.json();
+    console.log(`API data received:`, apiData);
+
+    // Step 2: Check if the API response contains a name
+    if (Array.isArray(apiData) && apiData.length > 0 && apiData[0].name) {
+      return apiData[0].name;
+    } else if (Array.isArray(apiData) && apiData.length > 0) {
+      console.warn(`Creator found in API but 'name' attribute is missing for UID: ${creatorId}`);
       return "Unknown Creator";
-    } else {
-      console.warn(`Creator not found for UID: ${creatorId}`);
-      return "Creator not available";
     }
+
+    // Step 3: If not found in API, query Firestore
+    console.log(`Creator not found in API. Querying Firestore with UID: ${creatorId}`);
+    const firestoreDocRef = doc(db, "users", creatorId);
+    const firestoreDoc = await getDoc(firestoreDocRef);
+
+    if (firestoreDoc.exists()) {
+      const firestoreData = firestoreDoc.data();
+      const firestoreName = firestoreData.firstName && firestoreData.lastName
+        ? `${firestoreData.firstName} ${firestoreData.lastName}`
+        : firestoreData.name || "Unknown Creator";
+
+      console.log(`Creator name found in Firestore: ${firestoreName}`);
+      return firestoreName;
+    }
+
+    console.warn(`Creator not found in Firestore for UID: ${creatorId}`);
+    return "Creator not available";
   } catch (error) {
     console.error(`Error fetching creator name:`, error, creatorId);
     return "Error retrieving creator";
   }
 }
+
 
   
     /**

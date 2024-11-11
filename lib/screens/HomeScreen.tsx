@@ -273,8 +273,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     const showTime = formatToLocalDateString(tempTime);
     const mediaItem = item.media[0];
     const ImageType = mediaItem?.getType();
+  
+    // Ensure ImageURI is a valid string
     let ImageURI = "";
     let IsImage = false;
+    
     if (ImageType === "image") {
       ImageURI = mediaItem.getUri();
       IsImage = true;
@@ -282,6 +285,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       ImageURI = mediaItem.getThumbnail();
       IsImage = true;
     }
+  
+    // Enforce `uri` as a string, especially for Android
+    const resolvedImageURI = Platform.OS === "android" ? String(ImageURI || "") : ImageURI;
+  
     return (
       <TouchableOpacity
         key={item.id}
@@ -311,12 +318,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         }}
       >
         <View style={{ flexDirection: "row", alignItems: "center" }}>
-          {IsImage ? (
+          {IsImage && resolvedImageURI ? (
             <View style={{ height: 100, width: 100 }}>
               <LoadingImage
-                imageURI={ImageURI || require("../../assets/placeholder-image.png")}
+                imageURI={resolvedImageURI}
                 type={ImageType}
-                isImage={Boolean(ImageURI)}
+                isImage={true}
                 useCustomDimensions={true}
                 customWidth={100}
                 customHeight={100}
@@ -327,14 +334,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
               <LoadingImage imageURI={""} type={ImageType} isImage={false} />
             </View>
           )}
-
+  
           <View style={{ position: "absolute", left: 120 }}>
             <Text style={styles(theme, width).noteTitle}>
               {item.title.length > textLength
                 ? item.title.slice(0, textLength) + "..."
                 : item.title}
             </Text>
-
+  
             <Text style={styles(theme, width).noteText}>{showTime}</Text>
           </View>
         </View>
@@ -356,6 +363,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       </TouchableOpacity>
     );
   };
+  
 
   const [searchQuery, setSearchQuery] = useState("");
 
