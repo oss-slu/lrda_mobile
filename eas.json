@@ -25,7 +25,6 @@
 "API_BASE_URL": "https://lived-religion-dev.rerum.io/deer-lr/",
 "MEASUREMENT_ID": "G-Z4NM1MFGPS",
 "S3_PROXY_PREFIX" : "http://s3-proxy.rerum.io/S3/"
-
       }
     }
   },
