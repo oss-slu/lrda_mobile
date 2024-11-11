@@ -17,3 +17,4 @@ grounded-*
 .DS_Store
 yarn.lock
 eas.json
+ios
