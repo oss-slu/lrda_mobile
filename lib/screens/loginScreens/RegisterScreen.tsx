@@ -12,7 +12,6 @@ import { Snackbar } from "react-native-paper";
 import { auth, db } from "../../config/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, Timestamp } from "firebase/firestore";
-import ApiService from "../../utils/api_calls";
 import { validateEmail, validatePassword } from "../../utils/validation";
 
 type RegisterProps = {
@@ -70,23 +69,7 @@ const RegistrationScreen: React.FC<RegisterProps> = ({ navigation }) => {
       };
       await setDoc(doc(db, "users", user.uid), firestoreData);
 
-      // API user data creation
-      const apiData = {
-        "@id": user.uid,
-        name: fullName,
-        roles: {
-          administrator: false,
-          contributor: true,
-        },
-      };
-      const response = await ApiService.createUserData(apiData);
-
-      if (response.status !== 200) {
-        setSnackMessage("Failed to create user data in API");
-        setSnackState(true);
-        return;
-      }
-
+      // Set success message and navigate to login screen
       setSnackMessage("Signup successful!");
       setSnackState(true);
 
