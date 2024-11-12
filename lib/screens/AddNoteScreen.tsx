@@ -2,19 +2,14 @@ import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
-  View,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
-  Keyboard,
-  Platform,
-  KeyboardAvoidingView,
-  Modal,
-  Text,
-  StyleSheet
+  View
 } from "react-native";
-import { WebViewMessageEvent } from "react-native-webview";
-import * as Location from 'expo-location';
 import ToastMessage from 'react-native-toast-message';
 import AudioContainer from "../components/audio";
 import LocationWindow from "../components/location";
@@ -36,6 +31,7 @@ const user = User.getInstance();
 const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, route }) => {
   const [titleText, setTitleText] = useState<string>("");
   const [isSaveButtonEnabled, setIsSaveButtonEnabled] = useState<boolean>(true);
+  const [untitledNumber, setUntitledNumber] = useState<string>("0");
   const [bodyText, setBodyText] = useState<string>("");
   const [newMedia, setNewMedia] = useState<Media[]>([]);
   const [newAudio, setNewAudio] = useState<AudioType[]>([]);
@@ -61,7 +57,6 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
   
   const { theme } = useTheme();
   const titleTextRef = useRef<TextInput>(null);
-  const scrollViewRef = useRef<KeyboardAwareScrollView>(null);
 
   useEffect(()=>{
         // Listen for keyboard events to show/hide toolbar
@@ -106,14 +101,6 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
     if (status === 'granted') {
       console.log("Location permission granted. Fetching current location...");
       try {
-        const { status } = await Location.getForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          const { status: requestStatus } = await Location.requestForegroundPermissionsAsync();
-          if (requestStatus !== 'granted') {
-            Alert.alert("Location permission denied", "Please enable location permissions to use this feature.");
-            return;
-          }
-        }
         const userLocation = await Location.getCurrentPositionAsync({});
         console.log("User location fetched:", userLocation.coords);
         setLocation({
@@ -206,42 +193,46 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
       text1: isPublished ? 'Note Unpublished' : 'Note Published',
       visibilityTime: 3000,
     });
-    await saveNote();
+  };
+
+  const saveNoteAsDraft = async () => {
+    const draftNote = {
+      title: "Draft - " + (titleText.trim() || `Untitled ${untitledNumber}`),
+      text: editor.getHTML(),
+      media: newMedia,
+      audio: newAudio,
+      tags,
+      time: new Date(),
+      published: false,
+    };
+    try {
+      await ApiService.writeNewNote(draftNote);
+    } catch (error) {
+      console.error("Error saving draft:", error);
+    }
   };
 
   const saveNote = async () => {
-    console.log("Back button pressed - saveNote function invoked.");
-    setIsUpdating(true);
-    setIsSaveButtonEnabled(true);
-
+    setIsSaveButtonEnabled(false);
     try {
-      const userLocation = await Location.getCurrentPositionAsync({});
-      const finalLocation = userLocation ? userLocation.coords : { latitude: 0, longitude: 0 };
-      const textContent = await editor.getHTML();
-      const sanitizedContent = textContent.replace(/<\/?p>/g, ''); // removes <p> tags from content
-      const uid = await user.getId();
-
       const newNote = {
-        title: titleText || "Untitled",
-        text: sanitizedContent,
-        media: newMedia || [],
-        audio: newAudio || [],
-        tags: tags || [],
-        latitude: finalLocation.latitude.toString(),
-        longitude: finalLocation.longitude.toString(),
+        title: titleText || `Untitled ${untitledNumber}`,
+        text: editor.getHTML(),
+        media: newMedia,
+        audio: newAudio,
         published: isPublished,
         time: new Date().toISOString(), // Automatically grabs current time
         creator: uid,
       };
 
       const response = await ApiService.writeNewNote(newNote);
-      await response.json();
+      const obj = await response.json();
       route.params.refreshPage();
       navigation.goBack();
     } catch (error) {
-      console.error("Error saving the note:", error);
+      console.error("An error occurred while creating the note:", error);
     } finally {
-      setIsUpdating(false);
+      setIsSaveButtonEnabled(true);
     }
   };
 
@@ -335,70 +326,19 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
             <View style={NotePageStyles().toolbar}testID="RichEditor">
             <Toolbar
             editor={editor}
-            items={DEFAULT_TOOLBAR_ITEMS}
+            style={NotePageStyles().container}
+            actions={['bold', 'italic', 'underline', 'bullet_list', 'blockquote', 'indent', 'outdent', 'close_keyboard' ]}
           />
         </View>
-      {Platform.OS === 'ios' && (
-      <Toolbar
-        editor={editor}
-        items={DEFAULT_TOOLBAR_ITEMS}
 
-      />
-    )}
-          </View>
-        </KeyboardAwareScrollView>
-          {/* Video Player Modal */}
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={isVideoModalVisible}
-          onRequestClose={() => setIsVideoModalVisible(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              {videoUri && (
-                <Video
-                  source={{ uri: videoUri }}
-                  useNativeControls
-                  resizeMode="contain"
-                  style={styles.videoPlayer}
-                />
-              )}
-              <TouchableOpacity onPress={() => setIsVideoModalVisible(false)}>
-                <Text style={styles.closeButton}>Close</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
 
-        <LoadingModal visible={isUpdating} />
       </KeyboardAvoidingView>
+
+      <LoadingModal visible={isUpdating} />
+      </View>
     </SafeAreaView>
+
   );
 };
 
 export default AddNoteScreen;
-
-const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
-    width: "90%",
-    padding: 20,
-    backgroundColor: "white",
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  videoPlayer: {
-    width: "100%",
-    height: 200,
-  },
-  closeButton: {
-    color: "blue",
-    marginTop: 20,
-  },
-});
