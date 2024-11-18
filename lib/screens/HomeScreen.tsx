@@ -85,10 +85,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         isPrivate ? userId : ""
       );
   
-      setMessages(data);
+      // Filter out archived notes; assume notes without `isArchived` are not archived
+      const unarchivedNotes = data.filter((note: Note) => !note.isArchived);
+  
+      setMessages(unarchivedNotes);
   
       // Convert data and sort notes by date (latest first)
-      const fetchedNotes = DataConversion.convertMediaTypes(data)
+      const fetchedNotes = DataConversion.convertMediaTypes(unarchivedNotes)
         .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
   
       // Apply reverse logic if 'reversed' is true
@@ -104,6 +107,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     }
   };
   
+  
+  
   const updateNote = (note: Note) => {
     setNotes((prevNotes) =>
       prevNotes?.map((prevNote) => (prevNote.id === note.id ? note : prevNote))
@@ -111,23 +116,50 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     refreshPage();
   };
 
-  const deleteNoteFromAPI = async (id: string) => {
-    try {
-      const userId = await user.getId();
-      const success = await ApiService.deleteNoteFromAPI(id, userId || "");
-      if (success) {
-        return true;
+  const handleArchiveNote = async (note: Note | undefined, user: User) => {
+    if (note?.id) {
+      try {
+        const userId = await user.getId();
+        const updatedNote = {
+          ...note,
+          isArchived: true,
+          published: false,
+          archivedAt: new Date().toISOString(),
+        };
+  
+        const response = await ApiService.overwriteNote(updatedNote);
+        if (response.ok) {
+          ToastMessage.show({
+            type: "success",
+            text1: "Success",
+            text2: "Note successfully archived.",
+          });
+          updateNote(updatedNote); // Update the note in local state
+          return true;
+        } else {
+          throw new Error("Archiving failed");
+        }
+      } catch (error) {
+        ToastMessage.show({
+          type: "error",
+          text1: "Error",
+          text2: "Failed to archive note. System failure. Try again later.",
+        });
+        console.error("Error archiving note:", error);
+        return false;
       }
-    } catch (error) {
-      console.error("Error deleting note:", error);
+    } else {
       ToastMessage.show({
         type: "error",
-        text1: "Error deleting note",
-        text2: error.message,
+        text1: "Error",
+        text2: "You must first save your note before archiving it.",
       });
       return false;
     }
   };
+  
+  
+  
 
   const handleFilters = (name: string) => {
     if (name === "published_entries") {
@@ -200,13 +232,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     );
   };
 
-  const deleteNote = (data: any, rowMap: any) => {
-    if (rowMap[data]) {
-      rowMap[data].closeRow();
+  const deleteNote = (id: string, rowMap: any) => {
+    if (rowMap[id]) {
+      rowMap[id].closeRow();
     }
-    setNotes((prevNotes) => prevNotes.filter((note) => note.id !== data));
-    deleteNoteFromAPI(data);
+  
+    const noteToDelete = notes.find((note) => note.id === id);
+  
+    if (noteToDelete) {
+      handleArchiveNote(noteToDelete, user); // Pass the correct arguments
+    }
+  
+    setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
   };
+  
 
   async function publishNote(data: any, rowMap: any) {
     if (rowMap[data]) {

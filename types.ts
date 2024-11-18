@@ -33,6 +33,7 @@ export type Note = {
   longitude: string;
   published: boolean | undefined;
   tags: string[];
+  isArchived?: boolean; // Optional flag to indicate if the note is archived
 };
 
 export type RootStackParamList = {
