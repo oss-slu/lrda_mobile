@@ -24,4 +24,10 @@ describe('AudioContainer', () => {
     const wrapper = render(<AudioContainer newAudio={[]} setNewAudio={() => {}} />);
     expect(wrapper).toMatchSnapshot();
   });
+
+  it('renders with audio', () => {
+    const wrapper = render(<AudioContainer newAudio={[{ uri: 'test', name: 'test' }]} setNewAudio={() => {}} />);
+    expect(wrapper).toMatchSnapshot();
+  });    
+  
 });
