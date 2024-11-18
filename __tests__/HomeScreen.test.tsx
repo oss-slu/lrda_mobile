@@ -4,6 +4,7 @@ import { Alert } from 'react-native';
 import AddNoteScreen from '../lib/screens/AddNoteScreen';
 import * as Location from 'expo-location';
 import HomeScreen from '../lib/screens/HomeScreen';
+import { onAuthStateChanged } from 'firebase/auth';
 
 // Mock external dependencies
 jest.mock('../lib/components/ThemeProvider', () => ({
@@ -11,6 +12,37 @@ jest.mock('../lib/components/ThemeProvider', () => ({
     theme: 'mockedTheme', // Provide a mocked theme object
   }),
 }));
+
+// Mock Firebase services
+jest.mock("firebase/app", () => ({
+  initializeApp: jest.fn(),
+}));
+
+jest.mock("firebase/auth", () => ({
+  getAuth: jest.fn(),
+  initializeAuth: jest.fn(),
+  getReactNativePersistence: jest.fn(),
+  onAuthStateChanged: jest.fn(), // Mock onAuthStateChanged
+}));
+
+
+jest.mock("firebase/firestore", () => ({
+  getFirestore: jest.fn(),
+}));
+
+jest.mock("firebase/database", () => ({
+  getDatabase: jest.fn(),
+}));
+
+jest.mock("firebase/storage", () => ({
+  getStorage: jest.fn(),
+}));
+
+
+onAuthStateChanged.mockImplementation((auth, callback) => {
+  const mockUser = { uid: "12345", email: "test@example.com" };
+  callback(mockUser); // Simulate a logged-in user
+});
 
 // Mock expo-location module with TypeScript type support
 jest.mock('expo-location', () => ({

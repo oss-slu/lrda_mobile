@@ -14,6 +14,17 @@ const store = mockStore({
   },
 });
 
+jest.mock("firebase/database", () => ({
+  getDatabase: jest.fn(), // Mock getDatabase to prevent the error
+}));
+
+jest.mock("firebase/auth", () => ({
+  getAuth: jest.fn(),
+  initializeAuth: jest.fn(),
+  getReactNativePersistence: jest.fn(),
+  onAuthStateChanged: jest.fn(), // Mock onAuthStateChanged
+}));
+
 // Silence console warnings during the test
 beforeEach(() => {
   jest.clearAllMocks();

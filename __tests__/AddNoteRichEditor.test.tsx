@@ -9,18 +9,64 @@ jest.mock('../lib/components/ThemeProvider', () => ({
     theme: 'mockedTheme', // Provide a mocked theme object
   }),
 }));
+// Mock Firebase services
+
+
+jest.mock("firebase/auth", () => ({
+  getAuth: jest.fn(),
+  initializeAuth: jest.fn(),
+  getReactNativePersistence: jest.fn(),
+  onAuthStateChanged: jest.fn(), // Mock onAuthStateChanged
+}));
+
+jest.mock("firebase/database", () => ({
+  getDatabase: jest.fn(), // Mock getDatabase to prevent the error
+}));
+
+jest.mock('react-native-keyboard-aware-scroll-view', () => ({
+  KeyboardAwareScrollView: jest.fn(({ children }) => children),
+}));
+
+
+jest.mock('firebase/firestore', () => ({
+  getFirestore: jest.fn(),
+  doc: jest.fn(() => ({
+    get: jest.fn(() => Promise.resolve({ exists: false })),
+  })),
+}));
+
+jest.mock('expo-location', () => ({
+  getForegroundPermissionsAsync: jest.fn(() =>
+    Promise.resolve({ status: 'granted' })
+  ),
+  requestForegroundPermissionsAsync: jest.fn(() =>
+    Promise.resolve({ status: 'granted' })
+  ),
+  getCurrentPositionAsync: jest.fn(() =>
+    Promise.resolve({
+      coords: {
+        latitude: 37.7749,
+        longitude: -122.4194,
+      },
+    })
+  ),
+}));
+
+
 
 jest.mock('@10play/tentap-editor', () => ({
   RichText: () => null,
   Toolbar: () => null,
   useEditorBridge: jest.fn(() => ({
     getHTML: jest.fn(() => ''),
-    commands: {
-      setContent: jest.fn(),
-      focus: jest.fn(),
-    },
-  })),
+    setContent: jest.fn(),
+    injectCSS: jest.fn(),
+    focus: jest.fn(),
+    insertImage: jest.fn(),
+  })),
+  DEFAULT_TOOLBAR_ITEMS: [], // Mock as an empty array
 }));
+
 
 beforeEach(() => {
    // Clear mocks before each test

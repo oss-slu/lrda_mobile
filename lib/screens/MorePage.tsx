@@ -61,7 +61,7 @@ export default function MorePage() {
 
           {/* Initiative Team Section */}
           <View style={styles.initiativeTeamSection}>
-            <Text style={styles.initiativeTeamTitle}>The Saint Louis University Where's Religion Team</Text>
+            
             <View style={styles.initiativeTeamMembers}>
             <View style={styles.teamMemberContainer}>
   {Image.resolveAssetSource(require('../../assets/Rachel.jpg')).uri ? (

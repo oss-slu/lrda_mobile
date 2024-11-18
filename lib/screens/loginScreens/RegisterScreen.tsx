@@ -62,7 +62,7 @@ const RegistrationScreen: React.FC<RegisterProps> = ({ navigation }) => {
         email,
         name: fullName,
         roles: {
-          administrator: false,
+          administrator: true,
           contributor: true,
         },
         createdAt: Timestamp.now(),

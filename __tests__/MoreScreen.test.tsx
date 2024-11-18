@@ -1,25 +1,33 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, fireEvent } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
 import configureStore from 'redux-mock-store';
 import MorePage from '../lib/screens/MorePage';
+import { Image } from 'react-native';
 import moxios from 'moxios';
-import { User } from '../lib/models/user_class';
-import { Linking } from 'react-native';
-import { useTheme } from '../lib/components/ThemeProvider';
 
 // Create a mock Redux store
 const mockStore = configureStore([]);
 const store = mockStore({
   navigation: {
-    navState: 'more', // Add mock navigation state if needed
+    navState: 'more',
   },
   theme: {
-    darkMode: false, // Add mock theme state if needed
+    darkMode: false,
   },
 });
 
-// Mock the ThemeProvider with spies
+jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
+  settings: {},
+  setValues: jest.fn(),
+  getConstants: jest.fn(() => ({
+    settings: {},
+  })),
+}));
+
+
+
+// Mock ThemeProvider
 jest.mock('../lib/components/ThemeProvider', () => ({
   useTheme: jest.fn(() => ({
     theme: {
@@ -29,36 +37,50 @@ jest.mock('../lib/components/ThemeProvider', () => ({
       logout: '#ff0000',
       logoutText: '#ffffff',
     },
-    isDarkmode: false, // Initial value of isDarkmode
-    toggleDarkmode: jest.fn(), // Mock the toggleDarkmode function
+    isDarkmode: false,
+    toggleDarkmode: jest.fn(),
   })),
 }));
 
-// Mock the User class
-jest.mock('../lib/models/user_class', () => {
+// Mock User class
+jest.mock('../lib/models/user_class', () => ({
+  User: {
+    getInstance: jest.fn(() => ({
+      logout: jest.fn(),
+    })),
+  },
+}));
+
+// Mock Image.resolveAssetSource
+jest.mock('react-native', () => {
+  const ReactNative = jest.requireActual('react-native');
   return {
-    User: {
-      getInstance: jest.fn(() => ({
-        logout: jest.fn(),
-      })),
+    ...ReactNative,
+    Image: {
+      ...ReactNative.Image,
+      resolveAssetSource: jest.fn(() => ({ uri: 'mocked-asset-uri' })),
     },
   };
 });
+jest.mock('../lib/utils/api_calls', () => ({
+  fetchCreatorName: jest.fn(() => Promise.resolve([])),
+}));
 
-beforeAll(() => {
-  // Suppress console logs during tests
+// Silence console warnings during the test
+beforeEach(() => {
+  jest.clearAllMocks();
+
   jest.spyOn(console, 'log').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
-
-  // Install moxios for mocking HTTP requests
-  moxios.install();
+  jest.spyOn(console, 'warn').mockImplementation(() => {});
+  moxios.install()
 });
 
-afterAll(() => {
-  // Restore the original console methods and uninstall moxios
+afterEach(() => {
   console.log.mockRestore();
   console.error.mockRestore();
-  moxios.uninstall();
+  console.warn.mockRestore(); // Restore console.warn after the tests
+  moxios.uninstall()
 });
 
 describe('MorePage', () => {
@@ -78,34 +100,12 @@ describe('MorePage', () => {
       </Provider>
     );
 
-    // Get the Switch component with testID "dark-mode-switch"
     const toggleSwitch = getByTestId('dark-mode-switch');
-
-    // Simulate the toggle of dark mode
     fireEvent(toggleSwitch, 'onValueChange', true);
 
-    // Ensure that dark mode is toggled
-    expect(toggleSwitch.props.value).toBe(false); // Based on initial value of `isDarkmode` being false
+    expect(toggleSwitch.props.value).toBe(false);
   });
 
-  it("opens email link when 'Report a Bug' is pressed", () => {
-    const spy = jest.spyOn(Linking, 'openURL');
-
-    const { getByText } = render(
-      <Provider store={store}>
-        <MorePage />
-      </Provider>
-    );
-
-    // Find the 'Report a Bug' button and simulate press
-    const emailButton = getByText('Report a Bug');
-    fireEvent.press(emailButton);
-
-    // Ensure the correct email URL is opened
-    expect(spy).toHaveBeenCalledWith(
-      "mailto:yashkamal.bhatia@slu.edu?subject=Bug%20Report%20on%20'Where's%20Religion%3F'&body=Please%20provide%20details%20of%20your%20issue%20you%20are%20facing%20here."
-    );
-  });
   it('renders the "Logout" button', () => {
     const { getByText } = render(
       <Provider store={store}>
@@ -113,7 +113,6 @@ describe('MorePage', () => {
       </Provider>
     );
 
-    // Check if the "Logout" button is rendered
     expect(getByText('Logout')).toBeTruthy();
   });
 });

@@ -4,433 +4,104 @@ exports[`MorePage renders correctly 1`] = `
 [
   <View
     style={
-      {
-        "alignItems": "center",
-        "backgroundColor": "#ffffff",
-        "justifyContent": "center",
-        "marginBottom": -8,
-        "marginTop": 53.36,
-        "padding": 13.34,
-      }
+      [
+        {
+          "alignItems": "center",
+          "justifyContent": "center",
+          "paddingVertical": 26.68,
+        },
+        {
+          "backgroundColor": undefined,
+        },
+      ]
     }
   >
     <Text
       style={
-        {
-          "color": "#000000",
-          "fontSize": 32,
-          "fontWeight": "bold",
-        }
+        [
+          {
+            "fontSize": 32,
+            "fontWeight": "bold",
+            "paddingTop": 40,
+          },
+          {
+            "color": "#000000",
+          },
+        ]
       }
     >
-      Where's Religion
+      About
     </Text>
   </View>,
   <RCTSafeAreaView>
     <RCTScrollView
       contentContainerStyle={
-        {
-          "alignItems": "center",
-          "flexGrow": 1,
-          "justifyContent": "flex-start",
-        }
+        [
+          {
+            "alignItems": "center",
+            "flexGrow": 1,
+            "paddingHorizontal": 20,
+          },
+          {
+            "paddingBottom": 140,
+          },
+        ]
       }
     >
       <View>
         <View
           style={
             {
-              "height": 300,
+              "alignItems": "center",
+              "marginTop": 20,
               "width": "100%",
             }
           }
         >
-          <Image
-            source={1}
-            style={
-              {
-                "flex": 1,
-                "height": undefined,
-                "resizeMode": "cover",
-                "width": undefined,
-              }
-            }
-          />
-        </View>
-        <View>
           <Text
             style={
               {
-                "alignSelf": "center",
-                "color": "#000000",
                 "fontSize": 28,
-                "fontWeight": "bold",
+                "fontWeight": "600",
+                "marginBottom": 20,
+                "textAlign": "center",
               }
             }
           >
-            Resources
-          </Text>
-          <View
-            accessibilityState={
-              {
-                "busy": undefined,
-                "checked": undefined,
-                "disabled": undefined,
-                "expanded": undefined,
-                "selected": undefined,
-              }
-            }
-            accessibilityValue={
-              {
-                "max": undefined,
-                "min": undefined,
-                "now": undefined,
-                "text": undefined,
-              }
-            }
-            accessible={true}
-            collapsable={false}
-            focusable={true}
-            onClick={[Function]}
-            onResponderGrant={[Function]}
-            onResponderMove={[Function]}
-            onResponderRelease={[Function]}
-            onResponderTerminate={[Function]}
-            onResponderTerminationRequest={[Function]}
-            onStartShouldSetResponder={[Function]}
-            style={
-              {
-                "opacity": 1,
-              }
-            }
-          >
-            <Text
-              style={
-                {
-                  "alignSelf": "center",
-                  "color": "#000000",
-                  "fontSize": 16,
-                  "lineHeight": 28,
-                }
-              }
-            >
-              Our Website
-            </Text>
-          </View>
-          <View
-            accessibilityState={
-              {
-                "busy": undefined,
-                "checked": undefined,
-                "disabled": undefined,
-                "expanded": undefined,
-                "selected": undefined,
-              }
-            }
-            accessibilityValue={
-              {
-                "max": undefined,
-                "min": undefined,
-                "now": undefined,
-                "text": undefined,
-              }
-            }
-            accessible={true}
-            collapsable={false}
-            focusable={true}
-            onClick={[Function]}
-            onResponderGrant={[Function]}
-            onResponderMove={[Function]}
-            onResponderRelease={[Function]}
-            onResponderTerminate={[Function]}
-            onResponderTerminationRequest={[Function]}
-            onStartShouldSetResponder={[Function]}
-            style={
-              {
-                "opacity": 1,
-              }
-            }
-          >
-            <Text
-              style={
-                {
-                  "alignSelf": "center",
-                  "color": "#000000",
-                  "fontSize": 16,
-                  "lineHeight": 28,
-                }
-              }
-            >
-              Guide to Ethnography
-            </Text>
-          </View>
-          <View
-            accessibilityState={
-              {
-                "busy": undefined,
-                "checked": undefined,
-                "disabled": undefined,
-                "expanded": undefined,
-                "selected": undefined,
-              }
-            }
-            accessibilityValue={
-              {
-                "max": undefined,
-                "min": undefined,
-                "now": undefined,
-                "text": undefined,
-              }
-            }
-            accessible={true}
-            collapsable={false}
-            focusable={true}
-            onClick={[Function]}
-            onResponderGrant={[Function]}
-            onResponderMove={[Function]}
-            onResponderRelease={[Function]}
-            onResponderTerminate={[Function]}
-            onResponderTerminationRequest={[Function]}
-            onStartShouldSetResponder={[Function]}
-            style={
-              {
-                "opacity": 1,
-              }
-            }
-          >
-            <Text
-              style={
-                {
-                  "alignSelf": "center",
-                  "color": "#000000",
-                  "fontSize": 16,
-                  "lineHeight": 28,
-                }
-              }
-            >
-              Guide to Coding
-            </Text>
-          </View>
-          <View
-            accessibilityState={
-              {
-                "busy": undefined,
-                "checked": undefined,
-                "disabled": undefined,
-                "expanded": undefined,
-                "selected": undefined,
-              }
-            }
-            accessibilityValue={
-              {
-                "max": undefined,
-                "min": undefined,
-                "now": undefined,
-                "text": undefined,
-              }
-            }
-            accessible={true}
-            collapsable={false}
-            focusable={true}
-            onClick={[Function]}
-            onResponderGrant={[Function]}
-            onResponderMove={[Function]}
-            onResponderRelease={[Function]}
-            onResponderTerminate={[Function]}
-            onResponderTerminationRequest={[Function]}
-            onStartShouldSetResponder={[Function]}
-            style={
-              {
-                "opacity": 1,
-              }
-            }
-          >
-            <Text
-              style={
-                {
-                  "alignSelf": "center",
-                  "color": "#000000",
-                  "fontSize": 16,
-                  "lineHeight": 28,
-                }
-              }
-            >
-              Report a Bug
-            </Text>
-          </View>
-          <Text
-            style={
-              {
-                "alignSelf": "center",
-                "color": "#000000",
-                "fontSize": 28,
-                "fontWeight": "bold",
-              }
-            }
-          >
-            Meet our Team
+            What is Where’s Religion?
           </Text>
           <Text
             style={
               {
-                "alignSelf": "center",
-                "color": "#000000",
                 "fontSize": 16,
-                "lineHeight": 28,
+                "lineHeight": 24,
+                "marginBottom": 15,
+                "paddingHorizontal": 10,
+                "textAlign": "justify",
               }
             }
           >
-            Insert Team Photo
+            Where’s Religion? is an open-source application developed by humanities faculty and IT professionals at Saint Louis University that supports in-person research, remote data entry, media sharing, and mapping. The app is designed to facilitate a more robust public understanding of religion through rigorous scholarly methods. Our conviction is that the study of religion must account for the wide range of embodied experiences, improvised practices, material cultures, and shared spaces that humans inhabit. Through a research methodology that moves beyond analysis of sacred texts, creeds, and official teachings, Where’s Religion? provides a platform to diversify the data we study and to advance the study of religion we all encounter in everyday life.
           </Text>
           <Text
             style={
               {
-                "alignSelf": "center",
-                "color": "#000000",
                 "fontSize": 16,
-                "lineHeight": 28,
+                "lineHeight": 24,
+                "marginBottom": 15,
+                "paddingHorizontal": 10,
+                "textAlign": "justify",
               }
             }
           >
-            Insert Team Message
-          </Text>
-          <Text
-            style={
-              {
-                "alignSelf": "center",
-                "color": "#000000",
-                "fontSize": 28,
-                "fontWeight": "bold",
-              }
-            }
-          >
-            Frequently Asked Questions
+            Where’s Religion? is a keystone outcome of the Center on Lived Religion at Saint Louis University. We have received external support from the Henry Luce Foundation ($400,000 in 2018 and $470,000 in 2022), and internal support from the College of Arts & Sciences, the Office for the Vice President for Research and the Research Computing Group, Open Source with SLU, the Walter J. Ong, S.J., Center for Digital Humanities, and the CREST Research Center (Culture, Religion, Ethics, Science, Technology).
           </Text>
         </View>
-        <Text
-          style={
-            {
-              "alignSelf": "center",
-              "color": "#000000",
-              "fontSize": 28,
-              "fontWeight": "bold",
-            }
-          }
-        >
-          What can users do?
-        </Text>
-        <Text
-          style={
-            {
-              "alignSelf": "center",
-              "color": "#000000",
-              "fontSize": 16,
-              "lineHeight": 28,
-            }
-          }
-        >
-          Explore religious traditions, find places of worship, engage in meaningful discussions.
-        </Text>
-        <Text
-          style={
-            {
-              "alignSelf": "center",
-              "color": "#000000",
-              "fontSize": 28,
-              "fontWeight": "bold",
-            }
-          }
-        >
-          Who is it for?
-        </Text>
-        <Text
-          style={
-            {
-              "alignSelf": "center",
-              "color": "#000000",
-              "fontSize": 16,
-              "lineHeight": 28,
-            }
-          }
-        >
-          Scholars, students, believers, and the curious about the world's religions.
-        </Text>
-        <Text
-          style={
-            {
-              "alignSelf": "center",
-              "color": "#000000",
-              "fontSize": 28,
-              "fontWeight": "bold",
-            }
-          }
-        >
-          What's unique?
-        </Text>
-        <Text
-          style={
-            {
-              "alignSelf": "center",
-              "color": "#000000",
-              "fontSize": 16,
-              "lineHeight": 28,
-            }
-          }
-        >
-          Provides a modern method to capture experiences using the devices that are with us every day.
-        </Text>
-        <Text
-          style={
-            {
-              "alignSelf": "center",
-              "color": "#000000",
-              "fontSize": 28,
-              "fontWeight": "bold",
-            }
-          }
-        >
-          Our Mission
-        </Text>
-        <Text
-          style={
-            {
-              "alignSelf": "center",
-              "color": "#000000",
-              "fontSize": 16,
-              "lineHeight": 28,
-            }
-          }
-        >
-          Connect people of diverse religious backgrounds, beliefs, and practices.
-        </Text>
-        <Text
-          style={
-            {
-              "alignSelf": "center",
-              "color": "#000000",
-              "fontSize": 28,
-              "fontWeight": "bold",
-            }
-          }
-        >
-          Why use 'Where's Religion?'
-        </Text>
-        <Text
-          style={
-            {
-              "alignSelf": "center",
-              "color": "#000000",
-              "fontSize": 16,
-              "lineHeight": 28,
-            }
-          }
-        >
-          Explore religious traditions, find places of worship, engage in meaningful discussions.
-        </Text>
         <View
           style={
             {
-              "paddingTop": 15,
+              "alignItems": "center",
+              "padding": 20,
               "width": "100%",
             }
           }
@@ -438,8 +109,10 @@ exports[`MorePage renders correctly 1`] = `
           <View
             style={
               {
-                "alignItems": "center",
-                "marginTop": 40,
+                "flexDirection": "row",
+                "justifyContent": "space-around",
+                "marginBottom": 16,
+                "width": "100%",
               }
             }
           >
@@ -447,44 +120,264 @@ exports[`MorePage renders correctly 1`] = `
               style={
                 {
                   "alignItems": "center",
-                  "backgroundColor": "#f0f0f0",
-                  "borderRadius": 10,
-                  "flexDirection": "row",
-                  "justifyContent": "space-between",
-                  "padding": 6,
-                  "width": "94%",
+                  "width": "45%",
                 }
               }
             >
+              <RCTImageView
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                internal_analyticTag={null}
+                resizeMode="cover"
+                source={
+                  [
+                    {
+                      "__packager_asset": true,
+                      "height": 1,
+                      "scale": 1,
+                      "uri": "file://assets/full/path/to/directory/name.type",
+                      "width": 1,
+                    },
+                  ]
+                }
+                style={
+                  {
+                    "borderRadius": 40,
+                    "height": 80,
+                    "marginBottom": 8,
+                    "overflow": "hidden",
+                    "width": 80,
+                  }
+                }
+              />
               <Text
                 style={
                   {
-                    "color": "#000000",
-                    "fontSize": 18,
-                    "fontWeight": "500",
-                    "marginLeft": 9,
+                    "fontSize": 16,
+                    "fontWeight": "bold",
+                    "textAlign": "center",
                   }
                 }
               >
-                Dark Mode
+                Rachel Lindsey
               </Text>
-              <RCTSwitch
-                accessibilityRole="switch"
-                onChange={[Function]}
-                onResponderTerminationRequest={[Function]}
-                onStartShouldSetResponder={[Function]}
-                onTintColor="#000000"
+              <Text
                 style={
                   {
-                    "height": 31,
-                    "width": 51,
+                    "fontSize": 14,
+                    "textAlign": "center",
                   }
                 }
-                testID="dark-mode-switch"
-                thumbTintColor="#ffffff"
-                tintColor="black"
-                value={false}
+              >
+                Director of Center on Lived Religion
+              </Text>
+            </View>
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "width": "45%",
+                }
+              }
+            >
+              <RCTImageView
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                internal_analyticTag={null}
+                resizeMode="cover"
+                source={
+                  [
+                    {
+                      "__packager_asset": true,
+                      "height": 1,
+                      "scale": 1,
+                      "uri": "file://assets/full/path/to/directory/name.type",
+                      "width": 1,
+                    },
+                  ]
+                }
+                style={
+                  {
+                    "borderRadius": 40,
+                    "height": 80,
+                    "marginBottom": 8,
+                    "overflow": "hidden",
+                    "width": 80,
+                  }
+                }
               />
+              <Text
+                style={
+                  {
+                    "fontSize": 16,
+                    "fontWeight": "bold",
+                    "textAlign": "center",
+                  }
+                }
+              >
+                Adam Park
+              </Text>
+              <Text
+                style={
+                  {
+                    "fontSize": 14,
+                    "textAlign": "center",
+                  }
+                }
+              >
+                Associate Director of Research (COLR)
+              </Text>
+            </View>
+          </View>
+          <View
+            style={
+              {
+                "flexDirection": "row",
+                "justifyContent": "space-around",
+                "marginBottom": 16,
+                "width": "100%",
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "width": "45%",
+                }
+              }
+            >
+              <RCTImageView
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                internal_analyticTag={null}
+                resizeMode="cover"
+                source={
+                  [
+                    {
+                      "__packager_asset": true,
+                      "height": 1,
+                      "scale": 1,
+                      "uri": "file://assets/full/path/to/directory/name.type",
+                      "width": 1,
+                    },
+                  ]
+                }
+                style={
+                  {
+                    "borderRadius": 40,
+                    "height": 80,
+                    "marginBottom": 8,
+                    "overflow": "hidden",
+                    "width": 80,
+                  }
+                }
+              />
+              <Text
+                style={
+                  {
+                    "fontSize": 16,
+                    "fontWeight": "bold",
+                    "textAlign": "center",
+                  }
+                }
+              >
+                Pauline Lee
+              </Text>
+              <Text
+                style={
+                  {
+                    "fontSize": 14,
+                    "textAlign": "center",
+                  }
+                }
+              >
+                Assiciate Director of Public Humanities (COLR)
+              </Text>
+            </View>
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "width": "45%",
+                }
+              }
+            >
+              <RCTImageView
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                internal_analyticTag={null}
+                resizeMode="cover"
+                source={
+                  [
+                    {
+                      "__packager_asset": true,
+                      "height": 1,
+                      "scale": 1,
+                      "uri": "file://assets/full/path/to/directory/name.type",
+                      "width": 1,
+                    },
+                  ]
+                }
+                style={
+                  {
+                    "borderRadius": 40,
+                    "height": 80,
+                    "marginBottom": 8,
+                    "overflow": "hidden",
+                    "width": 80,
+                  }
+                }
+              />
+              <Text
+                style={
+                  {
+                    "fontSize": 16,
+                    "fontWeight": "bold",
+                    "textAlign": "center",
+                  }
+                }
+              >
+                Yash Bhatia
+              </Text>
+              <Text
+                style={
+                  {
+                    "fontSize": 14,
+                    "textAlign": "center",
+                  }
+                }
+              >
+                Software Engineer and Tech Lead 
+              </Text>
             </View>
           </View>
         </View>
@@ -492,11 +385,357 @@ exports[`MorePage renders correctly 1`] = `
           style={
             {
               "alignItems": "center",
-              "backgroundColor": "#ffffff",
+              "padding": 20,
               "width": "100%",
             }
           }
         >
+          <Text
+            style={
+              {
+                "fontSize": 24,
+                "fontWeight": "bold",
+                "marginBottom": 16,
+              }
+            }
+          >
+            The Development Team
+          </Text>
+          <View
+            style={
+              {
+                "flexDirection": "row",
+                "justifyContent": "space-around",
+                "marginBottom": 16,
+                "width": "100%",
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "width": "45%",
+                }
+              }
+            >
+              <RCTImageView
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                internal_analyticTag={null}
+                resizeMode="cover"
+                source={
+                  [
+                    {
+                      "__packager_asset": true,
+                      "height": 1,
+                      "scale": 1,
+                      "uri": "file://assets/full/path/to/directory/name.type",
+                      "width": 1,
+                    },
+                  ]
+                }
+                style={
+                  {
+                    "borderRadius": 40,
+                    "height": 80,
+                    "marginBottom": 8,
+                    "overflow": "hidden",
+                    "width": 80,
+                  }
+                }
+              />
+              <Text
+                style={
+                  {
+                    "fontSize": 16,
+                    "fontWeight": "bold",
+                    "textAlign": "center",
+                  }
+                }
+              >
+                Patrick Cuba
+              </Text>
+              <Text
+                style={
+                  {
+                    "fontSize": 14,
+                    "textAlign": "center",
+                  }
+                }
+              >
+                IT Architect
+              </Text>
+            </View>
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "width": "45%",
+                }
+              }
+            >
+              <RCTImageView
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                internal_analyticTag={null}
+                resizeMode="cover"
+                source={
+                  [
+                    {
+                      "__packager_asset": true,
+                      "height": 1,
+                      "scale": 1,
+                      "uri": "file://assets/full/path/to/directory/name.type",
+                      "width": 1,
+                    },
+                  ]
+                }
+                style={
+                  {
+                    "borderRadius": 40,
+                    "height": 80,
+                    "marginBottom": 8,
+                    "overflow": "hidden",
+                    "width": 80,
+                  }
+                }
+              />
+              <Text
+                style={
+                  {
+                    "fontSize": 16,
+                    "fontWeight": "bold",
+                    "textAlign": "center",
+                  }
+                }
+              >
+                Bryan Haberberger
+              </Text>
+              <Text
+                style={
+                  {
+                    "fontSize": 14,
+                    "textAlign": "center",
+                  }
+                }
+              >
+                Full Stack Developer
+              </Text>
+            </View>
+          </View>
+          <View
+            style={
+              {
+                "flexDirection": "row",
+                "justifyContent": "space-around",
+                "marginBottom": 16,
+                "width": "100%",
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "width": "45%",
+                }
+              }
+            >
+              <RCTImageView
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                internal_analyticTag={null}
+                resizeMode="cover"
+                source={
+                  [
+                    {
+                      "__packager_asset": true,
+                      "height": 1,
+                      "scale": 1,
+                      "uri": "file://assets/full/path/to/directory/name.type",
+                      "width": 1,
+                    },
+                  ]
+                }
+                style={
+                  {
+                    "borderRadius": 40,
+                    "height": 80,
+                    "marginBottom": 8,
+                    "overflow": "hidden",
+                    "width": 80,
+                  }
+                }
+              />
+              <Text
+                style={
+                  {
+                    "fontSize": 16,
+                    "fontWeight": "bold",
+                    "textAlign": "center",
+                  }
+                }
+              >
+                Stuart Ray
+              </Text>
+              <Text
+                style={
+                  {
+                    "fontSize": 14,
+                    "textAlign": "center",
+                  }
+                }
+              >
+                Developer
+              </Text>
+            </View>
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "width": "45%",
+                }
+              }
+            >
+              <RCTImageView
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                internal_analyticTag={null}
+                resizeMode="cover"
+                source={
+                  [
+                    {
+                      "__packager_asset": true,
+                      "height": 1,
+                      "scale": 1,
+                      "uri": "file://assets/full/path/to/directory/name.type",
+                      "width": 1,
+                    },
+                  ]
+                }
+                style={
+                  {
+                    "borderRadius": 40,
+                    "height": 80,
+                    "marginBottom": 8,
+                    "overflow": "hidden",
+                    "width": 80,
+                  }
+                }
+              />
+              <Text
+                style={
+                  {
+                    "fontSize": 16,
+                    "fontWeight": "bold",
+                    "textAlign": "center",
+                  }
+                }
+              >
+                Izak Robles
+              </Text>
+              <Text
+                style={
+                  {
+                    "fontSize": 14,
+                    "textAlign": "center",
+                  }
+                }
+              >
+                Developer
+              </Text>
+            </View>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "marginTop": 20,
+              "width": "100%",
+            }
+          }
+        >
+          <View
+            style={
+              [
+                {
+                  "alignItems": "center",
+                  "borderRadius": 10,
+                  "flexDirection": "row",
+                  "justifyContent": "space-between",
+                  "marginBottom": 10,
+                  "padding": 10,
+                  "width": "90%",
+                },
+                {
+                  "backgroundColor": undefined,
+                },
+              ]
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 18,
+                    "fontWeight": "500",
+                  },
+                  {
+                    "color": "#000000",
+                  },
+                ]
+              }
+            >
+              Dark Mode
+            </Text>
+            <RCTSwitch
+              accessibilityRole="switch"
+              onChange={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              onTintColor="#000000"
+              style={
+                {
+                  "height": 31,
+                  "width": 51,
+                }
+              }
+              testID="dark-mode-switch"
+              thumbTintColor="#ffffff"
+              tintColor="black"
+              value={false}
+            />
+          </View>
           <View
             accessibilityState={
               {
@@ -528,27 +767,28 @@ exports[`MorePage renders correctly 1`] = `
             style={
               {
                 "alignItems": "center",
-                "backgroundColor": "#ff0000",
+                "backgroundColor": "black",
                 "borderRadius": 15,
                 "flexDirection": "row",
                 "height": 50,
                 "justifyContent": "center",
-                "marginBottom": 100,
-                "marginTop": 60,
                 "opacity": 1,
-                "width": "80%",
+                "width": "90%",
               }
             }
           >
             <Text
               style={
-                {
-                  "color": "#ffffff",
-                  "fontSize": 20,
-                  "fontWeight": "600",
-                  "marginLeft": 5,
-                  "marginRight": 10,
-                }
+                [
+                  {
+                    "fontSize": 20,
+                    "fontWeight": "600",
+                    "marginRight": 10,
+                  },
+                  {
+                    "color": "white",
+                  },
+                ]
               }
             >
               Logout

@@ -2,6 +2,12 @@ import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import TagWindow from '../lib/components/tagging';
 
+
+jest.mock('../lib/utils/api_calls', () => ({
+  fetchCreatorName: jest.fn(() => Promise.resolve([])),
+}));
+
+
 beforeEach(() => {
   // Clear mocks before each test
   jest.clearAllMocks();

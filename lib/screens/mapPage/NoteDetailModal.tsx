@@ -153,7 +153,7 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
       const { src, alt } = tnode.attributes;
       return (
         <View style={{ marginVertical: 10, alignItems: "center" }}>
-          <TouchableOpacity onPress={() => onPicturePress(src as string)}>
+          <TouchableOpacity onPress={() => onPicturePress(src as string)} testID="imageButton">
             <Image
               source={{ uri: src as string }}
               style={{ width: 400, height: 400, resizeMode: "contain" }}
@@ -170,7 +170,7 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
       if (href && (href.endsWith(".mp4") || href.endsWith(".mov"))) {
         return (
           <View style={{ width: width - 40, height: (width - 40) / 1.77, marginVertical: 20, alignSelf: "center" }}>
-            <TouchableOpacity onPress={() => onVideoPress({ uri: href as string })}>
+            <TouchableOpacity onPress={() => onVideoPress({ uri: href as string })} testID="videoButton">
               <View style={{ width: "100%", height: "100%", backgroundColor: "#000", justifyContent: "center" }}>
                 <Ionicons name="play-circle-outline" size={50} color="white" style={{ alignSelf: "center" }} />
               </View>
@@ -180,7 +180,7 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
       } else if (href && (href.endsWith(".mp3") || href.endsWith(".wav") || href.endsWith(".3gp"))) {
         return (
           <View style={[styles.audioContainer, { marginVertical: 10, alignItems: "center", width: width - 40 }]}>
-            <TouchableOpacity onPress={() => playPauseAudio(href as string)}>
+            <TouchableOpacity onPress={() => playPauseAudio(href as string)} testID="videoButton">
               <Ionicons
                 name={audioState.isPlaying ? "pause-circle-outline" : "play-circle-outline"}
                 size={30}

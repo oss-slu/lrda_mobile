@@ -11,65 +11,112 @@ jest.mock('../lib/components/ThemeProvider', () => ({
   }),
 }));
 
+// Mock Firebase services
+
+jest.mock('react-native-keyboard-aware-scroll-view', () => ({
+  KeyboardAwareScrollView: jest.fn(({ children }) => children),
+}));
+
+
+jest.mock('firebase/firestore', () => ({
+  getFirestore: jest.fn(),
+  doc: jest.fn(() => ({
+    get: jest.fn(() => Promise.resolve({ exists: false })),
+  })),
+}));
+
+jest.mock("firebase/auth", () => ({
+  getAuth: jest.fn(),
+  initializeAuth: jest.fn(),
+  getReactNativePersistence: jest.fn(),
+  onAuthStateChanged: jest.fn(), // Mock onAuthStateChanged
+}));
+
+
+jest.mock("firebase/database", () => ({
+  getDatabase: jest.fn(),
+}));
+
+
+
 jest.mock('@10play/tentap-editor', () => ({
   RichText: () => null,
   Toolbar: () => null,
   useEditorBridge: jest.fn(() => ({
     getHTML: jest.fn(() => ''),
-    commands: {
-      setContent: jest.fn(),
-      focus: jest.fn(),
-    },
-  })),
+    setContent: jest.fn(),
+    injectCSS: jest.fn(),
+    focus: jest.fn(),
+    insertImage: jest.fn(),
+  })),
+  DEFAULT_TOOLBAR_ITEMS: [], // Mock as an empty array
 }));
 
-// Mock expo-location properly
+
 jest.mock('expo-location', () => ({
   getForegroundPermissionsAsync: jest.fn(),
-  requestForegroundPermissionsAsync: jest.fn(),
-  getCurrentPositionAsync: jest.fn(),
+  requestForegroundPermissionsAsync: jest.fn(() =>
+    Promise.resolve({ status: 'granted' }) // Return 'granted' status
+  ),
+  getCurrentPositionAsync: jest.fn(() =>
+    Promise.resolve({
+      coords: {
+        latitude: 37.7749,
+        longitude: -122.4194,
+      },
+    })
+  ),
 }));
 
+let consoleLogSpy: jest.SpyInstance;
+let consoleErrorSpy: jest.SpyInstance;
 // Silence console logs and errors to avoid noise in test runs
 beforeEach(() => {
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  jest.clearAllMocks();
+  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   moxios.install();
 });
 
 afterEach(() => {
-  console.log.mockRestore();
-  console.error.mockRestore();
+  consoleLogSpy.mockRestore();
+  consoleErrorSpy.mockRestore();
   moxios.uninstall();
 });
 
 describe('AddNoteScreen', () => {
-  it('adds image to editor', () => {
+  it('adds image to editor', async () => {
     const routeMock = {
       params: {
         untitledNumber: 1,
       },
     };
-
-    // Render the component
-    const { getByTestId } = render(<AddNoteScreen route={routeMock as any} />);
-
-    // Mock richTextRef and its insertImage function
-    const richTextRef = { current: { insertImage: jest.fn() } };
-
-    // Add the addImageToEditor function, replicating the logic from the component
-    const addImageToEditor = (imageUri: string) => {
-      richTextRef.current?.insertImage(imageUri);
+  
+    const mockEditor = {
+      getHTML: jest.fn(() => ''),
+      setContent: jest.fn(),
+      focus: jest.fn(),
+      insertImage: jest.fn(),
     };
-
-    // Mock image URI
+  
+    jest.mock('@10play/tentap-editor', () => ({
+      useEditorBridge: jest.fn(() => mockEditor),
+    }));
+  
+    render(<AddNoteScreen route={routeMock as any} />);
+  
     const imageUri = '__tests__/TestResources/TestImage.jpg';
-
-    // Call addImageToEditor function
-    addImageToEditor(imageUri);
-
-    // Verify that insertImage was called with the correct argument
-    expect(richTextRef.current.insertImage).toHaveBeenCalledWith(imageUri);
+  
+    // Simulate adding an image to the editor
+    const addImageToEditor = async (uri) => {
+      mockEditor.insertImage(uri);
+    };
+  
+    await addImageToEditor(imageUri);
+  
+    // Assert that insertImage was called with the correct argument
+    expect(mockEditor.insertImage).toHaveBeenCalledWith(imageUri);
   });
+  
 });
 

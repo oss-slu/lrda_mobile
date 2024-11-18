@@ -283,13 +283,13 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
                 </TouchableOpacity>
               </View>
               <View style={NotePageStyles().keyContainer}>
-                <TouchableOpacity onPress={() => setViewMedia(!viewMedia)}>
+                <TouchableOpacity onPress={() => setViewMedia(!viewMedia)} testID="imageButton">
                   <Ionicons name="images-outline" size={30} color={NotePageStyles().saveText.color} />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => setViewAudio(!viewAudio)}>
                   <Ionicons name="mic-outline" size={30} color={NotePageStyles().saveText.color} />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={toggleLocation}>
+                <TouchableOpacity onPress={toggleLocation}testID="checklocationpermission">
                 <Ionicons name="location-outline" size={30} color={locationButtonColor} />
               </TouchableOpacity>
                 <TouchableOpacity onPress={() => setIsTagging(!isTagging)}>
@@ -313,7 +313,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
                 />
               )}
               {isTagging && <TagWindow tags={tags} setTags={setTags} />}
-              {isLocation && <LocationWindow location={location} setLocation={setLocation} />}
+              {isLocation && <LocationWindow location={location} setLocation={setLocation}/>}
               {isTime && <TimeWindow time={time} setTime={setTime} />}
             </View>
             <View style={NotePageStyles().richTextContainer}>
@@ -326,7 +326,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
                 ]}
               />
             </View>
-            <View style={NotePageStyles().toolbar}>
+            <View style={NotePageStyles().toolbar}testID="RichEditor">
             <Toolbar
             editor={editor}
             items={DEFAULT_TOOLBAR_ITEMS}
