@@ -26,8 +26,18 @@ describe('AudioContainer', () => {
   });
 
   it('renders with audio', () => {
-    const wrapper = render(<AudioContainer newAudio={[{ uri: 'test', name: 'test' }]} setNewAudio={() => {}} />);
+    // Render the AudioContainer component with a mock audio item in the newAudio array
+    const wrapper = render(
+      <AudioContainer 
+        newAudio={[{ uri: 'test', name: 'test' }]} // Mock audio data to simulate an audio item
+        setNewAudio={() => {}} // Pass an empty function as the setNewAudio prop (mocking the state setter)
+      />
+    ); 
+  
+    // Assert that the rendered output matches the stored snapshot
+    // This ensures the component renders correctly with the provided audio data
     expect(wrapper).toMatchSnapshot();
-  });    
+  });
+   
   
 });
