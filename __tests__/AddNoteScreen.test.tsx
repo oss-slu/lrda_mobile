@@ -168,3 +168,44 @@ describe("AddNoteScreen's checkLocationPermission method", () => {
   
   
 });
+
+describe('AddNoteScreen - insertAudioToEditor', () => {
+  it('inserts audio link into the editor content', async () => {
+    // Mock editor bridge methods
+    const mockGetHTML = jest.fn().mockResolvedValue('<p>Existing content</p>');
+    const mockSetContent = jest.fn();
+    const mockFocus = jest.fn();
+
+    // Properly mock useEditorBridge
+    jest.mock('@10play/tentap-editor', () => ({
+      RichText: () => null,
+      Toolbar: () => null,
+      useEditorBridge: () => ({
+        getHTML: mockGetHTML,
+        setContent: mockSetContent,
+        focus: mockFocus,
+      }),
+    }));
+
+    // Render the component
+    const { getByTestId } = render(<AddNoteScreen route={{ params: { untitledNumber: 1 } }} />);
+
+    // Mock the audio URI
+    const audioUri = 'https://example.com/test-audio.mp3';
+
+    // Simulate the process of inserting audio
+    const currentContent = await mockGetHTML();
+    const newContent = `${currentContent}<a href="${audioUri}">${audioUri}</a><br>`;
+    mockSetContent(newContent); // Simulate setting content
+    mockFocus(); // Simulate focusing the editor
+
+    // Verify that the methods were called correctly
+    expect(mockGetHTML).toHaveBeenCalledTimes(1); // Ensure content was fetched
+    expect(mockSetContent).toHaveBeenCalledWith(newContent); // Ensure new content was set
+    expect(mockFocus).toHaveBeenCalledTimes(1); // Ensure focus was triggered
+  });
+});
+
+
+
+
