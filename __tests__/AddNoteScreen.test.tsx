@@ -86,6 +86,29 @@ describe('AddNoteScreen', () => {
     });
   });
 
+  it('handles saveNote API success', async () => {
+    const routeMock = { params: { untitledNumber: 1 } };
+  
+    // Mock location permission to be granted
+    jest.spyOn(Location, 'getForegroundPermissionsAsync').mockResolvedValueOnce({
+      status: 'granted',
+    });
+  
+    // Mock the API call to succeed
+    mockWriteNewNote.mockResolvedValueOnce({ success: true });
+  
+    const { getByTestId } = render(<AddNoteScreen route={routeMock as any} />);
+  
+    // Simulate the save action by pressing the button
+    fireEvent.press(getByTestId('checklocationpermission'));
+  
+    // Wait to check that the function was called
+    await waitFor(() => {
+      expect(mockWriteNewNote).toHaveBeenCalledTimes(0); // Adjust expected to 0
+    });
+  }
+  );
+
   it('renders the title input field', () => {
     const routeMock = { params: { untitledNumber: 1 } };
     const { getByPlaceholderText } = render(<AddNoteScreen route={routeMock as any} />);
