@@ -4,7 +4,7 @@ import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import * as FileSystem from "expo-file-system";
 
 // const S3_PROXY_PREFIX = "http://99.7.218.98:8080/S3/";
-const S3_PROXY_PREFIX = "http://s3-proxy.rerum.io/S3/";
+const S3_PROXY_PREFIX = process.env.S3_PROXY_PREFIX || "http://s3-proxy.rerum.io/S3/";
 
 let attempts = 0;
 
@@ -37,17 +37,11 @@ async function uploadMedia(uri: string, mediaType: string): Promise<string> {
     const file = new File([blob], uniqueName, {
       type: mediaType === "image" ? "image/jpeg" : "video/mp4",
     });
-    console.log("Blob size:", blob.size);
-    console.log("File size:", file.size);
-
     data.append("file", file);
-  } else if(Platform.OS == "ios") {
+  } else if (Platform.OS == "ios") {
     let base64 = await FileSystem.readAsStringAsync(uri, {
       encoding: FileSystem.EncodingType.Base64,
     });
-    console.log(
-      "base64 has been defined and will attempt to upload to S3 soon"
-    );
     base64 = `data:${
       mediaType === "image" ? "image/jpeg" : "video/mp4"
     };base64,${base64}`;
@@ -56,8 +50,7 @@ async function uploadMedia(uri: string, mediaType: string): Promise<string> {
       uri: base64,
       name: uniqueName,
     });
-  }
-  else if (Platform.OS == "android"){
+  } else if (Platform.OS == "android") {
     data.append("file", {
       uri: uri,
       type: "video/mp4",
@@ -65,26 +58,30 @@ async function uploadMedia(uri: string, mediaType: string): Promise<string> {
     });
   }
 
+  console.log("uploadMedia - Starting fetch with S3_PROXY_PREFIX:", S3_PROXY_PREFIX);
+
   return fetch(S3_PROXY_PREFIX + "uploadFile", {
     method: "POST",
     mode: "cors",
     body: data,
   })
-    .then((resp) => {
-      console.log("uploadMedia - Server response status:", resp.status);
+    .then(async (resp) => {
       if (resp.ok) {
         const location = resp.headers.get("Location");
         console.log("uploadMedia - Uploaded successfully, Location:", location);
         return location;
       } else {
-        console.log("uploadMedia - Server response body:", resp.body);
+        const errorText = await resp.text(); // Retrieve response text for errors
+        console.log("uploadMedia - Failed response:", errorText);
+        throw new Error(`Failed to upload. Status: ${resp.status}, Error: ${errorText}`);
       }
     })
     .catch((err) => {
-      console.error("uploadMedia - Error:", err);
-      return err;
+      console.error("uploadMedia - Network request failed:", err.message);
+      throw err; // Re-throw error to be caught in the AddNoteScreen
     });
 }
+
 
 export { getThumbnail, convertHeicToJpg, uploadMedia };
 

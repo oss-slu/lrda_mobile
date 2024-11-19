@@ -2,7 +2,7 @@ name: App test
 
 on:
   push:
-    branches: [ main,Home-screen-navigation-issue, 161-search-published-entries ]
+    branches: [ main,firebase-login ]
   pull_request:
     branches: [ main ]
 

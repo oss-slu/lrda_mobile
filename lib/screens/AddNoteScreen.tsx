@@ -1,37 +1,46 @@
-import { RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
+
 import { Ionicons } from "@expo/vector-icons";
-import * as Location from 'expo-location';
+
 import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  ScrollView,
+  View,
   TextInput,
   TouchableOpacity,
-  View
+  SafeAreaView,
+  Keyboard,
+  Platform,
+  KeyboardAvoidingView,
+  Modal,
+  Text,
+  StyleSheet
 } from "react-native";
+import { WebViewMessageEvent } from "react-native-webview";
+import * as Location from 'expo-location';
 import ToastMessage from 'react-native-toast-message';
-import NotePageStyles from "../../styles/pages/NoteStyles";
+
 import AudioContainer from "../components/audio";
-import LoadingModal from "../components/LoadingModal";
-import LocationWindow from "../components/location";
+
 import PhotoScroller from "../components/photoScroller";
 import TagWindow from "../components/tagging";
-import { useTheme } from "../components/ThemeProvider";
+import LocationWindow from "../components/location";
 import TimeWindow from "../components/time";
-import { AudioType, Media } from "../models/media_class";
+import { DEFAULT_TOOLBAR_ITEMS, RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
+import NotePageStyles, { customImageCSS } from "../../styles/pages/NoteStyles";
+import { useTheme } from "../components/ThemeProvider";
+import LoadingModal from "../components/LoadingModal";
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { Video } from "expo-av";
+import { Link } from "@react-navigation/native";
 import { User } from "../models/user_class";
+import { AudioType, Media } from "../models/media_class";
 import ApiService from "../utils/api_calls";
-import { getThumbnail } from "../utils/S3_proxy";
 
 const user = User.getInstance();
 
 const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, route }) => {
   const [titleText, setTitleText] = useState<string>("");
   const [isSaveButtonEnabled, setIsSaveButtonEnabled] = useState<boolean>(true);
-  const [untitledNumber, setUntitledNumber] = useState<string>("0");
   const [bodyText, setBodyText] = useState<string>("");
   const [newMedia, setNewMedia] = useState<Media[]>([]);
   const [newAudio, setNewAudio] = useState<AudioType[]>([]);
@@ -43,301 +52,350 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
   const [isLocation, setIsLocation] = useState<boolean>(false);
   const [isTime, setIsTime] = useState<boolean>(false);
   const [isPublished, setIsPublished] = useState<boolean>(false);
-  const scrollViewRef = useRef<ScrollView>(null);
+  const [location, setLocation] = useState<{ latitude: number, longitude: number } | null>(null);
+  const [locationButtonColor, setLocationButtonColor] = useState<string>("#000"); // Default color
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
-  const editor = useEditorBridge({ initialContent: bodyText || "", autofocus: true });
+  const [isVideoModalVisible, setIsVideoModalVisible] = useState<boolean>(false);
+  const [videoUri, setVideoUri] = useState<string | null>(null);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  const editor = useEditorBridge({
+    initialContent: bodyText || "",
+    avoidIosKeyboard: true,
+  });
+  
   const { theme } = useTheme();
   const titleTextRef = useRef<TextInput>(null);
+  const scrollViewRef = useRef<KeyboardAwareScrollView>(null);
 
-  // Add a guard check before calling editor.commands.focus()
+  useEffect(()=>{
+        // Listen for keyboard events to show/hide toolbar
+        const showKeyboardListener = Keyboard.addListener('keyboardDidShow', () => {
+          setKeyboardVisible(true);
+        });
+        const hideKeyboardListener = Keyboard.addListener('keyboardDidHide', () => {
+          setKeyboardVisible(false);
+        });
+        return () => {
+          showKeyboardListener.remove();
+          hideKeyboardListener.remove();
+        };
+      }, []);
+    
+  
+      const customToolbarItems = [
+        ...DEFAULT_TOOLBAR_ITEMS,
+        {
+          icon: () => <Ionicons name="close" size={24} color={theme.text} />, // Close keyboard icon
+          onPress: () => Keyboard.dismiss(), // Dismiss the keyboard when tapped
+          id: 'closeKeyboard', // Unique ID for this toolbar item
+        },
+      ];
+
   useEffect(() => {
-    if (editor?.focus) {
-      const timeout = setTimeout(() => {
-        editor.focus();
-      }, 500);
-      return () => clearTimeout(timeout);
+    if (editor) {
+      editor.injectCSS(customImageCSS);
     }
   }, [editor]);
 
-  // Toggle Location Visibility Logic
-  const toggleLocationVisibility = async () => {
-    if (isLocation) {
-      // Hide location by resetting values
-      setLocation({ latitude: 0, longitude: 0 });
-      setIsLocation(false);
-    } else {
+  const setLocationToZero = () => {
+    setLocation({ latitude: 0, longitude: 0 });
+    setLocationButtonColor("red");
+    console.log("Location set to (0, 0) due to permission denial or manual setting.");
+  };
+
+  const fetchCurrentLocation = async () => {
+    console.log("Requesting location permission...");
+    const { status } = await Location.requestForegroundPermissionsAsync();
+
+    if (status === 'granted') {
+      console.log("Location permission granted. Fetching current location...");
       try {
         const userLocation = await Location.getCurrentPositionAsync({});
-        if (userLocation) {
-          setLocation({
-            latitude: userLocation.coords.latitude,
-            longitude: userLocation.coords.longitude,
-          });
-          setIsLocation(true);
-        }
+        console.log("User location fetched:", userLocation.coords);
+        setLocation({
+          latitude: userLocation.coords.latitude,
+          longitude: userLocation.coords.longitude,
+        });
+        setLocationButtonColor("#000"); // Reset icon color to default
       } catch (error) {
         console.error("Error fetching location:", error);
+        Alert.alert("Error", "Failed to retrieve location.");
       }
+    } else {
+      console.log("Location permission denied. Setting location to (0, 0).");
+      setLocationToZero();
     }
   };
 
-  const addImageToEditor = (imageUri: string) => {
-    const imgTag = 
-    `<img src="${imageUri}" class="note-image" style="width: 100px !important; height: 100px !important; display: block; margin: 10px 0;" />`;
-    editor.setContent(editor.getHTML() + imgTag);
-  };
-
-  const addVideoToEditor = async (videoUri: string) => {
-    try {
-      const thumbnailUri = await getThumbnail(videoUri);
-      const videoTag = `
-        <video width="320" height="240" controls poster="${thumbnailUri}">
-          <source src="${videoUri}" type="video/mp4">
-          Your browser does not support the video tag.
-        </video>`;
-      editor.setContent(editor.getHTML() + videoTag);
-    } catch (error) {
-      console.error("Error adding video: ", error);
+  const toggleLocation = () => {
+    if (location && location.latitude === 0 && location.longitude === 0) {
+      console.log("Re-fetching current location...");
+      fetchCurrentLocation();
+    } else {
+      setLocationToZero();
     }
   };
 
-  const insertAudioToEditor = async (audioUri: string) => {
-    if (editor?.setContent && editor?.getHTML) {
+  // Automatically check location on component mount
+  useEffect(() => {
+    fetchCurrentLocation();
+  }, []);
+  // Toggle location to (0, 0) when the location button is pressed
+  const toggleLocationToZero = () => {
+    setLocationToZero();
+  };
+
+    // Function to display an error message inside the editor
+    const displayErrorInEditor = async (errorMessage) => {
+      const currentContent = await editor.getHTML();
+      const errorTag = `<p style="color: red; font-weight: bold;">${errorMessage}</p><br />`;
+      editor.setContent(currentContent + errorTag);
+      editor.focus();
+    };
+
+    const insertImageToEditor = async (imageUri: string) => {
       try {
-        // Get the current content from the editor
         const currentContent = await editor.getHTML();
-        // Create the new audio link with line breaks for spacing
+        const imageTag = `<img src="${imageUri}" style="max-width: 200px; max-height: 200px; object-fit: cover;" /><br />`;
+        editor.setContent(currentContent + imageTag);
+        editor.focus();
+      } catch (error) {
+        console.error("Error inserting image:", error);
+        displayErrorInEditor(`Error inserting image: ${error.message}`);
+      }
+    };
+    
+    const addVideoToEditor = async (videoUri: string) => {
+      try {
+        const currentContent = await editor.getHTML();
+        const videoLink = `${currentContent}<a href="${videoUri}">${videoUri}</a><br>`;
+        editor.setContent(videoLink);
+        editor.focus();
+      } catch (error) {
+        console.error("Error adding video:", error);
+        displayErrorInEditor(`Error adding video: ${error.message}`);
+      }
+    };
+    
+
+  
+    // Function to add audio
+    const insertAudioToEditor = async (audioUri: string) => {
+      try {
+        const currentContent = await editor.getHTML();
         const audioLink = `${currentContent}<a href="${audioUri}">${audioUri}</a><br>`;
-        // Set the combined content back to the editor
         editor.setContent(audioLink);
         editor.focus();
       } catch (error) {
-        console.error("Error adding audio link to editor:", error);
+        console.error("Error adding audio:", error);
+        displayErrorInEditor(`Error adding audio: ${error.message}`);
       }
-    } else {
-      console.error("Editor instance is not available.");
-    }
-  };
+    };
+  
+  
+  
 
-  const handleShareButtonPress = () => {
+  const handleShareButtonPress = async () => {
     setIsPublished(!isPublished);
     ToastMessage.show({
       type: 'success',
       text1: isPublished ? 'Note Unpublished' : 'Note Published',
       visibilityTime: 3000,
     });
-  };
-
-  const saveNoteAsDraft = async () => {
-    const draftNote = {
-      title: "Draft - " + (titleText.trim() || `Untitled ${untitledNumber}`),
-      text: editor.getHTML(),
-      media: newMedia,
-      audio: newAudio,
-      tags,
-      time: new Date(),
-      published: false,
-    };
-    try {
-      await ApiService.writeNewNote(draftNote);
-    } catch (error) {
-      console.error("Error saving draft:", error);
-    }
+    await saveNote();
   };
 
   const saveNote = async () => {
-    setIsSaveButtonEnabled(false);
+    console.log("Back button pressed - saveNote function invoked.");
+    setIsUpdating(true);
+    setIsSaveButtonEnabled(true);
+
     try {
+      const userLocation = await Location.getCurrentPositionAsync({});
+      const finalLocation = userLocation ? userLocation.coords : { latitude: 0, longitude: 0 };
+      const textContent = await editor.getHTML();
+      const sanitizedContent = textContent.replace(/<\/?p>/g, ''); // removes <p> tags from content
+      const uid = await user.getId();
+
       const newNote = {
-        title: titleText || `Untitled ${untitledNumber}`,
-        text: editor.getHTML(),
-        media: newMedia,
-        audio: newAudio,
+        title: titleText || "Untitled",
+        text: sanitizedContent,
+        media: newMedia || [],
+        audio: newAudio || [],
+        tags: tags || [],
+        latitude: finalLocation.latitude.toString(),
+        longitude: finalLocation.longitude.toString(),
         published: isPublished,
+        time: new Date().toISOString(), // Automatically grabs current time
+        creator: uid,
       };
 
       const response = await ApiService.writeNewNote(newNote);
-      const obj = await response.json();
+      await response.json();
       route.params.refreshPage();
       navigation.goBack();
     } catch (error) {
-      console.error("An error occurred while creating the note:", error);
+      console.error("Error saving the note:", error);
     } finally {
-      setIsSaveButtonEnabled(true);
+      setIsUpdating(false);
     }
   };
 
-  
 
   return (
-    <SafeAreaView style={{ flex: 1}}>
-      <View style={{flex: 1}}>
-      {/* Top Section with Buttons and Title */}
-      <View style={[NotePageStyles().topContainer,]}>
-        <View style={[NotePageStyles().topButtonsContainer]}>
-          {/* Back Button */}
-          <TouchableOpacity
-            style={NotePageStyles().topButtons}
-            onPress={async () => {
-              const editorContent = await editor.getHTML();
-
-              if (titleText.trim() === "" && editorContent.trim() === "") {
-                Alert.alert(
-                  "Empty Note",
-                  "Would you like to delete the note or save it as a draft?",
-                  [
-                    {
-                      text: "Delete",
-                      onPress: () => navigation.goBack(),
-                      style: "destructive",
-                    },
-                    {
-                      text: "Save as Draft",
-                      onPress: async () => {
-                        await saveNoteAsDraft();
-                        navigation.goBack();
-                      },
-                    },
-                    { text: "Cancel", style: "cancel" },
-                  ]
-                );
-              } else {
-                await saveNote();
-                navigation.goBack();
-              }
-            }}
-          >
-            <Ionicons
-              name="arrow-back-outline"
-              size={30}
-              color={NotePageStyles().saveText.color}
-            />
-            
-          </TouchableOpacity>
-
-          {/* Title Input */}
-          <TextInput
-            ref={titleTextRef}
-            style={NotePageStyles().title}
-            placeholder="Title Field Note"
-            placeholderTextColor={NotePageStyles().title.color}
-            onChangeText={setTitleText}
-            value={titleText}
-            testID="RichEditor"
-          />
-
-          {/* Share Button */}
-          <TouchableOpacity
-            style={NotePageStyles().topButtons}
-            onPress={handleShareButtonPress}
-          >
-            <Ionicons
-              name={isPublished ? "share" : "share-outline"}
-              size={30}
-              color={NotePageStyles().saveText.color}
-            />
-          </TouchableOpacity>
-        </View>
-
-        {/* Toolbar Icons */}
-        <View style={[NotePageStyles().keyContainer]}>
-          <TouchableOpacity onPress={() => setViewMedia(!viewMedia)}>
-            <Ionicons
-              name="images-outline"
-              size={30}
-              color={NotePageStyles().saveText.color}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => setViewAudio(!viewAudio)}>
-            <Ionicons
-              name="mic-outline"
-              size={30}
-              color={NotePageStyles().saveText.color}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={toggleLocationVisibility} testID="checklocationpermission">
-            <Ionicons
-              name="location-outline"
-              size={30}
-              color={NotePageStyles().saveText.color}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => setIsTime(!isTime)}>
-            <Ionicons
-              name="time-outline"
-              size={30}
-              color={NotePageStyles().saveText.color}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => setIsTagging(!isTagging)}>
-            <Ionicons
-              name="pricetag-outline"
-              size={30}
-              color={NotePageStyles().saveText.color}
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
-     
-
-      {/* Display Media, Audio, Tags, Location, Time */}
-      <View style={NotePageStyles().container}>
-        <PhotoScroller
-          active={viewMedia}
-          newMedia={newMedia}
-          setNewMedia={setNewMedia}
-          insertImageToEditor={addImageToEditor}
-          addVideoToEditor={addVideoToEditor}
-        />
-        {viewAudio && (
-          <AudioContainer
-            newAudio={newAudio}
-            setNewAudio={setNewAudio}
-            insertAudioToEditor={insertAudioToEditor}
-          />
-        )}
-        {isTagging && <TagWindow tags={tags} setTags={setTags} />}
-        {isLocation && <LocationWindow location={location} setLocation={setLocation} />}
-        {isTime && <TimeWindow time={time} setTime={setTime} />}
-      </View>
-
-      {/* Rich Text Editor and Toolbar */}
+    <SafeAreaView style={{ flex: 1 }}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
       >
-          <View style={[NotePageStyles().richTextContainer]} testID="TenTapEditor">
-          <RichText
+        <KeyboardAwareScrollView
+          ref={scrollViewRef}
+          contentContainerStyle={{ flexGrow: 1 }}
+          enableOnAndroid={true}
+          extraScrollHeight={Platform.OS === 'ios' ? 80 : 0}
+          keyboardOpeningTime={0}
+          keyboardShouldPersistTaps="handled" 
+        >
+          <View style={{ flex: 1 }}>
+            <View style={NotePageStyles().topContainer}>
+              <View style={NotePageStyles().topButtonsContainer}>
+                <TouchableOpacity style={NotePageStyles().topButtons} onPress={saveNote}>
+                  <Ionicons name="arrow-back-outline" size={30} color={NotePageStyles().saveText.color} />
+                </TouchableOpacity>
+                <TextInput
+                  ref={titleTextRef}
+                  style={NotePageStyles().title}
+                  placeholder="Title Field Note"
+                  placeholderTextColor={NotePageStyles().title.color}
+                  onChangeText={setTitleText}
+                  value={titleText}
+                  onFocus={() => {
+                    // Remove focus from the editor when the title is being edited
+                    if (editor?.blur) {
+                      editor.blur();
+                    }
+                  }}
+                />
+                <TouchableOpacity style={NotePageStyles().topButtons} onPress={handleShareButtonPress}>
+                  <Ionicons
+                    name={isPublished ? "share" : "share-outline"}
+                    size={30}
+                    color={NotePageStyles().saveText.color}
+                  />
+                </TouchableOpacity>
+              </View>
+              <View style={NotePageStyles().keyContainer}>
+                <TouchableOpacity onPress={() => setViewMedia(!viewMedia)} testID="imageButton">
+                  <Ionicons name="images-outline" size={30} color={NotePageStyles().saveText.color} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setViewAudio(!viewAudio)}>
+                  <Ionicons name="mic-outline" size={30} color={NotePageStyles().saveText.color} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={toggleLocation}testID="checklocationpermission">
+                <Ionicons name="location-outline" size={30} color={locationButtonColor} />
+              </TouchableOpacity>
+                <TouchableOpacity onPress={() => setIsTagging(!isTagging)}>
+                  <Ionicons name="pricetag-outline" size={30} color={NotePageStyles().saveText.color} />
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View style={NotePageStyles().container}>
+              <PhotoScroller
+                active={viewMedia}
+                newMedia={newMedia}
+                setNewMedia={setNewMedia}
+                insertImageToEditor={insertImageToEditor}
+                addVideoToEditor={addVideoToEditor}
+              />
+              {viewAudio && (
+                <AudioContainer
+                  newAudio={newAudio}
+                  setNewAudio={setNewAudio}
+                  insertAudioToEditor={insertAudioToEditor}
+                />
+              )}
+              {isTagging && <TagWindow tags={tags} setTags={setTags} />}
+              {isLocation && <LocationWindow location={location} setLocation={setLocation}/>}
+              {isTime && <TimeWindow time={time} setTime={setTime} />}
+            </View>
+            <View style={NotePageStyles().richTextContainer}testID="TenTapEditor">
+              <RichText
+                editor={editor}
+                placeholder="Write Content Here..."
+                style={[
+                  NotePageStyles().editor,
+                  { backgroundColor: Platform.OS === "android" ? "white" : undefined },
+                ]}
+              />
+            </View>
+            <View style={NotePageStyles().toolbar}testID="RichEditor">
+            <Toolbar
             editor={editor}
-            placeholder="Write something..."
-            style={[NotePageStyles().editor, {backgroundColor: Platform.OS == "android" && "white"}]}
-
-          />
-           
-          </View>
-       
-        {/* Toolbar placed at the bottom */}
-        <View style={[NotePageStyles().toolBar]}>
-          <Toolbar
-            editor={editor}
-            style={NotePageStyles().container}
-            actions={['bold', 'italic', 'underline', 'bullet_list', 'blockquote', 'indent', 'outdent', 'close_keyboard' ]}
+            items={DEFAULT_TOOLBAR_ITEMS}
           />
         </View>
+      {Platform.OS === 'ios' && (
+      <Toolbar
+        editor={editor}
+        items={DEFAULT_TOOLBAR_ITEMS}
 
+      />
+    )}
+          </View>
+        </KeyboardAwareScrollView>
+          {/* Video Player Modal */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={isVideoModalVisible}
+          onRequestClose={() => setIsVideoModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              {videoUri && (
+                <Video
+                  source={{ uri: videoUri }}
+                  useNativeControls
+                  resizeMode="contain"
+                  style={styles.videoPlayer}
+                />
+              )}
+              <TouchableOpacity onPress={() => setIsVideoModalVisible(false)}>
+                <Text style={styles.closeButton}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
 
+        <LoadingModal visible={isUpdating} />
       </KeyboardAvoidingView>
-
-      <LoadingModal visible={isUpdating} />
-      </View>
     </SafeAreaView>
-
   );
 };
 
 export default AddNoteScreen;
+
+const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "90%",
+    padding: 20,
+    backgroundColor: "white",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  videoPlayer: {
+    width: "100%",
+    height: 200,
+  },
+  closeButton: {
+    color: "blue",
+    marginTop: 20,
+  },
+});

@@ -1,427 +1,349 @@
 import React, { useState, useEffect, memo, useMemo } from "react";
 import {
-  ActivityIndicator,
-  ScrollView,
-  View,
-  Text,
-  StyleSheet,
   Modal,
   TouchableOpacity,
   Image,
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
   useWindowDimensions,
-  SafeAreaView
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Note } from "../../../types";
-import RenderHTML from "react-native-render-html";
-import Video from 'react-native-video';
-import RendererRegistry, { defaultHTMLElementModels, HTMLContentModel, TNode } from 'react-native-render-html';
+import Slider from "@react-native-community/slider";
+import RenderHTML, { TNodeRendererProps } from "react-native-render-html";
+import ApiService from "../../utils/api_calls";
 import { useTheme } from "../../components/ThemeProvider";
 import ImageModal from "./ImageModal";
-import VideoModal from "./VideoModal"
+import VideoModal from "./VideoModal";
+import { Audio } from "expo-av";
+import { VideoType } from "../../models/media_class";
 
-interface Props {
+interface Note {
+  title: string;
+  description: string;
+  creator?: string;
+  time?: string;
+  images?: { uri: string }[];
+}
+
+interface NoteDetailModalProps {
   isVisible: boolean;
   onClose: () => void;
   note?: Note;
 }
 
-const NoteDetailModal: React.FC<Props> = memo(
-  ({ isVisible, onClose, note }) => {
-    const [isImageTouched, setImageTouched] = useState(false);
-    const [isTextTouched, setTextTouched] = useState(true);
-    const [creatorName, setCreatorName] = useState("");
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const [isVideoVisible, setIsVideoVisible] = useState(false);
-    const { height, width } = useWindowDimensions();
-    const { theme } = useTheme();
+const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClose, note }) => {
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedVideo, setSelectedVideo] = useState<VideoType | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [isVideoVisible, setIsVideoVisible] = useState<boolean>(false);
+  const [creatorName, setCreatorName] = useState<string>("");
+  const { width } = useWindowDimensions();
+  const { theme } = useTheme();
 
-    useEffect(() => {
-      setTextTouched(true);
-      if (note?.creator) {
-        fetch(note.creator)
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.name) {
-              setCreatorName(data.name);
-            }
-          })
-          .catch((err) => console.error("Error fetching creator: ", err));
-      }
-    }, [note]);
+  const [audioStates, setAudioStates] = useState<{ [key: string]: { sound: Audio.Sound | null, isPlaying: boolean, progress: number, duration: number } }>({});
+  const [playingMedia, setPlayingMedia] = useState<string | null>(null);
 
-    const handleImageTouchStart = () => {
-      setImageTouched(true);
-      setTextTouched(false);
-    };
-
-    const handleTextTouchStart = () => {
-      setTextTouched(true);
-      setImageTouched(false);
-    };
-
-    const onPicturePress = () => {
-      setIsModalVisible(true); // Open the PictureModal
-    };
-
-    const onVideoPress = () => {
-      setIsVideoVisible(true);
-    };
-
-    const tagsStyles = {
-      img: {
-        maxWidth: '10',
-        height: '10',
-      },
-    };
-
-    const customRenderers = {
-      img: ({tnode}) => {
-        // Access attributes from tnode
-        const { src, alt } = tnode.attributes;
-        const imageSize = { width: width, height: width }; // Fixed size for all images
-    
-        return <Image source={{ uri: src }} style={imageSize} accessibilityLabel={alt} />;
-      },
-    };
-
-    const html = note?.description;
-    console.log(html);
-
-    // Declare a new state variable for image loading
-    const [imageLoadedState, setImageLoadedState] = useState<{
-      [key: string]: boolean;
-    }>({});
-
-    const images: string = useMemo(() => {
-      if (note?.images) {
-        return note.images.filter(
-          (mediaItem: any) =>
-            mediaItem.uri.endsWith(".jpg") || mediaItem.uri.endsWith(".png")
-        );
-      }
-      return [];
-    }, [note]);
-
-    const videos: string = useMemo(() => {
-      if (note?.images) {
-        return note.images.filter(
-          (mediaItem: any) =>
-            mediaItem.uri.endsWith(".MOV") || mediaItem.uri.endsWith(".mov") || mediaItem.uri.endsWith(".mp4")
-        );
-      }
-      return [];
-    }, [note]);
-
-    const handleLoad = (uri: string) => {
-      setImageLoadedState((prev) => ({ ...prev, [uri]: true }));
-    };
-    let newNote = false;
-    if (note?.description && note.description.includes("<div>")) {
-      newNote = true;
+  useEffect(() => {
+    if (note?.creator) {
+      ApiService.fetchCreatorName(note.creator)
+        .then((name) => setCreatorName(name))
+        .catch(() => setCreatorName("Unknown Creator"));
+    } else {
+      setCreatorName("Creator not available");
     }
+  }, [note]);
 
-    const htmlSource = useMemo(() => {
-      return { html };
-    }, [html]);
+  const onPicturePress = (src: string) => {
+    setSelectedImage(src);
+    setIsModalVisible(true);
+  };
 
-    const CustomVideoPlayer: React.FC<VideoPlayerProps> = ({ src }) => {
-      return <Video source={{ uri: src }} style={{ width: 300, height: 300 }} controls />;
+  const onVideoPress = (video: VideoType) => {
+    setSelectedVideo(video);
+    setIsVideoVisible(true);
+  };
+
+  const initializeAudio = async (uri: string) => {
+    if (audioStates[uri]?.sound) return audioStates[uri];
+
+    const { sound } = await Audio.Sound.createAsync({ uri });
+    const status = await sound.getStatusAsync();
+    const newAudioState = {
+      sound,
+      isPlaying: false,
+      progress: 0,
+      duration: status.isLoaded ? status.durationMillis / 1000 : 0,
     };
-    
-    /*
-    const customRenderers = {
-      video: (props: { tnode: { attributes: { src: any; }; }; }) => {
-        const src = props.tnode.attributes.src;
-        return <CustomVideoPlayer src={src} />;
-      },
-    };
-    */
-    
-    const customHTMLElementModels = {
-      video: defaultHTMLElementModels.video.extend({
-        contentModel: HTMLContentModel.none,
-      }),
-    };
 
-    const MemoizedRenderHtml = React.memo(RenderHTML);
+    setAudioStates((prev) => ({ ...prev, [uri]: newAudioState }));
+    return newAudioState;
+  };
 
-    const styles = StyleSheet.create({
-      closeButton: {
-        position: "absolute",
-        top: 50,
-        left: 20,
-        zIndex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.5,
-        shadowRadius: 2,
-        elevation: 3,
-        borderRadius: 25,
-        backgroundColor: theme.primaryColor,
-      },
-      pictureButton: {
-        position: "absolute",
-        top: 50,
-        right: 20,
-        zIndex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.5,
-        shadowRadius: 2,
-        elevation: 3,
-        borderRadius: 25,
-        backgroundColor: theme.primaryColor,
-      },
-      videoButton: {
-        position: "absolute",
-        top: 50,
-        right: 70,
-        zIndex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.5,
-        shadowRadius: 2,
-        elevation: 3,
-        borderRadius: 25,
-        backgroundColor: theme.primaryColor,
-      },
-      closeIcon: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: theme.primaryColor,
-        alignItems: "center",
-        justifyContent: "center",
-      },
-      textContainer: {
-        padding: 10,
-        paddingLeft: 15, // Indentation for the body text
-        backgroundColor: theme.primaryColor,
-        borderTopColor: theme.text,
-        borderTopWidth: 2,
-        flex: 1,
-        paddingTop: 100,
-      },
-      modalTitle: {
-        fontSize: 26,
-        fontWeight: "bold",
-        marginLeft: 15, // Less indent for title
-        marginBottom: 8,
-        color: theme.text,
-      },
-      modalText: {
-        fontSize: 18,
-        lineHeight: 24,
-        marginLeft: 15, // Uniform indentation for other texts
-        color: theme.text,
-      },
-      metaDataContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        marginLeft: 15,
-        marginRight: 15,
-        marginBottom: 10,
-      },
-      creatorContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-      },
-      creatorIcon: {
-        fontSize: 16,
-        color: theme.text,
-      },
-      creatorText: {
-        fontSize: 16,
-        color: theme.text,
-        marginLeft: 5,
-      },
-      dateContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-      },
-      dateIcon: {
-        fontSize: 16,
-        color: theme.text,
-      },
-      dateText: {
-        fontSize: 16,
-        color: theme.text,
-        marginLeft: 5,
-      },
-      timeContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-      },
-      timeIcon: {
-        fontSize: 16,
-        color: theme.text,
-      },
-      timeText: {
-        fontSize: 16,
-        color: theme.text,
-        marginLeft: 5,
-      },
-      imageContainer: {
-        width: "100%",
-        height: 360,
-        marginBottom: 2,
-        overflow: "hidden",
-        borderColor: '#e0e0e0'
-      },
-      image: {
-        width: "100%",
-        height: "100%",
-        resizeMode: "cover",
-      },
-      separator: {
-        // Divider line style
-        height: 1,
-        width: "90%",
-        backgroundColor: "#e0e0e0",
-        marginLeft: "5%",
-        marginRight: "5%",
-        marginBottom: 20,
-      },
-    });
-
-    return (
-      <Modal animationType="slide" transparent={false} visible={isVisible}>
-        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-          <View style={styles.closeIcon}>
-            <Ionicons name="close" size={30} color={theme.text}/>
-          </View>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={onPicturePress} style={styles.pictureButton} testID='imageButton'>
-          <View style={styles.closeIcon}>
-            <Ionicons name="image" size={30} color={theme.text}/>
-          </View>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={onVideoPress} style={styles.videoButton} testID='videoButton'>
-          <View style={styles.closeIcon}>
-            <Ionicons name="videocam" size={30} color={theme.text}/>
-          </View>
-        </TouchableOpacity>
-
-        <View
-          style={[
-            styles.textContainer,
-            {
-              height: isTextTouched ? "60%" : "30%",
-            },
-          ]}
-          onTouchStart={handleTextTouchStart}
-        >
-            <Text style={styles.modalTitle}>{note?.title}</Text>
-            <View style={styles.metaDataContainer}>
-              <View style={styles.creatorContainer}>
-                <Ionicons name="person-circle-outline" size={18} color={theme.text} />
-                <Text style={styles.creatorText}>{creatorName}</Text>
-              </View>
-              <View style={styles.dateContainer}>
-                <Ionicons name="calendar-outline" size={18} color={theme.text} />
-                <Text style={styles.dateText}>{note?.time}</Text>
-              </View>
-            </View>
-            <View key="Tags Container" style={{flexDirection: 'row', marginHorizontal: 15,}}>
-            <Ionicons name="pricetags-outline" size={20} color={theme.text} style={{marginRight: 10}}/>
-
-            <ScrollView
-              horizontal={true}
-              showsHorizontalScrollIndicator={false}
-              style={{ width: "100%", paddingLeft: 5, marginBottom: 10, }}
-            >
-              {note?.tags &&
-                note.tags.map((tag, index) => (
-                  <View
-                    key={index}
-                    style={{
-                      flexDirection: "row",
-                      marginRight: 10,
-                      alignItems: "center",
-                    }}
-                  >
-                    <View
-                      style={{
-                        height: 20,
-                        width: 20,
-                        transform: [{ rotate: "45deg" }],
-                        position: "absolute",
-                        left: 2,
-                        borderLeftWidth: 2,
-                        borderBottomWidth: 2,
-                        borderColor: theme.text,
-                        justifyContent: "center",
-                        alignItems: "center",
-                      }}
-                    >
-                      <View
-                        style={{
-                          height: 5,
-                          width: 5,
-                          left: 2,
-                          borderRadius: 10,
-                          backgroundColor: theme.text,
-                          marginRight: 5,
-                        }}
-                      />
-                    </View>
-                    <View
-                      style={{
-                        borderTopRightRadius: 5,
-                        borderBottomRightRadius: 5,
-                        borderColor: theme.text,
-                        borderRightWidth: 2,
-                        borderBottomWidth: 2,
-                        borderTopWidth: 2,
-                        paddingHorizontal: 10,
-                        justifyContent: "center",
-                        flexDirection: "row",
-                        marginLeft: 10,
-                      }}
-                    >
-                      <Text style={styles.creatorText}>{tag}</Text>
-                    </View>
-                  </View>
-                ))}
-              </ScrollView>
-            </View>
-          <ScrollView>
-            <View
-              style={{
-                height: 2,
-                width: "100%",
-                backgroundColor: theme.text,
-                marginBottom: 10,
-              }}
-            ></View>
-            {
-              newNote ? (
-                <MemoizedRenderHtml
-                  baseStyle={{ color: theme.text }}
-                  contentWidth={width}
-                  source={htmlSource}
-                  tagsStyles={tagsStyles}
-                  renderers={customRenderers}
-                  customHTMLElementModels={customHTMLElementModels}
-                />
-              ) : (
-                <Text style={{ color: theme.text }}>{note?.description}</Text>
-              )
+  const playPauseAudio = async (uri: string) => {
+    const audioState = await initializeAudio(uri);
+    if (audioState.sound) {
+      if (audioState.isPlaying) {
+        await audioState.sound.pauseAsync();
+        setAudioStates((prev) => ({
+          ...prev,
+          [uri]: {
+            ...audioState,
+            isPlaying: false,
+          },
+        }));
+        setPlayingMedia(null);
+      } else {
+        if (playingMedia && playingMedia !== uri) {
+          const currentPlayingSound = audioStates[playingMedia]?.sound;
+          if (currentPlayingSound) await currentPlayingSound.pauseAsync();
+          setAudioStates((prev) => ({
+            ...prev,
+            [playingMedia]: { ...prev[playingMedia], isPlaying: false },
+          }));
+        }
+        setPlayingMedia(uri);
+        const status = await audioState.sound.getStatusAsync();
+        if (status.positionMillis === status.durationMillis) {
+          await audioState.sound.replayAsync();
+        } else {
+          await audioState.sound.playAsync();
+        }
+        audioState.sound.setOnPlaybackStatusUpdate((status) => {
+          if (status.isLoaded) {
+            setAudioStates((prev) => ({
+              ...prev,
+              [uri]: {
+                ...audioState,
+                isPlaying: status.isPlaying,
+                progress: status.positionMillis / 1000,
+                duration: status.durationMillis / 1000,
+              },
+            }));
+            if (status.didJustFinish) {
+              audioState.sound.stopAsync();
+              setAudioStates((prev) => ({
+                ...prev,
+                [uri]: { ...audioState, isPlaying: false, progress: 0 },
+              }));
+              setPlayingMedia(null);
             }
-          </ScrollView>
+          }
+        });
+      }
+    }
+  };
+
+  const handleSlidingComplete = async (value: number, uri: string) => {
+    const audioState = await initializeAudio(uri);
+    if (audioState.sound) {
+      await audioState.sound.setPositionAsync(value * 1000);
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60).toString().padStart(2, "0");
+    return `${mins}:${secs}`;
+  };
+
+  const customRenderers = useMemo(() => ({
+    img: ({ tnode }: TNodeRendererProps<any>) => {
+      const { src, alt } = tnode.attributes;
+      return (
+        <View style={{ marginVertical: 10, alignItems: "center" }}>
+          <TouchableOpacity onPress={() => onPicturePress(src as string)} testID="imageButton">
+            <Image
+              source={{ uri: src as string }}
+              style={{ width: 400, height: 400, resizeMode: "contain" }}
+              accessibilityLabel={alt as string}
+            />
+          </TouchableOpacity>
         </View>
-        <ImageModal isVisible={isModalVisible} onClose={() => setIsModalVisible(false)} images={images}/>
-        <VideoModal isVisible={isVideoVisible} onClose={() => setIsVideoVisible(false)} videos={videos}/>
-      </Modal>
-    );
-  }
-);
+      );
+    },
+    a: ({ tnode }: TNodeRendererProps<any>) => {
+      const { href } = tnode.attributes;
+      const audioState = audioStates[href as string] || { progress: 0, duration: 0, isPlaying: false };
+
+      if (href && (href.endsWith(".mp4") || href.endsWith(".mov"))) {
+        return (
+          <View style={{ width: width - 40, height: (width - 40) / 1.77, marginVertical: 20, alignSelf: "center" }}>
+            <TouchableOpacity onPress={() => onVideoPress({ uri: href as string })} testID="videoButton">
+              <View style={{ width: "100%", height: "100%", backgroundColor: "#000", justifyContent: "center" }}>
+                <Ionicons name="play-circle-outline" size={50} color="white" style={{ alignSelf: "center" }} />
+              </View>
+            </TouchableOpacity>
+          </View>
+        );
+      } else if (href && (href.endsWith(".mp3") || href.endsWith(".wav") || href.endsWith(".3gp"))) {
+        return (
+          <View style={[styles.audioContainer, { marginVertical: 10, alignItems: "center", width: width - 40 }]}>
+            <TouchableOpacity onPress={() => playPauseAudio(href as string)} testID="videoButton">
+              <Ionicons
+                name={audioState.isPlaying ? "pause-circle-outline" : "play-circle-outline"}
+                size={30}
+                color={theme.text}
+              />
+            </TouchableOpacity>
+            <Slider
+              style={styles.audioSlider}
+              minimumValue={0}
+              maximumValue={audioState.duration}
+              value={audioState.progress}
+              minimumTrackTintColor={theme.primaryColor}
+              maximumTrackTintColor="#d3d3d3"
+              thumbTintColor={theme.primaryColor}
+              onSlidingComplete={(value) => handleSlidingComplete(value, href as string)}
+            />
+            <Text style={styles.audioTimer}>{formatTime(audioState.progress)} / {formatTime(audioState.duration)}</Text>
+          </View>
+        );
+      }
+      return <Text style={{ color: theme.text, marginVertical: 10 }}>{tnode.data}</Text>;
+    },
+  }), [audioStates, theme]);
+
+  const htmlSource = useMemo(() => ({ html: note?.description || "" }), [note]);
+
+  return (
+    <Modal animationType="slide" transparent={false} visible={isVisible} >
+      <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+        <View style={styles.closeIcon}>
+          <Ionicons name="close" size={30} color={theme.text} />
+        </View>
+      </TouchableOpacity>
+
+      <View style={[styles.textContainer, { height: "100%" }]}>
+        <Text style={styles.modalTitle}>{note?.title}</Text>
+
+        <View style={styles.metaDataContainer}>
+          <View style={styles.creatorContainer}>
+            <Ionicons name="person-circle-outline" size={18} color={theme.text} />
+            <Text style={styles.creatorText}>{creatorName}</Text>
+          </View>
+
+          <View style={styles.dateContainer}>
+            <Ionicons name="calendar-outline" size={18} color={theme.text} />
+            <Text style={styles.dateText}>{note?.time || "Date not available"}</Text>
+          </View>
+        </View>
+
+        <View style={styles.dividerLine} />
+
+        <ScrollView>
+          <RenderHTML
+            baseStyle={{ color: theme.text }}
+            contentWidth={width}
+            source={htmlSource}
+            tagsStyles={tagsStyles}
+            renderers={customRenderers}
+          />
+        </ScrollView>
+      </View>
+
+      <ImageModal isVisible={isModalVisible} onClose={() => setIsModalVisible(false)} images={selectedImage ? [{ uri: selectedImage }] : []} />
+      <VideoModal isVisible={isVideoVisible} onClose={() => setIsVideoVisible(false)} videos={selectedVideo ? [selectedVideo] : []} />
+    </Modal>
+  );
+});
 
 export default NoteDetailModal;
+
+const styles = StyleSheet.create({
+  closeButton: {
+    position: "absolute",
+    top: 50,
+    left: 20,
+    zIndex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#ccc",
+    borderRadius: 25,
+    padding: 5,
+  },
+  closeIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#ccc",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  textContainer: {
+    padding: 10,
+    backgroundColor: "#f5f5f5",
+    borderTopColor: "#ddd",
+    borderTopWidth: 2,
+    flex: 1,
+    paddingTop: 100,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#333",
+    textAlign: "center",
+    marginBottom: 5,
+  },
+  metaDataContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+  },
+  creatorContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  creatorText: {
+    fontSize: 16,
+    color: "#333",
+    marginLeft: 5,
+  },
+  dateContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    flex: 1,
+  },
+  dateText: {
+    fontSize: 16,
+    color: "#333",
+    marginLeft: 5,
+  },
+  dividerLine: {
+    height: 2,
+    backgroundColor: "#ddd",
+    marginVertical: 10,
+    width: "100%",
+    alignSelf: "center",
+  },
+  audioContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f0f0f0",
+    padding: 10,
+    borderRadius: 10,
+    marginTop: 10,
+    alignSelf: "center",
+  },
+  audioSlider: {
+    flex: 1,
+    marginHorizontal: 10,
+  },
+  audioTimer: {
+    color: "#333",
+    textAlign: "right",
+    width: 60,
+  },
+});
+
+const tagsStyles = {
+  img: {
+    maxWidth: "100%",
+    height: "auto",
+  },
+};

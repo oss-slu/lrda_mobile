@@ -4,7 +4,7 @@ export default {
   expo: {
     name: "Where's Religion?",
     slug: "lrda_mobile",
-    version: "1.0.6",
+    version: "1.0.2",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -20,7 +20,19 @@ export default {
       config: {
         googleMapsApiKey: process.env.MAP_API_KEY
       },
-      buildNumber: "15"
+      buildNumber: "3",
+      infoPlist: {
+        NSAppTransportSecurity: {
+          NSAllowsArbitraryLoads: true,
+          NSExceptionDomains: {
+            "s3-proxy.rerum.io": {
+              NSTemporaryExceptionAllowsInsecureHTTPLoads: true,
+              NSTemporaryExceptionMinimumTLSVersion: "TLSv1.2",
+              NSIncludesSubdomains: true,
+            }
+          }
+        }
+      }
     },
     android: {
       adaptiveIcon: {
@@ -42,7 +54,7 @@ export default {
       policy: "sdkVersion"
     },
     updates: {
-      url: "https://u.expo.dev/622ba56f-88f9-440e-af87-280abce3b1e8"
+      "url": "https://u.expo.dev/801029ef-db83-4668-a97a-5adcc4c333e2"
     },
     crashReporter: true, // Add this line to enable crash reporting
     extra: {
@@ -53,8 +65,11 @@ export default {
       messagingSenderId: process.env.MESSAGING_SENDER_ID,
       appId: process.env.APP_ID,
       measurementId: process.env.MEASUREMENT_ID,
+      apiBaseUrl: process.env.API_BASE_URL,
+      s3ProxyPrefix: process.env.S3_PROXY_PREFIX,
       eas: {
+        "projectId": "801029ef-db83-4668-a97a-5adcc4c333e2"
       }
-    },
+    }
   }
 };

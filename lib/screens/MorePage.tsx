@@ -1,37 +1,33 @@
-import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import {
-  Dimensions,
-  Image,
-  Linking,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Switch,
+  View,
   Text,
+  ScrollView,
+  Linking,
   TouchableOpacity,
-  View
-} from "react-native";
-import { useDispatch } from "react-redux";
-import { useTheme } from "../components/ThemeProvider";
-import { User } from "../models/user_class";
+  SafeAreaView,
 
+  StyleSheet,
+  Dimensions,
+  Switch,
+  Image,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { User } from "../models/user_class";
+import { useTheme } from "../components/ThemeProvider";
+import { useDispatch } from "react-redux";
 
 
 const user = User.getInstance();
 const { width, height } = Dimensions.get("window");
 
 export default function MorePage() {
-  // Destructuring `toggleDarkmode` and `isDarkmode` from useTheme
   const { theme, isDarkmode, toggleDarkmode } = useTheme();
-
-  // Use the Redux dispatch for logging out
   const dispatch = useDispatch();
-
 
   const handleToggleDarkMode = () => {
     if (toggleDarkmode) {
-      toggleDarkmode(); // Ensure this is a valid function
+      toggleDarkmode();
     }
   };
 
@@ -39,259 +35,281 @@ export default function MorePage() {
     const emailAddress = "yashkamal.bhatia@slu.edu";
     const subject = "Bug Report on 'Where's Religion?'";
     const body = "Please provide details of your issue you are facing here.";
-
-    const emailUrl = `mailto:${emailAddress}?subject=${encodeURIComponent(
-      subject
-    )}&body=${encodeURIComponent(body)}`;
-
+    const emailUrl = `mailto:${emailAddress}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     Linking.openURL(emailUrl);
+  };
+
+  const handleVisitWebsite = () => {
+    const websiteUrl = "https://www.wheresreligion.org";
+    Linking.openURL(websiteUrl);
   };
 
   const onLogoutPress = async () => {
     try {
-
       await user.logout(dispatch);
-
     } catch (e) {
       console.log(e);
     }
   };
 
-
   return (
     <>
       <View style={[styles.header, { backgroundColor: theme.background }]}>
-        <Text style={[styles.headText, { color: theme.text }]}>Where's Religion</Text>
+        <Text style={[styles.headText, { color: theme.text }]}>About</Text>
       </View>
       <SafeAreaView>
-        <ScrollView contentContainerStyle={styles.container}>
-          <View style={{ height: 300, width: "100%" }}>
-            <Image
-              source={require("../../assets/collegeChurch.jpg")}
-              style={styles.image}
-            />
-          </View>
-
-          <View>
-            <Text style={[styles.headerText, { color: theme.text }]}>Resources</Text>
-            <TouchableOpacity
-              onPress={() =>
-                Linking.openURL(
-                  "http://lived-religion-dev.rerum.io/deer-lr/dashboard.html"
-                )
-              }
-            >
-              <Text style={[styles.text, { color: theme.text }]}>Our Website</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() =>
-                Linking.openURL(
-                  "https://guides.library.upenn.edu/ethnography/DoingEthnography"
-                )
-              }
-            >
-              <Text style={[styles.text, { color: theme.text }]}>Guide to Ethnography</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() =>
-                Linking.openURL(
-                  "http://changingminds.org/explanations/research/analysis/ethnographic_coding.htm"
-                )
-              }
-            >
-              <Text style={[styles.text, { color: theme.text }]}>Guide to Coding</Text>
-            </TouchableOpacity>
-            <TouchableOpacity key="Email" onPress={handleEmail}>
-              <Text style={[styles.text, { color: theme.text }]}>Report a Bug</Text>
-            </TouchableOpacity>
-
-            <Text style={[styles.headerText, { color: theme.text }]}>Meet our Team</Text>
-            <Text style={[styles.text, { color: theme.text }]}>Insert Team Photo</Text>
-            <Text style={[styles.text, { color: theme.text }]}>Insert Team Message</Text>
-
-            <Text style={[styles.headerText, { color: theme.text }]}>Frequently Asked Questions</Text>
-          </View>
-
-          <Text style={[styles.headerText, { color: theme.text }]}>What can users do?</Text>
-          <Text style={[styles.text, { color: theme.text }]}>
-            Explore religious traditions, find places of worship, engage in
-            meaningful discussions.
-          </Text>
-
-          <Text style={[styles.headerText, { color: theme.text }]}>Who is it for?</Text>
-          <Text style={[styles.text, { color: theme.text }]}>
-            Scholars, students, believers, and the curious about the world's
-            religions.
-          </Text>
-
-          <Text style={[styles.headerText, { color: theme.text }]}>What's unique?</Text>
-          <Text style={[styles.text, { color: theme.text }]}>
-            Provides a modern method to capture experiences using the devices
-            that are with us every day.
-          </Text>
-
-          <Text style={[styles.headerText, { color: theme.text }]}>Our Mission</Text>
-          <Text style={[styles.text, { color: theme.text }]}>
-            Connect people of diverse religious backgrounds, beliefs, and
-            practices.
-          </Text>
-
-          <Text style={[styles.headerText, { color: theme.text }]}>Why use 'Where's Religion?'</Text>
-          <Text style={[styles.text, { color: theme.text }]}>
-            Explore religious traditions, find places of worship, engage in
-            meaningful discussions.
-          </Text>
-
+        <ScrollView contentContainerStyle={[styles.container, { paddingBottom: 140 }]}>
+          {/* About Section Content */}
           <View style={styles.textContainer}>
-            <View style={styles.buttonContainer}>
-              <View style={[styles.switchContainer, { backgroundColor: theme.background }]}>
-                <Text style={[styles.switchText, {color: theme.text}]}>{isDarkmode ? "Dark Mode" : "Light Mode"}</Text>
-                {/* Use theme object in theme.primaryColor to apply colors to the switch */}
-                <Switch
-                  testID="dark-mode-switch"
-                  trackColor={{
-                    false: "black",
-                    true: theme.text,
-                  }}
-                  thumbColor={theme.primaryColor}
-                  onValueChange={handleToggleDarkMode}
-                  value={isDarkmode}
-                />
+            <Text style={[styles.titleText,{color:theme.text}]}>What is Where’s Religion?</Text>
+            <Text style={[styles.bodyText, { color: theme.text }]}>
+            Where’s Religion? is an open-source application developed by humanities faculty and IT professionals at Saint Louis University that supports in-person research, remote data entry, media sharing, and mapping. The app is designed to facilitate a more robust public understanding of religion through rigorous scholarly methods. Our conviction is that the study of religion must account for the wide range of embodied experiences, improvised practices, material cultures, and shared spaces that humans inhabit. Through a research methodology that moves beyond analysis of sacred texts, creeds, and official teachings, Where’s Religion? provides a platform to diversify the data we study and to advance the study of religion we all encounter in everyday life.</Text>
+            <Text style={[styles.bodyText, { color: theme.text }]}>
+Where’s Religion? is a keystone outcome of the Center on Lived Religion at Saint Louis University. We have received external support from the Henry Luce Foundation ($400,000 in 2018 and $470,000 in 2022), and internal support from the College of Arts & Sciences, the Office for the Vice President for Research and the Research Computing Group, Open Source with SLU, the Walter J. Ong, S.J., Center for Digital Humanities, and the CREST Research Center (Culture, Religion, Ethics, Science, Technology).</Text>
+          </View>
+
+          {/* Initiative Team Section */}
+          <View style={styles.initiativeTeamSection}>
+            
+            <View style={styles.initiativeTeamMembers}>
+            <View style={styles.teamMemberContainer}>
+  {Image.resolveAssetSource(require('../../assets/Rachel.jpg')).uri ? (
+    <Image source={require('../../assets/Rachel.jpg')} style={styles.teamImage} />
+  ) : (
+    <Text>Image not available</Text>
+  )}
+  <Text style={[styles.teamName,{color:theme.text}]}>Rachel Lindsey</Text>
+  <Text style={[styles.teamRole,{color:theme.text}]}>Director of Center on Lived Religion</Text>
+</View>
+
+              <View style={styles.initiativeMemberContainer}>
+              {Image.resolveAssetSource(require('../../assets/Adam.jpg')).uri ? (
+    <Image source={require('../../assets/Adam.jpg')} style={styles.teamImage} />
+  ) : (
+    <Text>Image not available</Text>
+  )}
+                <Text style={[styles.initiativeMemberName,{color:theme.text}]}>Adam Park</Text>
+                <Text style={[styles.initiativeMemberRole,{color:theme.text}]}>Associate Director of Research (COLR)</Text>
+              </View>
+            </View>
+            <View style={styles.initiativeTeamMembers}>
+              <View style={styles.teamMemberContainer}>
+              {Image.resolveAssetSource(require('../../assets/Yash.jpg')).uri ? (
+    <Image source={require('../../assets/Yash.jpg')} style={styles.teamImage} />
+  ) : (
+    <Text>Image not available</Text>
+  )}
+                <Text style={[styles.teamName,{color:theme.text}]}>Yash Bhatia</Text>
+                <Text style={[styles.teamRole,{color:theme.text}]}>Software Engineer and Tech Lead </Text>
               </View>
             </View>
           </View>
-          <View style={[styles.logoutContainer, { backgroundColor: theme.background }]}>
-  <TouchableOpacity
-    key="Logout"
-    style={[
-      styles.logout,
-      {
-        backgroundColor: isDarkmode ? 'white' : 'black',
-      },
-    ]}
-    onPress={onLogoutPress}
-  >
-    <Text
-      style={[
-        styles.logoutText,
-        {
-          color: isDarkmode ? 'black' : 'white',
-        },
-      ]}
-    >
-      Logout
-    </Text>
-    <Ionicons
-      name={"log-out-outline"}
-      size={30}
-      color={isDarkmode ? 'black' : 'white'}
-    />
-  </TouchableOpacity>
-</View>
 
+          {/* Development Team Section */}
+          <View style={styles.teamSection}>
+            <Text style={styles.teamTitle}>The Development Team</Text>
+            <View style={styles.teamMembersRow}>
+              <View style={styles.teamMemberContainer}>
+              {Image.resolveAssetSource(require('../../assets/Patrick.jpg')).uri ? (
+    <Image source={require('../../assets/Patrick.jpg')} style={styles.teamImage} />
+  ) : (
+    <Text>Image not available</Text>
+  )}
+                <Text style={[styles.teamName,{color:theme.text}]}>Patrick Cuba</Text>
+                <Text style={[styles.teamRole,{color:theme.text}]}>IT Architect</Text>
+              </View>
+              <View style={styles.teamMemberContainer}>
+              {Image.resolveAssetSource(require('../../assets/Bryan.jpg')).uri ? (
+    <Image source={require('../../assets/Bryan.jpg')} style={styles.teamImage} />
+  ) : (
+    <Text>Image not available</Text>
+  )}
+                <Text style={[styles.teamName,{color:theme.text}]}>Bryan Haberberger</Text>
+                <Text style={[styles.teamRole,{color:theme.text}]}>Full Stack Developer</Text>
+              </View>
+            </View>
+            <View style={styles.teamMembersRow}>
+              <View style={styles.teamMemberContainer}>
+              {Image.resolveAssetSource(require('../../assets/Stuart.jpg')).uri ? (
+    <Image source={require('../../assets/Stuart.jpg')} style={styles.teamImage} />
+  ) : (
+    <Text>Image not available</Text>
+  )}
+                <Text style={[styles.teamName,{color:theme.text}]}>Stuart Ray</Text>
+                <Text style={[styles.teamRole,{color:theme.text}]}>Developer</Text>
+              </View>
+              <View style={styles.teamMemberContainer}>
+              {Image.resolveAssetSource(require('../../assets/Izak.jpg')).uri ? (
+    <Image source={require('../../assets/Izak.jpg')} style={styles.teamImage} />
+  ) : (
+    <Text>Image not available</Text>
+  )}
+                <Text style={[styles.teamName,{color:theme.text}]}>Izak Robles</Text>
+                <Text style={[styles.teamRole,{color:theme.text}]}>Developer</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Dark Mode and Logout at the End of ScrollView */}
+          <View style={styles.bottomContainer}>
+          <View
+              style={[
+                styles.switchContainer,
+                { backgroundColor: theme.background },
+              ]}
+            >
+              <Text style={[styles.switchText, { color: theme.text }]}testID="Light Mode ">
+                {isDarkmode ? "Light Mode" : "Dark Mode"}
+              </Text>
+              <Switch
+                testID="dark-mode-switch"
+                trackColor={{
+                  false: "black",
+                  true: theme.text,
+                }}
+                thumbColor={theme.primaryColor}
+                onValueChange={handleToggleDarkMode}
+                value={isDarkmode}
+              />
+            </View>
+
+            <TouchableOpacity
+              style={[
+                styles.button,
+                { backgroundColor: theme.primaryColor },
+              ]}
+              onPress={handleEmail}
+            >
+              <Text
+                style={[
+                  styles.buttonText,
+                  { color: theme.text },
+                ]}
+              >
+                Report
+              </Text>
+              <Ionicons
+                name="mail-outline"
+                size={24}
+                color={theme.text}
+                style={{ marginLeft: 10 }}
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.button,
+                { backgroundColor: theme.primaryColor },
+              ]}
+              onPress={handleVisitWebsite}
+            >
+              <Text
+                style={[
+                  styles.buttonText,
+                  { color: theme.text },
+                ]}
+              >
+                Visit Our Website
+              </Text>
+              <Ionicons
+                name="globe-outline"
+                size={24}
+                color={theme.text}
+                style={{ marginLeft: 10 }}
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              key="Logout"
+              style={[
+                styles.logout,
+                { backgroundColor: isDarkmode ? "white" : "black" },
+              ]}
+              onPress={onLogoutPress}
+            >
+              <Text
+                style={[
+                  styles.logoutText,
+                  { color: isDarkmode ? "black" : "white" },
+                ]}
+              >
+                Logout
+              </Text>
+              <Ionicons
+                name={"log-out-outline"}
+                size={30}
+                color={isDarkmode ? "black" : "white"}
+              />
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </SafeAreaView>
     </>
   );
 }
 
-// All styles moved to the bottom
 const styles = StyleSheet.create({
-  header: {
-    backgroundColor: '#ffffff',
-    padding: height * 0.01,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: height * 0.04,
-    marginBottom: -8,
-  },
-  headText: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: '#000000',
-  },
-  container: {
-    flexGrow: 1,
-    justifyContent: "flex-start",
-    alignItems: "center",
-  },
-  textContainer: {
-    width: "100%",
-    paddingTop: 15,
-  },
-  titleText: {
-    alignSelf: "center",
-    fontSize: 40,
-    fontWeight: "600",
-    marginBottom: 10,
-    color: '#000000',
-  },
-  headerText: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: '#000000',
-    alignSelf: "center",
-  },
-  text: {
-    alignSelf: "center",
-    fontSize: 16,
-    lineHeight: 28,
-    color: '#000000',
-  },
-  logout: {
+  header: { paddingVertical: height * 0.02, justifyContent: "center", alignItems: "center" },
+  headText: { fontSize: 32, fontWeight: "bold", paddingTop: 40 },
+  container: { flexGrow: 1, alignItems: "center", paddingHorizontal: 20 },
+  textContainer: { width: "100%", alignItems: "center", marginTop: 20 },
+  titleText: { fontSize: 28, fontWeight: "600", textAlign: "center", marginBottom: 20 },
+  bodyText: { fontSize: 16, lineHeight: 24, textAlign: "justify", marginBottom: 15, paddingHorizontal: 10 },
+  button: {
     flexDirection: "row",
-    backgroundColor: '#ff0000',
-    justifyContent: "center",
     alignItems: "center",
+    justifyContent: "center",
     height: 50,
-    width: "80%",
+    width: "90%",
     borderRadius: 15,
-    marginTop: 60,
-    marginBottom: 100,
+    marginTop: 10,
+    paddingHorizontal: 20,
   },
-  logoutText: {
-    marginLeft: 5,
-    marginRight: 10,
+  buttonText: {
     fontSize: 20,
     fontWeight: "600",
-    color: '#ffffff',
+    textAlign: "center",
   },
-  buttonContainer: {
-    alignItems: "center",
-    marginTop: 40,
+
+
+  // Team Section
+  teamSection: { width: "100%", padding: 20, alignItems: "center" },
+  teamTitle: { fontSize: 24, fontWeight: "bold", marginBottom: 16 },
+  teamMembersRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    marginBottom: 16,
+  },
+  teamMemberContainer: { alignItems: 'center', width: '45%' },
+  teamImage: { width: 80, height: 80, borderRadius: 40, marginBottom: 8 },
+  teamName: { fontSize: 16, fontWeight: "bold", textAlign: "center" },
+  teamRole: { fontSize: 14, textAlign: "center" },
+
+  // Initiative Team Section
+  initiativeTeamSection: { width: "100%", padding: 20, alignItems: "center" },
+  initiativeTeamTitle: { fontSize: 24, fontWeight: "bold", marginBottom: 16 },
+  initiativeTeamMembers: { flexDirection: "row", justifyContent: "space-around", width: "100%", marginBottom: 16 },
+  initiativeMemberContainer: { alignItems: "center", width: "45%" },
+  initiativeMemberName: { fontSize: 16, fontWeight: "bold", textAlign: "center" },
+  initiativeMemberRole: { fontSize: 14, textAlign: "center" },
+
+  // Bottom Container for Dark Mode and Logout
+  bottomContainer: {
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 20,
   },
   switchContainer: {
-    width: "94%",
-    backgroundColor: '#f0f0f0',
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
-    borderRadius: 10,
-    padding: 6,
-  },
-  switchText: {
-    color: '#000000',
-    marginLeft: 9,
-    fontSize: 18,
-    fontWeight: "500",
-  },
-  logoutContainer: {
-    backgroundColor: '#ffffff',
-    width: "100%",
     alignItems: "center",
+    width: "90%",
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 10,
   },
-  image: {
-    flex: 1,
-    width: undefined,
-    height: undefined,
-    resizeMode: "cover",
-  },
-  lightModeText: {
-    color: '#000000', /* making sure color black is specified with color code */
-  },
-  darkModeText: {
-    color: '#ffffff', /* same with black */
-  }
+  switchText: { fontSize: 18, fontWeight: "500" },
+  logout: { flexDirection: "row", justifyContent: "center", alignItems: "center", height: 50, width: "90%", borderRadius: 15, marginTop:10},
+  logoutText: { fontSize: 20, fontWeight: "600", marginRight: 10 },
 });
-
-          

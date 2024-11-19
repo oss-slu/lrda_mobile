@@ -186,6 +186,11 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
                 Login
               </Text>
             </TouchableOpacity>
+            <TouchableOpacity onPress={handleGoRegister} style={styles.buttons} testID="register-button">
+              <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
+                Register
+              </Text>
+            </TouchableOpacity>
           </View>
         )}
       </ImageBackground>

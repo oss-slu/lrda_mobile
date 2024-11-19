@@ -3,6 +3,19 @@ import { lightTheme, darkTheme } from "../colors";
 import Constants from "expo-constants";
 import { useTheme } from "../../lib/components/ThemeProvider";
 
+// Define custom CSS as a separate string
+// In NotePageStyles.ts
+export const customImageCSS = `
+  .ProseMirror img {
+    max-width: 200px !important;
+    max-height: 200px !important;
+    object-fit: cover !important;
+    display: inline-block; /* Ensure images don't expand to fit container width */
+  }
+`;
+
+
+
 const NotePageStyles = () => {
   const { theme } = useTheme();
 
@@ -41,18 +54,45 @@ const NotePageStyles = () => {
       width: "100%",
     },
     editorContainer: {
-      marginBottom: 4,
+      marginBottom: 1,
       width: "100%",
       backgroundColor: theme.primaryColor, // Ensure it matches the overall theme
+      ...Platform.select({
+        android: {
+          marginBottom: 1,
+          backgroundColor: theme.primaryColor,
+          width: "100%",
+        },
+      }),
     },
     editor: {
       backgroundColor: theme.tertiaryColor,
+      flex: 1,
+      paddingBottom: 50, // Space for the toolbar
       marginBottom: 4,
       width: "100%",
       minHeight: 200, // Adjust for better visibility
-      color: theme.text, // Ensure text is visible
-      padding: 10, // Add padding for better input experience
+      color: theme.text,
+      padding: 10,
+      ...Platform.select({  // Adjust for better visibility
+        android: {
+          backgroundColor: theme.primaryColor,
+          color: theme.text,
+          marginBottom: 4,
+          width: "100%",
+          minHeight: 200,
+          padding: 10,
+        },
+      }),
     },
+
+   // Define this image style
+   editorImage: {
+    width: 50,
+    height: 50,
+    resizeMode: 'cover', // Ensures the image keeps its aspect ratio
+  },
+
     textEditorContainer: {
       minHeight: 300, // Set a minimum height for the editor
       flex: 1, // Ensure the editor takes up available space
@@ -110,9 +150,26 @@ const NotePageStyles = () => {
     richTextContainer: {
       height: Platform.OS == "android"? "90%" : "100%" 
     },
-    //tool bar styles
-    toolBar: {
-      height: 100
+    toolbar: {
+      position: 'absolute', // Keep toolbar at the bottom of the screen
+      bottom: 0, // Align toolbar with the bottom edge
+      width: '100%', // Full-width toolbar
+      height: 50, // Adjusted height for better usability
+      backgroundColor: theme.primaryColor, // Ensure it matches the theme
+      justifyContent: 'center', // Center items in the toolbar
+      paddingHorizontal: 10,
+      zIndex: 10, // Ensure it stays above other elements
+
+      ...Platform.select({
+        android: {
+          height: 70,
+          backgroundColor: theme.primaryColor,
+        },
+        ios: {
+          height: 50,
+          backgroundColor: theme.primaryColor,
+        },
+      }),
     },
     closeKeyboardButton: {
       padding: 10,

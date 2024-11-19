@@ -18,6 +18,10 @@ jest.mock('../lib/components/ThemeProvider', () => ({
     }),
 }));
 
+jest.mock('../lib/utils/api_calls', () => ({
+  fetchCreatorName: jest.fn(() => Promise.resolve([])),
+}));
+
 jest.mock('@react-native-community/datetimepicker', () => {
     const { View } = require("react-native");
     return (props: any) => <View testID={props.testID} />;

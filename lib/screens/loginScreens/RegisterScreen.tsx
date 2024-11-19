@@ -9,9 +9,9 @@ import {
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Snackbar } from "react-native-paper";
-import { auth } from "../../config"; 
+import { auth, db } from "../../config/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import ApiService from "../../utils/api_calls";
+import { doc, setDoc, Timestamp } from "firebase/firestore";
 import { validateEmail, validatePassword } from "../../utils/validation";
 
 type RegisterProps = {
@@ -19,7 +19,7 @@ type RegisterProps = {
   route: any;
 };
 
-const RegistrationScreen: React.FC<RegisterProps> = ({ navigation, route }) => {
+const RegistrationScreen: React.FC<RegisterProps> = ({ navigation }) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -52,29 +52,28 @@ const RegistrationScreen: React.FC<RegisterProps> = ({ navigation, route }) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
+      
+      // Combine firstName and lastName for name field
+      const fullName = `${firstName} ${lastName}`;
 
-      // Create user data in the API
-      const userData = {
-        "@id": user.uid,
-        name: `${firstName} ${lastName}`,
+      // Firestore user data creation
+      const firestoreData = {
+        uid: user.uid,
+        email,
+        name: fullName,
         roles: {
-          administrator: false,
+          administrator: true,
           contributor: true,
         },
+        createdAt: Timestamp.now(),
       };
+      await setDoc(doc(db, "users", user.uid), firestoreData);
 
-      const response = await ApiService.createUserData(userData);
-
-      if (response.status !== 200) {
-        setSnackMessage("Failed to create user data in API");
-        setSnackState(true);
-        return;
-      }
-
+      // Set success message and navigate to login screen
       setSnackMessage("Signup successful!");
       setSnackState(true);
 
-      navigation.navigate("Login"); 
+      navigation.navigate("Login");
     } catch (error) {
       setSnackMessage(`Signup failed: ${error}`);
       setSnackState(true);

@@ -11,6 +11,11 @@ jest.mock('../lib/components/ThemeProvider', () => ({
   }),
 }));
 
+jest.mock('../lib/utils/api_calls', () => ({
+  fetchCreatorName: jest.fn(() => Promise.resolve([])),
+}));
+
+
 beforeEach(() => {
   // Clear mocks before each test
   jest.clearAllMocks();
