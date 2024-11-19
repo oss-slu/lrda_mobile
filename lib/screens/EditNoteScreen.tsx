@@ -154,24 +154,26 @@ const EditNoteScreen = ({ route, navigation }) => {
     }
   };
 
-  if (isDarkmode && editor) {
-    editor.injectCSS(textColorCSS, 'text-color-style');
-  }
-  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
-  useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener("keyboardDidShow", () => {
-      setIsKeyboardVisible(true);
-    });
-    const keyboardDidHideListener = Keyboard.addListener("keyboardDidHide", () => {
-      setIsKeyboardVisible(false);
-    });
+  // Image insertion function for editor
+  const addImageToEditor = (imageUri: string) => {
+    const imgTag = `<img src="${imageUri}" style="max-width: 100%; height: auto;" />`;
+    editor.commands.setContent(editor.getHTML() + imgTag);
+  };
 
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-    };
-  }, []);
-
+  // Video insertion function for editor
+  const addVideoToEditor = async (videoUri: string) => {
+    try {
+      const thumbnailUri = await getThumbnail(videoUri);
+      const videoTag = `
+        <video width="320" height="240" controls poster="${thumbnailUri}">
+          <source src="${videoUri}" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>`;
+      editor.commands.setContent(editor.getHTML() + videoTag);
+    } catch (error) {
+      console.error("Error adding video: ", error);
+    }
+  };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>

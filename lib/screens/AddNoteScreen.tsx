@@ -198,20 +198,28 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
   };
 
   const saveNote = async () => {
+    console.log("Back button pressed - saveNote function invoked.");
     setIsUpdating(true);  // Show loading indicator during save
     setIsSaveButtonEnabled(true);
 
     try {
+      console.log("Fetching user location...");
       const userLocation = await Location.getCurrentPositionAsync({});
       const finalLocation = userLocation ? userLocation.coords : { latitude: 0, longitude: 0 };
 
+      const textContent = await editor.getHTML(); // Get text content as a string
+
+      // Fetch the user UID
+      const uid = await user.getId();
+      console.log("User UID:", uid);
+
+      // Construct payload including uid as creator
       const newNote = {
         title: titleText || "Untitled",
-        text: editor.getHTML(),
-        media: newMedia,
-        audio: newAudio,
-        tags,
-        time,
+        text: textContent,
+        media: newMedia || [],
+        audio: newAudio || [],
+        tags: tags || [],
         latitude: finalLocation.latitude.toString(),
         longitude: finalLocation.longitude.toString(),
         published: isPublished,
@@ -225,7 +233,8 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
     } catch (error) {
       console.error("Error saving the note:", error);
     } finally {
-      setIsUpdating(false);  // Hide loading indicator after save
+      setIsUpdating(false);
+      console.log("Exiting saveNote function.");
     }
   };
 
