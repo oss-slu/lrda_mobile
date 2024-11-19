@@ -25,6 +25,7 @@ import { Video } from "expo-av";
 import { Link } from "@react-navigation/native";
 import { User } from "../models/user_class";
 import { AudioType, Media } from "../models/media_class";
+import PhotoScroller from "../components/photoScroller";
 
 const user = User.getInstance();
 
@@ -198,6 +199,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
 
   const saveNote = async () => {
     setIsUpdating(true);  // Show loading indicator during save
+    setIsSaveButtonEnabled(true);
 
     try {
       const userLocation = await Location.getCurrentPositionAsync({});
