@@ -70,21 +70,15 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
 
     const { sound } = await Audio.Sound.createAsync({ uri });
     const status = await sound.getStatusAsync();
+    const newAudioState = {
+      sound,
+      isPlaying: false,
+      progress: 0,
+      duration: status.isLoaded ? status.durationMillis / 1000 : 0,
+    };
 
-    // Check if the status is of type AVPlaybackStatusSuccess
-    if (status.isLoaded) {
-      const newAudioState = {
-        sound,
-        isPlaying: false,
-        progress: 0,
-        duration: status.durationMillis ? status.durationMillis / 1000 : 0,
-      };
-
-      setAudioStates((prev) => ({ ...prev, [uri]: newAudioState }));
-      return newAudioState;
-    } else {
-      throw new Error("Audio failed to load.");
-    }
+    setAudioStates((prev) => ({ ...prev, [uri]: newAudioState }));
+    return newAudioState;
   };
 
   const playPauseAudio = async (uri: string) => {
@@ -110,14 +104,12 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
           }));
         }
         setPlayingMedia(uri);
-
         const status = await audioState.sound.getStatusAsync();
-        if (status.isLoaded && status.positionMillis === status.durationMillis) {
+        if (status.positionMillis === status.durationMillis) {
           await audioState.sound.replayAsync();
         } else {
           await audioState.sound.playAsync();
         }
-
         audioState.sound.setOnPlaybackStatusUpdate((status) => {
           if (status.isLoaded) {
             setAudioStates((prev) => ({
@@ -174,7 +166,7 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
     a: ({ tnode }: TNodeRendererProps<any>) => {
       const { href } = tnode.attributes;
       const audioState = audioStates[href as string] || { progress: 0, duration: 0, isPlaying: false };
-  
+
       if (href && (href.endsWith(".mp4") || href.endsWith(".mov"))) {
         return (
           <View style={{ width: width - 40, height: (width - 40) / 1.77, marginVertical: 20, alignSelf: "center" }}>
@@ -188,7 +180,7 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
       } else if (href && (href.endsWith(".mp3") || href.endsWith(".wav") || href.endsWith(".3gp"))) {
         return (
           <View style={[styles.audioContainer, { marginVertical: 10, alignItems: "center", width: width - 40 }]}>
-            <TouchableOpacity onPress={() => playPauseAudio(href as string)} testID="audioButton">
+            <TouchableOpacity onPress={() => playPauseAudio(href as string)} testID="videoButton">
               <Ionicons
                 name={audioState.isPlaying ? "pause-circle-outline" : "play-circle-outline"}
                 size={30}
@@ -212,7 +204,6 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
       return <Text style={{ color: theme.text, marginVertical: 10 }}>{tnode.data}</Text>;
     },
   }), [audioStates, theme]);
-  
 
   const htmlSource = useMemo(() => ({ html: note?.description || "" }), [note]);
 

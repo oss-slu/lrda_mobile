@@ -50,8 +50,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     undefined
   );
   const [isModalVisible, setModalVisible] = useState(false);
-  const [isSearchVisible, setIsSearchVisible] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
 
   const { theme } = useTheme();
 

@@ -8,9 +8,7 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  Keyboard,
 } from "react-native";
-
 import { Ionicons } from "@expo/vector-icons";
 import PhotoScroller from "../components/photoScroller";
 import { User } from "../models/user_class";
@@ -154,25 +152,6 @@ const EditNoteScreen = ({ route, navigation }) => {
       setIsUpdating(false);
     }
   };
-
-  if (isDarkmode && editor) {
-    editor.injectCSS(textColorCSS, 'text-color-style');
-  }
-  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
-  useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener("keyboardDidShow", () => {
-      setIsKeyboardVisible(true);
-    });
-    const keyboardDidHideListener = Keyboard.addListener("keyboardDidHide", () => {
-      setIsKeyboardVisible(false);
-    });
-
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-    };
-  }, []);
-
 
   return (
     <SafeAreaView style={{ flex: 1 }}>

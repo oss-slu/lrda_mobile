@@ -34,6 +34,7 @@ import { Video } from "expo-av";
 import { Link } from "@react-navigation/native";
 import { User } from "../models/user_class";
 import { AudioType, Media } from "../models/media_class";
+import ApiService from "../utils/api_calls";
 
 const user = User.getInstance();
 

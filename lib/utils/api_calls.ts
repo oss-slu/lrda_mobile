@@ -318,12 +318,18 @@ static async fetchCreatorName(creatorId: string): Promise<string> {
       // Filter the messages by title or tags containing the query string
       data = data.filter((message: any) => {
         // Check if title contains the query string
-        if (message.title && message.title.toLowerCase().includes(lowerCaseQuery)) {
+        if (message.title && typeof message.title === "string" && message.title.toLowerCase().includes(lowerCaseQuery)) {
           return true;
         }
   
-        // Check if any tags contain the query string
-        if (message.tags && message.tags.some((tag: string) => tag.toLowerCase().includes(lowerCaseQuery))) {
+        // Check if tags contain the query string
+        if (
+          Array.isArray(message.tags) &&
+          message.tags.some(
+            (tag: any) =>
+              typeof tag === "string" && tag.toLowerCase().includes(lowerCaseQuery)
+          )
+        ) {
           return true;
         }
   
@@ -336,6 +342,7 @@ static async fetchCreatorName(creatorId: string): Promise<string> {
       throw error;
     }
   }
+  
   
   
 }
