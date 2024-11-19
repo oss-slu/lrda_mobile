@@ -198,6 +198,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
   
   
   
+  
 
   const handleShareButtonPress = async () => {
     setIsPublished(!isPublished);
@@ -218,11 +219,12 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
       const userLocation = await Location.getCurrentPositionAsync({});
       const finalLocation = userLocation ? userLocation.coords : { latitude: 0, longitude: 0 };
       const textContent = await editor.getHTML();
+      const sanitizedContent = textContent.replace(/<\/?p>/g, ''); // removes <p> tags from content
       const uid = await user.getId();
 
       const newNote = {
         title: titleText || "Untitled",
-        text: textContent,
+        text: sanitizedContent,
         media: newMedia || [],
         audio: newAudio || [],
         tags: tags || [],
