@@ -4,7 +4,6 @@
   },
   "build": {
     "development": {
-      "channel": "development",
       "developmentClient": true,
       "distribution": "internal",
       "env": {
@@ -32,7 +31,6 @@
       }
     },
     "production": {
-      "channel": "production",
       "android": {
         "buildType": "app-bundle"
       },

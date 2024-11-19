@@ -4,7 +4,7 @@ export default {
   expo: {
     name: "Where's Religion?",
     slug: "lrda_mobile",
-    version: "1.0.2",
+    version: "1.0.4",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -19,7 +19,6 @@ export default {
       bundleIdentifier: "register.edu.slu.cs.oss.lrda",
       config: {
         googleMapsApiKey: process.env.MAP_API_KEY
-        
       },
       buildNumber: "3",
       infoPlist: {
