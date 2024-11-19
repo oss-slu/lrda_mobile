@@ -54,9 +54,9 @@ export default {
       policy: "sdkVersion"
     },
     updates: {
-      url: "https://u.expo.dev/801029ef-db83-4668-a97a-5adcc4c333e2"
+      "url": "https://u.expo.dev/801029ef-db83-4668-a97a-5adcc4c333e2"
     },
-    crashReporter: true,
+    crashReporter: true, // Add this line to enable crash reporting
     extra: {
       apiKey: process.env.FIREBASE_API_KEY,
       authDomain: process.env.AUTH_DOMAIN,
@@ -68,7 +68,7 @@ export default {
       apiBaseUrl: process.env.API_BASE_URL,
       s3ProxyPrefix: process.env.S3_PROXY_PREFIX,
       eas: {
-        projectId: "801029ef-db83-4668-a97a-5adcc4c333e2"
+        "projectId": "801029ef-db83-4668-a97a-5adcc4c333e2"
       }
     }
   }
