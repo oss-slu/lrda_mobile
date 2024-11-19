@@ -39,6 +39,11 @@ export default function MorePage() {
     Linking.openURL(emailUrl);
   };
 
+  const handleVisitWebsite = () => {
+    const websiteUrl = "https://www.wheresreligion.org";
+    Linking.openURL(websiteUrl);
+  };
+
   const onLogoutPress = async () => {
     try {
       await user.logout(dispatch);
@@ -147,8 +152,15 @@ Where’s Religion? is a keystone outcome of the Center on Lived Religion at Sai
 
           {/* Dark Mode and Logout at the End of ScrollView */}
           <View style={styles.bottomContainer}>
-            <View style={[styles.switchContainer, { backgroundColor: theme.background }]}>
-              <Text style={[styles.switchText, { color: theme.text }]}>Dark Mode</Text>
+          <View
+              style={[
+                styles.switchContainer,
+                { backgroundColor: theme.background },
+              ]}
+            >
+              <Text style={[styles.switchText, { color: theme.text }]}testID="Light Mode ">
+                {isDarkmode ? "Light Mode" : "Dark Mode"}
+              </Text>
               <Switch
                 testID="dark-mode-switch"
                 trackColor={{
@@ -160,6 +172,52 @@ Where’s Religion? is a keystone outcome of the Center on Lived Religion at Sai
                 value={isDarkmode}
               />
             </View>
+
+            <TouchableOpacity
+              style={[
+                styles.button,
+                { backgroundColor: theme.primaryColor },
+              ]}
+              onPress={handleEmail}
+            >
+              <Text
+                style={[
+                  styles.buttonText,
+                  { color: theme.text },
+                ]}
+              >
+                Report
+              </Text>
+              <Ionicons
+                name="mail-outline"
+                size={24}
+                color={theme.text}
+                style={{ marginLeft: 10 }}
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.button,
+                { backgroundColor: theme.primaryColor },
+              ]}
+              onPress={handleVisitWebsite}
+            >
+              <Text
+                style={[
+                  styles.buttonText,
+                  { color: theme.text },
+                ]}
+              >
+                Visit Our Website
+              </Text>
+              <Ionicons
+                name="globe-outline"
+                size={24}
+                color={theme.text}
+                style={{ marginLeft: 10 }}
+              />
+            </TouchableOpacity>
 
             <TouchableOpacity
               key="Logout"
@@ -197,6 +255,22 @@ const styles = StyleSheet.create({
   textContainer: { width: "100%", alignItems: "center", marginTop: 20 },
   titleText: { fontSize: 28, fontWeight: "600", textAlign: "center", marginBottom: 20 },
   bodyText: { fontSize: 16, lineHeight: 24, textAlign: "justify", marginBottom: 15, paddingHorizontal: 10 },
+  button: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    height: 50,
+    width: "90%",
+    borderRadius: 15,
+    marginTop: 10,
+    paddingHorizontal: 20,
+  },
+  buttonText: {
+    fontSize: 20,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+
 
   // Team Section
   teamSection: { width: "100%", padding: 20, alignItems: "center" },
@@ -236,6 +310,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   switchText: { fontSize: 18, fontWeight: "500" },
-  logout: { flexDirection: "row", justifyContent: "center", alignItems: "center", height: 50, width: "90%", borderRadius: 15 },
+  logout: { flexDirection: "row", justifyContent: "center", alignItems: "center", height: 50, width: "90%", borderRadius: 15, marginTop:10},
   logoutText: { fontSize: 20, fontWeight: "600", marginRight: 10 },
 });

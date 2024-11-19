@@ -7,6 +7,24 @@ jest.mock('../lib/utils/api_calls', () => ({
   fetchCreatorName: jest.fn(() => Promise.resolve([])),
 }));
 
+jest.mock('expo-font', () => ({
+  loadAsync: jest.fn(() => Promise.resolve()),
+  isLoaded: jest.fn(() => true),
+}));
+
+jest.mock('react-native/Libraries/Image/Image', () => ({
+  ...jest.requireActual('react-native/Libraries/Image/Image'),
+  resolveAssetSource: jest.fn(() => ({ uri: 'mocked-asset-uri' })),
+}));
+
+
+jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
+  settings: {},
+  setValues: jest.fn(),
+  getConstants: jest.fn(() => ({
+    settings: {},
+  })),
+}));
 
 beforeEach(() => {
   // Clear mocks before each test

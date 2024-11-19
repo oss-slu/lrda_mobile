@@ -170,7 +170,29 @@ exports[`TagWindowTest1 renders without crashing 1`] = `
                 }
                 testID="delete-action-0"
               >
-                <Text />
+                <Text
+                  allowFontScaling={false}
+                  selectable={false}
+                  style={
+                    [
+                      {
+                        "color": "#111111",
+                        "fontSize": 24,
+                      },
+                      {
+                        "alignSelf": "center",
+                      },
+                      {
+                        "fontFamily": "ionicons",
+                        "fontStyle": "normal",
+                        "fontWeight": "normal",
+                      },
+                      {},
+                    ]
+                  }
+                >
+                  
+                </Text>
               </View>
             </View>
           </View>
@@ -374,7 +396,29 @@ exports[`TagWindowTest1 renders without crashing 1`] = `
                 }
                 testID="delete-action-1"
               >
-                <Text />
+                <Text
+                  allowFontScaling={false}
+                  selectable={false}
+                  style={
+                    [
+                      {
+                        "color": "#111111",
+                        "fontSize": 24,
+                      },
+                      {
+                        "alignSelf": "center",
+                      },
+                      {
+                        "fontFamily": "ionicons",
+                        "fontStyle": "normal",
+                        "fontWeight": "normal",
+                      },
+                      {},
+                    ]
+                  }
+                >
+                  
+                </Text>
               </View>
             </View>
           </View>
@@ -578,7 +622,29 @@ exports[`TagWindowTest1 renders without crashing 1`] = `
                 }
                 testID="delete-action-2"
               >
-                <Text />
+                <Text
+                  allowFontScaling={false}
+                  selectable={false}
+                  style={
+                    [
+                      {
+                        "color": "#111111",
+                        "fontSize": 24,
+                      },
+                      {
+                        "alignSelf": "center",
+                      },
+                      {
+                        "fontFamily": "ionicons",
+                        "fontStyle": "normal",
+                        "fontWeight": "normal",
+                      },
+                      {},
+                    ]
+                  }
+                >
+                  
+                </Text>
               </View>
             </View>
           </View>

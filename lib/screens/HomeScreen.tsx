@@ -471,7 +471,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       height: width * 0.105,
     }}
   />
-  <TouchableOpacity onPress={toggleSearchBar}>
+  <TouchableOpacity onPress={toggleSearchBar} testID="searchButton">
     <Ionicons
       name={isSearchVisible ? "close-outline" : "search-outline"}
       size={28}

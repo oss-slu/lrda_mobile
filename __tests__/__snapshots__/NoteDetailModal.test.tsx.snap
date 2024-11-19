@@ -62,7 +62,27 @@ exports[`NoteDetailModal renders without crashing 1`] = `
         }
       }
     >
-      <Text />
+      <Text
+        allowFontScaling={false}
+        selectable={false}
+        style={
+          [
+            {
+              "color": "#000000",
+              "fontSize": 30,
+            },
+            undefined,
+            {
+              "fontFamily": "ionicons",
+              "fontStyle": "normal",
+              "fontWeight": "normal",
+            },
+            {},
+          ]
+        }
+      >
+        
+      </Text>
     </View>
   </View>
   <View
@@ -115,7 +135,27 @@ exports[`NoteDetailModal renders without crashing 1`] = `
           }
         }
       >
-        <Text />
+        <Text
+          allowFontScaling={false}
+          selectable={false}
+          style={
+            [
+              {
+                "color": "#000000",
+                "fontSize": 18,
+              },
+              undefined,
+              {
+                "fontFamily": "ionicons",
+                "fontStyle": "normal",
+                "fontWeight": "normal",
+              },
+              {},
+            ]
+          }
+        >
+          
+        </Text>
         <Text
           style={
             {
@@ -136,7 +176,27 @@ exports[`NoteDetailModal renders without crashing 1`] = `
           }
         }
       >
-        <Text />
+        <Text
+          allowFontScaling={false}
+          selectable={false}
+          style={
+            [
+              {
+                "color": "#000000",
+                "fontSize": 18,
+              },
+              undefined,
+              {
+                "fontFamily": "ionicons",
+                "fontStyle": "normal",
+                "fontWeight": "normal",
+              },
+              {},
+            ]
+          }
+        >
+          
+        </Text>
         <Text
           style={
             {
@@ -236,19 +296,41 @@ exports[`NoteDetailModal renders without crashing 1`] = `
                   }
                   testID="imageButton"
                 >
-                  <Image
+                  <RCTImageView
                     accessibilityLabel="Test Image"
-                    source={
+                    accessibilityState={
                       {
-                        "uri": "https://example.com/image1.jpg",
+                        "busy": undefined,
+                        "checked": undefined,
+                        "disabled": undefined,
+                        "expanded": undefined,
+                        "selected": undefined,
                       }
                     }
+                    internal_analyticTag={null}
+                    resizeMode="contain"
+                    source={
+                      [
+                        {
+                          "uri": "https://example.com/image1.jpg",
+                        },
+                      ]
+                    }
                     style={
-                      {
-                        "height": 400,
-                        "resizeMode": "contain",
-                        "width": 400,
-                      }
+                      [
+                        {
+                          "height": undefined,
+                          "width": undefined,
+                        },
+                        {
+                          "overflow": "hidden",
+                        },
+                        {
+                          "height": 400,
+                          "resizeMode": "contain",
+                          "width": 400,
+                        },
+                      ]
                     }
                   />
                 </View>
@@ -319,7 +401,29 @@ exports[`NoteDetailModal renders without crashing 1`] = `
                       }
                     }
                   >
-                    <Text />
+                    <Text
+                      allowFontScaling={false}
+                      selectable={false}
+                      style={
+                        [
+                          {
+                            "color": "white",
+                            "fontSize": 50,
+                          },
+                          {
+                            "alignSelf": "center",
+                          },
+                          {
+                            "fontFamily": "ionicons",
+                            "fontStyle": "normal",
+                            "fontWeight": "normal",
+                          },
+                          {},
+                        ]
+                      }
+                    >
+                      
+                    </Text>
                   </View>
                 </View>
               </View>

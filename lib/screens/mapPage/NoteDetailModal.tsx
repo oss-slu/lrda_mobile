@@ -166,7 +166,7 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
     a: ({ tnode }: TNodeRendererProps<any>) => {
       const { href } = tnode.attributes;
       const audioState = audioStates[href as string] || { progress: 0, duration: 0, isPlaying: false };
-
+  
       if (href && (href.endsWith(".mp4") || href.endsWith(".mov"))) {
         return (
           <View style={{ width: width - 40, height: (width - 40) / 1.77, marginVertical: 20, alignSelf: "center" }}>
@@ -180,7 +180,7 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
       } else if (href && (href.endsWith(".mp3") || href.endsWith(".wav") || href.endsWith(".3gp"))) {
         return (
           <View style={[styles.audioContainer, { marginVertical: 10, alignItems: "center", width: width - 40 }]}>
-            <TouchableOpacity onPress={() => playPauseAudio(href as string)} testID="videoButton">
+            <TouchableOpacity onPress={() => playPauseAudio(href as string)} testID="audioButton">
               <Ionicons
                 name={audioState.isPlaying ? "pause-circle-outline" : "play-circle-outline"}
                 size={30}
@@ -204,6 +204,7 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
       return <Text style={{ color: theme.text, marginVertical: 10 }}>{tnode.data}</Text>;
     },
   }), [audioStates, theme]);
+  
 
   const htmlSource = useMemo(() => ({ html: note?.description || "" }), [note]);
 

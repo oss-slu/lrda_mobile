@@ -316,7 +316,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
               {isLocation && <LocationWindow location={location} setLocation={setLocation}/>}
               {isTime && <TimeWindow time={time} setTime={setTime} />}
             </View>
-            <View style={NotePageStyles().richTextContainer}>
+            <View style={NotePageStyles().richTextContainer}testID="TenTapEditor">
               <RichText
                 editor={editor}
                 placeholder="Write Content Here..."

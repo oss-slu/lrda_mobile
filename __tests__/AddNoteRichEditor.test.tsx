@@ -52,6 +52,24 @@ jest.mock('expo-location', () => ({
   ),
 }));
 
+jest.mock('expo-font', () => ({
+  loadAsync: jest.fn(() => Promise.resolve()),
+  isLoaded: jest.fn(() => true),
+}));
+
+jest.mock('react-native/Libraries/Image/Image', () => ({
+  ...jest.requireActual('react-native/Libraries/Image/Image'),
+  resolveAssetSource: jest.fn(() => ({ uri: 'mocked-asset-uri' })),
+}));
+
+
+jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
+  settings: {},
+  setValues: jest.fn(),
+  getConstants: jest.fn(() => ({
+    settings: {},
+  })),
+}));
 
 
 jest.mock('@10play/tentap-editor', () => ({
