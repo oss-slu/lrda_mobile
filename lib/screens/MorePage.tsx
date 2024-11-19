@@ -15,7 +15,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
 import { useTheme } from "../components/ThemeProvider";
-import { User } from "../models/user_class";
+import { useDispatch } from "react-redux";
 
 
 const user = User.getInstance();

@@ -443,36 +443,44 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   return (
     <View style={styles(theme, width).container}>
       <View style={styles(theme, width).topView}>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            width: "100%",
-            paddingBottom: 15,
-            paddingTop: 10,
-          }}
-        >
-          <TouchableOpacity
-            style={[
-              styles(theme, width).userPhoto,
-              { backgroundColor: theme.black },
-            ]}
-            onPress={() => {
-              navigation.navigate("AccountPage");
-            }}
-          >
-            <Text style={styles(theme, width).pfpText}>{userInitials}</Text>
-          </TouchableOpacity>
-          <Image
-            source={require("../../assets/icon.png")}
-            style={{
-              width: width * 0.105,
-              height: width * 0.105,
-              marginEnd: width * 0.435,
-            }}
-          />
-        </View>
+      <View
+  style={{
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+    paddingBottom: 15,
+    paddingTop: 10,
+  }}
+>
+  <TouchableOpacity
+    style={[
+      styles(theme, width).userPhoto,
+      { backgroundColor: theme.black },
+    ]}
+    onPress={() => {
+      navigation.navigate("AccountPage");
+    }}
+  >
+    <Text style={styles(theme, width).pfpText}>{userInitials}</Text>
+  </TouchableOpacity>
+  <Image
+    source={require("../../assets/icon.png")}
+    style={{
+      width: width * 0.105,
+      height: width * 0.105,
+    }}
+  />
+  <TouchableOpacity onPress={toggleSearchBar}>
+    <Ionicons
+      name={isSearchVisible ? "close-outline" : "search-outline"}
+      size={28}
+      color={theme.text}
+      style={{ padding: 10 }}
+    />
+  </TouchableOpacity>
+</View>
+
       </View>
 
       <View style={styles(theme, width).dropdown}>
@@ -517,13 +525,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           showArrowIcon={true}
         />
       </View>
-      <TextInput
-        testID="searchBar"
-        placeholder="Search notes.."
-        onChangeText={handleSearch}
-        style={styles(theme, width).seachBar}
-        placeholderTextColor={theme.gray}
-      />
+      {isSearchVisible && (
+  <TextInput
+    testID="searchBar"
+    placeholder="Search notes..."
+    onChangeText={handleSearch}
+    value={searchQuery}
+    style={styles(theme, width).seachBar}
+    placeholderTextColor={theme.gray}
+  />
+)}
+
       <View style={styles(theme, width).horizontalLine} />
       <View style={styles(theme, width).scrollerBackgroundColor}>
         {rendering ? <NoteSkeleton /> : renderList(notes)}

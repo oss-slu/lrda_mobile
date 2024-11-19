@@ -4726,9 +4726,9 @@ expo-eas-client@~0.13.0:
   integrity sha512-IyeDiM6YSJG0c45kbuEo0qt76z0KTEZtisEFEtle+b+vfn9I3N+r3jbPscaI4yS3P6gpuoDyHv81YDVC6Dmkhw==
 
 expo-file-system@~18.0.3:
-  version "18.0.3"
-  resolved "https://registry.yarnpkg.com/expo-file-system/-/expo-file-system-18.0.3.tgz#907f058f4f2e2bbbdb970280edf9be735e85c0de"
-  integrity sha512-HKe0dGW3FWYFi1F3THVnTRueTG7j0onmEpUJKRB4UbjeHD2723cn/EutcG216wvrJeebe8w3+00F8Z4xk+9Jrw==
+  version "18.0.4"
+  resolved "https://registry.yarnpkg.com/expo-file-system/-/expo-file-system-18.0.4.tgz#eecf8dc0b3b545e9ac5cd00352665afe2d57732f"
+  integrity sha512-aAWEDwnu0XHOBYvQ9Q0+QIa+483vYJaC4IDsXyWQ73Rtsg273NZh5kYowY+cAocvoSmA99G6htrLBn11ax2bTQ==
   dependencies:
     web-streams-polyfill "^3.3.2"
 
@@ -4769,14 +4769,14 @@ expo-keep-awake@~14.0.1:
   integrity sha512-c5mGCAIk2YM+Vsdy90BlEJ4ZX+KG5Au9EkJUIxXWlpnuKmDAJ3N+5nEZ7EUO1ZTheqoSBeAo4jJ8rTWPU+JXdw==
 
 expo-location@~18.0.1:
-  version "18.0.1"
-  resolved "https://registry.yarnpkg.com/expo-location/-/expo-location-18.0.1.tgz#88d7e0e3793335b23a133f6e1f2ca209b3946ba3"
-  integrity sha512-LRpMkNXynLUbZvbRCfxHCdX6zxrmJx2afRDIXoq8kAYeMXRH7XpjXcF0Aj/+E8tSgu1Wn17zIdRYj4muJi+ldA==
+  version "18.0.2"
+  resolved "https://registry.yarnpkg.com/expo-location/-/expo-location-18.0.2.tgz#133e2d5d852207375708b28cbaf008cca8366756"
+  integrity sha512-45wPrQCv5UQM/RZcOJIei8za0lSyEm5wlb3izLa9P45bqlu3ChRZhYfZz+gMQhVb/oorVqzIVUQhKRTTz7GOXQ==
 
 expo-manifests@~0.15.0:
-  version "0.15.3"
-  resolved "https://registry.yarnpkg.com/expo-manifests/-/expo-manifests-0.15.3.tgz#61b9923c983b1f8ab3a65ba0a147b01a09ded6da"
-  integrity sha512-yXP7/AN9gRvnCMyGn2esaaDtY3RwiALMJThmGKqaHjlv9cLtiL23aCw5EiNddyI0eZnuHlotGf68Yagz+UZD/Q==
+  version "0.15.4"
+  resolved "https://registry.yarnpkg.com/expo-manifests/-/expo-manifests-0.15.4.tgz#43627d00c5ef8163ffd1880e42093d342bc7e80f"
+  integrity sha512-Ki6+twRbm+HTX3L8larhOdDbSYPG3ojGnZepR/+TGg3JF/5yyscosDVY6c6z8xEGjKIjs1F813yq9yAfiPh8/g==
   dependencies:
     "@expo/config" "~10.0.4"
     expo-json-utils "~0.14.0"

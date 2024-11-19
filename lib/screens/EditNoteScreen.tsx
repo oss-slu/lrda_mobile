@@ -9,7 +9,6 @@ import {
   ScrollView,
   StyleSheet,
 } from "react-native";
-
 import { Ionicons } from "@expo/vector-icons";
 import PhotoScroller from "../components/photoScroller";
 import { User } from "../models/user_class";
@@ -154,28 +153,6 @@ const EditNoteScreen = ({ route, navigation }) => {
     }
   };
 
-  // Image insertion function for editor
-  const addImageToEditor = (imageUri: string) => {
-    const imgTag = `<img src="${imageUri}" style="max-width: 100%; height: auto;" />`;
-    editor.commands.setContent(editor.getHTML() + imgTag);
-  };
-
-  // Video insertion function for editor
-  const addVideoToEditor = async (videoUri: string) => {
-    try {
-      const thumbnailUri = await getThumbnail(videoUri);
-      const videoTag = `
-        <video width="320" height="240" controls poster="${thumbnailUri}">
-          <source src="${videoUri}" type="video/mp4">
-          Your browser does not support the video tag.
-        </video>`;
-      editor.commands.setContent(editor.getHTML() + videoTag);
-    } catch (error) {
-      console.error("Error adding video: ", error);
-    }
-  };
-  
-
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
@@ -232,7 +209,6 @@ const EditNoteScreen = ({ route, navigation }) => {
         </ScrollView>
         <LoadingModal visible={isUpdating} />
       </KeyboardAvoidingView>
-
     </SafeAreaView>
   );
 };

@@ -1,5 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Alert,
   View,
@@ -11,15 +10,20 @@ import {
   KeyboardAvoidingView,
   Modal,
   Text,
-  StyleSheet,
+  StyleSheet
 } from "react-native";
 import { WebViewMessageEvent } from "react-native-webview";
 import * as Location from 'expo-location';
 import ToastMessage from 'react-native-toast-message';
+import { Ionicons } from "@expo/vector-icons";
+import { Media, AudioType } from "../models/media_class";
+import { getThumbnail } from "../utils/S3_proxy";
+import { User } from "../models/user_class";
+import ApiService from "../utils/api_calls";
+import PhotoScroller from "../components/photoScroller";
 import AudioContainer from "../components/audio";
-import LocationWindow from "../components/location";
 import TagWindow from "../components/tagging";
-
+import LocationWindow from "../components/location";
 import TimeWindow from "../components/time";
 import { DEFAULT_TOOLBAR_ITEMS, RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
 import NotePageStyles, { customImageCSS } from "../../styles/pages/NoteStyles";
@@ -28,9 +32,6 @@ import LoadingModal from "../components/LoadingModal";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Video } from "expo-av";
 import { Link } from "@react-navigation/native";
-import { User } from "../models/user_class";
-import { AudioType, Media } from "../models/media_class";
-import PhotoScroller from "../components/photoScroller";
 
 const user = User.getInstance();
 
@@ -62,6 +63,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
   
   const { theme } = useTheme();
   const titleTextRef = useRef<TextInput>(null);
+  const scrollViewRef = useRef<KeyboardAwareScrollView>(null);
 
   useEffect(()=>{
         // Listen for keyboard events to show/hide toolbar
@@ -86,12 +88,6 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
           id: 'closeKeyboard', // Unique ID for this toolbar item
         },
       ];
-
-  useEffect(() => {
-    if (editor) {
-      editor.injectCSS(customImageCSS);
-    }
-  }, [editor]);
 
   useEffect(() => {
     if (editor) {
@@ -188,14 +184,11 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
         const audioLink = `${currentContent}<a href="${audioUri}">${audioUri}</a><br>`;
         editor.setContent(audioLink);
         editor.focus();
-
-
       } catch (error) {
         console.error("Error adding audio:", error);
         displayErrorInEditor(`Error adding audio: ${error.message}`);
       }
     };
-  
   
   
   
@@ -235,15 +228,17 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
         creator: uid,
       };
 
-      await ApiService.writeNewNote(newNote);
-      route.params.refreshPage();  // Refresh the parent page if needed
-      navigation.goBack();  // Navigate back after saving the note
+      const response = await ApiService.writeNewNote(newNote);
+      await response.json();
+      route.params.refreshPage();
+      navigation.goBack();
     } catch (error) {
       console.error("Error saving the note:", error);
     } finally {
       setIsUpdating(false);
     }
   };
+
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -309,7 +304,6 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
                 setNewMedia={setNewMedia}
                 insertImageToEditor={insertImageToEditor}
                 addVideoToEditor={addVideoToEditor}
-                displayErrorInEditor={displayErrorInEditor}
               />
               {viewAudio && (
                 <AudioContainer
@@ -335,13 +329,41 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
             <View style={NotePageStyles().toolbar}testID="RichEditor">
             <Toolbar
             editor={editor}
-            style={NotePageStyles().container}
-            actions={['bold', 'italic', 'underline', 'bullet_list', 'blockquote', 'indent', 'outdent', 'close_keyboard' ]}
+            items={DEFAULT_TOOLBAR_ITEMS}
           />
         </View>
+      {Platform.OS === 'ios' && (
+      <Toolbar
+        editor={editor}
+        items={DEFAULT_TOOLBAR_ITEMS}
 
-
-      </KeyboardAvoidingView>
+      />
+    )}
+          </View>
+        </KeyboardAwareScrollView>
+          {/* Video Player Modal */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={isVideoModalVisible}
+          onRequestClose={() => setIsVideoModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              {videoUri && (
+                <Video
+                  source={{ uri: videoUri }}
+                  useNativeControls
+                  resizeMode="contain"
+                  style={styles.videoPlayer}
+                />
+              )}
+              <TouchableOpacity onPress={() => setIsVideoModalVisible(false)}>
+                <Text style={styles.closeButton}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
 
         <LoadingModal visible={isUpdating} />
       </KeyboardAvoidingView>
@@ -350,8 +372,6 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
 };
 
 export default AddNoteScreen;
-
-
 
 const styles = StyleSheet.create({
   modalOverlay: {
