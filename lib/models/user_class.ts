@@ -142,7 +142,7 @@ export class User {
     }
   }
 
-  public async logout(dispatch: any) {
+  public async logout(auth: any, dispatch: any) {
     try {
       const auth = getAuth();
       await signOut(auth);
