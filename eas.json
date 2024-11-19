@@ -6,29 +6,11 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "env": {
-        "NODE_ENV": "development",
-"MAP_API_KEY":"",
-"FIREBASE_API_KEY":"",
-"AUTH_DOMAIN":"",
-"PROJECT_ID":"",
-"STORAGE_BUCKET":"",
-"MESSAGING_SENDER_ID":"",
-"APP_ID":""
-      }
+      "channel": "development"
     },
     "preview": {
       "distribution": "internal",
-      "env": {
-        "NODE_ENV": "preview",
-        "MAP_API_KEY":"",
-"FIREBASE_API_KEY":"",
-"AUTH_DOMAIN":"",
-"PROJECT_ID":"",
-"STORAGE_BUCKET":"",
-"MESSAGING_SENDER_ID":"",
-"APP_ID":""
-      }
+      "channel": "preview"
     },
     "production": {
       "android": {

@@ -309,6 +309,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
                 setNewMedia={setNewMedia}
                 insertImageToEditor={insertImageToEditor}
                 addVideoToEditor={addVideoToEditor}
+                displayErrorInEditor={displayErrorInEditor}
               />
               {viewAudio && (
                 <AudioContainer
