@@ -48,6 +48,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     undefined
   );
   const [isModalVisible, setModalVisible] = useState(false);
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
 
   const { theme } = useTheme();
 
@@ -467,6 +468,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           showArrowIcon={true}
         />
       </View>
+      {isSearchVisible && (
       <TextInput
         testID="searchBar"
         placeholder="Search notes.."
