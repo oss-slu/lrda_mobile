@@ -70,15 +70,21 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
 
     const { sound } = await Audio.Sound.createAsync({ uri });
     const status = await sound.getStatusAsync();
-    const newAudioState = {
-      sound,
-      isPlaying: false,
-      progress: 0,
-      duration: status.isLoaded ? status.durationMillis / 1000 : 0,
-    };
 
-    setAudioStates((prev) => ({ ...prev, [uri]: newAudioState }));
-    return newAudioState;
+    // Check if the status is of type AVPlaybackStatusSuccess
+    if (status.isLoaded) {
+      const newAudioState = {
+        sound,
+        isPlaying: false,
+        progress: 0,
+        duration: status.durationMillis ? status.durationMillis / 1000 : 0,
+      };
+
+      setAudioStates((prev) => ({ ...prev, [uri]: newAudioState }));
+      return newAudioState;
+    } else {
+      throw new Error("Audio failed to load.");
+    }
   };
 
   const playPauseAudio = async (uri: string) => {
@@ -104,12 +110,14 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
           }));
         }
         setPlayingMedia(uri);
+
         const status = await audioState.sound.getStatusAsync();
-        if (status.positionMillis === status.durationMillis) {
+        if (status.isLoaded && status.positionMillis === status.durationMillis) {
           await audioState.sound.replayAsync();
         } else {
           await audioState.sound.playAsync();
         }
+
         audioState.sound.setOnPlaybackStatusUpdate((status) => {
           if (status.isLoaded) {
             setAudioStates((prev) => ({
