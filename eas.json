@@ -6,29 +6,44 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "channel": "development"
+      "env": {
+        "NODE_ENV": "development",
+"MAP_API_KEY":"",
+"FIREBASE_API_KEY":"",
+"AUTH_DOMAIN":"",
+"PROJECT_ID":"",
+"STORAGE_BUCKET":"",
+"MESSAGING_SENDER_ID":"",
+"APP_ID":""
+      }
     },
     "preview": {
       "distribution": "internal",
-      "channel": "preview"
+      "env": {
+        "NODE_ENV": "preview",
+        "MAP_API_KEY":"",
+"FIREBASE_API_KEY":"",
+"AUTH_DOMAIN":"",
+"PROJECT_ID":"",
+"STORAGE_BUCKET":"",
+"MESSAGING_SENDER_ID":"",
+"APP_ID":""
+      }
     },
     "production": {
       "android": {
         "buildType": "app-bundle"
       },
       "env": {
-        "MAP_API_KEY": "",
-        "FIREBASE_API_KEY": "",
-        "AUTH_DOMAIN": "",
-        "PROJECT_ID": "",
-        "STORAGE_BUCKET": "",
-        "MESSAGING_SENDER_ID": "",
-        "APP_ID": "",
-        "API_BASE_URL": "",
-        "MEASUREMENT_ID": "",
-        "S3_PROXY_PREFIX": ""
-      },
-      "channel": "production"
+        "NODE_ENV": "production",
+        "MAP_API_KEY":"",
+        "FIREBASE_API_KEY":"",
+        "AUTH_DOMAIN":"",
+        "PROJECT_ID":"",
+        "STORAGE_BUCKET":"",
+        "MESSAGING_SENDER_ID":"",
+        "APP_ID":""
+      }
     }
   },
   "submit": {
