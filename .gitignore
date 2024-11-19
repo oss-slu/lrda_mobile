@@ -16,7 +16,6 @@ grounded-*
 # macOS
 .DS_Store
 yarn.lock
-<<<<<<< HEAD
 android
 eas.json
 ios
