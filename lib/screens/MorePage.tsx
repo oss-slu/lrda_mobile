@@ -4,17 +4,17 @@ import {
   Text,
   ScrollView,
   Linking,
-  TouchableOpacity,
   SafeAreaView,
+
   StyleSheet,
   Dimensions,
   Switch,
   Image,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { User } from "../models/user_class";
-import { useTheme } from "../components/ThemeProvider";
 import { useDispatch } from "react-redux";
+import { useTheme } from "../components/ThemeProvider";
+import { User } from "../models/user_class";
+
 
 const user = User.getInstance();
 const { width, height } = Dimensions.get("window");
@@ -84,15 +84,6 @@ export default function MorePage() {
               </View>
             </View>
             <View style={styles.initiativeTeamMembers}>
-              <View style={styles.initiativeMemberContainer}>
-              {Image.resolveAssetSource(require('../../assets/Pauline.jpg')).uri ? (
-    <Image source={require('../../assets/Pauline.jpg')} style={styles.teamImage} />
-  ) : (
-    <Text>Image not available</Text>
-  )}
-                <Text style={styles.initiativeMemberName}>Pauline Lee</Text>
-                <Text style={styles.initiativeMemberRole}>Assiciate Director of Public Humanities (COLR)</Text>
-              </View>
               <View style={styles.teamMemberContainer}>
               {Image.resolveAssetSource(require('../../assets/Yash.jpg')).uri ? (
     <Image source={require('../../assets/Yash.jpg')} style={styles.teamImage} />
