@@ -1,4 +1,7 @@
-import React, { useEffect, useState, useRef } from "react";
+
+import { Ionicons } from "@expo/vector-icons";
+
+import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
   View,
@@ -15,13 +18,10 @@ import {
 import { WebViewMessageEvent } from "react-native-webview";
 import * as Location from 'expo-location';
 import ToastMessage from 'react-native-toast-message';
-import { Ionicons } from "@expo/vector-icons";
-import { Media, AudioType } from "../models/media_class";
-import { getThumbnail } from "../utils/S3_proxy";
-import { User } from "../models/user_class";
-import ApiService from "../utils/api_calls";
-import PhotoScroller from "../components/photoScroller";
+
 import AudioContainer from "../components/audio";
+
+import PhotoScroller from "../components/photoScroller";
 import TagWindow from "../components/tagging";
 import LocationWindow from "../components/location";
 import TimeWindow from "../components/time";
@@ -32,6 +32,8 @@ import LoadingModal from "../components/LoadingModal";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Video } from "expo-av";
 import { Link } from "@react-navigation/native";
+import { User } from "../models/user_class";
+import { AudioType, Media } from "../models/media_class";
 
 const user = User.getInstance();
 

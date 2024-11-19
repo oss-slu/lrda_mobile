@@ -4,7 +4,6 @@ import {
   Text,
   ScrollView,
   Linking,
-  TouchableOpacity,
   SafeAreaView,
 
   StyleSheet,
@@ -12,8 +11,7 @@ import {
   Switch,
   Image,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { User } from "../models/user_class";
+import { useDispatch } from "react-redux";
 import { useTheme } from "../components/ThemeProvider";
 import { useDispatch } from "react-redux";
 
