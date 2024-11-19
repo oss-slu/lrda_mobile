@@ -21,6 +21,7 @@ import ToastMessage from 'react-native-toast-message';
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../redux/store/store";
 import { setNavState } from "../../redux/slice/navigationSlice";
+import AudioPlayerScreen from "../screens/AudioPlayerScreen";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -42,6 +43,7 @@ const HomeStack = () => {
         component={AddNoteScreen}
         options={{ headerShown: false, gestureEnabled: false }}
       />
+      <Stack.Screen name="AudioPlayer" component={AudioPlayerScreen} />
       <Stack.Screen name="AccountPage" component={ProfilePage} />
       <Stack.Screen
         name="EditNote"
