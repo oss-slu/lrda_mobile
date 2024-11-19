@@ -531,7 +531,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     placeholder="Search notes..."
     onChangeText={handleSearch}
     value={searchQuery}
-    style={styles(theme, width).seachBar}
+    style={[styles(theme, width).seachBar, {marginTop: open && isSearchVisible ? 40: 0}]}
     placeholderTextColor={theme.gray}
   />
 )}
