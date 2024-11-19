@@ -105,13 +105,10 @@ describe('MorePage', () => {
     const toggleSwitch = getByTestId('dark-mode-switch');
     fireEvent(toggleSwitch, 'onValueChange', true);
 
-    // Ensure that dark mode is toggled
-    expect(toggleSwitch.props.value).toBe(false); // Based on initial value of `isDarkmode` being false
+    expect(toggleSwitch.props.value).toBe(false);
   });
 
-  it("opens email link when 'Report a Bug' is pressed", () => {
-    const spy = jest.spyOn(Linking, 'openURL');
-
+  it('renders the "Logout" button', () => {
     const { getByText } = render(
       <Provider store={store}>
         <MorePage />

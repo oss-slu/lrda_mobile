@@ -768,6 +768,7 @@ exports[`MorePage renders correctly 1`] = `
               {
                 "alignItems": "center",
                 "backgroundColor": "black",
+                "backgroundColor": "black",
                 "borderRadius": 15,
                 "flexDirection": "row",
                 "height": 50,
