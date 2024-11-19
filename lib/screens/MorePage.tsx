@@ -56,9 +56,11 @@ export default function MorePage() {
         <ScrollView contentContainerStyle={[styles.container, { paddingBottom: 140 }]}>
           {/* About Section Content */}
           <View style={styles.textContainer}>
-            <Text style={styles.titleText}>What is Where’s Religion?</Text>
-            <Text style={styles.bodyText}>Where’s Religion? is an open-source application developed by humanities faculty and IT professionals at Saint Louis University that supports in-person research, remote data entry, media sharing, and mapping. The app is designed to facilitate a more robust public understanding of religion through rigorous scholarly methods. Our conviction is that the study of religion must account for the wide range of embodied experiences, improvised practices, material cultures, and shared spaces that humans inhabit. Through a research methodology that moves beyond analysis of sacred texts, creeds, and official teachings, Where’s Religion? provides a platform to diversify the data we study and to advance the study of religion we all encounter in everyday life.</Text>
-            <Text style={styles.bodyText}>Where’s Religion? is a keystone outcome of the Center on Lived Religion at Saint Louis University. We have received external support from the Henry Luce Foundation ($400,000 in 2018 and $470,000 in 2022), and internal support from the College of Arts & Sciences, the Office for the Vice President for Research and the Research Computing Group, Open Source with SLU, the Walter J. Ong, S.J., Center for Digital Humanities, and the CREST Research Center (Culture, Religion, Ethics, Science, Technology).</Text>
+            <Text style={[styles.titleText,{color:theme.text}]}>What is Where’s Religion?</Text>
+            <Text style={[styles.bodyText, { color: theme.text }]}>
+            Where’s Religion? is an open-source application developed by humanities faculty and IT professionals at Saint Louis University that supports in-person research, remote data entry, media sharing, and mapping. The app is designed to facilitate a more robust public understanding of religion through rigorous scholarly methods. Our conviction is that the study of religion must account for the wide range of embodied experiences, improvised practices, material cultures, and shared spaces that humans inhabit. Through a research methodology that moves beyond analysis of sacred texts, creeds, and official teachings, Where’s Religion? provides a platform to diversify the data we study and to advance the study of religion we all encounter in everyday life.</Text>
+            <Text style={[styles.bodyText, { color: theme.text }]}>
+Where’s Religion? is a keystone outcome of the Center on Lived Religion at Saint Louis University. We have received external support from the Henry Luce Foundation ($400,000 in 2018 and $470,000 in 2022), and internal support from the College of Arts & Sciences, the Office for the Vice President for Research and the Research Computing Group, Open Source with SLU, the Walter J. Ong, S.J., Center for Digital Humanities, and the CREST Research Center (Culture, Religion, Ethics, Science, Technology).</Text>
           </View>
 
           {/* Initiative Team Section */}
@@ -71,8 +73,8 @@ export default function MorePage() {
   ) : (
     <Text>Image not available</Text>
   )}
-  <Text style={styles.teamName}>Rachel Lindsey</Text>
-  <Text style={styles.teamRole}>Director of Center on Lived Religion</Text>
+  <Text style={[styles.teamName,{color:theme.text}]}>Rachel Lindsey</Text>
+  <Text style={[styles.teamRole,{color:theme.text}]}>Director of Center on Lived Religion</Text>
 </View>
 
               <View style={styles.initiativeMemberContainer}>
@@ -81,8 +83,8 @@ export default function MorePage() {
   ) : (
     <Text>Image not available</Text>
   )}
-                <Text style={styles.initiativeMemberName}>Adam Park</Text>
-                <Text style={styles.initiativeMemberRole}>Associate Director of Research (COLR)</Text>
+                <Text style={[styles.initiativeMemberName,{color:theme.text}]}>Adam Park</Text>
+                <Text style={[styles.initiativeMemberRole,{color:theme.text}]}>Associate Director of Research (COLR)</Text>
               </View>
             </View>
             <View style={styles.initiativeTeamMembers}>
@@ -92,8 +94,8 @@ export default function MorePage() {
   ) : (
     <Text>Image not available</Text>
   )}
-                <Text style={styles.teamName}>Yash Bhatia</Text>
-                <Text style={styles.teamRole}>Software Engineer and Tech Lead </Text>
+                <Text style={[styles.teamName,{color:theme.text}]}>Yash Bhatia</Text>
+                <Text style={[styles.teamRole,{color:theme.text}]}>Software Engineer and Tech Lead </Text>
               </View>
             </View>
           </View>
@@ -108,8 +110,8 @@ export default function MorePage() {
   ) : (
     <Text>Image not available</Text>
   )}
-                <Text style={styles.teamName}>Patrick Cuba</Text>
-                <Text style={styles.teamRole}>IT Architect</Text>
+                <Text style={[styles.teamName,{color:theme.text}]}>Patrick Cuba</Text>
+                <Text style={[styles.teamRole,{color:theme.text}]}>IT Architect</Text>
               </View>
               <View style={styles.teamMemberContainer}>
               {Image.resolveAssetSource(require('../../assets/Bryan.jpg')).uri ? (
@@ -117,8 +119,8 @@ export default function MorePage() {
   ) : (
     <Text>Image not available</Text>
   )}
-                <Text style={styles.teamName}>Bryan Haberberger</Text>
-                <Text style={styles.teamRole}>Full Stack Developer</Text>
+                <Text style={[styles.teamName,{color:theme.text}]}>Bryan Haberberger</Text>
+                <Text style={[styles.teamRole,{color:theme.text}]}>Full Stack Developer</Text>
               </View>
             </View>
             <View style={styles.teamMembersRow}>
@@ -128,8 +130,8 @@ export default function MorePage() {
   ) : (
     <Text>Image not available</Text>
   )}
-                <Text style={styles.teamName}>Stuart Ray</Text>
-                <Text style={styles.teamRole}>Developer</Text>
+                <Text style={[styles.teamName,{color:theme.text}]}>Stuart Ray</Text>
+                <Text style={[styles.teamRole,{color:theme.text}]}>Developer</Text>
               </View>
               <View style={styles.teamMemberContainer}>
               {Image.resolveAssetSource(require('../../assets/Izak.jpg')).uri ? (
@@ -137,8 +139,8 @@ export default function MorePage() {
   ) : (
     <Text>Image not available</Text>
   )}
-                <Text style={styles.teamName}>Izak Robles</Text>
-                <Text style={styles.teamRole}>Developer</Text>
+                <Text style={[styles.teamName,{color:theme.text}]}>Izak Robles</Text>
+                <Text style={[styles.teamRole,{color:theme.text}]}>Developer</Text>
               </View>
             </View>
           </View>

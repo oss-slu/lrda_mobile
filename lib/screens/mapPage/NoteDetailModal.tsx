@@ -208,7 +208,7 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
   const htmlSource = useMemo(() => ({ html: note?.description || "" }), [note]);
 
   return (
-    <Modal animationType="slide" transparent={false} visible={isVisible}>
+    <Modal animationType="slide" transparent={false} visible={isVisible} >
       <TouchableOpacity onPress={onClose} style={styles.closeButton}>
         <View style={styles.closeIcon}>
           <Ionicons name="close" size={30} color={theme.text} />

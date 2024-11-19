@@ -67,7 +67,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       }
     })();
   }, []);
-
+  
   const refreshPage = () => {
     setUpdateCounter(updateCounter + 1);
   };
@@ -80,68 +80,37 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   const fetchMessages = async () => {
     try {
-        const userId = await user.getId(); // Get the current user's ID
-
-        let personalNotes: Note[] = [];
-        let globalNotes: Note[] = [];
-
-        if (userId) {
-            // Fetch personal notes and filter out archived ones
-            personalNotes = (await ApiService.fetchMessages(false, false, userId))
-                .filter(note => !note.isArchived);
-
-            // Convert media types and reverse the order for personal notes
-            personalNotes = DataConversion.convertMediaTypes(personalNotes).reverse();
-        }
-
-        // Fetch global published notes and filter out archived ones
-        globalNotes = (await ApiService.fetchMessages(false, true, ""))
-            .filter(note => !note.isArchived);
-
-        // Convert media types and reverse the order for global notes
-        globalNotes = DataConversion.convertMediaTypes(globalNotes).reverse();
-
-        // Combine personal and global notes based on the "published" filter
-        const allNotes = published ? globalNotes : personalNotes;
-
-        // Update state
-        setMessages(allNotes); // Update messages with combined notes
-        setNotes(reversed ? allNotes.reverse() : allNotes); // Reverse notes if required
-        setRendering(false);
-    } catch (error) {
-        console.error("Error fetching messages:", error);
-        ToastMessage.show({
-            type: "error",
-            text1: "Error fetching messages",
-            text2: error.message,
-        });
-    }
-};
-
+      const userId = await user.getId();
+      const data = await ApiService.fetchMessages(
+        false,
+        published,
+        isPrivate ? userId : "",
+      );
   
-
-  const renderNotes = () => {
-    return filteredNotes.map((note) => (
-      <TouchableOpacity
-        key={note.id}
-        style={styles(theme, width).noteContainer}
-        onPress={() => {
-          navigation.navigate("EditNote", { note });
-        }}
-      >
-        <Text style={styles(theme, width).noteTitle}>
-          {note.title.length > textLength
-            ? note.title.slice(0, textLength) + "..."
-            : note.title}
-        </Text>
-        <Text style={styles(theme, width).noteText}>
-          {formatToLocalDateString(new Date(note.time))}
-        </Text>
-      </TouchableOpacity>
-    ));
+      // Filter out archived notes; assume notes without `isArchived` are not archived
+      const unarchivedNotes = data.filter((note: Note) => !note.isArchived);
+  
+      setMessages(unarchivedNotes);
+  
+      // Convert data and sort notes by date (latest first)
+      const fetchedNotes = DataConversion.convertMediaTypes(unarchivedNotes)
+        .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+  
+      // Apply reverse logic if 'reversed' is true
+      setNotes(reversed ? fetchedNotes.reverse() : fetchedNotes);
+      setRendering(false);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      ToastMessage.show({
+        type: "error",
+        text1: "Error fetching messages",
+        text2: error.message,
+      });
+    }
   };
   
   
+
   
   const updateNote = (note: Note) => {
     setNotes((prevNotes) =>
@@ -150,23 +119,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     refreshPage();
   };
 
-  const deleteNoteFromAPI = async (id: string) => {
-    try {
-      const userId = await user.getId();
-      const success = await ApiService.deleteNoteFromAPI(id, userId || "");
-      if (success) {
-        return true;
-      }
-    } catch (error) {
-      console.error("Error deleting note:", error);
-      ToastMessage.show({
-        type: "error",
-        text1: "Error deleting note",
-        text2: error.message,
-      });
-      return false;
-    }
-  };
+
 
   const handleFilters = (name: string) => {
     if (name === "published_entries") {
@@ -199,9 +152,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           published: false,
           archivedAt: new Date().toISOString(),
         };
-        console.log(note)
-        
-
+  
         const response = await ApiService.overwriteNote(updatedNote);
         if (response.ok) {
           ToastMessage.show({
@@ -232,6 +183,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       return false;
     }
   };
+  
+  
+  
 
   const findNextUntitledNumber = (notes: Note[]) => {
     let maxNumber = 0;
@@ -287,15 +241,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     if (rowMap[id]) {
       rowMap[id].closeRow();
     }
-
+  
     const noteToDelete = notes.find((note) => note.id === id);
-
+  
     if (noteToDelete) {
       handleArchiveNote(noteToDelete, user); // Pass the correct arguments
     }
-
+  
     setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
   };
+  
 
   async function publishNote(data: any, rowMap: any) {
     if (rowMap[data]) {
@@ -597,7 +552,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   );
 };
 
-const styles = (theme, width) =>
+const styles = (theme, width,color,isDarkmode) =>
   StyleSheet.create({
     container: {
       paddingTop: Constants.statusBarHeight - 20,
@@ -654,6 +609,7 @@ const styles = (theme, width) =>
       height: 50,
       alignItems: "center",
       justifyContent: "center",
+      color:theme.text,
     },
     topView: {
       flexDirection: "row",
@@ -686,6 +642,7 @@ const styles = (theme, width) =>
       height: 185,
       paddingLeft: width * 0.03,
       paddingRight: width * 0.03,
+      color:theme.text
     },
     seachBar: {
       backgroundColor: theme.homeColor,
@@ -716,11 +673,13 @@ const styles = (theme, width) =>
       top: 0,
       width: 75,
       paddingRight: 17,
+      color:theme.text
     },
     backRightBtnRight: {
       backgroundColor: theme.homeGray,
       width: "50%",
       right: 0,
+      color:theme.text
     },
   });
 
