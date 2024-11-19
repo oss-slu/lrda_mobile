@@ -31,7 +31,6 @@ const user = User.getInstance();
 const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, route }) => {
   const [titleText, setTitleText] = useState<string>("");
   const [isSaveButtonEnabled, setIsSaveButtonEnabled] = useState<boolean>(true);
-  const [untitledNumber, setUntitledNumber] = useState<string>("0");
   const [bodyText, setBodyText] = useState<string>("");
   const [newMedia, setNewMedia] = useState<Media[]>([]);
   const [newAudio, setNewAudio] = useState<AudioType[]>([]);
@@ -193,46 +192,38 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
       text1: isPublished ? 'Note Unpublished' : 'Note Published',
       visibilityTime: 3000,
     });
-  };
 
-  const saveNoteAsDraft = async () => {
-    const draftNote = {
-      title: "Draft - " + (titleText.trim() || `Untitled ${untitledNumber}`),
-      text: editor.getHTML(),
-      media: newMedia,
-      audio: newAudio,
-      tags,
-      time: new Date(),
-      published: false,
-    };
-    try {
-      await ApiService.writeNewNote(draftNote);
-    } catch (error) {
-      console.error("Error saving draft:", error);
-    }
+    await saveNote(); // Save the note when the user shares it
   };
 
   const saveNote = async () => {
-    setIsSaveButtonEnabled(false);
+    setIsUpdating(true);  // Show loading indicator during save
+
     try {
+      const userLocation = await Location.getCurrentPositionAsync({});
+      const finalLocation = userLocation ? userLocation.coords : { latitude: 0, longitude: 0 };
+
       const newNote = {
-        title: titleText || `Untitled ${untitledNumber}`,
+        title: titleText || "Untitled",
         text: editor.getHTML(),
         media: newMedia,
         audio: newAudio,
+        tags,
+        time,
+        latitude: finalLocation.latitude.toString(),
+        longitude: finalLocation.longitude.toString(),
         published: isPublished,
         time: new Date().toISOString(), // Automatically grabs current time
         creator: uid,
       };
 
-      const response = await ApiService.writeNewNote(newNote);
-      const obj = await response.json();
-      route.params.refreshPage();
-      navigation.goBack();
+      await ApiService.writeNewNote(newNote);
+      route.params.refreshPage();  // Refresh the parent page if needed
+      navigation.goBack();  // Navigate back after saving the note
     } catch (error) {
-      console.error("An error occurred while creating the note:", error);
+      console.error("Error saving the note:", error);
     } finally {
-      setIsSaveButtonEnabled(true);
+      setIsUpdating(false);  // Hide loading indicator after save
     }
   };
 
@@ -334,11 +325,12 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
 
       </KeyboardAvoidingView>
 
-      <LoadingModal visible={isUpdating} />
+        <LoadingModal visible={isUpdating} />
       </View>
     </SafeAreaView>
-
   );
 };
 
 export default AddNoteScreen;
+
+

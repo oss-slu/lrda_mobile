@@ -9,7 +9,6 @@ import {
   ScrollView,
   StyleSheet,
 } from "react-native";
-import {  StyleSheet } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
 import PhotoScroller from "../components/photoScroller";
