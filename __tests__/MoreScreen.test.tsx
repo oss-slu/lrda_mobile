@@ -177,7 +177,7 @@ describe('MorePage', () => {
   
     // Check that Light Mode text is black when isDarkmode is false
     const lightModeText = getByText('Light Mode');
-    expect(lightModeText.props.style).toEqual(expect.arrayContaining([{ color: 'black' }]));
+    expect(lightModeText.props.style).toEqual(expect.arrayContaining([{ color: '#000000' }]));
   
     // Update isDarkmode to true and rerender
     useTheme.mockReturnValueOnce({
@@ -199,6 +199,6 @@ describe('MorePage', () => {
   
     // Check that Dark Mode text is white when isDarkmode is true
     const darkModeText = getByText('Dark Mode');
-    expect(darkModeText.props.style).toEqual(expect.arrayContaining([{ color: 'white' }]));
+    expect(darkModeText.props.style).toEqual(expect.arrayContaining([{ color: '#ffffff' }]));
   });
 });
