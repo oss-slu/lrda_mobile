@@ -1,12 +1,12 @@
 import { fireEvent, render } from '@testing-library/react-native';
 import moxios from 'moxios';
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
+
 import { Provider } from 'react-redux';
 import configureStore from 'redux-mock-store';
 import MorePage from '../lib/screens/MorePage';
 import { Image } from 'react-native';
-import moxios from 'moxios';
+
 
 // Create a mock Redux store
 const mockStore = configureStore([]);
