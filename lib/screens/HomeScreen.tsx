@@ -9,6 +9,7 @@ import {
   TextInput,
   StyleSheet,
 } from "react-native";
+import { useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
 import { Note } from "../../types";
@@ -41,6 +42,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     { label: "My Entries", value: "my_entries" },
     { label: "Published Entries", value: "published_entries" },
   ]);
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(initialItems[0].value);
   const [items, setItems] = useState(initialItems);
@@ -78,33 +80,65 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   const fetchMessages = async () => {
     try {
-      const userId = await user.getId();
-      const data = await ApiService.fetchMessages(
-        false,
-        published,
-        isPrivate ? userId : ""
-      );
-  
-      // Filter out archived notes; assume notes without `isArchived` are not archived
-      const unarchivedNotes = data.filter((note: Note) => !note.isArchived);
-  
-      setMessages(unarchivedNotes);
-  
-      // Convert data and sort notes by date (latest first)
-      const fetchedNotes = DataConversion.convertMediaTypes(unarchivedNotes)
-        .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-  
-      // Apply reverse logic if 'reversed' is true
-      setNotes(reversed ? fetchedNotes.reverse() : fetchedNotes);
-      setRendering(false);
+        const userId = await user.getId(); // Get the current user's ID
+
+        let personalNotes: Note[] = [];
+        let globalNotes: Note[] = [];
+
+        if (userId) {
+            // Fetch personal notes and filter out archived ones
+            personalNotes = (await ApiService.fetchMessages(false, false, userId))
+                .filter(note => !note.isArchived);
+
+            // Convert media types and reverse the order for personal notes
+            personalNotes = DataConversion.convertMediaTypes(personalNotes).reverse();
+        }
+
+        // Fetch global published notes and filter out archived ones
+        globalNotes = (await ApiService.fetchMessages(false, true, ""))
+            .filter(note => !note.isArchived);
+
+        // Convert media types and reverse the order for global notes
+        globalNotes = DataConversion.convertMediaTypes(globalNotes).reverse();
+
+        // Combine personal and global notes based on the "published" filter
+        const allNotes = published ? globalNotes : personalNotes;
+
+        // Update state
+        setMessages(allNotes); // Update messages with combined notes
+        setNotes(reversed ? allNotes.reverse() : allNotes); // Reverse notes if required
+        setRendering(false);
     } catch (error) {
-      console.error("Error fetching messages:", error);
-      ToastMessage.show({
-        type: "error",
-        text1: "Error fetching messages",
-        text2: error.message,
-      });
+        console.error("Error fetching messages:", error);
+        ToastMessage.show({
+            type: "error",
+            text1: "Error fetching messages",
+            text2: error.message,
+        });
     }
+};
+
+  
+
+  const renderNotes = () => {
+    return filteredNotes.map((note) => (
+      <TouchableOpacity
+        key={note.id}
+        style={styles(theme, width).noteContainer}
+        onPress={() => {
+          navigation.navigate("EditNote", { note });
+        }}
+      >
+        <Text style={styles(theme, width).noteTitle}>
+          {note.title.length > textLength
+            ? note.title.slice(0, textLength) + "..."
+            : note.title}
+        </Text>
+        <Text style={styles(theme, width).noteText}>
+          {formatToLocalDateString(new Date(note.time))}
+        </Text>
+      </TouchableOpacity>
+    ));
   };
   
   
@@ -114,6 +148,45 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       prevNotes?.map((prevNote) => (prevNote.id === note.id ? note : prevNote))
     );
     refreshPage();
+  };
+
+  const deleteNoteFromAPI = async (id: string) => {
+    try {
+      const userId = await user.getId();
+      const success = await ApiService.deleteNoteFromAPI(id, userId || "");
+      if (success) {
+        return true;
+      }
+    } catch (error) {
+      console.error("Error deleting note:", error);
+      ToastMessage.show({
+        type: "error",
+        text1: "Error deleting note",
+        text2: error.message,
+      });
+      return false;
+    }
+  };
+
+  const handleFilters = (name: string) => {
+    if (name === "published_entries") {
+      setIsPrivate(false);
+      setPublished(true);
+    } else if (name === "my_entries") {
+      setIsPrivate(true);
+      setPublished(false);
+    }
+    refreshPage();
+  };
+
+  useEffect(() => {
+    handleFilters(value);
+  }, []);
+
+  const handleReverseOrder = () => {
+    setNotes(notes.reverse());
+    setReversed(!reversed);
+    setUpdateCounter(updateCounter + 1);
   };
 
   const handleArchiveNote = async (note: Note | undefined, user: User) => {
@@ -126,7 +199,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           published: false,
           archivedAt: new Date().toISOString(),
         };
-  
+        console.log(note)
+        
+
         const response = await ApiService.overwriteNote(updatedNote);
         if (response.ok) {
           ToastMessage.show({
@@ -156,30 +231,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       });
       return false;
     }
-  };
-  
-  
-  
-
-  const handleFilters = (name: string) => {
-    if (name === "published_entries") {
-      setIsPrivate(false);
-      setPublished(true);
-    } else if (name === "my_entries") {
-      setIsPrivate(true);
-      setPublished(false);
-    }
-    refreshPage();
-  };
-
-  useEffect(() => {
-    handleFilters(value);
-  }, []);
-
-  const handleReverseOrder = () => {
-    setNotes(notes.reverse());
-    setReversed(!reversed);
-    setUpdateCounter(updateCounter + 1);
   };
 
   const findNextUntitledNumber = (notes: Note[]) => {
@@ -236,16 +287,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     if (rowMap[id]) {
       rowMap[id].closeRow();
     }
-  
+
     const noteToDelete = notes.find((note) => note.id === id);
-  
+
     if (noteToDelete) {
       handleArchiveNote(noteToDelete, user); // Pass the correct arguments
     }
-  
+
     setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
   };
-  
 
   async function publishNote(data: any, rowMap: any) {
     if (rowMap[data]) {
@@ -274,7 +324,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       ? notes.filter((note) => {
           const lowerCaseQuery = searchQuery.toLowerCase();
           const noteTime = new Date(note.time);
-          const formattedTime = formatDate(noteTime);
+          const formattedTime = formatToLocalDateString(noteTime);
           return (
             note.title.toLowerCase().includes(lowerCaseQuery) ||
             formattedTime.includes(lowerCaseQuery)
@@ -282,29 +332,29 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         })
       : notes;
 
-    return isPrivate ? (
-      <SwipeListView
-        data={filteredNotes}
-        renderItem={renderItem}
-        renderHiddenItem={sideMenu}
-        leftActivationValue={160}
-        rightActivationValue={-160}
-        leftOpenValue={75}
-        rightOpenValue={-75}
-        stopLeftSwipe={175}
-        stopRightSwipe={-175}
-        keyExtractor={(item) => item.id}
-        onRightAction={(data, rowMap) => deleteNote(data, rowMap)}
-        onLeftAction={(data, rowMap) => publishNote(data, rowMap)}
-      />
-    ) : (
-      <SwipeListView
-        data={filteredNotes}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-      />
-    );
-  };
+      return isPrivate ? (
+        <SwipeListView
+          data={filteredNotes}
+          renderItem={renderItem}
+          renderHiddenItem={sideMenu}
+          leftActivationValue={160}
+          rightActivationValue={-160}
+          leftOpenValue={75}
+          rightOpenValue={-75}
+          stopLeftSwipe={175}
+          stopRightSwipe={-175}
+          keyExtractor={(item) => item.id}
+          onRightAction={(data, rowMap) => deleteNote(data, rowMap)}
+          onLeftAction={(data, rowMap) => publishNote(data, rowMap)}
+        />
+      ) : (
+        <SwipeListView
+          data={filteredNotes}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+        />
+      );
+    };
 
   const renderItem = (data: any) => {
     const item = data.item;
@@ -409,6 +459,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const handleSearch = (query: string) => {
     setSearchQuery(query);
   };
+  
+  const toggleSearchBar = () => {
+    if (isSearchVisible) {
+      setSearchQuery(""); // Reset search query when closing
+    }
+    setIsSearchVisible(!isSearchVisible);
+  };
+  
 
   const formatDate = (date: Date) => {
     const day = date.getDate().toString();
@@ -419,12 +477,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   const filteredNotes = useMemo(() => {
     return notes.filter((note) => {
-      const noteTime = new Date(note.time);
-      const formattedTime = formatDate(noteTime);
-
+      const noteTime = formatToLocalDateString(new Date(note.time));
       return (
         note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        formattedTime.includes(searchQuery.toLowerCase())
+        noteTime.includes(searchQuery)
       );
     });
   }, [notes, searchQuery]);

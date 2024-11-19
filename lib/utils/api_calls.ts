@@ -287,6 +287,7 @@ static async fetchCreatorName(creatorId: string): Promise<string> {
         published: note.published,
         tags: note.tags,
         time: note.time,
+        isArchived:note.isArchived,
       }),
     });
   }
