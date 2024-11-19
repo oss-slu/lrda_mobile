@@ -174,6 +174,7 @@ const EditNoteScreen = ({ route, navigation }) => {
       console.error("Error adding video: ", error);
     }
   };
+  
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
