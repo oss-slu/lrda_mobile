@@ -101,9 +101,22 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
     }
   };
 
-  const insertAudioToEditor = (audioUri: string) => {
-    const audioTag = `<audio controls src="${audioUri}"></audio>`;
-    editor.setContent(editor.getHTML() + audioTag);
+  const insertAudioToEditor = async (audioUri: string) => {
+    if (editor?.setContent && editor?.getHTML) {
+      try {
+        // Get the current content from the editor
+        const currentContent = await editor.getHTML();
+        // Create the new audio link with line breaks for spacing
+        const audioLink = `${currentContent}<a href="${audioUri}">${audioUri}</a><br>`;
+        // Set the combined content back to the editor
+        editor.setContent(audioLink);
+        editor.focus();
+      } catch (error) {
+        console.error("Error adding audio link to editor:", error);
+      }
+    } else {
+      console.error("Editor instance is not available.");
+    }
   };
 
   const handleShareButtonPress = () => {
@@ -328,5 +341,3 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
 };
 
 export default AddNoteScreen;
-
-
