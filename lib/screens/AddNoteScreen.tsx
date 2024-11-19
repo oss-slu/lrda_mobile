@@ -108,6 +108,14 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
     if (status === 'granted') {
       console.log("Location permission granted. Fetching current location...");
       try {
+        const { status } = await Location.getForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          const { status: requestStatus } = await Location.requestForegroundPermissionsAsync();
+          if (requestStatus !== 'granted') {
+            Alert.alert("Location permission denied", "Please enable location permissions to use this feature.");
+            return;
+          }
+        }
         const userLocation = await Location.getCurrentPositionAsync({});
         console.log("User location fetched:", userLocation.coords);
         setLocation({
