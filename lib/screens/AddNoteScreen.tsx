@@ -9,9 +9,11 @@ import {
   Keyboard,
   Platform,
   KeyboardAvoidingView,
-  ScrollView,
+  Modal,
+  Text,
+  StyleSheet,
 } from "react-native";
-import { WebViewMessageEvent } from 'react-native-webview';
+import { WebViewMessageEvent } from "react-native-webview";
 import * as Location from 'expo-location';
 import ToastMessage from 'react-native-toast-message';
 import AudioContainer from "../components/audio";
@@ -347,3 +349,27 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
 export default AddNoteScreen;
 
 
+
+const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "90%",
+    padding: 20,
+    backgroundColor: "white",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  videoPlayer: {
+    width: "100%",
+    height: 200,
+  },
+  closeButton: {
+    color: "blue",
+    marginTop: 20,
+  },
+});
