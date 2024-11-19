@@ -2,14 +2,17 @@ import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  ScrollView,
+  View,
   TextInput,
   TouchableOpacity,
-  View
+  SafeAreaView,
+  Keyboard,
+  Platform,
+  KeyboardAvoidingView,
+  ScrollView,
 } from "react-native";
+import { WebViewMessageEvent } from 'react-native-webview';
+import * as Location from 'expo-location';
 import ToastMessage from 'react-native-toast-message';
 import AudioContainer from "../components/audio";
 import LocationWindow from "../components/location";
@@ -81,6 +84,12 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
           id: 'closeKeyboard', // Unique ID for this toolbar item
         },
       ];
+
+  useEffect(() => {
+    if (editor) {
+      editor.injectCSS(customImageCSS);
+    }
+  }, [editor]);
 
   useEffect(() => {
     if (editor) {
@@ -177,6 +186,8 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
         const audioLink = `${currentContent}<a href="${audioUri}">${audioUri}</a><br>`;
         editor.setContent(audioLink);
         editor.focus();
+
+
       } catch (error) {
         console.error("Error adding audio:", error);
         displayErrorInEditor(`Error adding audio: ${error.message}`);
@@ -193,27 +204,20 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
       text1: isPublished ? 'Note Unpublished' : 'Note Published',
       visibilityTime: 3000,
     });
-
-    await saveNote(); // Save the note when the user shares it
+    await saveNote();
   };
 
   const saveNote = async () => {
     console.log("Back button pressed - saveNote function invoked.");
-    setIsUpdating(true);  // Show loading indicator during save
+    setIsUpdating(true);
     setIsSaveButtonEnabled(true);
 
     try {
-      console.log("Fetching user location...");
       const userLocation = await Location.getCurrentPositionAsync({});
       const finalLocation = userLocation ? userLocation.coords : { latitude: 0, longitude: 0 };
-
-      const textContent = await editor.getHTML(); // Get text content as a string
-
-      // Fetch the user UID
+      const textContent = await editor.getHTML();
       const uid = await user.getId();
-      console.log("User UID:", uid);
 
-      // Construct payload including uid as creator
       const newNote = {
         title: titleText || "Untitled",
         text: textContent,
@@ -234,10 +238,8 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
       console.error("Error saving the note:", error);
     } finally {
       setIsUpdating(false);
-      console.log("Exiting saveNote function.");
     }
   };
-
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -337,7 +339,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
       </KeyboardAvoidingView>
 
         <LoadingModal visible={isUpdating} />
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };

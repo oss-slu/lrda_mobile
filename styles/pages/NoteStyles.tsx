@@ -3,6 +3,19 @@ import { lightTheme, darkTheme } from "../colors";
 import Constants from "expo-constants";
 import { useTheme } from "../../lib/components/ThemeProvider";
 
+// Define custom CSS as a separate string
+// In NotePageStyles.ts
+export const customImageCSS = `
+  .ProseMirror img {
+    max-width: 200px !important;
+    max-height: 200px !important;
+    object-fit: cover !important;
+    display: inline-block; /* Ensure images don't expand to fit container width */
+  }
+`;
+
+
+
 const NotePageStyles = () => {
   const { theme } = useTheme();
 
