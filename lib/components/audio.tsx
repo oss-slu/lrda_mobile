@@ -1,15 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
+  FlatList,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Audio } from "expo-av";
 import uuid from "react-native-uuid";
-import { uploadAudio } from "../utils/S3_proxy";  // Assuming you have a function to upload the audio
-import { AudioType } from "../models/media_class";  // Assuming AudioType is correctly defined
+import { uploadAudio } from "../utils/S3_proxy"; // Assuming you have a function to upload the audio
+import { AudioType } from "../models/media_class"; // Assuming AudioType is correctly defined
 
 type AudioContainerProps = {
   newAudio: AudioType[];
@@ -17,97 +19,157 @@ type AudioContainerProps = {
   insertAudioToEditor: (audioUri: string) => void;
 };
 
-const AudioContainer = ({ newAudio, setNewAudio, insertAudioToEditor }: AudioContainerProps) => {
+const AudioContainer = ({
+  newAudio,
+  setNewAudio,
+  insertAudioToEditor,
+}: AudioContainerProps) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recording, setRecording] = useState<null | Audio.Recording>(null);
+  const [currentSound, setCurrentSound] = useState<Audio.Sound | null>(null);
+  const [playingAudio, setPlayingAudio] = useState<string | null>(null);
 
-  async function startRecording() {
-    setIsRecording(true);
+  useEffect(() => {
+    return () => {
+      // Clean up any active audio players when component unmounts
+      if (currentSound) {
+        currentSound.unloadAsync();
+      }
+    };
+  }, [currentSound]);
+
+  const startRecording = async () => {
     try {
       const permission = await Audio.requestPermissionsAsync();
-      if (permission.status === "granted") {
-        await Audio.setAudioModeAsync({
-          playsInSilentModeIOS: true,
-          allowsRecordingIOS: true,
-        });
-  
-        const { recording } = await Audio.Recording.createAsync(
-          Audio.RecordingOptionsPresets.HIGH_QUALITY
-        );
-  
-        setRecording(recording);
-      } else {
-        alert("Please grant permission to access the microphone");
+      if (permission.status !== "granted") {
+        Alert.alert("Microphone Permission Denied", "Please enable microphone access.");
+        return;
       }
-    } catch (err) {
-      console.error("Failed to start recording", err);
-      setIsRecording(false); // Reset recording state if there’s an error
+
+      setIsRecording(true);
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
+
+      setRecording(recording);
+    } catch (error) {
+      console.error("Failed to start recording", error);
+      setIsRecording(false);
     }
-  }
-  
-  async function stopRecording() {
+  };
+
+  const stopRecording = async () => {
     setIsRecording(false);
     try {
       if (recording) {
         await recording.stopAndUnloadAsync();
-  
         const uri = recording.getURI();
-        setRecording(null); // Clear the recording reference to avoid overwriting
-  
+        setRecording(null);
+
         if (uri) {
-          const uploadedUri = await uploadAudio(uri); // Upload audio to your storage
-  
-          // Create a new audio object with unique ID and add it to the newAudio array
+          const uploadedUri = await uploadAudio(uri); // Upload the recording
           const newRecording = new AudioType({
             uuid: uuid.v4().toString(),
             type: "audio",
             uri: uploadedUri,
-            duration: "00:30", // Assuming a 30-second audio
+            duration: "00:30", // Example duration, replace with real duration if available
             name: `Recording ${newAudio.length + 1}`,
           });
-  
+
           setNewAudio((prevAudio) => [...prevAudio, newRecording]);
-  
-          // Insert the uploaded audio into the editor
           insertAudioToEditor(uploadedUri);
         }
       }
-    } catch (err) {
-      console.error("Failed to stop recording", err);
+    } catch (error) {
+      console.error("Failed to stop recording", error);
     }
-  }
-  
+  };
+
+  const playAudio = async (uri: string) => {
+    if (currentSound) {
+      await currentSound.unloadAsync();
+      setCurrentSound(null);
+      setPlayingAudio(null);
+    }
+
+    try {
+      const { sound } = await Audio.Sound.createAsync({ uri });
+      setCurrentSound(sound);
+      setPlayingAudio(uri);
+      await sound.playAsync();
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.didJustFinish) {
+          setPlayingAudio(null);
+          sound.unloadAsync();
+        }
+      });
+    } catch (error) {
+      console.error("Failed to play audio", error);
+    }
+  };
+
+  const stopAudio = async () => {
+    if (currentSound) {
+      await currentSound.stopAsync();
+      await currentSound.unloadAsync();
+      setCurrentSound(null);
+      setPlayingAudio(null);
+    }
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         {isRecording ? (
-          <Ionicons name={"mic-outline"} size={60} color="red" />
+          <Ionicons name="mic-outline" size={60} color="red" />
         ) : (
-          <Ionicons name={"mic-outline"} size={60} color="#111111" />
+          <Ionicons name="mic-outline" size={60} color="#111111" />
         )}
-        <Text style={{ fontSize: 24, fontWeight: "600" }}>Recordings</Text>
+        <Text style={styles.headerText}>Recordings</Text>
         {isRecording ? (
           <TouchableOpacity onPress={stopRecording}>
-            <Ionicons name={"stop-circle-outline"} size={45} color="#111111" />
+            <Ionicons name="stop-circle-outline" size={45} color="#111111" />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity onPress={startRecording}>
-            <Ionicons name={"radio-button-on-outline"} size={45} color="red" />
+            <Ionicons name="radio-button-on-outline" size={45} color="red" />
           </TouchableOpacity>
         )}
       </View>
 
-      <View style={styles.audioList}>
-        {newAudio?.map((audio, index) => (
-          <View style={styles.audioItem} key={index}>
-            <Text>{audio.name}</Text>
-            <TouchableOpacity onPress={() => console.log("Play audio")}>
-              <Ionicons name="play-outline" size={25} />
+      <FlatList
+        data={newAudio}
+        keyExtractor={(item) => item.uuid}
+        contentContainerStyle={styles.audioList}
+        renderItem={({ item }) => (
+          <View style={styles.audioItem}>
+            <Text style={styles.audioText}>{item.name}</Text>
+            <TouchableOpacity
+              onPress={() =>
+                playingAudio === item.uri ? stopAudio() : playAudio(item.uri)
+              }
+            >
+              <Ionicons
+                name={
+                  playingAudio === item.uri
+                    ? "pause-circle-outline"
+                    : "play-circle-outline"
+                }
+                size={30}
+                color={playingAudio === item.uri ? "red" : "#111111"}
+              />
             </TouchableOpacity>
           </View>
-        ))}
-      </View>
+        )}
+        ListEmptyComponent={
+          <Text style={styles.emptyListText}>No recordings available</Text>
+        }
+      />
     </View>
   );
 };
@@ -120,12 +182,17 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     width: "100%",
     alignItems: "center",
+    padding: 10,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     width: "100%",
+  },
+  headerText: {
+    fontSize: 24,
+    fontWeight: "600",
   },
   audioList: {
     width: "100%",
@@ -140,5 +207,15 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     width: "90%",
+  },
+  audioText: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#333",
+  },
+  emptyListText: {
+    color: "#888",
+    fontSize: 16,
+    marginTop: 20,
   },
 });

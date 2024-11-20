@@ -178,9 +178,9 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
                 testID="password-input"
               />
             </View>
-            <TouchableOpacity>
-              <Text style={styles.forgot}>Forgot Password?</Text>
-            </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
+  <Text style={styles.forgot}>Forgot Password?</Text>
+</TouchableOpacity>
             <TouchableOpacity onPress={onLoginPress} style={styles.buttons} testID="login-button">
               <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
                 Login
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     alignContent: "center",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "white",
+    backgroundColor: "rgba(255, 255, 255, 0.6)", // Transparent white background
     height: 500,
     width: 300,
     borderRadius: 10,

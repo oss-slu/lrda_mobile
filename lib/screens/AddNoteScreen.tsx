@@ -92,11 +92,20 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
         },
       ];
 
-  useEffect(() => {
-    if (editor) {
-      editor.injectCSS(customImageCSS);
-    }
-  }, [editor]);
+      useEffect(() => {
+        if (editor) {
+          // Combine custom image CSS and dark mode CSS
+          const combinedCSS = `
+            ${customImageCSS}
+            body {
+              color: ${theme.text}; /* Text color for dark mode */
+            }
+          `;
+          editor.injectCSS(combinedCSS); // Inject both styles at once
+        }
+      }, [editor, theme.text]);
+      
+  
 
   const setLocationToZero = () => {
     setLocation({ latitude: 0, longitude: 0 });
@@ -135,6 +144,11 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
     } else {
       setLocationToZero();
     }
+  };
+
+  const getIconStyle = (isDarkMode: boolean, isError: boolean) => {
+    if (isError) return "red";
+    return isDarkMode ? "white" : "black";
   };
 
   // Automatically check location on component mount
@@ -292,9 +306,13 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
                 <TouchableOpacity onPress={() => setViewAudio(!viewAudio)}>
                   <Ionicons name="mic-outline" size={30} color={NotePageStyles().saveText.color} />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={toggleLocation}testID="checklocationpermission">
-                <Ionicons name="location-outline" size={30} color={locationButtonColor} />
-              </TouchableOpacity>
+                <TouchableOpacity onPress={toggleLocation} testID="checklocationpermission">
+  <Ionicons
+    name="location-outline"
+    size={30}
+    color={location?.latitude === 0 && location?.longitude === 0 ? "red" : theme.text}
+  />
+</TouchableOpacity>
                 <TouchableOpacity onPress={() => setIsTagging(!isTagging)}>
                   <Ionicons name="pricetag-outline" size={30} color={NotePageStyles().saveText.color} />
                 </TouchableOpacity>
@@ -320,14 +338,19 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
               {isTime && <TimeWindow time={time} setTime={setTime} />}
             </View>
             <View style={NotePageStyles().richTextContainer}testID="TenTapEditor">
-              <RichText
-                editor={editor}
-                placeholder="Write Content Here..."
-                style={[
-                  NotePageStyles().editor,
-                  { backgroundColor: Platform.OS === "android" ? "white" : undefined },
-                ]}
-              />
+             <RichText
+  editor={editor}
+  placeholder="Write Content Here..."
+  style={[
+    NotePageStyles().editor,
+    {
+      backgroundColor: Platform.OS === "android" ? "white" : undefined,
+    },
+  ]}
+  textStyle={{
+    color: theme.text, // Add text-specific styles here
+  }}
+/>
             </View>
             <View style={NotePageStyles().toolbar}testID="RichEditor">
             <Toolbar

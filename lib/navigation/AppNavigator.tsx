@@ -21,6 +21,7 @@ import ToastMessage from 'react-native-toast-message';
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../redux/store/store";
 import { setNavState } from "../../redux/slice/navigationSlice";
+import ForgotPassword from "../screens/loginScreens/ForgotPassword";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -53,6 +54,8 @@ const HomeStack = () => {
         component={VideoPlayerScreen}
         options={{ headerShown: false, gestureEnabled: true }}
       />
+     
+
     </Stack.Navigator>
   );
 };
@@ -93,12 +96,19 @@ const AppNavigator: React.FC = () => {
           <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
           <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
           <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="ForgotPassword" component={ForgotPassword} options={{ headerShown: false }}
+/>
         </Stack.Navigator>
       )}
       {navState === "login" && (
         <Stack.Navigator initialRouteName="Login">
           <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
           <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
+          <Stack.Screen
+  name="ForgotPassword"
+  component={ForgotPassword}
+  options={{ headerShown: false }}
+/>
         </Stack.Navigator>
       )}
       {navState === "home" && (

@@ -150,6 +150,12 @@ const RegistrationScreen: React.FC<RegisterProps> = ({ navigation }) => {
               Register
             </Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={{ marginTop: 20 }}
+            onPress={() => navigation.navigate("Login")}
+          >
+            <Text style={styles.backToLoginText}>Back to Login</Text>
+          </TouchableOpacity>
         </View>
       </ImageBackground>
     </KeyboardAwareScrollView>
@@ -160,7 +166,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    alignItems: 'stretch',
+    alignItems: "stretch",
   },
   logo: {
     fontWeight: "bold",
@@ -191,6 +197,7 @@ const styles = StyleSheet.create({
     flex: 1,
     resizeMode: "cover",
     justifyContent: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.3)", // Faded background overlay
   },
   buttons: {
     backgroundColor: "rgb(17,47,187)",
@@ -205,20 +212,28 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 3,
   },
+  backToLoginText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "rgb(17,47,187)",
+  },
   loginBox: {
     alignSelf: "center",
     alignContent: "center",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "white",
-    height: 500,
-    width: 300,
+    backgroundColor: "rgba(255, 255, 255, 0.5)", // Transparent white background
+    height: 600, // Adjust height slightly to accommodate extra padding
+    width: 320, // Slightly wider for balance
     borderRadius: 10,
     elevation: 10,
     shadowColor: "#000",
-    shadowOpacity: 0.4,
+    shadowOpacity: 0.6,
     shadowRadius: 10,
+    paddingTop: 30, // Increased padding for top
+    paddingBottom: 30, // Increased padding for bottom
   },
 });
+
 
 export default RegistrationScreen;

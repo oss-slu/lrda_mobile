@@ -8,6 +8,7 @@ export default {
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
+    newArchEnabled: true, // Enable New Architecture for iOS
     splash: {
       image: "./assets/splash.png",
       resizeMode: "cover",
@@ -20,7 +21,8 @@ export default {
       config: {
         googleMapsApiKey: process.env.MAP_API_KEY
       },
-      buildNumber: "3",
+      buildNumber: "4",
+      newArchEnabled: true, // Enable New Architecture for iOS
       infoPlist: {
         NSAppTransportSecurity: {
           NSAllowsArbitraryLoads: true,
@@ -45,7 +47,8 @@ export default {
         }
       },
       package: "register.edu.slu.cs.oss.lrda",
-      versionCode: 1
+      versionCode: 1,
+      newArchEnabled: true // Enable New Architecture for Android
     },
     web: {
       favicon: "./assets/favicon.png"
