@@ -21,7 +21,7 @@ export default {
       config: {
         googleMapsApiKey: process.env.MAP_API_KEY
       },
-      buildNumber: "4",
+      buildNumber: "5",
       newArchEnabled: true, // Enable New Architecture for iOS
       infoPlist: {
         NSAppTransportSecurity: {
@@ -33,9 +33,13 @@ export default {
               NSIncludesSubdomains: true,
             }
           }
-        }
+        },
+        // Add these location permission descriptions
+        NSLocationWhenInUseUsageDescription: "This app requires location access to provide location-based services.",
+        NSLocationAlwaysUsageDescription: "This app needs location access to provide enhanced functionality."
       }
     },
+    
     android: {
       adaptiveIcon: {
         foregroundImage: "./assets/adaptive-icon.png",
