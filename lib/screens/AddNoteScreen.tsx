@@ -41,7 +41,7 @@ const user = User.getInstance();
 const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, route }) => {
   const [titleText, setTitleText] = useState<string>("");
   const [isSaveButtonEnabled, setIsSaveButtonEnabled] = useState<boolean>(true);
-  const [bodyText, setBodyText] = useState<string>("");
+  const [bodyText, setBodyText] = useState<string>("<p></p>");
   const [newMedia, setNewMedia] = useState<Media[]>([]);
   const [newAudio, setNewAudio] = useState<AudioType[]>([]);
   const [tags, setTags] = useState<string[]>([]);
@@ -58,15 +58,36 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
   const [isVideoModalVisible, setIsVideoModalVisible] = useState<boolean>(false);
   const [videoUri, setVideoUri] = useState<string | null>(null);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [isEditorReady, setIsEditorReady] = useState(false); // Track readiness
+  const [editorKey, setEditorKey] = useState<number>(0); // Forcing re-render if necessary
 
   const editor = useEditorBridge({
-    initialContent: bodyText || "",
-    avoidIosKeyboard: true,
-  });
+  initialContent: bodyText,// Fallback content to ensure editor initializes
+  avoidIosKeyboard: true,
+});
+
   
   const { theme } = useTheme();
   const titleTextRef = useRef<TextInput>(null);
   const scrollViewRef = useRef<KeyboardAwareScrollView>(null);
+
+
+  useEffect(() => {
+    if (editor) {
+      // Combine custom image CSS and dark mode CSS
+      const combinedCSS = `
+        ${customImageCSS}
+        body {
+          color: ${theme.text}; /* Text color for dark mode */
+        }
+      `;
+      editor.injectCSS(combinedCSS); // Inject both styles at once
+    }
+  }, [editor, theme.text]);
+  
+  
+  
+
 
   useEffect(()=>{
         // Listen for keyboard events to show/hide toolbar
@@ -91,19 +112,6 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
           id: 'closeKeyboard', // Unique ID for this toolbar item
         },
       ];
-
-      useEffect(() => {
-        if (editor) {
-          // Combine custom image CSS and dark mode CSS
-          const combinedCSS = `
-            ${customImageCSS}
-            body {
-              color: ${theme.text}; /* Text color for dark mode */
-            }
-          `;
-          editor.injectCSS(combinedCSS); // Inject both styles at once
-        }
-      }, [editor, theme.text]);
       
   
 
@@ -422,3 +430,5 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
 });
+
+

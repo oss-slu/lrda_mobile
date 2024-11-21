@@ -7,7 +7,7 @@
   resolved "https://registry.yarnpkg.com/@0no-co/graphql.web/-/graphql.web-1.0.11.tgz#035cbc6523af43358b81993f10b13e8d7a79c816"
   integrity sha512-xuSJ9WXwTmtngWkbdEoopMo6F8NLtjy84UNAMsAr5C3/2SgAL/dEU10TMqTIsipqPQ8HA/7WzeqQ9DEQxSvPPA==
 
-"@10play/tentap-editor@^0.5.21":
+"@10play/tentap-editor@^0.5.23":
   version "0.5.23"
   resolved "https://registry.yarnpkg.com/@10play/tentap-editor/-/tentap-editor-0.5.23.tgz#8e22ff81361e7fed222b4ce72510f9e1e3d834da"
   integrity sha512-D0PCvSt4379aPwfxQVjI5QiqRu3xnFJqqMM2LOaVI/HksbQUB6f8BELah0dYH57HJYtr5jqSMc2XwXp8WV5Omw==
@@ -3496,9 +3496,9 @@ camelize@^1.0.0:
   integrity sha512-dU+Tx2fsypxTgtLoE36npi3UqcjSSMNYfkqgmoEhtZrraP5VWq0K7FkWVTYa8eMPtnU/G2txVsfdCJTn9uzpuQ==
 
 caniuse-lite@^1.0.30001669:
-  version "1.0.30001680"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001680.tgz#5380ede637a33b9f9f1fc6045ea99bd142f3da5e"
-  integrity sha512-rPQy70G6AGUMnbwS1z6Xg+RkHYPAi18ihs47GH0jcxIG7wArmPgY3XbS2sRdBbxJljp3thdT8BIqv9ccCypiPA==
+  version "1.0.30001682"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001682.tgz#e44dab724829893a4e4fe679ed077eb4cdc34039"
+  integrity sha512-rJFwz3yRO6NU6Y8aEJKPzS4fngOE8j05pd33FW5Uk9v9b5StWNhGFeVpogwS2FFl78wNDGW5NsVvlwySPEDU5w==
 
 chalk@^2.0.1, chalk@^2.4.2:
   version "2.4.2"
@@ -4867,7 +4867,7 @@ expo-video@^2.0.1:
   resolved "https://registry.yarnpkg.com/expo-video/-/expo-video-2.0.1.tgz#0e15f14d36acaf4f52d1a64b6223e2bd22a0b073"
   integrity sha512-daPPGT1mfUjcVNjI5xQIskNS0hYlfoy0rierLnJWePYfDxNozrFbFyD0SvwjQN6QoQ9dSytIMSBWJTAHfuvMWg==
 
-expo@~52.0.8:
+expo@^52.0.9:
   version "52.0.9"
   resolved "https://registry.yarnpkg.com/expo/-/expo-52.0.9.tgz#e33dd6fd2fc50325747cb1df5fddad1e61e04cb0"
   integrity sha512-xbgsvshsJ99wEHp8IZLp4C4SIYVnafrlmQjTwyGjHKvZhBXLHRp7+fwx+Fa26iqQEbaPZ3XkSGxKR73cttR4ug==
@@ -8292,10 +8292,10 @@ react-native-video@^6.2.0:
   resolved "https://registry.yarnpkg.com/react-native-video/-/react-native-video-6.8.0.tgz#59153558ae014bd3e555f9fc184e1dde16917b60"
   integrity sha512-4Q4ccIXcPWG4Xm239DyLfTOTP01DYzrlXV4dBkuygINsrGTqua5E4jedkDRjj/KOOjIqDjO1elstZq2sfS2lOg==
 
-react-native-webview@13.12.4:
-  version "13.12.4"
-  resolved "https://registry.yarnpkg.com/react-native-webview/-/react-native-webview-13.12.4.tgz#1a563a7fbd6bf53d688388d46708f273ed0ebb94"
-  integrity sha512-8lWeYPVWeOj0ya9ZpDesOQPRgczuN3ogQHlhS21sNXndd4kvfPG+WjlRdrvxYgj//udpwmzcWzagwLnEp60Aqg==
+react-native-webview@13.12.2:
+  version "13.12.2"
+  resolved "https://registry.yarnpkg.com/react-native-webview/-/react-native-webview-13.12.2.tgz#b379b28c725632efabb42a2cf8387bd03cf34f33"
+  integrity sha512-OpRcEhf1IEushREax6rrKTeqGrHZ9OmryhZLBLQQU4PwjqVsq55iC8OdYSD61/F628f9rURn9THyxEZjrknpQQ==
   dependencies:
     escape-string-regexp "^4.0.0"
     invariant "2.2.4"

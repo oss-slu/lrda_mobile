@@ -150,13 +150,11 @@ const RegistrationScreen: React.FC<RegisterProps> = ({ navigation }) => {
               Register
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={{ marginTop: 20 }}
-            onPress={() => navigation.navigate("Login")}
-          >
-            <Text style={styles.backToLoginText}>Back to Login</Text>
-          </TouchableOpacity>
-        </View>
+          <View style={styles.signInStatement}>
+              <Text style={styles.signInQuery}>Already have an account?</Text>
+              <TouchableOpacity onPress={() => navigation.navigate("Login")}><Text style={styles.signIn}>Sign In</Text></TouchableOpacity>
+            </View>
+          </View>
       </ImageBackground>
     </KeyboardAwareScrollView>
   );
@@ -233,6 +231,25 @@ const styles = StyleSheet.create({
     paddingTop: 30, // Increased padding for top
     paddingBottom: 30, // Increased padding for bottom
   },
+  signInStatement: {
+    position: "absolute",
+    top: 570,
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: 'center',
+    alignItems: 'center'
+   
+},
+signInQuery: {
+  color: "black",
+  fontWeight: "600",
+},
+signIn:{
+  color: "blue",
+  fontWeight: "500",
+  marginTop: 0,
+
+}
 });
 
 

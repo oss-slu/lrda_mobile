@@ -478,7 +478,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     <Ionicons
       name={isSearchVisible ? "close-outline" : "search-outline"}
       size={28}
-      color={theme.text}
+      color={'black'}
       style={{ padding: 10 }}
     />
   </TouchableOpacity>

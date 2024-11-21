@@ -4,7 +4,7 @@ export default {
   expo: {
     name: "Where's Religion?",
     slug: "lrda_mobile",
-    version: "1.0.2",
+    version: "1.0.6",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -21,7 +21,7 @@ export default {
       config: {
         googleMapsApiKey: process.env.MAP_API_KEY
       },
-      buildNumber: "5",
+      buildNumber: "19",
       newArchEnabled: true, // Enable New Architecture for iOS
       infoPlist: {
         NSAppTransportSecurity: {
@@ -51,7 +51,7 @@ export default {
         }
       },
       package: "register.edu.slu.cs.oss.lrda",
-      versionCode: 1,
+      versionCode: 23,
       newArchEnabled: true // Enable New Architecture for Android
     },
     web: {
