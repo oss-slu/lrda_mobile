@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, startTransition } from "react";
 import {
   Platform,
   View,
@@ -30,7 +30,7 @@ import Tooltip from 'react-native-walkthrough-tooltip';
 import { Button } from "react-native-paper";
 const user = User.getInstance();
 
-const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
+const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route }) => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
   const [updateCounter, setUpdateCounter] = useState(0);
@@ -591,18 +591,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     }
   };
 
-  
-  const checkOnboarding = async () => {
-      const user = await User.getInstance();
-      const userData = await user.loadUser();
-      //setHasOnboarded(onboarded);
-      console.log("user onboarding:", JSON.stringify(userData, null, 2));
+  const [tutorialDone, setTutorialDone] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const initialize = async () => {
+      const tutorialStatus = await User.getHasDoneTutorial("home_screen");
+      console.log("TUTORIAL STATUS: ", tutorialStatus);
+      setTutorialDone( tutorialStatus );
     };
 
-    checkOnboarding();
-
-
-
+    initialize();
+  }, []);
 
     return (
       <View style={styles.container}>
@@ -632,7 +631,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     
             <View>
             <Tooltip
-              isVisible={tooltipVisible}
+              isVisible={tooltipVisible && !tutorialDone}
               content={
                 <View>
                   <Text style = {styles.buttonText}>Search Entries Here!</Text>
@@ -674,7 +673,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     
         <View style={styles.dropdown}>
         <Tooltip
-          isVisible={dropDownTip}
+          isVisible={dropDownTip && !tutorialDone}
           content={
             <View>
               <Text style = {styles.buttonText}>Switch between private and published entries here!</Text>
@@ -757,7 +756,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                 }}
               >
          <Tooltip
-              isVisible={addNoteTooltipVisible}
+              isVisible={addNoteTooltipVisible && !tutorialDone}
               content={
                 <View>
                   <Text style = {styles.buttonText}>You can add a new note here</Text>
@@ -766,6 +765,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                     onPress={() => {
                       setAddNoteTooltipVisible(false);
                       setDropDownTip(true);
+                      User.setUserTutorialDone("home_screen", true);
                     }}
                   >
                     <Text style={styles.gotItButtonText}>Got it!</Text>
@@ -793,5 +793,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     );
     
 };
+
+  
+
 
 export default HomeScreen;
