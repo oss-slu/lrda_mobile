@@ -21,6 +21,7 @@ import ToastMessage from 'react-native-toast-message';
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../redux/store/store";
 import { setNavState } from "../../redux/slice/navigationSlice";
+import TeamPage from "../screens/TeamPage";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -51,6 +52,16 @@ const HomeStack = () => {
       <Stack.Screen
         name="VideoPlayer" // Add the VideoPlayer route here
         component={VideoPlayerScreen}
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
+      name="MeetOurTeam"
+      component={TeamPage}
+      options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
+        name="More"
+        component={MorePage}
         options={{ headerShown: false, gestureEnabled: true }}
       />
     </Stack.Navigator>
