@@ -17,6 +17,16 @@
         "buildType": "app-bundle"
       },
       "env": {
+        "MAP_API_KEY":"AIzaSyAdPkGTowU6RANDTH2u1z1Zc2w1xrhmKgI",
+"FIREBASE_API_KEY":"AIzaSyDqGKjTtoroaTSBoR2H6w3ZJ14nI5NuBWs",
+"AUTH_DOMAIN":"lrda-75cf4.firebaseapp.com",
+"PROJECT_ID":"lrda-75cf4",
+"STORAGE_BUCKET":"lrda-75cf4.appspot.com",
+"MESSAGING_SENDER_ID":"840259501846",
+"APP_ID":"1:840259501846:web:7bda1da9535d6f746a1a37",
+"API_BASE_URL": "https://lived-religion-dev.rerum.io/deer-lr/",
+"MEASUREMENT_ID": "G-Z4NM1MFGPS",
+"S3_PROXY_PREFIX" : "http://s3-proxy.rerum.io/S3/",
       },
       "channel": "production"
     }

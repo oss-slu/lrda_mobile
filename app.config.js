@@ -21,7 +21,7 @@ export default {
       config: {
         googleMapsApiKey: process.env.MAP_API_KEY
       },
-      buildNumber: "19",
+      buildNumber: "21",
       newArchEnabled: true, // Enable New Architecture for iOS
       infoPlist: {
         NSAppTransportSecurity: {
@@ -34,9 +34,13 @@ export default {
             }
           }
         },
-        // Add these location permission descriptions
-        NSLocationWhenInUseUsageDescription: "This app requires location access to provide location-based services.",
-        NSLocationAlwaysUsageDescription: "This app needs location access to provide enhanced functionality."
+        // Add these permission descriptions
+        NSLocationWhenInUseUsageDescription: "Allowing location services enables you to see nearby notes and/or share the location of your notes with other app users.",
+        NSLocationAlwaysUsageDescription: "Allowing location services enables you to see nearby notes and/or share the location of your notes with other app users.",
+        NSCameraUsageDescription: "Allowing camera access enables you to upload and/or share your photos or videos with other app users. ",
+        NSMicrophoneUsageDescription: "Allowing microphone access enables you to take, upload, and/or share audio recordings with other app users.",
+        NSPhotoLibraryUsageDescription: "Allowing access to photo library enables you to select, upload, and/or share your chosen photos or videos with other app users. ",
+        NSPhotoLibraryAddUsageDescription: "Allowing access to photo library enables you to select, upload, and/or share your chosen photos or videos with other app users. ",
       }
     },
     
