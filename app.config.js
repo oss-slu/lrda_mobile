@@ -4,10 +4,11 @@ export default {
   expo: {
     name: "Where's Religion?",
     slug: "lrda_mobile",
-    version: "1.0.2",
+    version: "1.0.6",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
+    newArchEnabled: true, // Enable New Architecture for iOS
     splash: {
       image: "./assets/splash.png",
       resizeMode: "cover",
@@ -20,7 +21,8 @@ export default {
       config: {
         googleMapsApiKey: process.env.MAP_API_KEY
       },
-      buildNumber: "3",
+      buildNumber: "21",
+      newArchEnabled: true, // Enable New Architecture for iOS
       infoPlist: {
         NSAppTransportSecurity: {
           NSAllowsArbitraryLoads: true,
@@ -31,9 +33,17 @@ export default {
               NSIncludesSubdomains: true,
             }
           }
-        }
+        },
+        // Add these permission descriptions
+        NSLocationWhenInUseUsageDescription: "Allowing location services enables you to see nearby notes and/or share the location of your notes with other app users.",
+        NSLocationAlwaysUsageDescription: "Allowing location services enables you to see nearby notes and/or share the location of your notes with other app users.",
+        NSCameraUsageDescription: "Allowing camera access enables you to upload and/or share your photos or videos with other app users. ",
+        NSMicrophoneUsageDescription: "Allowing microphone access enables you to take, upload, and/or share audio recordings with other app users.",
+        NSPhotoLibraryUsageDescription: "Allowing access to photo library enables you to select, upload, and/or share your chosen photos or videos with other app users. ",
+        NSPhotoLibraryAddUsageDescription: "Allowing access to photo library enables you to select, upload, and/or share your chosen photos or videos with other app users. ",
       }
     },
+    
     android: {
       adaptiveIcon: {
         foregroundImage: "./assets/adaptive-icon.png",
@@ -45,7 +55,8 @@ export default {
         }
       },
       package: "register.edu.slu.cs.oss.lrda",
-      versionCode: 1
+      versionCode: 23,
+      newArchEnabled: true // Enable New Architecture for Android
     },
     web: {
       favicon: "./assets/favicon.png"

@@ -41,7 +41,7 @@ const user = User.getInstance();
 const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, route }) => {
   const [titleText, setTitleText] = useState<string>("");
   const [isSaveButtonEnabled, setIsSaveButtonEnabled] = useState<boolean>(true);
-  const [bodyText, setBodyText] = useState<string>("");
+  const [bodyText, setBodyText] = useState<string>("<p></p>");
   const [newMedia, setNewMedia] = useState<Media[]>([]);
   const [newAudio, setNewAudio] = useState<AudioType[]>([]);
   const [tags, setTags] = useState<string[]>([]);
@@ -58,15 +58,36 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
   const [isVideoModalVisible, setIsVideoModalVisible] = useState<boolean>(false);
   const [videoUri, setVideoUri] = useState<string | null>(null);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [isEditorReady, setIsEditorReady] = useState(false); // Track readiness
+  const [editorKey, setEditorKey] = useState<number>(0); // Forcing re-render if necessary
 
   const editor = useEditorBridge({
-    initialContent: bodyText || "",
-    avoidIosKeyboard: true,
-  });
+  initialContent: bodyText,// Fallback content to ensure editor initializes
+  avoidIosKeyboard: true,
+});
+
   
   const { theme } = useTheme();
   const titleTextRef = useRef<TextInput>(null);
   const scrollViewRef = useRef<KeyboardAwareScrollView>(null);
+
+
+  useEffect(() => {
+    if (editor) {
+      // Combine custom image CSS and dark mode CSS
+      const combinedCSS = `
+        ${customImageCSS}
+        body {
+          color: ${theme.text}; /* Text color for dark mode */
+        }
+      `;
+      editor.injectCSS(combinedCSS); // Inject both styles at once
+    }
+  }, [editor, theme.text]);
+  
+  
+  
+
 
   useEffect(()=>{
         // Listen for keyboard events to show/hide toolbar
@@ -91,12 +112,8 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
           id: 'closeKeyboard', // Unique ID for this toolbar item
         },
       ];
-
-  useEffect(() => {
-    if (editor) {
-      editor.injectCSS(customImageCSS);
-    }
-  }, [editor]);
+      
+  
 
   const setLocationToZero = () => {
     setLocation({ latitude: 0, longitude: 0 });
@@ -135,6 +152,11 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
     } else {
       setLocationToZero();
     }
+  };
+
+  const getIconStyle = (isDarkMode: boolean, isError: boolean) => {
+    if (isError) return "red";
+    return isDarkMode ? "white" : "black";
   };
 
   // Automatically check location on component mount
@@ -292,9 +314,13 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
                 <TouchableOpacity onPress={() => setViewAudio(!viewAudio)}>
                   <Ionicons name="mic-outline" size={30} color={NotePageStyles().saveText.color} />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={toggleLocation}testID="checklocationpermission">
-                <Ionicons name="location-outline" size={30} color={locationButtonColor} />
-              </TouchableOpacity>
+                <TouchableOpacity onPress={toggleLocation} testID="checklocationpermission">
+  <Ionicons
+    name="location-outline"
+    size={30}
+    color={location?.latitude === 0 && location?.longitude === 0 ? "red" : theme.text}
+  />
+</TouchableOpacity>
                 <TouchableOpacity onPress={() => setIsTagging(!isTagging)}>
                   <Ionicons name="pricetag-outline" size={30} color={NotePageStyles().saveText.color} />
                 </TouchableOpacity>
@@ -320,14 +346,19 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
               {isTime && <TimeWindow time={time} setTime={setTime} />}
             </View>
             <View style={NotePageStyles().richTextContainer}testID="TenTapEditor">
-              <RichText
-                editor={editor}
-                placeholder="Write Content Here..."
-                style={[
-                  NotePageStyles().editor,
-                  { backgroundColor: Platform.OS === "android" ? "white" : undefined },
-                ]}
-              />
+             <RichText
+  editor={editor}
+  placeholder="Write Content Here..."
+  style={[
+    NotePageStyles().editor,
+    {
+      backgroundColor: Platform.OS === "android" ? "white" : undefined,
+    },
+  ]}
+  textStyle={{
+    color: theme.text, // Add text-specific styles here
+  }}
+/>
             </View>
             <View style={NotePageStyles().toolbar}testID="RichEditor">
             <Toolbar
@@ -399,3 +430,5 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
 });
+
+

@@ -12,6 +12,7 @@ export const customImageCSS = `
     object-fit: cover !important;
     display: inline-block; /* Ensure images don't expand to fit container width */
   }
+     true; // Ensure valid JavaScript return value
 `;
 
 
