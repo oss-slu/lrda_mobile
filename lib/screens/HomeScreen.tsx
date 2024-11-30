@@ -596,7 +596,6 @@ const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route }) => {
   useEffect(() => {
     const initialize = async () => {
       const tutorialStatus = await User.getHasDoneTutorial("home_screen");
-      console.log("TUTORIAL STATUS: ", tutorialStatus);
       setTutorialDone( tutorialStatus );
     };
 
@@ -630,8 +629,9 @@ const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route }) => {
             <Image source={require('../../assets/icon.png')} style={{width: width * 0.105, height: width * 0.105, marginEnd: width * 0.025}} />
     
             <View>
+              
             <Tooltip
-              isVisible={tooltipVisible && !tutorialDone}
+              isVisible={tooltipVisible}
               content={
                 <View>
                   <Text style = {styles.buttonText}>Search Entries Here!</Text>
@@ -639,7 +639,7 @@ const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route }) => {
                     style={styles.gotItButton}
                     onPress={() => {
                       setTooltipVisible(false);
-                      setAddNoteTooltipVisible(true);
+                      setTimeout(() => setAddNoteTooltipVisible(true), 100); // Add a delay
                     }}
                   >
                     <Text style={styles.gotItButtonText}>Got it!</Text>
@@ -673,13 +673,17 @@ const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route }) => {
     
         <View style={styles.dropdown}>
         <Tooltip
-          isVisible={dropDownTip && !tutorialDone}
+          isVisible={dropDownTip}
           content={
             <View>
               <Text style = {styles.buttonText}>Switch between private and published entries here!</Text>
               <Button
                     style={styles.gotItButton}
-                    onPress={() => setDropDownTip(false)}
+                    onPress={() => {
+                      setDropDownTip(false)
+                      User.setUserTutorialDone("home_screen", true);
+                    }}
+                    
                   >
                     <Text style={styles.gotItButtonText}>Got it!</Text>
                   </Button>
@@ -689,6 +693,7 @@ const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route }) => {
           arrowSize={{ width: 10, height: 10 }} // Adjust arrow size for better alignment
           onClose={() => setDropDownTip(false)}
           showChildInTooltip={false}>
+            
           <DropDownPicker
             open={open}
             value={value}
@@ -756,7 +761,7 @@ const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route }) => {
                 }}
               >
          <Tooltip
-              isVisible={addNoteTooltipVisible && !tutorialDone}
+              isVisible={addNoteTooltipVisible}
               content={
                 <View>
                   <Text style = {styles.buttonText}>You can add a new note here</Text>
@@ -764,8 +769,7 @@ const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route }) => {
                     style={styles.gotItButton}
                     onPress={() => {
                       setAddNoteTooltipVisible(false);
-                      setDropDownTip(true);
-                      User.setUserTutorialDone("home_screen", true);
+                      setTimeout(() => setDropDownTip(true), 100);
                     }}
                   >
                     <Text style={styles.gotItButtonText}>Got it!</Text>
