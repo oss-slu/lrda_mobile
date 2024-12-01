@@ -53,10 +53,11 @@ const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route }) => {
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { theme } = useTheme();
-  const [hasOnboarded, setHasOnboarded] = useState(false);
   const [tooltipVisible, setTooltipVisible] = useState(true);
   const [addNoteTooltipVisible, setAddNoteTooltipVisible] = useState(false);
   const [dropDownTip, setDropDownTip] = useState(false);
+  const [accountTip, setAccountTip] = useState(false);
+
 
   let textLength = 18;
 
@@ -615,6 +616,25 @@ const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route }) => {
               paddingTop: 10,
             }}
           >
+                <Tooltip
+             isVisible={accountTip}
+             content={
+               <View>
+                 <Text style = {styles.buttonText}>See Account Here</Text>
+                 <Button
+                   style={styles.gotItButton}
+                   onPress={() => {
+                    setAccountTip(false);
+                    User.setUserTutorialDone("home_screen", true);
+                   }}
+                 >
+                   <Text style={styles.gotItButtonText}>Got it!</Text>
+                 </Button>
+               </View>
+             }
+             placement="right"
+          
+           >
             <TouchableOpacity
               style={[
                 styles.userPhoto,
@@ -626,10 +646,11 @@ const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route }) => {
             >
               <Text style={styles.pfpText}>{userInitials}</Text>
             </TouchableOpacity>
+           </Tooltip>
+        
             <Image source={require('../../assets/icon.png')} style={{width: width * 0.105, height: width * 0.105, marginEnd: width * 0.025}} />
-    
+           
             <View>
-              
             <Tooltip
               isVisible={tooltipVisible}
               content={
@@ -681,7 +702,7 @@ const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route }) => {
                     style={styles.gotItButton}
                     onPress={() => {
                       setDropDownTip(false)
-                      User.setUserTutorialDone("home_screen", true);
+                      setTimeout(() => (setAccountTip(true),100));
                     }}
                     
                   >
