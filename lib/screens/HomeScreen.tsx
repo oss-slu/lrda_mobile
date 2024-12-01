@@ -781,7 +781,7 @@ const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route }) => {
    
               showChildInTooltip={false}
             >
-              <Ionicons name="add-outline" size={32} color={theme.primaryColor} />
+              <Ionicons  name="add-outline" size={32} color={theme.primaryColor}   testID="addButtonIcon" />
             </Tooltip>
               </TouchableOpacity>
           
