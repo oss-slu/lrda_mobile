@@ -67,32 +67,59 @@ export default function TeamPage({ navigation }) {
 
   const renderItem = ({ item }) => (
     <View style={styles.teamMember}>
-      <Image source={item.image} style={styles.teamImage} />
+      <Image
+        source={item.image}
+        style={styles.teamImage}
+        accessible
+        accessibilityLabel={`${item.name}, ${item.role}`}
+      />
       <Text style={[styles.memberName, { color: theme.text || "#ffffff" }]}>
         {item.name}
       </Text>
-      <Text style={[styles.memberRole, { color: theme.secondaryText || "#aaaaaa" }]}>
+      <Text
+        style={[
+          styles.memberRole,
+          { color: theme.secondaryText || "#aaaaaa" },
+        ]}
+      >
         {item.role}
       </Text>
     </View>
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.background }]}
+    >
       {/* Header */}
       <View style={[styles.header, { backgroundColor: theme.background }]}>
-        <TouchableOpacity onPress={() => navigation.navigate("More")}>
-          <Ionicons name="arrow-back" size={24} color={theme.text || "#ffffff"} />
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          accessible
+          accessibilityLabel="Go back"
+        >
+          <Ionicons
+            name="arrow-back"
+            size={24}
+            color={theme.text || "#ffffff"}
+          />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: theme.text || "#ffffff" }]}>Team</Text>
+        <Text style={[styles.headerTitle, { color: theme.text || "#ffffff" }]}>
+          Team
+        </Text>
       </View>
 
       {/* About Our Team */}
       <View style={styles.titleContainer}>
         <Text style={[styles.title, { color: theme.text || "#ffffff" }]}>
-          About our Team
+          About Our Team
         </Text>
-        <Text style={[styles.subtitle, { color: theme.secondaryText || "#aaaaaa" }]}>
+        <Text
+          style={[
+            styles.subtitle,
+            { color: theme.secondaryText || "#aaaaaa" },
+          ]}
+        >
           The Development Team
         </Text>
       </View>
@@ -104,6 +131,8 @@ export default function TeamPage({ navigation }) {
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
         contentContainerStyle={styles.teamContainer}
+        columnWrapperStyle={styles.teamRow}
+        showsVerticalScrollIndicator={false}
       />
     </SafeAreaView>
   );
@@ -139,13 +168,16 @@ const styles = StyleSheet.create({
   },
   teamContainer: {
     paddingHorizontal: 16,
-    justifyContent: "center",
+    paddingBottom: 20,
+  },
+  teamRow: {
+    justifyContent: "space-between",
+    marginBottom: 20,
   },
   teamMember: {
     alignItems: "center",
-    marginHorizontal: 8,
-    marginBottom: 20,
     flex: 1,
+    marginHorizontal: 8,
   },
   teamImage: {
     width: 80,

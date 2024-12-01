@@ -16,6 +16,7 @@ import { useDispatch } from "react-redux";
 import { User } from "../models/user_class";
 import { useNavigation } from "@react-navigation/native";
 import Carousel from "react-native-reanimated-carousel";
+import ThemeToggle from "../components/ThemeToggle"; 
 
 const { width } = Dimensions.get("window");
 const data = [
@@ -70,13 +71,8 @@ export default function MorePage() {
           </View>
           <Text style={[styles.username, { color: isDarkmode ? "#fff" : theme.text }]}>More</Text>
         </View>
-        <Switch
-          value={isDarkmode}
-          onValueChange={handleToggleDarkMode}
-          thumbColor={isDarkmode ? "#fff" : "#ccc"}
-          trackColor={{ false: "#767577", true: "#81b0ff" }}
-        />
-      </View>
+        <ThemeToggle isDarkmode={isDarkmode} toggleDarkmode={toggleDarkmode} />
+        </View>
 
       {/* Carousel */}
       <View style={styles.carouselContainer}>
@@ -98,7 +94,7 @@ export default function MorePage() {
       <ScrollView contentContainerStyle={styles.menuContainer}>
         <MenuItem title="About" iconName="information-circle-outline" />
         <MenuItem title="Resource" iconName="link-outline" />
-        <MenuItem title="Meet our team" iconName="people-outline" onPress={() => navigation.navigate("MeetOurTeam")}/>
+        <MenuItem title="Meet our team" iconName="people-outline" onPress={() => navigation.navigate("TeamPage")}/>
         <MenuItem title="Settings" iconName="settings-outline" />
         <MenuItem title="FAQ" iconName="help-circle-outline" />
         <MenuItem title="Logout" iconName="exit-outline" onPress={onLogoutPress} />
@@ -161,4 +157,5 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "black", // Black text for contrast
   },
+  
 });
