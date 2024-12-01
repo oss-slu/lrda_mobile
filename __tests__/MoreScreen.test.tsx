@@ -34,6 +34,13 @@ jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
   })),
 }));
 
+//mock carousel
+jest.mock('react-native-reanimated-carousel', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  return (props) => <View>{props.children}</View>;
+});
+
 const mockStore = configureStore([]);
 const store = mockStore({
   navigation: {

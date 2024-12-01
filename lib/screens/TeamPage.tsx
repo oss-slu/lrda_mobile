@@ -42,6 +42,24 @@ const teamMembers = [
     role: "Developer",
     image: require("../../assets/Stuart.jpg"),
   },
+  {
+    id: 6,
+    name: "Amar Hadzic",
+    role: "Developer",
+    image: require("../../assets/stock_person.jpg"),
+  },
+  {
+    id: 7,
+    name: "Adem Durakovic",
+    role: "Developer",
+    image: require("../../assets/stock_person.jpg"),
+  },
+  {
+    id: 8,
+    name: "Nikhil Muthukumar",
+    role: "Developer",
+    image: require("../../assets/stock_person.jpg"),
+  },
 ];
 
 export default function TeamPage({ navigation }) {

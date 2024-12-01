@@ -15,8 +15,20 @@ import { useTheme } from "../components/ThemeProvider";
 import { useDispatch } from "react-redux";
 import { User } from "../models/user_class";
 import { useNavigation } from "@react-navigation/native";
+import Carousel from "react-native-reanimated-carousel";
 
 const { width } = Dimensions.get("window");
+const data = [
+  {source: require("../../assets/Pond_395.jpg")},
+  {source: require("../../assets/Pond_048.jpg")},
+  {source: require("../../assets/Pond_049.jpg")},
+  {source: require("../../assets/Pond_062.jpg")},
+  {source: require("../../assets/Pond_221.jpg")},
+  {source: require("../../assets/Pond_290.jpg")},
+  {source: require("../../assets/Pond_021.jpg")},
+  {source: require("../../assets/Pond_883.jpg")},
+];
+
 
 export default function MorePage() {
   const { theme, isDarkmode, toggleDarkmode } = useTheme();
@@ -66,11 +78,21 @@ export default function MorePage() {
         />
       </View>
 
-      {/* Banner Image */}
-      <Image
-        source={{ uri: "https://via.placeholder.com/300x150" }} // Replace with actual image URL
-        style={styles.bannerImage}
-      />
+      {/* Carousel */}
+      <View style={styles.carouselContainer}>
+        <Carousel
+          width={width} 
+          height={width / 2}
+          data={data}
+          renderItem={({ item }) => (
+            <Image source={item.source} style={styles.bannerImage} />
+          )}
+          autoPlay
+          autoPlayInterval={3000}
+          scrollAnimationDuration={800}
+        />
+      </View>
+
 
       {/* Menu Items */}
       <ScrollView contentContainerStyle={styles.menuContainer}>
@@ -104,12 +126,18 @@ const styles = StyleSheet.create({
   avatarText: { fontSize: 18, fontWeight: "bold" },
   username: { marginLeft: 12, fontSize: 20, fontWeight: "bold" },
   bannerImage: {
-    width: "100%",
-    height: 200,
+    width: "95%",
+    height: "100%",
     resizeMode: "cover",
-    marginBottom: 20,
+    alignSelf: "center",
+    borderRadius: 10, // Rounded corners
+  },  
+  carouselContainer: {
+    alignItems: "center",
+    marginVertical: 16,
   },
   menuContainer: {
+    marginTop: 200,
     padding: 16,
     alignItems: "center",
   },
