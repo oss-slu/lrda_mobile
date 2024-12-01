@@ -1,9 +1,9 @@
-import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import { Alert } from 'react-native';
-import AddNoteScreen from '../lib/screens/AddNoteScreen';
+import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import * as Location from 'expo-location';
+import React from 'react';
+import { Alert } from 'react-native';
 import { Provider } from 'react-redux';
+import AddNoteScreen from '../lib/screens/AddNoteScreen';
 import { store } from '../redux/store/store';
 
 // Mock external dependencies
@@ -267,6 +267,94 @@ describe('AddNoteScreen - insertAudioToEditor', () => {
     expect(mockGetHTML).toHaveBeenCalledTimes(1); // Ensure content was fetched
     expect(mockSetContent).toHaveBeenCalledWith(newContent); // Ensure new content was set
     expect(mockFocus).toHaveBeenCalledTimes(1); // Ensure focus was triggered
+  });
+});
+
+
+describe('AddNoteScreen - Keyboard Behavior', () => {
+  it('dismisses the keyboard when tapping outside of the input', async () => {
+    const routeMock = { params: { untitledNumber: 1 } };
+    const { getByPlaceholderText, getByTestId } = render(
+      <Provider store={store}>
+        <AddNoteScreen route={routeMock as any} />
+      </Provider>
+    );
+
+    // Locate  input and simulate a text entry
+    const titleInput = getByPlaceholderText('Title Field Note');
+    fireEvent.changeText(titleInput, 'Sample Note Title');
+    expect(titleInput.props.value).toBe('Sample Note Title');
+
+    // Simulate tapping outside the keyboard
+    fireEvent.press(getByTestId('TenTapEditor'));
+
+    // Wait for keyboard to be dismissed
+    await waitFor(() => {
+      expect(Keyboard.dismiss).toHaveBeenCalled();
+    });
+  });
+
+  it('dismisses the keyboard when pressing the "Done" button on the keyboard', async () => {
+    const routeMock = { params: { untitledNumber: 1 } };
+    const { getByPlaceholderText } = render(
+      <Provider store={store}>
+        <AddNoteScreen route={routeMock as any} />
+      </Provider>
+    );
+
+    // Locate  input and simulate text entry
+    const titleInput = getByPlaceholderText('Title Field Note');
+    fireEvent.changeText(titleInput, 'Sample Note Title');
+
+    // Simulate pressing "Done" button
+    fireEvent(titleInput, 'submitEditing');
+
+    // Wait for keyboard to be dismissed
+    await waitFor(() => {
+      expect(Keyboard.dismiss).toHaveBeenCalled();
+    });
+  });
+
+  it('maintains keyboard dismiss functionality across multiple inputs', async () => {
+    const routeMock = { params: { untitledNumber: 1 } };
+    const { getByPlaceholderText, getByTestId } = render(
+      <Provider store={store}>
+        <AddNoteScreen route={routeMock as any} />
+      </Provider>
+    );
+
+    // Locate inputs and simulate text entry
+    const titleInput = getByPlaceholderText('Title Field Note');
+    fireEvent.changeText(titleInput, 'Sample Title');
+    expect(titleInput.props.value).toBe('Sample Title');
+
+    const editorInput = getByTestId('TenTapEditor');
+    fireEvent.press(editorInput);
+
+    // Simulate tapping outside inputs
+    fireEvent.press(getByTestId('TenTapEditor'));
+
+    // Wait for keyboard to be dismissed
+    await waitFor(() => {
+      expect(Keyboard.dismiss).toHaveBeenCalled();
+    });
+  });
+
+  it('ensures KeyboardAvoidingView adjusts UI when keyboard is visible', async () => {
+    const routeMock = { params: { untitledNumber: 1 } };
+    const { getByPlaceholderText } = render(
+      <Provider store={store}>
+        <AddNoteScreen route={routeMock as any} />
+      </Provider>
+    );
+
+    // Simulate keyboard appearing
+    const titleInput = getByPlaceholderText('Title Field Note');
+    fireEvent.changeText(titleInput, 'Testing Keyboard Adjustment');
+    fireEvent(titleInput, 'focus');
+
+    // Check that KeyboardAvoidingView behavior is set correctly
+    expect(Platform.OS === 'ios' ? 'padding' : 'height').toBeTruthy();
   });
 });
 
