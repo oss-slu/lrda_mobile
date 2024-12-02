@@ -56,11 +56,12 @@ export default function MorePage() {
   const MenuItem = ({ title, iconName, onPress }) => (
     <TouchableOpacity style={styles.menuButton} onPress={onPress}>
       <View style={styles.menuContent}>
-        <Ionicons name={iconName} size={24} color={"black"} />
         <Text style={styles.menuText}>{title}</Text>
+        <Ionicons name={iconName} size={styles.menuIcon.fontSize} color={"black"} />
       </View>
     </TouchableOpacity>
   );
+  
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: isDarkmode ? "#000" : theme.background }]}>
@@ -146,22 +147,32 @@ const styles = StyleSheet.create({
   menuButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff", // White background for buttons
-    padding: 16,
-    marginBottom: 12,
-    borderRadius: 12,
-    width: "90%",
+    justifyContent: "space-between", // Space text and icon
+    backgroundColor: "#fff", // Button background
+    paddingVertical: 18, // Increase button height
+    paddingHorizontal: 30, // Increase horizontal padding for both sides
+    marginBottom: 12, // Space between buttons
+    borderRadius: 16, // Smooth rounded corners
+    width: "90%", // Full width for buttons
+    shadowColor: "#000", // Shadow color
+    shadowOffset: { width: 0, height: 4 }, // Shadow offset for depth
+    shadowOpacity: 0.1, // Subtle shadow opacity
+    shadowRadius: 6, // Blur for the shadow
+    elevation: 5, // Android shadow effect
   },
   menuContent: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-start",
+    justifyContent: "space-between",
+    width: "90%", // Ensure full width usage
   },
   menuText: {
-    marginLeft: 12,
-    fontSize: 16,
-    fontWeight: "600",
-    color: "black", // Black text for contrast
+    fontSize: 20, // Larger text size
+    fontWeight: "bold", // Bold text
+    color: "#000", // Black text color
+    marginLeft: 30, // Additional space on the left of text
   },
-  
+  menuIcon: {
+    fontSize: 28, // Icon size for visual balance
+  },
 });
