@@ -7,6 +7,7 @@ import {
   FlatList,
   TouchableOpacity,
   SafeAreaView,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../components/ThemeProvider";
@@ -141,6 +142,7 @@ export default function TeamPage({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: Platform.OS === "android" ? 25 : 0,
   },
   header: {
     flexDirection: "row",

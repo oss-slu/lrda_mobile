@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Dimensions,
   Switch,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../components/ThemeProvider";
@@ -91,7 +92,9 @@ export default function MorePage() {
 
 
       {/* Menu Items */}
-      <ScrollView contentContainerStyle={styles.menuContainer}>
+      <ScrollView contentContainerStyle={styles.menuContainer}
+        scrollEnabled={false}
+      >
         <MenuItem title="About" iconName="information-circle-outline" />
         <MenuItem title="Resource" iconName="link-outline" />
         <MenuItem title="Meet our team" iconName="people-outline" onPress={() => navigation.navigate("TeamPage")}/>
@@ -104,7 +107,9 @@ export default function MorePage() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1,
+    paddingTop: Platform.OS === "android" ? 25 : 0,
+   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
