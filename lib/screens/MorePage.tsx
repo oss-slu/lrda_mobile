@@ -93,7 +93,7 @@ export default function MorePage() {
 
       {/* Menu Items */}
       <ScrollView contentContainerStyle={styles.menuContainer}
-        scrollEnabled={false}
+        scrollEnabled={true}
       >
         <MenuItem title="About" iconName="information-circle-outline" />
         <MenuItem title="Resource" iconName="link-outline" />
@@ -107,7 +107,8 @@ export default function MorePage() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1,
+  container: { 
+    flex: 1,
     paddingTop: Platform.OS === "android" ? 25 : 0,
    },
   header: {
@@ -136,9 +137,9 @@ const styles = StyleSheet.create({
   carouselContainer: {
     alignItems: "center",
     marginVertical: 16,
+    marginBottom: 225,
   },
   menuContainer: {
-    marginTop: 200,
     padding: 16,
     alignItems: "center",
   },
