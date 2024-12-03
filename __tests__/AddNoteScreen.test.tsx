@@ -1,7 +1,7 @@
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import * as Location from 'expo-location';
 import React from 'react';
-import { Alert } from 'react-native';
+import { Alert, Keyboard, Platform } from 'react-native';
 import { Provider } from 'react-redux';
 import AddNoteScreen from '../lib/screens/AddNoteScreen';
 import { store } from '../redux/store/store';
@@ -97,11 +97,34 @@ jest.mock('expo-location', () => ({
   ),
 }));
 
+jest.mock('@react-native-community/progress-bar-android', () => ({
+  ProgressBarAndroid: () => null, // Mocked component
+}));
+
+jest.mock('@react-native-clipboard/clipboard', () => ({
+  getString: jest.fn(),
+  setString: jest.fn(),
+}));
+
 // Mock API calls directly
 const mockWriteNewNote = jest.fn();
 jest.mock('../lib/utils/api_calls', () => ({
   writeNewNote: mockWriteNewNote,
 }));
+
+jest.mock('react-native', () => {
+  const actualReactNative = jest.requireActual('react-native');
+  return {
+    ...actualReactNative,
+    Platform: {
+      OS: 'ios',
+      select: (options: { ios?: any; android?: any }) => options.ios,
+    },
+    Keyboard: {
+      dismiss: jest.fn(), // Mock dismiss to avoid ReferenceError
+    },
+  };
+});
 
 beforeEach(() => {
   // Clear mocks before each test
@@ -124,7 +147,7 @@ describe('AddNoteScreen', () => {
     const { getByTestId } = render(<AddNoteScreen route={routeMock as any} />);
 
     // Check if the RichEditor is rendered
-    expect(getByTestId('TenTapEditor')).toBeTruthy();
+    expect(getByTestId('RichEditor')).toBeTruthy();
   });
 
 
@@ -286,7 +309,7 @@ describe('AddNoteScreen - Keyboard Behavior', () => {
     expect(titleInput.props.value).toBe('Sample Note Title');
 
     // Simulate tapping outside the keyboard
-    fireEvent.press(getByTestId('TenTapEditor'));
+    fireEvent.press(getByTestId('RichEditor'));
 
     // Wait for keyboard to be dismissed
     await waitFor(() => {
@@ -328,11 +351,11 @@ describe('AddNoteScreen - Keyboard Behavior', () => {
     fireEvent.changeText(titleInput, 'Sample Title');
     expect(titleInput.props.value).toBe('Sample Title');
 
-    const editorInput = getByTestId('TenTapEditor');
+    const editorInput = getByTestId('RichEditor');
     fireEvent.press(editorInput);
 
     // Simulate tapping outside inputs
-    fireEvent.press(getByTestId('TenTapEditor'));
+    fireEvent.press(getByTestId('RichEditor'));
 
     // Wait for keyboard to be dismissed
     await waitFor(() => {

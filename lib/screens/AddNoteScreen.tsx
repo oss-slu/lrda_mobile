@@ -146,7 +146,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
       };
 
       const response = await ApiService.writeNewNote(newNote);
-      const obj = await response.json();
+      console.log('API response:', await response.json());
       route.params.refreshPage();
       navigation.goBack();
     } catch (error) {
@@ -166,7 +166,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
   }, [editor]);
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false} >
       <SafeAreaView style={{ flex: 1}}>
         <View style={{flex: 1}}>
         {/* Top Section with Buttons and Title */}
@@ -308,6 +308,11 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
         style={{ flex: 1 }}
         keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
       >
+        <ScrollView
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
+            ref={scrollViewRef}
+        >
       
           <View style={[NotePageStyles().richTextContainer]}>
           <RichText
@@ -326,7 +331,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
             actions={['bold', 'italic', 'underline', 'bullet_list', 'blockquote', 'indent', 'outdent', 'close_keyboard' ]}
           />
         </View>
-
+        </ScrollView>
 
       </KeyboardAvoidingView>
 
