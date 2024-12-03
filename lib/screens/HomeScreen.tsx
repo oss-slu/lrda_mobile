@@ -1,15 +1,16 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, startTransition } from "react";
 import {
   Platform,
   View,
   Text,
+  ScrollView,
   TouchableOpacity,
+  StyleSheet,
   Dimensions,
+  SafeAreaView,
   Image,
   TextInput,
-  StyleSheet,
 } from "react-native";
-import { useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
 import { Note } from "../../types";
@@ -20,15 +21,16 @@ import { SwipeListView } from "react-native-swipe-list-view";
 import NoteSkeleton from "../components/noteSkeleton";
 import LoadingImage from "../components/loadingImage";
 import { formatToLocalDateString } from "../components/time";
-import { useTheme } from "../components/ThemeProvider";
+import { useTheme } from '../components/ThemeProvider';
 import Constants from "expo-constants";
-import DropDownPicker from "react-native-dropdown-picker";
+import ToastMessage from 'react-native-toast-message';
+import DropDownPicker from 'react-native-dropdown-picker';
 import NoteDetailModal from "./mapPage/NoteDetailModal";
-import ToastMessage from "react-native-toast-message";
+import Tooltip from 'react-native-walkthrough-tooltip';
+import { Button } from "react-native-paper";
 
-const user = User.getInstance();
-
-const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
+const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route, showTooltip = true }) => {
+  const user = User.getInstance();
   const [notes, setNotes] = useState<Note[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
   const [updateCounter, setUpdateCounter] = useState(0);
@@ -37,21 +39,25 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [reversed, setReversed] = useState(false);
   const [rendering, setRendering] = useState(true);
   const [userInitials, setUserInitials] = useState("N/A");
-  const { width } = Dimensions.get("window");
+  const { width, height } = Dimensions.get("window");
   const [initialItems, setInitialItems] = useState([
-    { label: "My Entries", value: "my_entries" },
-    { label: "Published Entries", value: "published_entries" },
+    {label: 'My Entries', value: 'my_entries'},
+    {label: 'Published Entires', value: 'published_entries'},
+    // {label: 'Liked Entries', value: 'liked_entries'},
   ]);
-  const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(initialItems[0].value);
   const [items, setItems] = useState(initialItems);
-  const [selectedNote, setSelectedNote] = useState<Note | undefined>(
-    undefined
-  );
+  const [selectedNote, setSelectedNote] = useState<Note | undefined>(undefined);
   const [isModalVisible, setModalVisible] = useState(false);
-
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { theme } = useTheme();
+  const [tooltipVisible, setTooltipVisible] = useState(true);
+  const [addNoteTooltipVisible, setAddNoteTooltipVisible] = useState(false);
+  const [dropDownTip, setDropDownTip] = useState(false);
+  const [accountTip, setAccountTip] = useState(false);
+
 
   let textLength = 18;
 
@@ -67,16 +73,18 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       }
     })();
   }, []);
-  
+
   const refreshPage = () => {
     setUpdateCounter(updateCounter + 1);
   };
 
-  // Fetch notes, either all published or user-specific based on filter
   useEffect(() => {
     setRendering(true);
+    if (route.params?.note) {
+      setNotes([...notes, route.params.note]);
+    }
     fetchMessages();
-  }, [updateCounter, published, value]);
+  }, [route.params, updateCounter]);
 
   const fetchMessages = async () => {
     try {
@@ -84,34 +92,24 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       const data = await ApiService.fetchMessages(
         false,
         published,
-        isPrivate ? userId : "",
+        userId || ""
       );
-  
-      // Filter out archived notes; assume notes without `isArchived` are not archived
-      const unarchivedNotes = data.filter((note: Note) => !note.isArchived);
-  
-      setMessages(unarchivedNotes);
-  
-      // Convert data and sort notes by date (latest first)
-      const fetchedNotes = DataConversion.convertMediaTypes(unarchivedNotes)
-        .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-  
-      // Apply reverse logic if 'reversed' is true
-      setNotes(reversed ? fetchedNotes.reverse() : fetchedNotes);
+      setMessages(data);
+
+      const fetchedNotes = DataConversion.convertMediaTypes(data);
+
+      if (Platform.OS === "web") {
+        textLength = 50;
+        setNotes(reversed ? fetchedNotes.reverse() : fetchedNotes);
+      } else {
+        setNotes(reversed ? fetchedNotes : fetchedNotes.reverse());
+      }
       setRendering(false);
     } catch (error) {
       console.error("Error fetching messages:", error);
-      ToastMessage.show({
-        type: "error",
-        text1: "Error fetching messages",
-        text2: error.message,
-      });
     }
   };
-  
-  
 
-  
   const updateNote = (note: Note) => {
     setNotes((prevNotes) =>
       prevNotes?.map((prevNote) => (prevNote.id === note.id ? note : prevNote))
@@ -119,21 +117,36 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     refreshPage();
   };
 
-
+  const deleteNoteFromAPI = async (id: string) => {
+    try {
+      const userId = await user.getId();
+      const success = await ApiService.deleteNoteFromAPI(id, userId || "");
+      if (success) {
+        return true;
+      }
+    } catch (error) {
+      console.error("Error deleting note:", error);
+      return false;
+    }
+  };
 
   const handleFilters = (name: string) => {
-    if (name === "published_entries") {
+    if (name == "published_entries") {
       setIsPrivate(false);
       setPublished(true);
-    } else if (name === "my_entries") {
+      refreshPage();
+    } else if (name == "my_entries") {
       setIsPrivate(true);
       setPublished(false);
+      refreshPage();
     }
-    refreshPage();
+    else if (name == "liked_entries") {
+      // implement liked feature
+    }
   };
 
   useEffect(() => {
-    handleFilters(value);
+    handleFilters(value); // Call on initial render with the default value
   }, []);
 
   const handleReverseOrder = () => {
@@ -142,52 +155,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     setUpdateCounter(updateCounter + 1);
   };
 
-  const handleArchiveNote = async (note: Note | undefined, user: User) => {
-    if (note?.id) {
-      try {
-        const userId = await user.getId();
-        const updatedNote = {
-          ...note,
-          isArchived: true,
-          published: false,
-          archivedAt: new Date().toISOString(),
-        };
-  
-        const response = await ApiService.overwriteNote(updatedNote);
-        if (response.ok) {
-          ToastMessage.show({
-            type: "success",
-            text1: "Success",
-            text2: "Note successfully archived.",
-          });
-          updateNote(updatedNote); // Update the note in local state
-          return true;
-        } else {
-          throw new Error("Archiving failed");
-        }
-      } catch (error) {
-        ToastMessage.show({
-          type: "error",
-          text1: "Error",
-          text2: "Failed to archive note. System failure. Try again later.",
-        });
-        console.error("Error archiving note:", error);
-        return false;
-      }
-    } else {
-      ToastMessage.show({
-        type: "error",
-        text1: "Error",
-        text2: "You must first save your note before archiving it.",
-      });
-      return false;
-    }
-  };
-  
-  
-  
-
-  const findNextUntitledNumber = (notes: Note[]) => {
+  const findNextUntitledNumber = (notes : Note[]) => {
     let maxNumber = 0;
     notes.forEach((note) => {
       const match = note.title.match(/^Untitled (\d+)$/);
@@ -201,375 +169,25 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     return maxNumber + 1;
   };
 
-  const sideMenu = (data: any, rowMap: any) => {
-    return (
-      <View style={styles(theme, width).rowBack} key={data.index}>
-        <TouchableOpacity>
-          <TouchableOpacity onPress={() => publishNote(data.item.id, rowMap)}>
-            <Ionicons name="share" size={30} color={"green"} />
-          </TouchableOpacity>
-        </TouchableOpacity>
-        <View
-          style={[
-            styles(theme, width).backRightBtn,
-            styles(theme, width).backRightBtnRight,
-          ]}
-        >
-          {isPrivate ? (
-            <TouchableOpacity
-              style={{
-                justifyContent: "center",
-                alignItems: "center",
-                position: "absolute",
-                right: 20,
-              }}
-              onPress={() => deleteNote(data.item.id, rowMap)}
-            >
-              <Ionicons
-                name="trash-outline"
-                size={24}
-                color={styles(theme, width).backColor.color}
-              />
-            </TouchableOpacity>
-          ) : null}
-        </View>
-      </View>
-    );
-  };
-
-  const deleteNote = (id: string, rowMap: any) => {
-    if (rowMap[id]) {
-      rowMap[id].closeRow();
-    }
-  
-    const noteToDelete = notes.find((note) => note.id === id);
-  
-    if (noteToDelete) {
-      handleArchiveNote(noteToDelete, user); // Pass the correct arguments
-    }
-  
-    setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
-  };
-  
-
-  async function publishNote(data: any, rowMap: any) {
-    if (rowMap[data]) {
-      rowMap[data].closeRow();
-    }
-    const foundNote = notes.find((note) => note.id === data);
-    const editedNote: Note = {
-      id: foundNote?.id || "",
-      title: foundNote?.title || "",
-      text: foundNote?.text || "",
-      creator: foundNote?.creator || "",
-      media: foundNote?.media || [],
-      latitude: foundNote?.latitude || "",
-      longitude: foundNote?.longitude || "",
-      audio: foundNote?.audio || [],
-      published: !foundNote?.published || false,
-      time: foundNote?.time || new Date(),
-      tags: foundNote?.tags || [],
-    };
-    await ApiService.overwriteNote(editedNote);
-    refreshPage();
-  }
-
-  const renderList = (notes: Note[]) => {
-    const filteredNotes = searchQuery
-      ? notes.filter((note) => {
-          const lowerCaseQuery = searchQuery.toLowerCase();
-          const noteTime = new Date(note.time);
-          const formattedTime = formatToLocalDateString(noteTime);
-          return (
-            note.title.toLowerCase().includes(lowerCaseQuery) ||
-            formattedTime.includes(lowerCaseQuery)
-          );
-        })
-      : notes;
-
-      return isPrivate ? (
-        <SwipeListView
-          data={filteredNotes}
-          renderItem={renderItem}
-          renderHiddenItem={sideMenu}
-          leftActivationValue={160}
-          rightActivationValue={-160}
-          leftOpenValue={75}
-          rightOpenValue={-75}
-          stopLeftSwipe={175}
-          stopRightSwipe={-175}
-          keyExtractor={(item) => item.id}
-          onRightAction={(data, rowMap) => deleteNote(data, rowMap)}
-          onLeftAction={(data, rowMap) => publishNote(data, rowMap)}
-        />
-      ) : (
-        <SwipeListView
-          data={filteredNotes}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-        />
-      );
-    };
-
-  const renderItem = (data: any) => {
-    const item = data.item;
-    const tempTime = new Date(item.time);
-    const showTime = formatToLocalDateString(tempTime);
-    const mediaItem = item.media[0];
-    const ImageType = mediaItem?.getType();
-  
-    // Ensure ImageURI is a valid string
-    let ImageURI = "";
-    let IsImage = false;
-    
-    if (ImageType === "image") {
-      ImageURI = mediaItem.getUri();
-      IsImage = true;
-    } else if (ImageType === "video") {
-      ImageURI = mediaItem.getThumbnail();
-      IsImage = true;
-    }
-  
-    // Enforce `uri` as a string, especially for Android
-    const resolvedImageURI = Platform.OS === "android" ? String(ImageURI || "") : ImageURI;
-  
-    return (
-      <TouchableOpacity
-        key={item.id}
-        activeOpacity={1}
-        style={styles(theme, width).noteContainer}
-        onPress={() => {
-          if (!item.published) {
-            navigation.navigate("EditNote", {
-              note: item,
-              onSave: (editedNote: Note) => {
-                updateNote(editedNote);
-                refreshPage();
-              },
-            });
-          } else {
-            const formattedNote = {
-              ...item,
-              time: formatToLocalDateString(new Date(item.time)),
-              description: item.text,
-              images: item.media.map((mediaItem: { uri: any }) => ({
-                uri: mediaItem.uri,
-              })),
-            };
-            setSelectedNote(formattedNote);
-            setModalVisible(true);
-          }
-        }}
-      >
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          {IsImage && resolvedImageURI ? (
-            <View style={{ height: 100, width: 100 }}>
-              <LoadingImage
-                imageURI={resolvedImageURI}
-                type={ImageType}
-                isImage={true}
-                useCustomDimensions={true}
-                customWidth={100}
-                customHeight={100}
-              />
-            </View>
-          ) : (
-            <View style={{ height: 100, width: 100 }}>
-              <LoadingImage imageURI={""} type={ImageType} isImage={false} />
-            </View>
-          )}
-  
-          <View style={{ position: "absolute", left: 120 }}>
-            <Text style={styles(theme, width).noteTitle}>
-              {item.title.length > textLength
-                ? item.title.slice(0, textLength) + "..."
-                : item.title}
-            </Text>
-  
-            <Text style={styles(theme, width).noteText}>{showTime}</Text>
-          </View>
-        </View>
-        <View style={{ position: "absolute", right: 10 }}>
-          {item.published ? (
-            <Ionicons
-              name="share"
-              size={24}
-              color={styles(theme, width).shareColor.color}
-            />
-          ) : (
-            <Ionicons
-              name="share-outline"
-              size={24}
-              color={styles(theme, width).highlightColor.color}
-            />
-          )}
-        </View>
-      </TouchableOpacity>
-    );
-  };
-  
-
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-  };
-  
-  const toggleSearchBar = () => {
-    if (isSearchVisible) {
-      setSearchQuery(""); // Reset search query when closing
-    }
-    setIsSearchVisible(!isSearchVisible);
-  };
-  
-
-  const formatDate = (date: Date) => {
-    const day = date.getDate().toString();
-    const month = (date.getMonth() + 1).toString();
-    const year = date.getFullYear();
-    return `${month}/${day}/${year}`;
-  };
-
-  const filteredNotes = useMemo(() => {
-    return notes.filter((note) => {
-      const noteTime = formatToLocalDateString(new Date(note.time));
-      return (
-        note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        noteTime.includes(searchQuery)
-      );
-    });
-  }, [notes, searchQuery]);
-
-  return (
-    <View style={styles(theme, width).container}>
-      <View style={styles(theme, width).topView}>
-      <View
-  style={{
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    width: "100%",
-    paddingBottom: 15,
-    paddingTop: 10,
-  }}
->
-  <TouchableOpacity
-    style={[
-      styles(theme, width).userPhoto,
-      { backgroundColor: theme.black },
-    ]}
-    onPress={() => {
-      navigation.navigate("AccountPage");
-    }}
-  >
-    <Text style={styles(theme, width).pfpText}>{userInitials}</Text>
-  </TouchableOpacity>
-  <Image
-    source={require("../../assets/icon.png")}
-    style={{
-      width: width * 0.105,
-      height: width * 0.105,
-    }}
-  />
-  <TouchableOpacity onPress={toggleSearchBar} testID="searchButton">
-    <Ionicons
-      name={isSearchVisible ? "close-outline" : "search-outline"}
-      size={28}
-      color={theme.text}
-      style={{ padding: 10 }}
-    />
-  </TouchableOpacity>
-</View>
-
-      </View>
-
-      <View style={styles(theme, width).dropdown}>
-        <DropDownPicker
-          open={open}
-          value={value}
-          items={items.filter((item) => item.value !== value)}
-          setOpen={setOpen}
-          setValue={(callback: (arg0: string) => any) => {
-            const newValue = callback(value);
-            setValue(newValue);
-            handleFilters(newValue);
-          }}
-          setItems={setItems}
-          listMode="SCROLLVIEW"
-          scrollViewProps={{
-            nestedScrollEnabled: true,
-          }}
-          style={{
-            borderWidth: 0,
-            backgroundColor: theme.homeColor,
-          }}
-          dropDownContainerStyle={{
-            borderWidth: 0,
-            backgroundColor: theme.homeColor,
-          }}
-          placeholder={`${items.find((item) => item.value === value)?.label ||
-            "Select an option"} (${filteredNotes.length})`}
-          placeholderStyle={{
-            textAlign: "center",
-            fontSize: 22,
-            fontWeight: "bold",
-            color: theme.black,
-            paddingLeft: 28,
-          }}
-          textStyle={{
-            textAlign: "center",
-            fontSize: 22,
-            fontWeight: "bold",
-            color: theme.black,
-          }}
-          showArrowIcon={true}
-        />
-      </View>
-      {isSearchVisible && (
-  <TextInput
-    testID="searchBar"
-    placeholder="Search notes..."
-    onChangeText={handleSearch}
-    value={searchQuery}
-    style={[styles(theme, width).seachBar, {marginTop: open && isSearchVisible ? 40: 0}]}
-    placeholderTextColor={theme.gray}
-  />
-)}
-
-      <View style={styles(theme, width).horizontalLine} />
-      <View style={styles(theme, width).scrollerBackgroundColor}>
-        {rendering ? <NoteSkeleton /> : renderList(notes)}
-        <TouchableOpacity
-          style={styles(theme, width).addButton}
-          onPress={() => {
-            const untitledNumber = findNextUntitledNumber(notes);
-            navigation.navigate("AddNote", { untitledNumber, refreshPage });
-          }}
-        >
-          <Ionicons
-            name="add-outline"
-            size={32}
-            color={theme.primaryColor}
-            style={{ fontFamily: "Ionicons_" }}
-          />
-        </TouchableOpacity>
-      </View>
-
-      <NoteDetailModal
-        isVisible={isModalVisible}
-        onClose={() => setModalVisible(false)}
-        note={selectedNote}
-      />
-    </View>
-  );
-};
-
-const styles = (theme, width,color,isDarkmode) =>
-  StyleSheet.create({
+  const styles = StyleSheet.create({
     container: {
       paddingTop: Constants.statusBarHeight - 20,
       flex: 1,
       backgroundColor: theme.homeColor,
+    },
+    gotItButton: {
+      marginTop: 8, // Reduced from 10 to 8
+      padding: 8, // Reduced from 10 to 8
+      backgroundColor: theme.homeColor,
+      borderRadius: 5,
+    },
+    gotItButtonText: {
+      color: theme.text,
+      textAlign: 'center',
+    },
+    tooltipWrapper: {
+      alignSelf: 'flex-end', // Align the tooltip to the right
+      marginRight: 20, // Adjust this value as needed to move the tooltip to the right
     },
     pfpText: {
       fontWeight: "600",
@@ -578,13 +196,13 @@ const styles = (theme, width,color,isDarkmode) =>
       color: theme.white,
     },
     shareColor: {
-      color: "green",
+      color: 'green',
     },
     highlightColor: {
       color: theme.text,
     },
     backColor: {
-      color: "red",
+      color: 'red',
     },
     userPhoto: {
       height: width * 0.095,
@@ -607,6 +225,11 @@ const styles = (theme, width,color,isDarkmode) =>
       fontSize: 18,
       color: theme.text,
     },
+    emptyContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    },
     scrollerBackgroundColor: {
       backgroundColor: theme.homeGray,
       flex: 1,
@@ -621,7 +244,6 @@ const styles = (theme, width,color,isDarkmode) =>
       height: 50,
       alignItems: "center",
       justifyContent: "center",
-      color:theme.text,
     },
     topView: {
       flexDirection: "row",
@@ -648,22 +270,80 @@ const styles = (theme, width,color,isDarkmode) =>
       alignItems: "center",
       alignSelf: "center",
       backgroundColor: theme.primaryColor,
+      //borderRadius: 20,
       marginTop: 1,
       width: "100%",
+      //padding: 10,
       flexDirection: "row",
       height: 185,
       paddingLeft: width * 0.03,
       paddingRight: width * 0.03,
-      color:theme.text
     },
-    seachBar: {
-      backgroundColor: theme.homeColor,
+    filtersContainer: {
+      minHeight: 30,
+      alignSelf: "center",
       borderRadius: 20,
-      fontSize: 18,
-      padding: 20,
-      margin: 20,
+      paddingHorizontal: 5,
+      maxHeight: 30,
+      marginBottom: 10,
+      zIndex: 10,
+    },
+    filters: {
+      justifyContent: "center",
+      borderColor: theme.tertiaryColor,
+      borderWidth: 2,
+      borderRadius: 30,
+      marginRight: 10,
+      paddingHorizontal: 10,
+      zIndex: 10,
+    },
+    filtersSelected: {
+      justifyContent: "center",
+      backgroundColor: theme.logout,
+      fontSize: 22,
+      borderRadius: 30,
+      marginRight: 10,
+      paddingHorizontal: 10,
+    },
+    selectedFont: {
+      fontSize: 17,
+      color: theme.logoutText,
+      fontWeight: "700",
+    },
+    buttonText:{
+      fontSize: 16,
       color: theme.text,
-      borderWidth: 3,
+      fontWeight: "600",
+    },
+    filterFont: {
+      fontSize: 16,
+      fontWeight: "600",
+      color: theme.text,
+    },
+    title: {
+      fontSize: 33,
+      fontWeight: "bold",
+      lineHeight: 80,
+      color: theme.text,
+      marginLeft: 5,
+      marginBottom: "-1%",
+      marginRight: 55,
+    },
+    backRightBtn: {
+      alignItems: "flex-end",
+      bottom: 0,
+      justifyContent: "center",
+      position: "absolute",
+      top: 0,
+      width: 75,
+      paddingRight: 17,
+    },
+    backRightBtnRight: {
+      backgroundColor: theme.homeGray,
+      width: "50%",
+      right: 0,
+      // borderTopRightRadius: 20,
+      // borderBottomRightRadius: 20,
     },
     rowBack: {
       width: "100%",
@@ -677,22 +357,475 @@ const styles = (theme, width,color,isDarkmode) =>
       padding: 10,
       alignSelf: "center",
     },
-    backRightBtn: {
-      alignItems: "flex-end",
-      bottom: 0,
-      justifyContent: "center",
-      position: "absolute",
-      top: 0,
-      width: 75,
-      paddingRight: 17,
-      color:theme.text
-    },
-    backRightBtnRight: {
-      backgroundColor: theme.homeGray,
-      width: "50%",
-      right: 0,
-      color:theme.text
+    searchBar:{
+      backgroundColor: theme.homeColor,
+      borderRadius: 20,
+      fontSize: 18,
+      padding: 20,
+      margin: 20,
+      color: theme.text,
+      borderWidth: 3,
+    
     },
   });
+
+  const sideMenu = (data: any, rowMap: any) => {
+    return (
+      <View style={styles.rowBack} key={data.index}>
+        <TouchableOpacity>
+          <TouchableOpacity onPress={() => publishNote(data.item.id, rowMap)}>
+            <Ionicons name="share" size={30} color={'green'} />
+          </TouchableOpacity>
+        </TouchableOpacity>
+        <View style={[styles.backRightBtn, styles.backRightBtnRight]}>
+          {isPrivate ? (
+            <TouchableOpacity
+              style={{
+                justifyContent: "center",
+                alignItems: "center",
+                position: "absolute",
+                right: 20,
+              }}
+              onPress={() => deleteNote(data.item.id, rowMap)}
+            >
+              <Ionicons
+                name="trash-outline"
+                size={24}
+                color={styles.backColor.color}
+              />
+            </TouchableOpacity>
+          ) : null}
+        </View>
+      </View>
+    );
+  };
+
+  const deleteNote = (data: any, rowMap: any) => {
+    if (rowMap[data]) {
+      rowMap[data].closeRow();
+    }
+    setNotes((prevNotes) => prevNotes.filter((note) => note.id !== data));
+    deleteNoteFromAPI(data);
+  };
+
+  async function publishNote(data: any, rowMap: any) {
+    if (rowMap[data]) {
+      rowMap[data].closeRow();
+    }
+    const foundNote = notes.find((note) => note.id === data);
+    const editedNote: Note = {
+      id: foundNote?.id || "",
+      title: foundNote?.title || "",
+      text: foundNote?.text || "",
+      creator: foundNote?.creator || "",
+      media: foundNote?.media || [],
+      latitude: foundNote?.latitude || "",
+      longitude: foundNote?.longitude || "",
+      audio: foundNote?.audio || [],
+      published: !foundNote?.published || false,
+      time: foundNote?.time || new Date(),
+      tags: foundNote?.tags || [],
+    };
+    await ApiService.overwriteNote(editedNote);
+    refreshPage();
+  }
+
+  const renderList = (notes: Note[]) => {
+    const filteredNotes = searchQuery
+    ? notes.filter(note => {
+        const lowerCaseQuery = searchQuery.toLowerCase();
+        const noteTime = new Date(note.time);
+        const formattedTime = formatDate(noteTime);
+        return (
+          note.title.toLowerCase().includes(lowerCaseQuery) || formattedTime.includes(lowerCaseQuery)
+        );
+      })
+    : notes;
+    
+    return isPrivate ? (
+      <SwipeListView
+        data={filteredNotes}
+        renderItem={renderItem}
+        renderHiddenItem={sideMenu}
+        leftActivationValue={160}
+        rightActivationValue={-160}
+        leftOpenValue={75}
+        rightOpenValue={-75}
+        stopLeftSwipe={175}
+        stopRightSwipe={-175}
+        keyExtractor={(item) => item.id}
+        onRightAction={(data, rowMap) => deleteNote(data, rowMap)}
+        onLeftAction={(data, rowMap) => publishNote(data, rowMap)}
+      />
+    ) : (
+      <SwipeListView
+        data={filteredNotes}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
+      />
+    );
+  };
+
+  const renderItem = (data: any) => {
+    const item = data.item;
+    const tempTime = new Date(item.time);
+    const showTime = formatToLocalDateString(tempTime);
+    const mediaItem = item.media[0];
+    const ImageType = mediaItem?.getType();
+    let ImageURI = "";
+    let IsImage = false;
+    if (ImageType === "image") {
+      ImageURI = mediaItem.getUri();
+      IsImage = true;
+    } else if (ImageType === "video") {
+      ImageURI = mediaItem.getThumbnail();
+      IsImage = true;
+    }
+    return (
+      <TouchableOpacity
+        key={item.id}
+        activeOpacity={1}
+        style={styles.noteContainer}
+        onPress={() => {
+          if (!item.published) {
+            navigation.navigate("EditNote", {
+              note: item,
+              onSave: (editedNote: Note) => {
+                updateNote(editedNote);
+                refreshPage();
+              },
+            });
+          } else {
+            console.log(item);
+            const formattedNote = {
+              ...item,
+              time: formatToLocalDateString(new Date(item.time)),
+              description: item.text,
+              images: 
+                item.media.map((mediaItem: { uri: any; }) => ({ uri: mediaItem.uri }))
+            };
+            console.log(formattedNote.description);
+            setSelectedNote(formattedNote);
+            setModalVisible(true);
+          }
+        }}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          {IsImage ? (
+            <View style={{ height: 100, width: 100 }}>
+              <LoadingImage
+                imageURI={ImageURI}
+                type={ImageType}
+                isImage={true}
+                useCustomDimensions={true}
+                customWidth={100}
+                customHeight={100}
+              />
+            </View>
+          ) : (
+            <View style={{ height: 100, width: 100 }}>
+              <LoadingImage imageURI={""} type={ImageType} isImage={false} />
+            </View>
+          )}
+
+          <View style={{ position: "absolute", left: 120 }}>
+            <Text style={styles.noteTitle}>
+              {item.title.length > textLength
+                ? item.title.slice(0, textLength) + "..."
+                : item.title}
+            </Text>
+
+            <Text style={styles.noteText}>{showTime}</Text>
+          </View>
+        </View>
+        <View
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            position: "absolute",
+            right: 10,
+          }}
+        >
+          {item.published ? (
+            <Ionicons
+              name="share"
+              size={24}
+              color={styles.shareColor.color}
+            />
+          ) : (
+            <Ionicons
+              name="share-outline"
+              size={24}
+              color={styles.highlightColor.color}
+            />
+          )}
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
+
+  const formatDate = (date: Date) => {
+    const day = date.getDate().toString();
+    const month = (date.getMonth() + 1).toString(); // Months are zero-based
+    const year = date.getFullYear();
+    return `${month}/${day}/${year}`;
+  };
+
+  const filteredNotes = useMemo(() => {
+    return notes.filter(note => {
+      const noteTime = new Date(note.time);
+      const formattedTime = formatDate(noteTime);
+      
+      return note.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+             formattedTime.includes(searchQuery.toLowerCase());
+    });
+  }, [notes, searchQuery]);
+
+  // Reset search query when toggling search visibility
+  const resetSearchQuery = () => {
+    if(isSearchVisible){
+      setSearchQuery('');
+    }
+  };
+
+  const [tutorialDone, setTutorialDone] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const initialize = async () => {
+      const tutorialStatus = await User.getHasDoneTutorial("home_screen");
+      setTutorialDone( tutorialStatus );
+    };
+
+    initialize();
+  }, []);
+
+    return (
+      <View style={styles.container}>
+        <View style={styles.topView}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+              paddingBottom: 15,
+              paddingTop: 10,
+            }}
+          >
+                <Tooltip
+             isVisible={accountTip && !tutorialDone && showTooltip}
+             content={
+               <View>
+                 <Text style = {styles.buttonText}>See Account Here</Text>
+                 <Button
+                   style={styles.gotItButton}
+                   onPress={() => {
+                    setAccountTip(false);
+                    User.setUserTutorialDone("home_screen", true);
+                   }}
+                 >
+                   <Text style={styles.gotItButtonText}>Got it!</Text>
+                 </Button>
+               </View>
+             }
+             placement="right"
+          
+           >
+            <TouchableOpacity
+              style={[
+                styles.userPhoto,
+                { backgroundColor: theme.black },
+              ]}
+              onPress={() => {
+                navigation.navigate("AccountPage");
+              }}
+            >
+              <Text style={styles.pfpText}>{userInitials}</Text>
+            </TouchableOpacity>
+           </Tooltip>
+        
+            <Image source={require('../../assets/icon.png')} style={{width: width * 0.105, height: width * 0.105, marginEnd: width * 0.025}} />
+           
+            <View           testID="searchButton"     
+            >
+            <Tooltip  
+            
+
+              isVisible={tooltipVisible && !tutorialDone && showTooltip}
+              content={
+                <View>
+                  <Text style = {styles.buttonText}>Search Entries Here!</Text>
+                  <Button
+                    style={styles.gotItButton}
+                    onPress={() => {
+                      setTooltipVisible(false);
+                      setTimeout(() => setAddNoteTooltipVisible(true), 100); // Add a delay
+                    }}
+                  >
+                    <Text style={styles.gotItButtonText}>Got it!</Text>
+                  </Button>
+                </View>
+              }
+              placement="bottom"
+              onClose={() => {
+                setTooltipVisible(false);
+                setAddNoteTooltipVisible(true);
+              }}
+              
+            >
+    
+                <TouchableOpacity  
+                  onPress={() => {
+                    setIsSearchVisible(!isSearchVisible);
+                    resetSearchQuery();   
+                               
+                  }}
+                >
+                  <Ionicons
+                  
+                    name={isSearchVisible ? "close-outline" : "search-outline"}
+                    size={36}
+                    color={theme.black}
+                  />
+                </TouchableOpacity>
+           </Tooltip>
+            </View>
+          </View>
+        </View>
+    
+        <View style={styles.dropdown}>
+        <Tooltip
+          isVisible={dropDownTip && !tutorialDone && showTooltip}
+          content={
+            <View>
+              <Text style = {styles.buttonText}>Switch between private and published entries here!</Text>
+              <Button
+                    style={styles.gotItButton}
+                    onPress={() => {
+                      setDropDownTip(false)
+                      setTimeout(() => (setAccountTip(true),100));
+                    }}
+                    
+                  >
+                    <Text style={styles.gotItButtonText}>Got it!</Text>
+                  </Button>
+            </View>
+          }
+          placement="bottom"
+          arrowSize={{ width: 10, height: 10 }} // Adjust arrow size for better alignment
+          onClose={() => setDropDownTip(false)}
+          showChildInTooltip={false}>
+            
+          <DropDownPicker
+            open={open}
+            value={value}
+            items={items.filter(item => item.value !== value)}
+            setOpen={setOpen}
+            setValue={(callback: (arg0: string) => any) => {
+              const newValue = callback(value);
+              setValue(newValue);
+              handleFilters(newValue);
+            }}
+            setItems={setItems}
+            listMode="SCROLLVIEW"
+            scrollViewProps={{
+              nestedScrollEnabled: true,
+            }}
+            style={{
+              borderWidth: 0, 
+              backgroundColor: theme.homeColor, 
+            }}
+            dropDownContainerStyle={{
+              borderWidth: 0, 
+              backgroundColor: theme.homeColor,
+            }}
+            placeholder={`${items.find(item => item.value === value)?.label || 'Select an option'} (${filteredNotes.length})`}
+            placeholderStyle={{
+              textAlign: 'center',
+              fontSize: 22,
+              fontWeight: 'bold',
+              color: theme.black,
+              paddingLeft: 28,
+            }}
+            textStyle={{
+              textAlign: 'center',
+              fontSize: 22,
+              fontWeight: 'bold',
+              color: theme.black,
+            }}
+            showArrowIcon={true}
+          /> 
+        </Tooltip>
+
+        </View>
+    
+  <View testID="searchBar">
+    {isSearchVisible && (
+      <TextInput
+        placeholder="Search notes..."
+        onChangeText={handleSearch}
+        style={styles.searchBar}
+      />
+    )}
+  </View>
+
+        <View style={styles.horizontalLine} />
+        <View style={styles.scrollerBackgroundColor}>
+          {rendering ? <NoteSkeleton /> : renderList(notes)}
+    
+
+          <View >
+      
+              <TouchableOpacity
+                style={styles.addButton}
+                onPress={() => {
+                  const untitledNumber = findNextUntitledNumber(notes);
+                  navigation.navigate("AddNote", { untitledNumber, refreshPage });
+                }}
+              >
+         <Tooltip
+              isVisible={addNoteTooltipVisible && !tutorialDone && showTooltip}
+              content={
+                <View>
+                  <Text style = {styles.buttonText}>You can add a new note here</Text>
+                  <Button
+                    style={styles.gotItButton}
+                    onPress={() => {
+                      setAddNoteTooltipVisible(false);
+                      setTimeout(() => setDropDownTip(true), 100);
+                    }}
+                  >
+                    <Text style={styles.gotItButtonText}>Got it!</Text>
+                  </Button>
+                </View>
+              }
+              placement="top"
+              arrowSize={{ width: 10, height: 10 }} // Adjust arrow size for better alignment
+   
+              showChildInTooltip={false}
+            >
+              <Ionicons  name="add-outline" size={32} color={theme.primaryColor}   testID="addButtonIcon" />
+            </Tooltip>
+              </TouchableOpacity>
+          
+          </View>
+</View>
+    
+        <NoteDetailModal 
+          isVisible={isModalVisible} 
+          onClose={() => setModalVisible(false)} 
+          note={selectedNote} 
+        />
+      </View>
+    );
+    
+};
+
+  
+
 
 export default HomeScreen;
