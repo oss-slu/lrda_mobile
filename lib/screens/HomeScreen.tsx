@@ -175,6 +175,12 @@ const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route, showTooltip
       flex: 1,
       backgroundColor: theme.homeColor,
     },
+    skipTutorialText: {
+      fontSize: 12, // Small font size
+      color: 'lightgray', // Light gray text
+      textAlign: 'center', // Aligns the text to the center
+      marginTop: 10, // Adds spacing from the button above
+    },
     gotItButton: {
       marginTop: 8, // Reduced from 10 to 8
       padding: 8, // Reduced from 10 to 8
@@ -630,6 +636,18 @@ const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route, showTooltip
                  >
                    <Text style={styles.gotItButtonText}>Got it!</Text>
                  </Button>
+                 <Text 
+                    style={styles.skipTutorialText} 
+                    onPress={() => {
+                      setTooltipVisible(false);
+                      setAddNoteTooltipVisible(false); // Skip tutorial logic
+                      setDropDownTip(false)
+                      setAccountTip(false);
+                      User.setUserTutorialDone("home_screen", true);
+                    }}
+                  >
+                    Skip Tutorial
+                  </Text>
                </View>
              }
              placement="right"
@@ -658,7 +676,7 @@ const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route, showTooltip
               isVisible={tooltipVisible && !tutorialDone && showTooltip}
               content={
                 <View>
-                  <Text style = {styles.buttonText}>Search Entries Here!</Text>
+                  <Text style={styles.buttonText}>Search Entries Here!</Text>
                   <Button
                     style={styles.gotItButton}
                     onPress={() => {
@@ -668,8 +686,19 @@ const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route, showTooltip
                   >
                     <Text style={styles.gotItButtonText}>Got it!</Text>
                   </Button>
+                  <Text 
+                    style={styles.skipTutorialText} 
+                    onPress={() => {
+                      setTooltipVisible(false);
+                      setAddNoteTooltipVisible(false); // Skip tutorial logic
+                      User.setUserTutorialDone("home_screen", true);
+                    }}
+                  >
+                    Skip Tutorial
+                  </Text>
                 </View>
               }
+              
               placement="bottom"
               onClose={() => {
                 setTooltipVisible(false);
@@ -713,6 +742,18 @@ const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route, showTooltip
                   >
                     <Text style={styles.gotItButtonText}>Got it!</Text>
                   </Button>
+                  <Text 
+                    style={styles.skipTutorialText} 
+                    onPress={() => {
+                      setTooltipVisible(false);
+                      setAddNoteTooltipVisible(false); // Skip tutorial logic
+                      setDropDownTip(false)
+                      setAccountTip(false);
+                      User.setUserTutorialDone("home_screen", true);
+                    }}
+                  >
+                    Skip Tutorial
+                  </Text>
             </View>
           }
           placement="bottom"
@@ -801,6 +842,19 @@ const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route, showTooltip
                   >
                     <Text style={styles.gotItButtonText}>Got it!</Text>
                   </Button>
+                  <Text 
+                    style={styles.skipTutorialText} 
+                    onPress={() => {
+                      setTooltipVisible(false);
+                      setAddNoteTooltipVisible(false); // Skip tutorial logic
+                      setDropDownTip(false)
+                      setAccountTip(false);
+                      User.setUserTutorialDone("home_screen", true);
+                    }}
+                  >
+                    Skip Tutorial
+                  </Text>
+                    
                 </View>
               }
               placement="top"
