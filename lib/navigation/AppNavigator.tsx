@@ -21,6 +21,9 @@ import ToastMessage from 'react-native-toast-message';
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../redux/store/store";
 import { setNavState } from "../../redux/slice/navigationSlice";
+import Library from "../screens/Library";
+import AddNoteBtnComponent from "../components/AddNoteBtnComponent";
+import { Platform } from "react-native";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -61,7 +64,7 @@ const AppNavigator: React.FC = () => {
   const { theme, isDarkmode } = useTheme();
   const dispatch = useDispatch();
   const navState = useSelector((state: RootState) => state.navigation.navState);
-  
+
   useEffect(() => {
     const checkOnboarding = async () => {
       const onboarded = await getItem("onboarded");
@@ -102,9 +105,24 @@ const AppNavigator: React.FC = () => {
         </Stack.Navigator>
       )}
       {navState === "home" && (
-        <Tab.Navigator screenOptions={{ 
+        <Tab.Navigator screenOptions={{
           tabBarShowLabel: false,
           tabBarHideOnKeyboard: true,
+          tabBarStyle: {
+            backgroundColor: 'transparent',
+            position: 'absolute',
+            bottom: Platform.OS === 'ios'? -20 : 0,
+            left: 0,
+            right: 0,
+            elevation: 0,
+            borderTopWidth: 0,
+            paddingBottom: Platform.OS === 'ios' ? 20 : 0,
+            height: Platform.OS === 'ios' ? '9%' : '7%',
+          },
+          tabBarItemStyle: {
+            backgroundColor: theme.primaryColor,
+            height: '100%'
+          }
         }}>
           <Tab.Screen
             name="HomeTab"
@@ -116,6 +134,30 @@ const AppNavigator: React.FC = () => {
               ),
             }}
           />
+
+          <Tab.Screen
+            name="LibraryTab"
+            component={Library}
+            options={{
+              headerShown: false,
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name="library" color={color} size={size} />
+              ),
+            }}
+          />
+
+          <Tab.Screen
+            name="AddNotesTab"
+            component={AddNoteScreen}
+            options={{
+              headerShown: false,
+              // tabBarIcon: ({ color, size }) => (
+              //   <Ionicons name="library" color={color} size={size} />
+              // ),
+              tabBarButton: (props) => (<AddNoteBtnComponent/>)
+            }}
+          />
+
           <Tab.Screen
             name="Explore"
             component={ExploreScreen}
