@@ -624,6 +624,8 @@ const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route, showTooltip
           >
                 <Tooltip
              isVisible={accountTip && !tutorialDone && showTooltip}
+             topAdjustment={Platform.OS === "android" ? -30 : 0} // Set to -30 for Android, 0 otherwise
+
              content={
                <View>
                  <Text style = {styles.buttonText}>See Account Here</Text>
@@ -650,7 +652,8 @@ const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route, showTooltip
                   </Text>
                </View>
              }
-             placement="right"
+             placement="bottom"
+             showChildInTooltip={false}
           
            >
             <TouchableOpacity
@@ -674,6 +677,7 @@ const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route, showTooltip
             
 
               isVisible={tooltipVisible && !tutorialDone && showTooltip}
+              topAdjustment={Platform.OS === "android" ? -30 : 0} // Set to -30 for Android, 0 otherwise
               content={
                 <View>
                   <Text style={styles.buttonText}>Search Entries Here!</Text>
@@ -700,10 +704,8 @@ const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route, showTooltip
               }
               
               placement="bottom"
-              onClose={() => {
-                setTooltipVisible(false);
-                setAddNoteTooltipVisible(true);
-              }}
+              showChildInTooltip={false}
+
               
             >
     
@@ -729,6 +731,9 @@ const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route, showTooltip
         <View style={styles.dropdown}>
         <Tooltip
           isVisible={dropDownTip && !tutorialDone && showTooltip}
+          topAdjustment={Platform.OS === "android" ? -30 : 0} // Set to -30 for Android, 0 otherwise
+
+
           content={
             <View>
               <Text style = {styles.buttonText}>Switch between private and published entries here!</Text>
@@ -754,6 +759,7 @@ const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route, showTooltip
                   >
                     Skip Tutorial
                   </Text>
+                  
             </View>
           }
           placement="bottom"
@@ -830,6 +836,7 @@ const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route, showTooltip
               >
          <Tooltip
               isVisible={addNoteTooltipVisible && !tutorialDone && showTooltip}
+              topAdjustment={Platform.OS === "android" ? -30 : 0} // Set to -30 for Android, 0 otherwis
               content={
                 <View>
                   <Text style = {styles.buttonText}>You can add a new note here</Text>
