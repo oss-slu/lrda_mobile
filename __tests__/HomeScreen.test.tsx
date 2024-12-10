@@ -5,6 +5,8 @@ import AddNoteScreen from '../lib/screens/AddNoteScreen';
 import * as Location from 'expo-location';
 import HomeScreen from '../lib/screens/HomeScreen';
 import { onAuthStateChanged } from 'firebase/auth';
+import { act } from '@testing-library/react-native';
+
 
 // Mock external dependencies
 jest.mock('../lib/components/ThemeProvider', () => ({
@@ -93,7 +95,7 @@ afterEach(() => {
 describe('HomeScreen', () => {
   it('renders toggle search bar', async () => {
     const routeMock = { params: { untitledNumber: 1 } };
-    const { getByTestId } = render(<HomeScreen route={routeMock as any} />);
+    const { getByTestId } = render(<HomeScreen route={routeMock as any} showTooltip = {false} />);
   
     const toggleButton = await waitFor(() => getByTestId('searchButton'));
     expect(toggleButton).toBeTruthy();
@@ -101,14 +103,21 @@ describe('HomeScreen', () => {
 
   it('toggle search bar visibility', async () => {
     const routeMock = { params: { untitledNumber: 1 } };
-    const { getByTestId } = render(<HomeScreen route={routeMock as any} />);
+    const { getByTestId, debug } = render(<HomeScreen route={routeMock as any} showTooltip={false} />);
   
     const toggleButton = await waitFor(() => getByTestId('searchButton'));
     fireEvent.press(toggleButton);
   
+  
     const searchBar = await waitFor(() => getByTestId('searchBar'));
     expect(searchBar).toBeTruthy();
   });
+  it('renders add button', async () => {
+    const routeMock = { params: { untitledNumber: 1 } };
+    const { getByTestId } = render(<HomeScreen route={routeMock as any} showTooltip = {false} />);
+  
+    const addButton = await waitFor(() => getByTestId('addButtonIcon'));
+    expect(addButton).toBeTruthy();
+  });
 
 });
-
