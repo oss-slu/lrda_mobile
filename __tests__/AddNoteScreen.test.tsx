@@ -97,10 +97,6 @@ jest.mock('expo-location', () => ({
   ),
 }));
 
-jest.mock('@react-native-community/progress-bar-android', () => ({
-  ProgressBarAndroid: () => null, // Mocked component
-}));
-
 jest.mock('@react-native-clipboard/clipboard', () => ({
   getString: jest.fn(),
   setString: jest.fn(),
