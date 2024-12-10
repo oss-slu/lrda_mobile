@@ -4,8 +4,8 @@ import { Provider } from 'react-redux';
 import { SafeAreaProvider } from 'react-native-safe-area-context'; // Make sure to import SafeAreaProvider
 import configureStore from 'redux-mock-store';
 import LoginScreen from '../lib/screens/loginScreens/LoginScreen';
-import moxios from 'moxios'
-import { shallow } from 'enzyme';
+import moxios from 'moxios';
+
 // Create a mock store
 const mockStore = configureStore([]);
 const store = mockStore({
@@ -23,6 +23,19 @@ jest.mock("firebase/auth", () => ({
   initializeAuth: jest.fn(),
   getReactNativePersistence: jest.fn(),
   onAuthStateChanged: jest.fn(), // Mock onAuthStateChanged
+  signInWithEmailAndPassword: jest.fn(() =>
+    Promise.resolve({ user: { uid: '12345' } })
+  ), // Mock signInWithEmailAndPassword
+}));
+
+jest.mock("firebase/storage", () => ({
+  getStorage: jest.fn(),
+}));
+
+jest.mock('firebase/firestore', () => ({
+  getFirestore: jest.fn(() => ({})), // Mock getFirestore to return an empty object
+  doc: jest.fn(() => ({})), // Mock doc to return an empty object
+  getDoc: jest.fn(() => Promise.resolve({ exists: () => false })), // Mock getDoc to resolve without a document
 }));
 
 // Silence console warnings during the test
@@ -32,14 +45,12 @@ beforeEach(() => {
   jest.spyOn(console, 'log').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
   jest.spyOn(console, 'warn').mockImplementation(() => {});
-  moxios.install()
+  moxios.install();
 });
 
 afterEach(() => {
-  console.log.mockRestore();
-  console.error.mockRestore();
-  console.warn.mockRestore(); // Restore console.warn after the tests
-  moxios.uninstall()
+  jest.restoreAllMocks();
+  moxios.uninstall();
 });
 
 describe('LoginScreen', () => {
@@ -58,11 +69,11 @@ describe('LoginScreen', () => {
     expect(toJSON()).toMatchSnapshot();
   });
 
-  it('renders input fields', async () => {
+  it('renders input fields and handles login', async () => {
     const navigationMock = { navigate: jest.fn() };
     const routeMock = { params: {} };
 
-    const { queryByTestId } = render(
+    const { getByTestId } = render(
       <Provider store={store}>
         <SafeAreaProvider>
           <LoginScreen navigation={navigationMock} route={routeMock} />
@@ -70,12 +81,19 @@ describe('LoginScreen', () => {
       </Provider>
     );
 
-    // Simulate input and login button press 
-    const email = queryByTestId('email-input');
-    const password = queryByTestId('password-input');
-    const loginButton = queryByTestId('login-button');
+    const emailInput = getByTestId('email-input');
+    const passwordInput = getByTestId('password-input');
+    const loginButton = getByTestId('login-button');
 
+    // Simulate user input
+    fireEvent.changeText(emailInput, 'test@example.com');
+    fireEvent.changeText(passwordInput, 'password123');
 
+    // Simulate login button press
+    fireEvent.press(loginButton);
+
+    await waitFor(() => {
+      expect(navigationMock.navigate).toHaveBeenCalledWith('HomeTab');
+    });
   });
-  
 });

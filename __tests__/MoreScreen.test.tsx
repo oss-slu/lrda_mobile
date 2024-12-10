@@ -1,6 +1,7 @@
-import { fireEvent, render } from '@testing-library/react-native';
 import React from 'react';
+import { fireEvent, render } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
+import { NavigationContainer } from '@react-navigation/native';
 import configureStore from 'redux-mock-store';
 import MorePage from '../lib/screens/MorePage';
 
@@ -14,6 +15,19 @@ jest.mock("firebase/auth", () => ({
   getReactNativePersistence: jest.fn(),
   onAuthStateChanged: jest.fn(), // Mock onAuthStateChanged
 }));
+
+
+jest.mock('firebase/firestore', () => ({
+  getFirestore: jest.fn(),
+  doc: jest.fn(() => ({
+    get: jest.fn(() => Promise.resolve({ exists: false })),
+  })),
+}));
+
+jest.mock("firebase/storage", () => ({
+  getStorage: jest.fn(),
+}));
+
 jest.mock('expo-font', () => ({
   loadAsync: jest.fn(() => Promise.resolve()),
   isLoaded: jest.fn(() => true),
@@ -23,7 +37,6 @@ jest.mock('react-native/Libraries/Image/Image', () => ({
   ...jest.requireActual('react-native/Libraries/Image/Image'),
   resolveAssetSource: jest.fn(() => ({ uri: 'mocked-asset-uri' })),
 }));
-
 
 jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
   settings: {},
@@ -67,7 +80,9 @@ describe('MorePage', () => {
   it('toggles dark mode correctly', () => {
     const { getByTestId } = render(
       <Provider store={store}>
-        <MorePage />
+        <NavigationContainer>
+          <MorePage />
+        </NavigationContainer>
       </Provider>
     );
 
