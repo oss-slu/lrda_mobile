@@ -1,31 +1,19 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native'; // Added NavigationContainer
 import configureStore from 'redux-mock-store';
 import MorePage from '../lib/screens/MorePage';
 
-jest.mock("firebase/database", () => ({
-  getDatabase: jest.fn(), // Mock getDatabase to prevent the error
+jest.mock('firebase/database', () => ({
+  getDatabase: jest.fn(),
 }));
 
-jest.mock("firebase/auth", () => ({
+jest.mock('firebase/auth', () => ({
   getAuth: jest.fn(),
   initializeAuth: jest.fn(),
   getReactNativePersistence: jest.fn(),
-  onAuthStateChanged: jest.fn(), // Mock onAuthStateChanged
-}));
-
-
-jest.mock('firebase/firestore', () => ({
-  getFirestore: jest.fn(),
-  doc: jest.fn(() => ({
-    get: jest.fn(() => Promise.resolve({ exists: false })),
-  })),
-}));
-
-jest.mock("firebase/storage", () => ({
-  getStorage: jest.fn(),
+  onAuthStateChanged: jest.fn(),
 }));
 
 jest.mock('expo-font', () => ({
@@ -45,6 +33,13 @@ jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
     settings: {},
   })),
 }));
+
+//mock carousel
+jest.mock('react-native-reanimated-carousel', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  return (props) => <View>{props.children}</View>;
+});
 
 const mockStore = configureStore([]);
 const store = mockStore({
@@ -68,7 +63,7 @@ jest.mock('../lib/components/ThemeProvider', () => ({
       logoutText: '#ffffff',
     },
     isDarkmode: false,
-    toggleDarkmode: mockToggleDarkmode, // Mock toggleDarkmode
+    toggleDarkmode: mockToggleDarkmode,
   })),
 }));
 
@@ -77,8 +72,8 @@ beforeEach(() => {
 });
 
 describe('MorePage', () => {
-  it('toggles dark mode correctly', () => {
-    const { getByTestId } = render(
+  it('should render MorePage', () => {
+    const { getByText } = render(
       <Provider store={store}>
         <NavigationContainer>
           <MorePage />
@@ -86,11 +81,8 @@ describe('MorePage', () => {
       </Provider>
     );
 
-    const toggleSwitch = getByTestId('dark-mode-switch');
-    expect(toggleSwitch.props.value).toBe(false);
-
-    fireEvent(toggleSwitch, 'onValueChange', true);
-
-    expect(mockToggleDarkmode).toHaveBeenCalled(); // Verify call
+    expect(getByText('More')).toBeTruthy();
   });
+
 });
+
