@@ -68,6 +68,7 @@ export type RootTabParamList = {
 export type HomeScreenProps = {
   navigation: any;
   route: { params?: { note: Note; onSave: (note: Note) => void } };
+  showTooltip: boolean;
 };
 
 export type ProfilePageProps = {
