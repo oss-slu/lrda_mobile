@@ -2,6 +2,30 @@ import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import TagWindow from '../lib/components/tagging';
 
+
+jest.mock('../lib/utils/api_calls', () => ({
+  fetchCreatorName: jest.fn(() => Promise.resolve([])),
+}));
+
+jest.mock('expo-font', () => ({
+  loadAsync: jest.fn(() => Promise.resolve()),
+  isLoaded: jest.fn(() => true),
+}));
+
+jest.mock('react-native/Libraries/Image/Image', () => ({
+  ...jest.requireActual('react-native/Libraries/Image/Image'),
+  resolveAssetSource: jest.fn(() => ({ uri: 'mocked-asset-uri' })),
+}));
+
+
+jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
+  settings: {},
+  setValues: jest.fn(),
+  getConstants: jest.fn(() => ({
+    settings: {},
+  })),
+}));
+
 beforeEach(() => {
   // Clear mocks before each test
   jest.clearAllMocks();
@@ -16,6 +40,18 @@ afterEach(() => {
   console.log.mockRestore();
   console.error.mockRestore();
 });
+
+jest.mock('@10play/tentap-editor', () => ({
+  RichText: () => null,
+  Toolbar: () => null,
+  useEditorBridge: jest.fn(() => ({
+    getHTML: jest.fn(() => ''),
+    commands: {
+      setContent: jest.fn(),
+      focus: jest.fn(),
+    },
+  })),
+}));
 
 describe('TagWindowTest1', () => {
   const mockTags = ['Tag1', 'Tag2', 'Tag3'];

@@ -69,6 +69,7 @@ const PhotoScroller = forwardRef(
         console.log("PhotoScroller unmounted");
       };
     }, []);
+    
 
     const handleImageSelection = async (result: {
       canceled?: false;
@@ -124,6 +125,11 @@ const PhotoScroller = forwardRef(
       }
     };
 
+    const displayErrorInEditor = async (errorMessage: string) => {
+      Alert.alert("Error", errorMessage); // Alerts the error message to the user
+    };
+
+
     const handleSaveMedia = async (imageURI: string) => {
       try {
         const fileName = imageURI.replace(/^.*[\\\/]/, "");
@@ -141,6 +147,7 @@ const PhotoScroller = forwardRef(
         }, 2000);
       } catch (error) {
         console.error("Error saving media:", error);
+        displayErrorInEditor(`Error uploading media: ${error.message}`);
       }
     };
 
@@ -201,14 +208,7 @@ const PhotoScroller = forwardRef(
             delayLongPress={100}
             onPress={() => goBig(index)}
           >
-            <View
-              style={{
-                alignSelf: "center",
-                height: 100,
-                width: 100,
-                marginRight: index === newMedia.length - 1 ? 10 : 0,
-              }}
-            >
+            <View style={styles.mediaItem}>
               {IsImage ? (
                 <LoadingImage
                   imageURI={ImageURI}
@@ -420,3 +420,11 @@ const PhotoScroller = forwardRef(
 );
 
 export default PhotoScroller;
+
+const styles = StyleSheet.create({
+  mediaItem: {
+    width: 100, // You can adjust these values
+    height: 100,
+    marginRight: 5, // Spacing between images
+  },
+});

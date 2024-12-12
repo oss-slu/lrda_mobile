@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { DarkTheme, DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -12,14 +12,16 @@ import RegisterScreen from "../screens/loginScreens/RegisterScreen";
 import AddNoteScreen from "../screens/AddNoteScreen";
 import EditNote from "../components/EditNote";
 import OnboardingScreen from "../screens/OnboardingScreen";
+import VideoPlayerScreen from "../screens/VideoPlayer"; // Import the VideoPlayerScreen
 import { User } from "../models/user_class";
 import { getItem } from "../utils/async_storage";
 import * as SplashScreen from 'expo-splash-screen';
 import { useTheme } from '../components/ThemeProvider';
 import ToastMessage from 'react-native-toast-message';
-import { useSelector, useDispatch} from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../redux/store/store";
 import { setNavState } from "../../redux/slice/navigationSlice";
+import TeamPage from "../screens/TeamPage";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -28,35 +30,51 @@ const user = User.getInstance();
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-const HomeStack = () => {
-  return (
-    <Stack.Navigator>
-      <Stack.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{ headerShown: false, gestureEnabled: false }}
-      />
-      <Stack.Screen
-        name="AddNote"
-        component={AddNoteScreen}
-        options={{ headerShown: false, gestureEnabled: false }}
-      />
-      <Stack.Screen name="AccountPage" component={ProfilePage} />
-      <Stack.Screen
-        name="EditNote"
-        component={EditNote}
-        options={{ headerShown: false, gestureEnabled: false }}
-      />
-    </Stack.Navigator>
-  );
-};
+const HomeStack = () => (
+  <Stack.Navigator>
+    <Stack.Screen
+      name="Home"
+      component={HomeScreen}
+      options={{ headerShown: false, gestureEnabled: false }}
+    />
+    <Stack.Screen
+      name="AddNote"
+      component={AddNoteScreen}
+      options={{ headerShown: false, gestureEnabled: false }}
+    />
+    <Stack.Screen
+      name="EditNote"
+      component={EditNote}
+      options={{ headerShown: false, gestureEnabled: false }}
+    />
+    <Stack.Screen
+      name="VideoPlayer"
+      component={VideoPlayerScreen}
+      options={{ headerShown: false, gestureEnabled: true }}
+    />
+  </Stack.Navigator>
+);
+
+const MoreStack = () => (
+  <Stack.Navigator>
+    <Stack.Screen
+      name="MorePage"
+      component={MorePage}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="TeamPage"
+      component={TeamPage}
+      options={{ title: "Team",headerShown: false, headerBackTitleVisible: false }}
+    />
+  </Stack.Navigator>
+);
 
 const AppNavigator: React.FC = () => {
-  // const [navState, setNavState] = useState<"loading" | "onboarding" | "login" | "home">("loading");
   const { theme, isDarkmode } = useTheme();
   const dispatch = useDispatch();
   const navState = useSelector((state: RootState) => state.navigation.navState);
-  
+
   useEffect(() => {
     const checkOnboarding = async () => {
       const onboarded = await getItem("onboarded");
@@ -85,19 +103,44 @@ const AppNavigator: React.FC = () => {
     <NavigationContainer theme={isDarkmode ? DarkTheme : DefaultTheme}>
       {navState === "onboarding" && (
         <Stack.Navigator initialRouteName="Onboarding">
-          <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
-          <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-          <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
+          <Stack.Screen
+            name="Onboarding"
+            component={OnboardingScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Login"
+            component={LoginScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Register"
+            component={RegisterScreen}
+            options={{ headerShown: false }}
+          />
         </Stack.Navigator>
       )}
       {navState === "login" && (
         <Stack.Navigator initialRouteName="Login">
-          <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-          <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
+          <Stack.Screen
+            name="Login"
+            component={LoginScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Register"
+            component={RegisterScreen}
+            options={{ headerShown: false }}
+          />
         </Stack.Navigator>
       )}
       {navState === "home" && (
-        <Tab.Navigator screenOptions={{ tabBarShowLabel: false }}>
+        <Tab.Navigator
+          screenOptions={{
+            tabBarShowLabel: false,
+            tabBarHideOnKeyboard: true,
+          }}
+        >
           <Tab.Screen
             name="HomeTab"
             component={HomeStack}
@@ -120,7 +163,7 @@ const AppNavigator: React.FC = () => {
           />
           <Tab.Screen
             name="More"
-            component={MorePage}
+            component={MoreStack}
             options={{
               headerShown: false,
               tabBarIcon: ({ color, size }) => (

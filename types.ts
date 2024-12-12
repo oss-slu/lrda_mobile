@@ -33,6 +33,7 @@ export type Note = {
   longitude: string;
   published: boolean | undefined;
   tags: string[];
+  isArchived?: boolean; // Optional flag to indicate if the note is archived
 };
 
 export type RootStackParamList = {
@@ -67,6 +68,7 @@ export type RootTabParamList = {
 export type HomeScreenProps = {
   navigation: any;
   route: { params?: { note: Note; onSave: (note: Note) => void } };
+  showTooltip: boolean;
 };
 
 export type ProfilePageProps = {

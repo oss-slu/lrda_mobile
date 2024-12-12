@@ -50,6 +50,8 @@ const OnboardingScreen = ({ navigation }) => {
               isMuted={true}
             />
           ),
+          title: 'Welcome to Our App!',
+          subtitle: 'Learn more about our features in this onboarding experience.',
         },
         {
           backgroundColor: '#ff7f50',
@@ -63,6 +65,8 @@ const OnboardingScreen = ({ navigation }) => {
               isMuted={true}
             />
           ),
+          title: 'Stay Connected',
+          subtitle: 'Interact and stay connected with our community.',
         },
         {
           backgroundColor: '#ffe135',
@@ -76,6 +80,8 @@ const OnboardingScreen = ({ navigation }) => {
               isMuted={true}
             />
           ),
+          title: 'Get Notified',
+          subtitle: 'Receive instant notifications and stay updated.',
         },
         {
           backgroundColor: '#ffa280',
@@ -89,6 +95,8 @@ const OnboardingScreen = ({ navigation }) => {
               isMuted={true}
             />
           ),
+          title: 'Explore Features',
+          subtitle: 'Discover new functionalities tailored just for you.',
         },
         {
           backgroundColor: '#90ee90',
@@ -102,6 +110,8 @@ const OnboardingScreen = ({ navigation }) => {
               isMuted={true}
             />
           ),
+          title: 'Get Started!',
+          subtitle: 'Tap "Done" to start using the app.',
         },
       ]}
       transitionAnimationDuration={300}

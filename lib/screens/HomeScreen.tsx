@@ -1,30 +1,36 @@
-import { Ionicons } from "@expo/vector-icons";
-import Constants from "expo-constants";
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useMemo, startTransition } from "react";
 import {
-  Dimensions,
-  Image,
   Platform,
-  StyleSheet,
+  View,
   Text,
+  ScrollView,
   TouchableOpacity,
-  View
+  StyleSheet,
+  Dimensions,
+  SafeAreaView,
+  Image,
+  TextInput,
 } from "react-native";
-import DropDownPicker from 'react-native-dropdown-picker';
-import { SwipeListView } from "react-native-swipe-list-view";
-import { HomeScreenProps, Note } from "../../types";
-import { useTheme } from '../components/ThemeProvider';
-import LoadingImage from "../components/loadingImage";
-import NoteSkeleton from "../components/noteSkeleton";
-import { formatToLocalDateString } from "../components/time";
+import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
+import { Note } from "../../types";
+import { HomeScreenProps } from "../../types";
 import ApiService from "../utils/api_calls";
 import DataConversion from "../utils/data_conversion";
+import { SwipeListView } from "react-native-swipe-list-view";
+import NoteSkeleton from "../components/noteSkeleton";
+import LoadingImage from "../components/loadingImage";
+import { formatToLocalDateString } from "../components/time";
+import { useTheme } from '../components/ThemeProvider';
+import Constants from "expo-constants";
+import ToastMessage from 'react-native-toast-message';
+import DropDownPicker from 'react-native-dropdown-picker';
 import NoteDetailModal from "./mapPage/NoteDetailModal";
+import Tooltip from 'react-native-walkthrough-tooltip';
+import { Button } from "react-native-paper";
 
-const user = User.getInstance();
-
-const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
+const HomeScreen: React.FC<HomeScreenProps> =  ({ navigation, route, showTooltip = true }) => {
+  const user = User.getInstance();
   const [notes, setNotes] = useState<Note[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
   const [updateCounter, setUpdateCounter] = useState(0);
@@ -44,8 +50,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [items, setItems] = useState(initialItems);
   const [selectedNote, setSelectedNote] = useState<Note | undefined>(undefined);
   const [isModalVisible, setModalVisible] = useState(false);
-
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { theme } = useTheme();
+  const [tooltipVisible, setTooltipVisible] = useState(true);
+  const [addNoteTooltipVisible, setAddNoteTooltipVisible] = useState(false);
+  const [dropDownTip, setDropDownTip] = useState(false);
+  const [accountTip, setAccountTip] = useState(false);
+
 
   let textLength = 18;
 
@@ -156,13 +168,32 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     });
     return maxNumber + 1;
   };
-  
 
   const styles = StyleSheet.create({
     container: {
       paddingTop: Constants.statusBarHeight - 20,
       flex: 1,
       backgroundColor: theme.homeColor,
+    },
+    skipTutorialText: {
+      fontSize: 12, // Small font size
+      color: 'lightgray', // Light gray text
+      textAlign: 'center', // Aligns the text to the center
+      marginTop: 10, // Adds spacing from the button above
+    },
+    gotItButton: {
+      marginTop: 8, // Reduced from 10 to 8
+      padding: 8, // Reduced from 10 to 8
+      backgroundColor: theme.homeColor,
+      borderRadius: 5,
+    },
+    gotItButtonText: {
+      color: theme.text,
+      textAlign: 'center',
+    },
+    tooltipWrapper: {
+      alignSelf: 'flex-end', // Align the tooltip to the right
+      marginRight: 20, // Adjust this value as needed to move the tooltip to the right
     },
     pfpText: {
       fontWeight: "600",
@@ -233,7 +264,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       width: "100%",
       alignItems: "center",
       zIndex: 1000,
-      marginTop: -12,
+      marginTop: -13,
     },
     horizontalLine: {
       borderBottomColor: theme.text,
@@ -250,7 +281,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       width: "100%",
       //padding: 10,
       flexDirection: "row",
-      height: 140,
+      height: 185,
       paddingLeft: width * 0.03,
       paddingRight: width * 0.03,
     },
@@ -284,6 +315,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       fontSize: 17,
       color: theme.logoutText,
       fontWeight: "700",
+    },
+    buttonText:{
+      fontSize: 16,
+      color: theme.text,
+      fontWeight: "600",
     },
     filterFont: {
       fontSize: 16,
@@ -326,6 +362,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       marginTop: 1,
       padding: 10,
       alignSelf: "center",
+    },
+    searchBar:{
+      backgroundColor: theme.homeColor,
+      borderRadius: 20,
+      fontSize: 18,
+      padding: 20,
+      margin: 20,
+      color: theme.text,
+      borderWidth: 3,
+    
     },
   });
 
@@ -391,9 +437,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   }
 
   const renderList = (notes: Note[]) => {
+    const filteredNotes = searchQuery
+    ? notes.filter(note => {
+        const lowerCaseQuery = searchQuery.toLowerCase();
+        const noteTime = new Date(note.time);
+        const formattedTime = formatDate(noteTime);
+        return (
+          note.title.toLowerCase().includes(lowerCaseQuery) || formattedTime.includes(lowerCaseQuery)
+        );
+      })
+    : notes;
+    
     return isPrivate ? (
       <SwipeListView
-        data={notes}
+        data={filteredNotes}
         renderItem={renderItem}
         renderHiddenItem={sideMenu}
         leftActivationValue={160}
@@ -408,7 +465,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       />
     ) : (
       <SwipeListView
-        data={notes}
+        data={filteredNotes}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
       />
@@ -513,96 +570,323 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     );
   };
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.topView}>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            width: "100%",
-            paddingBottom: 15,
-            paddingTop: 10,
-          }}
-        >
-          <TouchableOpacity
-            style={[
-              styles.userPhoto,
-              { backgroundColor: theme.black },
-            ]}
-            onPress={() => {
-              navigation.navigate("AccountPage");
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
+
+  const formatDate = (date: Date) => {
+    const day = date.getDate().toString();
+    const month = (date.getMonth() + 1).toString(); // Months are zero-based
+    const year = date.getFullYear();
+    return `${month}/${day}/${year}`;
+  };
+
+  const filteredNotes = useMemo(() => {
+    return notes.filter(note => {
+      const noteTime = new Date(note.time);
+      const formattedTime = formatDate(noteTime);
+      
+      return note.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+             formattedTime.includes(searchQuery.toLowerCase());
+    });
+  }, [notes, searchQuery]);
+
+  // Reset search query when toggling search visibility
+  const resetSearchQuery = () => {
+    if(isSearchVisible){
+      setSearchQuery('');
+    }
+  };
+
+  const [tutorialDone, setTutorialDone] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const initialize = async () => {
+      const tutorialStatus = await User.getHasDoneTutorial("home_screen");
+      setTutorialDone( tutorialStatus );
+    };
+
+    initialize();
+  }, []);
+
+    return (
+      <View style={styles.container}>
+        <View style={styles.topView}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+              paddingBottom: 15,
+              paddingTop: 10,
             }}
           >
-            <Text style={styles.pfpText}>{userInitials}</Text>
-          </TouchableOpacity>
-          <Image source={require('../../assets/icon.png')} style={{width: width * 0.105, height: width * 0.105, marginEnd: width * 0.435}} />
+                <Tooltip
+             isVisible={accountTip && !tutorialDone && showTooltip}
+             topAdjustment={Platform.OS === "android" ? -30 : 0} // Set to -30 for Android, 0 otherwise
+
+             content={
+               <View>
+                 <Text style = {styles.buttonText}>See Account Here</Text>
+                 <Button
+                   style={styles.gotItButton}
+                   onPress={() => {
+                    setAccountTip(false);
+                    User.setUserTutorialDone("home_screen", true);
+                   }}
+                 >
+                   <Text style={styles.gotItButtonText}>Got it!</Text>
+                 </Button>
+                 <Text 
+                    style={styles.skipTutorialText} 
+                    onPress={() => {
+                      setTooltipVisible(false);
+                      setAddNoteTooltipVisible(false); // Skip tutorial logic
+                      setDropDownTip(false)
+                      setAccountTip(false);
+                      User.setUserTutorialDone("home_screen", true);
+                    }}
+                  >
+                    Skip Tutorial
+                  </Text>
+               </View>
+             }
+             placement="bottom"
+             showChildInTooltip={false}
+          
+           >
+            <TouchableOpacity
+              style={[
+                styles.userPhoto,
+                { backgroundColor: theme.black },
+              ]}
+              onPress={() => {
+                navigation.navigate("AccountPage");
+              }}
+            >
+              <Text style={styles.pfpText}>{userInitials}</Text>
+            </TouchableOpacity>
+           </Tooltip>
+        
+            <Image source={require('../../assets/icon.png')} style={{width: width * 0.105, height: width * 0.105, marginEnd: width * 0.025}} />
+           
+            <View           testID="searchButton"     
+            >
+            <Tooltip  
+            
+
+              isVisible={tooltipVisible && !tutorialDone && showTooltip}
+              topAdjustment={Platform.OS === "android" ? -30 : 0} // Set to -30 for Android, 0 otherwise
+              content={
+                <View>
+                  <Text style={styles.buttonText}>Search Entries Here!</Text>
+                  <Button
+                    style={styles.gotItButton}
+                    onPress={() => {
+                      setTooltipVisible(false);
+                      setTimeout(() => setAddNoteTooltipVisible(true), 100); // Add a delay
+                    }}
+                  >
+                    <Text style={styles.gotItButtonText}>Got it!</Text>
+                  </Button>
+                  <Text 
+                    style={styles.skipTutorialText} 
+                    onPress={() => {
+                      setTooltipVisible(false);
+                      setAddNoteTooltipVisible(false); // Skip tutorial logic
+                      User.setUserTutorialDone("home_screen", true);
+                    }}
+                  >
+                    Skip Tutorial
+                  </Text>
+                </View>
+              }
+              
+              placement="bottom"
+              showChildInTooltip={false}
+
+              
+            >
+    
+                <TouchableOpacity  
+                  onPress={() => {
+                    setIsSearchVisible(!isSearchVisible);
+                    resetSearchQuery();   
+                               
+                  }}
+                >
+                  <Ionicons
+                  
+                    name={isSearchVisible ? "close-outline" : "search-outline"}
+                    size={36}
+                    color={theme.black}
+                  />
+                </TouchableOpacity>
+           </Tooltip>
+            </View>
+          </View>
         </View>
-      </View>
-      <View style={styles.dropdown}>
-        <DropDownPicker
-          open={open}
-          value={value}
-          items={items.filter(item => item.value !== value)}
-          setOpen={setOpen}
-          setValue={(callback: (arg0: string) => any) => {
-            const newValue = callback(value);
-            setValue(newValue);
-            handleFilters(newValue);
-          }}
-          setItems={setItems}
-          listMode="SCROLLVIEW"
-          scrollViewProps={{
-            nestedScrollEnabled: true,
-          }}
-          style={{
-            borderWidth: 0, 
-            backgroundColor: theme.homeColor, 
-          }}
-          dropDownContainerStyle={{
-            borderWidth: 0, 
-            backgroundColor: theme.homeColor,
-          }}
-          placeholder={`${items.find(item => item.value === value)?.label || 'Select an option'} (${notes.length})`}
-          placeholderStyle={{
-            textAlign: 'center',
-            fontSize: 22,
-            fontWeight: 'bold',
-            color: theme.black,
-            paddingLeft: 28,
-          }}
-          textStyle={{
-            textAlign: 'center',
-            fontSize: 22,
-            fontWeight: 'bold',
-            color: theme.black,
-          }}
-          showArrowIcon={true}
-        /> 
-      </View>
-      <View style={styles.horizontalLine} />
-      <View style={styles.scrollerBackgroundColor}>
-        {rendering ? <NoteSkeleton /> : renderList(notes)}
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => {
-            const untitledNumber = findNextUntitledNumber(notes);
-            navigation.navigate("AddNote", { untitledNumber, refreshPage });
-          }}
-        >
-          <Ionicons name="add-outline" size={32} color={theme.primaryColor} style={{ fontFamily: 'Ionicons_' }} />
-        </TouchableOpacity>
-      </View>
+    
+        <View style={styles.dropdown}>
+        <Tooltip
+          isVisible={dropDownTip && !tutorialDone && showTooltip}
+          topAdjustment={Platform.OS === "android" ? -30 : 0} // Set to -30 for Android, 0 otherwise
 
-      <NoteDetailModal 
-        isVisible={isModalVisible} 
-        onClose={() => setModalVisible(false)} 
-        note={selectedNote} 
+
+          content={
+            <View>
+              <Text style = {styles.buttonText}>Switch between private and published entries here!</Text>
+              <Button
+                    style={styles.gotItButton}
+                    onPress={() => {
+                      setDropDownTip(false)
+                      setTimeout(() => (setAccountTip(true),100));
+                    }}
+                    
+                  >
+                    <Text style={styles.gotItButtonText}>Got it!</Text>
+                  </Button>
+                  <Text 
+                    style={styles.skipTutorialText} 
+                    onPress={() => {
+                      setTooltipVisible(false);
+                      setAddNoteTooltipVisible(false); // Skip tutorial logic
+                      setDropDownTip(false)
+                      setAccountTip(false);
+                      User.setUserTutorialDone("home_screen", true);
+                    }}
+                  >
+                    Skip Tutorial
+                  </Text>
+                  
+            </View>
+          }
+          placement="bottom"
+          arrowSize={{ width: 10, height: 10 }} // Adjust arrow size for better alignment
+          onClose={() => setDropDownTip(false)}
+          showChildInTooltip={false}>
+            
+          <DropDownPicker
+            open={open}
+            value={value}
+            items={items.filter(item => item.value !== value)}
+            setOpen={setOpen}
+            setValue={(callback: (arg0: string) => any) => {
+              const newValue = callback(value);
+              setValue(newValue);
+              handleFilters(newValue);
+            }}
+            setItems={setItems}
+            listMode="SCROLLVIEW"
+            scrollViewProps={{
+              nestedScrollEnabled: true,
+            }}
+            style={{
+              borderWidth: 0, 
+              backgroundColor: theme.homeColor, 
+            }}
+            dropDownContainerStyle={{
+              borderWidth: 0, 
+              backgroundColor: theme.homeColor,
+            }}
+            placeholder={`${items.find(item => item.value === value)?.label || 'Select an option'} (${filteredNotes.length})`}
+            placeholderStyle={{
+              textAlign: 'center',
+              fontSize: 22,
+              fontWeight: 'bold',
+              color: theme.black,
+              paddingLeft: 28,
+            }}
+            textStyle={{
+              textAlign: 'center',
+              fontSize: 22,
+              fontWeight: 'bold',
+              color: theme.black,
+            }}
+            showArrowIcon={true}
+          /> 
+        </Tooltip>
+
+        </View>
+    
+  <View testID="searchBar">
+    {isSearchVisible && (
+      <TextInput
+        placeholder="Search notes..."
+        onChangeText={handleSearch}
+        style={styles.searchBar}
       />
+    )}
+  </View>
 
-    </View>
-  );
+        <View style={styles.horizontalLine} />
+        <View style={styles.scrollerBackgroundColor}>
+          {rendering ? <NoteSkeleton /> : renderList(notes)}
+    
+
+          <View >
+      
+              <TouchableOpacity
+                style={styles.addButton}
+                onPress={() => {
+                  const untitledNumber = findNextUntitledNumber(notes);
+                  navigation.navigate("AddNote", { untitledNumber, refreshPage });
+                }}
+              >
+         <Tooltip
+              isVisible={addNoteTooltipVisible && !tutorialDone && showTooltip}
+              topAdjustment={Platform.OS === "android" ? -30 : 0} // Set to -30 for Android, 0 otherwis
+              content={
+                <View>
+                  <Text style = {styles.buttonText}>You can add a new note here</Text>
+                  <Button
+                    style={styles.gotItButton}
+                    onPress={() => {
+                      setAddNoteTooltipVisible(false);
+                      setTimeout(() => setDropDownTip(true), 100);
+                    }}
+                  >
+                    <Text style={styles.gotItButtonText}>Got it!</Text>
+                  </Button>
+                  <Text 
+                    style={styles.skipTutorialText} 
+                    onPress={() => {
+                      setTooltipVisible(false);
+                      setAddNoteTooltipVisible(false); // Skip tutorial logic
+                      setDropDownTip(false)
+                      setAccountTip(false);
+                      User.setUserTutorialDone("home_screen", true);
+                    }}
+                  >
+                    Skip Tutorial
+                  </Text>
+                    
+                </View>
+              }
+              placement="top"
+              arrowSize={{ width: 10, height: 10 }} // Adjust arrow size for better alignment
+   
+              showChildInTooltip={false}
+            >
+              <Ionicons  name="add-outline" size={32} color={theme.primaryColor}   testID="addButtonIcon" />
+            </Tooltip>
+              </TouchableOpacity>
+          
+          </View>
+</View>
+    
+        <NoteDetailModal 
+          isVisible={isModalVisible} 
+          onClose={() => setModalVisible(false)} 
+          note={selectedNote} 
+        />
+      </View>
+    );
+    
 };
+
+  
+
 
 export default HomeScreen;

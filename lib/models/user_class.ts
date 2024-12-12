@@ -21,6 +21,29 @@ export class User {
     return User.instance;
   }
 
+  public static async getHasDoneTutorial(page_tutorial): Promise<boolean> {
+    try {
+      const value = await AsyncStorage.getItem(page_tutorial);
+      if (value !== null) {
+        return JSON.parse(value);
+      }
+      else{
+        return false;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    return null;
+  }
+
+  public static async setUserTutorialDone(page_tutorial, bool) {
+    try {
+      await AsyncStorage.setItem(page_tutorial, JSON.stringify(bool));
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   private async persistUser(userData: UserData) {
     try {
       await AsyncStorage.setItem("userData", JSON.stringify(userData));
@@ -39,7 +62,7 @@ export class User {
     }
   }
 
-  private async loadUser(): Promise<UserData | null> {
+  public async loadUser(): Promise<UserData | null> {
     try {
       const value = await AsyncStorage.getItem("userData");
       if (value !== null) {

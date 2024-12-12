@@ -1,8 +1,20 @@
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 import { lightTheme, darkTheme } from "../colors";
 import Constants from "expo-constants";
 import { useTheme } from "../../lib/components/ThemeProvider";
-import { white } from "react-native-paper/lib/typescript/styles/themes/v2/colors";
+
+// Define custom CSS as a separate string
+// In NotePageStyles.ts
+export const customImageCSS = `
+  .ProseMirror img {
+    max-width: 200px !important;
+    max-height: 200px !important;
+    object-fit: cover !important;
+    display: inline-block; /* Ensure images don't expand to fit container width */
+  }
+`;
+
+
 
 const NotePageStyles = () => {
   const { theme } = useTheme();
@@ -40,23 +52,50 @@ const NotePageStyles = () => {
       backgroundColor: theme.tertiaryColor,
       marginBottom: 4,
       width: "100%",
-      // overflow: "hidden",
     },
     editorContainer: {
-      // backgroundColor: theme.tertiaryColor,
-      marginBottom: 4,
+      marginBottom: 1,
       width: "100%",
-      // overflow: "hidden",
+      backgroundColor: theme.primaryColor, // Ensure it matches the overall theme
+      ...Platform.select({
+        android: {
+          marginBottom: 1,
+          backgroundColor: theme.primaryColor,
+          width: "100%",
+        },
+      }),
     },
     editor: {
-      backgroundColor: theme.primaryColor,
+      backgroundColor: theme.tertiaryColor,
+      flex: 1,
+      paddingBottom: 50, // Space for the toolbar
       marginBottom: 4,
       width: "100%",
-      // color: theme.text,
-      // overflow: "hidden",
+      minHeight: 200, // Adjust for better visibility
+      color: theme.text,
+      padding: 10,
+      ...Platform.select({  // Adjust for better visibility
+        android: {
+          backgroundColor: theme.primaryColor,
+          color: theme.text,
+          marginBottom: 4,
+          width: "100%",
+          minHeight: 200,
+          padding: 10,
+        },
+      }),
     },
+
+   // Define this image style
+   editorImage: {
+    width: 50,
+    height: 50,
+    resizeMode: 'cover', // Ensures the image keeps its aspect ratio
+  },
+
     textEditorContainer: {
-      minHeight: 100,
+      minHeight: 300, // Set a minimum height for the editor
+      flex: 1, // Ensure the editor takes up available space
     },
     title: {
       height: 45,
@@ -66,12 +105,11 @@ const NotePageStyles = () => {
       borderRadius: 18,
       paddingHorizontal: 10,
       textAlign: "center",
-      fontSize: 30,
+      fontSize: 24, // Slightly smaller than 30 for better mobile readability
       color: theme.text,
     },
     input: {
       backgroundColor: 'white',
-      // borderColor: theme.secondaryColor,
       fontSize: 22,
       color: theme.text,
       height: 900, 
@@ -98,15 +136,45 @@ const NotePageStyles = () => {
     },
     saveText: {
       color: theme.text,
-      backgroundColor: 'black',
       fontWeight: "bold",
-      fontSize: 12,
+      fontSize: 14,
     },
     video: {
       width: "100%",
       height: "100%",
       justifyContent: "center",
       alignSelf: "center",
+    },
+
+    //editor styles
+    richTextContainer: {
+      height: Platform.OS == "android"? "90%" : "100%" 
+    },
+    toolbar: {
+      position: 'absolute', // Keep toolbar at the bottom of the screen
+      bottom: 0, // Align toolbar with the bottom edge
+      width: '100%', // Full-width toolbar
+      height: 50, // Adjusted height for better usability
+      backgroundColor: theme.primaryColor, // Ensure it matches the theme
+      justifyContent: 'center', // Center items in the toolbar
+      paddingHorizontal: 10,
+      zIndex: 10, // Ensure it stays above other elements
+
+      ...Platform.select({
+        android: {
+          height: 70,
+          backgroundColor: theme.primaryColor,
+        },
+        ios: {
+          height: 50,
+          backgroundColor: theme.primaryColor,
+        },
+      }),
+    },
+    closeKeyboardButton: {
+      padding: 10,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
   });
 };

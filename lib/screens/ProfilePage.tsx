@@ -17,7 +17,7 @@ import { ImageNote, ProfilePageProps } from "../../types";
 import DataConversion from "../utils/data_conversion";
 import ApiService from "../utils/api_calls";
 import { useTheme } from "../components/ThemeProvider";
-import {useAuth0, Auth0Provider} from 'react-native-auth0';
+
 
 const user = User.getInstance();
 
@@ -210,10 +210,6 @@ export default function ProfilePage({ navigation }: ProfilePageProps) {
               {allImages.length}
             </Text>
             <Text style={[styles.text, styles.subText]}>Images</Text>
-          </View>
-          <View style={styles.statsBox}>
-            <Text style={[styles.text, { fontSize: 24 }]}>{"< Year "}</Text>
-            <Text style={[styles.text, styles.subText]}>Age</Text>
           </View>
         </View>
 

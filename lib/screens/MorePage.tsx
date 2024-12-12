@@ -1,274 +1,178 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
   ScrollView,
-  Image,
-  Linking,
   TouchableOpacity,
   SafeAreaView,
+  Image,
   StyleSheet,
   Dimensions,
-  Switch
+  Switch,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { User } from "../models/user_class";
 import { useTheme } from "../components/ThemeProvider";
 import { useDispatch } from "react-redux";
+import { User } from "../models/user_class";
+import { useNavigation } from "@react-navigation/native";
+import Carousel from "react-native-reanimated-carousel";
+import ThemeToggle from "../components/ThemeToggle"; 
 
+const { width } = Dimensions.get("window");
+const data = [
+  {source: require("../../assets/Pond_395.jpg")},
+  {source: require("../../assets/Pond_048.jpg")},
+  {source: require("../../assets/Pond_049.jpg")},
+  {source: require("../../assets/Pond_062.jpg")},
+  {source: require("../../assets/Pond_221.jpg")},
+  {source: require("../../assets/Pond_290.jpg")},
+  {source: require("../../assets/Pond_021.jpg")},
+  {source: require("../../assets/Pond_883.jpg")},
+];
 
-
-const user = User.getInstance();
-const { width, height } = Dimensions.get("window");
 
 export default function MorePage() {
-  // Destructuring `toggleDarkmode` and `isDarkmode` from useTheme
   const { theme, isDarkmode, toggleDarkmode } = useTheme();
-
-  // Use the Redux dispatch for logging out
   const dispatch = useDispatch();
-
+  //add navigation prop
+  const navigation = useNavigation();
+  
 
   const handleToggleDarkMode = () => {
     if (toggleDarkmode) {
-      toggleDarkmode(); // Ensure this is a valid function
+      toggleDarkmode();
     }
-  };
-
-  const handleEmail = () => {
-    const emailAddress = "yashkamal.bhatia@slu.edu";
-    const subject = "Bug Report on 'Where's Religion?'";
-    const body = "Please provide details of your issue you are facing here.";
-
-    const emailUrl = `mailto:${emailAddress}?subject=${encodeURIComponent(
-      subject
-    )}&body=${encodeURIComponent(body)}`;
-
-    Linking.openURL(emailUrl);
   };
 
   const onLogoutPress = async () => {
     try {
-
-      await user.logout(dispatch);
-
+      await User.getInstance().logout(dispatch);
     } catch (e) {
       console.log(e);
     }
   };
 
-  return (
-    <>
-      <View style={styles.header}>
-        <Text style={styles.headText}>Where's Religion</Text>
+  const MenuItem = ({ title, iconName, onPress }) => (
+    <TouchableOpacity style={styles.menuButton} onPress={onPress}>
+      <View style={styles.menuContent}>
+        <Text style={styles.menuText}>{title}</Text>
+        <Ionicons name={iconName} size={styles.menuIcon.fontSize} color={"black"} />
       </View>
-      <SafeAreaView>
-        <ScrollView contentContainerStyle={styles.container}>
-          <View style={{ height: 300, width: "100%" }}>
-            <Image
-              source={require("../../assets/collegeChurch.jpg")}
-              style={styles.image}
-            />
+    </TouchableOpacity>
+  );
+  
+
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: isDarkmode ? "#000" : theme.background }]}>
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.profile}>
+          <View style={[styles.avatar, { backgroundColor: isDarkmode ? "#555" : "#ccc" }]}>
+            <Text style={[styles.avatarText, { color: isDarkmode ? "#fff" : theme.text }]}>Ap</Text>
           </View>
+          <Text style={[styles.username, { color: isDarkmode ? "#fff" : theme.text }]}>More</Text>
+        </View>
+        <ThemeToggle isDarkmode={isDarkmode} toggleDarkmode={toggleDarkmode} />
+        </View>
 
-          <View>
-            <Text style={styles.headerText}>Resources</Text>
-            <TouchableOpacity
-              onPress={() =>
-                Linking.openURL(
-                  "http://lived-religion-dev.rerum.io/deer-lr/dashboard.html"
-                )
-              }
-            >
-              <Text style={styles.text}>Our Website</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() =>
-                Linking.openURL(
-                  "https://guides.library.upenn.edu/ethnography/DoingEthnography"
-                )
-              }
-            >
-              <Text style={styles.text}>Guide to Ethnography</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() =>
-                Linking.openURL(
-                  "http://changingminds.org/explanations/research/analysis/ethnographic_coding.htm"
-                )
-              }
-            >
-              <Text style={styles.text}>Guide to Coding</Text>
-            </TouchableOpacity>
-            <TouchableOpacity key="Email" onPress={handleEmail}>
-              <Text style={styles.text}>Report a Bug</Text>
-            </TouchableOpacity>
+      {/* Carousel */}
+      <View style={styles.carouselContainer}>
+        <Carousel
+          width={width} 
+          height={width / 2}
+          data={data}
+          renderItem={({ item }) => (
+            <Image source={item.source} style={styles.bannerImage} />
+          )}
+          autoPlay
+          autoPlayInterval={3000}
+          scrollAnimationDuration={800}
+        />
+      </View>
 
-            <Text style={styles.headerText}>Meet our Team</Text>
-            <Text style={styles.text}>Insert Team Photo</Text>
-            <Text style={styles.text}>Insert Team Message</Text>
 
-            <Text style={styles.headerText}>Frequently Asked Questions</Text>
-          </View>
-
-          <Text style={styles.headerText}>What can users do?</Text>
-          <Text style={styles.text}>
-            Explore religious traditions, find places of worship, engage in
-            meaningful discussions.
-          </Text>
-
-          <Text style={styles.headerText}>Who is it for?</Text>
-          <Text style={styles.text}>
-            Scholars, students, believers, and the curious about the world's
-            religions.
-          </Text>
-
-          <Text style={styles.headerText}>What's unique?</Text>
-          <Text style={styles.text}>
-            Provides a modern method to capture experiences using the devices
-            that are with us every day.
-          </Text>
-
-          <Text style={styles.headerText}>Our Mission</Text>
-          <Text style={styles.text}>
-            Connect people of diverse religious backgrounds, beliefs, and
-            practices.
-          </Text>
-
-          <Text style={styles.headerText}>Why use 'Where's Religion?'</Text>
-          <Text style={styles.text}>
-            Explore religious traditions, find places of worship, engage in
-            meaningful discussions.
-          </Text>
-
-          <View style={styles.textContainer}>
-            <View style={styles.buttonContainer}>
-              <View style={styles.switchContainer}>
-                <Text style={styles.switchText}>Dark Mode</Text>
-                <Switch
-                  testID="dark-mode-switch"
-                  trackColor={{
-                    false: "black",
-                    true: theme.text,
-                  }}
-                  thumbColor={theme.primaryColor}
-                  onValueChange={handleToggleDarkMode}
-                  value={isDarkmode}
-                />
-              </View>
-            </View>
-          </View>
-          <View style={styles.logoutContainer}>
-            <TouchableOpacity
-              key="Logout"
-              style={styles.logout}
-              onPress={onLogoutPress}
-            >
-              <Text style={styles.logoutText}>Logout</Text>
-              <Ionicons
-                name={"log-out-outline"}
-                size={30}
-                color={theme.primaryColor}
-              />
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </>
+      {/* Menu Items */}
+      <ScrollView contentContainerStyle={styles.menuContainer}
+        scrollEnabled={true}
+      >
+        <MenuItem title="About" iconName="information-circle-outline" />
+        <MenuItem title="Resource" iconName="link-outline" />
+        <MenuItem title="Meet our team" iconName="people-outline" onPress={() => navigation.navigate("TeamPage")}/>
+        <MenuItem title="Settings" iconName="settings-outline" />
+        <MenuItem title="FAQ" iconName="help-circle-outline" />
+        <MenuItem title="Logout" iconName="exit-outline" onPress={onLogoutPress} />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
-// All styles moved to the bottom
 const styles = StyleSheet.create({
+  container: { 
+    flex: 1,
+    paddingTop: Platform.OS === "android" ? 25 : 0,
+   },
   header: {
-    backgroundColor: '#ffffff',
-    padding: height * 0.01,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: height * 0.04,
-    marginBottom: -8,
-  },
-  headText: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: '#000000',
-  },
-  container: {
-    flexGrow: 1,
-    justifyContent: "flex-start",
-    alignItems: "center",
-  },
-  textContainer: {
-    width: "100%",
-    paddingTop: 15,
-  },
-  titleText: {
-    alignSelf: "center",
-    fontSize: 40,
-    fontWeight: "600",
-    marginBottom: 10,
-    color: '#000000',
-  },
-  headerText: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: '#000000',
-    alignSelf: "center",
-  },
-  text: {
-    alignSelf: "center",
-    fontSize: 16,
-    lineHeight: 28,
-    color: '#000000',
-  },
-  logout: {
     flexDirection: "row",
-    backgroundColor: '#ff0000',
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+  },
+  profile: { flexDirection: "row", alignItems: "center" },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
-    height: 50,
-    width: "80%",
-    borderRadius: 15,
-    marginTop: 60,
-    marginBottom: 100,
   },
-  logoutText: {
-    marginLeft: 5,
-    marginRight: 10,
-    fontSize: 20,
-    fontWeight: "600",
-    color: '#ffffff',
-  },
-  buttonContainer: {
+  avatarText: { fontSize: 18, fontWeight: "bold" },
+  username: { marginLeft: 12, fontSize: 20, fontWeight: "bold" },
+  bannerImage: {
+    width: "95%",
+    height: "100%",
+    resizeMode: "cover",
+    alignSelf: "center",
+    borderRadius: 10, // Rounded corners
+  },  
+  carouselContainer: {
     alignItems: "center",
-    marginTop: 40,
+    marginVertical: 16,
+    marginBottom: 225,
   },
-  switchContainer: {
-    width: "94%",
-    backgroundColor: '#f0f0f0',
+  menuContainer: {
+    padding: 16,
+    alignItems: "center",
+  },
+  menuButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between", // Space text and icon
+    backgroundColor: "#fff", // Button background
+    paddingVertical: 18, // Increase button height
+    paddingHorizontal: 30, // Increase horizontal padding for both sides
+    marginBottom: 12, // Space between buttons
+    borderRadius: 16, // Smooth rounded corners
+    width: "90%", // Full width for buttons
+    shadowColor: "#000", // Shadow color
+    shadowOffset: { width: 0, height: 4 }, // Shadow offset for depth
+    shadowOpacity: 0.1, // Subtle shadow opacity
+    shadowRadius: 6, // Blur for the shadow
+    elevation: 5, // Android shadow effect
+  },
+  menuContent: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    borderRadius: 10,
-    padding: 6,
+    width: "90%", // Ensure full width usage
   },
-  switchText: {
-    color: '#000000',
-    marginLeft: 9,
-    fontSize: 18,
-    fontWeight: "500",
+  menuText: {
+    fontSize: 20, // Larger text size
+    fontWeight: "bold", // Bold text
+    color: "#000", // Black text color
+    marginLeft: 30, // Additional space on the left of text
   },
-  logoutContainer: {
-    backgroundColor: '#ffffff',
-    width: "100%",
-    alignItems: "center",
-  },
-  image: {
-    flex: 1,
-    width: undefined,
-    height: undefined,
-    resizeMode: "cover",
+  menuIcon: {
+    fontSize: 28, // Icon size for visual balance
   },
 });
-
-          
