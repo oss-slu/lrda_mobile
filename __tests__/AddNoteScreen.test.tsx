@@ -23,7 +23,6 @@ jest.mock('react-native/Libraries/Image/Image', () => ({
   resolveAssetSource: jest.fn(() => ({ uri: 'mocked-asset-uri' })),
 }));
 
-
 jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
   settings: {},
   setValues: jest.fn(),
@@ -95,11 +94,6 @@ jest.mock('expo-location', () => ({
       },
     })
   ),
-}));
-
-jest.mock('@react-native-clipboard/clipboard', () => ({
-  getString: jest.fn(),
-  setString: jest.fn(),
 }));
 
 // Mock API calls directly
