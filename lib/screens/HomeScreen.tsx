@@ -31,6 +31,7 @@ import NotesComponent from "../components/NotesComponent";
 import Greeting from "../components/Greeting";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import LottieView from 'lottie-react-native';
+import { green } from "react-native-reanimated/lib/typescript/Colors";
 
 
 const user = User.getInstance();
@@ -59,7 +60,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   );
   const [isModalVisible, setModalVisible] = useState(false);
   const { setNavigateToAddNote } = useAddNoteContext();
-  const { theme } = useTheme();
+  const { theme, isDarkmode } = useTheme();
   const animation = useRef(new Animated.Value(0)).current; // Animation value
   const screenWidth = Dimensions.get("window").width; // Screen width for full reveal
   let textLength = 18;
@@ -69,11 +70,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     const navigateToAddNote = () => {
       const untitledNumber = findNextUntitledNumber(notes);
       navigation.navigate("AddNote", { untitledNumber, refreshPage });
-      console.log('method called.')
+
     }
 
     setNavigateToAddNote(() => navigateToAddNote)
-    console.log('In homescreen')
   }, [navigation, notes])
 
 
@@ -314,14 +314,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       />)
         : (<View style={styles(theme, width).resultNotFound}>
 
-            <LottieView
-              source={require('../../assets/animations/noResultFound.json')}
-              autoPlay
-              loop
-              style={styles(theme, width).lottie}
-            />
-            <Text style={styles(theme, width).resultNotFoundTxt}>No Results Found</Text>
-          </View>
+          <LottieView
+            source={require('../../assets/animations/noResultFound.json')}
+            autoPlay
+            loop
+            style={styles(theme, width).lottie}
+          />
+          <Text style={styles(theme, width).resultNotFoundTxt}>No Results Found</Text>
+        </View>
         )
 
     ) : (
@@ -332,14 +332,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       />) :
         (<View style={styles(theme, width).resultNotFound}>
 
-            <LottieView
-              source={require('../../assets/animations/noResultFound.json')}
-              autoPlay
-              loop
-              style={styles(theme, width).lottie}
-            />
-            <Text style={styles(theme, width).resultNotFoundTxt}>No Results Found</Text>
-          </View>
+          <LottieView
+            source={require('../../assets/animations/noResultFound.json')}
+            autoPlay
+            loop
+            style={styles(theme, width).lottie}
+          />
+          <Text style={styles(theme, width).resultNotFoundTxt}>No Results Found</Text>
+        </View>
         )
     );
   };
@@ -370,7 +370,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       <TouchableOpacity
         key={item.id}
         activeOpacity={1}
-        style={styles(theme, width).noteContainer}
+        style={{backgroundColor: isDarkmode? 'black' : '#e6e6e6'}}
         onPress={() => {
           if (!item.published) {
             navigation.navigate("EditNote", {
@@ -394,7 +394,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
           }
         }}
       >
-        <NotesComponent IsImage={IsImage} resolvedImageURI={resolvedImageURI} ImageType={ImageType} textLength={textLength} showTime={showTime} item={item} />
+        <NotesComponent IsImage={IsImage} resolvedImageURI={resolvedImageURI} ImageType={ImageType} textLength={textLength} showTime={showTime} item={item} isDarkmode={isDarkmode}/>
       </TouchableOpacity>
     );
   };
@@ -451,109 +451,110 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   }, [notes, searchQuery]);
 
   return (
-    <View style={styles(theme, width).container}>
-      <View style={styles(theme, width).topView}>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            width: "100%",
-            paddingBottom: 15,
-            paddingTop: 10,
-          }}
-        >
-          <View style={styles(theme, width).userAccountAndPageTitle}>
-            <TouchableOpacity
-              style={[
-                styles(theme, width).userPhoto,
-                { backgroundColor: theme.black },
-              ]}
-              onPress={() => {
-                navigation.navigate("AccountPage");
-              }}
-            >
-              <Text style={styles(theme, width).pfpText}>{userInitials}</Text>
-            </TouchableOpacity>
-            <Text style={styles(theme, width).pageTitle}>Notes</Text>
-          </View>
-
-          <View style={styles(theme, width).userWishContainer}>
-            <Greeting />
-            <Text style={styles(theme, width).userName}>{userName}</Text>
-          </View>
-        </View>
-
-
-      </View>
-
-      <View style={[styles(theme, width).toolContainer, { marginHorizontal: 20 }]}>
-        {
-          !isSearchVisible && (<View>
-            <View style={styles(theme, width).publishedOrPrivateContainer}>
-              <Pressable onPress={() => {
-                setIsPrivate(false);
-                setPublished(true);
-              }}>
-                <View style={[styles(theme, width).publishedTxtContainer, { backgroundColor: isPrivate ? 'transparent' : 'black' },]}>
-                  <Text style={[styles(theme, width).publishedTxt, { color: isPrivate ? 'black' : 'white' }]}>Published</Text>
-                </View>
-              </Pressable>
-              <Pressable onPress={() => {
-                setIsPrivate(true);
-                setPublished(false);
-              }}>
-                <View style={[styles(theme, width).publishedTxtContainer, { backgroundColor: isPrivate ? 'black' : 'transparent' }]}>
-                  <Text style={[styles(theme, width).publishedTxt, { color: isPrivate ? 'white' : 'black' }]}>Private</Text>
-                </View>
-              </Pressable>
+    <View style={{ flex: 1}}>
+      <View style={styles(theme, width).container}>
+        <View style={styles(theme, width).topView}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+              paddingBottom: 15,
+              paddingTop: 10,
+            }}
+          >
+            <View style={styles(theme, width).userAccountAndPageTitle}>
+              <TouchableOpacity
+                style={[
+                  styles(theme, width).userPhoto,
+                  { backgroundColor: theme.black },
+                ]}
+                onPress={() => {
+                  navigation.navigate("AccountPage");
+                }}
+              >
+                <Text style={styles(theme, width).pfpText}>{userInitials}</Text>
+              </TouchableOpacity>
+              <Text style={styles(theme, width).pageTitle}>Notes</Text>
             </View>
-          </View>)
-        }
-        <View style={[styles(theme, width).searchParentContainer, { width: isSearchVisible ? '95%' : 40 }]}>
 
-          {/* Search Container */}
-          {isSearchVisible && (
-            <Animated.View
-              style={[
-                styles(theme, width).searchContainer,
-                {
-                  width: searchBarWidth,
-                },
-                {
-                  marginBottom: 23,
-                }
-              ]}
-            >
-              <TextInput
-                placeholder="Search..."
-                value={searchQuery}
-                placeholderTextColor="#999"
-                onChangeText={(e) => setSearchQuery(e)}
-                style={[styles(theme, width).searchInput]}
-                autoFocus={true}
-              />
-            </Animated.View>
-          )}
-          {
-            isSearchVisible ? (
-              <View style={styles(theme, width).seachIcon}>
-                <TouchableOpacity onPress={toggleSearchBar}>
-                  <Ionicons name='close' size={25} />
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <View style={styles(theme, width).searchIcon}>
-                <TouchableOpacity onPress={toggleSearchBar}>
-                  <Ionicons name='search' size={25} />
-                </TouchableOpacity>
-              </View>
-            )
-          }
+            <View style={styles(theme, width).userWishContainer}>
+              <Greeting />
+              <Text style={styles(theme, width).userName}>{userName}</Text>
+            </View>
+          </View>
+
+
         </View>
 
-      </View>
+        <View style={[styles(theme, width).toolContainer, { marginHorizontal: 20 }]}>
+          {
+            !isSearchVisible && (<View>
+              <View style={styles(theme, width).publishedOrPrivateContainer}>
+                <Pressable onPress={() => {
+                  setIsPrivate(false);
+                  setPublished(true);
+                }}>
+                  <View style={[styles(theme, width).publishedTxtContainer, { backgroundColor: isPrivate ? 'transparent' : 'black' },]}>
+                    <Text style={[styles(theme, width).publishedTxt, { color: isPrivate ? 'black' : 'white' }]}>Published</Text>
+                  </View>
+                </Pressable>
+                <Pressable onPress={() => {
+                  setIsPrivate(true);
+                  setPublished(false);
+                }}>
+                  <View style={[styles(theme, width).publishedTxtContainer, { backgroundColor: isPrivate ? 'black' : 'transparent' }]}>
+                    <Text style={[styles(theme, width).publishedTxt, { color: isPrivate ? 'white' : 'black' }]}>Private</Text>
+                  </View>
+                </Pressable>
+              </View>
+            </View>)
+          }
+          <View style={[styles(theme, width).searchParentContainer, { width: isSearchVisible ? '95%' : 40 }]}>
 
+            {/* Search Container */}
+            {isSearchVisible && (
+              <Animated.View
+                style={[
+                  styles(theme, width).searchContainer,
+                  {
+                    width: searchBarWidth,
+                  },
+                  {
+                    marginBottom: 23,
+                  }
+                ]}
+              >
+                <TextInput
+                  placeholder="Search..."
+                  value={searchQuery}
+                  placeholderTextColor="#999"
+                  onChangeText={(e) => setSearchQuery(e)}
+                  style={[styles(theme, width).searchInput]}
+                  autoFocus={true}
+                />
+              </Animated.View>
+            )}
+            {
+              isSearchVisible ? (
+                <View style={[styles(theme, width).seachIcon, {marginTop: -25}]}>
+                  <TouchableOpacity onPress={toggleSearchBar}>
+                    <Ionicons name='close' size={25} />
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View style={styles(theme, width).searchIcon}>
+                  <TouchableOpacity onPress={toggleSearchBar}>
+                    <Ionicons name='search' size={25} />
+                  </TouchableOpacity>
+                </View>
+              )
+            }
+          </View>
+
+        </View>
+      </View>
 
       <View style={styles(theme, width).scrollerBackgroundColor}>
         {rendering ? <NoteSkeleton /> : renderList(notes)}
@@ -572,7 +573,7 @@ const styles = (theme, width, color, isDarkmode) =>
   StyleSheet.create({
     container: {
       paddingTop: Constants.statusBarHeight - 20,
-      flex: 1,
+      height: '18%',
       backgroundColor: theme.homeColor,
     },
     pfpText: {
@@ -612,7 +613,6 @@ const styles = (theme, width, color, isDarkmode) =>
       color: theme.text,
     },
     scrollerBackgroundColor: {
-      backgroundColor: theme.homeGray,
       flex: 1,
     },
     addButton: {
@@ -674,6 +674,7 @@ const styles = (theme, width, color, isDarkmode) =>
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
+      marginTop: 10,
     },
     publishedOrPrivateContainer: {
       backgroundColor: '#e7e7e7',
@@ -697,12 +698,11 @@ const styles = (theme, width, color, isDarkmode) =>
     },
     searchContainer: {
       right: 0,
-      top: 10,
       bottom: 0,
       backgroundColor: "#f0f0f0",
       justifyContent: "center",
       alignItems: "center",
-      height: 50,
+      height: 35,
       borderRadius: 25,
       overflow: "hidden", // Ensures the reveal is smooth
 
@@ -747,7 +747,8 @@ const styles = (theme, width, color, isDarkmode) =>
     resultNotFoundTxt: {
       fontSize: 15,
       fontWeight: '400',
-    }
+    },
+
   });
 
 export default HomeScreen;

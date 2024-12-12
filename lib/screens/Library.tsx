@@ -57,7 +57,7 @@ const Library = ({ navigation, route }) => {
   );
   const [isModalVisible, setModalVisible] = useState(false);
   const [userName, setUserName] = useState('')
-  const { theme } = useTheme();
+  const { theme, isDarkmode } = useTheme();
   const { setNavigateToAddNote } = useAddNoteContext();
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const animation = useRef(new Animated.Value(0)).current; // Animation value
@@ -99,8 +99,6 @@ const Library = ({ navigation, route }) => {
         false,
         "someUserId"
       );
-  
-      console.log('inside fetch messages, ', data)
       // Filter out archived notes; assume notes without `isArchived` are not archived
       const publicNotes = data.filter((note: Note) => !note.isArchived && note.published);
   
@@ -213,6 +211,7 @@ const Library = ({ navigation, route }) => {
       <TouchableOpacity
         key={item.id}
         activeOpacity={1}
+        style={{backgroundColor: isDarkmode? 'black' : '#e6e6e6'}}
         onPress={() => {
           if (!item.published) {
             navigation.navigate("EditNote", {
@@ -236,7 +235,7 @@ const Library = ({ navigation, route }) => {
           }
         }}
       >
-        <NotesComponent IsImage={IsImage} resolvedImageURI={resolvedImageURI} ImageType={ImageType} textLength={textLength} showTime={showTime} item={item} />
+        <NotesComponent IsImage={IsImage} resolvedImageURI={resolvedImageURI} ImageType={ImageType} textLength={textLength} showTime={showTime} item={item} isDarkmode={isDarkmode}/>
        
       </TouchableOpacity>
     );
@@ -261,7 +260,8 @@ const Library = ({ navigation, route }) => {
   
 
   return (
-    <View style={styles(theme, width).container}>
+    <View style={{flex: 1}}>
+      <View style={styles(theme, width).container}>
       <View style={styles(theme, width).topView}>
         <View
           style={{
@@ -332,7 +332,7 @@ const Library = ({ navigation, route }) => {
           )}
           {
             isSearchVisible ? (
-              <View style={styles(theme, width).seachIcon}>
+              <View style={[styles(theme, width).seachIcon, {marginTop: -25}]}>
               <TouchableOpacity onPress={toggleSearchBar}>
                 <Ionicons name='close' size={25} />
               </TouchableOpacity>
@@ -349,7 +349,7 @@ const Library = ({ navigation, route }) => {
 
       </View>
 
-
+      </View>
       <View style={styles(theme, width).scrollerBackgroundColor}>
         {rendering ? <NoteSkeleton /> : renderList(notes)}
       </View>
@@ -367,7 +367,7 @@ const styles = (theme, width, color, isDarkmode) =>
   StyleSheet.create({
     container: {
       paddingTop: Constants.statusBarHeight - 20,
-      flex: 1,
+      height: '18%',
       backgroundColor: theme.homeColor,
     },
     pfpText: {
@@ -407,7 +407,6 @@ const styles = (theme, width, color, isDarkmode) =>
       color: theme.text,
     },
     scrollerBackgroundColor: {
-      backgroundColor: theme.homeGray,
       flex: 1,
     },
     addButton: {
@@ -491,39 +490,18 @@ const styles = (theme, width, color, isDarkmode) =>
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: 10
+      marginTop: 10,
     },
-    publishedOrPrivateContainer: {
-      backgroundColor: '#e7e7e7',
-      height: 30,
-      width: 120,
-      borderRadius: 20,
-      marginBottom: 10,
-      flexDirection: 'row',
-      justifyContent: 'space-evenly',
-      alignItems: 'center',
-    },
-    publishedTxtContainer: {
-      paddingHorizontal: 5,
-      paddingVertical: 3,
-      borderRadius: 20,
-    },
-    publishedTxt: {
-      color: 'white',
-      fontSize: 10,
-      fontWeight: '600',
-    },
+   
     searchContainer: {
       right: 0,
-      top: 10,
       bottom: 0,
       backgroundColor: "#f0f0f0",
       justifyContent: "center",
       alignItems: "center",
-      height: 50,
+      height: 35,
       borderRadius: 25,
       overflow: "hidden", // Ensures the reveal is smooth
-
     },
     searchInput: {
       flex: 1,
@@ -555,7 +533,6 @@ const styles = (theme, width, color, isDarkmode) =>
       height: 200,
     },
     resultNotFound: {
-
       justifyContent: 'center',
       alignItems: 'center'
     },
