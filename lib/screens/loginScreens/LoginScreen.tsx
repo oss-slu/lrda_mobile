@@ -1,26 +1,25 @@
 // LoginScreen.tsx
 
-import React, { useState, useEffect, useRef } from "react";
+import * as SplashScreen from "expo-splash-screen";
+import React, { useEffect, useRef, useState } from "react";
 import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  TouchableOpacity,
+  ActivityIndicator,
   Animated,
   ImageBackground,
+  Keyboard,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import * as SplashScreen from "expo-splash-screen";
 import { Snackbar } from "react-native-paper";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../config";  // Import the Firebase auth
-import { User } from "../../models/user_class";
-import { removeItem } from "../../utils/async_storage";
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setNavState } from "../../../redux/slice/navigationSlice";
 import { RootState } from "../../../redux/store/store";
-import { Keyboard } from "react-native";
+import { User } from "../../models/user_class";
+import { removeItem } from "../../utils/async_storage";
 
 const user = User.getInstance();
 
@@ -34,6 +33,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   const [password, setPassword] = useState("");
   const [firstClick, setFirstClick] = useState(true);
   const [snackState, toggleSnack] = useState(false);
+  const [loading, setLoading] = useState(false);
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const navState = useSelector((state: RootState) => state.navigation.navState);
   const dispatch = useDispatch()
@@ -86,10 +86,8 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
           if (userId !== null) {
               setUsername("")
               setPassword("")
-              setTimeout(() => {
               dispatch(setNavState('home'));
               navigation.navigate("HomeTab");  // Navigate to the HomeTab
-            }, 1000);
           }
         }
       }
@@ -113,10 +111,13 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   const onLoginPress = async () => {
     Keyboard.dismiss();
     try {
+      setLoading(true);
       await handleLogin();
+      setLoading(false);
 
     } catch (e) {
       console.log(e);
+      setLoading(false);
     }
   };
 
@@ -163,6 +164,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
                 onChangeText={(text) => setUsername(text)}
                 onSubmitEditing={handleLogin}
                 testID="email-input"
+                autoCapitalize="none"
               />
             </View>
 
@@ -182,9 +184,10 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
               <Text style={styles.forgot}>Forgot Password?</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={onLoginPress} style={styles.buttons} testID="login-button">
-              <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
+              {!loading && <Text style={{color: "white", fontWeight: "600", fontSize: 15}}>
                 Login
-              </Text>
+                </Text>}
+              {loading && <ActivityIndicator size="small" color="white" />}
             </TouchableOpacity>
             <TouchableOpacity onPress={handleGoRegister} style={styles.buttons} testID="register-button">
               <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
