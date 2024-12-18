@@ -151,6 +151,7 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
   const customRenderers = useMemo(() => ({
     img: ({ tnode }: TNodeRendererProps<any>) => {
       const { src, alt } = tnode.attributes;
+      console.log("Image view ",src)
       return (
         <View style={{ marginVertical: 10, alignItems: "center" }}>
           <TouchableOpacity onPress={() => onPicturePress(src as string)} testID="imageButton">

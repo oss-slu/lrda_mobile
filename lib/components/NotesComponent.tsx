@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, Image, StyleSheet, Alert } from 'react-native'
+import { View, Text, Image, StyleSheet, Alert, Dimensions } from 'react-native'
 import LoadingImage from './loadingImage'
 import * as Location from "expo-location";
 import axios from 'axios';
+
+
+const {width, height} = Dimensions.get('window');
 
 function NotesComponent({ IsImage, resolvedImageURI, ImageType, textLength, showTime, item, isPublished, isDarkmode }) {
     {
@@ -75,7 +78,7 @@ function NotesComponent({ IsImage, resolvedImageURI, ImageType, textLength, show
     }, [item])
     return (
         <View style={[styles.notesContainer, { backgroundColor: isDarkmode ? '#3f3f3f' : 'white' }]}>
-            <View style={styles.notesContent}>
+            
                 {IsImage && resolvedImageURI ? (
                     <View>
                         <LoadingImage
@@ -103,13 +106,13 @@ function NotesComponent({ IsImage, resolvedImageURI, ImageType, textLength, show
 
                         <Text style={[styles.noteText, { color: isDarkmode ? '#d9d9d9' : 'black' }]}>{showTime}</Text>
                     </View>
-                    <View style={styles.columnData}>
+                    {/* <View style={styles.columnData}>
                         <Text>{address?.slice(0, 20)}...</Text>
                         <Text>{author}</Text>
-                    </View>
+                    </View> */}
                 </View>
 
-            </View>
+           
 
         </View>
 
@@ -120,44 +123,24 @@ export default NotesComponent;
 
 const styles = StyleSheet.create({
     notesContainer: {
-        position: 'relative',
-        flexDirection: "row",
-        marginHorizontal: 10,
-        elevation: 5,
-        borderRadius: 15,
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        height: 100,
-        marginTop: 15,
-        backgroundColor: 'blue',
-        width: '95%'
+       flexDirection: 'row',
+       width: '95%',
+       margin: 10,
+       height: height * 0.1,
+       alignItems: 'center',
+       paddingHorizontal: 20,
+       borderRadius: 10,
+       
+    },
 
-    },
-    notesContent: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignContent: 'center',
-        marginLeft: 10,
-        width: '65%'
-    },
     notesTxtContent: {
-        marginLeft: 10,
-        width: '100%',
-        flexDirection: 'row',
-        justifyContent: 'space-evenly'
-    },
-    noteTitle: {
-        fontSize: 18,
-        fontWeight: '500'
-    },
-    noteText: {
-        fontSize: 10,
-        fontWeight: '500'
+        marginLeft: 20,
+        flexWrap: 'wrap',
     },
     columnData: {
-        height: '100%',
-        justifyContent: 'space-evenly',
-        width: '45%'
-    }
+        height: '80%',
+        justifyContent: 'space-evenly'
+    },
+   
 
 })
