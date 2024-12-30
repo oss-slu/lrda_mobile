@@ -4,22 +4,39 @@ import { View, Text, Pressable, StyleSheet } from 'react-native'
 import { SvgIcon } from './SvgIcon'
 import IonIcons from 'react-native-vector-icons/Ionicons'
 import { useAddNoteContext } from '../context/AddNoteContext'
-
+import { useSelector, useDispatch } from 'react-redux'
+import Feather from 'react-native-vector-icons/Feather'
+import { toogleAddNoteState } from '../../redux/slice/AddNoteStateSlice'
 function AddNoteBtnComponent() {
 
-    const {navigateToAddNote} = useAddNoteContext();
+    const dispatch = useDispatch();
 
+    const {navigateToAddNote, publishNote} = useAddNoteContext();
+    const appThemeColor = useSelector((state) => state?.themeSlice?.theme)
+    const addNoteState = useSelector((state) => state?.addNoteState?.isAddNoteOpned);
+    console.log("inside add note button ", addNoteState);
+    
     const handleAddNote = () => {
-        
+        dispatch(toogleAddNoteState())
         console.log("AddtoNotePressed")
         navigateToAddNote();
+
+    }
+
+    const handlePublish = () => {
+        publishNote();
     }
 
   return (
-   <View style={styles.conatiner} >
-        <SvgIcon style={styles.backgroung}/>
-        <TouchableOpacity style={styles.button} onPress={handleAddNote}>
-            <IonIcons style={styles.buttonIcon} name = 'add' size={25}/>
+   <View style={[styles.conatiner,]} >
+        <SvgIcon style={[styles.backgroung,]}/>
+        <TouchableOpacity style={styles.button} onPress={!addNoteState ? handleAddNote : handlePublish}>
+            {
+                !addNoteState ? 
+                (<IonIcons style={styles.buttonIcon} name = 'add' size={25}/>)
+                :
+                (<Feather style={styles.buttonIcon} name = 'upload-cloud' size={25}/>)
+            }
         </TouchableOpacity>
    </View>
   )
@@ -44,8 +61,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderRadius: 50,
         top: -25,
-        elevation: 2
-
+        shadowColor: '#000', 
+        shadowOffset: { width: 0, height: 2 }, 
+        shadowOpacity: 0.25, 
+        shadowRadius: 4, 
+        // Android elevation
+        elevation: 5, 
     },
     buttonIcon: {
         fontWeight: '800',

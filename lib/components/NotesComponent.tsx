@@ -8,14 +8,12 @@ import axios from 'axios';
 const {width, height} = Dimensions.get('window');
 
 function NotesComponent({ IsImage, resolvedImageURI, ImageType, textLength, showTime, item, isPublished, isDarkmode }) {
-    {
-        console.log("inside node data ====> ", item, "\n\n\n");
-    }
+   
     const [address, setAddress] = useState(null);
     const [author, setAuthor] = useState('anonymous')
 
     const fetchUserName = async (url) => {
-        console.log("in fetch userName ", url)
+       
       try {
         // Perform the GET request
         const response = await axios.get(url);
@@ -24,12 +22,12 @@ function NotesComponent({ IsImage, resolvedImageURI, ImageType, textLength, show
         // Fetch the author
         const author = data.name; // "karthik"
     
-        console.log("Fetched data:", { author});
+        // console.log("Fetched data:", { author});
     
         setAuthor(author)
        
       } catch (error) {
-        console.error("Error fetching data:", error.message);
+        // console.error("Error fetching data:", error.message);
     
         // Handle the error (you can throw it or return a default value)
         throw new Error("Failed to fetch data.");
@@ -42,7 +40,7 @@ function NotesComponent({ IsImage, resolvedImageURI, ImageType, textLength, show
         const lon = parseFloat(longitude);
 
         if (isNaN(lat) || isNaN(lon)) {
-            console.error("Invalid latitude or longitude values:", latitude, longitude);
+            // console.error("Invalid latitude or longitude values:", latitude, longitude);
             // Alert.alert("Error", "Invalid latitude or longitude values.");
             return;
         }
@@ -71,9 +69,9 @@ function NotesComponent({ IsImage, resolvedImageURI, ImageType, textLength, show
 
 
     useEffect(() => {
-        console.log("lat and long, ", item.latitude, item.longitude)
+        // console.log("lat and long, ", item.latitude, item.longitude)
         fetchAddress(item.latitude, item.longitude)
-        console.log("inside the useEffect ", item.creator)
+        // console.log("inside the useEffect ", item.creator)
         fetchUserName(item.creator)
     }, [item])
     return (

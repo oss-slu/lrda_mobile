@@ -9,7 +9,9 @@ import {
   TextInput,
   StyleSheet,
   Pressable,
-  Animated
+  Animated,
+  StatusBar,
+  Keyboard
 } from "react-native";
 import { useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -33,7 +35,7 @@ import { useAddNoteContext } from "../context/AddNoteContext";
 import LottieView from 'lottie-react-native';
 import { green } from "react-native-reanimated/lib/typescript/Colors";
 
-
+const { width, height } = Dimensions.get("window");
 const user = User.getInstance();
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
@@ -45,7 +47,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [reversed, setReversed] = useState(false);
   const [rendering, setRendering] = useState(true);
   const [userInitials, setUserInitials] = useState("N/A");
-  const { width } = Dimensions.get("window");
   const [userName, setUserName] = useState('');
   const [initialItems, setInitialItems] = useState([
     { label: "My Entries", value: "my_entries" },
@@ -65,14 +66,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const screenWidth = Dimensions.get("window").width; // Screen width for full reveal
   let textLength = 18;
 
+  
   useEffect(() => {
-
     const navigateToAddNote = () => {
       const untitledNumber = findNextUntitledNumber(notes);
+      console.log("in homescreen untitled numbe ", untitledNumber);
       navigation.navigate("AddNote", { untitledNumber, refreshPage });
-
+  
     }
-
     setNavigateToAddNote(() => navigateToAddNote)
   }, [navigation, notes])
 
@@ -196,19 +197,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
 
 
-  const findNextUntitledNumber = (notes: Note[]) => {
-    let maxNumber = 0;
-    notes.forEach((note) => {
-      const match = note.title.match(/^Untitled (\d+)$/);
-      if (match) {
-        const number = parseInt(match[1]);
-        if (number > maxNumber) {
-          maxNumber = number;
+  const findNextUntitledNumber = (notes: Note[]): number => {
+    return notes.reduce((maxNumber, note) => {
+        const match = note.title.match(/^Untitled (\d+)$/);
+        if (match) {
+            const number = parseInt(match[1], 10);
+            return Math.max(maxNumber, number);
         }
-      }
-    });
-    return maxNumber + 1;
-  };
+        return maxNumber;
+    }, 0) + 1;
+};
+
 
   const sideMenu = (data: any, rowMap: any) => {
     return (
@@ -451,7 +450,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   }, [notes, searchQuery]);
 
   return (
-    <View style={{ flex: 1}}>
+    <View style={{ flex: 1, backgroundColor : isDarkmode? 'black' : '#e4e4e4'}}>
+      <StatusBar translucent backgroundColor="transparent" />
       <View style={styles(theme, width).container}>
         <View style={styles(theme, width).topView}>
           <View
@@ -488,7 +488,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
         </View>
 
-        <View style={[styles(theme, width).toolContainer, { marginHorizontal: 20 }]}>
+        <View style={[styles(theme, width).toolContainer, { marginHorizontal: 20, }]}>
           {
             !isSearchVisible && (<View>
               <View style={styles(theme, width).publishedOrPrivateContainer}>
@@ -532,6 +532,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                   placeholderTextColor="#999"
                   onChangeText={(e) => setSearchQuery(e)}
                   style={[styles(theme, width).searchInput]}
+                  cursorColor='black'
                   autoFocus={true}
                 />
               </Animated.View>
@@ -573,7 +574,7 @@ const styles = (theme, width, color, isDarkmode) =>
   StyleSheet.create({
     container: {
       paddingTop: Constants.statusBarHeight - 20,
-      height: '18%',
+      height: height * 0.18,
       backgroundColor: theme.homeColor,
     },
     pfpText: {
@@ -702,18 +703,17 @@ const styles = (theme, width, color, isDarkmode) =>
       backgroundColor: "#f0f0f0",
       justifyContent: "center",
       alignItems: "center",
-      height: 35,
+      height: 36,
       borderRadius: 25,
       overflow: "hidden", // Ensures the reveal is smooth
-
     },
     searchInput: {
       flex: 1,
       fontSize: 16,
       color: "black",
       paddingHorizontal: 10,
+      paddingVertical: 0, 
       width: "100%",
-
     },
     searchIcon: {
       marginBottom: 10,

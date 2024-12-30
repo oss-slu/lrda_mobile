@@ -35,6 +35,9 @@ import { Link } from "@react-navigation/native";
 import { User } from "../models/user_class";
 import { AudioType, Media } from "../models/media_class";
 import ApiService from "../utils/api_calls";
+import { useDispatch, useSelector } from "react-redux";
+import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
+import { useAddNoteContext } from "../context/AddNoteContext";
 
 const user = User.getInstance();
 
@@ -58,39 +61,52 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
   const [isVideoModalVisible, setIsVideoModalVisible] = useState<boolean>(false);
   const [videoUri, setVideoUri] = useState<string | null>(null);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const { setPublishNote } = useAddNoteContext();
+
+
+  const addNoteState = useSelector((state) => state?.addNoteState?.isAddNoteOpned);
+  useEffect(() => {
+    console.log("Updated isAddNoteOpened state:", addNoteState);
+  }, [addNoteState]);
+
+  const dispatch = useDispatch();
 
   const editor = useEditorBridge({
     initialContent: bodyText || "",
     avoidIosKeyboard: true,
   });
-  
+
   const { theme } = useTheme();
   const titleTextRef = useRef<TextInput>(null);
   const scrollViewRef = useRef<KeyboardAwareScrollView>(null);
 
-  useEffect(()=>{
-        // Listen for keyboard events to show/hide toolbar
-        const showKeyboardListener = Keyboard.addListener('keyboardDidShow', () => {
-          setKeyboardVisible(true);
-        });
-        const hideKeyboardListener = Keyboard.addListener('keyboardDidHide', () => {
-          setKeyboardVisible(false);
-        });
-        return () => {
-          showKeyboardListener.remove();
-          hideKeyboardListener.remove();
-        };
-      }, []);
-    
-  
-      const customToolbarItems = [
-        ...DEFAULT_TOOLBAR_ITEMS,
-        {
-          icon: () => <Ionicons name="close" size={24} color={theme.text} />, // Close keyboard icon
-          onPress: () => Keyboard.dismiss(), // Dismiss the keyboard when tapped
-          id: 'closeKeyboard', // Unique ID for this toolbar item
-        },
-      ];
+  useEffect(() => {
+    // Listen for keyboard events to show/hide toolbar
+    const showKeyboardListener = Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboardVisible(true);
+    });
+    const hideKeyboardListener = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardVisible(false);
+    });
+
+    // Save the correct reference to handleShareButtonPress
+    setPublishNote(() => handleShareButtonPress);
+
+    return () => {
+      showKeyboardListener.remove();
+      hideKeyboardListener.remove();
+    };
+  }, []);
+
+
+  const customToolbarItems = [
+    ...DEFAULT_TOOLBAR_ITEMS,
+    {
+      icon: () => <Ionicons name="close" size={24} color={theme.text} />, // Close keyboard icon
+      onPress: () => Keyboard.dismiss(), // Dismiss the keyboard when tapped
+      id: 'closeKeyboard', // Unique ID for this toolbar item
+    },
+  ];
 
   useEffect(() => {
     if (editor) {
@@ -146,55 +162,55 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
     setLocationToZero();
   };
 
-    // Function to display an error message inside the editor
-    const displayErrorInEditor = async (errorMessage) => {
+  // Function to display an error message inside the editor
+  const displayErrorInEditor = async (errorMessage) => {
+    const currentContent = await editor.getHTML();
+    const errorTag = `<p style="color: red; font-weight: bold;">${errorMessage}</p><br />`;
+    editor.setContent(currentContent + errorTag);
+    editor.focus();
+  };
+
+  const insertImageToEditor = async (imageUri: string) => {
+    try {
       const currentContent = await editor.getHTML();
-      const errorTag = `<p style="color: red; font-weight: bold;">${errorMessage}</p><br />`;
-      editor.setContent(currentContent + errorTag);
+      const imageTag = `<img src="${imageUri}" style="max-width: 200px; max-height: 200px; object-fit: cover;" /><br />`;
+      editor.setContent(currentContent + imageTag);
       editor.focus();
-    };
+    } catch (error) {
+      console.error("Error inserting image:", error);
+      displayErrorInEditor(`Error inserting image: ${error.message}`);
+    }
+  };
 
-    const insertImageToEditor = async (imageUri: string) => {
-      try {
-        const currentContent = await editor.getHTML();
-        const imageTag = `<img src="${imageUri}" style="max-width: 200px; max-height: 200px; object-fit: cover;" /><br />`;
-        editor.setContent(currentContent + imageTag);
-        editor.focus();
-      } catch (error) {
-        console.error("Error inserting image:", error);
-        displayErrorInEditor(`Error inserting image: ${error.message}`);
-      }
-    };
-    
-    const addVideoToEditor = async (videoUri: string) => {
-      try {
-        const currentContent = await editor.getHTML();
-        const videoLink = `${currentContent}<a href="${videoUri}">${videoUri}</a><br>`;
-        editor.setContent(videoLink);
-        editor.focus();
-      } catch (error) {
-        console.error("Error adding video:", error);
-        displayErrorInEditor(`Error adding video: ${error.message}`);
-      }
-    };
-    
+  const addVideoToEditor = async (videoUri: string) => {
+    try {
+      const currentContent = await editor.getHTML();
+      const videoLink = `${currentContent}<a href="${videoUri}">${videoUri}</a><br>`;
+      editor.setContent(videoLink);
+      editor.focus();
+    } catch (error) {
+      console.error("Error adding video:", error);
+      displayErrorInEditor(`Error adding video: ${error.message}`);
+    }
+  };
 
-  
-    // Function to add audio
-    const insertAudioToEditor = async (audioUri: string) => {
-      try {
-        const currentContent = await editor.getHTML();
-        const audioLink = `${currentContent}<a href="${audioUri}">${audioUri}</a><br>`;
-        editor.setContent(audioLink);
-        editor.focus();
-      } catch (error) {
-        console.error("Error adding audio:", error);
-        displayErrorInEditor(`Error adding audio: ${error.message}`);
-      }
-    };
-  
-  
-  
+
+
+  // Function to add audio
+  const insertAudioToEditor = async (audioUri: string) => {
+    try {
+      const currentContent = await editor.getHTML();
+      const audioLink = `${currentContent}<a href="${audioUri}">${audioUri}</a><br>`;
+      editor.setContent(audioLink);
+      editor.focus();
+    } catch (error) {
+      console.error("Error adding audio:", error);
+      displayErrorInEditor(`Error adding audio: ${error.message}`);
+    }
+  };
+
+
+
 
   const handleShareButtonPress = async () => {
     setIsPublished(!isPublished);
@@ -206,45 +222,61 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
     await saveNote();
   };
 
+  const prepareNoteData = async () => {
+    const userLocation = await Location.getCurrentPositionAsync({});
+    const finalLocation = userLocation ? userLocation.coords : { latitude: 0, longitude: 0 };
+    const textContent = await editor.getHTML();
+    const sanitizedContent = textContent.replace(/<\/?p>/g, ""); // Remove <p> tags
+    const uid = await user.getId();
+  
+    const title = titleText.trim()
+      ? titleText.trim()
+      : route.params.untitledNumber
+      ? `Untitled ${route.params.untitledNumber}`
+      : "Untitled";
+  
+    return {
+      title,
+      text: sanitizedContent,
+      media: newMedia || [],
+      audio: newAudio || [],
+      tags: tags || [],
+      latitude: finalLocation.latitude.toString(),
+      longitude: finalLocation.longitude.toString(),
+      published: isPublished,
+      time: new Date().toISOString(),
+      creator: uid,
+    };
+  };
   const saveNote = async () => {
     console.log("Back button pressed - saveNote function invoked.");
     setIsUpdating(true);
     setIsSaveButtonEnabled(true);
-
+  
     try {
-      const userLocation = await Location.getCurrentPositionAsync({});
-      const finalLocation = userLocation ? userLocation.coords : { latitude: 0, longitude: 0 };
-      const textContent = await editor.getHTML();
-      const sanitizedContent = textContent.replace(/<\/?p>/g, ''); // removes <p> tags from content
-      const uid = await user.getId();
-
-      const newNote = {
-        title: titleText || "Untitled",
-        text: sanitizedContent,
-        media: newMedia || [],
-        audio: newAudio || [],
-        tags: tags || [],
-        latitude: finalLocation.latitude.toString(),
-        longitude: finalLocation.longitude.toString(),
-        published: isPublished,
-        time: new Date().toISOString(), // Automatically grabs current time
-        creator: uid,
-      };
-
+      const newNote = await prepareNoteData();
       const response = await ApiService.writeNewNote(newNote);
       await response.json();
-      route.params.refreshPage();
-      navigation.goBack();
+  
+      if (route.params.refreshPage) {
+        route.params.refreshPage();
+      }
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+      }
     } catch (error) {
       console.error("Error saving the note:", error);
     } finally {
       setIsUpdating(false);
+      dispatch(toogleAddNoteState());
     }
   };
+    
+  
 
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <View style={{ flex: 1 }}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
@@ -255,11 +287,11 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
           enableOnAndroid={true}
           extraScrollHeight={Platform.OS === 'ios' ? 80 : 0}
           keyboardOpeningTime={0}
-          keyboardShouldPersistTaps="handled" 
+          keyboardShouldPersistTaps="handled"
         >
           <View style={{ flex: 1 }}>
-            <View style={NotePageStyles().topContainer}>
-              <View style={NotePageStyles().topButtonsContainer}>
+            <View style={[NotePageStyles().topContainer,]}>
+              <View style={[NotePageStyles().topButtonsContainer, { backgroundColor: theme.homeColor }]}>
                 <TouchableOpacity style={NotePageStyles().topButtons} onPress={saveNote}>
                   <Ionicons name="arrow-back-outline" size={30} color={NotePageStyles().saveText.color} />
                 </TouchableOpacity>
@@ -277,13 +309,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
                     }
                   }}
                 />
-                <TouchableOpacity style={NotePageStyles().topButtons} onPress={handleShareButtonPress}>
-                  <Ionicons
-                    name={isPublished ? "share" : "share-outline"}
-                    size={30}
-                    color={NotePageStyles().saveText.color}
-                  />
-                </TouchableOpacity>
+
               </View>
               <View style={NotePageStyles().keyContainer}>
                 <TouchableOpacity onPress={() => setViewMedia(!viewMedia)} testID="imageButton">
@@ -292,9 +318,9 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
                 <TouchableOpacity onPress={() => setViewAudio(!viewAudio)}>
                   <Ionicons name="mic-outline" size={30} color={NotePageStyles().saveText.color} />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={toggleLocation}testID="checklocationpermission">
-                <Ionicons name="location-outline" size={30} color={locationButtonColor} />
-              </TouchableOpacity>
+                <TouchableOpacity onPress={toggleLocation} testID="checklocationpermission">
+                  <Ionicons name="location-outline" size={30} color={locationButtonColor} />
+                </TouchableOpacity>
                 <TouchableOpacity onPress={() => setIsTagging(!isTagging)}>
                   <Ionicons name="pricetag-outline" size={30} color={NotePageStyles().saveText.color} />
                 </TouchableOpacity>
@@ -316,10 +342,10 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
                 />
               )}
               {isTagging && <TagWindow tags={tags} setTags={setTags} />}
-              {isLocation && <LocationWindow location={location} setLocation={setLocation}/>}
+              {isLocation && <LocationWindow location={location} setLocation={setLocation} />}
               {isTime && <TimeWindow time={time} setTime={setTime} />}
             </View>
-            <View style={NotePageStyles().richTextContainer}testID="TenTapEditor">
+            <View style={NotePageStyles().richTextContainer} testID="TenTapEditor">
               <RichText
                 editor={editor}
                 placeholder="Write Content Here..."
@@ -329,22 +355,22 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
                 ]}
               />
             </View>
-            <View style={NotePageStyles().toolbar}testID="RichEditor">
-            <Toolbar
-            editor={editor}
-            items={DEFAULT_TOOLBAR_ITEMS}
-          />
-        </View>
-      {Platform.OS === 'ios' && (
-      <Toolbar
-        editor={editor}
-        items={DEFAULT_TOOLBAR_ITEMS}
+            <View style={NotePageStyles().toolbar} testID="RichEditor">
+              <Toolbar
+                editor={editor}
+                items={DEFAULT_TOOLBAR_ITEMS}
+              />
+            </View>
+            {Platform.OS === 'ios' && (
+              <Toolbar
+                editor={editor}
+                items={DEFAULT_TOOLBAR_ITEMS}
 
-      />
-    )}
+              />
+            )}
           </View>
         </KeyboardAwareScrollView>
-          {/* Video Player Modal */}
+        {/* Video Player Modal */}
         <Modal
           animationType="slide"
           transparent={true}
@@ -370,7 +396,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
 
         <LoadingModal visible={isUpdating} />
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 };
 

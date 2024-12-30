@@ -10,6 +10,7 @@ import {
   StyleSheet,
   Pressable,
   Animated,
+  StatusBar
 } from "react-native";
 import { useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -35,6 +36,8 @@ import LottieView from 'lottie-react-native';
 
 const user = User.getInstance();
 
+const { width, height } = Dimensions.get("window");
+
 const Library = ({ navigation, route }) => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
@@ -45,7 +48,6 @@ const Library = ({ navigation, route }) => {
   const [rendering, setRendering] = useState(true);
   const [userInitials, setUserInitials] = useState("N/A");
   const [globeIcon, setGlobeIcon] = useState("earth-outline");
-  const { width } = Dimensions.get("window");
   const [initialItems, setInitialItems] = useState([
     { label: "My Entries", value: "my_entries" },
     { label: "Published Entries", value: "published_entries" },
@@ -79,7 +81,7 @@ const Library = ({ navigation, route }) => {
     })();
   }, []);
 
- 
+
 
   const refreshPage = () => {
     setUpdateCounter(updateCounter + 1);
@@ -101,11 +103,11 @@ const Library = ({ navigation, route }) => {
       );
       // Filter out archived notes; assume notes without `isArchived` are not archived
       const publicNotes = data.filter((note: Note) => !note.isArchived && note.published);
-  
+
       // Convert data and sort notes by date (latest first)
       const fetchedNotes = DataConversion.convertMediaTypes(publicNotes)
         .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-  
+
       setNotes(reversed ? fetchedNotes.reverse() : fetchedNotes);
       setRendering(false);
     } catch (error) {
@@ -117,7 +119,7 @@ const Library = ({ navigation, route }) => {
       });
     }
   };
-  
+
 
 
   const toggleSearchBar = () => {
@@ -173,14 +175,14 @@ const Library = ({ navigation, route }) => {
       />) :
         (<View style={styles(theme, width).resultNotFound}>
 
-            <LottieView
-              source={require('../../assets/animations/noResultFound.json')}
-              autoPlay
-              loop
-              style={styles(theme, width).lottie}
-            />
-            <Text style={styles(theme, width).resultNotFoundTxt}>No Results Found</Text>
-          </View>
+          <LottieView
+            source={require('../../assets/animations/noResultFound.json')}
+            autoPlay
+            loop
+            style={styles(theme, width).lottie}
+          />
+          <Text style={styles(theme, width).resultNotFoundTxt}>No Results Found</Text>
+        </View>
         )
     )
   };
@@ -211,7 +213,7 @@ const Library = ({ navigation, route }) => {
       <TouchableOpacity
         key={item.id}
         activeOpacity={1}
-        style={{backgroundColor: isDarkmode? 'black' : '#e6e6e6'}}
+        style={{ backgroundColor: isDarkmode ? 'black' : '#e6e6e6' }}
         onPress={() => {
           if (!item.published) {
             navigation.navigate("EditNote", {
@@ -235,8 +237,8 @@ const Library = ({ navigation, route }) => {
           }
         }}
       >
-        <NotesComponent IsImage={IsImage} resolvedImageURI={resolvedImageURI} ImageType={ImageType} textLength={textLength} showTime={showTime} item={item} isDarkmode={isDarkmode}/>
-       
+        <NotesComponent IsImage={IsImage} resolvedImageURI={resolvedImageURI} ImageType={ImageType} textLength={textLength} showTime={showTime} item={item} isDarkmode={isDarkmode} />
+
       </TouchableOpacity>
     );
   };
@@ -257,97 +259,99 @@ const Library = ({ navigation, route }) => {
     return `${month}/${day}/${year}`;
   };
 
-  
+
 
   return (
-    <View style={{flex: 1}}>
+    <View style={{ flex: 1, backgroundColor : isDarkmode? 'black' : '#e4e4e4' }}>
+      <StatusBar translucent backgroundColor="transparent" />
       <View style={styles(theme, width).container}>
-      <View style={styles(theme, width).topView}>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            width: "100%",
-            paddingBottom: 15,
-            paddingTop: 10,
-          }}
-        >
-          <View style={styles(theme, width).userAccountAndPageTitle}>
-            <TouchableOpacity
-              style={[
-                styles(theme, width).userPhoto,
-                { backgroundColor: theme.black },
-              ]}
-              onPress={() => {
-                navigation.navigate("AccountPage");
-              }}
-            >
-              <Text style={styles(theme, width).pfpText}>{userInitials}</Text>
-            </TouchableOpacity>
-            <Text style={styles(theme, width).pageTitle}>Library</Text>
-          </View>
-
-          <View style={styles(theme, width).userWishContainer}>
-            <Greeting />
-            <Text style={styles(theme, width).userName}>{userName}</Text>
-          </View>
-        </View>
-
-
-      </View>
-
-      <View style={[styles(theme, width).toolContainer, { marginHorizontal: 20 }]}>
-        {
-          !isSearchVisible && (<View>
-            <TouchableOpacity>
-              <MaterialIcons name='sort' size={30}/>
-            </TouchableOpacity>
-          </View>)
-        }
-        <View style={[styles(theme, width).searchParentContainer, { width: isSearchVisible ? '95%' : 40 }]}>
-         
-          {/* Search Container */}
-          {isSearchVisible && (
-            <Animated.View
-              style={[
-                styles(theme, width).searchContainer,
-                {
-                  width: searchBarWidth,
-                },
-                {
-                  marginBottom: 23,
-                }
-              ]}
-            >
-              <TextInput
-                placeholder="Search..."
-                value={searchQuery}
-                placeholderTextColor="#999"
-                onChangeText={(e) => setSearchQuery(e)}
-                style={[styles(theme, width).searchInput]}
-                autoFocus={true}
-              />
-            </Animated.View>
-          )}
-          {
-            isSearchVisible ? (
-              <View style={[styles(theme, width).seachIcon, {marginTop: -25}]}>
-              <TouchableOpacity onPress={toggleSearchBar}>
-                <Ionicons name='close' size={25} />
+        <View style={styles(theme, width).topView}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+              paddingBottom: 15,
+              paddingTop: 10,
+            }}
+          >
+            <View style={styles(theme, width).userAccountAndPageTitle}>
+              <TouchableOpacity
+                style={[
+                  styles(theme, width).userPhoto,
+                  { backgroundColor: theme.black },
+                ]}
+                onPress={() => {
+                  navigation.navigate("AccountPage");
+                }}
+              >
+                <Text style={styles(theme, width).pfpText}>{userInitials}</Text>
               </TouchableOpacity>
+              <Text style={styles(theme, width).pageTitle}>Library</Text>
             </View>
-            ) : (
-              <View style={styles(theme, width).seachIcon}>
-                <TouchableOpacity onPress={toggleSearchBar}>
-                  <Ionicons name='search' size={25} />
-                </TouchableOpacity>
-              </View>
-            )
-          }
+
+            <View style={styles(theme, width).userWishContainer}>
+              <Greeting />
+              <Text style={styles(theme, width).userName}>{userName}</Text>
+            </View>
+          </View>
+
+
         </View>
 
-      </View>
+        <View style={[styles(theme, width).toolContainer, { marginHorizontal: 20 }]}>
+          {
+            !isSearchVisible && (<View>
+              <TouchableOpacity>
+                <MaterialIcons name='sort' size={30} />
+              </TouchableOpacity>
+            </View>)
+          }
+          <View style={[styles(theme, width).searchParentContainer, { width: isSearchVisible ? '95%' : 40 }]}>
+
+            {/* Search Container */}
+            {isSearchVisible && (
+              <Animated.View
+                style={[
+                  styles(theme, width).searchContainer,
+                  {
+                    width: searchBarWidth,
+                  },
+                  {
+                    marginBottom: 23,
+                  }
+                ]}
+              >
+                <TextInput
+                  placeholder="Search..."
+                  value={searchQuery}
+                  placeholderTextColor="#999"
+                  onChangeText={(e) => setSearchQuery(e)}
+                  style={[styles(theme, width).searchInput]}
+                  cursorColor={'black'}
+                  autoFocus={true}
+                />
+              </Animated.View>
+            )}
+            {
+              isSearchVisible ? (
+                <View style={[styles(theme, width).seachIcon, { marginTop: -25 }]}>
+                  <TouchableOpacity onPress={toggleSearchBar}>
+                    <Ionicons name='close' size={25} />
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View style={styles(theme, width).seachIcon}>
+                  <TouchableOpacity onPress={toggleSearchBar}>
+                    <Ionicons name='search' size={25} />
+                  </TouchableOpacity>
+                </View>
+              )
+            }
+          </View>
+
+        </View>
 
       </View>
       <View style={styles(theme, width).scrollerBackgroundColor}>
@@ -367,7 +371,7 @@ const styles = (theme, width, color, isDarkmode) =>
   StyleSheet.create({
     container: {
       paddingTop: Constants.statusBarHeight - 20,
-      height: '18%',
+      height: height * 0.18,
       backgroundColor: theme.homeColor,
     },
     pfpText: {
@@ -492,14 +496,13 @@ const styles = (theme, width, color, isDarkmode) =>
       alignItems: 'center',
       marginTop: 10,
     },
-   
     searchContainer: {
       right: 0,
       bottom: 0,
       backgroundColor: "#f0f0f0",
       justifyContent: "center",
       alignItems: "center",
-      height: 35,
+      height: 36,
       borderRadius: 25,
       overflow: "hidden", // Ensures the reveal is smooth
     },
@@ -508,8 +511,8 @@ const styles = (theme, width, color, isDarkmode) =>
       fontSize: 16,
       color: "black",
       paddingHorizontal: 10,
+      paddingVertical: 0, 
       width: "100%",
-
     },
     searchParentContainer: {
       flexDirection: 'row',
