@@ -62,6 +62,8 @@ const Library = ({ navigation, route }) => {
   const { theme, isDarkmode } = useTheme();
   const { setNavigateToAddNote } = useAddNoteContext();
   const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [isSortOpened, setIsSortOpened] = useState(false);
+  const [selectedSortOption, setSelectedSortOption] = useState(1);
   const animation = useRef(new Animated.Value(0)).current; // Animation value
   const screenWidth = Dimensions.get("window").width; // Screen width for full reveal
 
@@ -157,24 +159,40 @@ const Library = ({ navigation, route }) => {
   const renderList = (notes: Note[]) => {
     const filteredNotes = searchQuery
       ? notes.filter((note) => {
-        const lowerCaseQuery = searchQuery.toLowerCase();
-        const noteTime = new Date(note.time);
-        const formattedTime = formatToLocalDateString(noteTime);
-        return (
-          note.title.toLowerCase().includes(lowerCaseQuery) ||
-          formattedTime.includes(lowerCaseQuery)
-        );
-      })
+          const lowerCaseQuery = searchQuery.toLowerCase();
+          const noteTime = new Date(note.time);
+          const formattedTime = formatToLocalDateString(noteTime);
+          return (
+            note.title.toLowerCase().includes(lowerCaseQuery) ||
+            formattedTime.includes(lowerCaseQuery)
+          );
+        })
       : notes;
-
+  
+    // Apply sorting based on selectedSortOption
+    filteredNotes.sort((a, b) => {
+      if (selectedSortOption === 1) {
+        // Sort by date and time (latest first)
+        return new Date(b.time).getTime() - new Date(a.time).getTime();
+      } else if (selectedSortOption === 2) {
+        // Sort A-Z by title
+        return a.title.toLowerCase().localeCompare(b.title.toLowerCase());
+      } else if (selectedSortOption === 3) {
+        // Sort Z-A by title
+        return b.title.toLowerCase().localeCompare(a.title.toLowerCase());
+      }
+      return 0;
+    });
+  
     return published && (
-      filteredNotes.length > 0 ? (<SwipeListView
-        data={filteredNotes}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-      />) :
-        (<View style={styles(theme, width).resultNotFound}>
-
+      filteredNotes.length > 0 ? (
+        <SwipeListView
+          data={filteredNotes}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+        />
+      ) : (
+        <View style={styles(theme, width).resultNotFound}>
           <LottieView
             source={require('../../assets/animations/noResultFound.json')}
             autoPlay
@@ -183,9 +201,10 @@ const Library = ({ navigation, route }) => {
           />
           <Text style={styles(theme, width).resultNotFoundTxt}>No Results Found</Text>
         </View>
-        )
-    )
+      )
+    );
   };
+  
 
   const renderItem = (data: any) => {
     const item = data.item;
@@ -259,10 +278,18 @@ const Library = ({ navigation, route }) => {
     return `${month}/${day}/${year}`;
   };
 
+  //handle sort
+  const handleSort = () => {
+    setIsSortOpened(!isSortOpened);
+  }
 
+  const handleSortOption = ({ option }) => {
+    setSelectedSortOption(option);
+    setIsSortOpened(false);
+  }
 
   return (
-    <View style={{ flex: 1, backgroundColor : isDarkmode? 'black' : '#e4e4e4' }}>
+    <View style={{ flex: 1, backgroundColor: isDarkmode ? 'black' : '#e4e4e4' }}>
       <StatusBar translucent backgroundColor="transparent" />
       <View style={styles(theme, width).container}>
         <View style={styles(theme, width).topView}>
@@ -302,11 +329,23 @@ const Library = ({ navigation, route }) => {
 
         <View style={[styles(theme, width).toolContainer, { marginHorizontal: 20 }]}>
           {
-            !isSearchVisible && (<View>
-              <TouchableOpacity>
-                <MaterialIcons name='sort' size={30} />
-              </TouchableOpacity>
-            </View>)
+            !isSearchVisible && (
+              <View>
+                {
+                  !isSortOpened ? (<TouchableOpacity
+                    onPress={handleSort}
+                  >
+                    <MaterialIcons name='sort' size={30} />
+                  </TouchableOpacity>)
+                    : (
+                      <TouchableOpacity
+                        onPress={handleSort}
+                      >
+                        <MaterialIcons name='close' size={30} />
+                      </TouchableOpacity>)
+                }
+              </View>
+            )
           }
           <View style={[styles(theme, width).searchParentContainer, { width: isSearchVisible ? '95%' : 40 }]}>
 
@@ -357,7 +396,41 @@ const Library = ({ navigation, route }) => {
       <View style={styles(theme, width).scrollerBackgroundColor}>
         {rendering ? <NoteSkeleton /> : renderList(notes)}
       </View>
-
+      {isSortOpened && <View style={{
+        height: 400,
+        width: '90%',
+        backgroundColor: isDarkmode? '#525252' : 'white',
+        position: 'absolute',
+        top: "20%",
+        left: '5%',
+        borderRadius: 20,
+        padding: 20,
+      }}>
+        <Text style={{ fontSize: 20, color: isDarkmode? '#c7c7c7' : 'black', fontWeight: 600}}>Sort by</Text>
+        <View style={{ height: '90%', justifyContent: 'space-evenly', alignItems: 'center'}}>
+          <TouchableOpacity
+            onPress={() => handleSortOption({ option: 1 })}
+          >
+            <View style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 1 ? theme.homeColor : 'none', width: 200 }]}>
+              <Text style={{ fontSize: 20, color: isDarkmode && selectedSortOption != 1 ? '#c7c7c7' : 'black' }}>Date & Time(latest)</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => handleSortOption({ option: 2 })}
+          >
+            <View style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 2 ? theme.homeColor : 'none' }]}>
+              <Text style={{ fontSize: 20, color: isDarkmode && selectedSortOption != 2 ? '#c7c7c7' : 'black' }}>A-Z</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => handleSortOption({ option: 3 })}
+          >
+            <View style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 3 ? theme.homeColor : 'none' }]}>
+              <Text style={{ fontSize: 20, color: isDarkmode && selectedSortOption != 3 ? '#c7c7c7' : 'black' }}>Z-A</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+      </View>}
       <NoteDetailModal
         isVisible={isModalVisible}
         onClose={() => setModalVisible(false)}
@@ -511,7 +584,7 @@ const styles = (theme, width, color, isDarkmode) =>
       fontSize: 16,
       color: "black",
       paddingHorizontal: 10,
-      paddingVertical: 0, 
+      paddingVertical: 0,
       width: "100%",
     },
     searchParentContainer: {
@@ -542,6 +615,14 @@ const styles = (theme, width, color, isDarkmode) =>
     resultNotFoundTxt: {
       fontSize: 15,
       fontWeight: '400',
+    },
+    selectedSortOption: {
+      // backgroundColor: theme.homeColor,
+      width: width * 0.4,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 10,
+      borderRadius: 10,
     }
 
   });
