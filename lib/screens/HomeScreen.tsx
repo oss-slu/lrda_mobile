@@ -33,6 +33,7 @@ import NotesComponent from "../components/NotesComponent";
 import Greeting from "../components/Greeting";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import LottieView from 'lottie-react-native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { green } from "react-native-reanimated/lib/typescript/Colors";
 
 const { width, height } = Dimensions.get("window");
@@ -64,6 +65,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const { theme, isDarkmode } = useTheme();
   const animation = useRef(new Animated.Value(0)).current; // Animation value
   const screenWidth = Dimensions.get("window").width; // Screen width for full reveal
+  const [isSortOpened, setIsSortOpened] = useState(false);
+  const [selectedSortOption, setSelectedSortOption] = useState(1);
+
   let textLength = 18;
 
   
@@ -244,6 +248,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       </View>
     );
   };
+ //handle sort
+ const handleSort = () => {
+  setIsSortOpened(!isSortOpened);
+}
+
+const handleSortOption = ({ option }) => {
+  setSelectedSortOption(option);
+  setIsSortOpened(false);
+}
 
   const deleteNote = (id: string, rowMap: any) => {
     if (rowMap[id]) {
@@ -294,6 +307,21 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         );
       })
       : notes;
+
+      // Apply sorting based on selectedSortOption
+    filteredNotes.sort((a, b) => {
+      if (selectedSortOption === 1) {
+        // Sort by date and time (latest first)
+        return new Date(b.time).getTime() - new Date(a.time).getTime();
+      } else if (selectedSortOption === 2) {
+        // Sort A-Z by title
+        return a.title.toLowerCase().localeCompare(b.title.toLowerCase());
+      } else if (selectedSortOption === 3) {
+        // Sort Z-A by title
+        return b.title.toLowerCase().localeCompare(a.title.toLowerCase());
+      }
+      return 0;
+    });
 
     return isPrivate ? (
 
@@ -491,7 +519,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
         <View style={[styles(theme, width).toolContainer, { marginHorizontal: 20, }]}>
           {
-            !isSearchVisible && (<View>
+            !isSearchVisible && (<View style={{flexDirection: 'row', width: '45%', justifyContent: 'space-between', }}>
               <View style={styles(theme, width).publishedOrPrivateContainer}>
                 <Pressable onPress={() => {
                   setIsPrivate(false);
@@ -510,7 +538,23 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                   </View>
                 </Pressable>
               </View>
-            </View>)
+              <View>
+                {
+                  !isSortOpened ? (<TouchableOpacity
+                    onPress={handleSort}
+                  >
+                    <MaterialIcons name='sort' size={30} />
+                  </TouchableOpacity>)
+                    : (
+                      <TouchableOpacity
+                        onPress={handleSort}
+                      >
+                        <MaterialIcons name='close' size={30} />
+                      </TouchableOpacity>)
+                }
+              </View>
+            </View>
+            )
           }
           <View style={[styles(theme, width).searchParentContainer, { width: isSearchVisible ? '95%' : 40 }]}>
 
@@ -562,11 +606,47 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         {rendering ? <NoteSkeleton /> : renderList(notes)}
       </View>
 
+
       <NoteDetailModal
         isVisible={isModalVisible}
         onClose={() => setModalVisible(false)}
         note={selectedNote}
       />
+
+{isSortOpened && isSearchVisible== false && <View style={{
+        height: "100%",
+        width: '100%',
+        backgroundColor: isDarkmode? '#525252' : 'white',
+        position: 'absolute',
+        top: '19%',
+        borderRadius: 20,
+        padding: 20,
+      }}>
+        <Text style={{ fontSize: 20, color: isDarkmode? '#c7c7c7' : 'black', fontWeight: 600}}>Sort by</Text>
+        <View style={{ height: '50%', justifyContent: 'space-evenly', alignItems: 'center'}}>
+          <TouchableOpacity
+            onPress={() => handleSortOption({ option: 1 })}
+          >
+            <View style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 1 ? theme.homeColor : 'none', width: 200 }]}>
+              <Text style={{ fontSize: 20, color: isDarkmode && selectedSortOption != 1 ? '#c7c7c7' : 'black' }}>Date & Time(latest)</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => handleSortOption({ option: 2 })}
+          >
+            <View style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 2 ? theme.homeColor : 'none' }]}>
+              <Text style={{ fontSize: 20, color: isDarkmode && selectedSortOption != 2 ? '#c7c7c7' : 'black' }}>A-Z</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => handleSortOption({ option: 3 })}
+          >
+            <View style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 3 ? theme.homeColor : 'none' }]}>
+              <Text style={{ fontSize: 20, color: isDarkmode && selectedSortOption != 3 ? '#c7c7c7' : 'black' }}>Z-A</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+      </View>}
     </View>
   );
 };
@@ -749,6 +829,14 @@ const styles = (theme, width, color, isDarkmode) =>
       fontSize: 15,
       fontWeight: '400',
     },
+    selectedSortOption: {
+      // backgroundColor: theme.homeColor,
+      width: width * 0.4,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 10,
+      borderRadius: 10,
+    }
 
   });
 

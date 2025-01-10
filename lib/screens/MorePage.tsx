@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, } from "react";
 import {
   View,
   Text,
@@ -10,7 +10,8 @@ import {
   Dimensions,
   Switch,
   Platform,
-  StatusBar
+  StatusBar,
+  Linking
 
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -51,7 +52,8 @@ export default function MorePage() {
   const [isThemeOpen, setIsThemeOpen] = useState(false)
   const [userName, setUserName] = useState('');
   const [userInitials, setUserInitials] = useState("N/A");
-
+  const [isDeleteAccountClicked, setIsDeleteAccountClicked] = useState(false);
+  const [isDeleteBtnClicked, setIsDeleteBtnClicked] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -82,6 +84,10 @@ export default function MorePage() {
     }
   };
 
+  const handleDeleteAccount = () => {
+    setIsDeleteAccountClicked(!isDeleteAccountClicked);
+  }
+
   const onLogoutPress = async () => {
     try {
       await User.getInstance().logout(dispatch);
@@ -89,6 +95,25 @@ export default function MorePage() {
     } catch (e) {
       console.log(e);
     }
+  };
+
+  const handleDeleteUserAccount = () => {
+    setTimeout(()=> {
+      onLogoutPress();
+    },3000)
+  }
+
+  const handleReportClick = () => {
+    const email = 'yashkamal.bhatia@slu.edu'; // The predefined email address
+    const subject = 'Bug Report on \'Where\'s Religion?'; // The subject of the email
+    const body = 'Please provide details of your issue you are facing here.'; // The body of the email
+
+    // Create the mailto link
+    const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    // Open the email client
+    Linking.openURL(mailtoLink)
+      .catch((err) => console.error('Error opening email client:', err));
   };
 
 
@@ -210,13 +235,15 @@ export default function MorePage() {
               >
                 <SettingOptions optionName={'App Theme'} icon={'none'} />
               </TouchableOpacity>
-              <TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleDeleteAccount}
+              >
                 <SettingOptions optionName={'Delete My Account'} icon={'delete'} />
-              </TouchableOpacity><TouchableOpacity>
-                <SettingOptions optionName={'Report an Issue'} icon={'report'} />
-              </TouchableOpacity><TouchableOpacity>
-                <SettingOptions optionName={'Contact Us'} icon={'connect-without-contact'} />
               </TouchableOpacity>
+              <TouchableOpacity onPress={handleReportClick}>
+                <SettingOptions optionName={'Report an Issue'} icon={'report'} />
+              </TouchableOpacity>
+
 
             </View>
 
@@ -251,7 +278,87 @@ export default function MorePage() {
             </View>
           </Modal>
 
+          <Modal
+            isVisible={isDeleteAccountClicked}
+            backdropColor="#00aa00"
+            backdropOpacity={0}
+            style={{ margin: 0, justifyContent: 'center', alignItems: 'center', top: "20%" }} // Center the modal
+          >
+            <View
+              style={{
+                backgroundColor: 'white',
+                padding: 20,
+                borderRadius: 10,
+                height: height * 0.7, // Restrict modal height to 70% of the screen
+                width: '90%', // Set the width to 90% of the screen
+              }}
+            >
 
+              {
+                !isDeleteBtnClicked ? <>
+                  <Text style={styles.heading}>Are you sure you want to delete your account?</Text>
+                  <View
+                    style={{
+                      marginTop: 50,
+                    }}
+                  >
+                    <Text style={{ fontSize: 10 }}>This action is permanent and cannot be undone. You will lose access to your account and all associated data, including:</Text>
+                    <Text style={styles.deleteAccountBulletPoints}>
+                      •  Saved preferences
+                    </Text>
+                    <Text style={styles.deleteAccountBulletPoints}>
+                      •  Uploaded content
+                    </Text>
+                  </View>
+
+                  <View style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-evenly',
+                    height: 100,
+                  }}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setIsDeleteAccountClicked(false);
+                      }}
+                    >
+                      <View style={styles.deleteAccountActionButtons}>
+                        <Text style={{ color: theme.homeColor, }}>Cancel</Text>
+                      </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => {
+                      setIsDeleteBtnClicked(true);
+                      handleDeleteUserAccount();
+                    }}>
+                      <View style={styles.deleteAccountActionButtons}>
+                        <Text style={{ color: 'red' }}>Delete</Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                </> : <>
+                 <View style={{flex: 1,}}>
+                 <Text style={{
+                  marginTop: 50,
+                  fontSize: 23,
+                  fontWeight: '500'
+                 }}>
+                    We’ll Miss You, {userName}!
+                  </Text>
+                  <Text 
+                  style={{
+                    marginTop: 20,
+                  }}
+                  >
+                  We’re sad to see you go, but don’t worry—you can always create a new account if you decide to come back.
+                  </Text>
+                 </View>
+
+                </>
+              }
+
+            </View>
+
+          </Modal>
 
 
 
@@ -382,5 +489,17 @@ const styles = StyleSheet.create({
   headingAndAction: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+  },
+
+  deleteAccountBulletPoints: {
+    fontSize: 8,
+  },
+  deleteAccountActionButtons: {
+    backgroundColor: 'white',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderColor: 'balck',
+    borderWidth: 1,
+    borderRadius: 12,
   },
 });

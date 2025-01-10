@@ -396,18 +396,17 @@ const Library = ({ navigation, route }) => {
       <View style={styles(theme, width).scrollerBackgroundColor}>
         {rendering ? <NoteSkeleton /> : renderList(notes)}
       </View>
-      {isSortOpened && <View style={{
-        height: 400,
-        width: '90%',
+      {isSortOpened && isSearchVisible == false && <View style={{
+        height: "100%",
+        width: '100%',
         backgroundColor: isDarkmode? '#525252' : 'white',
         position: 'absolute',
-        top: "20%",
-        left: '5%',
+        top: '19%',
         borderRadius: 20,
         padding: 20,
       }}>
         <Text style={{ fontSize: 20, color: isDarkmode? '#c7c7c7' : 'black', fontWeight: 600}}>Sort by</Text>
-        <View style={{ height: '90%', justifyContent: 'space-evenly', alignItems: 'center'}}>
+        <View style={{ height: '50%', justifyContent: 'space-evenly', alignItems: 'center'}}>
           <TouchableOpacity
             onPress={() => handleSortOption({ option: 1 })}
           >
