@@ -344,6 +344,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   };
 
   const renderItem = (data: any) => {
+   
     const item = data.item;
     const tempTime = new Date(item.time);
     const showTime = formatToLocalDateString(tempTime);

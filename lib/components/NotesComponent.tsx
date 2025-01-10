@@ -20,16 +20,13 @@ function NotesComponent({ IsImage, resolvedImageURI, ImageType, textLength, show
         const data = response.data;
     
         // Fetch the author
-        const author = data.name; // "karthik"
+        const author = data.name; 
     
-        // console.log("Fetched data:", { author});
+       
     
         setAuthor(author)
        
       } catch (error) {
-        // console.error("Error fetching data:", error.message);
-    
-        // Handle the error (you can throw it or return a default value)
         throw new Error("Failed to fetch data.");
       }
     };
@@ -74,6 +71,7 @@ function NotesComponent({ IsImage, resolvedImageURI, ImageType, textLength, show
         // console.log("inside the useEffect ", item.creator)
         fetchUserName(item.creator)
     }, [item])
+    
     return (
         <View style={[styles.notesContainer, { backgroundColor: isDarkmode ? '#3f3f3f' : 'white' }]}>
             

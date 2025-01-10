@@ -63,7 +63,6 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const { setPublishNote } = useAddNoteContext();
 
-
   const addNoteState = useSelector((state) => state?.addNoteState?.isAddNoteOpned);
   useEffect(() => {
     console.log("Updated isAddNoteOpened state:", addNoteState);
@@ -98,6 +97,11 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
     };
   }, []);
 
+  useEffect(() => {
+     // Save the correct reference to handleShareButtonPress
+     console.log("useeffect called when to hit save button");
+     setPublishNote(() => handleShareButtonPress);
+  }, [titleText]);
 
   const customToolbarItems = [
     ...DEFAULT_TOOLBAR_ITEMS,
@@ -214,6 +218,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
 
   const handleShareButtonPress = async () => {
     setIsPublished(!isPublished);
+    console.log("This is title in handleShare button ",titleText);
     ToastMessage.show({
       type: 'success',
       text1: isPublished ? 'Note Unpublished' : 'Note Published',
@@ -222,20 +227,25 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
     await saveNote();
   };
 
+  const getTitle = () => {
+    console.log(titleText);
+    const title = titleText.trim()? titleText.trim()
+      : route.params.untitledNumber
+      ? `Untitled ${route.params.untitledNumber}`
+      : "Untitled";
+      console.log(title);
+
+      return title;
+  }
   const prepareNoteData = async () => {
     const userLocation = await Location.getCurrentPositionAsync({});
     const finalLocation = userLocation ? userLocation.coords : { latitude: 0, longitude: 0 };
     const textContent = await editor.getHTML();
     const sanitizedContent = textContent.replace(/<\/?p>/g, ""); // Remove <p> tags
     const uid = await user.getId();
-  
-    const title = titleText.trim()
-      ? titleText.trim()
-      : route.params.untitledNumber
-      ? `Untitled ${route.params.untitledNumber}`
-      : "Untitled";
-  
+    const title = getTitle();
     return {
+
       title,
       text: sanitizedContent,
       media: newMedia || [],
@@ -248,16 +258,21 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
       creator: uid,
     };
   };
+
+  
   const saveNote = async () => {
-    console.log("Back button pressed - saveNote function invoked.");
+    console.log("Saving note...");
+    console.log("Title Text:", titleText.length); // Log the title to ensure it's what you expect
+    const noteData = await prepareNoteData();
+    console.log("Note Data Prepared:", noteData); // Check if title is being passed correctly
+    
+    // Proceed with saving the note
     setIsUpdating(true);
     setIsSaveButtonEnabled(true);
   
     try {
-      const newNote = await prepareNoteData();
-      const response = await ApiService.writeNewNote(newNote);
-      await response.json();
-  
+      const response = await ApiService.writeNewNote(noteData);
+      const responseJson = await response.json();
       if (route.params.refreshPage) {
         route.params.refreshPage();
       }
@@ -271,6 +286,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
       dispatch(toogleAddNoteState());
     }
   };
+  
     
   
 
