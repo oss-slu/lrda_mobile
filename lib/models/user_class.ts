@@ -45,15 +45,33 @@ export class User {
   private async loadUser(): Promise<UserData | null> {
     try {
       const value = await AsyncStorage.getItem("userData");
-      if (value !== null) {
-        return JSON.parse(value);
+  
+      // Log raw data retrieved from AsyncStorage
+      console.log("Loaded raw user data from AsyncStorage:", value);
+  
+      // Check if data exists and is non-empty
+      if (value && value.trim() !== "") {
+        try {
+          const parsedData = JSON.parse(value);
+          console.log("Parsed user data:", parsedData);
+          return parsedData;
+        } catch (parseError) {
+          // Log detailed error if JSON parsing fails
+          console.error("JSON parse error. Invalid data format:", value, parseError);
+        }
+      } else {
+        // Log explicitly when the value is null or empty
+        console.log("No valid data in AsyncStorage or data is empty.");
       }
     } catch (error) {
-      console.log(error);
+      // Log errors related to AsyncStorage operations
+      console.error("Error retrieving or parsing user data from AsyncStorage:", error);
     }
+  
+    // Return null if data is invalid or parsing fails
     return null;
   }
-
+  
   private async clearUser() {
     try {
       await AsyncStorage.removeItem("userData");
