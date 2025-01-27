@@ -84,5 +84,25 @@ describe('MorePage', () => {
     expect(getByText('More')).toBeTruthy();
   });
 
+  it('renders all main menu items', () => {
+    const { getByText } = render(
+      <Provider store={store}>
+        <NavigationContainer>
+          <MorePage />
+        </NavigationContainer>
+      </Provider>
+    );
+
+    expect(getByText('About')).toBeTruthy();
+    expect(getByText('Resource')).toBeTruthy();
+    expect(getByText('Meet our team')).toBeTruthy();
+    expect(getByText('Settings')).toBeTruthy();
+    expect(getByText('FAQ')).toBeTruthy();
+    expect(getByText('Logout')).toBeTruthy();
+  });
 });
+
+
+
+
 

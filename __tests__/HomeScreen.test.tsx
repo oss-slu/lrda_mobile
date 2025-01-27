@@ -51,6 +51,7 @@ jest.mock('react-native/Libraries/Image/Image', () => ({
 }));
 
 
+
 jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
   settings: {},
   setValues: jest.fn(),
@@ -119,5 +120,6 @@ describe('HomeScreen', () => {
     const addButton = await waitFor(() => getByTestId('addButtonIcon'));
     expect(addButton).toBeTruthy();
   });
+
 
 });

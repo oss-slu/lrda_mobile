@@ -56,10 +56,10 @@ const styles = StyleSheet.create({
 
     },
     header: {
-        height: height * 0.15,
-    },
+        height: width > 500 ? height * 0.12 : height * 0.19,
+        },
     headerContent: {
-        marginTop: '20%',
+        marginTop: width > 500? '5%' :'20%',
         flexDirection: 'row',
         justifyContent: 'flex-start',
         alignItems: 'center',

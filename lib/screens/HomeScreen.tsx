@@ -40,6 +40,7 @@ const { width, height } = Dimensions.get("window");
 const user = User.getInstance();
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
+  console.log("Home screen width is ", width);
   const [notes, setNotes] = useState<Note[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
   const [updateCounter, setUpdateCounter] = useState(0);
@@ -64,7 +65,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const { setNavigateToAddNote } = useAddNoteContext();
   const { theme, isDarkmode } = useTheme();
   const animation = useRef(new Animated.Value(0)).current; // Animation value
-  const screenWidth = Dimensions.get("window").width; // Screen width for full reveal
   const [isSortOpened, setIsSortOpened] = useState(false);
   const [selectedSortOption, setSelectedSortOption] = useState(1);
 
@@ -398,7 +398,10 @@ const handleSortOption = ({ option }) => {
       <TouchableOpacity
         key={item.id}
         activeOpacity={1}
-        style={{backgroundColor: isDarkmode? 'black' : '#e6e6e6'}}
+        style={{
+          backgroundColor: isDarkmode? 'black' : '#e6e6e6',
+          width: "100%",
+        }}
         onPress={() => {
           if (!item.published) {
             navigation.navigate("EditNote", {
@@ -447,7 +450,7 @@ const handleSortOption = ({ option }) => {
       // Show the search container
       setIsSearchVisible(true);
       Animated.timing(animation, {
-        toValue: screenWidth - 100,
+        toValue: width - 100,
         duration: 300,
         useNativeDriver: false,
       }).start();
@@ -455,8 +458,8 @@ const handleSortOption = ({ option }) => {
   };
 
   const searchBarWidth = animation.interpolate({
-    inputRange: [0, screenWidth],
-    outputRange: [0, screenWidth],
+    inputRange: [0, width],
+    outputRange: [0, width],
   });
 
 
@@ -497,7 +500,11 @@ const handleSortOption = ({ option }) => {
               <TouchableOpacity
                 style={[
                   styles(theme, width).userPhoto,
-                  { backgroundColor: theme.black },
+                  { 
+                    backgroundColor: theme.black, 
+                    width: width > 1000 ? 50 : 30,
+                    height: width > 1000 ? 50 : 30,
+                  },
                 ]}
                 onPress={() => {
                   navigation.navigate("AccountPage");
@@ -519,7 +526,8 @@ const handleSortOption = ({ option }) => {
 
         <View style={[styles(theme, width).toolContainer, { marginHorizontal: 20, }]}>
           {
-            !isSearchVisible && (<View style={{flexDirection: 'row', width: '45%', justifyContent: 'space-between', }}>
+            !isSearchVisible && (
+            <View style={styles(theme, width).publishedAndSortContainer}>
               <View style={styles(theme, width).publishedOrPrivateContainer}>
                 <Pressable onPress={() => {
                   setIsPrivate(false);
@@ -655,8 +663,8 @@ const styles = (theme, width, color, isDarkmode) =>
   StyleSheet.create({
     container: {
       paddingTop: Constants.statusBarHeight - 20,
-      height: height * 0.18,
       backgroundColor: theme.homeColor,
+      height: width > 500 ? height * 0.12 : height * 0.19,
     },
     pfpText: {
       fontWeight: "600",
@@ -696,6 +704,7 @@ const styles = (theme, width, color, isDarkmode) =>
     },
     scrollerBackgroundColor: {
       flex: 1,
+      width: '100%',
     },
     addButton: {
       position: "absolute",
@@ -722,13 +731,14 @@ const styles = (theme, width, color, isDarkmode) =>
       width: "100%",
       height: 140,
       alignItems: "center",
-      backgroundColor: theme.homeGray,
+      backgroundColor: 'green',
       flex: 1,
       flexDirection: "row",
       justifyContent: "space-between",
       marginTop: 1,
       padding: 10,
       alignSelf: "center",
+
     },
     backRightBtn: {
       alignItems: "flex-end",
@@ -747,10 +757,11 @@ const styles = (theme, width, color, isDarkmode) =>
       color: theme.text
     },
     userWishContainer: {
-      marginRight: 10
+      marginRight: 10, 
     },
     userName: {
-      fontWeight: '500'
+      fontWeight: '500',
+      height: "50%",
     },
     toolContainer: {
       flexDirection: 'row',
@@ -767,6 +778,11 @@ const styles = (theme, width, color, isDarkmode) =>
       flexDirection: 'row',
       justifyContent: 'space-evenly',
       alignItems: 'center',
+    },
+    publishedAndSortContainer:{
+      flexDirection: 'row', 
+      width: width > 500? "20%" : "45%",
+      justifyContent: 'space-between', 
     },
     publishedTxtContainer: {
       paddingHorizontal: 5,
@@ -808,7 +824,7 @@ const styles = (theme, width, color, isDarkmode) =>
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      width: '27%',
+      width: width> 500? '13%' : "27%",
 
     },
     pageTitle: {

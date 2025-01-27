@@ -120,11 +120,11 @@ export default NotesComponent;
 const styles = StyleSheet.create({
     notesContainer: {
        flexDirection: 'row',
-       width: '95%',
+       width: width > 1000? "97.5%" : "95%",
        margin: 10,
        height: height * 0.1,
        alignItems: 'center',
-       paddingHorizontal: 20,
+       paddingHorizontal: height * 0.02,
        borderRadius: 10,
        
     },

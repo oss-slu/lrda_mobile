@@ -142,9 +142,10 @@ export default function TeamPage({ navigation }) {
           renderItem={renderItem}
           keyExtractor={(item) => item.id.toString()}
           numColumns={2}
-          contentContainerStyle={styles.teamContainer}
+          contentContainerStyle={[styles.teamContainer, {paddingBottom: 200}]}
           columnWrapperStyle={styles.teamRow}
           showsVerticalScrollIndicator={false}
+          
         />
     </View>
   );
@@ -155,10 +156,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    height: height * 0.15,
+    height: width > 500 ? height * 0.12 : height * 0.19,
   },
   headerContent: {
-    marginTop: '20%',
+    marginTop: width > 500? '5%' :'20%',
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'center',

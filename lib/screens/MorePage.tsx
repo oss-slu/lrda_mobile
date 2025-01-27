@@ -166,7 +166,10 @@ export default function MorePage() {
                 <TouchableOpacity
                   style={[
                     styles.userPhoto,
-                    { backgroundColor: theme.black },
+                    { backgroundColor: theme.black,
+                      width: width > 1000 ? 50 : 30,
+                      height: width > 1000 ? 50 : 30,
+                     },
                   ]}
                   onPress={() => {
                     navigation.navigate("AccountPage");
@@ -373,16 +376,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: Platform.OS === "android" ? 25 : 0,
+
   },
   header: {
-    height: height * 0.15
+    height: width > 500 ? height * 0.12 : height * 0.19,
   },
   profile: { flexDirection: "row", alignItems: "center" },
   userAccountAndPageTitle: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    width: '26%',
+    width: width > 500? '13%':'27%',
 
   },
   userPhoto: {
@@ -460,7 +464,7 @@ const styles = StyleSheet.create({
   },
   headerContent: {
     marginLeft: 0,
-    marginTop: '15%',
+    marginTop: width > 500? '5%' : "15%",
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -474,7 +478,7 @@ const styles = StyleSheet.create({
 
   settingsHeaderContent: {
     marginLeft: 0,
-    marginTop: '15%',
+    marginTop: width > 500? '4%' : "15%",
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'center',

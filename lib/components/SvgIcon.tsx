@@ -12,8 +12,8 @@ export const SvgIcon: React.FC<Props> = ({ color = 'white', height = 64, width =
   const { theme } = useTheme();
 
   // Define the original aspect ratio
-  const originalWidth = 75;
-  const originalHeight = 60;
+  const originalWidth = width > 1000 ? 150 : 75;
+  const originalHeight = width > 1000 ? 120 : 60;
 
   // Maintain the aspect ratio of the viewBox
   const aspectRatio = originalWidth / originalHeight;
@@ -23,8 +23,8 @@ export const SvgIcon: React.FC<Props> = ({ color = 'white', height = 64, width =
 
   return (
     <Svg
-      height={height}
-      width={width}
+      height={height * 1.5}
+      width={width * 1.2}
       viewBox={`0 0 ${originalWidth} ${originalHeight}`} // Keep the original viewBox
       {...props}
     >

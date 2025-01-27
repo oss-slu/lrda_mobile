@@ -307,7 +307,10 @@ const Library = ({ navigation, route }) => {
               <TouchableOpacity
                 style={[
                   styles(theme, width).userPhoto,
-                  { backgroundColor: theme.black },
+                  { backgroundColor: theme.black,
+                    width: width > 1000 ? 50 : 30,
+                    height: width > 1000 ? 50 : 30,
+                   },
                 ]}
                 onPress={() => {
                   navigation.navigate("AccountPage");
@@ -443,7 +446,7 @@ const styles = (theme, width, color, isDarkmode) =>
   StyleSheet.create({
     container: {
       paddingTop: Constants.statusBarHeight - 20,
-      height: height * 0.18,
+      height: width > 500 ? height * 0.12 : height * 0.19,
       backgroundColor: theme.homeColor,
     },
     pfpText: {
@@ -560,7 +563,8 @@ const styles = (theme, width, color, isDarkmode) =>
       marginRight: 10
     },
     userName: {
-      fontWeight: '500'
+      fontWeight: '500',
+      height: "50%",
     },
     toolContainer: {
       flexDirection: 'row',
@@ -595,7 +599,7 @@ const styles = (theme, width, color, isDarkmode) =>
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      width: '29%',
+      width: width> 500? '13%' : "27%",
 
     },
     pageTitle: {
@@ -622,7 +626,9 @@ const styles = (theme, width, color, isDarkmode) =>
       alignItems: 'center',
       padding: 10,
       borderRadius: 10,
-    }
+    },
+
+   
 
   });
 
