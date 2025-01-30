@@ -60,7 +60,6 @@ const Library = ({ navigation, route }) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [userName, setUserName] = useState('')
   const { theme, isDarkmode } = useTheme();
-  const { setNavigateToAddNote } = useAddNoteContext();
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [isSortOpened, setIsSortOpened] = useState(false);
   const [selectedSortOption, setSelectedSortOption] = useState(1);
@@ -289,7 +288,7 @@ const Library = ({ navigation, route }) => {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: isDarkmode ? 'black' : '#e4e4e4' }}>
+    <View testID = "Library" style={{ flex: 1, backgroundColor: isDarkmode ? 'black' : '#e4e4e4' }}>
       <StatusBar translucent backgroundColor="transparent" />
       <View style={styles(theme, width).container}>
         <View style={styles(theme, width).topView}>
@@ -327,7 +326,7 @@ const Library = ({ navigation, route }) => {
 
         </View>
 
-        <View style={[styles(theme, width).toolContainer, { marginHorizontal: 20 }]}>
+        <View testID= "Filter" style={[styles(theme, width).toolContainer, { marginHorizontal: 20 }]}>
           {
             !isSearchVisible && (
               <View>
@@ -347,7 +346,7 @@ const Library = ({ navigation, route }) => {
               </View>
             )
           }
-          <View style={[styles(theme, width).searchParentContainer, { width: isSearchVisible ? '95%' : 40 }]}>
+          <View testID="SearchBar" style={[styles(theme, width).searchParentContainer, { width: isSearchVisible ? '95%' : 40 }]}>
 
             {/* Search Container */}
             {isSearchVisible && (
