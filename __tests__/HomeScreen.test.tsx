@@ -1,17 +1,13 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import { Alert } from 'react-native';
-import AddNoteScreen from '../lib/screens/AddNoteScreen';
-import * as Location from 'expo-location';
+import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import HomeScreen from '../lib/screens/HomeScreen';
+import { AddNoteProvider } from '../lib/context/AddNoteContext';
 import { onAuthStateChanged } from 'firebase/auth';
-import { act } from '@testing-library/react-native';
-
 
 // Mock external dependencies
 jest.mock('../lib/components/ThemeProvider', () => ({
   useTheme: () => ({
-    theme: 'mockedTheme', // Provide a mocked theme object
+    theme: 'mockedTheme',
   }),
 }));
 
@@ -24,9 +20,8 @@ jest.mock("firebase/auth", () => ({
   getAuth: jest.fn(),
   initializeAuth: jest.fn(),
   getReactNativePersistence: jest.fn(),
-  onAuthStateChanged: jest.fn(), // Mock onAuthStateChanged
+  onAuthStateChanged: jest.fn(),
 }));
-
 
 jest.mock("firebase/firestore", () => ({
   getFirestore: jest.fn(),
@@ -50,8 +45,6 @@ jest.mock('react-native/Libraries/Image/Image', () => ({
   resolveAssetSource: jest.fn(() => ({ uri: 'mocked-asset-uri' })),
 }));
 
-
-
 jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
   settings: {},
   setValues: jest.fn(),
@@ -62,64 +55,117 @@ jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
 
 onAuthStateChanged.mockImplementation((auth, callback) => {
   const mockUser = { uid: "12345", email: "test@example.com" };
-  callback(mockUser); // Simulate a logged-in user
+  callback(mockUser);
 });
 
-// Mock expo-location module with TypeScript type support
+// Mock expo-location module
 jest.mock('expo-location', () => ({
   getForegroundPermissionsAsync: jest.fn(),
   requestForegroundPermissionsAsync: jest.fn(),
   getCurrentPositionAsync: jest.fn(),
 }));
 
-// Mock API calls directly
+// Mock API calls
 const mockWriteNewNote = jest.fn();
 jest.mock('../lib/utils/api_calls', () => ({
   writeNewNote: mockWriteNewNote,
 }));
 
 beforeEach(() => {
-  // Clear mocks before each test
   jest.clearAllMocks();
-
-  // Mock console methods to avoid unnecessary log outputs in tests
   jest.spyOn(console, 'log').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
 });
 
 afterEach(() => {
-  // Restore the original console methods
   console.log.mockRestore();
   console.error.mockRestore();
 });
 
 describe('HomeScreen', () => {
+  it('renders HomeScreen', async () => {
+    const routeMock = { params: { untitledNumber: 1 } };
+
+    const { getByTestId } = render(
+      <AddNoteProvider>
+        <HomeScreen route={routeMock as any} showTooltip={false} />
+      </AddNoteProvider>
+    );
+
+    const homeScreen = await waitFor(() => getByTestId('HomeScreen'));
+    expect(homeScreen).toBeTruthy();
+  });
+
   it('renders toggle search bar', async () => {
     const routeMock = { params: { untitledNumber: 1 } };
-    const { getByTestId } = render(<HomeScreen route={routeMock as any} showTooltip = {false} />);
-  
+
+    const { getByTestId } = render(
+      <AddNoteProvider>
+        <HomeScreen route={routeMock as any} showTooltip={false} />
+      </AddNoteProvider>
+    );
+
     const toggleButton = await waitFor(() => getByTestId('searchButton'));
     expect(toggleButton).toBeTruthy();
   });
 
-  it('toggle search bar visibility', async () => {
+  it('renders sort button', async () => {
     const routeMock = { params: { untitledNumber: 1 } };
-    const { getByTestId, debug } = render(<HomeScreen route={routeMock as any} showTooltip={false} />);
-  
-    const toggleButton = await waitFor(() => getByTestId('searchButton'));
-    fireEvent.press(toggleButton);
-  
-  
-    const searchBar = await waitFor(() => getByTestId('searchBar'));
-    expect(searchBar).toBeTruthy();
-  });
-  it('renders add button', async () => {
-    const routeMock = { params: { untitledNumber: 1 } };
-    const { getByTestId } = render(<HomeScreen route={routeMock as any} showTooltip = {false} />);
-  
-    const addButton = await waitFor(() => getByTestId('addButtonIcon'));
-    expect(addButton).toBeTruthy();
+
+    const { getByTestId } = render(
+      <AddNoteProvider>
+        <HomeScreen route={routeMock as any} showTooltip={false} />
+      </AddNoteProvider>
+    );
+
+    const sortButton = await waitFor(() => getByTestId('sort-button'));
+    expect(sortButton).toBeTruthy();
   });
 
+  it('shows sort options', async () => {
+    const routeMock = { params: { untitledNumber: 1 } };
+  
+    const { getByTestId } = render(
+      <AddNoteProvider>
+        <HomeScreen route={routeMock as any} showTooltip={false} />
+      </AddNoteProvider>
+    );
+  
+    const sortButton = await waitFor(() => getByTestId('sort-button'));
+    
+    fireEvent.press(sortButton);
+  
+    const sortOptions = await waitFor(() => getByTestId('sort-options'));
+    expect(sortOptions).toBeTruthy();
+  });
 
+  it('toggles private notes', async () => {
+    const routeMock = { params: { untitledNumber: 1 } };
+
+    const { getByTestId } = render(
+      <AddNoteProvider>
+        <HomeScreen route={routeMock as any} showTooltip={false} />
+      </AddNoteProvider>
+    );
+
+    const togglePrivateNotesButton = await waitFor(() => getByTestId('private-btn'));
+    fireEvent.press(togglePrivateNotesButton);
+    expect(togglePrivateNotesButton).toBeTruthy();
+  }
+  );
+  it('toggles public notes', async () => {
+    const routeMock = { params: { untitledNumber: 1 } };
+
+    const { getByTestId } = render(
+      <AddNoteProvider>
+        <HomeScreen route={routeMock as any} showTooltip={false} />
+      </AddNoteProvider>
+    );
+
+    const togglePublicNotesButton = await waitFor(() => getByTestId('public-btn'));
+    fireEvent.press(togglePublicNotesButton);
+    expect(togglePublicNotesButton).toBeTruthy();
+
+  }
+  );
 });

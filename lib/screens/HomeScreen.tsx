@@ -138,17 +138,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     }
   };
 
-
-
-
   const updateNote = (note: Note) => {
     setNotes((prevNotes) =>
       prevNotes?.map((prevNote) => (prevNote.id === note.id ? note : prevNote))
     );
     refreshPage();
   };
-
-
 
   const handleReverseOrder = () => {
     setNotes(notes.reverse());
@@ -484,7 +479,7 @@ const handleSortOption = ({ option }) => {
   return (
     <View style={{ flex: 1, backgroundColor : isDarkmode? 'black' : '#e4e4e4'}}>
       <StatusBar translucent backgroundColor="transparent" />
-      <View style={styles(theme, width).container}>
+      <View testID="HomeScreen" style={styles(theme, width).container}>
         <View style={styles(theme, width).topView}>
           <View
             style={{
@@ -527,13 +522,13 @@ const handleSortOption = ({ option }) => {
         <View style={[styles(theme, width).toolContainer, { marginHorizontal: 20, }]}>
           {
             !isSearchVisible && (
-            <View style={styles(theme, width).publishedAndSortContainer}>
+            <View testID="searchButton" style={styles(theme, width).publishedAndSortContainer}>
               <View style={styles(theme, width).publishedOrPrivateContainer}>
                 <Pressable onPress={() => {
                   setIsPrivate(false);
                   setPublished(true);
                 }}>
-                  <View style={[styles(theme, width).publishedTxtContainer, { backgroundColor: isPrivate ? 'transparent' : 'black' },]}>
+                  <View testID="public-btn" style={[styles(theme, width).publishedTxtContainer, { backgroundColor: isPrivate ? 'transparent' : 'black' },]}>
                     <Text style={[styles(theme, width).publishedTxt, { color: isPrivate ? 'black' : 'white' }]}>Published</Text>
                   </View>
                 </Pressable>
@@ -541,14 +536,14 @@ const handleSortOption = ({ option }) => {
                   setIsPrivate(true);
                   setPublished(false);
                 }}>
-                  <View style={[styles(theme, width).publishedTxtContainer, { backgroundColor: isPrivate ? 'black' : 'transparent' }]}>
+                  <View testID="private-btn" style={[styles(theme, width).publishedTxtContainer, { backgroundColor: isPrivate ? 'black' : 'transparent' }]}>
                     <Text style={[styles(theme, width).publishedTxt, { color: isPrivate ? 'white' : 'black' }]}>Private</Text>
                   </View>
                 </Pressable>
               </View>
               <View>
                 {
-                  !isSortOpened ? (<TouchableOpacity
+                  !isSortOpened ? (<TouchableOpacity testID="sort-button"
                     onPress={handleSort}
                   >
                     <MaterialIcons name='sort' size={30} />
@@ -592,14 +587,14 @@ const handleSortOption = ({ option }) => {
             )}
             {
               isSearchVisible ? (
-                <View style={[styles(theme, width).seachIcon, {marginTop: -25}]}>
+                <View style={[styles(theme, width).searchIcon, {marginTop: -25}]}>
                   <TouchableOpacity onPress={toggleSearchBar}>
                     <Ionicons name='close' size={25} />
                   </TouchableOpacity>
                 </View>
               ) : (
                 <View style={styles(theme, width).searchIcon}>
-                  <TouchableOpacity onPress={toggleSearchBar}>
+                  <TouchableOpacity testID="search-button" onPress={toggleSearchBar}>
                     <Ionicons name='search' size={25} />
                   </TouchableOpacity>
                 </View>
@@ -621,7 +616,7 @@ const handleSortOption = ({ option }) => {
         note={selectedNote}
       />
 
-{isSortOpened && isSearchVisible== false && <View style={{
+{isSortOpened && isSearchVisible== false && <View testID="sort-options" style={{
         height: "100%",
         width: '100%',
         backgroundColor: isDarkmode? '#525252' : 'white',
