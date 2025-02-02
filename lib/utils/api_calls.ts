@@ -22,7 +22,7 @@ static async fetchMessages(
   global: boolean,
   published: boolean,
   userId: string,
-  limit = 150,
+  limit = 10,
   skip = 0,
   allResults: any[] = []
 ): Promise<any[]> {
@@ -39,8 +39,10 @@ static async fetchMessages(
     if (global) {
       body = { type: "message" };
     } else if (published) {
+      console.log("in api_calls +++++++++{else_if block} ")
       body = { type: "message", published: true }; // For published messages, no specific creator
     } else {
+      console.log("in api_calls ========={else block} ", userId)
       body = { type: "message", creator: userId };
     }
 
@@ -54,9 +56,9 @@ static async fetchMessages(
    
     if (data.length > 0) {
       allResults = allResults.concat(data);
-      return this.fetchMessages(global, published, userId, limit, skip + data.length, allResults);
+      //this line causes the issue
+      //return this.fetchMessages(global, published, userId, limit, skip + data.length, allResults);
     }
-
     return allResults;
   } catch (error) {
     console.error("Error fetching messages:", error);
