@@ -185,11 +185,11 @@ const AppNavigator: React.FC = () => {
             elevation: 0,
             borderTopWidth: 0,
             paddingBottom: Platform.OS === 'ios' ? 20 : 0,
-            height: Platform.OS === 'ios' ? '9%' : '7%',
+            height: Platform.OS === 'ios' ? '11%' : '9%',
           },
           tabBarItemStyle: {
             backgroundColor: theme.primaryColor,
-            height: '100%'
+            height: '100%',
           }
         }}>
           <Tab.Screen

@@ -85,23 +85,26 @@ const Library = ({ navigation, route }) => {
 
 
 
-  const refreshPage = () => {
-    setUpdateCounter(updateCounter + 1);
-  };
+  // const refreshPage = () => {
+  //   setUpdateCounter(updateCounter + 1);
+  // };
 
   // Fetch notes, either all published or user-specific based on filter
   useEffect(() => {
     setRendering(true);
     fetchMessages();
-  }, [updateCounter, published]);
+  }, []);
+
+  //updateCounter, published
 
   const fetchMessages = async () => {
+    console.log("fetch message called ========================================================")
     try {
       // Fetch all public notes (published and not archived)
       const data = await ApiService.fetchMessages(
-        true,
         false,
-        "someUserId"
+        true,
+        "",
       );
       // Filter out archived notes; assume notes without `isArchived` are not archived
       const publicNotes = data.filter((note: Note) => !note.isArchived && note.published);
@@ -159,16 +162,16 @@ const Library = ({ navigation, route }) => {
   const renderList = (notes: Note[]) => {
     const filteredNotes = searchQuery
       ? notes.filter((note) => {
-          const lowerCaseQuery = searchQuery.toLowerCase();
-          const noteTime = new Date(note.time);
-          const formattedTime = formatToLocalDateString(noteTime);
-          return (
-            note.title.toLowerCase().includes(lowerCaseQuery) ||
-            formattedTime.includes(lowerCaseQuery)
-          );
-        })
+        const lowerCaseQuery = searchQuery.toLowerCase();
+        const noteTime = new Date(note.time);
+        const formattedTime = formatToLocalDateString(noteTime);
+        return (
+          note.title.toLowerCase().includes(lowerCaseQuery) ||
+          formattedTime.includes(lowerCaseQuery)
+        );
+      })
       : notes;
-  
+
     // Apply sorting based on selectedSortOption
     filteredNotes.sort((a, b) => {
       if (selectedSortOption === 1) {
@@ -183,14 +186,35 @@ const Library = ({ navigation, route }) => {
       }
       return 0;
     });
-  
+
     return published && (
       filteredNotes.length > 0 ? (
-        <SwipeListView
-          data={filteredNotes}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-        />
+        <View>
+          <SwipeListView
+            data={filteredNotes}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={{ paddingBottom: 100 }}
+            ListFooterComponent={() => (
+              <View style={{ padding: 20, alignItems: 'center',}}>
+                <TouchableOpacity>
+                  <View style={{ 
+                    height: 60, 
+                    width: width * 0.6, 
+                    backgroundColor: theme.homeColor, 
+                    justifyContent: 'center', 
+                    alignItems: 'center',
+                    borderRadius: 20,
+                    }}>
+                    <Text style={{fontSize: 15}}>load more</Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            )}
+          />
+
+        </View>
+
       ) : (
         <View style={styles(theme, width).resultNotFound}>
           <LottieView
@@ -204,7 +228,7 @@ const Library = ({ navigation, route }) => {
       )
     );
   };
-  
+
 
   const renderItem = (data: any) => {
     const item = data.item;
@@ -307,10 +331,11 @@ const Library = ({ navigation, route }) => {
               <TouchableOpacity
                 style={[
                   styles(theme, width).userPhoto,
-                  { backgroundColor: theme.black,
+                  {
+                    backgroundColor: theme.black,
                     width: width > 1000 ? 50 : 30,
                     height: width > 1000 ? 50 : 30,
-                   },
+                  },
                 ]}
                 onPress={() => {
                   navigation.navigate("AccountPage");
@@ -402,14 +427,14 @@ const Library = ({ navigation, route }) => {
       {isSortOpened && isSearchVisible == false && <View style={{
         height: "100%",
         width: '100%',
-        backgroundColor: isDarkmode? '#525252' : 'white',
+        backgroundColor: isDarkmode ? '#525252' : 'white',
         position: 'absolute',
         top: '19%',
         borderRadius: 20,
         padding: 20,
       }}>
-        <Text style={{ fontSize: 20, color: isDarkmode? '#c7c7c7' : 'black', fontWeight: 600}}>Sort by</Text>
-        <View style={{ height: '50%', justifyContent: 'space-evenly', alignItems: 'center'}}>
+        <Text style={{ fontSize: 20, color: isDarkmode ? '#c7c7c7' : 'black', fontWeight: 600 }}>Sort by</Text>
+        <View style={{ height: '50%', justifyContent: 'space-evenly', alignItems: 'center' }}>
           <TouchableOpacity
             onPress={() => handleSortOption({ option: 1 })}
           >
@@ -599,7 +624,7 @@ const styles = (theme, width, color, isDarkmode) =>
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      width: width> 500? '13%' : "27%",
+      width: width > 500 ? '13%' : "27%",
 
     },
     pageTitle: {
@@ -628,7 +653,7 @@ const styles = (theme, width, color, isDarkmode) =>
       borderRadius: 10,
     },
 
-   
+
 
   });
 
