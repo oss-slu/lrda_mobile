@@ -229,7 +229,7 @@ describe('HomeScreen', () => {
       </AddNoteProvider>
     );
   
-    // Find the account button (ensure testID is set in HomeScreen.tsx)
+    // Find the account button
     const accountComponent = await waitFor(() => getByTestId("user-account"));
     expect(accountComponent).toBeTruthy();
   
