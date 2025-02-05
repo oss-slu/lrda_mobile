@@ -337,6 +337,7 @@ const handleSortOption = ({ option }) => {
         : (<View style={styles(theme, width).resultNotFound}>
 
           <LottieView
+            testID="no-results-animation"
             source={require('../../assets/animations/noResultFound.json')}
             autoPlay
             loop
@@ -355,6 +356,7 @@ const handleSortOption = ({ option }) => {
         (<View style={styles(theme, width).resultNotFound}>
 
           <LottieView
+            testID="no-results-animation"
             source={require('../../assets/animations/noResultFound.json')}
             autoPlay
             loop
@@ -492,7 +494,7 @@ const handleSortOption = ({ option }) => {
             }}
           >
             <View style={styles(theme, width).userAccountAndPageTitle}>
-              <TouchableOpacity
+              <TouchableOpacity testID="user-account"
                 style={[
                   styles(theme, width).userPhoto,
                   { 
@@ -510,7 +512,7 @@ const handleSortOption = ({ option }) => {
               <Text style={styles(theme, width).pageTitle}>Notes</Text>
             </View>
 
-            <View style={styles(theme, width).userWishContainer}>
+            <View testID="greeting-component" style={styles(theme, width).userWishContainer}>
               <Greeting />
               <Text style={styles(theme, width).userName}>{userName}</Text>
             </View>
@@ -522,7 +524,7 @@ const handleSortOption = ({ option }) => {
         <View style={[styles(theme, width).toolContainer, { marginHorizontal: 20, }]}>
           {
             !isSearchVisible && (
-            <View testID="searchButton" style={styles(theme, width).publishedAndSortContainer}>
+            <View style={styles(theme, width).publishedAndSortContainer}>
               <View style={styles(theme, width).publishedOrPrivateContainer}>
                 <Pressable onPress={() => {
                   setIsPrivate(false);
@@ -575,6 +577,7 @@ const handleSortOption = ({ option }) => {
                 ]}
               >
                 <TextInput
+                  testID="search-input"
                   placeholder="Search..."
                   value={searchQuery}
                   placeholderTextColor="#999"
@@ -588,13 +591,13 @@ const handleSortOption = ({ option }) => {
             {
               isSearchVisible ? (
                 <View style={[styles(theme, width).searchIcon, {marginTop: -25}]}>
-                  <TouchableOpacity onPress={toggleSearchBar}>
+                  <TouchableOpacity testID="searchButton" onPress={toggleSearchBar}>
                     <Ionicons name='close' size={25} />
                   </TouchableOpacity>
                 </View>
               ) : (
                 <View style={styles(theme, width).searchIcon}>
-                  <TouchableOpacity testID="search-button" onPress={toggleSearchBar}>
+                  <TouchableOpacity testID="searchButton" onPress={toggleSearchBar}>
                     <Ionicons name='search' size={25} />
                   </TouchableOpacity>
                 </View>
@@ -605,7 +608,7 @@ const handleSortOption = ({ option }) => {
         </View>
       </View>
 
-      <View style={styles(theme, width).scrollerBackgroundColor}>
+      <View testID="notes-list" style={styles(theme, width).scrollerBackgroundColor}>
         {rendering ? <NoteSkeleton /> : renderList(notes)}
       </View>
 

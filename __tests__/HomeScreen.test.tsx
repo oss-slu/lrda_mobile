@@ -3,6 +3,7 @@ import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import HomeScreen from '../lib/screens/HomeScreen';
 import { AddNoteProvider } from '../lib/context/AddNoteContext';
 import { onAuthStateChanged } from 'firebase/auth';
+import ApiService from '../lib/utils/api_calls';
 
 // Mock external dependencies
 jest.mock('../lib/components/ThemeProvider', () => ({
@@ -51,6 +52,13 @@ jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
   getConstants: jest.fn(() => ({
     settings: {},
   })),
+}));
+
+
+jest.mock("../lib/utils/api_calls", () => ({
+  default: {
+    fetchMessages: jest.fn().mockResolvedValue([]),
+  },
 }));
 
 onAuthStateChanged.mockImplementation((auth, callback) => {
@@ -107,6 +115,11 @@ describe('HomeScreen', () => {
 
     const toggleButton = await waitFor(() => getByTestId('searchButton'));
     expect(toggleButton).toBeTruthy();
+
+    fireEvent.press(toggleButton);
+
+    const searchBar = await waitFor(() => getByTestId('search-input'));
+    expect(searchBar).toBeTruthy();
   });
 
   it('renders sort button', async () => {
@@ -153,6 +166,7 @@ describe('HomeScreen', () => {
     expect(togglePrivateNotesButton).toBeTruthy();
   }
   );
+
   it('toggles public notes', async () => {
     const routeMock = { params: { untitledNumber: 1 } };
 
@@ -168,4 +182,68 @@ describe('HomeScreen', () => {
 
   }
   );
+
+  //greeting component test
+  it('renders greeting component', async () => {
+    const routeMock = { params: { untitledNumber: 1 } };
+
+    const { getByTestId } = render(
+      <AddNoteProvider>
+        <HomeScreen route={routeMock as any} showTooltip={false} />
+      </AddNoteProvider>
+    );
+
+    const greetingComponent = await waitFor(() => getByTestId('greeting-component'));
+    expect(greetingComponent).toBeTruthy();
+  });
+
+  it('renders notes list', async () => {
+    const routeMock = { params: { untitledNumber: 1 } };
+
+    const { getByTestId } = render(
+      <AddNoteProvider>
+        <HomeScreen route={routeMock as any} showTooltip={false} />
+      </AddNoteProvider>
+    );
+
+    const notesList = await waitFor(() => getByTestId('notes-list'));
+    expect(notesList).toBeTruthy();
+  });
+
+  it("renders the account component and navigates to AccountPage when clicked", async () => {
+    const mockNavigate = jest.fn();  // Mock navigation function
+    const routeMock = { params: { untitledNumber: 1 } };
+  
+    const { getByTestId } = render(
+      <AddNoteProvider>
+        <HomeScreen route={routeMock as any} navigation={{ navigate: mockNavigate } as any} showTooltip={false} />
+      </AddNoteProvider>
+    );
+  
+    // Find the account button (ensure testID is set in HomeScreen.tsx)
+    const accountComponent = await waitFor(() => getByTestId("user-account"));
+    expect(accountComponent).toBeTruthy();
+  
+    // Simulate pressing the button
+    fireEvent.press(accountComponent);
+  
+    // Check if navigation was triggered
+    expect(mockNavigate).toHaveBeenCalledWith("AccountPage");
+  });
+
+  it("renders the 'Notes' title next to the account component", async () => {
+    const routeMock = { params: { untitledNumber: 1 } };
+  
+    const { getByText } = render(
+      <AddNoteProvider>
+        <HomeScreen route={routeMock as any} showTooltip={false} />
+      </AddNoteProvider>
+    );
+  
+    // Wait for "Notes" title to appear
+    await waitFor(() => {
+      expect(getByText("Notes")).toBeTruthy();
+    });
+  });
+  
 });
