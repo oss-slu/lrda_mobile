@@ -54,13 +54,6 @@ jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
   })),
 }));
 
-
-jest.mock("../lib/utils/api_calls", () => ({
-  default: {
-    fetchMessages: jest.fn().mockResolvedValue([]),
-  },
-}));
-
 onAuthStateChanged.mockImplementation((auth, callback) => {
   const mockUser = { uid: "12345", email: "test@example.com" };
   callback(mockUser);
@@ -77,6 +70,7 @@ jest.mock('expo-location', () => ({
 const mockWriteNewNote = jest.fn();
 jest.mock('../lib/utils/api_calls', () => ({
   writeNewNote: mockWriteNewNote,
+  fetchMessages: jest.fn(() => Promise.resolve([])),
 }));
 
 beforeEach(() => {
@@ -100,6 +94,7 @@ describe('HomeScreen', () => {
       </AddNoteProvider>
     );
 
+    // Wait for the HomeScreen to be rendered
     const homeScreen = await waitFor(() => getByTestId('HomeScreen'));
     expect(homeScreen).toBeTruthy();
   });
@@ -113,11 +108,14 @@ describe('HomeScreen', () => {
       </AddNoteProvider>
     );
 
+    // Wait for the toggle button to be rendered
     const toggleButton = await waitFor(() => getByTestId('searchButton'));
     expect(toggleButton).toBeTruthy();
 
+    // Simulate pressing the toggle button
     fireEvent.press(toggleButton);
 
+    // Check if the search bar is rendered
     const searchBar = await waitFor(() => getByTestId('search-input'));
     expect(searchBar).toBeTruthy();
   });
@@ -131,6 +129,7 @@ describe('HomeScreen', () => {
       </AddNoteProvider>
     );
 
+    // Wait for the sort button to be rendered
     const sortButton = await waitFor(() => getByTestId('sort-button'));
     expect(sortButton).toBeTruthy();
   });
@@ -144,10 +143,13 @@ describe('HomeScreen', () => {
       </AddNoteProvider>
     );
   
+    // Wait for the sort button to be rendered
     const sortButton = await waitFor(() => getByTestId('sort-button'));
     
+    // Simulate pressing the sort button
     fireEvent.press(sortButton);
   
+    // Check if the sort options are rendered
     const sortOptions = await waitFor(() => getByTestId('sort-options'));
     expect(sortOptions).toBeTruthy();
   });
@@ -161,7 +163,10 @@ describe('HomeScreen', () => {
       </AddNoteProvider>
     );
 
+    // Wait for the toggle button to be rendered
     const togglePrivateNotesButton = await waitFor(() => getByTestId('private-btn'));
+
+    // Simulate pressing the toggle button and check if it is rendered
     fireEvent.press(togglePrivateNotesButton);
     expect(togglePrivateNotesButton).toBeTruthy();
   }
@@ -176,15 +181,17 @@ describe('HomeScreen', () => {
       </AddNoteProvider>
     );
 
+    // Wait for the toggle button to be rendered
     const togglePublicNotesButton = await waitFor(() => getByTestId('public-btn'));
+
+    // Simulate pressing the toggle button and check if it is rendered
     fireEvent.press(togglePublicNotesButton);
     expect(togglePublicNotesButton).toBeTruthy();
 
   }
   );
 
-  //greeting component test
-  it('renders greeting component', async () => {
+  it('greets the user', async () => {
     const routeMock = { params: { untitledNumber: 1 } };
 
     const { getByTestId } = render(
@@ -193,11 +200,12 @@ describe('HomeScreen', () => {
       </AddNoteProvider>
     );
 
+    // Wait for the greeting component to be rendered
     const greetingComponent = await waitFor(() => getByTestId('greeting-component'));
     expect(greetingComponent).toBeTruthy();
   });
 
-  it('renders notes list', async () => {
+  it('renders notes', async () => {
     const routeMock = { params: { untitledNumber: 1 } };
 
     const { getByTestId } = render(
@@ -206,6 +214,7 @@ describe('HomeScreen', () => {
       </AddNoteProvider>
     );
 
+    // Wait for the notes list to be rendered
     const notesList = await waitFor(() => getByTestId('notes-list'));
     expect(notesList).toBeTruthy();
   });
@@ -231,7 +240,7 @@ describe('HomeScreen', () => {
     expect(mockNavigate).toHaveBeenCalledWith("AccountPage");
   });
 
-  it("renders the 'Notes' title next to the account component", async () => {
+  it("handles and renders the 'Notes' title next to the account component", async () => {
     const routeMock = { params: { untitledNumber: 1 } };
   
     const { getByText } = render(
@@ -243,6 +252,29 @@ describe('HomeScreen', () => {
     // Wait for "Notes" title to appear
     await waitFor(() => {
       expect(getByText("Notes")).toBeTruthy();
+    });
+  });
+
+  it("renders a Lottie animation when there are no notes found", async () => {
+    const routeMock = { params: { untitledNumber: 1 } };
+
+    // Mock the API call to return an empty array (No notes found)
+    jest.spyOn(ApiService, "fetchMessages").mockResolvedValueOnce([]);
+  
+    const { getByTestId } = render(
+      <AddNoteProvider>
+        <HomeScreen route={routeMock as any} showTooltip={false} />
+      </AddNoteProvider>
+    );
+  
+    //Ensure the API call was triggered
+    await waitFor(() => {
+      expect(ApiService.fetchMessages).toHaveBeenCalled();
+    });
+  
+    //Ensure the Lottie animation appears
+    await waitFor(() => {
+      expect(getByTestId("no-results-animation")).toBeTruthy();
     });
   });
   
