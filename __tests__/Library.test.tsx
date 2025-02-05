@@ -135,21 +135,33 @@ describe('Library Component', () => {
     await waitFor(() => expect(getByTestId('Filter')).toBeTruthy());
   });
 
-  it('Renders the account icon, (top left)', async () => {
+  it('renders the account icon (top left) and navigates to AccountPage when clicked', async () => {
+    // Provide a navigation object with a navigate function
     const navigationMock = {
-        navigate: jest.fn(),
-        goBack: jest.fn(),
-        push: jest.fn(),
-      };    
-    const routeMock = { params: {} }; // Mock route prop
+      navigate: jest.fn(),
+      goBack: jest.fn(),
+      push: jest.fn(),
+    };
+    const routeMock = { params: {} };
+
+    // Render the Library component with the mocked navigation
     const { getByTestId } = render(
-            <Library navigation={navigationMock as any} route={routeMock as any} /> 
+      <Library navigation={navigationMock} route={routeMock} />
     );
-    await waitFor(() => expect(getByTestId('Account')).toBeTruthy());
-    
+
+    // Wait for the account component to appear (using the testID we added)
+    const accountComponent = await waitFor(() => getByTestId('account-page'));
+    expect(accountComponent).toBeTruthy();
+
+     // Simulate a press event on the account component
+     fireEvent.press(accountComponent);
+
+     // Assert that navigation.navigate was called with "AccountPage"
+     expect(navigationMock.navigate).toHaveBeenCalledWith("AccountPage");
+
   });
 
-  it('Toggles Search Bar', async () => {
+  it('Toggles Search Bar and clicks it', async () => {
     const navigationMock = {
       navigate: jest.fn(),
       goBack: jest.fn(),
@@ -221,8 +233,58 @@ describe('Library Component', () => {
     expect(closeButton).toBeTruthy();
   });
 
+  it('renders the "Library" title at the top', async () => {
+    const navigationMock = {
+      navigate: jest.fn(),
+      goBack: jest.fn(),
+      push: jest.fn(),
+    };
+    const routeMock = { params: {} };
+
+    const { getByText } = render(
+      <Library navigation={navigationMock as any} route={routeMock as any} />
+    );
+
+    await waitFor(() => {
+      expect(getByText("Library")).toBeTruthy();
+    });
+  });
+
+  it('renders the notes list', async () => {
+    const navigationMock = {
+        navigate: jest.fn(),
+        goBack: jest.fn(),
+        push: jest.fn(),
+      };    
+    const routeMock = { params: {} }; // Mock route prop
+    const { getByTestId } = render(
+            <Library navigation={navigationMock as any} route={routeMock as any} /> 
+    );
+    await waitFor(() => expect(getByTestId('notes-list')).toBeTruthy());
+  });
+
+  it('renders the LottieView empty state when no notes are loaded', async () => {
+    const navigationMock = {
+      navigate: jest.fn(),
+      goBack: jest.fn(),
+      push: jest.fn(),
+    };
+    const routeMock = { params: {} };
+
+    // Simulate an API call that returns an empty array (no notes)
+    jest.spyOn(ApiService, 'fetchMessages').mockResolvedValue([]);
+
+    // Render the Library component
+    const { getByText } = render(
+      <Library navigation={navigationMock} route={routeMock} />
+    );
+
+    // Wait for the asynchronous update and verify that the empty state text is displayed
+    await waitFor(() => {
+      expect(getByText('No Results Found')).toBeTruthy();
+    });
+  });
+
 });
 
-function queryByPlaceholderText(arg0: string): any {
-    throw new Error('Function not implemented.');
-}
+

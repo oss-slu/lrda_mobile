@@ -302,8 +302,8 @@ const Library = ({ navigation, route }) => {
               paddingTop: 10,
             }}
           >
-            <View testID="Account" style={styles(theme, width).userAccountAndPageTitle}>
-              <TouchableOpacity
+            <View style={styles(theme, width).userAccountAndPageTitle}>
+              <TouchableOpacity testID="account-page"
                 style={[
                   styles(theme, width).userPhoto,
                   { backgroundColor: theme.black },
@@ -394,7 +394,7 @@ const Library = ({ navigation, route }) => {
         </View>
 
       </View>
-      <View style={styles(theme, width).scrollerBackgroundColor}>
+      <View testID = "notes-list" style={styles(theme, width).scrollerBackgroundColor}>
         {rendering ? <NoteSkeleton /> : renderList(notes)}
       </View>
       {isSortOpened && isSearchVisible == false && <View style={{
