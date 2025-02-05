@@ -302,7 +302,7 @@ const Library = ({ navigation, route }) => {
               paddingTop: 10,
             }}
           >
-            <View style={styles(theme, width).userAccountAndPageTitle}>
+            <View testID="Account" style={styles(theme, width).userAccountAndPageTitle}>
               <TouchableOpacity
                 style={[
                   styles(theme, width).userPhoto,
@@ -375,14 +375,16 @@ const Library = ({ navigation, route }) => {
             {
               isSearchVisible ? (
                 <View style={[styles(theme, width).seachIcon, { marginTop: -25 }]}>
-                  <TouchableOpacity onPress={toggleSearchBar}>
-                    <Ionicons name='close' size={25} />
+                  {/* Add testID to the close button */}
+                  <TouchableOpacity onPress={toggleSearchBar} testID="close-button">
+                    <Ionicons name="close" size={25} />
                   </TouchableOpacity>
                 </View>
               ) : (
                 <View style={styles(theme, width).seachIcon}>
-                  <TouchableOpacity onPress={toggleSearchBar}>
-                    <Ionicons name='search' size={25} />
+                  {/* Add testID to the search button */}
+                  <TouchableOpacity onPress={toggleSearchBar} testID="search-button">
+                    <Ionicons name="search" size={25} />
                   </TouchableOpacity>
                 </View>
               )

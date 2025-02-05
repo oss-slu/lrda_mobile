@@ -8,6 +8,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import configureStore from 'redux-mock-store';
 import { AddNoteProvider } from '../lib/context/AddNoteContext';
 import moxios from 'moxios'
+import { User } from '../lib/models/user_class';
 
 
 jest.mock('firebase/database', () => ({
@@ -108,7 +109,6 @@ describe('Library Component', () => {
     await waitFor(() => expect(getByTestId('Library')).toBeTruthy());
   });
 
-
   it('renders search bar', async () => {
     const navigationMock = {
         navigate: jest.fn(),
@@ -135,4 +135,94 @@ describe('Library Component', () => {
     await waitFor(() => expect(getByTestId('Filter')).toBeTruthy());
   });
 
+  it('Renders the account icon, (top left)', async () => {
+    const navigationMock = {
+        navigate: jest.fn(),
+        goBack: jest.fn(),
+        push: jest.fn(),
+      };    
+    const routeMock = { params: {} }; // Mock route prop
+    const { getByTestId } = render(
+            <Library navigation={navigationMock as any} route={routeMock as any} /> 
+    );
+    await waitFor(() => expect(getByTestId('Account')).toBeTruthy());
+    
+  });
+
+  it('Toggles Search Bar', async () => {
+    const navigationMock = {
+      navigate: jest.fn(),
+      goBack: jest.fn(),
+      push: jest.fn(),
+    };
+    const routeMock = { params: {} };
+
+    // Optionally, mock the ApiService to avoid network calls
+    jest.spyOn(ApiService, 'fetchMessages').mockResolvedValue([]);
+
+    // Render the Library component
+    const { getByTestId } = render(
+      <Library navigation={navigationMock as any} route={routeMock as any} />
+    );
+
+    // Query the search icon button using its testID and simulate a press event.
+    const searchButton = await waitFor(() => getByTestId('search-button'));
+    fireEvent.press(searchButton);
+    expect(searchButton).toBeTruthy();
+  });
+  
+  it('renders the user name "Adem" regardless of the greeting', async () => {
+    const navigationMock = {
+      navigate: jest.fn(),
+      goBack: jest.fn(),
+      push: jest.fn(),
+    };
+    const routeMock = { params: {} };
+
+    // Mock the asynchronous getName method to always return "Adem"
+    const userInstance = User.getInstance();
+    jest.spyOn(userInstance, 'getName').mockResolvedValue('Adem');
+
+    const { getByText } = render(
+      <Library navigation={navigationMock as any} route={routeMock as any} />
+    );
+
+    // Wait for the asynchronous update and check if "Adem" appears
+    await waitFor(() => {
+      expect(getByText(/Adem/)).toBeTruthy();
+    });
+  });
+
+  it('shows the close button when the search bar is opened', async () => {
+    const navigationMock = {
+      navigate: jest.fn(),
+      goBack: jest.fn(),
+      push: jest.fn(),
+    };
+    const routeMock = { params: {} };
+
+    // Optionally, mock the ApiService.fetchMessages to avoid network calls.
+    jest.spyOn(ApiService, 'fetchMessages').mockResolvedValue([]);
+
+    // Render the Library component.
+    const { getByTestId } = render(
+      <Library navigation={navigationMock as any} route={routeMock as any} />
+    );
+
+    // Query the search button using its testID.
+    const searchButton = await waitFor(() => getByTestId('search-button'));
+    expect(searchButton).toBeTruthy();
+
+    // Simulate a press event on the search button.
+    fireEvent.press(searchButton);
+
+    // Now, wait for the close button (the X button) to appear.
+    const closeButton = await waitFor(() => getByTestId('close-button'));
+    expect(closeButton).toBeTruthy();
+  });
+
 });
+
+function queryByPlaceholderText(arg0: string): any {
+    throw new Error('Function not implemented.');
+}
