@@ -222,7 +222,7 @@ export default function MorePage() {
               <TouchableOpacity onPress={handleSettingsToggle}>
                 <Feather name={'arrow-left'} size={30} />
               </TouchableOpacity>
-              <View style={styles.headerHeading}>
+              <View style={styles.headerHeading} testID="settings-header">
                 <Text style={{ fontSize: 17, fontWeight: 'bold' }}>Settings</Text>
               </View>
             </View>
@@ -272,7 +272,7 @@ export default function MorePage() {
                 <Text style={styles.heading}>Customize your app</Text>
 
                 <TouchableOpacity
-                  onPress={handleThemeOpen}
+                  onPress={handleThemeOpen} testID="close-app-theme-modal"
                 >
                   <Entypo name={'cross'} size={30} />
                 </TouchableOpacity>
