@@ -263,6 +263,19 @@ describe('Library Component', () => {
     await waitFor(() => expect(getByTestId('notes-list')).toBeTruthy());
   });
 
+  it('wishes the user', async () => {
+    const navigationMock = {
+        navigate: jest.fn(),
+        goBack: jest.fn(),
+        push: jest.fn(),
+      };    
+    const routeMock = { params: {} }; // Mock route prop
+    const { getByTestId } = render(
+            <Library navigation={navigationMock as any} route={routeMock as any} /> 
+    );
+    await waitFor(() => expect(getByTestId('greeting-component')).toBeTruthy());
+  });
+
   it('renders the LottieView empty state when no notes are loaded', async () => {
     const navigationMock = {
       navigate: jest.fn(),

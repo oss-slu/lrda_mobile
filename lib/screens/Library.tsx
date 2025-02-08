@@ -317,7 +317,7 @@ const Library = ({ navigation, route }) => {
               <Text style={styles(theme, width).pageTitle}>Library</Text>
             </View>
 
-            <View style={styles(theme, width).userWishContainer}>
+            <View testID="greeting-component" style={styles(theme, width).userWishContainer}>
               <Greeting />
               <Text style={styles(theme, width).userName}>{userName}</Text>
             </View>
