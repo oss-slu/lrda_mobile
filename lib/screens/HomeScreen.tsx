@@ -138,17 +138,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     }
   };
 
-
-
-
   const updateNote = (note: Note) => {
     setNotes((prevNotes) =>
       prevNotes?.map((prevNote) => (prevNote.id === note.id ? note : prevNote))
     );
     refreshPage();
   };
-
-
 
   const handleReverseOrder = () => {
     setNotes(notes.reverse());
@@ -342,6 +337,7 @@ const handleSortOption = ({ option }) => {
         : (<View style={styles(theme, width).resultNotFound}>
 
           <LottieView
+            testID="no-results-animation"
             source={require('../../assets/animations/noResultFound.json')}
             autoPlay
             loop
@@ -360,6 +356,7 @@ const handleSortOption = ({ option }) => {
         (<View style={styles(theme, width).resultNotFound}>
 
           <LottieView
+            testID="no-results-animation"
             source={require('../../assets/animations/noResultFound.json')}
             autoPlay
             loop
@@ -484,7 +481,7 @@ const handleSortOption = ({ option }) => {
   return (
     <View style={{ flex: 1, backgroundColor : isDarkmode? 'black' : '#e4e4e4'}}>
       <StatusBar translucent backgroundColor="transparent" />
-      <View style={styles(theme, width).container}>
+      <View testID="HomeScreen" style={styles(theme, width).container}>
         <View style={styles(theme, width).topView}>
           <View
             style={{
@@ -497,7 +494,7 @@ const handleSortOption = ({ option }) => {
             }}
           >
             <View style={styles(theme, width).userAccountAndPageTitle}>
-              <TouchableOpacity
+              <TouchableOpacity testID="user-account"
                 style={[
                   styles(theme, width).userPhoto,
                   { 
@@ -515,7 +512,7 @@ const handleSortOption = ({ option }) => {
               <Text style={styles(theme, width).pageTitle}>Notes</Text>
             </View>
 
-            <View style={styles(theme, width).userWishContainer}>
+            <View testID="greeting-component" style={styles(theme, width).userWishContainer}>
               <Greeting />
               <Text style={styles(theme, width).userName}>{userName}</Text>
             </View>
@@ -533,7 +530,7 @@ const handleSortOption = ({ option }) => {
                   setIsPrivate(false);
                   setPublished(true);
                 }}>
-                  <View style={[styles(theme, width).publishedTxtContainer, { backgroundColor: isPrivate ? 'transparent' : 'black' },]}>
+                  <View testID="public-btn" style={[styles(theme, width).publishedTxtContainer, { backgroundColor: isPrivate ? 'transparent' : 'black' },]}>
                     <Text style={[styles(theme, width).publishedTxt, { color: isPrivate ? 'black' : 'white' }]}>Published</Text>
                   </View>
                 </Pressable>
@@ -541,14 +538,14 @@ const handleSortOption = ({ option }) => {
                   setIsPrivate(true);
                   setPublished(false);
                 }}>
-                  <View style={[styles(theme, width).publishedTxtContainer, { backgroundColor: isPrivate ? 'black' : 'transparent' }]}>
+                  <View testID="private-btn" style={[styles(theme, width).publishedTxtContainer, { backgroundColor: isPrivate ? 'black' : 'transparent' }]}>
                     <Text style={[styles(theme, width).publishedTxt, { color: isPrivate ? 'white' : 'black' }]}>Private</Text>
                   </View>
                 </Pressable>
               </View>
               <View>
                 {
-                  !isSortOpened ? (<TouchableOpacity
+                  !isSortOpened ? (<TouchableOpacity testID="sort-button"
                     onPress={handleSort}
                   >
                     <MaterialIcons name='sort' size={30} />
@@ -580,6 +577,7 @@ const handleSortOption = ({ option }) => {
                 ]}
               >
                 <TextInput
+                  testID="search-input"
                   placeholder="Search..."
                   value={searchQuery}
                   placeholderTextColor="#999"
@@ -592,14 +590,14 @@ const handleSortOption = ({ option }) => {
             )}
             {
               isSearchVisible ? (
-                <View style={[styles(theme, width).seachIcon, {marginTop: -25}]}>
-                  <TouchableOpacity onPress={toggleSearchBar}>
+                <View style={[styles(theme, width).searchIcon, {marginTop: -25}]}>
+                  <TouchableOpacity testID="searchButton" onPress={toggleSearchBar}>
                     <Ionicons name='close' size={25} />
                   </TouchableOpacity>
                 </View>
               ) : (
                 <View style={styles(theme, width).searchIcon}>
-                  <TouchableOpacity onPress={toggleSearchBar}>
+                  <TouchableOpacity testID="searchButton" onPress={toggleSearchBar}>
                     <Ionicons name='search' size={25} />
                   </TouchableOpacity>
                 </View>
@@ -610,7 +608,7 @@ const handleSortOption = ({ option }) => {
         </View>
       </View>
 
-      <View style={styles(theme, width).scrollerBackgroundColor}>
+      <View testID="notes-list" style={styles(theme, width).scrollerBackgroundColor}>
         {rendering ? <NoteSkeleton /> : renderList(notes)}
       </View>
 
@@ -621,7 +619,7 @@ const handleSortOption = ({ option }) => {
         note={selectedNote}
       />
 
-{isSortOpened && isSearchVisible== false && <View style={{
+{isSortOpened && isSearchVisible== false && <View testID="sort-options" style={{
         height: "100%",
         width: '100%',
         backgroundColor: isDarkmode? '#525252' : 'white',
