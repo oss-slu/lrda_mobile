@@ -3,6 +3,18 @@ import { render } from '@testing-library/react-native';
 import AddNoteScreen from '../lib/screens/AddNoteScreen';
 import * as Location from 'expo-location';
 import moxios from 'moxios';
+import { AddNoteProvider } from '../lib/context/AddNoteContext'; // Import the provider
+import { Provider } from 'react-redux';
+import { store } from '../redux/store/store';
+
+// Mock redux-persist to avoid persistence logic in tests
+jest.mock('redux-persist', () => {
+  const real = jest.requireActual('redux-persist');
+  return {
+    ...real,
+    persistReducer: jest.fn().mockImplementation((config, reducers) => reducers),
+  };
+});
 
 // Mock the ThemeProvider
 jest.mock('../lib/components/ThemeProvider', () => ({
@@ -85,6 +97,14 @@ jest.mock('expo-location', () => ({
     })
   ),
 }));
+// Helper function to render the component with providers
+const renderWithProviders = (component: React.ReactElement) => {
+  return render(
+    <Provider store={store}>
+      <AddNoteProvider>{component}</AddNoteProvider>
+    </Provider>
+  );
+};
 
 let consoleLogSpy: jest.SpyInstance;
 let consoleErrorSpy: jest.SpyInstance;
@@ -121,7 +141,7 @@ describe('AddNoteScreen', () => {
       useEditorBridge: jest.fn(() => mockEditor),
     }));
   
-    render(<AddNoteScreen route={routeMock as any} />);
+    renderWithProviders(<AddNoteScreen route={routeMock as any} />);
   
     const imageUri = '__tests__/TestResources/TestImage.jpg';
   
