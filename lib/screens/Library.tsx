@@ -60,7 +60,6 @@ const Library = ({ navigation, route }) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [userName, setUserName] = useState('')
   const { theme, isDarkmode } = useTheme();
-  const { setNavigateToAddNote } = useAddNoteContext();
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [isSortOpened, setIsSortOpened] = useState(false);
   const [selectedSortOption, setSelectedSortOption] = useState(1);
@@ -289,7 +288,7 @@ const Library = ({ navigation, route }) => {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: isDarkmode ? 'black' : '#e4e4e4' }}>
+    <View testID = "Library" style={{ flex: 1, backgroundColor: isDarkmode ? 'black' : '#e4e4e4' }}>
       <StatusBar translucent backgroundColor="transparent" />
       <View style={styles(theme, width).container}>
         <View style={styles(theme, width).topView}>
@@ -304,7 +303,7 @@ const Library = ({ navigation, route }) => {
             }}
           >
             <View style={styles(theme, width).userAccountAndPageTitle}>
-              <TouchableOpacity
+              <TouchableOpacity testID="account-page"
                 style={[
                   styles(theme, width).userPhoto,
                   { backgroundColor: theme.black,
@@ -321,7 +320,7 @@ const Library = ({ navigation, route }) => {
               <Text style={styles(theme, width).pageTitle}>Library</Text>
             </View>
 
-            <View style={styles(theme, width).userWishContainer}>
+            <View testID="greeting-component" style={styles(theme, width).userWishContainer}>
               <Greeting />
               <Text style={styles(theme, width).userName}>{userName}</Text>
             </View>
@@ -330,7 +329,7 @@ const Library = ({ navigation, route }) => {
 
         </View>
 
-        <View style={[styles(theme, width).toolContainer, { marginHorizontal: 20 }]}>
+        <View testID= "Filter" style={[styles(theme, width).toolContainer, { marginHorizontal: 20 }]}>
           {
             !isSearchVisible && (
               <View>
@@ -350,7 +349,7 @@ const Library = ({ navigation, route }) => {
               </View>
             )
           }
-          <View style={[styles(theme, width).searchParentContainer, { width: isSearchVisible ? '95%' : 40 }]}>
+          <View testID="SearchBar" style={[styles(theme, width).searchParentContainer, { width: isSearchVisible ? '95%' : 40 }]}>
 
             {/* Search Container */}
             {isSearchVisible && (
@@ -379,14 +378,16 @@ const Library = ({ navigation, route }) => {
             {
               isSearchVisible ? (
                 <View style={[styles(theme, width).seachIcon, { marginTop: -25 }]}>
-                  <TouchableOpacity onPress={toggleSearchBar}>
-                    <Ionicons name='close' size={25} />
+                  {/* Add testID to the close button */}
+                  <TouchableOpacity onPress={toggleSearchBar} testID="close-button">
+                    <Ionicons name="close" size={25} />
                   </TouchableOpacity>
                 </View>
               ) : (
                 <View style={styles(theme, width).seachIcon}>
-                  <TouchableOpacity onPress={toggleSearchBar}>
-                    <Ionicons name='search' size={25} />
+                  {/* Add testID to the search button */}
+                  <TouchableOpacity onPress={toggleSearchBar} testID="search-button">
+                    <Ionicons name="search" size={25} />
                   </TouchableOpacity>
                 </View>
               )
@@ -396,7 +397,7 @@ const Library = ({ navigation, route }) => {
         </View>
 
       </View>
-      <View style={styles(theme, width).scrollerBackgroundColor}>
+      <View testID = "notes-list" style={styles(theme, width).scrollerBackgroundColor}>
         {rendering ? <NoteSkeleton /> : renderList(notes)}
       </View>
       {isSortOpened && isSearchVisible == false && <View style={{
