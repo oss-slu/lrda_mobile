@@ -40,7 +40,7 @@ jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
 jest.mock('react-native-reanimated-carousel', () => {
   const React = require('react');
   const { View } = require('react-native');
-  return (props) => <View>{props.children}</View>;
+  return (props) => <View testID="carousel">{props.children}</View>;
 });
 
 const mockNavigate = jest.fn();
@@ -109,6 +109,31 @@ beforeAll(() => {
 });
 
 describe('MorePage - Main View', () => {
+  it('should render the carousel', async () => {
+    const { getByTestId } = render(
+        <Provider store={store}>
+          <NavigationContainer>
+            <MorePage />
+          </NavigationContainer>
+        </Provider>
+    );
+    await waitFor(() => {
+      expect(getByTestId('carousel')).toBeTruthy();
+    });
+  });
+
+  it('should toggle dark mode when theme switch is pressed', async () => {
+    const { getByTestId } = render(
+        <Provider store={store}>
+          <NavigationContainer>
+            <MorePage />
+          </NavigationContainer>
+        </Provider>
+    );
+    const toggleSwitch = getByTestId('dark-mode-toggle');
+    fireEvent.press(toggleSwitch);
+    expect(mockToggleDarkmode).toHaveBeenCalled();
+  });
 
   it('should display user and navigate to AccountPage when avatar is pressed', async () => {
     const { getByText } = render(

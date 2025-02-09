@@ -1,7 +1,13 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
-const ThemeToggle = ({ isDarkmode, toggleDarkmode }) => {
+interface ThemeToggleProps {
+    isDarkmode: boolean;
+    toggleDarkmode: () => void;
+    testID?: string; // Optional testID prop for testing
+}
+
+const ThemeToggle: React.FC<ThemeToggleProps> = ({ isDarkmode, toggleDarkmode, testID }) => {
   return (
     <View style={styles.toggleContainer}>
       <TouchableOpacity
@@ -10,6 +16,7 @@ const ThemeToggle = ({ isDarkmode, toggleDarkmode }) => {
           { backgroundColor: isDarkmode ? "transparent" : "#000" },
         ]}
         onPress={toggleDarkmode}
+        testID={testID}
       >
         <Text style={[styles.text, { color: isDarkmode ? "#000" : "#fff" }]}>
           Light
@@ -21,6 +28,7 @@ const ThemeToggle = ({ isDarkmode, toggleDarkmode }) => {
           { backgroundColor: isDarkmode ? "#000" : "transparent" },
         ]}
         onPress={toggleDarkmode}
+        testID={'${testID}-dark'}
       >
         <Text style={[styles.text, { color: isDarkmode ? "#fff" : "#000" }]}>
           Dark

@@ -179,7 +179,7 @@ export default function MorePage() {
                 </TouchableOpacity>
                 <Text style={styles.pageTitle}>More</Text>
               </View>
-              <ThemeToggle isDarkmode={isDarkmode} toggleDarkmode={toggleDarkmode} />
+              <ThemeToggle isDarkmode={isDarkmode} toggleDarkmode={toggleDarkmode} testID="dark-mode-toggle"/>
             </View>
           </View>
 
