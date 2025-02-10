@@ -261,30 +261,7 @@ describe('MorePage - Main View', () => {
 
     });
 
-    it('should open the Delete Account modal when Delete My Account is pressed', async () => {
-      const { getByText, queryByText } = await renderAndOpenSettings();
-
-      // Initially, delete account modal is not visible
-      expect(queryByText('Are you sure you want to delete your account?')).toBeNull();
-
-      // Press the "Delete My Account" option
-      const deleteOption = getByText('Delete My Account');
-      fireEvent.press(deleteOption);
-
-      // Modal should now be visible with the confirmation question
-      await waitFor(() => {
-        expect(getByText('Are you sure you want to delete your account?')).toBeTruthy();
-      });
-
-      const cancelBtn = getByText('Cancel');
-      fireEvent.press(cancelBtn);
-
-      // The modal should be closed.
-      await waitFor(() => {
-        expect(queryByText('Are you sure you want to delete your account?')).toBeNull();
-      });
-    });
-
+   
     it('should call Linking.openURL when Report an Issue is pressed', async () => {
       const { getByText } = await renderAndOpenSettings();
 

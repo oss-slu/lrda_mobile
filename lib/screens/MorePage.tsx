@@ -11,8 +11,9 @@ import {
   Switch,
   Platform,
   StatusBar,
-  Linking
-
+  Linking,
+  Alert,
+  TextInput,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../components/ThemeProvider";
@@ -27,7 +28,15 @@ import Modal from 'react-native-modal';
 import AppThemeSelectorScreen from "./AppThemeSelectorScreen";
 import Entypo from 'react-native-vector-icons/Entypo';
 import { clearThemeReducer } from "../../redux/slice/ThemeSlice";
-
+import { deleteUser } from "firebase/auth";
+import { ref, remove } from "firebase/database";
+import { deleteDoc, doc } from "firebase/firestore";
+import { deleteObject } from "firebase/storage";
+import { auth } from "../config";
+import { db, realtimeDb, storage } from "../config/firebase";
+import { reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
+import { collection, addDoc, getDoc,} from "firebase/firestore";
+import { KeyboardAvoidingView, Keyboard, TouchableWithoutFeedback } from "react-native"; // Import necessary components
 
 const { width, height } = Dimensions.get("window");
 const data = [
@@ -42,18 +51,17 @@ const data = [
 ];
 
 
+
+
 export default function MorePage() {
   const { theme, isDarkmode, toggleDarkmode } = useTheme();
   const dispatch = useDispatch();
   const userObject = User.getInstance();
-  //add navigation prop
   const navigation = useNavigation();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isThemeOpen, setIsThemeOpen] = useState(false)
   const [userName, setUserName] = useState('');
   const [userInitials, setUserInitials] = useState("N/A");
-  const [isDeleteAccountClicked, setIsDeleteAccountClicked] = useState(false);
-  const [isDeleteBtnClicked, setIsDeleteBtnClicked] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -69,7 +77,6 @@ export default function MorePage() {
     })();
   }, []);
 
-  console.log(userObject?.userData?.name[0])
   const handleThemeOpen = () => {
     setIsThemeOpen(!isThemeOpen);
   }
@@ -77,6 +84,20 @@ export default function MorePage() {
   const handleSettingsToggle = () => {
     setIsSettingsOpen(!isSettingsOpen);
   }
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [reasons, setReasons] = useState([]); // To track selected reasons
+  const [keyboardVisible, setKeyboardVisible] = useState(false); // Track keyboard visibility
+
+
+const [additionalDetails, setAdditionalDetails] = useState("");
+
+const toggleReason = (reason) => {
+  if (reasons.includes(reason)) {
+    setReasons(reasons.filter((r) => r !== reason)); // Remove if already selected
+  } else {
+    setReasons([...reasons, reason]); // Add if not already selected
+  }
+}
 
   const handleToggleDarkMode = () => {
     if (toggleDarkmode) {
@@ -84,9 +105,93 @@ export default function MorePage() {
     }
   };
 
-  const handleDeleteAccount = () => {
-    setIsDeleteAccountClicked(!isDeleteAccountClicked);
-  }
+
+  React.useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener("keyboardDidShow", () => {
+      setKeyboardVisible(true);
+    });
+    const keyboardDidHideListener = Keyboard.addListener("keyboardDidHide", () => {
+      setKeyboardVisible(false);
+    });
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
+
+  const onDeleteAccount = async () => {
+    try {
+      if (reasons.length === 0) {
+        Alert.alert("Error", "Please select at least one reason for account deletion.");
+        return;
+      }
+
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        Alert.alert("Error", "No user is logged in. Please log in to delete your account.");
+        return;
+      }
+
+      const userId = currentUser.uid;
+
+      // Save review to Firestore
+      const reviewContent = {
+        userId,
+        reasons,
+        additionalDetails: additionalDetails || "None",
+        timestamp: new Date().toISOString(),
+      };
+
+      await addDoc(collection(db, "accountDeletionReviews"), reviewContent);
+
+      // Check if the user exists in Firestore
+      const userDocRef = doc(db, "users", userId);
+      const userDoc = await getDoc(userDocRef);
+
+      if (userDoc.exists()) {
+        // User exists in Firestore, proceed to delete their Firestore record
+        console.log("User found in Firestore. Deleting Firestore record...");
+        await deleteDoc(userDocRef);
+      } else {
+        console.log("No Firestore data found for the user. Proceeding to delete only authentication...");
+      }
+
+      // Delete the authenticated user
+      try {
+        await deleteUser(currentUser);
+        Alert.alert("Success", "Your account and feedback have been successfully recorded and deleted.");
+        onLogoutPress(); // Call your existing logout function
+      } catch (error) {
+        if (error.code === "auth/requires-recent-login") {
+          console.log("Session expired. Reauthenticating the user...");
+          Alert.alert("Reauthenticate", "Your session has expired. Please log in again to delete your account.");
+        } else {
+          console.error("Error deleting user:", error);
+          Alert.alert("Error", "Failed to delete account. Please try again.");
+        }
+      }
+
+      setShowDeleteModal(false);
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      Alert.alert("Error", "Failed to delete account. Please try again.");
+    }
+  };
+
+  
+  const handleEmail = () => {
+    const emailAddress = "yashkamal.bhatia@slu.edu";
+    const subject = "Bug Report on 'Where's Religion?'";
+    const body = "Please provide details of your issue you are facing here.";
+    const emailUrl = `mailto:${emailAddress}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    Linking.openURL(emailUrl);
+  };
+
+  const handleVisitWebsite = () => {
+    const websiteUrl = "https://www.wheresreligion.org";
+    Linking.openURL(websiteUrl);
+  };
 
   const onLogoutPress = async () => {
     try {
@@ -205,11 +310,11 @@ export default function MorePage() {
             </View>
             {/* Menu Items */}
             <View style={{ marginTop: 40, }}>
-              <MenuItem title="About" iconName="information-circle-outline" />
+              <MenuItem title="About" iconName="information-circle-outline" onPress={()=> {}}/>
               <MenuItem title="Resource" iconName="link-outline" onPress={() => navigation.navigate("Resource")} />
               <MenuItem title="Meet our team" iconName="people-outline" onPress={() => navigation.navigate("TeamPage")} />
               <MenuItem title="Settings" iconName="settings-outline" onPress={handleSettingsToggle} />
-              <MenuItem title="FAQ" iconName="help-circle-outline" />
+              <MenuItem title="FAQ" iconName="help-circle-outline" onPress={()=> {}}/>
               <MenuItem title="Logout" iconName="exit-outline" onPress={onLogoutPress} />
             </View>
 
@@ -239,7 +344,7 @@ export default function MorePage() {
                 <SettingOptions optionName={'App Theme'} icon={'none'} />
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={handleDeleteAccount}
+                onPress={()=>setShowDeleteModal(true)}
               >
                 <SettingOptions optionName={'Delete My Account'} icon={'delete'} />
               </TouchableOpacity>
@@ -282,93 +387,79 @@ export default function MorePage() {
           </Modal>
 
           <Modal
-            isVisible={isDeleteAccountClicked}
-            backdropColor="#00aa00"
-            backdropOpacity={0}
-            style={{ margin: 0, justifyContent: 'center', alignItems: 'center', top: "20%" }} // Center the modal
-          >
-            <View
-              style={{
-                backgroundColor: 'white',
-                padding: 20,
-                borderRadius: 10,
-                height: height * 0.7, // Restrict modal height to 70% of the screen
-                width: '90%', // Set the width to 90% of the screen
-              }}
-            >
+      visible={showDeleteModal}
+      transparent={true}
+      animationType="slide"
+      onRequestClose={() => setShowDeleteModal(false)}
+    >
+      <KeyboardAvoidingView
+        style={[styles.modalOverlay, { justifyContent: keyboardVisible ? "flex-end" : "center" }]}
+        behavior={Platform.OS === "ios" ? "padding" : "height"} // Adjust for iOS and Android
+        keyboardVerticalOffset={Platform.OS === "ios" ? 50 : 0} // Offset for iOS
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={[styles.modalContent, { backgroundColor: isDarkmode ? "#333" : "#fff" }]}>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>Why are you deleting your account?</Text>
 
-              {
-                !isDeleteBtnClicked ? <>
-                  <Text style={styles.heading}>Are you sure you want to delete your account?</Text>
-                  <View
-                    style={{
-                      marginTop: 50,
-                    }}
-                  >
-                    <Text style={{ fontSize: 10 }}>This action is permanent and cannot be undone. You will lose access to your account and all associated data, including:</Text>
-                    <Text style={styles.deleteAccountBulletPoints}>
-                      •  Saved preferences
-                    </Text>
-                    <Text style={styles.deleteAccountBulletPoints}>
-                      •  Uploaded content
-                    </Text>
-                  </View>
-
-                  <View style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-evenly',
-                    height: 100,
-                  }}>
-                    <TouchableOpacity
-                      onPress={() => {
-                        setIsDeleteAccountClicked(false);
-                      }}
-                    >
-                      <View style={styles.deleteAccountActionButtons}>
-                        <Text style={{ color: theme.homeColor, }}>Cancel</Text>
-                      </View>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => {
-                      setIsDeleteBtnClicked(true);
-                      handleDeleteUserAccount();
-                    }}>
-                      <View style={styles.deleteAccountActionButtons}>
-                        <Text style={{ color: 'red' }}>Delete</Text>
-                      </View>
-                    </TouchableOpacity>
-                  </View>
-                </> : <>
-                 <View style={{flex: 1,}}>
-                 <Text style={{
-                  marginTop: 50,
-                  fontSize: 23,
-                  fontWeight: '500'
-                 }}>
-                    We’ll Miss You, {userName}!
-                  </Text>
-                  <Text 
-                  style={{
-                    marginTop: 20,
-                  }}
-                  >
-                  We’re sad to see you go, but don’t worry—you can always create a new account if you decide to come back.
-                  </Text>
-                 </View>
-
-                </>
-              }
-
+            {/* Checkbox Options */}
+            <View style={styles.checkboxOption}>
+              <TouchableOpacity style={styles.checkbox} onPress={() => toggleReason("Slow Loading")}>
+                <Text style={[styles.checkboxSymbol, { color: theme.text }]}>
+                  {reasons.includes("Slow Loading") ? "☑" : "☐"}
+                </Text>
+              </TouchableOpacity>
+              <Text style={[styles.checkboxText, { color: theme.text }]}>Slow Loading</Text>
             </View>
+            <View style={styles.checkboxOption}>
+              <TouchableOpacity style={styles.checkbox} onPress={() => toggleReason("Connectivity Issues")}>
+                <Text style={[styles.checkboxSymbol, { color: theme.text }]}>
+                  {reasons.includes("Connectivity Issues") ? "☑" : "☐"}
+                </Text>
+              </TouchableOpacity>
+              <Text style={[styles.checkboxText, { color: theme.text }]}>Connectivity Issues</Text>
+            </View>
+            <View style={styles.checkboxOption}>
+              <TouchableOpacity style={styles.checkbox} onPress={() => toggleReason("No Reason")}>
+                <Text style={[styles.checkboxSymbol, { color: theme.text }]}>
+                  {reasons.includes("No Reason") ? "☑" : "☐"}
+                </Text>
+              </TouchableOpacity>
+              <Text style={[styles.checkboxText, { color: theme.text }]}>No Reason</Text>
+            </View>
+           
 
-          </Modal>
+            {/* Additional Details */}
+            <TextInput
+              placeholder="Additional details (optional)"
+              placeholderTextColor={isDarkmode ? "#aaa" : "#555"}
+              style={[styles.textInput, { borderColor: isDarkmode ? "#555" : "#ccc", color: theme.text }]}
+              value={additionalDetails}
+              onChangeText={setAdditionalDetails}
+            />
 
-
-
+            {/* Buttons */}
+            <View style={styles.modalButtonContainer}>
+              <TouchableOpacity style={[styles.modalButton, { backgroundColor: "red" }]} onPress={onDeleteAccount}>
+                <Text style={styles.modalButtonText}>Confirm Delete</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.modalButton,
+                  { backgroundColor: isDarkmode ? "#6c757d" : "#007bff" },
+                ]}
+                onPress={() => setShowDeleteModal(false)}
+              >
+                <Text style={styles.modalButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    </Modal>
 
         </>)
       }
-    </View>
+      </View>
   );
 }
 
@@ -506,4 +597,78 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 12,
   },
+  switchText: { fontSize: 18, fontWeight: "500" },
+  logout: { flexDirection: "row", justifyContent: "center", alignItems: "center", height: 50, width: "90%", borderRadius: 15, marginTop:10},
+  logoutText: { fontSize: 20, fontWeight: "600", marginRight: 10 },
+
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    width: "90%",
+    borderRadius: 10,
+    padding: 20,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5, // Android shadow
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  radioOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 5,
+  },
+  radioText: {
+    fontSize: 18,
+    marginLeft: 10,
+  },
+  textInput: {
+    height: 40,
+    width: "100%",
+    borderWidth: 1,
+    borderRadius: 5,
+    marginVertical: 10,
+    paddingHorizontal: 10,
+  },
+  modalButtonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
+    marginTop: 20,
+  },
+  modalButton: {
+    padding: 10,
+    borderRadius: 5,
+    width: "45%",
+  },
+  modalButtonText: {
+    color: "#fff",
+    textAlign: "center",
+    fontWeight: "600",
+  },
+
+  checkboxOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 5,
+  },
+  checkbox: {
+    marginRight: 10,
+  },
+  checkboxSymbol: {
+    fontSize: 20,
+  },
+  checkboxText: {
+    fontSize: 18,
+  },
 });
+
