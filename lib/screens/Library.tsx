@@ -47,7 +47,6 @@ const Library = ({ navigation, route }) => {
   const [reversed, setReversed] = useState(false);
   const [rendering, setRendering] = useState(true);
   const [userInitials, setUserInitials] = useState("N/A");
-  const [globeIcon, setGlobeIcon] = useState("earth-outline");
   const [initialItems, setInitialItems] = useState([
     { label: "My Entries", value: "my_entries" },
     { label: "Published Entries", value: "published_entries" },
@@ -98,9 +97,9 @@ const Library = ({ navigation, route }) => {
     try {
       // Fetch all public notes (published and not archived)
       const data = await ApiService.fetchMessages(
-        true,
-        false,
-        "someUserId"
+          true,
+          true,
+          "someUserId"
       );
       // Filter out archived notes; assume notes without `isArchived` are not archived
       const publicNotes = data.filter((note: Note) => !note.isArchived && note.published);
@@ -189,6 +188,7 @@ const Library = ({ navigation, route }) => {
           data={filteredNotes}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
+          contentContainerStyle={{paddingBottom: 150}}
         />
       ) : (
         <View style={styles(theme, width).resultNotFound}>
