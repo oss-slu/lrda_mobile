@@ -40,7 +40,6 @@ const { width, height } = Dimensions.get("window");
 const user = User.getInstance();
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
-  console.log("Home screen width is ", width);
   const [notes, setNotes] = useState<Note[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
   const [updateCounter, setUpdateCounter] = useState(0);
@@ -80,7 +79,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     }
     setNavigateToAddNote(() => navigateToAddNote)
   }, [navigation, notes])
-
 
 
   useEffect(() => {
@@ -128,6 +126,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       // Apply reverse logic if 'reversed' is true
       setNotes(reversed ? fetchedNotes.reverse() : fetchedNotes);
       setRendering(false);
+      
     } catch (error) {
       console.error("Error fetching messages:", error);
       ToastMessage.show({
@@ -192,9 +191,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       return false;
     }
   };
-
-
-
 
   const findNextUntitledNumber = (notes: Note[]): number => {
     return notes.reduce((maxNumber, note) => {
@@ -271,6 +267,7 @@ const handleSortOption = ({ option }) => {
   async function publishNote(data: any, rowMap: any) {
     if (rowMap[data]) {
       rowMap[data].closeRow();
+
     }
     const foundNote = notes.find((note) => note.id === data);
     const editedNote: Note = {
@@ -290,6 +287,8 @@ const handleSortOption = ({ option }) => {
     refreshPage();
   }
 
+  
+  
   const renderList = (notes: Note[]) => {
     const filteredNotes = searchQuery
       ? notes.filter((note) => {
@@ -317,11 +316,10 @@ const handleSortOption = ({ option }) => {
       }
       return 0;
     });
-
+    const privateData = filteredNotes.filter((eachNotes) => eachNotes.published === false)
     return isPrivate ? (
-
-      filteredNotes.length > 0 ? (<SwipeListView
-        data={filteredNotes}
+      privateData.length > 0 ? (<SwipeListView
+        data={privateData}
         renderItem={renderItem}
         renderHiddenItem={sideMenu}
         leftActivationValue={160}
@@ -375,7 +373,6 @@ const handleSortOption = ({ option }) => {
     const showTime = formatToLocalDateString(tempTime);
     const mediaItem = item.media[0];
     const ImageType = mediaItem?.getType();
-
     // Ensure ImageURI is a valid string
     let ImageURI = "";
     let IsImage = false;
@@ -729,7 +726,7 @@ const styles = (theme, width, color, isDarkmode) =>
       width: "100%",
       height: 140,
       alignItems: "center",
-      backgroundColor: 'green',
+      backgroundColor: theme.homeColor,
       flex: 1,
       flexDirection: "row",
       justifyContent: "space-between",
