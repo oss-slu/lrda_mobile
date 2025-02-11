@@ -287,8 +287,6 @@ const handleSortOption = ({ option }) => {
     refreshPage();
   }
 
-  
-  
   const renderList = (notes: Note[]) => {
     const filteredNotes = searchQuery
       ? notes.filter((note) => {
@@ -316,7 +314,8 @@ const handleSortOption = ({ option }) => {
       }
       return 0;
     });
-    const privateData = filteredNotes.filter((eachNotes) => eachNotes.published === false)
+    const privateData = filteredNotes.filter((eachNotes) => eachNotes.published === false);
+    const publicData = filteredNotes.filter((eachNotes) => eachNotes.published != false);
     return isPrivate ? (
       privateData.length > 0 ? (<SwipeListView
         data={privateData}
@@ -331,6 +330,7 @@ const handleSortOption = ({ option }) => {
         keyExtractor={(item) => item.id}
         onRightAction={(data, rowMap) => deleteNote(data, rowMap)}
         onLeftAction={(data, rowMap) => publishNote(data, rowMap)}
+        contentContainerStyle={{paddingBottom: 150}}
       />)
         : (<View style={styles(theme, width).resultNotFound}>
 
@@ -346,10 +346,11 @@ const handleSortOption = ({ option }) => {
         )
 
     ) : (
-      filteredNotes.length > 0 ? (<SwipeListView
-        data={filteredNotes}
+      publicData.length > 0 ? (<SwipeListView
+        data={publicData}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
+        contentContainerStyle={{paddingBottom: 150}}
       />) :
         (<View style={styles(theme, width).resultNotFound}>
 
