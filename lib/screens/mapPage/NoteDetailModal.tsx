@@ -21,10 +21,10 @@ import VideoModal from "./VideoModal";
 import { Audio } from "expo-av";
 import { VideoType } from "../../models/media_class";
 
-// ---------------------------------------
+//
 // LoadingImage Component
 // Displays an ActivityIndicator overlay until the image loads
-// ---------------------------------------
+//
 interface LoadingImageProps {
   uri: string;
   alt?: string;
@@ -80,15 +80,14 @@ const loadingImageStyles = StyleSheet.create({
   },
 });
 
-// ---------------------------------------
+//
 // LoadingDots Component
-// Displays animated blinking dots (using the Animated API)
-// while waiting for the creator name to load
-// ---------------------------------------
+// Displays three animated dots using the Animated API.
+//
 const LoadingDots: React.FC = () => {
-  const dot1Opacity = useRef(new Animated.Value(0)).current;
-  const dot2Opacity = useRef(new Animated.Value(0)).current;
-  const dot3Opacity = useRef(new Animated.Value(0)).current;
+  const dot1Opacity = useRef(new Animated.Value(15)).current;
+  const dot2Opacity = useRef(new Animated.Value(15)).current;
+  const dot3Opacity = useRef(new Animated.Value(15)).current;
 
   useEffect(() => {
     const animateDots = () => {
@@ -124,7 +123,7 @@ const LoadingDots: React.FC = () => {
           duration: 300,
           useNativeDriver: true,
         }),
-        Animated.delay(300),
+        Animated.delay(100),
       ]).start(() => animateDots());
     };
 
@@ -133,7 +132,6 @@ const LoadingDots: React.FC = () => {
 
   return (
     <View style={loadingDotsStyles.container}>
-      <Text style={loadingDotsStyles.text}>Loading</Text>
       <Animated.Text style={[loadingDotsStyles.dot, { opacity: dot1Opacity }]}>
         .
       </Animated.Text>
@@ -152,20 +150,16 @@ const loadingDotsStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  text: {
-    fontSize: 18,
-    color: "#333",
-  },
   dot: {
     fontSize: 18,
     color: "#333",
-    marginLeft: 2,
+    marginHorizontal: 2,
   },
 });
 
-// ---------------------------------------
+//
 // NoteDetailModal Component
-// ---------------------------------------
+//
 interface Note {
   title: string;
   description: string;
@@ -189,7 +183,7 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
   const { width } = useWindowDimensions();
   const { theme } = useTheme();
 
-  // Reset state on note change to avoid flashing previous note content.
+  // Reset internal state on note change to avoid flashing previous note data.
   useEffect(() => {
     setCreatorName("");
     setSelectedImage(null);
@@ -249,10 +243,7 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
         await audioState.sound.pauseAsync();
         setAudioStates((prev) => ({
           ...prev,
-          [uri]: {
-            ...audioState,
-            isPlaying: false,
-          },
+          [uri]: { ...audioState, isPlaying: false },
         }));
         setPlayingMedia(null);
       } else {
@@ -309,7 +300,7 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
     return `${mins}:${secs}`;
   };
 
-  // Updated customRenderers using LoadingImage for <img> tags
+  // Custom renderers for RenderHTML
   const customRenderers = useMemo(() => ({
     img: ({ tnode }: TNodeRendererProps<any>) => {
       const { src, alt } = tnode.attributes;
