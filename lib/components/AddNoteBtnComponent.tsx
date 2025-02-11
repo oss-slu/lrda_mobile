@@ -14,11 +14,9 @@ function AddNoteBtnComponent() {
     const {navigateToAddNote, publishNote} = useAddNoteContext();
     const appThemeColor = useSelector((state) => state?.themeSlice?.theme)
     const addNoteState = useSelector((state) => state?.addNoteState?.isAddNoteOpned);
-    console.log("inside add note button ", addNoteState);
     
     const handleAddNote = () => {
         dispatch(toogleAddNoteState())
-        console.log("AddtoNotePressed")
         navigateToAddNote();
 
     }
