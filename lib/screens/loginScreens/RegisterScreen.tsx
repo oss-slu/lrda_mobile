@@ -14,12 +14,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, Timestamp } from "firebase/firestore";
 import { validateEmail, validatePassword } from "../../utils/validation";
 
-type RegisterProps = {
-  navigation: any;
-  route: any;
-};
-
-const RegistrationScreen: React.FC<RegisterProps> = ({ navigation }) => {
+const RegistrationScreen = ({ navigation }) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -35,14 +30,12 @@ const RegistrationScreen: React.FC<RegisterProps> = ({ navigation }) => {
       setSnackState(true);
       return;
     }
-
     const passwordError = validatePassword(password);
     if (passwordError) {
       setSnackMessage(passwordError);
       setSnackState(true);
       return;
     }
-
     if (password !== confirmPassword) {
       setSnackMessage("Passwords do not match");
       setSnackState(true);
@@ -52,104 +45,44 @@ const RegistrationScreen: React.FC<RegisterProps> = ({ navigation }) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      
-      // Combine firstName and lastName for name field
       const fullName = `${firstName} ${lastName}`;
-
-      // Firestore user data creation
-      const firestoreData = {
+      await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         email,
         name: fullName,
-        roles: {
-          administrator: true,
-          contributor: true,
-        },
+        roles: { administrator: true, contributor: true },
         createdAt: Timestamp.now(),
-      };
-      await setDoc(doc(db, "users", user.uid), firestoreData);
-
-      // Set success message and navigate to login screen
+      });
       setSnackMessage("Signup successful!");
       setSnackState(true);
-
       navigation.navigate("Login");
     } catch (error) {
-      setSnackMessage(`Signup failed: ${error}`);
+      setSnackMessage(`Signup failed: ${error.message}`);
       setSnackState(true);
     }
   };
 
-  const onDismissSnackBar = () => setSnackState(false);
-
   return (
-    <KeyboardAwareScrollView contentContainerStyle={styles.container} style={{ backgroundColor: '#F4DFCD' }}>
+    <KeyboardAwareScrollView contentContainerStyle={styles.container}>
       <ImageBackground source={require("../../../assets/splash.jpg")} style={styles.imageBackground}>
-        <Snackbar
-          visible={snackState}
-          onDismiss={onDismissSnackBar}
-          style={{
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "white",
-          }}
-        >
+        <Snackbar visible={snackState} onDismiss={() => setSnackState(false)} style={styles.snackbar}>
           <Text style={{ textAlign: "center" }}>{snackMessage}</Text>
         </Snackbar>
-        <View style={styles.loginBox}>
-          <Text style={[styles.logo, { marginBottom: 50 }]}>Register</Text>
-          <View style={styles.inputView}>
-            <TextInput
-              style={styles.inputText}
-              placeholder="First Name..."
-              placeholderTextColor="#003f5c"
-              value={firstName}
-              onChangeText={(text) => setFirstName(text)}
-            />
+        <View style={styles.registerBox}>
+          <Text style={styles.title}>Register</Text>
+          <View style={{marginTop: 50}} >
+          <TextInput style={styles.input} placeholder="First Name" placeholderTextColor="#7D7D7D" value={firstName} onChangeText={setFirstName} />
+          <TextInput style={styles.input} placeholder="Last Name" placeholderTextColor="#7D7D7D" value={lastName} onChangeText={setLastName} />
+          <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#7D7D7D" value={email} onChangeText={setEmail} />
+          <TextInput style={styles.input} placeholder="Password" secureTextEntry placeholderTextColor="#7D7D7D" value={password} onChangeText={setPassword} />
+          <TextInput style={styles.input} placeholder="Confirm Password" secureTextEntry placeholderTextColor="#7D7D7D" value={confirmPassword} onChangeText={setConfirmPassword} />
           </View>
-          <View style={styles.inputView}>
-            <TextInput
-              style={styles.inputText}
-              placeholder="Last Name..."
-              placeholderTextColor="#003f5c"
-              value={lastName}
-              onChangeText={(text) => setLastName(text)}
-            />
-          </View>
-          <View style={styles.inputView}>
-            <TextInput
-              style={styles.inputText}
-              placeholder="Email..."
-              placeholderTextColor="#003f5c"
-              value={email}
-              onChangeText={(text) => setEmail(text)}
-            />
-          </View>
-          <View style={styles.inputView}>
-            <TextInput
-              secureTextEntry
-              style={styles.inputText}
-              placeholder="Password..."
-              placeholderTextColor="#003f5c"
-              value={password}
-              onChangeText={(text) => setPassword(text)}
-            />
-          </View>
-          <View style={styles.inputView}>
-            <TextInput
-              secureTextEntry
-              style={styles.inputText}
-              placeholder="Confirm Password..."
-              placeholderTextColor="#003f5c"
-              value={confirmPassword}
-              onChangeText={(text) => setConfirmPassword(text)}
-            />
-          </View>
-          <TouchableOpacity onPress={handleRegister} style={styles.buttons}>
-            <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
-              Register
-            </Text>
+          <TouchableOpacity onPress={handleRegister} style={styles.button}>
+            <Text style={styles.buttonText}>Sign Up</Text>
           </TouchableOpacity>
+          <Text style={styles.loginText}>
+            Already have an account? <Text style={styles.signIn} onPress={() => navigation.navigate("Login")}>Sign In</Text>
+          </Text>
         </View>
       </ImageBackground>
     </KeyboardAwareScrollView>
@@ -160,64 +93,65 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    alignItems: 'stretch',
-  },
-  logo: {
-    fontWeight: "bold",
-    fontSize: 50,
-    color: "#111111",
-    marginBottom: 70,
-  },
-  inputView: {
-    width: "80%",
-    backgroundColor: "#fff",
-    borderRadius: 25,
-    height: 50,
-    marginBottom: 20,
-    padding: 20,
-    justifyContent: "center",
-    alignItems: "flex-start",
-    borderColor: "gray",
-    borderWidth: 2,
-  },
-  inputText: {
-    height: 50,
-    color: "#111111",
-    fontSize: 16,
-    width: "100%",
-    borderRadius: 25,
   },
   imageBackground: {
     flex: 1,
     resizeMode: "cover",
     justifyContent: "center",
   },
-  buttons: {
-    backgroundColor: "rgb(17,47,187)",
-    width: 200,
-    height: 50,
-    borderRadius: 30,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 10,
-    elevation: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-  },
-  loginBox: {
-    alignSelf: "center",
-    alignContent: "center",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "white",
-    height: 500,
-    width: 300,
+  registerBox: {
+    backgroundColor: "rgba(255, 255, 255, 0.80)",
+    padding: 25,
     borderRadius: 10,
-    elevation: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
+    width: "85%",
+    alignSelf: "center",
+    elevation: 5,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: "bold",
+    color: "#000",
+    marginBottom: 20,
+    paddingLeft: 10,
+    paddingTop: 10,
+    textAlign: "left",
+  },
+  input: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#000",
+    marginBottom: 40,
+    marginTop: 10,
+    paddingVertical: 7,
+    fontSize: 14,
+    paddingLeft: 10,
+    color: "#000",
+  },
+  button: {
+    backgroundColor: "#6C47FF",
+    borderRadius: 15,
+    paddingVertical: 10,
+    alignItems: "center",
+    marginTop: 25,
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 22,
+    fontWeight: "bold",
+  },
+  loginText: {
+    marginTop: 20,
+    textAlign: "center",
+    fontSize: 16,
+    color: "#000",
+    fontWeight: "bold",
+  },
+  signIn: {
+    color: "#6C47FF",
+    fontWeight: "bold",
+  },
+  snackbar: {
+    backgroundColor: "white",
+    alignItems: "center",
   },
 });
 
