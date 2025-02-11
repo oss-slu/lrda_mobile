@@ -41,10 +41,11 @@ const LoadingImage: React.FC<LoadingImageProps> = ({ uri, alt, onPress }) => {
         style={[loadingImageStyles.image, { opacity: loading ? 0 : 1 }]}
         accessibilityLabel={alt}
         onLoadEnd={() => setLoading(false)}
+        testID="bufferingImage"
       />
       {loading && (
         <View style={loadingImageStyles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator testID="loadingIndicator" size="large" color="#0000ff" />
         </View>
       )}
       <TouchableOpacity
