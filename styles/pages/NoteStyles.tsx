@@ -1,10 +1,14 @@
-import { Platform, StyleSheet } from "react-native";
+import { Platform, StyleSheet, Dimensions } from "react-native";
 import { lightTheme, darkTheme } from "../colors";
 import Constants from "expo-constants";
 import { useTheme } from "../../lib/components/ThemeProvider";
 
 // Define custom CSS as a separate string
 // In NotePageStyles.ts
+
+
+const {height} = Dimensions.get('window');
+
 export const customImageCSS = `
   .ProseMirror img {
     max-width: 200px !important;
@@ -22,6 +26,7 @@ const NotePageStyles = () => {
   return StyleSheet.create({
     topContainer: {
       minHeight: 140,
+    
     },
     topButtonsContainer: {
       justifyContent: "space-between",
@@ -31,6 +36,7 @@ const NotePageStyles = () => {
       backgroundColor: theme.primaryColor,
       alignItems: "center",
       textAlign: "center",
+      height: height * 0.15,
     },
     topText: {
       maxWidth: "100%",
@@ -99,14 +105,17 @@ const NotePageStyles = () => {
     },
     title: {
       height: 45,
-      width: "70%",
+      width: "80%",
       borderColor: theme.text,
       borderWidth: 1,
       borderRadius: 18,
       paddingHorizontal: 10,
       textAlign: "center",
-      fontSize: 24, // Slightly smaller than 30 for better mobile readability
+      fontSize: 20, // Slightly smaller than 30 for better mobile readability
       color: theme.text,
+      marginRight: '5%',
+
+      
     },
     input: {
       backgroundColor: 'white',

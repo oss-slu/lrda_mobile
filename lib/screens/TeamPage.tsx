@@ -8,9 +8,17 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Platform,
+  Dimensions,
+  ScrollView,
+  StatusBar
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../components/ThemeProvider";
+import Feather from 'react-native-vector-icons/Feather';
+
+
+
+const { width, height } = Dimensions.get('window');
 
 const teamMembers = [
   {
@@ -45,9 +53,9 @@ const teamMembers = [
   },
   {
     id: 6,
-    name: "Amar Hadzic",
-    role: "Developer",
-    image: require("../../assets/stock_person.jpg"),
+    name: "Karthik Mangineni",
+    role: "Tech Lead",
+    image: require("../../assets/karthikMangineni.jpg"),
   },
   {
     id: 7,
@@ -57,6 +65,13 @@ const teamMembers = [
   },
   {
     id: 8,
+    name: "Amar Hadzic",
+    role: "Developer",
+    image: require("../../assets/stock_person.jpg"),
+  },
+
+  {
+    id: 9,
     name: "Nikhil Muthukumar",
     role: "Developer",
     image: require("../../assets/stock_person.jpg"),
@@ -89,65 +104,69 @@ export default function TeamPage({ navigation }) {
   );
 
   return (
-    <SafeAreaView
+    <View
       style={[styles.container, { backgroundColor: theme.background }]}
     >
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: theme.background }]}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          accessible
-          accessibilityLabel="Go back"
-        >
-          <Ionicons
-            name="arrow-back"
-            size={24}
-            color={theme.text || "#ffffff"}
-          />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: theme.text || "#ffffff" }]}>
-          Team
-        </Text>
+      <StatusBar translucent backgroundColor="transparent" />
+      {/** header content starts here */}
+      <View style={[styles.header, { backgroundColor: theme.homeColor }]}>
+        <View style={styles.headerContent}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Feather name={'arrow-left'} size={30} />
+          </TouchableOpacity>
+          <View style={styles.headerHeading}>
+            <Text style={{ fontSize: 17, fontWeight: 'bold' }}>Team</Text>
+          </View>
+        </View>
       </View>
+      {/** header content ends here */}
 
-      {/* About Our Team */}
-      <View style={styles.titleContainer}>
-        <Text style={[styles.title, { color: theme.text || "#ffffff" }]}>
-          About Our Team
-        </Text>
-        <Text
-          style={[
-            styles.subtitle,
-            { color: theme.secondaryText || "#aaaaaa" },
-          ]}
-        >
-          The Development Team
-        </Text>
-      </View>
+        {/* About Our Team */}
+        <View style={styles.titleContainer}>
+          <Text style={[styles.title, { color: theme.text || "#ffffff" }]}>
+            About Our Team
+          </Text>
+          <Text
+            style={[
+              styles.subtitle,
+              { color: theme.secondaryText || "#aaaaaa" },
+            ]}
+          >
+            The Development Team
+          </Text>
+        </View>
 
-      {/* Team Members Grid */}
-      <FlatList
-        data={teamMembers}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
-        numColumns={2}
-        contentContainerStyle={styles.teamContainer}
-        columnWrapperStyle={styles.teamRow}
-        showsVerticalScrollIndicator={false}
-      />
-    </SafeAreaView>
+        {/* Team Members Grid */}
+        <FlatList
+          data={teamMembers}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id.toString()}
+          numColumns={2}
+          contentContainerStyle={[styles.teamContainer, {paddingBottom: 200}]}
+          columnWrapperStyle={styles.teamRow}
+          showsVerticalScrollIndicator={false}
+          
+        />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: Platform.OS === "android" ? 25 : 0,
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
+    height: width > 500 ? height * 0.12 : height * 0.19,
+  },
+  headerContent: {
+    marginTop: width > 500? '5%' :'20%',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  headerHeading: {
+    marginLeft: 20,
   },
   headerTitle: {
     fontSize: 20,

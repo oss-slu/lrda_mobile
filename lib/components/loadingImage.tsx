@@ -15,8 +15,8 @@ export default function LoadingImage({
   imageURI,
   type,
   isImage,
-  height = 100,
-  width = 100,
+  height,
+  width,
 }: LoadingImageProps) {
   const [isLoading, setIsLoading] = useState(true);
 

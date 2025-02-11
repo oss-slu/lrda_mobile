@@ -154,10 +154,10 @@ const EditNoteScreen = ({ route, navigation }) => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <View style={{ flex: 1 }}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
         <ScrollView ref={scrollViewRef} contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
-          <View style={NotePageStyles().topContainer}>
+          <View style={[NotePageStyles().topContainer, {backgroundColor: theme.homeColor}]}>
             <View style={NotePageStyles().topButtonsContainer}>
               <TouchableOpacity style={NotePageStyles().topButtons} onPress={handleSaveNote}>
                 <Ionicons name="arrow-back-outline" size={30} color={NotePageStyles().title.color} />
@@ -168,9 +168,7 @@ const EditNoteScreen = ({ route, navigation }) => {
                 value={title}
                 onChangeText={setTitle}
               />
-              <TouchableOpacity style={NotePageStyles().topButtons} onPress={() => setIsPublished(!isPublished)}>
-                <Ionicons name={isPublished ? "share" : "share-outline"} size={30} color={NotePageStyles().title.color} />
-              </TouchableOpacity>
+             
             </View>
             <View style={NotePageStyles().keyContainer}>
               <TouchableOpacity onPress={() => setViewMedia(!viewMedia)}>
@@ -209,7 +207,7 @@ const EditNoteScreen = ({ route, navigation }) => {
         </ScrollView>
         <LoadingModal visible={isUpdating} />
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 };
 

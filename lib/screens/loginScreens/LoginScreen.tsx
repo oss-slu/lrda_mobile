@@ -37,7 +37,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const navState = useSelector((state: RootState) => state.navigation.navState);
   const dispatch = useDispatch()
-
+  const [hasNavigated, setHasNavigated] = useState(false);
 
   const fadeOut = () => {
     Animated.timing(fadeAnim, {
@@ -47,6 +47,13 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
     }).start(() => setFirstClick(false));
   };
 
+  useEffect(() => {
+    if (navState === "home" && !hasNavigated) {
+      setHasNavigated(true); // Prevent repeated navigation
+      navigation.navigate("HomeTab");
+    }
+  }, [navState, hasNavigated]);
+  
   useEffect(() => {
     const timer = setTimeout(() => {
       fadeOut();
@@ -76,7 +83,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
       toggleSnack(!snackState);
     } else {
 
-      // changes made by karthik 
+      
 
       try {
         const status = await user.login(username, password)
@@ -87,7 +94,6 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
               setUsername("")
               setPassword("")
               dispatch(setNavState('home'));
-              navigation.navigate("HomeTab");  // Navigate to the HomeTab
           }
         }
       }
