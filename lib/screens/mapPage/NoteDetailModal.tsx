@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo, useMemo } from "react";
+import React, { useState, useEffect, memo, useMemo, useRef } from "react";
 import {
   Modal,
   TouchableOpacity,
@@ -8,6 +8,8 @@ import {
   StyleSheet,
   ScrollView,
   useWindowDimensions,
+  ActivityIndicator,
+  Animated,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
@@ -19,6 +21,151 @@ import VideoModal from "./VideoModal";
 import { Audio } from "expo-av";
 import { VideoType } from "../../models/media_class";
 
+// ---------------------------------------
+// LoadingImage Component
+// Displays an ActivityIndicator overlay until the image loads
+// ---------------------------------------
+interface LoadingImageProps {
+  uri: string;
+  alt?: string;
+  onPress: (uri: string) => void;
+}
+
+const LoadingImage: React.FC<LoadingImageProps> = ({ uri, alt, onPress }) => {
+  const [loading, setLoading] = useState(true);
+
+  return (
+    <View style={loadingImageStyles.container}>
+      <Image
+        source={{ uri }}
+        style={[loadingImageStyles.image, { opacity: loading ? 0 : 1 }]}
+        accessibilityLabel={alt}
+        onLoadEnd={() => setLoading(false)}
+      />
+      {loading && (
+        <View style={loadingImageStyles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      )}
+      <TouchableOpacity
+        style={StyleSheet.absoluteFill}
+        onPress={() => onPress(uri)}
+      />
+    </View>
+  );
+};
+
+const loadingImageStyles = StyleSheet.create({
+  container: {
+    width: 400, // adjust as needed
+    height: 400, // adjust as needed
+    position: "relative",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "contain",
+  },
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.7)",
+  },
+});
+
+// ---------------------------------------
+// LoadingDots Component
+// Displays animated blinking dots (using the Animated API)
+// while waiting for the creator name to load
+// ---------------------------------------
+const LoadingDots: React.FC = () => {
+  const dot1Opacity = useRef(new Animated.Value(0)).current;
+  const dot2Opacity = useRef(new Animated.Value(0)).current;
+  const dot3Opacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const animateDots = () => {
+      Animated.sequence([
+        Animated.timing(dot1Opacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(dot2Opacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(dot3Opacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.delay(300),
+        Animated.timing(dot1Opacity, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(dot2Opacity, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(dot3Opacity, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.delay(300),
+      ]).start(() => animateDots());
+    };
+
+    animateDots();
+  }, [dot1Opacity, dot2Opacity, dot3Opacity]);
+
+  return (
+    <View style={loadingDotsStyles.container}>
+      <Text style={loadingDotsStyles.text}>Loading</Text>
+      <Animated.Text style={[loadingDotsStyles.dot, { opacity: dot1Opacity }]}>
+        .
+      </Animated.Text>
+      <Animated.Text style={[loadingDotsStyles.dot, { opacity: dot2Opacity }]}>
+        .
+      </Animated.Text>
+      <Animated.Text style={[loadingDotsStyles.dot, { opacity: dot3Opacity }]}>
+        .
+      </Animated.Text>
+    </View>
+  );
+};
+
+const loadingDotsStyles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  text: {
+    fontSize: 18,
+    color: "#333",
+  },
+  dot: {
+    fontSize: 18,
+    color: "#333",
+    marginLeft: 2,
+  },
+});
+
+// ---------------------------------------
+// NoteDetailModal Component
+// ---------------------------------------
 interface Note {
   title: string;
   description: string;
@@ -42,10 +189,14 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
   const { width } = useWindowDimensions();
   const { theme } = useTheme();
 
-  const [audioStates, setAudioStates] = useState<{ [key: string]: { sound: Audio.Sound | null, isPlaying: boolean, progress: number, duration: number } }>({});
-  const [playingMedia, setPlayingMedia] = useState<string | null>(null);
-
+  // Reset state on note change to avoid flashing previous note content.
   useEffect(() => {
+    setCreatorName("");
+    setSelectedImage(null);
+    setSelectedVideo(null);
+    setIsModalVisible(false);
+    setIsVideoVisible(false);
+
     if (note?.creator) {
       ApiService.fetchCreatorName(note.creator)
         .then((name) => setCreatorName(name))
@@ -54,6 +205,16 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
       setCreatorName("Creator not available");
     }
   }, [note]);
+
+  const [audioStates, setAudioStates] = useState<{ 
+    [key: string]: { 
+      sound: Audio.Sound | null, 
+      isPlaying: boolean, 
+      progress: number, 
+      duration: number 
+    } 
+  }>({});
+  const [playingMedia, setPlayingMedia] = useState<string | null>(null);
 
   const onPicturePress = (src: string) => {
     setSelectedImage(src);
@@ -148,38 +309,68 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
     return `${mins}:${secs}`;
   };
 
+  // Updated customRenderers using LoadingImage for <img> tags
   const customRenderers = useMemo(() => ({
     img: ({ tnode }: TNodeRendererProps<any>) => {
       const { src, alt } = tnode.attributes;
       return (
         <View style={{ marginVertical: 10, alignItems: "center" }}>
-          <TouchableOpacity onPress={() => onPicturePress(src as string)} testID="imageButton">
-            <Image
-              source={{ uri: src as string }}
-              style={{ width: 400, height: 400, resizeMode: "contain" }}
-              accessibilityLabel={alt as string}
-            />
-          </TouchableOpacity>
+          <LoadingImage
+            uri={src as string}
+            alt={alt as string}
+            onPress={onPicturePress}
+          />
         </View>
       );
     },
     a: ({ tnode }: TNodeRendererProps<any>) => {
       const { href } = tnode.attributes;
-      const audioState = audioStates[href as string] || { progress: 0, duration: 0, isPlaying: false };
+      const audioState =
+        audioStates[href as string] || { progress: 0, duration: 0, isPlaying: false };
 
       if (href && (href.endsWith(".mp4") || href.endsWith(".mov"))) {
         return (
-          <View style={{ width: width - 40, height: (width - 40) / 1.77, marginVertical: 20, alignSelf: "center" }}>
-            <TouchableOpacity onPress={() => onVideoPress({ uri: href as string })} testID="videoButton">
-              <View style={{ width: "100%", height: "100%", backgroundColor: "#000", justifyContent: "center" }}>
-                <Ionicons name="play-circle-outline" size={50} color="white" style={{ alignSelf: "center" }} />
+          <View
+            style={{
+              width: width - 40,
+              height: (width - 40) / 1.77,
+              marginVertical: 20,
+              alignSelf: "center",
+            }}
+          >
+            <TouchableOpacity
+              onPress={() => onVideoPress({ uri: href as string })}
+              testID="videoButton"
+            >
+              <View
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  backgroundColor: "#000",
+                  justifyContent: "center",
+                }}
+              >
+                <Ionicons
+                  name="play-circle-outline"
+                  size={50}
+                  color="white"
+                  style={{ alignSelf: "center" }}
+                />
               </View>
             </TouchableOpacity>
           </View>
         );
-      } else if (href && (href.endsWith(".mp3") || href.endsWith(".wav") || href.endsWith(".3gp"))) {
+      } else if (
+        href &&
+        (href.endsWith(".mp3") || href.endsWith(".wav") || href.endsWith(".3gp"))
+      ) {
         return (
-          <View style={[styles.audioContainer, { marginVertical: 10, alignItems: "center", width: width - 40 }]}>
+          <View
+            style={[
+              styles.audioContainer,
+              { marginVertical: 10, alignItems: "center", width: width - 40 },
+            ]}
+          >
             <TouchableOpacity onPress={() => playPauseAudio(href as string)} testID="videoButton">
               <Ionicons
                 name={audioState.isPlaying ? "pause-circle-outline" : "play-circle-outline"}
@@ -197,18 +388,20 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
               thumbTintColor={theme.primaryColor}
               onSlidingComplete={(value) => handleSlidingComplete(value, href as string)}
             />
-            <Text style={styles.audioTimer}>{formatTime(audioState.progress)} / {formatTime(audioState.duration)}</Text>
+            <Text style={styles.audioTimer}>
+              {formatTime(audioState.progress)} / {formatTime(audioState.duration)}
+            </Text>
           </View>
         );
       }
       return <Text style={{ color: theme.text, marginVertical: 10 }}>{tnode.data}</Text>;
     },
-  }), [audioStates, theme]);
+  }), [audioStates, theme, width]);
 
   const htmlSource = useMemo(() => ({ html: note?.description || "" }), [note]);
 
   return (
-    <Modal animationType="slide" transparent={false} visible={isVisible} >
+    <Modal animationType="slide" transparent={false} visible={isVisible}>
       <TouchableOpacity onPress={onClose} style={styles.closeButton}>
         <View style={styles.closeIcon}>
           <Ionicons name="close" size={30} color={theme.text} />
@@ -221,7 +414,11 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
         <View style={styles.metaDataContainer}>
           <View style={styles.creatorContainer}>
             <Ionicons name="person-circle-outline" size={18} color={theme.text} />
-            <Text style={styles.creatorText}>{creatorName}</Text>
+            {creatorName ? (
+              <Text style={styles.creatorText}>{creatorName}</Text>
+            ) : (
+              <LoadingDots />
+            )}
           </View>
 
           <View style={styles.dateContainer}>
@@ -243,8 +440,16 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
         </ScrollView>
       </View>
 
-      <ImageModal isVisible={isModalVisible} onClose={() => setIsModalVisible(false)} images={selectedImage ? [{ uri: selectedImage }] : []} />
-      <VideoModal isVisible={isVideoVisible} onClose={() => setIsVideoVisible(false)} videos={selectedVideo ? [selectedVideo] : []} />
+      <ImageModal
+        isVisible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        images={selectedImage ? [{ uri: selectedImage }] : []}
+      />
+      <VideoModal
+        isVisible={isVideoVisible}
+        onClose={() => setIsVideoVisible(false)}
+        videos={selectedVideo ? [selectedVideo] : []}
+      />
     </Modal>
   );
 });
