@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     width: "85%",
     alignSelf: "center",
-    elevation: 5,
+    elevation: 0,
   },
   title: {
     fontSize: 32,
