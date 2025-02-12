@@ -163,6 +163,20 @@ describe('NoteDetailModal', () => {
     // Restore the spy after the test.
     fetchCreatorNameSpy.mockRestore();
   });
+  it('should display error message if image fails to load', () => {
+    const { getByTestId, getByText } = render(
+      <NoteDetailModal isVisible={true} note={mockNote} onClose={() => {}} />
+    );
+    
+    // Fire an error event on the image so that the component sets error state.
+    fireEvent(getByTestId('bufferingImage'), 'error');
+  
+    // Check that the error view is displayed by looking for its testID or text.
+    expect(getByTestId('no-image')).toBeTruthy();
+    expect(getByText("Couldn't load image")).toBeTruthy();
+  });
+  
+  
   
   
 });

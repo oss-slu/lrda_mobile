@@ -24,7 +24,8 @@ import { VideoType } from "../../models/media_class";
 
 //
 // LoadingImage Component
-// Displays an ActivityIndicator overlay until the image loads
+// Displays an ActivityIndicator overlay until the image loads.
+// If the image fails to load, it displays an error icon and message.
 //
 interface LoadingImageProps {
   uri: string;
@@ -34,6 +35,16 @@ interface LoadingImageProps {
 
 const LoadingImage: React.FC<LoadingImageProps> = ({ uri, alt, onPress }) => {
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  if (error) {
+    return (
+      <View testID="no-image" style={loadingImageStyles.container}>
+        <Ionicons name="alert-circle-outline" size={50} color="#ff0000" />
+        <Text style={styles.errorText}>Couldn't load image</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={loadingImageStyles.container}>
@@ -43,6 +54,10 @@ const LoadingImage: React.FC<LoadingImageProps> = ({ uri, alt, onPress }) => {
         style={[loadingImageStyles.image, { opacity: loading ? 0 : 1 }]}
         accessibilityLabel={alt}
         onLoadEnd={() => setLoading(false)}
+        onError={() => {
+          setLoading(false);
+          setError(true);
+        }}
       />
       {loading && (
         <View style={loadingImageStyles.loadingOverlay}>
@@ -84,12 +99,59 @@ const loadingImageStyles = StyleSheet.create({
 });
 
 //
+// LoadingVideoButton Component
+// Displays an ActivityIndicator overlay while attempting to load the video thumbnail.
+// If the thumbnail fails to load, it shows an error icon and message.
+//
+interface LoadingVideoButtonProps {
+  uri: string;
+  onPress: (video: VideoType) => void;
+}
+
+const LoadingVideoButton: React.FC<LoadingVideoButtonProps> = ({ uri, onPress }) => {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  if (error) {
+    return (
+      <View style={[loadingImageStyles.container, { width: 400, height: 400 / 1.77 }]}>
+        <Ionicons name="alert-circle-outline" size={50} color="#ff0000" />
+        <Text style={styles.errorText}>Couldn't load video</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={[loadingImageStyles.container, { width: 400, height: 400 / 1.77 }]}>
+      <Image
+        source={{ uri }}
+        style={[loadingImageStyles.image, { opacity: loading ? 0 : 1, resizeMode: "cover" }]}
+        onLoadEnd={() => setLoading(false)}
+        onError={() => {
+          setLoading(false);
+          setError(true);
+        }}
+      />
+      {loading && (
+        <View style={loadingImageStyles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      )}
+      <TouchableOpacity
+        testID="videoButton"
+        style={StyleSheet.absoluteFill}
+        onPress={() => onPress({ uri })}
+      />
+    </View>
+  );
+};
+
+//
 // LoadingDots Component
 // If tests are running, simply render static text.
 // Otherwise, run the animated dots sequence.
 //
 const LoadingDots: React.FC = () => {
-  // If in test mode, return a static placeholder to avoid animation errors.
   if (!!process.env.JEST_WORKER_ID) {
     return <Text testID="loadingDotsStatic">...</Text>;
   }
@@ -338,26 +400,7 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
               alignSelf: "center",
             }}
           >
-            <TouchableOpacity
-              onPress={() => onVideoPress({ uri: href as string })}
-              testID="videoButton"
-            >
-              <View
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  backgroundColor: "#000",
-                  justifyContent: "center",
-                }}
-              >
-                <Ionicons
-                  name="play-circle-outline"
-                  size={50}
-                  color="white"
-                  style={{ alignSelf: "center" }}
-                />
-              </View>
-            </TouchableOpacity>
+            <LoadingVideoButton uri={href as string} onPress={onVideoPress} />
           </View>
         );
       } else if (
@@ -543,6 +586,11 @@ const styles = StyleSheet.create({
     color: "#333",
     textAlign: "right",
     width: 60,
+  },
+  errorText: {
+    marginTop: 10,
+    color: "#ff0000",
+    fontSize: 16,
   },
 });
 
