@@ -14,7 +14,12 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, Timestamp } from "firebase/firestore";
 import { validateEmail, validatePassword } from "../../utils/validation";
 
-const RegistrationScreen = ({ navigation }) => {
+type RegisterProps = {
+  navigation: any;
+  route: any;
+};
+
+const RegistrationScreen: React.FC<RegisterProps> = ({ navigation }) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
