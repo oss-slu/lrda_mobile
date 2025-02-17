@@ -98,11 +98,11 @@ const loadingImageStyles = StyleSheet.create({
   },
 });
 
-//
+
 // LoadingVideoButton Component
 // Displays an ActivityIndicator overlay while attempting to load the video thumbnail.
 // If the thumbnail fails to load, it shows an error icon and message.
-//
+
 interface LoadingVideoButtonProps {
   uri: string;
   onPress: (video: VideoType) => void;
@@ -146,11 +146,10 @@ const LoadingVideoButton: React.FC<LoadingVideoButtonProps> = ({ uri, onPress })
   );
 };
 
-//
 // LoadingDots Component
 // If tests are running, simply render static text.
 // Otherwise, run the animated dots sequence.
-//
+
 const LoadingDots: React.FC = () => {
   if (!!process.env.JEST_WORKER_ID) {
     return <Text testID="loadingDotsStatic">...</Text>;
@@ -228,9 +227,8 @@ const loadingDotsStyles = StyleSheet.create({
   },
 });
 
-//
 // NoteDetailModal Component
-//
+
 interface Note {
   title: string;
   description: string;
