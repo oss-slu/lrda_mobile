@@ -22,11 +22,11 @@ import VideoModal from "./VideoModal";
 import { Audio } from "expo-av";
 import { VideoType } from "../../models/media_class";
 
-//
+
 // LoadingImage Component
 // Displays an ActivityIndicator overlay until the image loads.
 // If the image fails to load, it displays an error icon and message.
-//
+
 interface LoadingImageProps {
   uri: string;
   alt?: string;
