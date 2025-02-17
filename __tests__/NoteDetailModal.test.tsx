@@ -122,7 +122,6 @@ describe('NoteDetailModal', () => {
     expect(toJSON()).toMatchSnapshot();
   });
 
-  // Uncomment these tests to verify button interactions:
   
   it('should respond to image button press', () => {
     const { getByTestId } = render(
