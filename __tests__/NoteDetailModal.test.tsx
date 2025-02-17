@@ -1,9 +1,7 @@
 // __tests__/NoteDetailModal.test.tsx
 
-import 'react-native'; // required for react-native testing
+import 'react-native'; 
 
-// --- Mock Animated Easing ---
-// This mock prevents errors like "_bezier is not a function" by returning dummy easing functions.
 jest.mock('react-native/Libraries/Animated/Easing', () => ({
   linear: (t: number) => t,
   ease: (t: number) => t,
@@ -13,20 +11,12 @@ jest.mock('react-native/Libraries/Animated/Easing', () => ({
   bezier: () => (t: number) => t,
 }));
 
-// Note: The NativeAnimatedHelper mapping is configured in your jest.config.js via moduleNameMapper.
-// For example, in your jest.config.js you should have:
-// moduleNameMapper: {
-//   '^react-native/Libraries/Animated/NativeAnimatedHelper$': '<rootDir>/__mocks__/NativeAnimatedHelper.js',
-// },
-
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import NoteDetailModal from '../lib/screens/mapPage/NoteDetailModal';
 import moxios from 'moxios';
 import { onAuthStateChanged } from 'firebase/auth';
 import ApiService from '../lib/utils/api_calls';
-
-// --- Mocks for ThemeProvider and Firebase services ---
 
 jest.mock('../lib/components/ThemeProvider', () => ({
   useTheme: () => ({
@@ -83,7 +73,6 @@ onAuthStateChanged.mockImplementation((auth, callback) => {
   callback(mockUser); // Simulate a logged-in user
 });
 
-// Save original console methods so we can restore them after tests
 const originalConsoleError = console.error;
 const originalConsoleLog = console.log;
 
@@ -167,15 +156,9 @@ describe('NoteDetailModal', () => {
       <NoteDetailModal isVisible={true} note={mockNote} onClose={() => {}} />
     );
     
-    // Fire an error event on the image so that the component sets error state.
     fireEvent(getByTestId('bufferingImage'), 'error');
   
-    // Check that the error view is displayed by looking for its testID or text.
     expect(getByTestId('no-image')).toBeTruthy();
     expect(getByText("Couldn't load image")).toBeTruthy();
   });
-  
-  
-  
-  
 });
