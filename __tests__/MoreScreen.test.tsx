@@ -6,7 +6,8 @@ import configureStore from 'redux-mock-store';
 import MorePage from '../lib/screens/MorePage';
 import { Linking,TouchableOpacity } from 'react-native';
 import HomeScreen from '../lib/screens/HomeScreen';
-import { fireEvent, render, waitFor } from "@testing-library/react-native";
+import { waitFor } from '@testing-library/react-native';
+
 
 jest.mock('firebase/database', () => ({
   getDatabase: jest.fn(),
@@ -36,6 +37,18 @@ jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
     settings: {},
   })),
 }));
+
+jest.mock('firebase/firestore', () => ({
+  getFirestore: jest.fn(),
+  doc: jest.fn(() => ({
+    id: 'mocked-doc-id',
+  })),
+  getDoc: jest.fn(() => Promise.resolve({
+    exists: () => true,
+    data: () => ({ name: 'Mocked User' }),
+  })),
+}));
+
 
 //mock carousel
 jest.mock('react-native-reanimated-carousel', () => {
