@@ -35,12 +35,14 @@ const RegistrationScreen: React.FC<RegisterProps> = ({ navigation }) => {
       setSnackState(true);
       return;
     }
+
     const passwordError = validatePassword(password);
     if (passwordError) {
       setSnackMessage(passwordError);
       setSnackState(true);
       return;
     }
+
     if (password !== confirmPassword) {
       setSnackMessage("Passwords do not match");
       setSnackState(true);
@@ -50,27 +52,41 @@ const RegistrationScreen: React.FC<RegisterProps> = ({ navigation }) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
+      
+      // Combine firstName and lastName for name field
       const fullName = `${firstName} ${lastName}`;
-      await setDoc(doc(db, "users", user.uid), {
+
+      // Firestore user data creation
+      const firestoreData = {
         uid: user.uid,
         email,
         name: fullName,
-        roles: { administrator: true, contributor: true },
+        roles: {
+          administrator: true,
+          contributor: true,
+        },
         createdAt: Timestamp.now(),
-      });
+      };
+      await setDoc(doc(db, "users", user.uid), firestoreData);
+
+      // Set success message and navigate to login screen
       setSnackMessage("Signup successful!");
       setSnackState(true);
+      
       navigation.navigate("Login");
-    } catch (error) {
-      setSnackMessage(`Signup failed: ${error.message}`);
-      setSnackState(true);
-    }
+      } catch (error) {
+        setSnackMessage(`Signup failed: ${error}`);
+        setSnackState(true);
+      }
   };
+
+  const onDismissSnackBar = () => setSnackState(false);
+
 
   return (
     <KeyboardAwareScrollView contentContainerStyle={styles.container}>
       <ImageBackground source={require("../../../assets/splash.jpg")} style={styles.imageBackground}>
-        <Snackbar visible={snackState} onDismiss={() => setSnackState(false)} style={styles.snackbar}>
+        <Snackbar visible={snackState} onDismiss={() => onDismissSnackBar} style={styles.snackbar}>
           <Text style={{ textAlign: "center" }}>{snackMessage}</Text>
         </Snackbar>
         <View style={styles.registerBox}>
