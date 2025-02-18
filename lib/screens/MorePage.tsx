@@ -55,9 +55,9 @@ const data = [
 
 export default function MorePage() {
   const { theme, isDarkmode, toggleDarkmode } = useTheme();
+  const navigation = useNavigation(); // Get navigation instance
   const dispatch = useDispatch();
   const userObject = User.getInstance();
-  const navigation = useNavigation();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isThemeOpen, setIsThemeOpen] = useState(false)
   const [userName, setUserName] = useState('');

@@ -44,7 +44,7 @@ const user = User.getInstance();
 const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, route }) => {
   const [titleText, setTitleText] = useState<string>("");
   const [isSaveButtonEnabled, setIsSaveButtonEnabled] = useState<boolean>(true);
-  const [bodyText, setBodyText] = useState<string>("");
+  const [bodyText, setBodyText] = useState<string>("<p></p>");
   const [newMedia, setNewMedia] = useState<Media[]>([]);
   const [newAudio, setNewAudio] = useState<AudioType[]>([]);
   const [tags, setTags] = useState<string[]>([]);
@@ -78,6 +78,24 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
   const { theme } = useTheme();
   const titleTextRef = useRef<TextInput>(null);
   const scrollViewRef = useRef<KeyboardAwareScrollView>(null);
+
+
+  useEffect(() => {
+    if (editor) {
+      // Combine custom image CSS and dark mode CSS
+      const combinedCSS = `
+        ${customImageCSS}
+        body {
+          color: ${theme.text}; /* Text color for dark mode */
+        }
+      `;
+      editor.injectCSS(combinedCSS); // Inject both styles at once
+    }
+  }, [editor, theme.text]);
+  
+  
+  
+
 
   useEffect(() => {
     // Listen for keyboard events to show/hide toolbar
@@ -155,6 +173,11 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
     } else {
       setLocationToZero();
     }
+  };
+
+  const getIconStyle = (isDarkMode: boolean, isError: boolean) => {
+    if (isError) return "red";
+    return isDarkMode ? "white" : "black";
   };
 
   // Automatically check location on component mount
@@ -441,3 +464,5 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
 });
+
+
