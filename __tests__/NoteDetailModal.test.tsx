@@ -1,6 +1,11 @@
-// __tests__/NoteDetailModal.test.tsx
 
 import 'react-native'; 
+import React from 'react';
+import { render, fireEvent } from '@testing-library/react-native';
+import NoteDetailModal from '../lib/screens/mapPage/NoteDetailModal';
+import moxios from 'moxios';
+import { onAuthStateChanged } from 'firebase/auth';
+import ApiService from '../lib/utils/api_calls';
 
 jest.mock('react-native/Libraries/Animated/Easing', () => ({
   linear: (t: number) => t,
@@ -10,13 +15,6 @@ jest.mock('react-native/Libraries/Animated/Easing', () => ({
   inOut: (t: number) => t,
   bezier: () => (t: number) => t,
 }));
-
-import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
-import NoteDetailModal from '../lib/screens/mapPage/NoteDetailModal';
-import moxios from 'moxios';
-import { onAuthStateChanged } from 'firebase/auth';
-import ApiService from '../lib/utils/api_calls';
 
 jest.mock('../lib/components/ThemeProvider', () => ({
   useTheme: () => ({
@@ -161,4 +159,11 @@ describe('NoteDetailModal', () => {
     expect(getByTestId('no-image')).toBeTruthy();
     expect(getByText("Couldn't load image")).toBeTruthy();
   });
+  it('should display loading indicator while image is loading', () => {
+    const { getByTestId } = render(
+      <NoteDetailModal isVisible={true} note={mockNote} onClose={() => {}} />
+    );
+    expect(getByTestId('loadingIndicator')).toBeTruthy();
+  });
+  
 });

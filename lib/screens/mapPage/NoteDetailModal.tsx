@@ -1,4 +1,3 @@
-// NoteDetailModal.tsx
 import React, { useState, useEffect, memo, useMemo, useRef } from "react";
 import {
   Modal,
@@ -25,7 +24,6 @@ import { VideoType } from "../../models/media_class";
 
 // LoadingImage Component
 // Displays an ActivityIndicator overlay until the image loads.
-// If the image fails to load, it displays an error icon and message.
 
 interface LoadingImageProps {
   uri: string;
@@ -98,10 +96,8 @@ const loadingImageStyles = StyleSheet.create({
   },
 });
 
-
 // LoadingVideoButton Component
 // Displays an ActivityIndicator overlay while attempting to load the video thumbnail.
-// If the thumbnail fails to load, it shows an error icon and message.
 
 interface LoadingVideoButtonProps {
   uri: string;
@@ -145,6 +141,67 @@ const LoadingVideoButton: React.FC<LoadingVideoButtonProps> = ({ uri, onPress })
     </View>
   );
 };
+
+
+// LoadingAudio Component
+// Displays an ActivityIndicator while loading the audio file.
+// If the audio fails to load, displays an error icon and message.
+const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
+  const { theme } = useTheme();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    Audio.Sound.createAsync({ uri })
+      .then(({ sound, status }) => {
+        if (isMounted) {
+          setSound(sound);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (isMounted) {
+          setError(true);
+          setLoading(false);
+        }
+      });
+    return () => {
+      isMounted = false;
+      if (sound) {
+        sound.unloadAsync();
+      }
+    };
+  }, [uri]);
+
+  if (error) {
+    return (
+      <View style={styles.audioContainer}>
+        <Ionicons name="alert-circle-outline" size={30} color="#ff0000" />
+        <Text style={styles.errorText}>Couldn't load audio</Text>
+      </View>
+    );
+  }
+
+  if (loading) {
+    return (
+      <View style={styles.audioContainer}>
+        <ActivityIndicator size="large" color={theme.primaryColor} />
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.audioContainer}>
+      <TouchableOpacity onPress={() => { /* Implement play logic as needed */ }}>
+        <Ionicons name="play-circle-outline" size={30} color={theme.text} />
+      </TouchableOpacity>
+      <Text style={styles.audioTimer}>Audio Loaded</Text>
+    </View>
+  );
+};
+
 
 // LoadingDots Component
 // If tests are running, simply render static text.
@@ -227,7 +284,6 @@ const loadingDotsStyles = StyleSheet.create({
   },
 });
 
-// NoteDetailModal Component
 
 interface Note {
   title: string;
@@ -401,37 +457,11 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
             <LoadingVideoButton uri={href as string} onPress={onVideoPress} />
           </View>
         );
-      } else if (
-        href &&
-        (href.endsWith(".mp3") || href.endsWith(".wav") || href.endsWith(".3gp"))
-      ) {
+      } else if (href && (href.endsWith(".mp3") || href.endsWith(".wav") || href.endsWith(".3gp"))) {
+        // Use the new LoadingAudio component
         return (
-          <View
-            style={[
-              styles.audioContainer,
-              { marginVertical: 10, alignItems: "center", width: width - 40 },
-            ]}
-          >
-            <TouchableOpacity onPress={() => playPauseAudio(href as string)} testID="videoButton">
-              <Ionicons
-                name={audioState.isPlaying ? "pause-circle-outline" : "play-circle-outline"}
-                size={30}
-                color={theme.text}
-              />
-            </TouchableOpacity>
-            <Slider
-              style={styles.audioSlider}
-              minimumValue={0}
-              maximumValue={audioState.duration}
-              value={audioState.progress}
-              minimumTrackTintColor={theme.primaryColor}
-              maximumTrackTintColor="#d3d3d3"
-              thumbTintColor={theme.primaryColor}
-              onSlidingComplete={(value) => handleSlidingComplete(value, href as string)}
-            />
-            <Text style={styles.audioTimer}>
-              {formatTime(audioState.progress)} / {formatTime(audioState.duration)}
-            </Text>
+          <View style={{ marginVertical: 10, alignItems: "center" }}>
+            <LoadingAudio uri={href as string} />
           </View>
         );
       }
