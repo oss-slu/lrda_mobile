@@ -91,7 +91,7 @@ const RegistrationScreen: React.FC<RegisterProps> = ({ navigation }) => {
         </Snackbar>
         <View style={styles.registerBox}>
           <Text style={styles.title}>Register</Text>
-          <View style={{marginTop: 50}} >
+          <View style={{marginTop: 40}} >
           <TextInput style={styles.input} placeholder="First Name" placeholderTextColor="#7D7D7D" value={firstName} onChangeText={setFirstName} />
           <TextInput style={styles.input} placeholder="Last Name" placeholderTextColor="#7D7D7D" value={lastName} onChangeText={setLastName} />
           <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#7D7D7D" value={email} onChangeText={setEmail} />
@@ -125,6 +125,7 @@ const styles = StyleSheet.create({
     padding: 25,
     borderRadius: 10,
     width: "85%",
+    minHeight: "auto",
     alignSelf: "center",
     elevation: 0,
   },
@@ -132,7 +133,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "bold",
     color: "#000",
-    marginBottom: 20,
+    marginBottom: 0,
     paddingLeft: 10,
     paddingTop: 10,
     textAlign: "left",
@@ -141,7 +142,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#000",
     marginBottom: 40,
-    marginTop: 10,
+    marginTop: 0,
     paddingVertical: 7,
     fontSize: 14,
     paddingLeft: 10,
@@ -152,7 +153,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     paddingVertical: 10,
     alignItems: "center",
-    marginTop: 25,
+    marginTop: 20,
   },
   buttonText: {
     color: "white",
