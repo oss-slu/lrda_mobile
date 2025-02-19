@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     color: "#000",
   },
   button: {
-    backgroundColor: "#6C47FF",
+    backgroundColor: "rgb(17,47,187)",
     borderRadius: 15,
     paddingVertical: 10,
     alignItems: "center",
@@ -163,12 +163,11 @@ const styles = StyleSheet.create({
   loginText: {
     marginTop: 20,
     textAlign: "center",
-    fontSize: 16,
+    fontSize: 14,
     color: "#000",
-    fontWeight: "bold",
   },
   signIn: {
-    color: "#6C47FF",
+    color: "rgb(17,47,187)",
     fontWeight: "bold",
   },
   snackbar: {
