@@ -1,0 +1,243 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RegisterScreen renders correctly 1`] = `
+<View>
+  <View
+    accessibilityIgnoresInvertColors={true}
+    style={
+      {
+        "flex": 1,
+        "justifyContent": "center",
+        "resizeMode": "cover",
+      }
+    }
+  >
+    <Image
+      source={
+        {
+          "testUri": "../../../assets/splash.jpg",
+        }
+      }
+      style={
+        [
+          {
+            "bottom": 0,
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "height": undefined,
+            "width": undefined,
+          },
+          undefined,
+        ]
+      }
+    />
+    <View
+      style={
+        {
+          "alignSelf": "center",
+          "backgroundColor": "rgba(255, 255, 255, 0.80)",
+          "borderRadius": 10,
+          "elevation": 0,
+          "minHeight": "auto",
+          "padding": 25,
+          "width": "85%",
+        }
+      }
+    >
+      <Text
+        style={
+          {
+            "color": "#000",
+            "fontSize": 32,
+            "fontWeight": "bold",
+            "marginBottom": 0,
+            "paddingLeft": 10,
+            "paddingTop": 10,
+            "textAlign": "left",
+          }
+        }
+      >
+        Register
+      </Text>
+      <View
+        style={
+          {
+            "marginTop": 40,
+          }
+        }
+      >
+        <TextInput
+          onChangeText={[Function]}
+          placeholder="First Name"
+          placeholderTextColor="#7D7D7D"
+          style={
+            {
+              "borderBottomColor": "#000",
+              "borderBottomWidth": 1,
+              "color": "#000",
+              "fontSize": 14,
+              "marginBottom": 40,
+              "marginTop": 0,
+              "paddingLeft": 10,
+              "paddingVertical": 7,
+            }
+          }
+          value=""
+        />
+        <TextInput
+          onChangeText={[Function]}
+          placeholder="Last Name"
+          placeholderTextColor="#7D7D7D"
+          style={
+            {
+              "borderBottomColor": "#000",
+              "borderBottomWidth": 1,
+              "color": "#000",
+              "fontSize": 14,
+              "marginBottom": 40,
+              "marginTop": 0,
+              "paddingLeft": 10,
+              "paddingVertical": 7,
+            }
+          }
+          value=""
+        />
+        <TextInput
+          onChangeText={[Function]}
+          placeholder="Email"
+          placeholderTextColor="#7D7D7D"
+          style={
+            {
+              "borderBottomColor": "#000",
+              "borderBottomWidth": 1,
+              "color": "#000",
+              "fontSize": 14,
+              "marginBottom": 40,
+              "marginTop": 0,
+              "paddingLeft": 10,
+              "paddingVertical": 7,
+            }
+          }
+          value=""
+        />
+        <TextInput
+          onChangeText={[Function]}
+          placeholder="Password"
+          placeholderTextColor="#7D7D7D"
+          secureTextEntry={true}
+          style={
+            {
+              "borderBottomColor": "#000",
+              "borderBottomWidth": 1,
+              "color": "#000",
+              "fontSize": 14,
+              "marginBottom": 40,
+              "marginTop": 0,
+              "paddingLeft": 10,
+              "paddingVertical": 7,
+            }
+          }
+          value=""
+        />
+        <TextInput
+          onChangeText={[Function]}
+          placeholder="Confirm Password"
+          placeholderTextColor="#7D7D7D"
+          secureTextEntry={true}
+          style={
+            {
+              "borderBottomColor": "#000",
+              "borderBottomWidth": 1,
+              "color": "#000",
+              "fontSize": 14,
+              "marginBottom": 40,
+              "marginTop": 0,
+              "paddingLeft": 10,
+              "paddingVertical": 7,
+            }
+          }
+          value=""
+        />
+      </View>
+      <View
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        onClick={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "rgb(17,47,187)",
+            "borderRadius": 15,
+            "marginTop": 20,
+            "opacity": 1,
+            "paddingVertical": 10,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "white",
+              "fontSize": 22,
+              "fontWeight": "bold",
+            }
+          }
+        >
+          Sign Up
+        </Text>
+      </View>
+      <Text
+        style={
+          {
+            "color": "#000",
+            "fontSize": 14,
+            "marginTop": 20,
+            "textAlign": "center",
+          }
+        }
+      >
+        Already have an account? 
+        <Text
+          onPress={[Function]}
+          style={
+            {
+              "color": "rgb(17,47,187)",
+              "fontWeight": "bold",
+            }
+          }
+        >
+          Sign In
+        </Text>
+      </Text>
+    </View>
+  </View>
+</View>
+`;
