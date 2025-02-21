@@ -8,4 +8,7 @@ module.exports = {
   transformIgnorePatterns: [
     'node_modules/(?!react-native|@react-native|expo|@expo|@unimodules)' // Ensure proper transformation of React Native modules
   ],
+  moduleNameMapper: {
+    '^react-native/Libraries/Animated/NativeAnimatedHelper$': '<rootDir>/__mocks__/NativeAnimatedHelper.js',
+  },
 };
