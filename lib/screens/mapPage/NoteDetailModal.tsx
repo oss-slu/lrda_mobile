@@ -1,3 +1,4 @@
+// NoteDetailModal.tsx
 import React, { useState, useEffect, memo, useMemo, useRef } from "react";
 import {
   Modal,
@@ -21,10 +22,11 @@ import VideoModal from "./VideoModal";
 import { Audio } from "expo-av";
 import { VideoType } from "../../models/media_class";
 
-
+//
 // LoadingImage Component
 // Displays an ActivityIndicator overlay until the image loads.
-
+// If the image fails to load, it displays an error icon and message.
+//
 interface LoadingImageProps {
   uri: string;
   alt?: string;
@@ -32,13 +34,14 @@ interface LoadingImageProps {
 }
 
 const LoadingImage: React.FC<LoadingImageProps> = ({ uri, alt, onPress }) => {
+  const { theme } = useTheme();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   if (error) {
     return (
       <View testID="no-image" style={loadingImageStyles.container}>
-        <Ionicons name="alert-circle-outline" size={50} color="#ff0000" />
+        <Ionicons name="alert-circle-outline" size={50} color={theme.homeColor} />
         <Text style={styles.errorText}>Couldn't load image</Text>
       </View>
     );
@@ -59,7 +62,7 @@ const LoadingImage: React.FC<LoadingImageProps> = ({ uri, alt, onPress }) => {
       />
       {loading && (
         <View style={loadingImageStyles.loadingOverlay}>
-          <ActivityIndicator testID="loadingIndicator" size="large" color="#0000ff" />
+          <ActivityIndicator testID="loadingIndicator" size="large" color={theme.homeColor} />
         </View>
       )}
       <TouchableOpacity
@@ -96,22 +99,25 @@ const loadingImageStyles = StyleSheet.create({
   },
 });
 
+//
 // LoadingVideoButton Component
 // Displays an ActivityIndicator overlay while attempting to load the video thumbnail.
-
+// If the thumbnail fails to load, it shows an error icon and message.
+//
 interface LoadingVideoButtonProps {
   uri: string;
   onPress: (video: VideoType) => void;
 }
 
 const LoadingVideoButton: React.FC<LoadingVideoButtonProps> = ({ uri, onPress }) => {
+  const { theme } = useTheme();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   if (error) {
     return (
       <View style={[loadingImageStyles.container, { width: 400, height: 400 / 1.77 }]}>
-        <Ionicons name="alert-circle-outline" size={50} color="#ff0000" />
+        <Ionicons name="alert-circle-outline" size={50} color={theme.homeColor} />
         <Text style={styles.errorText}>Couldn't load video</Text>
       </View>
     );
@@ -130,7 +136,7 @@ const LoadingVideoButton: React.FC<LoadingVideoButtonProps> = ({ uri, onPress })
       />
       {loading && (
         <View style={loadingImageStyles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator testID="videoLoadingIndicator" size="large" color={theme.homeColor} />
         </View>
       )}
       <TouchableOpacity
@@ -142,10 +148,12 @@ const LoadingVideoButton: React.FC<LoadingVideoButtonProps> = ({ uri, onPress })
   );
 };
 
-
+//
 // LoadingAudio Component
 // Displays an ActivityIndicator while loading the audio file.
 // If the audio fails to load, displays an error icon and message.
+// Once loaded, it shows a simple play button UI (for demonstration).
+//
 const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
   const { theme } = useTheme();
   const [loading, setLoading] = useState(true);
@@ -178,7 +186,7 @@ const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
   if (error) {
     return (
       <View style={styles.audioContainer}>
-        <Ionicons name="alert-circle-outline" size={30} color="#ff0000" />
+        <Ionicons name="alert-circle-outline" size={30} color={theme.homeColor} />
         <Text style={styles.errorText}>Couldn't load audio</Text>
       </View>
     );
@@ -187,7 +195,7 @@ const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
   if (loading) {
     return (
       <View style={styles.audioContainer}>
-        <ActivityIndicator size="large" color={theme.primaryColor} />
+        <ActivityIndicator testID="audioLoadingIndicator" size="large" color={theme.homeColor} />
       </View>
     );
   }
@@ -202,14 +210,14 @@ const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
   );
 };
 
-
+//
 // LoadingDots Component
 // If tests are running, simply render static text.
 // Otherwise, run the animated dots sequence.
-
 const LoadingDots: React.FC = () => {
+  const { theme } = useTheme();
   if (!!process.env.JEST_WORKER_ID) {
-    return <Text testID="loadingDotsStatic">...</Text>;
+    return <Text testID="loadingDotsStatic" style={{ color: theme.homeColor }}>...</Text>;
   }
 
   const dot1Opacity = useRef(new Animated.Value(0)).current;
@@ -279,12 +287,14 @@ const loadingDotsStyles = StyleSheet.create({
   },
   dot: {
     fontSize: 18,
-    color: "#333",
+    color: "#333", // This will be overridden by theme.homeColor in our component.
     marginHorizontal: 2,
   },
 });
 
-
+//
+// NoteDetailModal Component
+//
 interface Note {
   title: string;
   description: string;

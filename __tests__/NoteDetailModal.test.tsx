@@ -164,6 +164,37 @@ describe('NoteDetailModal', () => {
       <NoteDetailModal isVisible={true} note={mockNote} onClose={() => {}} />
     );
     expect(getByTestId('loadingIndicator')).toBeTruthy();
+  }); it('should display video loading indicator while video thumbnail is loading', () => {
+    // Create a note with a video link in the description.
+    const videoNote = {
+      ...mockNote,
+      description: '<div><a href="https://example.com/video.mp4">Video</a></div>',
+    };
+
+    const { getByTestId } = render(
+      <NoteDetailModal isVisible={true} note={videoNote} onClose={() => {}} />
+    );
+    expect(getByTestId('videoLoadingIndicator')).toBeTruthy();
   });
+
+  it('should display audio loading indicator while audio is loading', () => {
+    jest.useFakeTimers();
+    const audioNote = {
+      ...mockNote,
+      description: '<div><a href="https://example.com/audio.mp3">Audio</a></div>',
+    };
+  
+    const expoAV = require('expo-av');
+    jest.spyOn(expoAV.Audio.Sound, 'createAsync').mockReturnValue(new Promise(() => {}));
+  
+    const { getByTestId } = render(
+      <NoteDetailModal isVisible={true} note={audioNote} onClose={() => {}} />
+    );
+    
+    expect(getByTestId('audioLoadingIndicator')).toBeTruthy();
+    jest.useRealTimers();
+  });
+  
+
   
 });
