@@ -22,11 +22,10 @@ import VideoModal from "./VideoModal";
 import { Audio } from "expo-av";
 import { VideoType } from "../../models/media_class";
 
-//
+
 // LoadingImage Component
 // Displays an ActivityIndicator overlay until the image loads.
 // If the image fails to load, it displays an error icon and message.
-//
 interface LoadingImageProps {
   uri: string;
   alt?: string;
@@ -99,11 +98,10 @@ const loadingImageStyles = StyleSheet.create({
   },
 });
 
-//
+
 // LoadingVideoButton Component
 // Displays an ActivityIndicator overlay while attempting to load the video thumbnail.
 // If the thumbnail fails to load, it shows an error icon and message.
-//
 interface LoadingVideoButtonProps {
   uri: string;
   onPress: (video: VideoType) => void;
@@ -148,12 +146,12 @@ const LoadingVideoButton: React.FC<LoadingVideoButtonProps> = ({ uri, onPress })
   );
 };
 
-//
+
 // LoadingAudio Component
 // Displays an ActivityIndicator while loading the audio file.
 // If the audio fails to load, displays an error icon and message.
 // Once loaded, it shows a simple play button UI (for demonstration).
-//
+
 const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
   const { theme } = useTheme();
   const [loading, setLoading] = useState(true);
@@ -210,7 +208,7 @@ const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
   );
 };
 
-//
+
 // LoadingDots Component
 // If tests are running, simply render static text.
 // Otherwise, run the animated dots sequence.
@@ -292,9 +290,9 @@ const loadingDotsStyles = StyleSheet.create({
   },
 });
 
-//
+
 // NoteDetailModal Component
-//
+
 interface Note {
   title: string;
   description: string;
