@@ -1,6 +1,5 @@
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
-import { act } from 'react-test-renderer';
 import RegistrationScreen from '../lib/screens/loginScreens/RegisterScreen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -66,8 +65,6 @@ jest.mock('react-native-paper', () => {
     },
   };
 });
-
-jest.useFakeTimers()
 
 describe('RegisterScreen', () => {
   const navigationMock = { navigate: jest.fn() };
