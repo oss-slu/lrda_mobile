@@ -25,6 +25,7 @@ const RegistrationScreen: React.FC<RegisterProps> = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [snackState, setSnackState] = useState(false);
   const [snackMessage, setSnackMessage] = useState("");
 
@@ -70,23 +71,28 @@ const RegistrationScreen: React.FC<RegisterProps> = ({ navigation }) => {
       await setDoc(doc(db, "users", user.uid), firestoreData);
 
       // Set success message and navigate to login screen
+      setRegistrationSuccess(true);
       setSnackMessage("Signup successful!");
       setSnackState(true);
-      
-      navigation.navigate("Login");
+
       } catch (error) {
+        setRegistrationSuccess(false);
         setSnackMessage(`Signup failed: ${error}`);
         setSnackState(true);
       }
   };
 
-  const onDismissSnackBar = () => setSnackState(false);
-
+  const onDismissSnackBar = () => {
+    setSnackState(false);
+    if (registrationSuccess) {
+      navigation.navigate("Login");
+    }
+  };
 
   return (
     <KeyboardAwareScrollView contentContainerStyle={styles.container}>
       <ImageBackground source={require("../../../assets/splash.jpg")} style={styles.imageBackground}>
-        <Snackbar visible={snackState} onDismiss={() => onDismissSnackBar} style={styles.snackbar}>
+        <Snackbar visible={snackState} onDismiss={onDismissSnackBar} duration={1500} style={styles.snackbar}>
           <Text style={{ textAlign: "center" }}>{snackMessage}</Text>
         </Snackbar>
         <View style={styles.registerBox}>
