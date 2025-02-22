@@ -11,7 +11,8 @@ import {
   Pressable,
   Animated,
   StatusBar,
-  Keyboard
+  Keyboard,
+  ActivityIndicator,
 } from "react-native";
 import { useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -35,6 +36,7 @@ import { useAddNoteContext } from "../context/AddNoteContext";
 import LottieView from 'lottie-react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { green } from "react-native-reanimated/lib/typescript/Colors";
+
 
 const { width, height } = Dimensions.get("window");
 const user = User.getInstance();
@@ -67,6 +69,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [isSortOpened, setIsSortOpened] = useState(false);
   const [selectedSortOption, setSelectedSortOption] = useState(1);
 
+  const [page, setPage] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+
   let textLength = 18;
 
   
@@ -75,7 +81,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       const untitledNumber = findNextUntitledNumber(notes);
       console.log("in homescreen untitled numbe ", untitledNumber);
       navigation.navigate("AddNote", { untitledNumber, refreshPage });
-  
     }
     setNavigateToAddNote(() => navigateToAddNote)
   }, [navigation, notes])
@@ -102,38 +107,64 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   // Fetch notes, either all published or user-specific based on filter
   useEffect(() => {
     setRendering(true);
-    fetchMessages();
+    setPage(1);
+    setHasMore(true);
+    fetchNotes(1);
   }, [updateCounter, published, value]);
 
-  const fetchMessages = async () => {
+  const fetchNotes = async (pageNumber: number) => {
     try {
       const userId = await user.getId();
-      const data = await ApiService.fetchMessages(
-        false,
-        published,
-        isPrivate ? userId : "",
+      // Calculate the skip value based on the current page:
+      const skip = (pageNumber - 1) * 20;
+      // Call the new batch-fetch API method:
+      const data = await ApiService.fetchMessagesBatch(
+          false,
+          published,
+          isPrivate ? userId : "",
+          20,
+          skip
       );
 
-      // Filter out archived notes; assume notes without `isArchived` are not archived
+      // Filter out archived notes:
       const unarchivedNotes = data.filter((note: Note) => !note.isArchived);
 
-      setMessages(unarchivedNotes);
+      // Convert and sort the notes:
+      let fetchedNotes = DataConversion.convertMediaTypes(unarchivedNotes)
+          .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
 
-      // Convert data and sort notes by date (latest first)
-      const fetchedNotes = DataConversion.convertMediaTypes(unarchivedNotes)
-        .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+      if (reversed) {
+        fetchedNotes = fetchedNotes.reverse();
+      }
 
-      // Apply reverse logic if 'reversed' is true
-      setNotes(reversed ? fetchedNotes.reverse() : fetchedNotes);
+      // For the first page, replace the notes; otherwise, append:
+      if (pageNumber === 1) {
+        setNotes(fetchedNotes);
+      } else {
+        setNotes((prevNotes) => [...prevNotes, ...fetchedNotes]);
+      }
+
+      // If fewer than 20 notes are returned, there are no more to load:
+      setHasMore(fetchedNotes.length === 20);
       setRendering(false);
-      
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching messages:", error);
       ToastMessage.show({
         type: "error",
         text1: "Error fetching messages",
         text2: error.message,
       });
+    }
+  };
+
+
+  const handleLoadMore = async () => {
+    if (hasMore && !isLoadingMore) {
+      setIsLoadingMore(true);
+      const nextPage = page + 1;
+      await fetchNotes(nextPage);
+      setPage(nextPage);
+      setIsLoadingMore(false);
     }
   };
 
@@ -317,52 +348,71 @@ const handleSortOption = ({ option }) => {
     const privateData = filteredNotes.filter((eachNotes) => eachNotes.published === false);
     const publicData = filteredNotes.filter((eachNotes) => eachNotes.published != false);
     return isPrivate ? (
-      privateData.length > 0 ? (<SwipeListView
-        data={privateData}
-        renderItem={renderItem}
-        renderHiddenItem={sideMenu}
-        leftActivationValue={160}
-        rightActivationValue={-160}
-        leftOpenValue={75}
-        rightOpenValue={-75}
-        stopLeftSwipe={175}
-        stopRightSwipe={-175}
-        keyExtractor={(item) => item.id}
-        onRightAction={(data, rowMap) => deleteNote(data, rowMap)}
-        onLeftAction={(data, rowMap) => publishNote(data, rowMap)}
-        contentContainerStyle={{paddingBottom: 150}}
-      />)
-        : (<View style={styles(theme, width).resultNotFound}>
-
-          <LottieView
-            testID="no-results-animation"
-            source={require('../../assets/animations/noResultFound.json')}
-            autoPlay
-            loop
-            style={styles(theme, width).lottie}
-          />
-          <Text style={styles(theme, width).resultNotFoundTxt}>No Results Found</Text>
-        </View>
+        privateData.length > 0 ? (
+            <SwipeListView
+                data={privateData}
+                renderItem={renderItem}
+                renderHiddenItem={sideMenu}
+                leftActivationValue={160}
+                rightActivationValue={-160}
+                leftOpenValue={75}
+                rightOpenValue={-75}
+                stopLeftSwipe={175}
+                stopRightSwipe={-175}
+                keyExtractor={(item) => item.id}
+                onRightAction={(data, rowMap) => deleteNote(data, rowMap)}
+                onLeftAction={(data, rowMap) => publishNote(data, rowMap)}
+                contentContainerStyle={{ paddingBottom: 150 }}
+                onEndReached={handleLoadMore}
+                onEndReachedThreshold={0.5}
+                ListFooterComponent={
+                  isLoadingMore ? (
+                      <View style={{ padding: 20 }}>
+                        <ActivityIndicator size="small" color={theme.text} />
+                      </View>
+                  ) : null
+                }
+            />
+        ) : (
+            <View style={styles(theme, width).resultNotFound}>
+              <LottieView
+                  testID="no-results-animation"
+                  source={require('../../assets/animations/noResultFound.json')}
+                  autoPlay
+                  loop
+                  style={styles(theme, width).lottie}
+              />
+              <Text style={styles(theme, width).resultNotFoundTxt}>No Results Found</Text>
+            </View>
         )
-
     ) : (
-      publicData.length > 0 ? (<SwipeListView
-        data={publicData}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{paddingBottom: 150}}
-      />) :
-        (<View style={styles(theme, width).resultNotFound}>
-
-          <LottieView
-            testID="no-results-animation"
-            source={require('../../assets/animations/noResultFound.json')}
-            autoPlay
-            loop
-            style={styles(theme, width).lottie}
-          />
-          <Text style={styles(theme, width).resultNotFoundTxt}>No Results Found</Text>
-        </View>
+        publicData.length > 0 ? (
+            <SwipeListView
+                data={publicData}
+                renderItem={renderItem}
+                keyExtractor={(item) => item.id}
+                contentContainerStyle={{ paddingBottom: 150 }}
+                onEndReached={handleLoadMore}
+                onEndReachedThreshold={0.5}
+                ListFooterComponent={
+                  isLoadingMore ? (
+                      <View style={{ padding: 20 }}>
+                        <ActivityIndicator size="small" color={theme.text} />
+                      </View>
+                  ) : null
+                }
+            />
+        ) : (
+            <View style={styles(theme, width).resultNotFound}>
+              <LottieView
+                  testID="no-results-animation"
+                  source={require('../../assets/animations/noResultFound.json')}
+                  autoPlay
+                  loop
+                  style={styles(theme, width).lottie}
+              />
+              <Text style={styles(theme, width).resultNotFoundTxt}>No Results Found</Text>
+            </View>
         )
     );
   };
