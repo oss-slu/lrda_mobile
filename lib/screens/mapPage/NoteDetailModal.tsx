@@ -167,7 +167,7 @@ interface LoadingImageProps {
 const LoadingImage: React.FC<LoadingImageProps> = ({ uri, alt, onPress }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const theme = useTheme();
+  const { theme } = useTheme();
 
   if (error) {
     return (
@@ -193,7 +193,7 @@ const LoadingImage: React.FC<LoadingImageProps> = ({ uri, alt, onPress }) => {
           setError(true);
         }}
       />
-      {loading && (
+        {loading && (
         <View style={loadingImageStyles.loadingOverlay}>
           <ActivityIndicator testID="loadingIndicator" size="large" color={theme.homeColor} />
         </View>
@@ -209,8 +209,8 @@ const LoadingImage: React.FC<LoadingImageProps> = ({ uri, alt, onPress }) => {
 
 const loadingImageStyles = StyleSheet.create({
   container: {
-    width: 400, 
-    height: 400, 
+    width: 400, // adjust as needed
+    height: 400, // adjust as needed
     position: "relative",
     justifyContent: "center",
     alignItems: "center",
@@ -316,7 +316,7 @@ const loadingDotsStyles = StyleSheet.create({
   },
   dot: {
     fontSize: 18,
-    color: "#333",
+    color: "333",
     marginHorizontal: 2,
   },
 });
@@ -332,7 +332,7 @@ const LoadingVideo: React.FC<LoadingVideoProps> = ({ uri, onPress, width }) => {
   const [error, setError] = useState(false);
   const containerWidth = width - 40;
   const containerHeight = containerWidth / 1.77;
-  const theme = useTheme();
+  const {theme} = useTheme();
 
   if (error) {
     return (
@@ -397,7 +397,6 @@ const loadingVideoStyles = StyleSheet.create({
     bottom: 0,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.7)",
   },
   errorContainer: {
     flex: 1,
@@ -407,7 +406,7 @@ const loadingVideoStyles = StyleSheet.create({
   },
   errorText: {
     marginTop: 10,
-    color: "white",
+    color: "red",
     fontSize: 16,
   },
 });
