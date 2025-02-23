@@ -152,63 +152,6 @@ const LoadingVideoButton: React.FC<LoadingVideoButtonProps> = ({ uri, onPress })
 // If the audio fails to load, displays an error icon and message.
 // Once loaded, it shows a simple play button UI (for demonstration).
 
-const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
-  const { theme } = useTheme();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
-
-  useEffect(() => {
-    let isMounted = true;
-    Audio.Sound.createAsync({ uri })
-      .then(({ sound, status }) => {
-        if (isMounted) {
-          setSound(sound);
-          setLoading(false);
-        }
-      })
-      .catch((err) => {
-        if (isMounted) {
-          setError(true);
-          setLoading(false);
-        }
-      });
-    return () => {
-      isMounted = false;
-      if (sound) {
-        sound.unloadAsync();
-      }
-    };
-  }, [uri]);
-
-  if (error) {
-    return (
-      <View style={styles.audioContainer}>
-        <Ionicons name="alert-circle-outline" size={30} color={theme.homeColor} />
-        <Text style={styles.errorText}>Couldn't load audio</Text>
-      </View>
-    );
-  }
-
-  if (loading) {
-    return (
-      <View style={styles.audioContainer}>
-        <ActivityIndicator testID="audioLoadingIndicator" size="large" color={theme.homeColor} />
-      </View>
-    );
-  }
-
-  return (
-    <View style={styles.audioContainer}>
-      <TouchableOpacity onPress={() => { /* Implement play logic as needed */ }}>
-        <Ionicons name="play-circle-outline" size={30} color={theme.text} />
-      </TouchableOpacity>
-      <Text style={styles.audioTimer}>Audio Loaded</Text>
-    </View>
-  );
-};
-
-
 // LoadingDots Component
 // If tests are running, simply render static text.
 // Otherwise, run the animated dots sequence.
@@ -478,6 +421,130 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
   }), [audioStates, theme, width]);
 
   const htmlSource = useMemo(() => ({ html: note?.description || "" }), [note]);
+  const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
+    const { theme } = useTheme();
+    const { width } = useWindowDimensions();
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
+    const [sound, setSound] = useState<Audio.Sound | null>(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [progress, setProgress] = useState(0);
+    const [duration, setDuration] = useState(0);
+  
+    // Format seconds as m:ss
+    const formatTime = (seconds: number): string => {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60).toString().padStart(2, "0");
+      return `${mins}:${secs}`;
+    };
+  
+    useEffect(() => {
+      let isMounted = true;
+      Audio.Sound.createAsync({ uri })
+        .then(({ sound, status }) => {
+          if (isMounted) {
+            setSound(sound);
+            setLoading(false);
+            if (status.durationMillis) {
+              setDuration(status.durationMillis / 1000);
+            }
+            sound.setOnPlaybackStatusUpdate((status) => {
+              if (status.isLoaded) {
+                setProgress(status.positionMillis / 1000);
+                setIsPlaying(status.isPlaying);
+                if (status.didJustFinish) {
+                  setIsPlaying(false);
+                  setProgress(0);
+                  sound.setPositionAsync(0);
+                }
+              }
+            });
+          }
+        })
+        .catch(() => {
+          if (isMounted) {
+            setError(true);
+            setLoading(false);
+          }
+        });
+  
+      return () => {
+        isMounted = false;
+        if (sound) {
+          sound.unloadAsync();
+        }
+      };
+    }, [uri]);
+  
+    const playPauseAudio = async () => {
+      if (sound) {
+        if (isPlaying) {
+          await sound.pauseAsync();
+          setIsPlaying(false);
+        } else {
+          const status = await sound.getStatusAsync();
+          // Restart from beginning if audio has finished.
+          if (status.positionMillis >= status.durationMillis) {
+            await sound.setPositionAsync(0);
+          }
+          await sound.playAsync();
+          setIsPlaying(true);
+        }
+      }
+    };
+  
+    const handleSlidingComplete = async (value: number) => {
+      if (sound) {
+        await sound.setPositionAsync(value * 1000);
+        setProgress(value);
+      }
+    };
+  
+    if (error) {
+      return (
+        <View style={styles.audioContainer}>
+          <Ionicons name="alert-circle-outline" size={30} color={theme.homeColor} />
+          <Text style={styles.errorText}>Couldn't load audio</Text>
+        </View>
+      );
+    }
+  
+    if (loading) {
+      return (
+        <View style={styles.audioContainer}>
+          <ActivityIndicator testID="audioLoadingIndicator" size="large" color={theme.homeColor} />
+        </View>
+      );
+    }
+  
+    return (
+      <View style={styles.audioContainer}>
+        <View style={[styles.audioContainer, { marginVertical: 10, alignItems: "center", width: width - 40 }]}>
+          <TouchableOpacity onPress={playPauseAudio} testID="audioButton">
+            <Ionicons
+              name={isPlaying ? "pause-circle-outline" : "play-circle-outline"}
+              size={30}
+              color={theme.text}
+            />
+          </TouchableOpacity>
+          <Slider
+            style={styles.audioSlider}
+            minimumValue={0}
+            maximumValue={duration}
+            value={progress}
+            minimumTrackTintColor={theme.primaryColor}
+            maximumTrackTintColor="#d3d3d3"
+            thumbTintColor={theme.primaryColor}
+            onSlidingComplete={handleSlidingComplete}
+          />
+          <Text style={styles.audioTimer}>
+            {formatTime(progress)} / {formatTime(duration)}
+          </Text>
+        </View>
+      </View>
+    );
+  };
+  
 
   return (
     <Modal animationType="slide" transparent={false} visible={isVisible}>
