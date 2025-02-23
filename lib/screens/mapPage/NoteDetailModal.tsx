@@ -147,11 +147,6 @@ const LoadingVideoButton: React.FC<LoadingVideoButtonProps> = ({ uri, onPress })
 };
 
 
-// LoadingAudio Component
-// Displays an ActivityIndicator while loading the audio file.
-// If the audio fails to load, displays an error icon and message.
-// Once loaded, it shows a simple play button UI (for demonstration).
-
 // LoadingDots Component
 // If tests are running, simply render static text.
 // Otherwise, run the animated dots sequence.
@@ -483,7 +478,6 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
           setIsPlaying(false);
         } else {
           const status = await sound.getStatusAsync();
-          // Restart from beginning if audio has finished.
           if (status.positionMillis >= status.durationMillis) {
             await sound.setPositionAsync(0);
           }
@@ -545,7 +539,6 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
     );
   };
   
-
   return (
     <Modal animationType="slide" transparent={false} visible={isVisible}>
       <TouchableOpacity onPress={onClose} style={styles.closeButton}>
