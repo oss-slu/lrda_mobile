@@ -19,13 +19,145 @@ import ApiService from "../../utils/api_calls";
 import { useTheme } from "../../components/ThemeProvider";
 import ImageModal from "./ImageModal";
 import VideoModal from "./VideoModal";
-import { Audio } from "expo-av";
+import { Audio, Video } from "expo-av";
 import { VideoType } from "../../models/media_class";
 
+// LoadingAudio Component
+const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
+  const { theme } = useTheme();
+  const { width } = useWindowDimensions();
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+
+  // Format seconds as M:SS
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60).toString().padStart(2, "0");
+    return `${mins}:${secs}`;
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    Audio.Sound.createAsync({ uri })
+      .then(({ sound, status }) => {
+        if (!isMounted) return;
+        setSound(sound);
+        setLoading(false);
+
+        if (status.durationMillis) {
+          setDuration(status.durationMillis / 1000);
+        }
+
+        // Watch playback status
+        sound.setOnPlaybackStatusUpdate((s) => {
+          if (!s.isLoaded) return;
+          setProgress(s.positionMillis / 1000);
+          setIsPlaying(s.isPlaying);
+
+          // If finished, reset
+          if (s.didJustFinish) {
+            setIsPlaying(false);
+            setProgress(0);
+            sound.setPositionAsync(0);
+          }
+        });
+      })
+      .catch(() => {
+        if (isMounted) {
+          setError(true);
+          setLoading(false);
+        }
+      });
+
+    // Cleanup
+    return () => {
+      isMounted = false;
+      if (sound) {
+        sound.unloadAsync();
+      }
+    };
+  }, [uri]);
+
+  const handlePlayPause = async () => {
+    if (!sound) return;
+
+    const status = await sound.getStatusAsync();
+    if (status.isLoaded) {
+      if (status.isPlaying) {
+        await sound.pauseAsync();
+        setIsPlaying(false);
+      } else {
+        // If at end, replay from start
+        if (status.positionMillis === status.durationMillis) {
+          await sound.replayAsync();
+        } else {
+          await sound.playAsync();
+        }
+        setIsPlaying(true);
+      }
+    }
+  };
+
+  const handleSlidingComplete = async (value: number) => {
+    if (sound) {
+      await sound.setPositionAsync(value * 1000);
+      setProgress(value);
+    }
+  };
+
+  // Error State
+  if (error) {
+    return (
+      <View style={styles.audioContainer}>
+        <Ionicons name="alert-circle-outline" size={30} color={theme.homeColor} />
+        <Text style={styles.errorText}>Couldn't load audio</Text>
+      </View>
+    );
+  }
+
+  // Loading State
+  if (loading) {
+    return (
+      <View style={styles.audioContainer}>
+        <ActivityIndicator testID="audioLoadingIndicator" size="large" color={theme.homeColor} />
+      </View>
+    );
+  }
+
+  // Normal Audio Player
+  return (
+    <View style={[styles.audioContainer, { marginVertical: 10, alignItems: "center", width: width - 40 }]}>
+      <TouchableOpacity onPress={handlePlayPause} testID="audioButton">
+        <Ionicons
+          name={isPlaying ? "pause-circle-outline" : "play-circle-outline"}
+          size={30}
+          color={theme.text}
+        />
+      </TouchableOpacity>
+      <Slider
+        style={styles.audioSlider}
+        minimumValue={0}
+        maximumValue={duration}
+        value={progress}
+        minimumTrackTintColor={theme.primaryColor}
+        maximumTrackTintColor="#d3d3d3"
+        thumbTintColor={theme.primaryColor}
+        onSlidingComplete={handleSlidingComplete}
+      />
+      <Text style={styles.audioTimer}>
+        {formatTime(progress)} / {formatTime(duration)}
+      </Text>
+    </View>
+  );
+};
 
 // LoadingImage Component
-// Displays an ActivityIndicator overlay until the image loads.
-// If the image fails to load, it displays an error icon and message.
 interface LoadingImageProps {
   uri: string;
   alt?: string;
@@ -33,15 +165,17 @@ interface LoadingImageProps {
 }
 
 const LoadingImage: React.FC<LoadingImageProps> = ({ uri, alt, onPress }) => {
-  const { theme } = useTheme();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const theme = useTheme();
 
   if (error) {
     return (
-      <View testID="no-image" style={loadingImageStyles.container}>
-        <Ionicons name="alert-circle-outline" size={50} color={theme.homeColor} />
-        <Text style={styles.errorText}>Couldn't load image</Text>
+      <View testID= "no-image"  style={loadingImageStyles.container}>
+        <View style={loadingImageStyles.errorContainer}>
+          <Ionicons name="alert-circle-outline" size={50} color="red" />
+          <Text style={loadingImageStyles.errorText}>Couldn't load image</Text>
+        </View>
       </View>
     );
   }
@@ -75,8 +209,8 @@ const LoadingImage: React.FC<LoadingImageProps> = ({ uri, alt, onPress }) => {
 
 const loadingImageStyles = StyleSheet.create({
   container: {
-    width: 400, // adjust as needed
-    height: 400, // adjust as needed
+    width: 400, 
+    height: 400, 
     position: "relative",
     justifyContent: "center",
     alignItems: "center",
@@ -96,69 +230,28 @@ const loadingImageStyles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.7)",
   },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 10,
+  },
+  errorText: {
+    marginTop: 10,
+    color: "black",
+    fontSize: 16,
+  },
 });
 
-
-// LoadingVideoButton Component
-// Displays an ActivityIndicator overlay while attempting to load the video thumbnail.
-// If the thumbnail fails to load, it shows an error icon and message.
-interface LoadingVideoButtonProps {
-  uri: string;
-  onPress: (video: VideoType) => void;
-}
-
-const LoadingVideoButton: React.FC<LoadingVideoButtonProps> = ({ uri, onPress }) => {
-  const { theme } = useTheme();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  if (error) {
-    return (
-      <View style={[loadingImageStyles.container, { width: 400, height: 400 / 1.77 }]}>
-        <Ionicons name="alert-circle-outline" size={50} color={theme.homeColor} />
-        <Text style={styles.errorText}>Couldn't load video</Text>
-      </View>
-    );
-  }
-
-  return (
-    <View style={[loadingImageStyles.container, { width: 400, height: 400 / 1.77 }]}>
-      <Image
-        source={{ uri }}
-        style={[loadingImageStyles.image, { opacity: loading ? 0 : 1, resizeMode: "cover" }]}
-        onLoadEnd={() => setLoading(false)}
-        onError={() => {
-          setLoading(false);
-          setError(true);
-        }}
-      />
-      {loading && (
-        <View style={loadingImageStyles.loadingOverlay}>
-          <ActivityIndicator testID="videoLoadingIndicator" size="large" color={theme.homeColor} />
-        </View>
-      )}
-      <TouchableOpacity
-        testID="videoButton"
-        style={StyleSheet.absoluteFill}
-        onPress={() => onPress({ uri })}
-      />
-    </View>
-  );
-};
-
-
-// LoadingDots Component
-// If tests are running, simply render static text.
-// Otherwise, run the animated dots sequence.
 const LoadingDots: React.FC = () => {
-  const { theme } = useTheme();
-  if (!!process.env.JEST_WORKER_ID) {
-    return <Text testID="loadingDotsStatic" style={{ color: theme.homeColor }}>...</Text>;
-  }
-
   const dot1Opacity = useRef(new Animated.Value(0)).current;
   const dot2Opacity = useRef(new Animated.Value(0)).current;
   const dot3Opacity = useRef(new Animated.Value(0)).current;
+
+  // Skip animation if in Jest environment
+  if (!!process.env.JEST_WORKER_ID) {
+    return <Text testID="loadingDotsStatic">...</Text>;
+  }
 
   useEffect(() => {
     const animateDots = () => {
@@ -223,14 +316,103 @@ const loadingDotsStyles = StyleSheet.create({
   },
   dot: {
     fontSize: 18,
-    color: "#333", // This will be overridden by theme.homeColor in our component.
+    color: "#333",
     marginHorizontal: 2,
   },
 });
 
+interface LoadingVideoProps {
+  uri: string;
+  onPress: (uri: string) => void;
+  width: number;
+}
 
-// NoteDetailModal Component
+const LoadingVideo: React.FC<LoadingVideoProps> = ({ uri, onPress, width }) => {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const containerWidth = width - 40;
+  const containerHeight = containerWidth / 1.77;
+  const theme = useTheme();
 
+  if (error) {
+    return (
+      <View testID= "no-video" style={[loadingVideoStyles.container, { width: containerWidth, height: containerHeight }]}>
+        <View style={loadingVideoStyles.errorContainer}>
+          <Ionicons name="alert-circle-outline" size={50} color="red" />
+          <Text style={loadingVideoStyles.errorText}>Couldn't load video</Text>
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View style={[loadingVideoStyles.container, { width: containerWidth, height: containerHeight }]}>
+      <Video
+        source={{ uri }}
+        style={loadingVideoStyles.video}
+        resizeMode="contain"
+        shouldPlay={false}
+        isLooping={false}
+        onLoad={() => setLoading(false)}
+        onError={() => setError(true)}
+        onLoadEnd={() => setLoading(false)}
+      />
+      {loading && (
+        <View style={loadingVideoStyles.loadingOverlay}>
+          <ActivityIndicator testID="videoLoadingIndicator" size="large" color={theme.homeColor} />
+        </View>
+      )}
+      <TouchableOpacity
+        testID="videoButton"
+        style={StyleSheet.absoluteFill}
+        onPress={() => onPress(uri)}
+      >
+        <Ionicons
+          name="play-circle-outline"
+          size={50}
+          color="white"
+          style={{ alignSelf: "center", marginTop: 70 }}
+        />
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+const loadingVideoStyles = StyleSheet.create({
+  container: {
+    position: "relative",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#000",
+  },
+  video: {
+    width: "100%",
+    height: "100%",
+  },
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.7)",
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 10,
+  },
+  errorText: {
+    marginTop: 10,
+    color: "white",
+    fontSize: 16,
+  },
+});
+
+// NoteDetailModal
 interface Note {
   title: string;
   description: string;
@@ -254,7 +436,7 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
   const { width } = useWindowDimensions();
   const { theme } = useTheme();
 
-  // Reset internal state on note change to avoid flashing previous note data.
+  // Reset state whenever the note changes
   useEffect(() => {
     setCreatorName("");
     setSelectedImage(null);
@@ -271,16 +453,7 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
     }
   }, [note]);
 
-  const [audioStates, setAudioStates] = useState<{ 
-    [key: string]: { 
-      sound: Audio.Sound | null, 
-      isPlaying: boolean, 
-      progress: number, 
-      duration: number 
-    } 
-  }>({});
-  const [playingMedia, setPlayingMedia] = useState<string | null>(null);
-
+  // Handlers for images & videos
   const onPicturePress = (src: string) => {
     setSelectedImage(src);
     setIsModalVisible(true);
@@ -292,241 +465,61 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
   };
 
   // Custom renderers for RenderHTML
-  const customRenderers = useMemo(() => ({
-    img: ({ tnode }: TNodeRendererProps<any>) => {
-      const { src, alt } = tnode.attributes;
-      return (
-        <View style={{ marginVertical: 10, alignItems: "center" }}>
-          <LoadingImage
-            uri={src as string}
-            alt={alt as string}
-            onPress={onPicturePress}
-          />
-        </View>
-      );
-    },
-    a: ({ tnode }: TNodeRendererProps<any>) => {
-      const { href } = tnode.attributes;
-      const audioState =
-        audioStates[href as string] || { progress: 0, duration: 0, isPlaying: false };
-
-      if (href && (href.endsWith(".mp4") || href.endsWith(".mov"))) {
-        return (
-          <View
-            style={{
-              width: width - 40,
-              height: (width - 40) / 1.77,
-              marginVertical: 20,
-              alignSelf: "center",
-            }}
-          >
-            <LoadingVideoButton uri={href as string} onPress={onVideoPress} />
-          </View>
-        );
-      } else if (href && (href.endsWith(".mp3") || href.endsWith(".wav") || href.endsWith(".3gp"))) {
-        // Use the new LoadingAudio component
+  const customRenderers = useMemo(
+    () => ({
+      img: ({ tnode }: TNodeRendererProps<any>) => {
+        const { src, alt } = tnode.attributes;
         return (
           <View style={{ marginVertical: 10, alignItems: "center" }}>
-            <LoadingAudio uri={href as string} />
+            <LoadingImage uri={src as string} alt={alt as string} onPress={onPicturePress} />
           </View>
         );
-      }
-      return <Text style={{ color: theme.text, marginVertical: 10 }}>{tnode.data}</Text>;
-    },
-  }), [audioStates, theme, width]);
+      },
+      a: ({ tnode }: TNodeRendererProps<any>) => {
+        const { href } = tnode.attributes;
+
+        // If it's a video
+        if (href && (href.endsWith(".mp4") || href.endsWith(".mov"))) {
+          return (
+            <View style={{ marginVertical: 20, alignSelf: "center" }}>
+              <LoadingVideo uri={href as string} onPress={(uri) => onVideoPress({ uri })} width={width} />
+            </View>
+          );
+        }
+
+        // If it's an audio file
+        if (href && (href.endsWith(".mp3") || href.endsWith(".wav") || href.endsWith(".3gp"))) {
+          return (
+            <View style={{ marginVertical: 10, alignItems: "center", width: width - 40 }}>
+              <LoadingAudio uri={href as string} />
+            </View>
+          );
+        }
+
+        // Otherwise, just render text
+        return <Text style={{ color: theme.text, marginVertical: 10 }}>{tnode.data}</Text>;
+      },
+    }),
+    [theme, width]
+  );
 
   const htmlSource = useMemo(() => ({ html: note?.description || "" }), [note]);
-  const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
-    const { theme } = useTheme();
-    const { width } = useWindowDimensions();
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-    const [sound, setSound] = useState<Audio.Sound | null>(null);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [progress, setProgress] = useState(0);
-    const [duration, setDuration] = useState(0);
-
-
-  const initializeAudio = async (uri: string) => {
-    if (audioStates[uri]?.sound) return audioStates[uri];
-
-    const { sound } = await Audio.Sound.createAsync({ uri });
-    const status = await sound.getStatusAsync();
-    const newAudioState = {
-      sound,
-      isPlaying: false,
-      progress: 0,
-      duration: status.isLoaded ? status.durationMillis / 1000 : 0,
-    };
-
-    setAudioStates((prev) => ({ ...prev, [uri]: newAudioState }));
-    return newAudioState;
-  };
-
-
-  
-    // Format seconds as m:ss
-    const formatTime = (seconds: number): string => {
-      const mins = Math.floor(seconds / 60);
-      const secs = Math.floor(seconds % 60).toString().padStart(2, "0");
-      return `${mins}:${secs}`;
-    };
-  
-    useEffect(() => {
-      let isMounted = true;
-      Audio.Sound.createAsync({ uri })
-        .then(({ sound, status }) => {
-          if (isMounted) {
-            setSound(sound);
-            setLoading(false);
-            if (status.durationMillis) {
-              setDuration(status.durationMillis / 1000);
-            }
-            sound.setOnPlaybackStatusUpdate((status) => {
-              if (status.isLoaded) {
-                setProgress(status.positionMillis / 1000);
-                setIsPlaying(status.isPlaying);
-                if (status.didJustFinish) {
-                  setIsPlaying(false);
-                  setProgress(0);
-                  sound.setPositionAsync(0);
-                }
-              }
-            });
-          }
-        })
-        .catch(() => {
-          if (isMounted) {
-            setError(true);
-            setLoading(false);
-          }
-        });
-  
-      return () => {
-        isMounted = false;
-        if (sound) {
-          sound.unloadAsync();
-        }
-      };
-    }, [uri]);
-  
-    const playPauseAudio = async (uri: string) => {
-      const audioState = await initializeAudio(uri);
-      if (audioState.sound) {
-        if (audioState.isPlaying) {
-          await audioState.sound.pauseAsync();
-          setAudioStates((prev) => ({
-            ...prev,
-            [uri]: { ...audioState, isPlaying: false },
-          }));
-          setPlayingMedia(null);
-        } else {
-          if (playingMedia && playingMedia !== uri) {
-            const currentPlayingSound = audioStates[playingMedia]?.sound;
-            if (currentPlayingSound) await currentPlayingSound.pauseAsync();
-            setAudioStates((prev) => ({
-              ...prev,
-              [playingMedia]: { ...prev[playingMedia], isPlaying: false },
-            }));
-          }
-          setPlayingMedia(uri);
-          const status = await audioState.sound.getStatusAsync();
-          if (status.positionMillis === status.durationMillis) {
-            await audioState.sound.replayAsync();
-          } else {
-            await audioState.sound.playAsync();
-          }
-          audioState.sound.setOnPlaybackStatusUpdate((status) => {
-            if (status.isLoaded) {
-              setAudioStates((prev) => ({
-                ...prev,
-                [uri]: {
-                  ...audioState,
-                  isPlaying: status.isPlaying,
-                  progress: status.positionMillis / 1000,
-                  duration: status.durationMillis / 1000,
-                },
-              }));
-              if (status.didJustFinish) {
-                audioState.sound.stopAsync();
-                setAudioStates((prev) => ({
-                  ...prev,
-                  [uri]: { ...audioState, isPlaying: false, progress: 0 },
-                }));
-                setPlayingMedia(null);
-              }
-            }
-          });
-        }
-      }
-    };
-  
-  
-    const handleSlidingComplete = async (value: number) => {
-      if (sound) {
-        await sound.setPositionAsync(value * 1000);
-        setProgress(value);
-      }
-    };
-  
-    if (error) {
-      return (
-        <View style={styles.audioContainer}>
-          <Ionicons name="alert-circle-outline" size={30} color={theme.homeColor} />
-          <Text style={styles.errorText}>Couldn't load audio</Text>
-        </View>
-      );
-    }
-  
-    if (loading) {
-      return (
-        <View style={styles.audioContainer}>
-          <ActivityIndicator testID="audioLoadingIndicator" size="large" color={theme.homeColor} />
-        </View>
-      );
-    }
-  
-    return (
-      <View style={styles.audioContainer}>
-        <View style={[styles.audioContainer, { marginVertical: 10, alignItems: "center", width: width - 40 }]}>
-          <TouchableOpacity onPress={playPauseAudio} testID="audioButton">
-            <Ionicons
-              name={isPlaying ? "pause-circle-outline" : "play-circle-outline"}
-              size={30}
-              color={theme.text}
-            />
-          </TouchableOpacity>
-          <Slider
-            style={styles.audioSlider}
-            minimumValue={0}
-            maximumValue={duration}
-            value={progress}
-            minimumTrackTintColor={theme.primaryColor}
-            maximumTrackTintColor="#d3d3d3"
-            thumbTintColor={theme.primaryColor}
-            onSlidingComplete={handleSlidingComplete}
-          />
-          <Text style={styles.audioTimer}>
-            {formatTime(progress)} / {formatTime(duration)}
-          </Text>
-        </View>
-      </View>
-    );
-  };
-  
 
   return (
     <Modal animationType="slide" transparent={false} visible={isVisible}>
+      {/* Close Button */}
       <TouchableOpacity onPress={onClose} style={styles.closeButton}>
         <View style={styles.closeIcon}>
           <Ionicons name="close" size={30} color={theme.text} />
         </View>
       </TouchableOpacity>
 
+      {/* Main Content */}
       <View style={[styles.textContainer, { height: "100%" }]}>
         <Text style={styles.modalTitle}>{note?.title}</Text>
 
         <View style={styles.metaDataContainer}>
+          {/* Creator Name */}
           <View style={styles.creatorContainer}>
             <Ionicons name="person-circle-outline" size={18} color={theme.text} />
             {creatorName ? (
@@ -536,6 +529,7 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
             )}
           </View>
 
+          {/* Date */}
           <View style={styles.dateContainer}>
             <Ionicons name="calendar-outline" size={18} color={theme.text} />
             <Text style={styles.dateText}>{note?.time || "Date not available"}</Text>
@@ -544,6 +538,7 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
 
         <View style={styles.dividerLine} />
 
+        {/* Description Content */}
         <ScrollView>
           <RenderHTML
             baseStyle={{ color: theme.text }}
@@ -555,11 +550,14 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
         </ScrollView>
       </View>
 
+      {/* Image Modal */}
       <ImageModal
         isVisible={isModalVisible}
         onClose={() => setIsModalVisible(false)}
         images={selectedImage ? [{ uri: selectedImage }] : []}
       />
+
+      {/* Video Modal */}
       <VideoModal
         isVisible={isVideoVisible}
         onClose={() => setIsVideoVisible(false)}
@@ -570,6 +568,7 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
 });
 
 export default NoteDetailModal;
+
 
 const styles = StyleSheet.create({
   closeButton: {
@@ -641,13 +640,13 @@ const styles = StyleSheet.create({
     width: "100%",
     alignSelf: "center",
   },
+  // Audio
   audioContainer: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#f0f0f0",
     padding: 10,
     borderRadius: 10,
-    marginTop: 10,
     alignSelf: "center",
   },
   audioSlider: {
@@ -660,8 +659,8 @@ const styles = StyleSheet.create({
     width: 60,
   },
   errorText: {
-    marginTop: 10,
-    color: "#ff0000",
+    marginLeft: 10,
+    color: "#333",
     fontSize: 16,
   },
 });
