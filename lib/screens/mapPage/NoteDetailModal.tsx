@@ -291,86 +291,6 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
     setIsVideoVisible(true);
   };
 
-  const initializeAudio = async (uri: string) => {
-    if (audioStates[uri]?.sound) return audioStates[uri];
-
-    const { sound } = await Audio.Sound.createAsync({ uri });
-    const status = await sound.getStatusAsync();
-    const newAudioState = {
-      sound,
-      isPlaying: false,
-      progress: 0,
-      duration: status.isLoaded ? status.durationMillis / 1000 : 0,
-    };
-
-    setAudioStates((prev) => ({ ...prev, [uri]: newAudioState }));
-    return newAudioState;
-  };
-
-  const playPauseAudio = async (uri: string) => {
-    const audioState = await initializeAudio(uri);
-    if (audioState.sound) {
-      if (audioState.isPlaying) {
-        await audioState.sound.pauseAsync();
-        setAudioStates((prev) => ({
-          ...prev,
-          [uri]: { ...audioState, isPlaying: false },
-        }));
-        setPlayingMedia(null);
-      } else {
-        if (playingMedia && playingMedia !== uri) {
-          const currentPlayingSound = audioStates[playingMedia]?.sound;
-          if (currentPlayingSound) await currentPlayingSound.pauseAsync();
-          setAudioStates((prev) => ({
-            ...prev,
-            [playingMedia]: { ...prev[playingMedia], isPlaying: false },
-          }));
-        }
-        setPlayingMedia(uri);
-        const status = await audioState.sound.getStatusAsync();
-        if (status.positionMillis === status.durationMillis) {
-          await audioState.sound.replayAsync();
-        } else {
-          await audioState.sound.playAsync();
-        }
-        audioState.sound.setOnPlaybackStatusUpdate((status) => {
-          if (status.isLoaded) {
-            setAudioStates((prev) => ({
-              ...prev,
-              [uri]: {
-                ...audioState,
-                isPlaying: status.isPlaying,
-                progress: status.positionMillis / 1000,
-                duration: status.durationMillis / 1000,
-              },
-            }));
-            if (status.didJustFinish) {
-              audioState.sound.stopAsync();
-              setAudioStates((prev) => ({
-                ...prev,
-                [uri]: { ...audioState, isPlaying: false, progress: 0 },
-              }));
-              setPlayingMedia(null);
-            }
-          }
-        });
-      }
-    }
-  };
-
-  const handleSlidingComplete = async (value: number, uri: string) => {
-    const audioState = await initializeAudio(uri);
-    if (audioState.sound) {
-      await audioState.sound.setPositionAsync(value * 1000);
-    }
-  };
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60).toString().padStart(2, "0");
-    return `${mins}:${secs}`;
-  };
-
   // Custom renderers for RenderHTML
   const customRenderers = useMemo(() => ({
     img: ({ tnode }: TNodeRendererProps<any>) => {
@@ -425,6 +345,25 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
     const [duration, setDuration] = useState(0);
+
+
+  const initializeAudio = async (uri: string) => {
+    if (audioStates[uri]?.sound) return audioStates[uri];
+
+    const { sound } = await Audio.Sound.createAsync({ uri });
+    const status = await sound.getStatusAsync();
+    const newAudioState = {
+      sound,
+      isPlaying: false,
+      progress: 0,
+      duration: status.isLoaded ? status.durationMillis / 1000 : 0,
+    };
+
+    setAudioStates((prev) => ({ ...prev, [uri]: newAudioState }));
+    return newAudioState;
+  };
+
+
   
     // Format seconds as m:ss
     const formatTime = (seconds: number): string => {
@@ -471,21 +410,57 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
       };
     }, [uri]);
   
-    const playPauseAudio = async () => {
-      if (sound) {
-        if (isPlaying) {
-          await sound.pauseAsync();
-          setIsPlaying(false);
+    const playPauseAudio = async (uri: string) => {
+      const audioState = await initializeAudio(uri);
+      if (audioState.sound) {
+        if (audioState.isPlaying) {
+          await audioState.sound.pauseAsync();
+          setAudioStates((prev) => ({
+            ...prev,
+            [uri]: { ...audioState, isPlaying: false },
+          }));
+          setPlayingMedia(null);
         } else {
-          const status = await sound.getStatusAsync();
-          if (status.positionMillis >= status.durationMillis) {
-            await sound.setPositionAsync(0);
+          if (playingMedia && playingMedia !== uri) {
+            const currentPlayingSound = audioStates[playingMedia]?.sound;
+            if (currentPlayingSound) await currentPlayingSound.pauseAsync();
+            setAudioStates((prev) => ({
+              ...prev,
+              [playingMedia]: { ...prev[playingMedia], isPlaying: false },
+            }));
           }
-          await sound.playAsync();
-          setIsPlaying(true);
+          setPlayingMedia(uri);
+          const status = await audioState.sound.getStatusAsync();
+          if (status.positionMillis === status.durationMillis) {
+            await audioState.sound.replayAsync();
+          } else {
+            await audioState.sound.playAsync();
+          }
+          audioState.sound.setOnPlaybackStatusUpdate((status) => {
+            if (status.isLoaded) {
+              setAudioStates((prev) => ({
+                ...prev,
+                [uri]: {
+                  ...audioState,
+                  isPlaying: status.isPlaying,
+                  progress: status.positionMillis / 1000,
+                  duration: status.durationMillis / 1000,
+                },
+              }));
+              if (status.didJustFinish) {
+                audioState.sound.stopAsync();
+                setAudioStates((prev) => ({
+                  ...prev,
+                  [uri]: { ...audioState, isPlaying: false, progress: 0 },
+                }));
+                setPlayingMedia(null);
+              }
+            }
+          });
         }
       }
     };
+  
   
     const handleSlidingComplete = async (value: number) => {
       if (sound) {
@@ -539,6 +514,7 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
     );
   };
   
+
   return (
     <Modal animationType="slide" transparent={false} visible={isVisible}>
       <TouchableOpacity onPress={onClose} style={styles.closeButton}>
