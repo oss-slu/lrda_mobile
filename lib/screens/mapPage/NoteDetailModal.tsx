@@ -22,51 +22,109 @@ import VideoModal from "./VideoModal";
 import { Audio, Video } from "expo-av";
 import { VideoType } from "../../models/media_class";
 
-// LoadingAudio Component
+// Audio component.
 const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
   const { theme } = useTheme();
   const { width } = useWindowDimensions();
 
+  const [audioState, setAudioState] = useState<{
+    sound: Audio.Sound;
+    isPlaying: boolean;
+    progress: number;
+    duration: number;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [duration, setDuration] = useState(0);
 
-  // Format seconds as M:SS
+  const [playingMedia, setPlayingMedia] = useState<string | null>(null);
+
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60).toString().padStart(2, "0");
     return `${mins}:${secs}`;
   };
 
-  useEffect(() => {
-    let isMounted = true;
+  const initializeAudio = async (uri: string) => {
+    if (audioState?.sound) return audioState;
+    try {
+      const { sound } = await Audio.Sound.createAsync({ uri });
+      const status = await sound.getStatusAsync();
+      const newAudioState = {
+        sound,
+        isPlaying: false,
+        progress: 0,
+        duration: status.isLoaded ? status.durationMillis / 1000 : 0,
+      };
+      setAudioState(newAudioState);
+      return newAudioState;
+    } catch (err) {
+      setError(true);
+      throw err;
+    }
+  };
 
-    Audio.Sound.createAsync({ uri })
-      .then(({ sound, status }) => {
-        if (!isMounted) return;
-        setSound(sound);
-        setLoading(false);
-
-        if (status.durationMillis) {
-          setDuration(status.durationMillis / 1000);
+  // Handles play/pause logic, including stopping any other playing audio
+  const playPauseAudio = async (uri: string) => {
+    const state = await initializeAudio(uri);
+    if (state.sound) {
+      if (state.isPlaying) {
+        await state.sound.pauseAsync();
+        setAudioState({ ...state, isPlaying: false });
+        setPlayingMedia(null);
+      } else {
+        if (playingMedia && playingMedia !== uri) {
+          const currentPlayingSound = audioState[playingMedia]?.sound;
+          if (currentPlayingSound) await currentPlayingSound.pauseAsync();
+          setAudioState((prev) => ({
+            ...prev,
+            [playingMedia]: { ...prev[playingMedia], isPlaying: false },
+          }));
         }
 
-        // Watch playback status
-        sound.setOnPlaybackStatusUpdate((s) => {
-          if (!s.isLoaded) return;
-          setProgress(s.positionMillis / 1000);
-          setIsPlaying(s.isPlaying);
-
-          // If finished, reset
-          if (s.didJustFinish) {
-            setIsPlaying(false);
-            setProgress(0);
-            sound.setPositionAsync(0);
+        setPlayingMedia(uri);
+        const status = await state.sound.getStatusAsync();
+        if (status.positionMillis === status.durationMillis) {
+          await state.sound.replayAsync();
+        } else {
+          await state.sound.playAsync();
+        }
+        state.sound.setOnPlaybackStatusUpdate((status) => {
+          if (status.isLoaded) {
+            setAudioState((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    isPlaying: status.isPlaying,
+                    progress: status.positionMillis / 1000,
+                    duration: status.durationMillis / 1000,
+                  }
+                : null
+            );
+            if (status.didJustFinish) {
+              state.sound.stopAsync();
+              setAudioState((prev) =>
+                prev ? { ...prev, isPlaying: false, progress: 0 } : null
+              );
+              setPlayingMedia(null);
+            }
           }
         });
+      }
+    }
+  };
+
+  const handleSlidingComplete = async (value: number) => {
+    if (audioState?.sound) {
+      await audioState.sound.setPositionAsync(value * 1000);
+      setAudioState({ ...audioState, progress: value });
+    }
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+    initializeAudio(uri)
+      .then(() => {
+        if (isMounted) setLoading(false);
       })
       .catch(() => {
         if (isMounted) {
@@ -75,43 +133,15 @@ const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
         }
       });
 
-    // Cleanup
     return () => {
       isMounted = false;
-      if (sound) {
-        sound.unloadAsync();
+      if (audioState?.sound) {
+        audioState.sound.unloadAsync();
       }
     };
   }, [uri]);
 
-  const handlePlayPause = async () => {
-    if (!sound) return;
-
-    const status = await sound.getStatusAsync();
-    if (status.isLoaded) {
-      if (status.isPlaying) {
-        await sound.pauseAsync();
-        setIsPlaying(false);
-      } else {
-        // If at end, replay from start
-        if (status.positionMillis === status.durationMillis) {
-          await sound.replayAsync();
-        } else {
-          await sound.playAsync();
-        }
-        setIsPlaying(true);
-      }
-    }
-  };
-
-  const handleSlidingComplete = async (value: number) => {
-    if (sound) {
-      await sound.setPositionAsync(value * 1000);
-      setProgress(value);
-    }
-  };
-
-  // Error State
+  // Error case
   if (error) {
     return (
       <View style={styles.audioContainer}>
@@ -121,21 +151,25 @@ const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
     );
   }
 
-  // Loading State
-  if (loading) {
+  // Loading state case
+  if (loading || !audioState) {
     return (
       <View style={styles.audioContainer}>
         <ActivityIndicator testID="audioLoadingIndicator" size="large" color={theme.homeColor} />
       </View>
     );
   }
-
-  // Normal Audio Player
+  // Normal case
   return (
-    <View style={[styles.audioContainer, { marginVertical: 10, alignItems: "center", width: width - 40 }]}>
-      <TouchableOpacity onPress={handlePlayPause} testID="audioButton">
+    <View
+      style={[
+        styles.audioContainer,
+        { marginVertical: 10, alignItems: "center", width: width - 40 },
+      ]}
+    >
+      <TouchableOpacity onPress={() => playPauseAudio(uri)} testID="audioButton">
         <Ionicons
-          name={isPlaying ? "pause-circle-outline" : "play-circle-outline"}
+          name={audioState.isPlaying ? "pause-circle-outline" : "play-circle-outline"}
           size={30}
           color={theme.text}
         />
@@ -143,15 +177,15 @@ const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
       <Slider
         style={styles.audioSlider}
         minimumValue={0}
-        maximumValue={duration}
-        value={progress}
+        maximumValue={audioState.duration}
+        value={audioState.progress}
         minimumTrackTintColor={theme.primaryColor}
         maximumTrackTintColor="#d3d3d3"
         thumbTintColor={theme.primaryColor}
         onSlidingComplete={handleSlidingComplete}
       />
       <Text style={styles.audioTimer}>
-        {formatTime(progress)} / {formatTime(duration)}
+        {formatTime(audioState.progress)} / {formatTime(audioState.duration)}
       </Text>
     </View>
   );
