@@ -350,6 +350,7 @@ const handleSortOption = ({ option }) => {
     return isPrivate ? (
         privateData.length > 0 ? (
             <SwipeListView
+                testID="swipe-list"
                 data={privateData}
                 renderItem={renderItem}
                 renderHiddenItem={sideMenu}
@@ -363,13 +364,29 @@ const handleSortOption = ({ option }) => {
                 onRightAction={(data, rowMap) => deleteNote(data, rowMap)}
                 onLeftAction={(data, rowMap) => publishNote(data, rowMap)}
                 contentContainerStyle={{ paddingBottom: 150 }}
-                onEndReached={handleLoadMore}
-                onEndReachedThreshold={0.5}
                 ListFooterComponent={
                   isLoadingMore ? (
                       <View style={{ padding: 20 }}>
                         <ActivityIndicator size="small" color={theme.text} />
                       </View>
+                  ) : hasMore ? (
+                      <TouchableOpacity
+                          onPress={handleLoadMore}
+                          style={{
+                            paddingVertical: 10,
+                            paddingHorizontal: 20,
+                            alignItems: "center",
+                            borderWidth: 1,
+                            borderColor: "white",
+                            borderRadius: 10,
+                            marginVertical: 10,
+                            backgroundColor: "white",
+                          }}
+                      >
+                        <Text style={{ color: theme.text, fontSize: 18, fontWeight: "bold" }}>
+                          Load More
+                        </Text>
+                      </TouchableOpacity>
                   ) : null
                 }
             />
@@ -392,13 +409,29 @@ const handleSortOption = ({ option }) => {
                 renderItem={renderItem}
                 keyExtractor={(item) => item.id}
                 contentContainerStyle={{ paddingBottom: 150 }}
-                onEndReached={handleLoadMore}
-                onEndReachedThreshold={0.5}
                 ListFooterComponent={
                   isLoadingMore ? (
                       <View style={{ padding: 20 }}>
                         <ActivityIndicator size="small" color={theme.text} />
                       </View>
+                  ) : hasMore ? (
+                      <TouchableOpacity
+                          onPress={handleLoadMore}
+                          style={{
+                            paddingVertical: 10,
+                            paddingHorizontal: 20,
+                            alignItems: "center",
+                            borderWidth: 1,
+                            borderColor: "white",
+                            borderRadius: 10,
+                            marginVertical: 10,
+                            backgroundColor: "white",
+                          }}
+                      >
+                        <Text style={{ color: theme.text, fontSize: 18 }}>
+                          Load More
+                        </Text>
+                      </TouchableOpacity>
                   ) : null
                 }
             />
