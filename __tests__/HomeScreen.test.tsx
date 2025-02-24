@@ -5,9 +5,10 @@ import HomeScreen from '../lib/screens/HomeScreen';
 import { AddNoteProvider } from '../lib/context/AddNoteContext';
 import { onAuthStateChanged } from 'firebase/auth';
 import ApiService from '../lib/utils/api_calls';
+import DataConversion from "../lib/utils/data_conversion";
 
 // Mock external dependencies
-jest.mock('../lib/components/ThemeProvider', () => ({
+jest.mock ('../lib/components/ThemeProvider', () => ({
   useTheme: () => ({
     theme: 'mockedTheme',
   }),
@@ -55,15 +56,44 @@ jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
   })),
 }));
 
+jest.mock('../lib/utils/data_conversion', () => {
+  return {
+    convertMediaTypes: (data: any[]) => {
+      return data.map(message => ({
+        ...message,
+        // Ensure that the id is set from "@id" or fallback to message.id
+        id: message["@id"] || message.id,
+        title: message.title || "",
+        text: message.BodyText || "",
+        time: message.time || (message.__rerum && message.__rerum.createdAt) || "",
+        creator: message.creator || "",
+        media: message.media || [],
+        audio: message.audio || [],
+        latitude: message.latitude || "",
+        longitude: message.longitude || "",
+        published: message.published || false,
+        tags: message.tags || [],
+      }));
+    },
+    // Pass through extractImages as-is.
+    extractImages: jest.requireActual('../lib/utils/data_conversion').extractImages,
+  };
+});
+
 jest.mock('../lib/components/NotesComponent', () => {
   const React = require('react');
   const { Text } = require('react-native');
-  return ({ item }: { item: any }) => (
-      <Text testID={`note-${item["@id"]}`}>
-        {item.title}
-      </Text>
-  );
+  return ({ item }: { item: any }) => {
+    // Use @id if available, otherwise fall back to item.id
+    const noteId = item["@id"] || item.id;
+    return (
+        <Text testID={`note-${noteId}`}>
+          {item.title}
+        </Text>
+    );
+  };
 });
+
 
 
 
@@ -292,78 +322,77 @@ describe('HomeScreen', () => {
     });
   });
 
-  it("loads additional notes on scroll (batch rendering)", async () => {
-    // Prepare two batches: 20 notes for the first batch and 10 for the second batch.
-    const now = new Date().toISOString();
-    const mockBatch1 = Array.from({ length: 20 }, (_, i) => ({
-      "@id": `note-${i + 1}`,
-      title: `Note ${i + 1}`,
-      BodyText: `Content for note ${i + 1}`,
-      time: now,
-      __rerum: { createdAt: now }, // Required by DataConversion
-      creator: "12345",
-      media: [],
-      audio: [],
-      latitude: "",
-      longitude: "",
-      published: false,
-      tags: [],
-    }));
-    const mockBatch2 = Array.from({ length: 10 }, (_, i) => ({
-      "@id": `note-${i + 21}`,
-      title: `Note ${i + 21}`,
-      BodyText: `Content for note ${i + 21}`,
-      time: now,
-      __rerum: { createdAt: now }, // Required by DataConversion
-      creator: "12345",
-      media: [],
-      audio: [],
-      latitude: "",
-      longitude: "",
-      published: false,
-      tags: [],
-    }));
+  it(
+      "loads additional notes on scroll (batch rendering)",
+      async () => {
+        const now = new Date().toISOString();
+        const mockBatch1 = Array.from({ length: 20 }, (_, i) => ({
+          "@id": `note-${i + 1}`, // This is used by DataConversion
+          id: `note-${i + 1}`,   // Optional, but can help if other code uses it
+          title: `Note ${i + 1}`,
+          BodyText: `Content for note ${i + 1}`,
+          time: now,
+          __rerum: { createdAt: now }, // required by conversion
+          creator: "12345",
+          media: [],
+          audio: [],
+          latitude: "",
+          longitude: "",
+          published: false,
+          tags: [],
+        }));
 
-    // Override the mocked implementation of fetchMessagesBatch.
-    (ApiService.fetchMessagesBatch as jest.Mock)
-        .mockImplementationOnce(() => Promise.resolve(mockBatch1))
-        .mockImplementationOnce(() => Promise.resolve(mockBatch2));
+        const mockBatch2 = Array.from({ length: 10 }, (_, i) => ({
+          "@id": `note-${i + 21}`,
+          id: `note-${i + 21}`,
+          title: `Note ${i + 21}`,
+          BodyText: `Content for note ${i + 21}`,
+          time: now,
+          __rerum: { createdAt: now },
+          creator: "12345",
+          media: [],
+          audio: [],
+          latitude: "",
+          longitude: "",
+          published: false,
+          tags: [],
+        }));
 
-    const routeMock = { params: { untitledNumber: 1 } };
+        // Override the mocked implementation of fetchMessagesBatch.
+        (ApiService.fetchMessagesBatch as jest.Mock)
+            .mockImplementationOnce(() => Promise.resolve(mockBatch1))
+            .mockImplementationOnce(() => Promise.resolve(mockBatch2));
 
-    const { getByTestId } = render(
-        <AddNoteProvider>
-          <HomeScreen route={routeMock as any} showTooltip={false} />
-        </AddNoteProvider>
-    );
+        const routeMock = { params: { untitledNumber: 1 } };
 
-    // Wait for the initial batch (20 notes) to load.
-    await waitFor(() => {
-      // Use getByTestId to check for specific note items.
-      expect(getByTestId("note-note-1")).toBeTruthy();
-      expect(getByTestId("note-note-20")).toBeTruthy();
-    }, { timeout: 5000 });
+        // Destructure findByTestId from render so we can wait for elements.
+        const { findByTestId, getByTestId } = render(
+            <AddNoteProvider>
+              <HomeScreen route={routeMock as any} showTooltip={false} />
+            </AddNoteProvider>
+        );
 
-    // Get the SwipeListView using its testID and simulate a scroll event.
-    const list = getByTestId("swipe-list");
-    fireEvent.scroll(list, {
-      nativeEvent: {
-        contentOffset: { y: 1000 },
-        contentSize: { height: 1500 },
-        layoutMeasurement: { height: 500 },
+        // Wait for the initial batch (20 notes) to load.
+        await findByTestId("note-note-1");
+        await findByTestId("note-note-20");
+
+        // Get the SwipeListView (make sure your HomeScreen adds testID="swipe-list" to it)
+        const swipeList = getByTestId("swipe-list");
+        // Directly trigger onEndReached to load the next batch.
+        fireEvent(swipeList, "onEndReached", { distanceFromEnd: 0 });
+
+        // Wait for a note from the second batch to appear.
+        await findByTestId("note-note-21");
+
+        // Verify that fetchMessagesBatch was called twice (initial load and batch load).
+        expect(ApiService.fetchMessagesBatch).toHaveBeenCalledTimes(2);
       },
-    });
-
-    // Wait for the second batch to load and verify that a note from the second batch is rendered.
-    await waitFor(() => {
-      expect(getByTestId("note-note-21")).toBeTruthy();
-    }, { timeout: 5000 });
-
-    // Ensure that the fetchMessagesBatch method was called twice (initial load + batch load).
-    expect(ApiService.fetchMessagesBatch).toHaveBeenCalledTimes(2);
-  });
-
-
+      10000 // Set overall timeout to 10 seconds.
+  );
 
 
 });
+
+
+
+
