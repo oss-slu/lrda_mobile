@@ -323,16 +323,16 @@ describe('HomeScreen', () => {
   });
 
   it(
-      "loads additional notes on scroll (batch rendering)",
+      "loads additional notes on press of 'Load More' button (batch rendering)",
       async () => {
         const now = new Date().toISOString();
         const mockBatch1 = Array.from({ length: 20 }, (_, i) => ({
-          "@id": `note-${i + 1}`, // This is used by DataConversion
-          id: `note-${i + 1}`,   // Optional, but can help if other code uses it
+          "@id": `note-${i + 1}`,
+          id: `note-${i + 1}`,
           title: `Note ${i + 1}`,
           BodyText: `Content for note ${i + 1}`,
           time: now,
-          __rerum: { createdAt: now }, // required by conversion
+          __rerum: { createdAt: now },
           creator: "12345",
           media: [],
           audio: [],
@@ -358,37 +358,45 @@ describe('HomeScreen', () => {
           tags: [],
         }));
 
-        // Override the mocked implementation of fetchMessagesBatch.
+        // Override mocked implementation of fetchMessagesBatch.
         (ApiService.fetchMessagesBatch as jest.Mock)
             .mockImplementationOnce(() => Promise.resolve(mockBatch1))
             .mockImplementationOnce(() => Promise.resolve(mockBatch2));
 
         const routeMock = { params: { untitledNumber: 1 } };
 
-        // Destructure findByTestId from render so we can wait for elements.
-        const { findByTestId, getByTestId } = render(
+        // Destructure findByTestId and findByText so we can wait for elements.
+        const { getAllByTestId, findByTestId, findByText } = render(
             <AddNoteProvider>
               <HomeScreen route={routeMock as any} showTooltip={false} />
             </AddNoteProvider>
         );
 
-        // Wait for the initial batch (20 notes) to load.
+        // Wait for at least one note from the initial batch to render.
         await findByTestId("note-note-1");
-        await findByTestId("note-note-20");
 
-        // Get the SwipeListView (make sure your HomeScreen adds testID="swipe-list" to it)
-        const swipeList = getByTestId("swipe-list");
-        // Directly trigger onEndReached to load the next batch.
-        fireEvent(swipeList, "onEndReached", { distanceFromEnd: 0 });
+        const initialNotes = getAllByTestId(/^note-/);
+        expect(initialNotes.length).toBe(20);
+        // Check that the "Load More" button is visible.
 
-        // Wait for a note from the second batch to appear.
-        await findByTestId("note-note-21");
+        const loadMoreButton = await findByText("Load More");
+        expect(loadMoreButton).toBeTruthy();
 
-        // Verify that fetchMessagesBatch was called twice (initial load and batch load).
+        // Simulate a press on the "Load More" button.
+        fireEvent.press(loadMoreButton);
+
+        // Wait for a note from the second batch
+        await waitFor(() => {
+          const newNotes = getAllByTestId(/^note-/);
+          expect(newNotes.length).toBeGreaterThan(initialNotes.length);
+        });
+
+        // Verify that fetchMessagesBatch was called twice (initial load and when loading more).
         expect(ApiService.fetchMessagesBatch).toHaveBeenCalledTimes(2);
       },
-      10000 // Set overall timeout to 10 seconds.
+      10000 // Increase overall timeout if needed.
   );
+
 
 
 });

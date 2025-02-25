@@ -393,6 +393,8 @@ const handleSortOption = ({ option }) => {
                 onLeftAction={(data, rowMap) => publishNote(data, rowMap)}
                 contentContainerStyle={{ paddingBottom: 150 }}
                 ListFooterComponent={renderFooter}
+                initialNumToRender={21}
+                disableVirtualization={true}
             />
         ) : (
             <View style={styles(theme, width).resultNotFound}>
@@ -414,6 +416,8 @@ const handleSortOption = ({ option }) => {
                 keyExtractor={(item) => item.id}
                 contentContainerStyle={{ paddingBottom: 150 }}
                 ListFooterComponent={renderFooter}
+                initialNumToRender={21}
+                disableVirtualization={true}
             />
         ) : (
             <View style={styles(theme, width).resultNotFound}>
