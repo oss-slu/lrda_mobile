@@ -22,6 +22,9 @@ import { DEFAULT_TOOLBAR_ITEMS, RichText, Toolbar, useEditorBridge } from "@10pl
 import NotePageStyles, { customImageCSS } from "../../styles/pages/NoteStyles";
 import { useTheme } from "../components/ThemeProvider";
 import LoadingModal from "../components/LoadingModal";
+import { useAddNoteContext } from "../context/AddNoteContext";
+import { useDispatch } from "react-redux";
+import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
 
 const user = User.getInstance();
 
@@ -44,6 +47,7 @@ const EditNoteScreen = ({ route, navigation }) => {
   const [viewMedia, setViewMedia] = useState(false);
   const [viewAudio, setViewAudio] = useState(false);
   const { theme } = useTheme();
+  const dispatch = useDispatch();
 
   const editor = useEditorBridge({
     initialContent: note.text || "",
@@ -51,7 +55,11 @@ const EditNoteScreen = ({ route, navigation }) => {
   });
 
   const scrollViewRef = useRef(null);
+  const { setPublishNote } = useAddNoteContext();
 
+  useEffect(() => {
+    setPublishNote(() => handleSaveNote);
+  },[])
   useEffect(() => {
     if (editor) {
       const combinedCSS = `
@@ -136,6 +144,7 @@ const EditNoteScreen = ({ route, navigation }) => {
       console.error("Error updating the note:", error);
     } finally {
       setIsUpdating(false);
+      dispatch(toogleAddNoteState());
     }
   };
 
