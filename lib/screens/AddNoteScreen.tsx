@@ -1,4 +1,3 @@
-
 import { Ionicons } from "@expo/vector-icons";
 
 import React, { useEffect, useRef, useState } from "react";
@@ -13,11 +12,11 @@ import {
   KeyboardAvoidingView,
   Modal,
   Text,
-  StyleSheet
+  StyleSheet,
 } from "react-native";
 import { WebViewMessageEvent } from "react-native-webview";
-import * as Location from 'expo-location';
-import ToastMessage from 'react-native-toast-message';
+import * as Location from "expo-location";
+import ToastMessage from "react-native-toast-message";
 
 import AudioContainer from "../components/audio";
 
@@ -25,11 +24,16 @@ import PhotoScroller from "../components/photoScroller";
 import TagWindow from "../components/tagging";
 import LocationWindow from "../components/location";
 import TimeWindow from "../components/time";
-import { DEFAULT_TOOLBAR_ITEMS, RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
+import {
+  DEFAULT_TOOLBAR_ITEMS,
+  RichText,
+  Toolbar,
+  useEditorBridge,
+} from "@10play/tentap-editor";
 import NotePageStyles, { customImageCSS } from "../../styles/pages/NoteStyles";
 import { useTheme } from "../components/ThemeProvider";
 import LoadingModal from "../components/LoadingModal";
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Video } from "expo-av";
 import { Link } from "@react-navigation/native";
 import { User } from "../models/user_class";
@@ -38,10 +42,14 @@ import ApiService from "../utils/api_calls";
 import { useDispatch, useSelector } from "react-redux";
 import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
 import { useAddNoteContext } from "../context/AddNoteContext";
+import { Button } from "react-native-paper";
 
 const user = User.getInstance();
 
-const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, route }) => {
+const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
+  navigation,
+  route,
+}) => {
   const [titleText, setTitleText] = useState<string>("");
   const [isSaveButtonEnabled, setIsSaveButtonEnabled] = useState<boolean>(true);
   const [bodyText, setBodyText] = useState<string>("");
@@ -55,15 +63,22 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
   const [isLocation, setIsLocation] = useState<boolean>(false);
   const [isTime, setIsTime] = useState<boolean>(false);
   const [isPublished, setIsPublished] = useState<boolean>(false);
-  const [location, setLocation] = useState<{ latitude: number, longitude: number } | null>(null);
-  const [locationButtonColor, setLocationButtonColor] = useState<string>("#000"); // Default color
+  const [location, setLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+  const [locationButtonColor, setLocationButtonColor] =
+    useState<string>("#000"); // Default color
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
-  const [isVideoModalVisible, setIsVideoModalVisible] = useState<boolean>(false);
+  const [isVideoModalVisible, setIsVideoModalVisible] =
+    useState<boolean>(false);
   const [videoUri, setVideoUri] = useState<string | null>(null);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const { setPublishNote } = useAddNoteContext();
 
-  const addNoteState = useSelector((state) => state?.addNoteState?.isAddNoteOpned);
+  const addNoteState = useSelector(
+    (state) => state?.addNoteState?.isAddNoteOpned
+  );
   useEffect(() => {
     console.log("Updated isAddNoteOpened state:", addNoteState);
   }, [addNoteState]);
@@ -81,10 +96,10 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
 
   useEffect(() => {
     // Listen for keyboard events to show/hide toolbar
-    const showKeyboardListener = Keyboard.addListener('keyboardDidShow', () => {
+    const showKeyboardListener = Keyboard.addListener("keyboardDidShow", () => {
       setKeyboardVisible(true);
     });
-    const hideKeyboardListener = Keyboard.addListener('keyboardDidHide', () => {
+    const hideKeyboardListener = Keyboard.addListener("keyboardDidHide", () => {
       setKeyboardVisible(false);
     });
 
@@ -98,9 +113,9 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
   }, []);
 
   useEffect(() => {
-     // Save the correct reference to handleShareButtonPress
-     console.log("useeffect called when to hit save button");
-     setPublishNote(() => handleShareButtonPress);
+    // Save the correct reference to handleShareButtonPress
+    console.log("useeffect called when to hit save button");
+    setPublishNote(() => handleShareButtonPress);
   }, [titleText]);
 
   const customToolbarItems = [
@@ -108,7 +123,7 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
     {
       icon: () => <Ionicons name="close" size={24} color={theme.text} />, // Close keyboard icon
       onPress: () => Keyboard.dismiss(), // Dismiss the keyboard when tapped
-      id: 'closeKeyboard', // Unique ID for this toolbar item
+      id: "closeKeyboard", // Unique ID for this toolbar item
     },
   ];
 
@@ -121,14 +136,16 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
   const setLocationToZero = () => {
     setLocation({ latitude: 0, longitude: 0 });
     setLocationButtonColor("red");
-    console.log("Location set to (0, 0) due to permission denial or manual setting.");
+    console.log(
+      "Location set to (0, 0) due to permission denial or manual setting."
+    );
   };
 
   const fetchCurrentLocation = async () => {
     console.log("Requesting location permission...");
     const { status } = await Location.requestForegroundPermissionsAsync();
 
-    if (status === 'granted') {
+    if (status === "granted") {
       console.log("Location permission granted. Fetching current location...");
       try {
         const userLocation = await Location.getCurrentPositionAsync({});
@@ -198,8 +215,6 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
     }
   };
 
-
-
   // Function to add audio
   const insertAudioToEditor = async (audioUri: string) => {
     try {
@@ -213,15 +228,12 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
     }
   };
 
-
-
-
   const handleShareButtonPress = async () => {
     setIsPublished(!isPublished);
-    console.log("This is title in handleShare button ",titleText);
+    console.log("This is title in handleShare button ", titleText);
     ToastMessage.show({
-      type: 'success',
-      text1: isPublished ? 'Note Unpublished' : 'Note Published',
+      type: "success",
+      text1: isPublished ? "Note Unpublished" : "Note Published",
       visibilityTime: 3000,
     });
     await saveNote();
@@ -229,23 +241,25 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
 
   const getTitle = () => {
     console.log(titleText);
-    const title = titleText.trim()? titleText.trim()
+    const title = titleText.trim()
+      ? titleText.trim()
       : route.params.untitledNumber
       ? `Untitled ${route.params.untitledNumber}`
       : "Untitled";
-      console.log(title);
+    console.log(title);
 
-      return title;
-  }
+    return title;
+  };
   const prepareNoteData = async () => {
     const userLocation = await Location.getCurrentPositionAsync({});
-    const finalLocation = userLocation ? userLocation.coords : { latitude: 0, longitude: 0 };
+    const finalLocation = userLocation
+      ? userLocation.coords
+      : { latitude: 0, longitude: 0 };
     const textContent = await editor.getHTML();
     const sanitizedContent = textContent.replace(/<\/?p>/g, ""); // Remove <p> tags
     const uid = await user.getId();
     const title = getTitle();
     return {
-
       title,
       text: sanitizedContent,
       media: newMedia || [],
@@ -259,17 +273,16 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
     };
   };
 
-  
   const saveNote = async () => {
     console.log("Saving note...");
     console.log("Title Text:", titleText.length); // Log the title to ensure it's what you expect
     const noteData = await prepareNoteData();
     console.log("Note Data Prepared:", noteData); // Check if title is being passed correctly
-    
+
     // Proceed with saving the note
     setIsUpdating(true);
     setIsSaveButtonEnabled(true);
-  
+
     try {
       const response = await ApiService.writeNewNote(noteData);
       const responseJson = await response.json();
@@ -286,10 +299,11 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
       dispatch(toogleAddNoteState());
     }
   };
-  
-    
-  
 
+  const handleDonePress = () => {
+    editor.blur(); // Close TenTap editor keyboard
+    Keyboard.dismiss(); //close keyboard when title is being edited
+  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -301,18 +315,29 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
           ref={scrollViewRef}
           contentContainerStyle={{ flexGrow: 1 }}
           enableOnAndroid={true}
-          extraScrollHeight={Platform.OS === 'ios' ? 80 : 0}
+          extraScrollHeight={Platform.OS === "ios" ? 80 : 0}
           keyboardOpeningTime={0}
           keyboardShouldPersistTaps="handled"
         >
           <View style={{ flex: 1 }}>
-            <View style={[NotePageStyles().topContainer,]}>
-              <View style={[NotePageStyles().topButtonsContainer, { backgroundColor: theme.homeColor }]}>
-                <TouchableOpacity style={NotePageStyles().topButtons} onPress={saveNote}>
-                  <Ionicons name="arrow-back-outline" size={30} color={NotePageStyles().saveText.color} />
+            <View style={[NotePageStyles().topContainer]}>
+              <View
+                style={[
+                  NotePageStyles().topButtonsContainer,
+                  { backgroundColor: theme.homeColor },
+                ]}
+              >
+                <TouchableOpacity
+                  style={NotePageStyles().topButtons}
+                  onPress={saveNote}
+                >
+                  <Ionicons
+                    name="arrow-back-outline"
+                    size={30}
+                    color={NotePageStyles().saveText.color}
+                  />
                 </TouchableOpacity>
                 <TextInput
-                  ref={titleTextRef}
                   style={NotePageStyles().title}
                   placeholder="Title Field Note"
                   placeholderTextColor={NotePageStyles().title.color}
@@ -325,20 +350,41 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
                     }
                   }}
                 />
-
               </View>
               <View style={NotePageStyles().keyContainer}>
-                <TouchableOpacity onPress={() => setViewMedia(!viewMedia)} testID="imageButton">
-                  <Ionicons name="images-outline" size={30} color={NotePageStyles().saveText.color} />
+                <TouchableOpacity
+                  onPress={() => setViewMedia(!viewMedia)}
+                  testID="imageButton"
+                >
+                  <Ionicons
+                    name="images-outline"
+                    size={30}
+                    color={NotePageStyles().saveText.color}
+                  />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => setViewAudio(!viewAudio)}>
-                  <Ionicons name="mic-outline" size={30} color={NotePageStyles().saveText.color} />
+                  <Ionicons
+                    name="mic-outline"
+                    size={30}
+                    color={NotePageStyles().saveText.color}
+                  />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={toggleLocation} testID="checklocationpermission">
-                  <Ionicons name="location-outline" size={30} color={locationButtonColor} />
+                <TouchableOpacity
+                  onPress={toggleLocation}
+                  testID="checklocationpermission"
+                >
+                  <Ionicons
+                    name="location-outline"
+                    size={30}
+                    color={locationButtonColor}
+                  />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => setIsTagging(!isTagging)}>
-                  <Ionicons name="pricetag-outline" size={30} color={NotePageStyles().saveText.color} />
+                  <Ionicons
+                    name="pricetag-outline"
+                    size={30}
+                    color={NotePageStyles().saveText.color}
+                  />
                 </TouchableOpacity>
               </View>
             </View>
@@ -358,33 +404,42 @@ const AddNoteScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, 
                 />
               )}
               {isTagging && <TagWindow tags={tags} setTags={setTags} />}
-              {isLocation && <LocationWindow location={location} setLocation={setLocation} />}
+              {isLocation && (
+                <LocationWindow location={location} setLocation={setLocation} />
+              )}
               {isTime && <TimeWindow time={time} setTime={setTime} />}
             </View>
-            <View style={NotePageStyles().richTextContainer} testID="TenTapEditor">
+            <View
+              style={NotePageStyles().richTextContainer}
+              testID="TenTapEditor"
+            >
               <RichText
                 editor={editor}
                 placeholder="Write Content Here..."
                 style={[
                   NotePageStyles().editor,
-                  { backgroundColor: Platform.OS === "android" ? "white" : undefined },
+                  {
+                    backgroundColor:
+                      Platform.OS === "android" ? "white" : undefined,
+                  },
                 ]}
               />
             </View>
-            <View style={NotePageStyles().toolbar} testID="RichEditor">
-              <Toolbar
-                editor={editor}
-                items={DEFAULT_TOOLBAR_ITEMS}
-              />
-            </View>
-            {Platform.OS === 'ios' && (
-              <Toolbar
-                editor={editor}
-                items={DEFAULT_TOOLBAR_ITEMS}
 
-              />
+            <View style={NotePageStyles().toolbar} testID="RichEditor">
+              <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
+            </View>
+            {Platform.OS === "ios" && (
+              <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
             )}
           </View>
+          {keyboardVisible &&(
+          <View style={styles.doneButton} testID="doneButton">
+            <TouchableOpacity onPress={handleDonePress}>
+              <Text style={styles.doneText}>Done</Text>
+            </TouchableOpacity>
+          </View>
+          )}
         </KeyboardAwareScrollView>
         {/* Video Player Modal */}
         <Modal
@@ -439,5 +494,19 @@ const styles = StyleSheet.create({
   closeButton: {
     color: "blue",
     marginTop: 20,
+  },
+  doneButton: {
+    bottom: 0,
+    width: "100%",
+    backgroundColor: "#fff",
+    padding: 0,
+    alignItems: "center",
+  },
+  doneText: {
+    color: "blue",
+    fontSize: 14,
+    padding: 10,
+    //set the alignment of the text to the right
+    paddingLeft: 350,
   },
 });

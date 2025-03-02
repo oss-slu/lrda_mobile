@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import { Alert } from 'react-native';
+import { Alert, EmitterSubscription, Keyboard } from 'react-native';
 import AddNoteScreen from '../lib/screens/AddNoteScreen';
 import { AddNoteProvider } from '../lib/context/AddNoteContext'; // Import the provider
 import { Provider } from 'react-redux';
@@ -197,6 +197,32 @@ describe('AddNoteScreen', () => {
     // Check if the title input is rendered
     expect(getByPlaceholderText('Title Field Note')).toBeTruthy();
   });
+
+  it('renders the "Done" button when the keyboard is open', async () => {
+    const routeMock = { params: { untitledNumber: 1 } };
+  
+    // Mock `Keyboard.addListener` to simulate keyboard opening
+    const mockKeyboardListener = jest.spyOn(Keyboard, 'addListener').mockImplementation((event, callback) => {
+      if (event === 'keyboardDidShow') {
+        setTimeout(callback, 0); 
+      }
+      return {
+        remove: jest.fn(),
+      } as unknown as EmitterSubscription;
+    });
+  
+    const { findByTestId } = renderWithProviders(
+      <AddNoteScreen route={routeMock as any} />
+    );
+  
+    // Expect the "Done" button to appear when keyboard opens
+    const doneButton = await findByTestId("doneButton");
+    expect(doneButton).toBeTruthy();
+  
+    // Cleanup mock
+    mockKeyboardListener.mockRestore();
+  });
+  
 });
 
 describe("AddNoteScreen's checkLocationPermission method", () => {
