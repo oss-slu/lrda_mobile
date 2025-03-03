@@ -285,7 +285,7 @@ describe('Library Component', () => {
     const routeMock = { params: {} };
 
     // Simulate an API call that returns an empty array (no notes)
-    jest.spyOn(ApiService, 'fetchMessages').mockResolvedValue([]);
+    jest.spyOn(ApiService, 'fetchMessagesBatch').mockResolvedValue([]);
 
     // Render the Library component
     const { getByText } = render(
@@ -297,6 +297,42 @@ describe('Library Component', () => {
       expect(getByText('No Results Found')).toBeTruthy();
     });
   });
+
+
+
+  it('renders the load more button when there are more notes to load', async () => {
+    // Create an array of 20 dummy notes
+    const dummyNotes = Array.from({ length: 20 }, (_, i) => ({
+      id: `note-${i}`,
+      title: `Note ${i}`,
+      text: 'Sample text',
+      creator: '',
+      media: [{
+        getType: () => 'image',
+        getUri: () => 'dummy-uri',
+      }],
+      time: new Date().toISOString(),
+      published: true,
+      isArchived: false,
+    }));
+  
+    // Mock the API to return dummyNotes for any call to fetchMessagesBatch
+    jest.spyOn(ApiService, 'fetchMessagesBatch').mockResolvedValue(dummyNotes);
+  
+    const navigationMock = { navigate: jest.fn(), goBack: jest.fn(), push: jest.fn() };
+    const routeMock = { params: {} };
+  
+    const { getByText } = render(
+      <Library navigation={navigationMock} route={routeMock} />
+    );
+  
+    // Wait until the component finishes fetching and renders the Load More button
+    await waitFor(() => {
+      expect(getByTestId('load-more-button')).toBeTruthy();
+    });
+  });
+  
+  
 
 });
 
