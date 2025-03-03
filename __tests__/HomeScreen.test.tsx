@@ -358,40 +358,36 @@ describe('HomeScreen', () => {
           tags: [],
         }));
 
-        // Override mocked implementation of fetchMessagesBatch.
         (ApiService.fetchMessagesBatch as jest.Mock)
             .mockImplementationOnce(() => Promise.resolve(mockBatch1))
             .mockImplementationOnce(() => Promise.resolve(mockBatch2));
 
         const routeMock = { params: { untitledNumber: 1 } };
 
-        // Destructure findByTestId and findByText so we can wait for elements.
         const { getAllByTestId, findByTestId, findByText } = render(
             <AddNoteProvider>
               <HomeScreen route={routeMock as any} showTooltip={false} />
             </AddNoteProvider>
         );
 
-        // Wait for at least one note from the initial batch to render.
+        // wait for first note to render
         await findByTestId("note-note-1");
 
         const initialNotes = getAllByTestId(/^note-/);
         expect(initialNotes.length).toBe(20);
-        // Check that the "Load More" button is visible.
 
         const loadMoreButton = await findByText("Load More");
         expect(loadMoreButton).toBeTruthy();
 
-        // Simulate a press on the "Load More" button.
         fireEvent.press(loadMoreButton);
 
-        // Wait for a note from the second batch
+
         await waitFor(() => {
           const newNotes = getAllByTestId(/^note-/);
           expect(newNotes.length).toBeGreaterThan(initialNotes.length);
         });
 
-        // Verify that fetchMessagesBatch was called twice (initial load and when loading more).
+        // check fetMessagesBatch gets called twice
         expect(ApiService.fetchMessagesBatch).toHaveBeenCalledTimes(2);
       },
       10000 // Increase overall timeout if needed.
