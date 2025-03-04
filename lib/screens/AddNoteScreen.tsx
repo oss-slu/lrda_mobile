@@ -500,13 +500,12 @@ const styles = StyleSheet.create({
     width: "100%",
     backgroundColor: "#fff",
     padding: 0,
-    alignItems: "center",
   },
   doneText: {
     color: "blue",
     fontSize: 14,
     padding: 10,
-    //set the alignment of the text to the right
-    paddingLeft: 350,
+    textAlign: "right",
+    marginRight: 25,
   },
 });
