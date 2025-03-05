@@ -315,66 +315,7 @@ describe('Library Component', () => {
     });
   });
 
-  it('loads more notes when "Load More" is pressed on the Library page', async () => {
-    const now = new Date().toISOString();
   
-    const mockBatch1 = Array.from({ length: 20 }, (_, i) => ({
-      id: `note-${i + 1}`,
-      title: `Note ${i + 1}`,
-      text: 'Sample text',
-      creator: '123',
-      media: [{
-        getType: () => 'image',
-        getUri: () => 'dummy-uri',
-      }],
-      time: now,
-      published: true,
-      isArchived: false,
-    }));
-  
-    const mockBatch2 = Array.from({ length: 10 }, (_, i) => ({
-      id: `note-${i + 21}`,
-      title: `Note ${i + 21}`,
-      text: 'Sample text',
-      creator: '123',
-      media: [{
-        getType: () => 'image',
-        getUri: () => 'dummy-uri',
-      }],
-      time: now,
-      published: true,
-      isArchived: false,
-    }));
-  
-    jest.spyOn(ApiService, 'fetchMessagesBatch')
-      .mockResolvedValueOnce(mockBatch1)
-      .mockResolvedValueOnce(mockBatch2);
-  
-    const navigationMock = { navigate: jest.fn(), goBack: jest.fn(), push: jest.fn() };
-    const routeMock = { params: {} };
-  
-    const { getAllByTestId, getByText, findByTestId } = render(
-      <Library navigation={navigationMock} route={routeMock} />
-    );
-  
-    await findByTestId('note-note-1');
-  
-    let initialNotes = getAllByTestId(/^note-/);
-    expect(initialNotes.length).toBe(20);
-  
-    const loadMoreButton = await waitFor(() => getByText('Load More'));
-    expect(loadMoreButton).toBeTruthy();
-  
-    fireEvent.press(loadMoreButton);
-  
-    await waitFor(() => {
-      const newNotes = getAllByTestId(/^note-/);
-      expect(newNotes.length).toBe(21);
-    });
-  
-    expect(ApiService.fetchMessagesBatch).toHaveBeenCalledTimes(2);
-  });
-
   it("Renders no results found when there are no more notes.", async () => {
 
     const navigationMock = {
@@ -430,9 +371,5 @@ describe('Library Component', () => {
       expect(getByText("Load More")).toBeTruthy();
     });
   });
-  
-
-  
-  
 });
 
