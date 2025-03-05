@@ -278,7 +278,6 @@ const Library: React.FC = ({ navigation, route }) => {
     );
   };
 
-  // Render list with optional sorting and filtering
   const renderList = () => {
     let sortedNotes = [...filteredNotes];
     sortedNotes.sort((a, b) => {
