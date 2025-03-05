@@ -574,7 +574,7 @@ const styles = (theme, width) =>
       width: "100%",
       height: 140,
       alignItems: "center",
-      backgroundColor: theme.homeColor,
+      backgroundColor: theme.homeGray,
       flex: 1,
       flexDirection: "row",
       justifyContent: "space-between",
