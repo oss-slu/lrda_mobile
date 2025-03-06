@@ -97,10 +97,10 @@ const Library = ({ navigation, route }) => {
     fetchMessages(1);
   }, [updateCounter, published]);
 
-  const fetchMessages = async (p0: number) => {
+  const fetchMessages = async (pageNum: number) => {
     try {
       // Calculate skip using the current page number
-      const skip = (p0 - 1) * limit;
+      const skip = (pageNum - 1) * limit;
       // Get userId if needed
       const userId = await user.getId();
       // Use batch-fetching with skip and limit; note we use isPrivate state
@@ -118,7 +118,7 @@ const Library = ({ navigation, route }) => {
         .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
       const finalNotes = reversed ? fetchedNotes.reverse() : fetchedNotes;
   
-      if (p0 === 1) {
+      if (pageNum === 1) {
         setNotes(finalNotes);
       } else {
         setNotes((prev) => [...prev, ...finalNotes]);
@@ -150,8 +150,8 @@ const Library = ({ navigation, route }) => {
   const renderFooter = () => {
     if (isLoadingMore) {
       return (
-        <View style={{ padding: 20, alignItems: "center" }}>
-          <ActivityIndicator size="large" color={theme.text} />
+        <View  style={{ paddingVertical: 50, alignItems: "center", marginBottom: 100 }}>
+          <ActivityIndicator size="small" color={theme.text} />
         </View>
       );
     }
@@ -161,14 +161,13 @@ const Library = ({ navigation, route }) => {
           testID="load-more"
           onPress={handleLoadMore}
           style={{
-            paddingVertical: 20,
-            paddingHorizontal: 40,
+            paddingVertical: 10, // reduced from 20
+            paddingHorizontal: 20, // reduced from 40
             alignItems: "center",
             alignSelf: "center",
             borderWidth: 1,
-            borderColor: "white",
-            borderRadius: 10,
-            marginVertical: 10,
+            borderRadius: 8,
+            marginVertical: 4, // reduced from 8
             backgroundColor: theme.homeColor,
           }}
         >
@@ -217,6 +216,7 @@ const Library = ({ navigation, route }) => {
   };
 
   const renderList = (notes: Note[]) => {
+    // Filter notes if there's a search query.
     const filteredNotes = searchQuery
       ? notes.filter((note) => {
           const lowerCaseQuery = searchQuery.toLowerCase();
@@ -228,26 +228,30 @@ const Library = ({ navigation, route }) => {
           );
         })
       : notes;
-  
-    // Apply sorting based on selectedSortOption
-    filteredNotes.sort((a, b) => {
-      if (selectedSortOption === 1) {
-        return new Date(b.time).getTime() - new Date(a.time).getTime();
-      } else if (selectedSortOption === 2) {
-        return a.title.toLowerCase().localeCompare(b.title.toLowerCase());
-      } else if (selectedSortOption === 3) {
-        return b.title.toLowerCase().localeCompare(a.title.toLowerCase());
-      }
-      return 0;
-    });
-  
+    
+    // Only apply sort if there's an active search query.
+    // Otherwise, display the notes in the natural order they are stored.
+    const displayNotes = searchQuery
+      ? filteredNotes.sort((a, b) => {
+          // (Your sorting logic here if needed when filtering)
+          if (selectedSortOption === 1) {
+            return new Date(b.time).getTime() - new Date(a.time).getTime();
+          } else if (selectedSortOption === 2) {
+            return a.title.toLowerCase().localeCompare(b.title.toLowerCase());
+          } else if (selectedSortOption === 3) {
+            return b.title.toLowerCase().localeCompare(a.title.toLowerCase());
+          }
+          return 0;
+        })
+      : filteredNotes;
+    
     return published && (
-      filteredNotes.length > 0 ? (
+      displayNotes.length > 0 ? (
         <SwipeListView
-          data={filteredNotes}
+          data={displayNotes}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingBottom: 150 }}
+          contentContainerStyle={{ paddingBottom: isLoadingMore ? 50 : 150 }}
           ListFooterComponent={renderFooter}
         />
       ) : (
@@ -263,6 +267,7 @@ const Library = ({ navigation, route }) => {
       )
     );
   };
+  
 
   const renderItem = (data: any) => {
     const item = data.item;
