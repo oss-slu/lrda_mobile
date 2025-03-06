@@ -17,7 +17,6 @@ import {
 import { WebViewMessageEvent } from "react-native-webview";
 import * as Location from "expo-location";
 import ToastMessage from "react-native-toast-message";
-
 import AudioContainer from "../components/audio";
 
 import PhotoScroller from "../components/photoScroller";
@@ -426,7 +425,7 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
               />
             </View>
 
-            <View style={NotePageStyles().toolbar} testID="RichEditor">
+            <View style={styles.toolbar} testID="RichEditor">
               <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
             </View>
             {Platform.OS === "ios" && (
@@ -496,16 +495,35 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   doneButton: {
+    position: "absolute",
     bottom: 0,
     width: "100%",
     backgroundColor: "#fff",
-    padding: 0,
+    paddingVertical: 5, // Increase padding for better tap area
+    zIndex: 10, // Ensures it appears above other elements
+    borderColor: "#ddd",
   },
   doneText: {
     color: "blue",
     fontSize: 14,
-    padding: 10,
+    padding: 0,
     textAlign: "right",
     marginRight: 25,
+  },
+  toolbar: {
+    position: 'absolute', // Keep toolbar at the bottom of the screen
+    bottom: 27, // Align toolbar with the bottom edge
+    width: '100%', // Full-width toolbar
+    justifyContent: 'center', // Center items in the toolbar
+    paddingHorizontal: 10,
+    zIndex: 10, // Ensure it stays above other elements
+    ...Platform.select({
+      android: {
+        height: 70,
+      },
+      ios: {
+        height: 50,
+      },
+    }),
   },
 });
