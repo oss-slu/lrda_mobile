@@ -393,6 +393,44 @@ describe('HomeScreen', () => {
       10000 // Increase overall timeout if needed.
   );
 
+  it("renders 'No more notes.' message when all notes have been fetched", async () => {
+    const now = new Date().toISOString();
+    //create mock batch of notes
+    const mockNotes = Array.from({ length: 10 }, (_, i) => ({
+      "@id": `note-${i + 1}`,
+      id: `note-${i + 1}`,
+      title: `Note ${i + 1}`,
+      BodyText: `Content for note ${i + 1}`,
+      time: now,
+      __rerum: { createdAt: now },
+      creator: "12345",
+      media: [],
+      audio: [],
+      latitude: "",
+      longitude: "",
+      published: false,
+      tags: [],
+    }));
+
+    (ApiService.fetchMessagesBatch as jest.Mock).mockResolvedValueOnce(mockNotes);
+
+    const routeMock = { params: { untitledNumber: 1 } };
+
+    const { findByText } = render(
+        <AddNoteProvider>
+          <HomeScreen route={routeMock as any} showTooltip={false} />
+        </AddNoteProvider>
+    );
+
+    // wait for first note to render
+    await findByText("Note 1");
+
+    // check if footer shows "No more notes."
+    const footerText = await findByText("No more notes.");
+    expect(footerText).toBeTruthy();
+  });
+
+
 
 
 });

@@ -115,9 +115,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const fetchNotes = async (pageNumber: number) => {
     try {
       const userId = await user.getId();
-      // Calculate the skip value based on the current page:
       const skip = (pageNumber - 1) * 20;
-      // Call the new batch-fetch API method:
       const data = await ApiService.fetchMessagesBatch(
           false,
           published,
