@@ -357,8 +357,8 @@ const handleSortOption = ({ option }) => {
               <TouchableOpacity
                   onPress={handleLoadMore}
                   style={{
-                      paddingVertical: 10,
-                      paddingHorizontal: 20,
+                      paddingVertical: 13,
+                      paddingHorizontal: 40,
                       alignItems: "center",
                       alignSelf: "center",
                       borderWidth: 1,
@@ -372,7 +372,13 @@ const handleSortOption = ({ option }) => {
                       Load More
                   </Text>
               </TouchableOpacity>
-          ) : null
+          ) : (
+              <View style={{ padding: 20, alignItems: "center" }}>
+                <Text style={{ color: "gray", fontSize: 14 }}>
+                  No more notes.
+                </Text>
+              </View>
+          )
       );
 
     return isPrivate ? (
