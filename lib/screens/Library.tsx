@@ -161,8 +161,8 @@ const Library = ({ navigation, route }) => {
           testID="load-more"
           onPress={handleLoadMore}
           style={{
-            paddingVertical: 10, // reduced from 20
-            paddingHorizontal: 20, // reduced from 40
+            paddingVertical: 7, // reduced from 20
+            paddingHorizontal: 12, // reduced from 40
             alignItems: "center",
             alignSelf: "center",
             borderWidth: 1,
