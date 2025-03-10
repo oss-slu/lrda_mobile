@@ -35,6 +35,8 @@ import { useAddNoteContext } from "../context/AddNoteContext";
 import LottieView from 'lottie-react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { green } from "react-native-reanimated/lib/typescript/Colors";
+import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
+import { useSelector, useDispatch } from 'react-redux'
 
 const { width, height } = Dimensions.get("window");
 const user = User.getInstance();
@@ -66,9 +68,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const animation = useRef(new Animated.Value(0)).current; // Animation value
   const [isSortOpened, setIsSortOpened] = useState(false);
   const [selectedSortOption, setSelectedSortOption] = useState(1);
-
   let textLength = 18;
-
+  const dispatch = useDispatch();
   
   useEffect(() => {
     const navigateToAddNote = () => {
@@ -399,6 +400,7 @@ const handleSortOption = ({ option }) => {
         }}
         onPress={() => {
           if (!item.published) {
+            dispatch(toogleAddNoteState());
             navigation.navigate("EditNote", {
               note: item,
               onSave: (editedNote: Note) => {
