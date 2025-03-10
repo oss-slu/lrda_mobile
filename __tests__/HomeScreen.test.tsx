@@ -1,12 +1,14 @@
 import React from 'react';
+import { Text } from "react-native";
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import HomeScreen from '../lib/screens/HomeScreen';
 import { AddNoteProvider } from '../lib/context/AddNoteContext';
 import { onAuthStateChanged } from 'firebase/auth';
 import ApiService from '../lib/utils/api_calls';
+import DataConversion from "../lib/utils/data_conversion";
 
 // Mock external dependencies
-jest.mock('../lib/components/ThemeProvider', () => ({
+jest.mock ('../lib/components/ThemeProvider', () => ({
   useTheme: () => ({
     theme: 'mockedTheme',
   }),
@@ -54,6 +56,47 @@ jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
   })),
 }));
 
+jest.mock('../lib/utils/data_conversion', () => {
+  return {
+    convertMediaTypes: (data: any[]) => {
+      return data.map(message => ({
+        ...message,
+        // Ensure that the id is set from "@id" or fallback to message.id
+        id: message["@id"] || message.id,
+        title: message.title || "",
+        text: message.BodyText || "",
+        time: message.time || (message.__rerum && message.__rerum.createdAt) || "",
+        creator: message.creator || "",
+        media: message.media || [],
+        audio: message.audio || [],
+        latitude: message.latitude || "",
+        longitude: message.longitude || "",
+        published: message.published || false,
+        tags: message.tags || [],
+      }));
+    },
+    // Pass through extractImages as-is.
+    extractImages: jest.requireActual('../lib/utils/data_conversion').extractImages,
+  };
+});
+
+jest.mock('../lib/components/NotesComponent', () => {
+  const React = require('react');
+  const { Text } = require('react-native');
+  return ({ item }: { item: any }) => {
+    // Use @id if available, otherwise fall back to item.id
+    const noteId = item["@id"] || item.id;
+    return (
+        <Text testID={`note-${noteId}`}>
+          {item.title}
+        </Text>
+    );
+  };
+});
+
+
+
+
 onAuthStateChanged.mockImplementation((auth, callback) => {
   const mockUser = { uid: "12345", email: "test@example.com" };
   callback(mockUser);
@@ -71,6 +114,7 @@ const mockWriteNewNote = jest.fn();
 jest.mock('../lib/utils/api_calls', () => ({
   writeNewNote: mockWriteNewNote,
   fetchMessages: jest.fn(() => Promise.resolve([])),
+  fetchMessagesBatch: jest.fn(() => Promise.resolve([])),
 }));
 
 beforeEach(() => {
@@ -269,7 +313,7 @@ describe('HomeScreen', () => {
   
     //Ensure the API call was triggered
     await waitFor(() => {
-      expect(ApiService.fetchMessages).toHaveBeenCalled();
+      expect(ApiService.fetchMessagesBatch).toHaveBeenCalled();
     });
   
     //Ensure the Lottie animation appears
@@ -277,5 +321,120 @@ describe('HomeScreen', () => {
       expect(getByTestId("no-results-animation")).toBeTruthy();
     });
   });
-  
+
+  it(
+      "loads additional notes on press of 'Load More' button (batch rendering)",
+      async () => {
+        const now = new Date().toISOString();
+        const mockBatch1 = Array.from({ length: 20 }, (_, i) => ({
+          "@id": `note-${i + 1}`,
+          id: `note-${i + 1}`,
+          title: `Note ${i + 1}`,
+          BodyText: `Content for note ${i + 1}`,
+          time: now,
+          __rerum: { createdAt: now },
+          creator: "12345",
+          media: [],
+          audio: [],
+          latitude: "",
+          longitude: "",
+          published: false,
+          tags: [],
+        }));
+
+        const mockBatch2 = Array.from({ length: 10 }, (_, i) => ({
+          "@id": `note-${i + 21}`,
+          id: `note-${i + 21}`,
+          title: `Note ${i + 21}`,
+          BodyText: `Content for note ${i + 21}`,
+          time: now,
+          __rerum: { createdAt: now },
+          creator: "12345",
+          media: [],
+          audio: [],
+          latitude: "",
+          longitude: "",
+          published: false,
+          tags: [],
+        }));
+
+        (ApiService.fetchMessagesBatch as jest.Mock)
+            .mockImplementationOnce(() => Promise.resolve(mockBatch1))
+            .mockImplementationOnce(() => Promise.resolve(mockBatch2));
+
+        const routeMock = { params: { untitledNumber: 1 } };
+
+        const { getAllByTestId, findByTestId, findByText } = render(
+            <AddNoteProvider>
+              <HomeScreen route={routeMock as any} showTooltip={false} />
+            </AddNoteProvider>
+        );
+
+        // wait for first note to render
+        await findByTestId("note-note-1");
+
+        const initialNotes = getAllByTestId(/^note-/);
+        expect(initialNotes.length).toBe(20);
+
+        const loadMoreButton = await findByText("Load More");
+        expect(loadMoreButton).toBeTruthy();
+
+        fireEvent.press(loadMoreButton);
+
+
+        await waitFor(() => {
+          const newNotes = getAllByTestId(/^note-/);
+          expect(newNotes.length).toBeGreaterThan(initialNotes.length);
+        });
+
+        // check fetMessagesBatch gets called twice
+        expect(ApiService.fetchMessagesBatch).toHaveBeenCalledTimes(2);
+      },
+      10000 // Increase overall timeout if needed.
+  );
+
+  it("renders 'No more notes.' message when all notes have been fetched", async () => {
+    const now = new Date().toISOString();
+    //create mock batch of notes
+    const mockNotes = Array.from({ length: 10 }, (_, i) => ({
+      "@id": `note-${i + 1}`,
+      id: `note-${i + 1}`,
+      title: `Note ${i + 1}`,
+      BodyText: `Content for note ${i + 1}`,
+      time: now,
+      __rerum: { createdAt: now },
+      creator: "12345",
+      media: [],
+      audio: [],
+      latitude: "",
+      longitude: "",
+      published: false,
+      tags: [],
+    }));
+
+    (ApiService.fetchMessagesBatch as jest.Mock).mockResolvedValueOnce(mockNotes);
+
+    const routeMock = { params: { untitledNumber: 1 } };
+
+    const { findByText } = render(
+        <AddNoteProvider>
+          <HomeScreen route={routeMock as any} showTooltip={false} />
+        </AddNoteProvider>
+    );
+
+    // wait for first note to render
+    await findByText("Note 1");
+
+    // check if footer shows "No more notes."
+    const footerText = await findByText("No more notes.");
+    expect(footerText).toBeTruthy();
+  });
+
+
+
+
 });
+
+
+
+
