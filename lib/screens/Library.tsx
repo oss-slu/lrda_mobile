@@ -158,23 +158,22 @@ const Library = ({ navigation, route }) => {
     if (hasMore) {
       return (
         <TouchableOpacity
-          testID="load-more"
-          onPress={handleLoadMore}
-          style={{
-            paddingVertical: 7, // reduced from 20
-            paddingHorizontal: 12, // reduced from 40
-            alignItems: "center",
-            alignSelf: "center",
-            borderWidth: 1,
-            borderRadius: 8,
-            marginVertical: 4, // reduced from 8
-            backgroundColor: theme.homeColor,
-          }}
-        >
-          <Text testID="load-more-button" style={{ color: theme.text, fontSize: 16, fontWeight: "600" }}>
-            Load More
-          </Text>
-        </TouchableOpacity>
+        testID="load-more"
+        onPress={handleLoadMore}
+        style={{
+          paddingVertical: 20,
+          width: "65%",
+          alignItems: "center",
+          alignSelf: "center",
+          borderRadius: 20,
+          marginVertical: 4, // reduced from 8
+          backgroundColor: theme.homeColor,
+        }}
+      >
+        <Text testID="load-more-button" style={{ color: theme.text, fontSize: 16, fontWeight: "400" }}>
+          Load More
+        </Text>
+      </TouchableOpacity>
       );
     }
     return (
