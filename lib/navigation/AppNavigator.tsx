@@ -173,31 +173,44 @@ const AppNavigator: React.FC = () => {
         </Stack.Navigator>
       )}
       {navState === "home" && (
-        <Tab.Navigator screenOptions={{
-          tabBarShowLabel: false,
-          tabBarHideOnKeyboard: true,
-          tabBarStyle: {
+       <Tab.Navigator
+       screenOptions={{
+         tabBarShowLabel: true, // Enable default labels
+         tabBarHideOnKeyboard: true,
+         tabBarStyle: {
+           backgroundColor: 'transparent',
+           position: 'absolute',
+           bottom: Platform.OS === 'ios' ? -20 : 0,
+           left: 0,
+           right: 0,
+           elevation: 0,
+           borderTopWidth: 0,
+           tabBarStyle: {
             backgroundColor: 'transparent',
             position: 'absolute',
-            bottom: Platform.OS === 'ios' ? -20 : 0,
+            bottom: 0, // Ensures it's positioned correctly on all platforms
             left: 0,
             right: 0,
             elevation: 0,
             borderTopWidth: 0,
-            paddingBottom: Platform.OS === 'ios' ? 20 : 0,
-            height: Platform.OS === 'ios' ? '9%' : '7%',
+            paddingBottom: Platform.OS === 'ios' ? 30 : 15, // More padding for Android too
+            height: Platform.OS === 'ios' ? '10%' : '8%', // Increase height for Android as well
           },
-          tabBarItemStyle: {
-            backgroundColor: theme.primaryColor,
-            height: '100%'
-          }
-        }}>
+          
+         },
+         tabBarItemStyle: {
+           backgroundColor: theme.primaryColor,
+           height: '100%'
+         }
+       }}
+     >
           <Tab.Screen
             name="HomeTab"
             component={HomeStack}
             // component={AppThemeSelectorScreen}
             options={{
               headerShown: false,
+              tabBarLabel: 'Home',
               tabBarIcon: ({ color, size, focused }) => (
                 <Ionicons name="home" color={isDarkmode ? focused ? 'white' : 'grey' : focused ? 'black' : 'grey'} size={size} />
               ),
@@ -209,6 +222,7 @@ const AppNavigator: React.FC = () => {
             component={Library}
             options={{
               headerShown: false,
+              tabBarLabel: 'Library',
               tabBarIcon: ({ color, size, focused }) => (
                 <Ionicons name="library" color={isDarkmode ? focused ? 'white' : 'grey' : focused ? 'black' : 'grey'} size={size} />
               ),
@@ -220,9 +234,10 @@ const AppNavigator: React.FC = () => {
             component={AddNoteScreen}
             options={{
               headerShown: false,
-              // tabBarIcon: ({ color, size }) => (
-              //   <Ionicons name="library" color={color} size={size} />
-              // ),
+              tabBarLabel: 'Add Note',
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name="library" color={color} size={size} />
+              ),
               tabBarButton: (props) => (<AddNoteBtnComponent />)
             }}
           />
