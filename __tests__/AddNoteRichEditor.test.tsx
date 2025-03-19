@@ -2,6 +2,18 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react-native';
 import AddNoteScreen from '../lib/screens/AddNoteScreen';
 import moxios from 'moxios';
+import { AddNoteProvider } from '../lib/context/AddNoteContext'; // Import the provider
+import { Provider } from 'react-redux';
+import { store } from '../redux/store/store';
+
+// Mock redux-persist to avoid persistence logic in tests
+jest.mock('redux-persist', () => {
+  const real = jest.requireActual('redux-persist');
+  return {
+    ...real,
+    persistReducer: jest.fn().mockImplementation((config, reducers) => reducers),
+  };
+});
 
 // Mocking external dependencies and components
 jest.mock('../lib/components/ThemeProvider', () => ({
@@ -85,6 +97,14 @@ jest.mock('@10play/tentap-editor', () => ({
   DEFAULT_TOOLBAR_ITEMS: [], // Mock as an empty array
 }));
 
+// Helper function to render the component with providers
+const renderWithProviders = (component: React.ReactElement) => {
+  return render(
+    <Provider store={store}>
+      <AddNoteProvider>{component}</AddNoteProvider>
+    </Provider>
+  );
+};
 
 beforeEach(() => {
    // Clear mocks before each test
@@ -122,13 +142,13 @@ describe("AddNoteScreen", () => {
   });
 
   it("renders without crashing", () => {
-    render(<AddNoteScreen route={{ params: { untitledNumber: 1 }}} />);
+    renderWithProviders(<AddNoteScreen route={{ params: { untitledNumber: 1 }}} />);
     // Instead of using toBeInTheDocument (which is DOM-specific), use toBeTruthy
     expect(screen.getByTestId('RichEditor')).toBeTruthy();
   });
 
   it('calls setNoteContent when the Rich Text Editor content changes', () => {
-    render(<AddNoteScreen route={{ params: { untitledNumber: 1 }}} />);
+    renderWithProviders(<AddNoteScreen route={{ params: { untitledNumber: 1 }}} />);
 
     const richTextEditor = screen.getByTestId('RichEditor'); // Ensure the element is rendered
     const newText = 'New content';

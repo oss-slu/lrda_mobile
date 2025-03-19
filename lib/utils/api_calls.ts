@@ -1,6 +1,6 @@
 import { doc, getDoc } from "firebase/firestore";
 import { UserData } from "../../types";
-import { db } from "../config/firebase";
+import  {db} from "../config/firebase";
 
 /**
  * Provides methods for interacting with the API to fetch, create, update, and delete notes.
@@ -161,7 +161,6 @@ static async fetchCreatorName(creatorId: string): Promise<string> {
     });
 
     const apiData = await apiResponse.json();
-    console.log(`API data received:`, apiData);
 
     // Step 2: Check if the API response contains a name
     if (Array.isArray(apiData) && apiData.length > 0 && apiData[0].name) {
@@ -172,7 +171,7 @@ static async fetchCreatorName(creatorId: string): Promise<string> {
     }
 
     // Step 3: If not found in API, query Firestore
-    console.log(`Creator not found in API. Querying Firestore with UID: ${creatorId}`);
+   // console.log(`Creator not found in API. Querying Firestore with UID: ${creatorId}`);
     const firestoreDocRef = doc(db, "users", creatorId);
     const firestoreDoc = await getDoc(firestoreDocRef);
 

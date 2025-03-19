@@ -1,24 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, } from "react";
 import {
   View,
   Text,
   ScrollView,
-  Linking,
   TouchableOpacity,
   SafeAreaView,
-
+  Image,
   StyleSheet,
   Dimensions,
   Switch,
-  Image,
+  Platform,
+  StatusBar,
+  Linking,
   Alert,
-  Modal,
   TextInput,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { User } from "../models/user_class";
 import { useTheme } from "../components/ThemeProvider";
 import { useDispatch } from "react-redux";
+import { User } from "../models/user_class";
+import { useNavigation } from "@react-navigation/native";
+import Carousel from "react-native-reanimated-carousel";
+import ThemeToggle from "../components/ThemeToggle";
+import Feather from 'react-native-vector-icons/Feather';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Modal from 'react-native-modal';
+import AppThemeSelectorScreen from "./AppThemeSelectorScreen";
+import Entypo from 'react-native-vector-icons/Entypo';
+import { clearThemeReducer } from "../../redux/slice/ThemeSlice";
 import { deleteUser } from "firebase/auth";
 import { ref, remove } from "firebase/database";
 import { deleteDoc, doc } from "firebase/firestore";
@@ -26,15 +35,21 @@ import { deleteObject } from "firebase/storage";
 import { auth } from "../config";
 import { db, realtimeDb, storage } from "../config/firebase";
 import { reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
-
 import { collection, addDoc, getDoc,} from "firebase/firestore";
-import { useNavigation } from "@react-navigation/native"; // Import navigation hook
-import { KeyboardAvoidingView, Platform, Keyboard, TouchableWithoutFeedback } from "react-native"; // Import necessary components
+import { KeyboardAvoidingView, Keyboard, TouchableWithoutFeedback } from "react-native"; // Import necessary components
 
-
-
-const user = User.getInstance();
 const { width, height } = Dimensions.get("window");
+const data = [
+  { source: require("../../assets/Pond_395.jpg") },
+  { source: require("../../assets/Pond_048.jpg") },
+  { source: require("../../assets/Pond_049.jpg") },
+  { source: require("../../assets/Pond_062.jpg") },
+  { source: require("../../assets/Pond_221.jpg") },
+  { source: require("../../assets/Pond_290.jpg") },
+  { source: require("../../assets/Pond_021.jpg") },
+  { source: require("../../assets/Pond_883.jpg") },
+];
+
 
 
 
@@ -42,6 +57,33 @@ export default function MorePage() {
   const { theme, isDarkmode, toggleDarkmode } = useTheme();
   const navigation = useNavigation(); // Get navigation instance
   const dispatch = useDispatch();
+  const userObject = User.getInstance();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isThemeOpen, setIsThemeOpen] = useState(false)
+  const [userName, setUserName] = useState('');
+  const [userInitials, setUserInitials] = useState("N/A");
+
+  useEffect(() => {
+    (async () => {
+      const name = await userObject.getName();
+      setUserName(name);
+      if (name) {
+        const initials = name
+          .split(" ")
+          .map((namePart) => namePart[0])
+          .join("");
+        setUserInitials(initials);
+      }
+    })();
+  }, []);
+
+  const handleThemeOpen = () => {
+    setIsThemeOpen(!isThemeOpen);
+  }
+
+  const handleSettingsToggle = () => {
+    setIsSettingsOpen(!isSettingsOpen);
+  }
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [reasons, setReasons] = useState([]); // To track selected reasons
   const [keyboardVisible, setKeyboardVisible] = useState(false); // Track keyboard visibility
@@ -63,6 +105,7 @@ const toggleReason = (reason) => {
     }
   };
 
+
   React.useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener("keyboardDidShow", () => {
       setKeyboardVisible(true);
@@ -83,42 +126,36 @@ const toggleReason = (reason) => {
         Alert.alert("Error", "Please select at least one reason for account deletion.");
         return;
       }
-
+  
       const currentUser = auth.currentUser;
       if (!currentUser) {
         Alert.alert("Error", "No user is logged in. Please log in to delete your account.");
         return;
       }
-
+  
       const userId = currentUser.uid;
-
-      // Save review to Firestore
-      const reviewContent = {
-        userId,
-        reasons,
-        additionalDetails: additionalDetails || "None",
-        timestamp: new Date().toISOString(),
-      };
-
-      await addDoc(collection(db, "accountDeletionReviews"), reviewContent);
-
-      // Check if the user exists in Firestore
+  
+      // Check if the document exists before trying to delete it
       const userDocRef = doc(db, "users", userId);
       const userDoc = await getDoc(userDocRef);
-
-      if (userDoc.exists()) {
-        // User exists in Firestore, proceed to delete their Firestore record
-        console.log("User found in Firestore. Deleting Firestore record...");
-        await deleteDoc(userDocRef);
-      } else {
-        console.log("No Firestore data found for the user. Proceeding to delete only authentication...");
+  
+      if (!userDoc.exists()) {
+        console.log("Firestore document not found for user:", userId);
+        Alert.alert("Error", "No Firestore data found for the user. Cannot delete.");
+        return;
       }
-
-      // Delete the authenticated user
+  
+      console.log("User document exists, proceeding with deletion...");
+  
+      // Proceed with deletion
+      await deleteDoc(userDocRef);
+      console.log("Firestore document deleted successfully");
+  
+      // Try to delete the user from Firebase Authentication
       try {
         await deleteUser(currentUser);
-        Alert.alert("Success", "Your account and feedback have been successfully recorded and deleted.");
-        onLogoutPress(); // Call your existing logout function
+        Alert.alert("Success", "Your account has been successfully deleted.");
+        onLogoutPress();
       } catch (error) {
         if (error.code === "auth/requires-recent-login") {
           console.log("Session expired. Reauthenticating the user...");
@@ -128,13 +165,12 @@ const toggleReason = (reason) => {
           Alert.alert("Error", "Failed to delete account. Please try again.");
         }
       }
-
-      setShowDeleteModal(false);
     } catch (error) {
       console.error("Error deleting account:", error);
       Alert.alert("Error", "Failed to delete account. Please try again.");
     }
   };
+  
 
   
   const handleEmail = () => {
@@ -152,219 +188,198 @@ const toggleReason = (reason) => {
 
   const onLogoutPress = async () => {
     try {
-      await user.logout(dispatch);
+      await User.getInstance().logout(dispatch);
+      dispatch(clearThemeReducer())
     } catch (e) {
       console.log(e);
     }
   };
 
-  return (
-    <>
-      <View style={[styles.header, { backgroundColor: theme.background }]}>
-        <Text style={[styles.headText, { color: theme.text }]}>About</Text>
+  const handleDeleteUserAccount = () => {
+    setTimeout(()=> {
+      onLogoutPress();
+    },3000)
+  }
+
+  const handleReportClick = () => {
+    const email = 'yashkamal.bhatia@slu.edu'; // The predefined email address
+    const subject = 'Bug Report on \'Where\'s Religion?'; // The subject of the email
+    const body = 'Please provide details of your issue you are facing here.'; // The body of the email
+
+    // Create the mailto link
+    const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    // Open the email client
+    Linking.openURL(mailtoLink)
+      .catch((err) => console.error('Error opening email client:', err));
+  };
+
+
+  const SettingOptions = ({ optionName, icon }) => (
+    <View style={{
+      height: 60,
+      width: width * 0.8,
+      backgroundColor: '#e5e8e5',
+      shadowColor: "#000", // Shadow color
+      shadowOffset: { width: 0, height: 4 }, // Shadow offset for depth
+      shadowOpacity: 0.1, // Subtle shadow opacity
+      shadowRadius: 6, // Blur for the shadow
+      marginTop: 30,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      borderRadius: 10,
+
+    }}>
+      <Text style={{ fontSize: 14, fontWeight: '500', color: icon === 'delete' ? 'red' : 'black' }}>{optionName}</Text>
+      {
+        icon === 'none' ? (
+          <View style={{ height: 25, width: 25, backgroundColor: theme.homeColor, borderRadius: 50, borderWidth: 0.5 }}>
+          </View>) :
+          (<MaterialIcons name={icon} size={25} color={icon === 'delete' ? 'red' : 'black'} />)
+      }
+    </View>
+  )
+  const MenuItem = ({ title, iconName, onPress }) => (
+    <TouchableOpacity style={styles.menuButton} onPress={onPress}>
+      <View style={styles.menuContent}>
+        <Text style={[styles.menuText, { fontSize: 14, fontWeight: '500' }]}>{title}</Text>
+        <Ionicons name={iconName} size={styles.menuIcon.fontSize} color={"black"} />
       </View>
-      <SafeAreaView>
-        <ScrollView contentContainerStyle={[styles.container, { paddingBottom: 140 }]}>
-          {/* About Section Content */}
-          <View style={styles.textContainer}>
-            <Text style={[styles.titleText,{color:theme.text}]}>What is Where’s Religion?</Text>
-            <Text style={[styles.bodyText, { color: theme.text }]}>
-            Where’s Religion? is an open-source application developed by humanities faculty and IT professionals at Saint Louis University that supports in-person research, remote data entry, media sharing, and mapping. The app is designed to facilitate a more robust public understanding of religion through rigorous scholarly methods. Our conviction is that the study of religion must account for the wide range of embodied experiences, improvised practices, material cultures, and shared spaces that humans inhabit. Through a research methodology that moves beyond analysis of sacred texts, creeds, and official teachings, Where’s Religion? provides a platform to diversify the data we study and to advance the study of religion we all encounter in everyday life.</Text>
-            <Text style={[styles.bodyText, { color: theme.text }]}>
-Where’s Religion? is a keystone outcome of the Center on Lived Religion at Saint Louis University. We have received external support from the Henry Luce Foundation ($400,000 in 2018 and $470,000 in 2022), and internal support from the College of Arts & Sciences, the Office for the Vice President for Research and the Research Computing Group, Open Source with SLU, the Walter J. Ong, S.J., Center for Digital Humanities, and the CREST Research Center (Culture, Religion, Ethics, Science, Technology).</Text>
-          </View>
+    </TouchableOpacity>
+  );
 
-          {/* Initiative Team Section */}
-          <View style={styles.initiativeTeamSection}>
-            
-            <View style={styles.initiativeTeamMembers}>
-            <View style={styles.teamMemberContainer}>
-  {Image.resolveAssetSource(require('../../assets/Rachel.jpg')).uri ? (
-    <Image source={require('../../assets/Rachel.jpg')} style={styles.teamImage} />
-  ) : (
-    <Text>Image not available</Text>
-  )}
-  <Text style={[styles.teamName,{color:theme.text}]}>Rachel Lindsey</Text>
-  <Text style={[styles.teamRole,{color:theme.text}]}>Director of Center on Lived Religion</Text>
-</View>
 
-              <View style={styles.initiativeMemberContainer}>
-              {Image.resolveAssetSource(require('../../assets/Adam.jpg')).uri ? (
-    <Image source={require('../../assets/Adam.jpg')} style={styles.teamImage} />
-  ) : (
-    <Text>Image not available</Text>
-  )}
-                <Text style={[styles.initiativeMemberName,{color:theme.text}]}>Adam Park</Text>
-                <Text style={[styles.initiativeMemberRole,{color:theme.text}]}>Associate Director of Research (COLR)</Text>
+  return (
+    <View style={{ flex: 1 }}>
+      <StatusBar translucent backgroundColor="transparent" />
+
+      {
+        !isSettingsOpen ? (<>
+          {/* Header */}
+          <View style={[styles.header, { backgroundColor: theme.homeColor }]}>
+            <View style={styles.headerContent}>
+              <View style={styles.userAccountAndPageTitle}>
+                <TouchableOpacity
+                  style={[
+                    styles.userPhoto,
+                    { backgroundColor: theme.black,
+                      width: width > 1000 ? 50 : 30,
+                      height: width > 1000 ? 50 : 30,
+                     },
+                  ]}
+                  onPress={() => {
+                    navigation.navigate("AccountPage");
+                  }}
+                >
+                  <Text style={styles.pfpText}>{userInitials}</Text>
+                </TouchableOpacity>
+                <Text style={styles.pageTitle}>More</Text>
               </View>
-            </View>
-            <View style={styles.initiativeTeamMembers}>
-              <View style={styles.teamMemberContainer}>
-              {Image.resolveAssetSource(require('../../assets/Yash.jpg')).uri ? (
-    <Image source={require('../../assets/Yash.jpg')} style={styles.teamImage} />
-  ) : (
-    <Text>Image not available</Text>
-  )}
-                <Text style={[styles.teamName,{color:theme.text}]}>Yash Bhatia</Text>
-                <Text style={[styles.teamRole,{color:theme.text}]}>Software Engineer and Tech Lead </Text>
-              </View>
+              <ThemeToggle isDarkmode={isDarkmode} toggleDarkmode={toggleDarkmode} testID="dark-mode-toggle"/>
             </View>
           </View>
 
-          {/* Development Team Section */}
-          <View style={styles.teamSection}>
-            <Text style={styles.teamTitle}>The Development Team</Text>
-            <View style={styles.teamMembersRow}>
-              <View style={styles.teamMemberContainer}>
-              {Image.resolveAssetSource(require('../../assets/Patrick.jpg')).uri ? (
-    <Image source={require('../../assets/Patrick.jpg')} style={styles.teamImage} />
-  ) : (
-    <Text>Image not available</Text>
-  )}
-                <Text style={[styles.teamName,{color:theme.text}]}>Patrick Cuba</Text>
-                <Text style={[styles.teamRole,{color:theme.text}]}>IT Architect</Text>
-              </View>
-              <View style={styles.teamMemberContainer}>
-              {Image.resolveAssetSource(require('../../assets/Bryan.jpg')).uri ? (
-    <Image source={require('../../assets/Bryan.jpg')} style={styles.teamImage} />
-  ) : (
-    <Text>Image not available</Text>
-  )}
-                <Text style={[styles.teamName,{color:theme.text}]}>Bryan Haberberger</Text>
-                <Text style={[styles.teamRole,{color:theme.text}]}>Full Stack Developer</Text>
-              </View>
-            </View>
-            <View style={styles.teamMembersRow}>
-              <View style={styles.teamMemberContainer}>
-              {Image.resolveAssetSource(require('../../assets/Stuart.jpg')).uri ? (
-    <Image source={require('../../assets/Stuart.jpg')} style={styles.teamImage} />
-  ) : (
-    <Text>Image not available</Text>
-  )}
-                <Text style={[styles.teamName,{color:theme.text}]}>Stuart Ray</Text>
-                <Text style={[styles.teamRole,{color:theme.text}]}>Developer</Text>
-              </View>
-              <View style={styles.teamMemberContainer}>
-              {Image.resolveAssetSource(require('../../assets/Izak.jpg')).uri ? (
-    <Image source={require('../../assets/Izak.jpg')} style={styles.teamImage} />
-  ) : (
-    <Text>Image not available</Text>
-  )}
-                <Text style={[styles.teamName,{color:theme.text}]}>Izak Robles</Text>
-                <Text style={[styles.teamRole,{color:theme.text}]}>Developer</Text>
-              </View>
-            </View>
-          </View>
+          <ScrollView
 
-          {/* Dark Mode and Logout at the End of ScrollView */}
-          <View style={styles.bottomContainer}>
-          <View
-              style={[
-                styles.switchContainer,
-                { backgroundColor: theme.background },
-              ]}
-            >
-              <Text style={[styles.switchText, { color: theme.text }]}testID="Light Mode ">
-                {isDarkmode ? "Light Mode" : "Dark Mode"}
-              </Text>
-              <Switch
-                testID="dark-mode-switch"
-                trackColor={{
-                  false: "black",
-                  true: theme.text,
-                }}
-                thumbColor={theme.primaryColor}
-                onValueChange={handleToggleDarkMode}
-                value={isDarkmode}
-              />
-            </View>
-
-            <TouchableOpacity
-              style={[
-                styles.button,
-                { backgroundColor: theme.primaryColor },
-              ]}
-              onPress={handleEmail}
-            >
-              <Text
-                style={[
-                  styles.buttonText,
-                  { color: theme.text },
-                ]}
-              >
-                Report
-              </Text>
-              <Ionicons
-                name="mail-outline"
-                size={24}
-                color={theme.text}
-                style={{ marginLeft: 10 }}
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.button,
-                { backgroundColor: theme.primaryColor },
-              ]}
-              onPress={handleVisitWebsite}
-            >
-              <Text
-                style={[
-                  styles.buttonText,
-                  { color: theme.text },
-                ]}
-              >
-                Visit Our Website
-              </Text>
-              <Ionicons
-                name="globe-outline"
-                size={24}
-                color={theme.text}
-                style={{ marginLeft: 10 }}
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-            style={[styles.button, { backgroundColor: theme.primaryColor }]}
-            onPress={() => setShowDeleteModal(true)}
+            contentContainerStyle={[styles.menuContainer, { paddingBottom: 200, }]}
+            scrollEnabled={true}
+            showsVerticalScrollIndicator={false}
           >
-            <Text style={[styles.buttonText, { color: theme.text }]}>Delete Account</Text>
-            <Ionicons
-              name="trash-outline"
-              size={24}
-              color={theme.text}
-              style={{ marginLeft: 10 }}
-            />
-          </TouchableOpacity>
-
-
-            <TouchableOpacity
-              key="Logout"
-              style={[
-                styles.logout,
-                { backgroundColor: isDarkmode ? "white" : "black" },
-              ]}
-              onPress={onLogoutPress}
-            >
-              <Text
-                style={[
-                  styles.logoutText,
-                  { color: isDarkmode ? "black" : "white" },
-                ]}
-              >
-                Logout
-              </Text>
-              <Ionicons
-                name={"log-out-outline"}
-                size={30}
-                color={isDarkmode ? "black" : "white"}
+            {/* Carousel */}
+            <View style={styles.carouselContainer}>
+              <Carousel
+                width={width}
+                height={width / 2}
+                data={data}
+                renderItem={({ item }) => (
+                  <Image source={item.source} style={styles.bannerImage} />
+                )}
+                autoPlay
+                autoPlayInterval={3000}
+                scrollAnimationDuration={800}
               />
-            </TouchableOpacity>
+            </View>
+            {/* Menu Items */}
+            <View style={{ marginTop: 40, }}>
+              <MenuItem title="About" iconName="information-circle-outline" onPress={()=> {}}/>
+              <MenuItem title="Resource" iconName="link-outline" onPress={() => navigation.navigate("Resource")} />
+              <MenuItem title="Meet our team" iconName="people-outline" onPress={() => navigation.navigate("TeamPage")} />
+              <MenuItem title="Settings" iconName="settings-outline" onPress={handleSettingsToggle} />
+              <MenuItem title="FAQ" iconName="help-circle-outline" onPress={()=> {}}/>
+              <MenuItem title="Logout" iconName="exit-outline" onPress={onLogoutPress} />
+            </View>
+
+
+          </ScrollView>
+        </>) : (<>
+          {/** header content starts here */}
+          <View style={[styles.header, { backgroundColor: theme.homeColor }]}>
+            <View style={styles.settingsHeaderContent}>
+              <TouchableOpacity onPress={handleSettingsToggle}>
+                <Feather name={'arrow-left'} size={30} />
+              </TouchableOpacity>
+              <View style={styles.headerHeading} testID="settings-header">
+                <Text style={{ fontSize: 17, fontWeight: 'bold' }}>Settings</Text>
+              </View>
+            </View>
           </View>
-        </ScrollView>
-      </SafeAreaView>
-      <Modal
+          {/** header content ends here */}
+          <ScrollView>
+            <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 60 }}>
+
+
+
+              <TouchableOpacity
+                onPress={handleThemeOpen}
+              >
+                <SettingOptions optionName={'App Theme'} icon={'none'} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={()=>setShowDeleteModal(true)}
+              >
+                <SettingOptions optionName={'Delete My Account'} icon={'delete'} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleReportClick}>
+                <SettingOptions optionName={'Report an Issue'} icon={'report'} />
+              </TouchableOpacity>
+
+
+            </View>
+
+          </ScrollView>
+
+          <Modal
+            isVisible={isThemeOpen}
+            backdropColor="#00aa00"
+            backdropOpacity={0}
+            style={{ margin: 0, justifyContent: 'center', alignItems: 'center', top: "20%" }} // Center the modal
+          >
+            <View
+              style={{
+                backgroundColor: 'white',
+                padding: 20,
+                borderRadius: 10,
+                height: height * 0.7, // Restrict modal height to 70% of the screen
+                width: '90%', // Set the width to 90% of the screen
+              }}
+            >
+              <View style={styles.headingAndAction}>
+
+                <Text style={styles.heading}>Customize your app</Text>
+
+                <TouchableOpacity
+                  onPress={handleThemeOpen} testID="close-app-theme-modal"
+                >
+                  <Entypo name={'cross'} size={30} />
+                </TouchableOpacity>
+              </View>
+              <AppThemeSelectorScreen />
+            </View>
+          </Modal>
+
+          <Modal
       visible={showDeleteModal}
       transparent={true}
       animationType="slide"
@@ -435,70 +450,145 @@ Where’s Religion? is a keystone outcome of the Center on Lived Religion at Sai
       </KeyboardAvoidingView>
     </Modal>
 
-    </>
+        </>)
+      }
+      </View>
   );
 }
 
 const styles = StyleSheet.create({
-  header: { paddingVertical: height * 0.02, justifyContent: "center", alignItems: "center" },
-  headText: { fontSize: 32, fontWeight: "bold", paddingTop: 40 },
-  container: { flexGrow: 1, alignItems: "center", paddingHorizontal: 20 },
-  textContainer: { width: "100%", alignItems: "center", marginTop: 20 },
-  titleText: { fontSize: 28, fontWeight: "600", textAlign: "center", marginBottom: 20 },
-  bodyText: { fontSize: 16, lineHeight: 24, textAlign: "justify", marginBottom: 15, paddingHorizontal: 10 },
-  button: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    height: 50,
-    width: "90%",
-    borderRadius: 15,
-    marginTop: 10,
-    paddingHorizontal: 20,
-  },
-  buttonText: {
-    fontSize: 20,
-    fontWeight: "600",
-    textAlign: "center",
-  },
+  container: {
+    flex: 1,
+    paddingTop: Platform.OS === "android" ? 25 : 0,
 
-
-  // Team Section
-  teamSection: { width: "100%", padding: 20, alignItems: "center" },
-  teamTitle: { fontSize: 24, fontWeight: "bold", marginBottom: 16 },
-  teamMembersRow: {
+  },
+  header: {
+    height: width > 500 ? height * 0.12 : height * 0.19,
+  },
+  profile: { flexDirection: "row", alignItems: "center" },
+  userAccountAndPageTitle: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-    marginBottom: 16,
-  },
-  teamMemberContainer: { alignItems: 'center', width: '45%' },
-  teamImage: { width: 80, height: 80, borderRadius: 40, marginBottom: 8 },
-  teamName: { fontSize: 16, fontWeight: "bold", textAlign: "center" },
-  teamRole: { fontSize: 14, textAlign: "center" },
-
-  // Initiative Team Section
-  initiativeTeamSection: { width: "100%", padding: 20, alignItems: "center" },
-  initiativeTeamTitle: { fontSize: 24, fontWeight: "bold", marginBottom: 16 },
-  initiativeTeamMembers: { flexDirection: "row", justifyContent: "space-around", width: "100%", marginBottom: 16 },
-  initiativeMemberContainer: { alignItems: "center", width: "45%" },
-  initiativeMemberName: { fontSize: 16, fontWeight: "bold", textAlign: "center" },
-  initiativeMemberRole: { fontSize: 14, textAlign: "center" },
-
-  // Bottom Container for Dark Mode and Logout
-  bottomContainer: {
-    width: '100%',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 20,
+    width: width > 500? '13%':'27%',
+
   },
-  switchContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  userPhoto: {
+    height: width * 0.095,
+    width: width * 0.095,
+    borderRadius: 50,
+    alignContent: "center",
+    justifyContent: "center",
+    backgroundColor: 'black',
+    marginLeft: 8,
+  },
+  pfpText: {
+    fontWeight: "600",
+    fontSize: 14,
+    alignSelf: "center",
+    color: 'white',
+  },
+  pageTitle: {
+    fontSize: 18,
+    fontWeight: '500'
+
+  },
+  bannerImage: {
+    width: "95%",
+    height: "100%",
+    resizeMode: "cover",
+    alignSelf: "center",
+    borderRadius: 10, // Rounded corners
+  },
+  carouselContainer: {
     alignItems: "center",
-    width: "90%",
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 10,
+    height: width / 2,
+    marginTop: 20,
+
+  },
+  menuContainer: {
+    alignItems: "center",
+
+  },
+  menuButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between", // Space text and icon
+    backgroundColor: "#fff", // Button background
+    paddingVertical: 18, // Increase button height
+    paddingHorizontal: 30, // Increase horizontal padding for both sides
+    marginBottom: 12, // Space between buttons
+    borderRadius: 16, // Smooth rounded corners
+    width: "90%", // Full width for buttons
+    shadowColor: "#000", // Shadow color
+    shadowOffset: { width: 0, height: 4 }, // Shadow offset for depth
+    shadowOpacity: 0.1, // Subtle shadow opacity
+    shadowRadius: 6, // Blur for the shadow
+    elevation: 5, // Android shadow effect
+  },
+  menuContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "90%", // Ensure full width usage
+  },
+  menuText: {
+    fontSize: 20, // Larger text size
+    fontWeight: "bold", // Bold text
+    color: "#000", // Black text color
+    marginLeft: 30, // Additional space on the left of text
+  },
+  menuIcon: {
+    fontSize: 28, // Icon size for visual balance
+  },
+
+
+  settingsHeader: {
+    height: height * 0.15,
+  },
+  headerContent: {
+    marginLeft: 0,
+    marginTop: width > 500? '5%' : "15%",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    width: width,
+    height: '50%'
+  },
+  headerHeading: {
+    marginLeft: 20,
+  },
+
+  settingsHeaderContent: {
+    marginLeft: 0,
+    marginTop: width > 500? '4%' : "15%",
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    width: width,
+    height: '50%'
+  },
+  heading: {
+    fontSize: 18,
+    fontWeight: '600'
+  },
+  headingAndAction: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+
+  deleteAccountBulletPoints: {
+    fontSize: 8,
+  },
+  deleteAccountActionButtons: {
+    backgroundColor: 'white',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderColor: 'balck',
+    borderWidth: 1,
+    borderRadius: 12,
   },
   switchText: { fontSize: 18, fontWeight: "500" },
   logout: { flexDirection: "row", justifyContent: "center", alignItems: "center", height: 50, width: "90%", borderRadius: 15, marginTop:10},
@@ -508,7 +598,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Overlay effect
   },
   modalContent: {
     width: "90%",
@@ -575,3 +664,4 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
 });
+

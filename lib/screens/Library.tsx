@@ -10,8 +10,7 @@ import {
   StyleSheet,
   Pressable,
   Animated,
-  StatusBar,
-  Keyboard
+  StatusBar
 } from "react-native";
 import { useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -29,57 +28,44 @@ import Constants from "expo-constants";
 import DropDownPicker from "react-native-dropdown-picker";
 import NoteDetailModal from "./mapPage/NoteDetailModal";
 import ToastMessage from "react-native-toast-message";
-import NotesComponent from "../components/NotesComponent";
-import Greeting from "../components/Greeting";
 import { useAddNoteContext } from "../context/AddNoteContext";
-import LottieView from 'lottie-react-native';
+import Greeting from "../components/Greeting";
+import NotesComponent from "../components/NotesComponent";
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { green } from "react-native-reanimated/lib/typescript/Colors";
+import LottieView from 'lottie-react-native';
 
-const { width, height } = Dimensions.get("window");
 const user = User.getInstance();
 
-const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
+const { width, height } = Dimensions.get("window");
+
+const Library = ({ navigation, route }) => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
   const [updateCounter, setUpdateCounter] = useState(0);
-  const [isPrivate, setIsPrivate] = useState(true);
-  const [published, setPublished] = useState(false);
+  const [isFilterOpned, setIsFilterOpned] = useState(false)
+  const [published, setPublished] = useState(true);
   const [reversed, setReversed] = useState(false);
   const [rendering, setRendering] = useState(true);
   const [userInitials, setUserInitials] = useState("N/A");
-  const [userName, setUserName] = useState('');
   const [initialItems, setInitialItems] = useState([
     { label: "My Entries", value: "my_entries" },
     { label: "Published Entries", value: "published_entries" },
   ]);
-  const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(initialItems[0].value);
   const [items, setItems] = useState(initialItems);
   const [selectedNote, setSelectedNote] = useState<Note | undefined>(
     undefined
   );
   const [isModalVisible, setModalVisible] = useState(false);
-  const { setNavigateToAddNote } = useAddNoteContext();
+  const [userName, setUserName] = useState('')
   const { theme, isDarkmode } = useTheme();
-  const animation = useRef(new Animated.Value(0)).current; // Animation value
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [isSortOpened, setIsSortOpened] = useState(false);
   const [selectedSortOption, setSelectedSortOption] = useState(1);
+  const animation = useRef(new Animated.Value(0)).current; // Animation value
+  const screenWidth = Dimensions.get("window").width; // Screen width for full reveal
 
   let textLength = 18;
-
-  
-  useEffect(() => {
-    const navigateToAddNote = () => {
-      const untitledNumber = findNextUntitledNumber(notes);
-      console.log("in homescreen untitled numbe ", untitledNumber);
-      navigation.navigate("AddNote", { untitledNumber, refreshPage });
-  
-    }
-    setNavigateToAddNote(() => navigateToAddNote)
-  }, [navigation, notes])
-
 
   useEffect(() => {
     (async () => {
@@ -95,6 +81,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     })();
   }, []);
 
+
+
   const refreshPage = () => {
     setUpdateCounter(updateCounter + 1);
   };
@@ -103,46 +91,62 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   useEffect(() => {
     setRendering(true);
     fetchMessages();
-  }, [updateCounter, published, value]);
+  }, [updateCounter, published]);
 
   const fetchMessages = async () => {
     try {
-      const userId = await user.getId();
+      // Fetch all public notes (published and not archived)
       const data = await ApiService.fetchMessages(
-        false,
-        published,
-        isPrivate ? userId : "",
+          true,
+          true,
+          "someUserId"
       );
-
       // Filter out archived notes; assume notes without `isArchived` are not archived
-      const unarchivedNotes = data.filter((note: Note) => !note.isArchived);
-
-      setMessages(unarchivedNotes);
+      const publicNotes = data.filter((note: Note) => !note.isArchived && note.published);
 
       // Convert data and sort notes by date (latest first)
-      const fetchedNotes = DataConversion.convertMediaTypes(unarchivedNotes)
+      const fetchedNotes = DataConversion.convertMediaTypes(publicNotes)
         .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
 
-      // Apply reverse logic if 'reversed' is true
       setNotes(reversed ? fetchedNotes.reverse() : fetchedNotes);
       setRendering(false);
-      
     } catch (error) {
-      console.error("Error fetching messages:", error);
+      console.error("Error fetching public notes:", error);
       ToastMessage.show({
         type: "error",
-        text1: "Error fetching messages",
+        text1: "Error fetching notes",
         text2: error.message,
       });
     }
   };
 
-  const updateNote = (note: Note) => {
-    setNotes((prevNotes) =>
-      prevNotes?.map((prevNote) => (prevNote.id === note.id ? note : prevNote))
-    );
-    refreshPage();
+
+
+  const toggleSearchBar = () => {
+    if (isSearchVisible) {
+      // Hide the search container
+      setSearchQuery('');
+      Animated.timing(animation, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: false,
+      }).start(() => setIsSearchVisible(false));
+    } else {
+      // Show the search container
+      setIsSearchVisible(true);
+      Animated.timing(animation, {
+        toValue: screenWidth - 100,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+    }
   };
+
+  const searchBarWidth = animation.interpolate({
+    inputRange: [0, screenWidth],
+    outputRange: [0, screenWidth],
+  });
+
 
   const handleReverseOrder = () => {
     setNotes(notes.reverse());
@@ -150,157 +154,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     setUpdateCounter(updateCounter + 1);
   };
 
-  const handleArchiveNote = async (note: Note | undefined, user: User) => {
-    if (note?.id) {
-      try {
-        const userId = await user.getId();
-        const updatedNote = {
-          ...note,
-          isArchived: true,
-          published: false,
-          archivedAt: new Date().toISOString(),
-        };
-
-        const response = await ApiService.overwriteNote(updatedNote);
-        if (response.ok) {
-          ToastMessage.show({
-            type: "success",
-            text1: "Success",
-            text2: "Note successfully archived.",
-          });
-          updateNote(updatedNote); // Update the note in local state
-          return true;
-        } else {
-          throw new Error("Archiving failed");
-        }
-      } catch (error) {
-        ToastMessage.show({
-          type: "error",
-          text1: "Error",
-          text2: "Failed to archive note. System failure. Try again later.",
-        });
-        console.error("Error archiving note:", error);
-        return false;
-      }
-    } else {
-      ToastMessage.show({
-        type: "error",
-        text1: "Error",
-        text2: "You must first save your note before archiving it.",
-      });
-      return false;
-    }
-  };
-
-  const findNextUntitledNumber = (notes: Note[]): number => {
-    return notes.reduce((maxNumber, note) => {
-        const match = note.title.match(/^Untitled (\d+)$/);
-        if (match) {
-            const number = parseInt(match[1], 10);
-            return Math.max(maxNumber, number);
-        }
-        return maxNumber;
-    }, 0) + 1;
-};
-
-
-  const sideMenu = (data: any, rowMap: any) => {
-    return (
-      <View style={styles(theme, width).rowBack} key={data.index}>
-        <TouchableOpacity>
-          <TouchableOpacity onPress={() => publishNote(data.item.id, rowMap)}>
-            <Ionicons name="share" size={30} color={"green"} />
-          </TouchableOpacity>
-        </TouchableOpacity>
-        <View
-          style={[
-            styles(theme, width).backRightBtn,
-            styles(theme, width).backRightBtnRight,
-          ]}
-        >
-          {isPrivate ? (
-            <TouchableOpacity
-              style={{
-                justifyContent: "center",
-                alignItems: "center",
-                position: "absolute",
-                right: 20,
-              }}
-              onPress={() => deleteNote(data.item.id, rowMap)}
-            >
-              <Ionicons
-                name="trash-outline"
-                size={24}
-                color={styles(theme, width).backColor.color}
-              />
-            </TouchableOpacity>
-          ) : null}
-        </View>
-      </View>
-    );
-  };
- //handle sort
- const handleSort = () => {
-  setIsSortOpened(!isSortOpened);
-}
-
-const handleSortOption = ({ option }) => {
-  setSelectedSortOption(option);
-  setIsSortOpened(false);
-}
-
-  const deleteNote = (id: string, rowMap: any) => {
-    if (rowMap[id]) {
-      rowMap[id].closeRow();
-    }
-
-    const noteToDelete = notes.find((note) => note.id === id);
-
-    if (noteToDelete) {
-      handleArchiveNote(noteToDelete, user); // Pass the correct arguments
-    }
-
-    setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
-  };
-
-
-  async function publishNote(data: any, rowMap: any) {
-    if (rowMap[data]) {
-      rowMap[data].closeRow();
-
-    }
-    const foundNote = notes.find((note) => note.id === data);
-    const editedNote: Note = {
-      id: foundNote?.id || "",
-      title: foundNote?.title || "",
-      text: foundNote?.text || "",
-      creator: foundNote?.creator || "",
-      media: foundNote?.media || [],
-      latitude: foundNote?.latitude || "",
-      longitude: foundNote?.longitude || "",
-      audio: foundNote?.audio || [],
-      published: !foundNote?.published || false,
-      time: foundNote?.time || new Date(),
-      tags: foundNote?.tags || [],
-    };
-    await ApiService.overwriteNote(editedNote);
-    refreshPage();
-  }
-
   const renderList = (notes: Note[]) => {
     const filteredNotes = searchQuery
       ? notes.filter((note) => {
-        const lowerCaseQuery = searchQuery.toLowerCase();
-        const noteTime = new Date(note.time);
-        const formattedTime = formatToLocalDateString(noteTime);
-        return (
-          note.title.toLowerCase().includes(lowerCaseQuery) ||
-          formattedTime.includes(lowerCaseQuery)
-        );
-      })
+          const lowerCaseQuery = searchQuery.toLowerCase();
+          const noteTime = new Date(note.time);
+          const formattedTime = formatToLocalDateString(noteTime);
+          return (
+            note.title.toLowerCase().includes(lowerCaseQuery) ||
+            formattedTime.includes(lowerCaseQuery)
+          );
+        })
       : notes;
-
-      // Apply sorting based on selectedSortOption
+  
+    // Apply sorting based on selectedSortOption
     filteredNotes.sort((a, b) => {
       if (selectedSortOption === 1) {
         // Sort by date and time (latest first)
@@ -314,28 +181,18 @@ const handleSortOption = ({ option }) => {
       }
       return 0;
     });
-    const privateData = filteredNotes.filter((eachNotes) => eachNotes.published === false);
-    const publicData = filteredNotes.filter((eachNotes) => eachNotes.published != false);
-    return isPrivate ? (
-      privateData.length > 0 ? (<SwipeListView
-        data={privateData}
-        renderItem={renderItem}
-        renderHiddenItem={sideMenu}
-        leftActivationValue={160}
-        rightActivationValue={-160}
-        leftOpenValue={75}
-        rightOpenValue={-75}
-        stopLeftSwipe={175}
-        stopRightSwipe={-175}
-        keyExtractor={(item) => item.id}
-        onRightAction={(data, rowMap) => deleteNote(data, rowMap)}
-        onLeftAction={(data, rowMap) => publishNote(data, rowMap)}
-        contentContainerStyle={{paddingBottom: 150}}
-      />)
-        : (<View style={styles(theme, width).resultNotFound}>
-
+  
+    return published && (
+      filteredNotes.length > 0 ? (
+        <SwipeListView
+          data={filteredNotes}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{paddingBottom: 150}}
+        />
+      ) : (
+        <View style={styles(theme, width).resultNotFound}>
           <LottieView
-            testID="no-results-animation"
             source={require('../../assets/animations/noResultFound.json')}
             autoPlay
             loop
@@ -343,37 +200,18 @@ const handleSortOption = ({ option }) => {
           />
           <Text style={styles(theme, width).resultNotFoundTxt}>No Results Found</Text>
         </View>
-        )
-
-    ) : (
-      publicData.length > 0 ? (<SwipeListView
-        data={publicData}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{paddingBottom: 150}}
-      />) :
-        (<View style={styles(theme, width).resultNotFound}>
-
-          <LottieView
-            testID="no-results-animation"
-            source={require('../../assets/animations/noResultFound.json')}
-            autoPlay
-            loop
-            style={styles(theme, width).lottie}
-          />
-          <Text style={styles(theme, width).resultNotFoundTxt}>No Results Found</Text>
-        </View>
-        )
+      )
     );
   };
+  
 
   const renderItem = (data: any) => {
-   
     const item = data.item;
     const tempTime = new Date(item.time);
     const showTime = formatToLocalDateString(tempTime);
     const mediaItem = item.media[0];
     const ImageType = mediaItem?.getType();
+
     // Ensure ImageURI is a valid string
     let ImageURI = "";
     let IsImage = false;
@@ -393,22 +231,16 @@ const handleSortOption = ({ option }) => {
       <TouchableOpacity
         key={item.id}
         activeOpacity={1}
-        style={{
-          backgroundColor: isDarkmode? 'black' : '#e6e6e6',
-          width: "100%",
-        }}
+        style={{ backgroundColor: isDarkmode ? 'black' : '#e6e6e6' }}
         onPress={() => {
           if (!item.published) {
             navigation.navigate("EditNote", {
-              note: {
-                ...item,
-                time: item.time.toISOString(), // Convert Date to ISO string
-              },
+              note: item,
               onSave: (editedNote: Note) => {
                 updateNote(editedNote);
                 refreshPage();
               },
-            });            
+            });
           } else {
             const formattedNote = {
               ...item,
@@ -423,7 +255,8 @@ const handleSortOption = ({ option }) => {
           }
         }}
       >
-        <NotesComponent IsImage={IsImage} resolvedImageURI={resolvedImageURI} ImageType={ImageType} textLength={textLength} showTime={showTime} item={item} isDarkmode={isDarkmode}/>
+        <NotesComponent IsImage={IsImage} resolvedImageURI={resolvedImageURI} ImageType={ImageType} textLength={textLength} showTime={showTime} item={item} isDarkmode={isDarkmode} />
+
       </TouchableOpacity>
     );
   };
@@ -435,31 +268,6 @@ const handleSortOption = ({ option }) => {
     setSearchQuery(query);
   };
 
-  const toggleSearchBar = () => {
-    if (isSearchVisible) {
-      // Hide the search container
-      setSearchQuery('');
-      Animated.timing(animation, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: false,
-      }).start(() => setIsSearchVisible(false));
-    } else {
-      // Show the search container
-      setIsSearchVisible(true);
-      Animated.timing(animation, {
-        toValue: width - 100,
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
-    }
-  };
-
-  const searchBarWidth = animation.interpolate({
-    inputRange: [0, width],
-    outputRange: [0, width],
-  });
-
 
 
   const formatDate = (date: Date) => {
@@ -469,20 +277,20 @@ const handleSortOption = ({ option }) => {
     return `${month}/${day}/${year}`;
   };
 
-  const filteredNotes = useMemo(() => {
-    return notes.filter((note) => {
-      const noteTime = formatToLocalDateString(new Date(note.time));
-      return (
-        note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        noteTime.includes(searchQuery)
-      );
-    });
-  }, [notes, searchQuery]);
+  //handle sort
+  const handleSort = () => {
+    setIsSortOpened(!isSortOpened);
+  }
+
+  const handleSortOption = ({ option }) => {
+    setSelectedSortOption(option);
+    setIsSortOpened(false);
+  }
 
   return (
-    <View style={{ flex: 1, backgroundColor : isDarkmode? 'black' : '#e4e4e4'}}>
+    <View testID = "Library" style={{ flex: 1, backgroundColor: isDarkmode ? 'black' : '#e4e4e4' }}>
       <StatusBar translucent backgroundColor="transparent" />
-      <View testID="HomeScreen" style={styles(theme, width).container}>
+      <View style={styles(theme, width).container}>
         <View style={styles(theme, width).topView}>
           <View
             style={{
@@ -495,14 +303,13 @@ const handleSortOption = ({ option }) => {
             }}
           >
             <View style={styles(theme, width).userAccountAndPageTitle}>
-              <TouchableOpacity testID="user-account"
+              <TouchableOpacity testID="account-page"
                 style={[
                   styles(theme, width).userPhoto,
-                  { 
-                    backgroundColor: theme.black, 
+                  { backgroundColor: theme.black,
                     width: width > 1000 ? 50 : 30,
                     height: width > 1000 ? 50 : 30,
-                  },
+                   },
                 ]}
                 onPress={() => {
                   navigation.navigate("AccountPage");
@@ -510,7 +317,7 @@ const handleSortOption = ({ option }) => {
               >
                 <Text style={styles(theme, width).pfpText}>{userInitials}</Text>
               </TouchableOpacity>
-              <Text style={styles(theme, width).pageTitle}>Notes</Text>
+              <Text style={styles(theme, width).pageTitle}>Library</Text>
             </View>
 
             <View testID="greeting-component" style={styles(theme, width).userWishContainer}>
@@ -522,31 +329,12 @@ const handleSortOption = ({ option }) => {
 
         </View>
 
-        <View style={[styles(theme, width).toolContainer, { marginHorizontal: 20, }]}>
+        <View testID= "Filter" style={[styles(theme, width).toolContainer, { marginHorizontal: 20 }]}>
           {
             !isSearchVisible && (
-            <View style={styles(theme, width).publishedAndSortContainer}>
-              <View style={styles(theme, width).publishedOrPrivateContainer}>
-                <Pressable onPress={() => {
-                  setIsPrivate(false);
-                  setPublished(true);
-                }}>
-                  <View testID="public-btn" style={[styles(theme, width).publishedTxtContainer, { backgroundColor: isPrivate ? 'transparent' : 'black' },]}>
-                    <Text style={[styles(theme, width).publishedTxt, { color: isPrivate ? 'black' : 'white' }]}>Published</Text>
-                  </View>
-                </Pressable>
-                <Pressable onPress={() => {
-                  setIsPrivate(true);
-                  setPublished(false);
-                }}>
-                  <View testID="private-btn" style={[styles(theme, width).publishedTxtContainer, { backgroundColor: isPrivate ? 'black' : 'transparent' }]}>
-                    <Text style={[styles(theme, width).publishedTxt, { color: isPrivate ? 'white' : 'black' }]}>Private</Text>
-                  </View>
-                </Pressable>
-              </View>
               <View>
                 {
-                  !isSortOpened ? (<TouchableOpacity testID="sort-button"
+                  !isSortOpened ? (<TouchableOpacity
                     onPress={handleSort}
                   >
                     <MaterialIcons name='sort' size={30} />
@@ -559,10 +347,9 @@ const handleSortOption = ({ option }) => {
                       </TouchableOpacity>)
                 }
               </View>
-            </View>
             )
           }
-          <View style={[styles(theme, width).searchParentContainer, { width: isSearchVisible ? '95%' : 40 }]}>
+          <View testID="SearchBar" style={[styles(theme, width).searchParentContainer, { width: isSearchVisible ? '95%' : 40 }]}>
 
             {/* Search Container */}
             {isSearchVisible && (
@@ -578,28 +365,29 @@ const handleSortOption = ({ option }) => {
                 ]}
               >
                 <TextInput
-                  testID="search-input"
                   placeholder="Search..."
                   value={searchQuery}
                   placeholderTextColor="#999"
                   onChangeText={(e) => setSearchQuery(e)}
                   style={[styles(theme, width).searchInput]}
-                  cursorColor='black'
+                  cursorColor={'black'}
                   autoFocus={true}
                 />
               </Animated.View>
             )}
             {
               isSearchVisible ? (
-                <View style={[styles(theme, width).searchIcon, {marginTop: -25}]}>
-                  <TouchableOpacity testID="searchButton" onPress={toggleSearchBar}>
-                    <Ionicons name='close' size={25} />
+                <View style={[styles(theme, width).seachIcon, { marginTop: -25 }]}>
+                  {/* Add testID to the close button */}
+                  <TouchableOpacity onPress={toggleSearchBar} testID="close-button">
+                    <Ionicons name="close" size={25} />
                   </TouchableOpacity>
                 </View>
               ) : (
-                <View style={styles(theme, width).searchIcon}>
-                  <TouchableOpacity testID="searchButton" onPress={toggleSearchBar}>
-                    <Ionicons name='search' size={25} />
+                <View style={styles(theme, width).seachIcon}>
+                  {/* Add testID to the search button */}
+                  <TouchableOpacity onPress={toggleSearchBar} testID="search-button">
+                    <Ionicons name="search" size={25} />
                   </TouchableOpacity>
                 </View>
               )
@@ -607,20 +395,12 @@ const handleSortOption = ({ option }) => {
           </View>
 
         </View>
-      </View>
 
-      <View testID="notes-list" style={styles(theme, width).scrollerBackgroundColor}>
+      </View>
+      <View testID = "notes-list" style={styles(theme, width).scrollerBackgroundColor}>
         {rendering ? <NoteSkeleton /> : renderList(notes)}
       </View>
-
-
-      <NoteDetailModal
-        isVisible={isModalVisible}
-        onClose={() => setModalVisible(false)}
-        note={selectedNote}
-      />
-
-{isSortOpened && isSearchVisible== false && <View testID="sort-options" style={{
+      {isSortOpened && isSearchVisible == false && <View style={{
         height: "100%",
         width: '100%',
         backgroundColor: isDarkmode? '#525252' : 'white',
@@ -654,6 +434,11 @@ const handleSortOption = ({ option }) => {
           </TouchableOpacity>
         </View>
       </View>}
+      <NoteDetailModal
+        isVisible={isModalVisible}
+        onClose={() => setModalVisible(false)}
+        note={selectedNote}
+      />
     </View>
   );
 };
@@ -662,8 +447,8 @@ const styles = (theme, width, color, isDarkmode) =>
   StyleSheet.create({
     container: {
       paddingTop: Constants.statusBarHeight - 20,
-      backgroundColor: theme.homeColor,
       height: width > 500 ? height * 0.12 : height * 0.19,
+      backgroundColor: theme.homeColor,
     },
     pfpText: {
       fontWeight: "600",
@@ -703,7 +488,6 @@ const styles = (theme, width, color, isDarkmode) =>
     },
     scrollerBackgroundColor: {
       flex: 1,
-      width: '100%',
     },
     addButton: {
       position: "absolute",
@@ -726,18 +510,39 @@ const styles = (theme, width, color, isDarkmode) =>
       marginTop: 10,
       backgroundColor: theme.homeColor,
     },
+    dropdown: {
+      width: "100%",
+      alignItems: "center",
+      zIndex: 1000,
+      marginTop: -13,
+    },
+
+    noteContainer: {
+      justifyContent: "space-between",
+      alignItems: "center",
+      alignSelf: "center",
+      backgroundColor: theme.primaryColor,
+      marginTop: 1,
+      width: "100%",
+      flexDirection: "row",
+      height: 185,
+      paddingLeft: width * 0.03,
+      paddingRight: width * 0.03,
+      color: theme.text
+    },
+
+
     rowBack: {
       width: "100%",
       height: 140,
       alignItems: "center",
-      backgroundColor: theme.homeColor,
+      backgroundColor: theme.homeGray,
       flex: 1,
       flexDirection: "row",
       justifyContent: "space-between",
       marginTop: 1,
       padding: 10,
       alignSelf: "center",
-
     },
     backRightBtn: {
       alignItems: "flex-end",
@@ -756,7 +561,7 @@ const styles = (theme, width, color, isDarkmode) =>
       color: theme.text
     },
     userWishContainer: {
-      marginRight: 10, 
+      marginRight: 10
     },
     userName: {
       fontWeight: '500',
@@ -767,31 +572,6 @@ const styles = (theme, width, color, isDarkmode) =>
       justifyContent: 'space-between',
       alignItems: 'center',
       marginTop: 10,
-    },
-    publishedOrPrivateContainer: {
-      backgroundColor: '#e7e7e7',
-      height: 30,
-      width: 120,
-      borderRadius: 20,
-      marginBottom: 10,
-      flexDirection: 'row',
-      justifyContent: 'space-evenly',
-      alignItems: 'center',
-    },
-    publishedAndSortContainer:{
-      flexDirection: 'row', 
-      width: width > 500? "20%" : "45%",
-      justifyContent: 'space-between', 
-    },
-    publishedTxtContainer: {
-      paddingHorizontal: 5,
-      paddingVertical: 3,
-      borderRadius: 20,
-    },
-    publishedTxt: {
-      color: 'white',
-      fontSize: 10,
-      fontWeight: '600',
     },
     searchContainer: {
       right: 0,
@@ -808,11 +588,8 @@ const styles = (theme, width, color, isDarkmode) =>
       fontSize: 16,
       color: "black",
       paddingHorizontal: 10,
-      paddingVertical: 0, 
+      paddingVertical: 0,
       width: "100%",
-    },
-    searchIcon: {
-      marginBottom: 10,
     },
     searchParentContainer: {
       flexDirection: 'row',
@@ -836,7 +613,6 @@ const styles = (theme, width, color, isDarkmode) =>
       height: 200,
     },
     resultNotFound: {
-
       justifyContent: 'center',
       alignItems: 'center'
     },
@@ -851,14 +627,10 @@ const styles = (theme, width, color, isDarkmode) =>
       alignItems: 'center',
       padding: 10,
       borderRadius: 10,
-    }
+    },
+
+   
 
   });
 
-export default HomeScreen;
-
-
-
-
-
-
+export default Library;
