@@ -400,12 +400,15 @@ const handleSortOption = ({ option }) => {
         onPress={() => {
           if (!item.published) {
             navigation.navigate("EditNote", {
-              note: item,
+              note: {
+                ...item,
+                time: item.time.toISOString(), // Convert Date to ISO string
+              },
               onSave: (editedNote: Note) => {
                 updateNote(editedNote);
                 refreshPage();
               },
-            });
+            });            
           } else {
             const formattedNote = {
               ...item,

@@ -36,6 +36,7 @@ function AddNoteBtnComponent() {
                 (<Feather style={styles.buttonIcon} name = 'upload-cloud' size={25}/>)
             }
         </TouchableOpacity>
+        <Text style={styles.label}>Add/Publish</Text>
    </View>
   )
 }
@@ -49,12 +50,14 @@ const styles = StyleSheet.create({
     },
     backgroung:{
         position: 'absolute',
-        backgroundColor: 'transparent'
+        backgroundColor: 'transparent',
+        bottom:-26,
+        transform: [{ scaleY: 0.8 }], // Reduce vertical stretch of the curve
     },
     button: {
         backgroundColor: '#f0f0f0',
-        height: 50,
-        width: 50,
+        height: 40,
+        width: 40,
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 50,
@@ -64,12 +67,17 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25, 
         shadowRadius: 4, 
         // Android elevation
-        elevation: 5, 
+        elevation: 4, 
     },
     buttonIcon: {
         fontWeight: '800',
         fontSize: 30
     },
+    label: {
+        fontSize: 12,
+        color: 'grey',
+        marginTop: -8 // Adds space between button and label
+      },
 })
 
 export default AddNoteBtnComponent

@@ -186,20 +186,19 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
                 testID="password-input"
               />
             </View>
-            <TouchableOpacity>
-              <Text style={styles.forgot}>Forgot Password?</Text>
-            </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
+            <View style={styles.forgotPasswordContainer}><Text style={styles.forgotText}>Forgot Password?</Text></View>
+</TouchableOpacity>
             <TouchableOpacity onPress={onLoginPress} style={styles.buttons} testID="login-button">
               {!loading && <Text style={{color: "white", fontWeight: "600", fontSize: 15}}>
                 Login
                 </Text>}
               {loading && <ActivityIndicator size="small" color="white" />}
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleGoRegister} style={styles.buttons} testID="register-button">
-              <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
-                Register
-              </Text>
-            </TouchableOpacity>
+            <View style={styles.signUpStatement}>
+              <Text style={styles.signUpQuery}>Don't have an account?</Text>
+              <TouchableOpacity onPress={handleGoRegister}><Text style={styles.signUp}>Sign Up</Text></TouchableOpacity>
+            </View>
           </View>
         )}
       </ImageBackground>
@@ -239,12 +238,6 @@ const styles = StyleSheet.create({
     width: "100%",
     borderRadius: 25,
   },
-  forgot: {
-    color: "#111111",
-    fontSize: 12,
-    fontWeight: "400",
-    marginBottom: 20,
-  },
   imageBackground: {
     flex: 1,
     resizeMode: "cover",
@@ -275,7 +268,7 @@ const styles = StyleSheet.create({
     alignContent: "center",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "white",
+    backgroundColor: "rgba(255, 255, 255, 0.6)", // Transparent white background
     height: 500,
     width: 300,
     borderRadius: 10,
@@ -284,6 +277,39 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 10,
   },
+
+  forgotPasswordContainer: {
+    width: 300,
+    justifyContent: 'center',
+    alignItems: "flex-end",
+
+  },
+  forgotText: {
+    color: "#111111",
+    fontSize: 12,
+    fontWeight: "400",
+    marginBottom: 20,
+    marginRight: 40
+  },
+  signUpStatement: {
+      position: "absolute",
+      top: 450,
+      display: "flex",
+      flexDirection: "row",
+      justifyContent: 'center',
+      alignItems: 'center'
+     
+  },
+  signUpQuery: {
+    color: "black",
+    fontWeight: "600",
+  },
+  signUp:{
+    color: "blue",
+    fontWeight: "500",
+    marginTop: 0,
+
+  }
 });
 
 export default LoginScreen;
