@@ -157,14 +157,10 @@ exports[`NoteDetailModal renders without crashing 1`] = `
           
         </Text>
         <Text
-          style={
-            {
-              "color": "#333",
-              "fontSize": 16,
-              "marginLeft": 5,
-            }
-          }
-        />
+          testID="loadingDotsStatic"
+        >
+          ...
+        </Text>
       </View>
       <View
         style={

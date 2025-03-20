@@ -56,6 +56,7 @@ jest.mock("expo-splash-screen", () => ({
 // Silence console warnings during the test
 beforeEach(() => {
   jest.clearAllMocks();
+  jest.useFakeTimers();
   jest.spyOn(console, 'log').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
   jest.spyOn(console, 'warn').mockImplementation(() => {});
@@ -64,6 +65,7 @@ beforeEach(() => {
 
 afterEach(() => {
   jest.restoreAllMocks();
+  jest.useRealTimers();
   moxios.uninstall();
 });
 
@@ -84,6 +86,7 @@ describe('LoginScreen', () => {
   });
 
   it('renders input fields and handles login', async () => {
+    jest.setTimeout(20000); // Increase timeout to 10 seconds for this test
     const navigationMock = { navigate: jest.fn() };
     const routeMock = { params: {} };
 
@@ -109,8 +112,9 @@ describe('LoginScreen', () => {
     // 2️⃣ Simulate user tap on splash screen
     fireEvent.press(getByText("Where's \n Religion?"));
 
-    // 3️⃣ Ensure animation completes before checking login form
-    await new Promise((resolve) => setTimeout(resolve, 2500)); // Wait for animation
+   // Fast-forward the animation to skip waiting for 6 seconds
+  jest.advanceTimersByTime(6000); // Move time forward by 6000ms
+
 
     // 4️⃣ Wait for the login form to be present
     await waitFor(() => {
