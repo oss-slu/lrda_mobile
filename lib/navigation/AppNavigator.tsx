@@ -29,6 +29,7 @@ import ResourceScreen from "../screens/ResourceScreen";
 import ReadMoreScreen from "../screens/ReadMoreScreen";
 import AppThemeSelectorScreen from "../screens/AppThemeSelectorScreen";
 import { Keyboard } from "react-native";
+import ForgotPassword from "../screens/loginScreens/ForgotPassword";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -156,6 +157,11 @@ const AppNavigator: React.FC = () => {
             component={RegisterScreen}
             options={{ headerShown: false }}
           />
+          <Stack.Screen
+            name="ForgotPassword"
+            component={ForgotPassword}
+            options={{ headerShown: false }}
+          />
         </Stack.Navigator>
       )}
       {navState === "login" && (
@@ -168,6 +174,11 @@ const AppNavigator: React.FC = () => {
           <Stack.Screen
             name="Register"
             component={RegisterScreen}
+            options={{ headerShown: false }}
+          />
+             <Stack.Screen
+            name="ForgotPassword"
+            component={ForgotPassword}
             options={{ headerShown: false }}
           />
         </Stack.Navigator>

@@ -98,7 +98,7 @@
     "@testing-library/react": "^16.0.1",
     "@testing-library/react-native": "^12.5.1",
     "@types/jest": "^29.5.12",
-    "@types/react": "^19.0.12",
+    "@types/react": "18.3.12",
     "@types/react-native": "^0.73.0",
     "@types/react-native-video": "^5.0.20",
     "@types/redux-persist": "^4.3.1",
