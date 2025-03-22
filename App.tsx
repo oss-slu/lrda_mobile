@@ -7,10 +7,19 @@ import { Provider } from 'react-redux';
 import { store, persistor } from './redux/store/store';
 import { AddNoteProvider } from './lib/context/AddNoteContext';
 import 'react-native-gesture-handler';
+import { useFonts } from 'expo-font';
 import { PersistGate } from 'redux-persist/lib/integration/react'; 
 
 
 export default function App() {
+
+  const [fontsLoaded] = useFonts({
+    'Espial-Regular': require('./assets/fonts/Espial-Regular.otf'),
+  })
+
+  if (!fontsLoaded) {
+    return null; // Alternatively, render a loading component
+  }
   
   return (
     <Provider store={store}>

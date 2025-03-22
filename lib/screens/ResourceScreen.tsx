@@ -3,12 +3,13 @@ import { View, Text, TouchableOpacity, StyleSheet, Dimensions, FlatList, StatusB
 import { useTheme } from '../components/ThemeProvider';
 import Feather from 'react-native-vector-icons/Feather';
 import { bibiloText } from '../data';
+import { defaultTextFont } from '../../styles/globalStyles';
 
 const { width, height } = Dimensions.get("window");
 
 const renderList = (data, navigation) => (
     <View style={styles.eachBibiloComponent}>
-        <Text>{data.item.bibiloText}</Text>
+        <Text style={{...defaultTextFont}}>{data.item.bibiloText}</Text>
         <View style={styles.readMoreContainer}>
             <TouchableOpacity onPress={() => { navigation.navigate('ReadMore') }}>
                 <Text style={styles.readMoreLink}>Read more</Text>
@@ -29,7 +30,7 @@ function ResourceScreen({ navigation }) {
                         <Feather name={'arrow-left'} size={30} />
                     </TouchableOpacity>
                     <View style={styles.headerHeading}>
-                        <Text style={{ fontSize: 17, fontWeight: 'bold' }}>Resource</Text>
+                        <Text style={{ ...defaultTextFont, fontSize: 17, fontWeight: 'bold' }}>Resource</Text>
                     </View>
                 </View>
             </View>
@@ -72,6 +73,7 @@ const styles = StyleSheet.create({
         padding: 10,
     },
     bibilographyTxt: {
+        ...defaultTextFont,
         fontSize: 15,
         fontWeight: '600',
 
@@ -97,6 +99,7 @@ const styles = StyleSheet.create({
         paddingRight: 20,
     },
     readMoreLink: {
+        ...defaultTextFont,
         color: '#0e0ec6'
     }
 })

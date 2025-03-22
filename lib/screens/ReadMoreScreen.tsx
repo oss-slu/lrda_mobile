@@ -4,6 +4,7 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import WebView from 'react-native-webview';
 import { useTheme } from '../components/ThemeProvider';
 import Feather from 'react-native-vector-icons/Feather';
+import { defaultTextFont } from '../../styles/globalStyles';
 
 
 
@@ -28,7 +29,7 @@ function ReadMoreScreen({ navigation }) {
                         <Feather name={'arrow-left'} size={30} />
                     </TouchableOpacity>
                     <View style={styles.headerHeading}>
-                        <Text style={{ fontSize: 17, fontWeight: 'bold' }}>Resource</Text>
+                        <Text style={{ ...defaultTextFont, fontSize: 17, fontWeight: 'bold' }}>Resource</Text>
                     </View>
                 </View>
             </View>
