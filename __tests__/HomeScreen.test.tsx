@@ -1,5 +1,7 @@
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
+import { Provider } from 'react-redux';
+import configureStore from 'redux-mock-store'; // Import for creating a mock store
 import HomeScreen from '../lib/screens/HomeScreen';
 import { AddNoteProvider } from '../lib/context/AddNoteContext';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -12,7 +14,7 @@ jest.mock('../lib/components/ThemeProvider', () => ({
   }),
 }));
 
-// Mock Firebase services
+// Mock Firebase services (unchanged)
 jest.mock("firebase/app", () => ({
   initializeApp: jest.fn(),
 }));
@@ -73,6 +75,10 @@ jest.mock('../lib/utils/api_calls', () => ({
   fetchMessages: jest.fn(() => Promise.resolve([])),
 }));
 
+// Create a mock store
+const mockStore = configureStore([]);
+const store = mockStore({}); // You can pass an initial state here if needed
+
 beforeEach(() => {
   jest.clearAllMocks();
   jest.spyOn(console, 'log').mockImplementation(() => {});
@@ -89,9 +95,11 @@ describe('HomeScreen', () => {
     const routeMock = { params: { untitledNumber: 1 } };
 
     const { getByTestId } = render(
-      <AddNoteProvider>
-        <HomeScreen route={routeMock as any} showTooltip={false} />
-      </AddNoteProvider>
+      <Provider store={store}> {/* Wrap with Provider */}
+        <AddNoteProvider>
+          <HomeScreen route={routeMock as any} showTooltip={false} />
+        </AddNoteProvider>
+      </Provider>
     );
 
     // Wait for the HomeScreen to be rendered
@@ -103,9 +111,11 @@ describe('HomeScreen', () => {
     const routeMock = { params: { untitledNumber: 1 } };
 
     const { getByTestId } = render(
-      <AddNoteProvider>
-        <HomeScreen route={routeMock as any} showTooltip={false} />
-      </AddNoteProvider>
+      <Provider store={store}> {/* Wrap with Provider */}
+        <AddNoteProvider>
+          <HomeScreen route={routeMock as any} showTooltip={false} />
+        </AddNoteProvider>
+      </Provider>
     );
 
     // Wait for the toggle button to be rendered
@@ -124,9 +134,11 @@ describe('HomeScreen', () => {
     const routeMock = { params: { untitledNumber: 1 } };
 
     const { getByTestId } = render(
-      <AddNoteProvider>
-        <HomeScreen route={routeMock as any} showTooltip={false} />
-      </AddNoteProvider>
+      <Provider store={store}> {/* Wrap with Provider */}
+        <AddNoteProvider>
+          <HomeScreen route={routeMock as any} showTooltip={false} />
+        </AddNoteProvider>
+      </Provider>
     );
 
     // Wait for the sort button to be rendered
@@ -138,9 +150,11 @@ describe('HomeScreen', () => {
     const routeMock = { params: { untitledNumber: 1 } };
   
     const { getByTestId } = render(
-      <AddNoteProvider>
-        <HomeScreen route={routeMock as any} showTooltip={false} />
-      </AddNoteProvider>
+      <Provider store={store}> {/* Wrap with Provider */}
+        <AddNoteProvider>
+          <HomeScreen route={routeMock as any} showTooltip={false} />
+        </AddNoteProvider>
+      </Provider>
     );
   
     // Wait for the sort button to be rendered
@@ -158,9 +172,11 @@ describe('HomeScreen', () => {
     const routeMock = { params: { untitledNumber: 1 } };
 
     const { getByTestId } = render(
-      <AddNoteProvider>
-        <HomeScreen route={routeMock as any} showTooltip={false} />
-      </AddNoteProvider>
+      <Provider store={store}> {/* Wrap with Provider */}
+        <AddNoteProvider>
+          <HomeScreen route={routeMock as any} showTooltip={false} />
+        </AddNoteProvider>
+      </Provider>
     );
 
     // Wait for the toggle button to be rendered
@@ -169,16 +185,17 @@ describe('HomeScreen', () => {
     // Simulate pressing the toggle button and check if it is rendered
     fireEvent.press(togglePrivateNotesButton);
     expect(togglePrivateNotesButton).toBeTruthy();
-  }
-  );
+  });
 
   it('toggles public notes', async () => {
     const routeMock = { params: { untitledNumber: 1 } };
 
     const { getByTestId } = render(
-      <AddNoteProvider>
-        <HomeScreen route={routeMock as any} showTooltip={false} />
-      </AddNoteProvider>
+      <Provider store={store}> {/* Wrap with Provider */}
+        <AddNoteProvider>
+          <HomeScreen route={routeMock as any} showTooltip={false} />
+        </AddNoteProvider>
+      </Provider>
     );
 
     // Wait for the toggle button to be rendered
@@ -187,17 +204,17 @@ describe('HomeScreen', () => {
     // Simulate pressing the toggle button and check if it is rendered
     fireEvent.press(togglePublicNotesButton);
     expect(togglePublicNotesButton).toBeTruthy();
-
-  }
-  );
+  });
 
   it('greets the user', async () => {
     const routeMock = { params: { untitledNumber: 1 } };
 
     const { getByTestId } = render(
-      <AddNoteProvider>
-        <HomeScreen route={routeMock as any} showTooltip={false} />
-      </AddNoteProvider>
+      <Provider store={store}> {/* Wrap with Provider */}
+        <AddNoteProvider>
+          <HomeScreen route={routeMock as any} showTooltip={false} />
+        </AddNoteProvider>
+      </Provider>
     );
 
     // Wait for the greeting component to be rendered
@@ -209,9 +226,11 @@ describe('HomeScreen', () => {
     const routeMock = { params: { untitledNumber: 1 } };
 
     const { getByTestId } = render(
-      <AddNoteProvider>
-        <HomeScreen route={routeMock as any} showTooltip={false} />
-      </AddNoteProvider>
+      <Provider store={store}> {/* Wrap with Provider */}
+        <AddNoteProvider>
+          <HomeScreen route={routeMock as any} showTooltip={false} />
+        </AddNoteProvider>
+      </Provider>
     );
 
     // Wait for the notes list to be rendered
@@ -224,9 +243,11 @@ describe('HomeScreen', () => {
     const routeMock = { params: { untitledNumber: 1 } };
   
     const { getByTestId } = render(
-      <AddNoteProvider>
-        <HomeScreen route={routeMock as any} navigation={{ navigate: mockNavigate } as any} showTooltip={false} />
-      </AddNoteProvider>
+      <Provider store={store}> {/* Wrap with Provider */}
+        <AddNoteProvider>
+          <HomeScreen route={routeMock as any} navigation={{ navigate: mockNavigate } as any} showTooltip={false} />
+        </AddNoteProvider>
+      </Provider>
     );
   
     // Find the account button
@@ -244,9 +265,11 @@ describe('HomeScreen', () => {
     const routeMock = { params: { untitledNumber: 1 } };
   
     const { getByText } = render(
-      <AddNoteProvider>
-        <HomeScreen route={routeMock as any} showTooltip={false} />
-      </AddNoteProvider>
+      <Provider store={store}> {/* Wrap with Provider */}
+        <AddNoteProvider>
+          <HomeScreen route={routeMock as any} showTooltip={false} />
+        </AddNoteProvider>
+      </Provider>
     );
   
     // Wait for "Notes" title to appear
@@ -262,20 +285,21 @@ describe('HomeScreen', () => {
     jest.spyOn(ApiService, "fetchMessages").mockResolvedValueOnce([]);
   
     const { getByTestId } = render(
-      <AddNoteProvider>
-        <HomeScreen route={routeMock as any} showTooltip={false} />
-      </AddNoteProvider>
+      <Provider store={store}> {/* Wrap with Provider */}
+        <AddNoteProvider>
+          <HomeScreen route={routeMock as any} showTooltip={false} />
+        </AddNoteProvider>
+      </Provider>
     );
   
-    //Ensure the API call was triggered
+    // Ensure the API call was triggered
     await waitFor(() => {
       expect(ApiService.fetchMessages).toHaveBeenCalled();
     });
   
-    //Ensure the Lottie animation appears
+    // Ensure the Lottie animation appears
     await waitFor(() => {
       expect(getByTestId("no-results-animation")).toBeTruthy();
     });
   });
-  
 });
