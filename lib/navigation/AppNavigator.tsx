@@ -189,26 +189,16 @@ const AppNavigator: React.FC = () => {
          tabBarShowLabel: true, // Enable default labels
          tabBarHideOnKeyboard: true,
          tabBarStyle: {
-           backgroundColor: 'transparent',
-           position: 'absolute',
-           bottom: Platform.OS === 'ios' ? -20 : 0,
-           left: 0,
-           right: 0,
-           elevation: 0,
-           borderTopWidth: 0,
-           tabBarStyle: {
-            backgroundColor: 'transparent',
-            position: 'absolute',
-            bottom: 0, // Ensures it's positioned correctly on all platforms
-            left: 0,
-            right: 0,
-            elevation: 0,
-            borderTopWidth: 0,
-            paddingBottom: Platform.OS === 'ios' ? 30 : 15, // More padding for Android too
-            height: Platform.OS === 'ios' ? '10%' : '8%', // Increase height for Android as well
-          },
-          
-         },
+          backgroundColor: theme.primaryColor,  // Ensure it's visible
+          position: 'absolute',
+          bottom: 0,  // Fully extend to the bottom
+          left: 0,
+          right: 0,
+          height: Platform.OS === 'ios' ? 80 : 70, // Increase height for full coverage
+          paddingBottom: Platform.OS === 'ios' ? 30 : 20, // Ensure space for gestures
+          borderTopWidth: 0,  // Remove any top borders
+          elevation: 0,  // Remove shadow
+        },
          tabBarItemStyle: {
            backgroundColor: theme.primaryColor,
            height: '100%'
@@ -223,7 +213,7 @@ const AppNavigator: React.FC = () => {
               headerShown: false,
               tabBarLabel: 'Home',
               tabBarIcon: ({ color, size, focused }) => (
-                <Ionicons name="home" color={isDarkmode ? focused ? 'white' : 'grey' : focused ? 'black' : 'grey'} size={size} />
+                <Ionicons name="home" color={isDarkmode ? focused ? 'white' : 'blue' : focused ? 'black' : 'blue'} size={size} />
               ),
             }}
           />
@@ -235,7 +225,7 @@ const AppNavigator: React.FC = () => {
               headerShown: false,
               tabBarLabel: 'Library',
               tabBarIcon: ({ color, size, focused }) => (
-                <Ionicons name="library" color={isDarkmode ? focused ? 'white' : 'grey' : focused ? 'black' : 'grey'} size={size} />
+                <Ionicons name="library" color={isDarkmode ? focused ? 'white' : 'blue' : focused ? 'black' : 'blue'} size={size} />
               ),
             }}
           />
@@ -246,7 +236,7 @@ const AppNavigator: React.FC = () => {
             options={{
               headerShown: false,
               tabBarLabel: 'Add Note',
-              tabBarIcon: ({ color, size }) => (
+              tabBarIcon: ({ color, size, focused }) => (
                 <Ionicons name="library" color={color} size={size} />
               ),
               tabBarButton: (props) => (<AddNoteBtnComponent />)
@@ -255,12 +245,12 @@ const AppNavigator: React.FC = () => {
           }
 
           <Tab.Screen
-            name="Explore"
+            name="Map"
             component={ExploreScreen}
             options={{
               headerShown: false,
               tabBarIcon: ({ color, size, focused }) => (
-                <Ionicons name="map" color={isDarkmode ? focused ? 'white' : 'grey' : focused ? 'black' : 'grey'} size={size} />
+                <Ionicons name="map" color={isDarkmode ? focused ? 'white' : 'blue' : focused ? 'black' : 'blue'} size={size} />
               ),
             }}
           />
@@ -270,7 +260,7 @@ const AppNavigator: React.FC = () => {
             options={{
               headerShown: false,
               tabBarIcon: ({ color, size, focused }) => (
-                <Ionicons name="menu-outline" color={isDarkmode ? focused ? 'white' : 'grey' : focused ? 'black' : 'grey'} size={size + 10} />
+                <Ionicons name="menu-outline" color={isDarkmode ? focused ? 'white' : 'blue' : focused ? 'black' : 'blue'} size={size + 10} />
               ),
             }}
           />

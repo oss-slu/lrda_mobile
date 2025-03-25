@@ -7,12 +7,15 @@ import { useAddNoteContext } from '../context/AddNoteContext'
 import { useSelector, useDispatch } from 'react-redux'
 import Feather from 'react-native-vector-icons/Feather'
 import { toogleAddNoteState } from '../../redux/slice/AddNoteStateSlice'
+import { useTheme } from './ThemeProvider'
+
 function AddNoteBtnComponent() {
 
     const dispatch = useDispatch();
 
     const {navigateToAddNote, publishNote} = useAddNoteContext();
-    const appThemeColor = useSelector((state) => state?.themeSlice?.theme)
+    const { theme, isDarkmode } = useTheme();
+
     const addNoteState = useSelector((state) => state?.addNoteState?.isAddNoteOpned);
     
     const handleAddNote = () => {
@@ -27,17 +30,39 @@ function AddNoteBtnComponent() {
 
   return (
    <View style={[styles.conatiner,]} >
-        <SvgIcon style={[styles.backgroung,]}/>
-        <TouchableOpacity style={styles.button} onPress={!addNoteState ? handleAddNote : handlePublish}>
-            {
-                !addNoteState ? 
-                (<IonIcons style={styles.buttonIcon} name = 'add' size={25}/>)
-                :
-                (<Feather style={styles.buttonIcon} name = 'upload-cloud' size={25}/>)
-            }
-        </TouchableOpacity>
-        <Text style={styles.label}>Add/Publish</Text>
-   </View>
+        <SvgIcon style={[styles.backgroung, {width:60}]}/>
+        <TouchableOpacity
+        style={[
+          styles.button,
+          { backgroundColor: theme.primaryColor } // ⬅️ Apply theme color
+        ]}
+        onPress={!addNoteState ? handleAddNote : handlePublish}
+      >
+           {!addNoteState ? (
+    <IonIcons
+      name="add"
+      size={25}
+      style={[
+        styles.buttonIcon,
+        { color: isDarkmode ? theme.iconColor || 'blue' : 'blue' }
+      ]}
+    />
+  ) : (
+    <Feather
+      name="upload-cloud"
+      size={25}
+      style={[
+        styles.buttonIcon,
+        { color: isDarkmode ? theme.iconColor || 'blue' : 'blue' }
+      ]}
+    />
+  )}
+      </TouchableOpacity>
+      <Text style={[styles.label, { color: theme.textColor || 'gray' }]}>
+  {!addNoteState ? 'Add' : 'Publish'}
+</Text>
+
+    </View>
   )
 }
 
@@ -51,8 +76,8 @@ const styles = StyleSheet.create({
     backgroung:{
         position: 'absolute',
         backgroundColor: 'transparent',
-        bottom:-26,
-        transform: [{ scaleY: 0.8 }], // Reduce vertical stretch of the curve
+        bottom:-35,
+        transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }], // Scale width inward
     },
     button: {
         backgroundColor: '#f0f0f0',
