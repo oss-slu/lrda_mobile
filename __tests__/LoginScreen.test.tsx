@@ -37,6 +37,8 @@ jest.mock("react-native-safe-area-context", () => {
   };
 });
 
+
+
 jest.mock("firebase/storage", () => ({
   getStorage: jest.fn(),
 }));

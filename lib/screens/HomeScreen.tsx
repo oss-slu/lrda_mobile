@@ -35,6 +35,8 @@ import { useAddNoteContext } from "../context/AddNoteContext";
 import LottieView from 'lottie-react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { green } from "react-native-reanimated/lib/typescript/Colors";
+import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
+import { useSelector, useDispatch } from 'react-redux'
 
 const { width, height } = Dimensions.get("window");
 const user = User.getInstance();
@@ -66,9 +68,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const animation = useRef(new Animated.Value(0)).current; // Animation value
   const [isSortOpened, setIsSortOpened] = useState(false);
   const [selectedSortOption, setSelectedSortOption] = useState(1);
-
   let textLength = 18;
-
+  const dispatch = useDispatch();
   
   useEffect(() => {
     const navigateToAddNote = () => {
@@ -84,8 +85,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   useEffect(() => {
     (async () => {
       const name = await user.getName();
-      setUserName(name);
       if (name) {
+        const firstName = name.split(" ")[0];
+        setUserName(firstName);
+  
         const initials = name
           .split(" ")
           .map((namePart) => namePart[0])
@@ -94,6 +97,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       }
     })();
   }, []);
+  
 
   const refreshPage = () => {
     setUpdateCounter(updateCounter + 1);
@@ -399,6 +403,7 @@ const handleSortOption = ({ option }) => {
         }}
         onPress={() => {
           if (!item.published) {
+            dispatch(toogleAddNoteState());
             navigation.navigate("EditNote", {
               note: {
                 ...item,
@@ -515,7 +520,7 @@ const handleSortOption = ({ option }) => {
 
             <View testID="greeting-component" style={styles(theme, width).userWishContainer}>
               <Greeting />
-              <Text style={styles(theme, width).userName}>{userName}</Text>
+              <Text testID="user-name" style={styles(theme, width).userName}>{userName}</Text>
             </View>
           </View>
 
@@ -761,7 +766,10 @@ const styles = (theme, width, color, isDarkmode) =>
     userName: {
       fontWeight: '500',
       height: "50%",
+      textAlign: 'center',       
+      alignSelf: 'center',       
     },
+    
     toolContainer: {
       flexDirection: 'row',
       justifyContent: 'space-between',

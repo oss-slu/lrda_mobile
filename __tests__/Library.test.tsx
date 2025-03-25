@@ -15,6 +15,17 @@ jest.mock('firebase/database', () => ({
     getDatabase: jest.fn(),
 }));
 
+jest.mock('firebase/firestore', () => ({
+  getFirestore: jest.fn(() => ({})), 
+  doc: jest.fn(() => ({})), 
+  getDoc: jest.fn(() => Promise.resolve({ exists: () => false })),
+}));
+
+
+jest.mock("firebase/storage", () => ({
+  getStorage: jest.fn(),
+}));
+
 jest.mock('../lib/utils/data_conversion', () => {
   return {
     convertMediaTypes: (data: any[]) => {
@@ -120,7 +131,7 @@ jest.mock('expo-location', () => ({
 // Silence console warnings during the test
 beforeEach(() => {
   jest.clearAllMocks();
-
+  jest.useFakeTimers();
   jest.spyOn(console, 'log').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
   jest.spyOn(console, 'warn').mockImplementation(() => {});
@@ -128,6 +139,8 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  jest.restoreAllMocks();
+  jest.useRealTimers();
   moxios.uninstall();
 });
 
