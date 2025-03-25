@@ -29,6 +29,7 @@ import ResourceScreen from "../screens/ResourceScreen";
 import ReadMoreScreen from "../screens/ReadMoreScreen";
 import AppThemeSelectorScreen from "../screens/AppThemeSelectorScreen";
 import { Keyboard } from "react-native";
+import AboutScreen from "../screens/AboutScreen";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -72,6 +73,11 @@ const MoreStack = () => (
     <Stack.Screen
       name="MorePage"
       component={MorePage}
+      options={{ headerShown: false }}
+    />
+     <Stack.Screen
+      name="AboutScreen"
+      component={AboutScreen}
       options={{ headerShown: false }}
     />
     <Stack.Screen
