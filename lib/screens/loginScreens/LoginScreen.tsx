@@ -15,11 +15,12 @@ import {
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Snackbar } from "react-native-paper";
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from "react-redux";
 import { setNavState } from "../../../redux/slice/navigationSlice";
 import { RootState } from "../../../redux/store/store";
 import { User } from "../../models/user_class";
 import { removeItem } from "../../utils/async_storage";
+import { LinearGradient } from "expo-linear-gradient";
 
 const user = User.getInstance();
 
@@ -36,7 +37,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   const [loading, setLoading] = useState(false);
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const navState = useSelector((state: RootState) => state.navigation.navState);
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const [hasNavigated, setHasNavigated] = useState(false);
 
   const fadeOut = () => {
@@ -49,20 +50,19 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
 
   useEffect(() => {
     if (navState === "home" && !hasNavigated) {
-      setHasNavigated(true); // Prevent repeated navigation
+      setHasNavigated(true);
       navigation.navigate("HomeTab");
     }
   }, [navState, hasNavigated]);
-  
+
   useEffect(() => {
     const timer = setTimeout(() => {
       fadeOut();
     }, 2000);
-
     return () => clearTimeout(timer);
   }, []);
 
-  console.log("in login page the redux value is ", navState)
+  console.log("in login page the redux value is ", navState);
 
   useEffect(() => {
     (async () => {
@@ -78,30 +78,23 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   const onDismissSnackBar = () => toggleSnack(false);
 
   const handleLogin = async () => {
-
     if (username === "" || password === "") {
       toggleSnack(!snackState);
     } else {
-
-      
-
       try {
-        const status = await user.login(username, password)
-        if (status == "success") {
+        const status = await user.login(username, password);
+        if (status === "success") {
           const userId = await user.getId();
-          // console.log("in login page, Inside the is statement of success ", userId)
           if (userId !== null) {
-              setUsername("")
-              setPassword("")
-              dispatch(setNavState('home'));
+            setUsername("");
+            setPassword("");
+            dispatch(setNavState("home"));
           }
         }
-      }
-      catch (error) {
+      } catch (error) {
         console.log("login failed :", error);
-        toggleSnack(true)
+        toggleSnack(true);
       }
-
     }
   };
 
@@ -120,7 +113,6 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
       setLoading(true);
       await handleLogin();
       setLoading(false);
-
     } catch (e) {
       console.log(e);
       setLoading(false);
@@ -128,83 +120,83 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   };
 
   return (
-    <KeyboardAwareScrollView
-      contentContainerStyle={styles.container}
-      style={{ backgroundColor: "#F4DFCD" }}
-      keyboardShouldPersistTaps="handled"
-    >
-      <ImageBackground
-        source={require("../../../assets/splash.jpg")}
-        style={styles.imageBackground}
+      <KeyboardAwareScrollView
+          contentContainerStyle={styles.container}
+          style={{ backgroundColor: "#F4DFCD" }}
+          keyboardShouldPersistTaps="handled"
       >
-        <Snackbar
-          visible={snackState}
-          onDismiss={onDismissSnackBar}
-          style={{
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "white",
-          }}
+        <ImageBackground
+            source={require("../../../assets/splash.jpg")}
+            style={styles.imageBackground}
         >
-          <Text style={{ textAlign: "center" }}>Invalid User Credentials</Text>
-        </Snackbar>
-        {firstClick ? (
-          <TouchableOpacity
-            activeOpacity={1}
-            style={styles.title}
-            onPress={fadeOut}
+          {/* Overlay gradient */}
+          <Snackbar
+              visible={snackState}
+              onDismiss={onDismissSnackBar}
+              style={{
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "white",
+              }}
           >
-            <Animated.Text style={[styles.logo, { opacity: fadeAnim }]}>
-              Where's {"\n"} Religion?
-            </Animated.Text>
-          </TouchableOpacity>
-        ) : (
-          <View style={styles.loginBox}>
-            <Text style={[styles.logo, { marginBottom: 50 }]}>Login</Text>
-            <View style={styles.inputView}>
-              <TextInput
-                style={styles.inputText}
-                placeholder="Email..."
-                placeholderTextColor="#003f5c"
-                value={username}
-                onChangeText={(text) => setUsername(text)}
-                onSubmitEditing={handleLogin}
-                testID="email-input"
-                autoCapitalize="none"
-              />
-            </View>
-
-            <View style={styles.inputView}>
-              <TextInput
-                secureTextEntry
-                style={styles.inputText}
-                placeholder="Password..."
-                placeholderTextColor="#003f5c"
-                value={password}
-                onChangeText={(text) => setPassword(text)}
-                onSubmitEditing={handleLogin}
-                testID="password-input"
-              />
-            </View>
-            <TouchableOpacity>
-              <Text style={styles.forgot}>Forgot Password?</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={onLoginPress} style={styles.buttons} testID="login-button">
-              {!loading && <Text style={{color: "white", fontWeight: "600", fontSize: 15}}>
-                Login
-                </Text>}
-              {loading && <ActivityIndicator size="small" color="white" />}
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleGoRegister} style={styles.buttons} testID="register-button">
-              <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
-                Register
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </ImageBackground>
-    </KeyboardAwareScrollView>
-
+            <Text style={{ textAlign: "center" }}>Invalid User Credentials</Text>
+          </Snackbar>
+          {firstClick ? (
+              <TouchableOpacity activeOpacity={1} style={styles.title} onPress={fadeOut}>
+                <Animated.Text style={[styles.logo, { opacity: fadeAnim }]}>
+                  Where's {"\n"} Religion?
+                </Animated.Text>
+              </TouchableOpacity>
+          ) : (
+              <View style={styles.loginBox}>
+                <Text style={[styles.logo, styles.loginTitle]}>Login</Text>
+                <View style={styles.inputView}>
+                  <TextInput
+                      style={styles.inputText}
+                      placeholder="Email"
+                      placeholderTextColor="#003f5c"
+                      value={username}
+                      onChangeText={(text) => setUsername(text)}
+                      onSubmitEditing={handleLogin}
+                      testID="email-input"
+                      autoCapitalize="none"
+                  />
+                </View>
+                <View style={styles.inputView}>
+                  <TextInput
+                      secureTextEntry
+                      style={styles.inputText}
+                      placeholder="Password"
+                      placeholderTextColor="#003f5c"
+                      value={password}
+                      onChangeText={(text) => setPassword(text)}
+                      onSubmitEditing={handleLogin}
+                      testID="password-input"
+                  />
+                </View>
+                <TouchableOpacity>
+                  <Text style={styles.forgot}>Forgot Password</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={onLoginPress} style={styles.primaryButton} testID="login-button">
+                  {!loading && (
+                      <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
+                        Sign In
+                      </Text>
+                  )}
+                  {loading && <ActivityIndicator size="small" color="white" />}
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleGoRegister} style={styles.registerButton} testID="register-button">
+                  <Text style={[styles.registerText, { fontFamily: "CustomFont" }]}>
+                    Don't have an account?{' '}
+                    <Text style={styles.registerLink} onPress={handleGoRegister}>
+                      Sign up
+                    </Text>
+                  </Text>
+                </TouchableOpacity>
+              </View>
+          )}
+        </ImageBackground>
+      </KeyboardAwareScrollView>
   );
 };
 
@@ -222,33 +214,29 @@ const styles = StyleSheet.create({
   },
   inputView: {
     width: "80%",
-    backgroundColor: "#fff",
-    borderRadius: 25,
-    height: 50,
+    borderBottomWidth: 1,
+    borderColor: "black",
     marginBottom: 20,
-    padding: 20,
-    justifyContent: "center",
-    alignItems: "flex-start",
-    borderColor: "gray",
-    borderWidth: 2,
   },
   inputText: {
     height: 50,
     color: "#111111",
-    fontSize: 16,
+    fontSize: 14,
     width: "100%",
-    borderRadius: 25,
   },
   forgot: {
-    color: "#111111",
+    color: "#0000EE",
     fontSize: 12,
     fontWeight: "400",
-    marginBottom: 20,
+    alignSelf: "flex-end",
+    marginBottom: 10,
+    marginRight: -100,
   },
   imageBackground: {
     flex: 1,
     resizeMode: "cover",
     justifyContent: "center",
+
   },
   title: {
     justifyContent: "center",
@@ -257,32 +245,57 @@ const styles = StyleSheet.create({
     marginBottom: 200,
     paddingVertical: 200,
   },
-  buttons: {
-    backgroundColor: "rgb(17,47,187)",
-    width: 200,
-    height: 50,
-    borderRadius: 30,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 10,
-    elevation: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
+  loginTitle: {
+    alignSelf: "flex-start",
+    marginLeft: 20,
+    marginBottom: 30,
+    fontSize: 36,
   },
   loginBox: {
-    alignSelf: "center",
-    alignContent: "center",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "white",
+    backgroundColor: "rgba(245,245,245,0.8)",
+    width: 290,
     height: 500,
-    width: 300,
-    borderRadius: 10,
+    borderRadius: 20,
+    alignSelf: "center",
+    alignItems: "center",
+    paddingVertical: 30,
+    paddingHorizontal: 20,
     elevation: 10,
     shadowColor: "#000",
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
+    shadowOpacity: .2,
+    shadowRadius: 5,
+  },
+  primaryButton: {
+    backgroundColor: "#A020F0", // Vibrant purple
+    width: "90%", // Full-width (matching inputs)
+    height: 45,
+    borderRadius: 10,
+    alignItems: "center", // Left-align text
+    justifyContent: "center",
+    marginTop: 60,
+  },
+  registerButton: {
+    alignSelf: "flex-end",
+    marginRight: 30,
+    fontSize: 12,
+    fontWeight: "400",
+  },
+  linkText: {
+    color: "#0000EE", // Blue text for secondary action
+    fontSize: 15,
+    fontWeight: "600",
+    textAlign: "center",
+    paddingTop: 20,
+  },
+  registerText: {
+    color: "#111111", // Default text color for the register message
+    fontSize: 12,
+    fontWeight: "600",
+    textAlign: "center",
+    marginTop: 20,
+  },
+  registerLink: {
+    color: "#0000EE", // Blue color for the clickable "Register now" link
   },
 });
 
