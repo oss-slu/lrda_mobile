@@ -1,2 +1,2 @@
-export const defaultTextFont = { fontFamily: "Espial-Regular" };
+export const defaultTextFont = { fontFamily: "Inter" };
 

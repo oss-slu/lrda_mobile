@@ -14,7 +14,7 @@ import { PersistGate } from 'redux-persist/lib/integration/react';
 export default function App() {
 
   const [fontsLoaded] = useFonts({
-    'Espial-Regular': require('./assets/fonts/Espial-Regular.otf'),
+    'Inter': require('./assets/fonts/Inter.otf'),
   })
 
   if (!fontsLoaded) {
