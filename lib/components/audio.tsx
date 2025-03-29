@@ -10,6 +10,7 @@ import { Audio } from "expo-av";
 import uuid from "react-native-uuid";
 import { uploadAudio } from "../utils/S3_proxy";  // Assuming you have a function to upload the audio
 import { AudioType } from "../models/media_class";  // Assuming AudioType is correctly defined
+import { defaultTextFont } from "../../styles/globalStyles";
 
 type AudioContainerProps = {
   newAudio: AudioType[];
@@ -86,7 +87,7 @@ const AudioContainer = ({ newAudio, setNewAudio, insertAudioToEditor }: AudioCon
         ) : (
           <Ionicons name={"mic-outline"} size={60} color="#111111" />
         )}
-        <Text style={{ fontSize: 24, fontWeight: "600" }}>Recordings</Text>
+        <Text style={{ ...defaultTextFont, fontSize: 24, fontWeight: "600" }}>Recordings</Text>
         {isRecording ? (
           <TouchableOpacity onPress={stopRecording}>
             <Ionicons name={"stop-circle-outline"} size={45} color="#111111" />
@@ -101,7 +102,7 @@ const AudioContainer = ({ newAudio, setNewAudio, insertAudioToEditor }: AudioCon
       <View style={styles.audioList}>
         {newAudio?.map((audio, index) => (
           <View style={styles.audioItem} key={index}>
-            <Text>{audio.name}</Text>
+            <Text style={{...defaultTextFont}}>{audio.name}</Text>
             <TouchableOpacity onPress={() => console.log("Play audio")}>
               <Ionicons name="play-outline" size={25} />
             </TouchableOpacity>

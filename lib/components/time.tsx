@@ -1,6 +1,7 @@
 import React, { useState, useEffect} from "react";
 import { View, Text, StyleSheet ,Button, Platform} from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { defaultTextFont } from "../../styles/globalStyles";
 
 export function formatToLocalDateString(date: Date): string {
   const localTime = new Date(date);
@@ -153,6 +154,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   label: {
+    ...defaultTextFont,
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 1,
@@ -180,9 +182,11 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   savedTime: {
+    ...defaultTextFont,
     fontSize: 16,
   },
   selectedDateTimeLabel: {
+    ...defaultTextFont,
     marginBottom: 10, 
     fontSize: 16,
     textAlign: 'center',

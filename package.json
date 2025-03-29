@@ -35,7 +35,7 @@
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.8",
     "enzyme-to-json": "^3.6.2",
-    "expo": "~52.0.38",
+    "expo": "~52.0.41",
     "expo-app-loading": "^2.1.1",
     "expo-av": "^15.0.1",
     "expo-constants": "~17.0.8",
