@@ -13,12 +13,13 @@ import {
   Animated,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import Slider from "@react-native-community/slider";
 import RenderHTML, { TNodeRendererProps } from "react-native-render-html";
 import ApiService from "../../utils/api_calls";
 import { useTheme } from "../../components/ThemeProvider";
 import ImageModal from "./ImageModal";
 import VideoModal from "./VideoModal";
-import AudioPlayer from "../../components/AudioPlayer"; // Assuming you have this component
+import { Audio, Video } from "expo-av";
 import { VideoType } from "../../models/media_class";
 
 // Audio component.
@@ -451,8 +452,6 @@ interface Note {
   creator?: string;
   time?: string;
   images?: { uri: string }[];
-  videos?: { uri: string }[]; // Video URIs if applicable
-  audios?: { uri: string }[]; // Audio URIs to store uploaded audio
 }
 
 interface NoteDetailModalProps {
@@ -470,6 +469,7 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
   const { width } = useWindowDimensions();
   const { theme } = useTheme();
 
+  // Reset state whenever the note changes
   useEffect(() => {
     setCreatorName("");
     setSelectedImage(null);
@@ -497,49 +497,50 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
     setIsVideoVisible(true);
   };
 
-  const customRenderers = useMemo(() => ({
-    img: ({ tnode }: TNodeRendererProps<any>) => {
-      const { src, alt } = tnode.attributes;
-      return (
-        <View style={styles.imageWrapper}>
-          <TouchableOpacity onPress={() => onPicturePress(src as string)} testID="imageButton">
-            <Image
-              source={{ uri: src as string }}
-              style={styles.image}
-              accessibilityLabel={alt as string}
-            />
-          </TouchableOpacity>
-        </View>
-      );
-    },
-    a: ({ tnode }: TNodeRendererProps<any>) => {
-      const { href } = tnode.attributes;
+  // Custom renderers for RenderHTML
+  const customRenderers = useMemo(
+    () => ({
+      img: ({ tnode }: TNodeRendererProps<any>) => {
+        const { src, alt } = tnode.attributes;
+        return (
+          <View style={{ marginVertical: 10, alignItems: "center" }}>
+            <LoadingImage uri={src as string} alt={alt as string} onPress={onPicturePress} />
+          </View>
+        );
+      },
+      a: ({ tnode }: TNodeRendererProps<any>) => {
+        const { href } = tnode.attributes;
 
-      if (href && (href.endsWith(".mp4") || href.endsWith(".mov"))) {
-        return (
-          <View style={[styles.videoContainer, { width: width - 40 }]}>
-            <TouchableOpacity onPress={() => onVideoPress({ uri: href as string })} testID="videoButton">
-              <View style={styles.videoInner}>
-                <Ionicons name="play-circle-outline" size={50} color="white" />
-              </View>
-            </TouchableOpacity>
-          </View>
-        );
-      } else if (href && (href.endsWith(".mp3") || href.endsWith(".wav") || href.endsWith(".3gp"))) {
-        return (
-          <View style={styles.audioWrapper}>
-            <AudioPlayer audioUri={href as string} />
-          </View>
-        );
-      }
-      return <Text style={{ color: theme.text, marginVertical: 10 }}>{tnode.data}</Text>;
-    },
-  }), [theme]);
+        // If it's a video
+        if (href && (href.endsWith(".mp4") || href.endsWith(".mov"))) {
+          return (
+            <View style={{ marginVertical: 20, alignSelf: "center" }}>
+              <LoadingVideo uri={href as string} onPress={(uri) => onVideoPress({ uri })} width={width} />
+            </View>
+          );
+        }
+
+        // If it's an audio file
+        if (href && (href.endsWith(".mp3") || href.endsWith(".wav") || href.endsWith(".3gp"))) {
+          return (
+            <View style={{ marginVertical: 10, alignItems: "center", width: width - 40 }}>
+              <LoadingAudio uri={href as string} />
+            </View>
+          );
+        }
+
+        // Otherwise, just render text
+        return <Text style={{ color: theme.text, marginVertical: 10 }}>{tnode.data}</Text>;
+      },
+    }),
+    [theme, width]
+  );
 
   const htmlSource = useMemo(() => ({ html: note?.description || "" }), [note]);
 
   return (
     <Modal animationType="slide" transparent={false} visible={isVisible}>
+      {/* Close Button */}
       <TouchableOpacity onPress={onClose} style={styles.closeButton}>
         <View style={styles.closeIcon}>
           <Ionicons name="close" size={30} color={theme.text} />
@@ -607,7 +608,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 50,
     left: 20,
-    zIndex: 2,
+    zIndex: 1,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#ccc",
@@ -672,36 +673,28 @@ const styles = StyleSheet.create({
     width: "100%",
     alignSelf: "center",
   },
-  imageWrapper: {
-    marginVertical: 10,
+  // Audio
+  audioContainer: {
+    flexDirection: "row",
     alignItems: "center",
-    zIndex: 1,
-  },
-  image: {
-    width: 300,
-    height: 300,
-    resizeMode: "contain",
-  },
-  videoContainer: {
-    height: 200, // Reduced height for better touch interaction
-    backgroundColor: "#000",
-    marginVertical: 10,
+    backgroundColor: "#f0f0f0",
+    padding: 10,
     borderRadius: 10,
-    overflow: "hidden",
     alignSelf: "center",
-    zIndex: 1,
   },
-  videoInner: {
-    width: "100%",
-    height: "100%",
-    justifyContent: "center",
-    alignItems: "center",
+  audioSlider: {
+    flex: 1,
+    marginHorizontal: 10,
   },
-  audioWrapper: {
-    marginTop: 10,
-    width: "85%", // Smaller width for the audio player
-    alignSelf: "center",
-    zIndex: 1,
+  audioTimer: {
+    color: "#333",
+    textAlign: "right",
+    width: 60,
+  },
+  errorText: {
+    marginLeft: 10,
+    color: "#333",
+    fontSize: 16,
   },
 });
 
@@ -711,4 +704,3 @@ const tagsStyles = {
     height: "auto",
   },
 };
-

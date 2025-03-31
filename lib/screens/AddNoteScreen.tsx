@@ -130,6 +130,12 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
   }, []);
 
   useEffect(() => {
+    if (theme?.text) {
+      setLocationButtonColor(theme.text);
+    }
+  }, [theme?.text]);
+
+  useEffect(() => {
     // Save the correct reference to handleShareButtonPress
     console.log("useeffect called when to hit save button");
     setPublishNote(() => handleShareButtonPress);
