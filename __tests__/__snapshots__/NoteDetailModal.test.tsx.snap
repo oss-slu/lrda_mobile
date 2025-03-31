@@ -46,7 +46,7 @@ exports[`NoteDetailModal renders without crashing 1`] = `
         "padding": 5,
         "position": "absolute",
         "top": 50,
-        "zIndex": 2,
+        "zIndex": 1,
       }
     }
   >
@@ -254,44 +254,19 @@ exports[`NoteDetailModal renders without crashing 1`] = `
                   {
                     "alignItems": "center",
                     "marginVertical": 10,
-                    "zIndex": 1,
                   }
                 }
               >
                 <View
-                  accessibilityState={
-                    {
-                      "busy": undefined,
-                      "checked": undefined,
-                      "disabled": undefined,
-                      "expanded": undefined,
-                      "selected": undefined,
-                    }
-                  }
-                  accessibilityValue={
-                    {
-                      "max": undefined,
-                      "min": undefined,
-                      "now": undefined,
-                      "text": undefined,
-                    }
-                  }
-                  accessible={true}
-                  collapsable={false}
-                  focusable={true}
-                  onClick={[Function]}
-                  onResponderGrant={[Function]}
-                  onResponderMove={[Function]}
-                  onResponderRelease={[Function]}
-                  onResponderTerminate={[Function]}
-                  onResponderTerminationRequest={[Function]}
-                  onStartShouldSetResponder={[Function]}
                   style={
                     {
-                      "opacity": 1,
+                      "alignItems": "center",
+                      "height": 400,
+                      "justifyContent": "center",
+                      "position": "relative",
+                      "width": 400,
                     }
                   }
-                  testID="imageButton"
                 >
                   <RCTImageView
                     accessibilityLabel="Test Image"
@@ -305,6 +280,8 @@ exports[`NoteDetailModal renders without crashing 1`] = `
                       }
                     }
                     internal_analyticTag={null}
+                    onError={[Function]}
+                    onLoadEnd={[Function]}
                     resizeMode="contain"
                     source={
                       [
@@ -322,13 +299,78 @@ exports[`NoteDetailModal renders without crashing 1`] = `
                         {
                           "overflow": "hidden",
                         },
-                        {
-                          "height": 300,
-                          "resizeMode": "contain",
-                          "width": 300,
-                        },
+                        [
+                          {
+                            "height": "100%",
+                            "resizeMode": "contain",
+                            "width": "100%",
+                          },
+                          {
+                            "opacity": 0,
+                          },
+                        ],
                       ]
                     }
+                    testID="bufferingImage"
+                  />
+                  <View
+                    style={
+                      {
+                        "alignItems": "center",
+                        "backgroundColor": "rgba(255,255,255,0.7)",
+                        "bottom": 0,
+                        "justifyContent": "center",
+                        "left": 0,
+                        "position": "absolute",
+                        "right": 0,
+                        "top": 0,
+                      }
+                    }
+                  >
+                    <ActivityIndicator
+                      size="large"
+                      testID="loadingIndicator"
+                    />
+                  </View>
+                  <View
+                    accessibilityState={
+                      {
+                        "busy": undefined,
+                        "checked": undefined,
+                        "disabled": undefined,
+                        "expanded": undefined,
+                        "selected": undefined,
+                      }
+                    }
+                    accessibilityValue={
+                      {
+                        "max": undefined,
+                        "min": undefined,
+                        "now": undefined,
+                        "text": undefined,
+                      }
+                    }
+                    accessible={true}
+                    collapsable={false}
+                    focusable={true}
+                    onClick={[Function]}
+                    onResponderGrant={[Function]}
+                    onResponderMove={[Function]}
+                    onResponderRelease={[Function]}
+                    onResponderTerminate={[Function]}
+                    onResponderTerminationRequest={[Function]}
+                    onStartShouldSetResponder={[Function]}
+                    style={
+                      {
+                        "bottom": 0,
+                        "left": 0,
+                        "opacity": 1,
+                        "position": "absolute",
+                        "right": 0,
+                        "top": 0,
+                      }
+                    }
+                    testID="imageButton"
                   />
                 </View>
               </View>
@@ -345,66 +387,147 @@ exports[`NoteDetailModal renders without crashing 1`] = `
             >
               <View
                 style={
-                  [
-                    {
-                      "alignSelf": "center",
-                      "backgroundColor": "#000",
-                      "borderRadius": 10,
-                      "height": 200,
-                      "marginVertical": 10,
-                      "overflow": "hidden",
-                      "zIndex": 1,
-                    },
-                    {
-                      "width": 710,
-                    },
-                  ]
+                  {
+                    "alignSelf": "center",
+                    "marginVertical": 20,
+                  }
                 }
               >
                 <View
-                  accessibilityState={
-                    {
-                      "busy": undefined,
-                      "checked": undefined,
-                      "disabled": undefined,
-                      "expanded": undefined,
-                      "selected": undefined,
-                    }
-                  }
-                  accessibilityValue={
-                    {
-                      "max": undefined,
-                      "min": undefined,
-                      "now": undefined,
-                      "text": undefined,
-                    }
-                  }
-                  accessible={true}
-                  collapsable={false}
-                  focusable={true}
-                  onClick={[Function]}
-                  onResponderGrant={[Function]}
-                  onResponderMove={[Function]}
-                  onResponderRelease={[Function]}
-                  onResponderTerminate={[Function]}
-                  onResponderTerminationRequest={[Function]}
-                  onStartShouldSetResponder={[Function]}
                   style={
-                    {
-                      "opacity": 1,
-                    }
+                    [
+                      {
+                        "alignItems": "center",
+                        "backgroundColor": "#000",
+                        "justifyContent": "center",
+                        "position": "relative",
+                      },
+                      {
+                        "height": 401.12994350282486,
+                        "width": 710,
+                      },
+                    ]
                   }
-                  testID="videoButton"
                 >
+                  <View
+                    style={
+                      [
+                        {
+                          "overflow": "hidden",
+                          "pointerEvents": "box-none",
+                        },
+                        {
+                          "height": "100%",
+                          "width": "100%",
+                        },
+                      ]
+                    }
+                  >
+                    <ViewManagerAdapter_ExpoVideoView
+                      onError={[Function]}
+                      onFullscreenUpdate={[Function]}
+                      onLoad={[Function]}
+                      onLoadEnd={[Function]}
+                      onLoadStart={[Function]}
+                      onReadyForDisplay={[Function]}
+                      onStatusUpdate={[Function]}
+                      resizeMode="mock"
+                      source={
+                        {
+                          "headers": undefined,
+                          "overridingExtension": null,
+                          "uri": "https://example.com/video.mp4",
+                        }
+                      }
+                      status={
+                        {
+                          "isLooping": false,
+                          "shouldPlay": false,
+                        }
+                      }
+                      style={
+                        [
+                          {
+                            "bottom": 0,
+                            "left": 0,
+                            "position": "absolute",
+                            "right": 0,
+                            "top": 0,
+                          },
+                          undefined,
+                        ]
+                      }
+                      videoStyle={
+                        [
+                          {
+                            "bottom": 0,
+                            "left": 0,
+                            "position": "absolute",
+                            "right": 0,
+                            "top": 0,
+                          },
+                          undefined,
+                        ]
+                      }
+                    />
+                  </View>
                   <View
                     style={
                       {
                         "alignItems": "center",
-                        "height": "100%",
+                        "bottom": 0,
                         "justifyContent": "center",
-                        "width": "100%",
+                        "left": 0,
+                        "position": "absolute",
+                        "right": 0,
+                        "top": 0,
                       }
                     }
+                  >
+                    <ActivityIndicator
+                      size="large"
+                      testID="videoLoadingIndicator"
+                    />
+                  </View>
+                  <View
+                    accessibilityState={
+                      {
+                        "busy": undefined,
+                        "checked": undefined,
+                        "disabled": undefined,
+                        "expanded": undefined,
+                        "selected": undefined,
+                      }
+                    }
+                    accessibilityValue={
+                      {
+                        "max": undefined,
+                        "min": undefined,
+                        "now": undefined,
+                        "text": undefined,
+                      }
+                    }
+                    accessible={true}
+                    collapsable={false}
+                    focusable={true}
+                    onClick={[Function]}
+                    onResponderGrant={[Function]}
+                    onResponderMove={[Function]}
+                    onResponderRelease={[Function]}
+                    onResponderTerminate={[Function]}
+                    onResponderTerminationRequest={[Function]}
+                    onStartShouldSetResponder={[Function]}
+                    style={
+                      {
+                        "bottom": 0,
+                        "left": 0,
+                        "opacity": 1,
+                        "position": "absolute",
+                        "right": 0,
+                        "top": 0,
+                      }
+                    }
+                    testID="videoButton"
                   >
                     <Text
                       allowFontScaling={false}
@@ -415,7 +538,10 @@ exports[`NoteDetailModal renders without crashing 1`] = `
                             "color": "white",
                             "fontSize": 50,
                           },
-                          undefined,
+                          {
+                            "alignSelf": "center",
+                            "marginTop": 70,
+                          },
                           {
                             "fontFamily": "ionicons",
                             "fontStyle": "normal",

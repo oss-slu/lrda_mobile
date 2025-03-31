@@ -38,6 +38,8 @@ const user = User.getInstance();
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
+
+
 const HomeStack = () => (
   <Stack.Navigator>
     <Stack.Screen
@@ -104,6 +106,8 @@ const AppNavigator: React.FC = () => {
   const dispatch = useDispatch();
   const navState = useSelector((state: RootState) => state.navigation.navState);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const appThemeColor = useSelector((state: RootState) => state.themeSlice.theme);
+
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
@@ -213,7 +217,7 @@ const AppNavigator: React.FC = () => {
               headerShown: false,
               tabBarLabel: 'Home',
               tabBarIcon: ({ color, size, focused }) => (
-                <Ionicons name="home" color={isDarkmode ? focused ? 'white' : 'blue' : focused ? 'black' : 'blue'} size={size} />
+                <Ionicons name="home" size={size}color={focused ? isDarkmode ? 'white' : 'black'  : appThemeColor }/>
               ),
             }}
           />
@@ -225,7 +229,7 @@ const AppNavigator: React.FC = () => {
               headerShown: false,
               tabBarLabel: 'Library',
               tabBarIcon: ({ color, size, focused }) => (
-                <Ionicons name="library" color={isDarkmode ? focused ? 'white' : 'blue' : focused ? 'black' : 'blue'} size={size} />
+                <Ionicons name="library" size={size}color={focused ? isDarkmode ? 'white' : 'black'  : appThemeColor }/>
               ),
             }}
           />
@@ -250,7 +254,7 @@ const AppNavigator: React.FC = () => {
             options={{
               headerShown: false,
               tabBarIcon: ({ color, size, focused }) => (
-                <Ionicons name="map" color={isDarkmode ? focused ? 'white' : 'blue' : focused ? 'black' : 'blue'} size={size} />
+                <Ionicons name="map" size={size}color={focused ? isDarkmode ? 'white' : 'black'  : appThemeColor } />
               ),
             }}
           />
@@ -260,7 +264,7 @@ const AppNavigator: React.FC = () => {
             options={{
               headerShown: false,
               tabBarIcon: ({ color, size, focused }) => (
-                <Ionicons name="menu-outline" color={isDarkmode ? focused ? 'white' : 'blue' : focused ? 'black' : 'blue'} size={size + 10} />
+                <Ionicons name="menu-outline" size={size + 10}color={focused ? isDarkmode ? 'white' : 'black'  : appThemeColor } />
               ),
             }}
           />

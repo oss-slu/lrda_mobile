@@ -16,6 +16,9 @@ function AddNoteBtnComponent() {
     const {navigateToAddNote, publishNote} = useAddNoteContext();
     const { theme, isDarkmode } = useTheme();
 
+    const appThemeColor = useSelector((state) => state.themeSlice.theme);
+
+
     const addNoteState = useSelector((state) => state?.addNoteState?.isAddNoteOpned);
     
     const handleAddNote = () => {
@@ -34,31 +37,29 @@ function AddNoteBtnComponent() {
         <TouchableOpacity
         style={[
           styles.button,
-          { backgroundColor: theme.primaryColor } // ⬅️ Apply theme color
+          { backgroundColor: theme.primaryColor, // ⬅️ Apply theme color
+            shadowColor: isDarkmode ? '#fff' : '#000', // ⬅️ Dynamically set shadow color
+          } 
         ]}
         onPress={!addNoteState ? handleAddNote : handlePublish}
       >
            {!addNoteState ? (
-    <IonIcons
-      name="add"
-      size={25}
-      style={[
-        styles.buttonIcon,
-        { color: isDarkmode ? theme.iconColor || 'blue' : 'blue' }
-      ]}
-    />
+   <IonIcons
+   name="add"
+   size={25}
+   style={[styles.buttonIcon, { color: appThemeColor }]}
+ />
+ 
   ) : (
     <Feather
-      name="upload-cloud"
-      size={25}
-      style={[
-        styles.buttonIcon,
-        { color: isDarkmode ? theme.iconColor || 'blue' : 'blue' }
-      ]}
-    />
+    name="upload-cloud"
+    size={25}
+    style={[styles.buttonIcon, { color: appThemeColor }]}
+  />
+  
   )}
       </TouchableOpacity>
-      <Text style={[styles.label, { color: theme.textColor || 'gray' }]}>
+      <Text style={[styles.label, { color: appThemeColor || 'gray' }]}>
   {!addNoteState ? 'Add' : 'Publish'}
 </Text>
 
@@ -81,13 +82,12 @@ const styles = StyleSheet.create({
     },
     button: {
         backgroundColor: '#f0f0f0',
-        height: 40,
-        width: 40,
+        height: 50,
+        width: 50,
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 50,
         top: -25,
-        shadowColor: '#000', 
         shadowOffset: { width: 0, height: 2 }, 
         shadowOpacity: 0.25, 
         shadowRadius: 4, 
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 12,
         color: 'grey',
-        marginTop: -8 // Adds space between button and label
+        marginTop: -13 // Adds space between button and label
       },
 })
 
