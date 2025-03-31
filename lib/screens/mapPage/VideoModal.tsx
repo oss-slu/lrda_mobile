@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { Video, ResizeMode, Audio } from 'expo-av';
 import { useTheme } from "../../components/ThemeProvider";
+import { defaultTextFont } from '../../../styles/globalStyles';
 
 interface VideoType {
   uri: string;
@@ -107,6 +108,7 @@ const styles = StyleSheet.create({
     height: width,
   },
   noVideosText: {
+    ...defaultTextFont,
     alignSelf: 'center',
     justifyContent: 'center',
     marginTop: 200,

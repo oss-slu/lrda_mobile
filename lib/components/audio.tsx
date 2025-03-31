@@ -10,8 +10,11 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Audio } from "expo-av";
 import uuid from "react-native-uuid";
-import { uploadAudio } from "../utils/S3_proxy"; // Assuming you have a function to upload the audio
-import { AudioType } from "../models/media_class"; // Assuming AudioType is correctly defined
+
+import { uploadAudio } from "../utils/S3_proxy";  // Assuming you have a function to upload the audio
+import { AudioType } from "../models/media_class";  // Assuming AudioType is correctly defined
+import { defaultTextFont } from "../../styles/globalStyles";
+
 
 type AudioContainerProps = {
   newAudio: AudioType[];
@@ -130,7 +133,9 @@ const AudioContainer = ({
         ) : (
           <Ionicons name="mic-outline" size={60} color="#111111" />
         )}
-        <Text style={styles.headerText}>Recordings</Text>
+
+        <Text style={{ ...defaultTextFont, fontSize: 24, fontWeight: "600" }}>Recordings</Text>
+
         {isRecording ? (
           <TouchableOpacity onPress={stopRecording}>
             <Ionicons name="stop-circle-outline" size={45} color="#111111" />
@@ -141,6 +146,7 @@ const AudioContainer = ({
           </TouchableOpacity>
         )}
       </View>
+
 
       <FlatList
         data={newAudio}
@@ -163,6 +169,7 @@ const AudioContainer = ({
                 size={30}
                 color={playingAudio === item.uri ? "red" : "#111111"}
               />
+
             </TouchableOpacity>
           </View>
         )}

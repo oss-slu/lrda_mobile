@@ -36,6 +36,7 @@
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.8",
     "enzyme-to-json": "^3.6.2",
+
     "expo": "52.0.42",
     "expo-app-loading": "^2.1.1",
     "expo-av": "^15.0.1",
@@ -53,6 +54,7 @@
     "firebase": "^10.12.2",
     "jest": "^29.7.0",
     "jest-expo": "52.0.6",
+
     "lottie-ios": "4.5.0",
     "lottie-react-native": "7.1.0",
     "metro": "~0.81.0",
@@ -62,7 +64,9 @@
     "patch-package": "^8.0.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
+
     "react-native": "0.76.8",
+
     "react-native-color-picker": "^0.6.0",
     "react-native-draggable-flatlist": "^4.0.1",
     "react-native-dropdown-picker": "^5.4.6",

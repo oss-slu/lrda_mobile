@@ -37,6 +37,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { green } from "react-native-reanimated/lib/typescript/Colors";
 import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
 import { useSelector, useDispatch } from 'react-redux'
+import { defaultTextFont } from "../../styles/globalStyles";
 
 const { width, height } = Dimensions.get("window");
 const user = User.getInstance();
@@ -634,27 +635,27 @@ const handleSortOption = ({ option }) => {
         borderRadius: 20,
         padding: 20,
       }}>
-        <Text style={{ fontSize: 20, color: isDarkmode? '#c7c7c7' : 'black', fontWeight: 600}}>Sort by</Text>
+        <Text style={{ ...defaultTextFont,fontSize: 20, color: isDarkmode? '#c7c7c7' : 'black', fontWeight: 600}}>Sort by</Text>
         <View style={{ height: '50%', justifyContent: 'space-evenly', alignItems: 'center'}}>
           <TouchableOpacity
             onPress={() => handleSortOption({ option: 1 })}
           >
             <View style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 1 ? theme.homeColor : 'none', width: 200 }]}>
-              <Text style={{ fontSize: 20, color: isDarkmode && selectedSortOption != 1 ? '#c7c7c7' : 'black' }}>Date & Time(latest)</Text>
+              <Text style={{ ...defaultTextFont,fontSize: 20, color: isDarkmode && selectedSortOption != 1 ? '#c7c7c7' : 'black' }}>Date & Time(latest)</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => handleSortOption({ option: 2 })}
           >
             <View style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 2 ? theme.homeColor : 'none' }]}>
-              <Text style={{ fontSize: 20, color: isDarkmode && selectedSortOption != 2 ? '#c7c7c7' : 'black' }}>A-Z</Text>
+              <Text style={{ ...defaultTextFont,fontSize: 20, color: isDarkmode && selectedSortOption != 2 ? '#c7c7c7' : 'black' }}>A-Z</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => handleSortOption({ option: 3 })}
           >
             <View style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 3 ? theme.homeColor : 'none' }]}>
-              <Text style={{ fontSize: 20, color: isDarkmode && selectedSortOption != 3 ? '#c7c7c7' : 'black' }}>Z-A</Text>
+              <Text style={{ ...defaultTextFont,fontSize: 20, color: isDarkmode && selectedSortOption != 3 ? '#c7c7c7' : 'black' }}>Z-A</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -671,6 +672,7 @@ const styles = (theme, width, color, isDarkmode) =>
       height: width > 500 ? height * 0.12 : height * 0.19,
     },
     pfpText: {
+      ...defaultTextFont,
       fontWeight: "600",
       fontSize: 14,
       alignSelf: "center",
@@ -695,6 +697,7 @@ const styles = (theme, width, color, isDarkmode) =>
       marginLeft: 8,
     },
     noteTitle: {
+      ...defaultTextFont,
       fontSize: 22,
       fontWeight: "700",
       maxWidth: "100%",
@@ -702,6 +705,7 @@ const styles = (theme, width, color, isDarkmode) =>
       color: theme.text,
     },
     noteText: {
+      ...defaultTextFont,
       marginTop: 10,
       fontSize: 18,
       color: theme.text,
@@ -764,6 +768,7 @@ const styles = (theme, width, color, isDarkmode) =>
       marginRight: 10, 
     },
     userName: {
+      ...defaultTextFont,
       fontWeight: '500',
       height: "50%",
       textAlign: 'center',       
@@ -797,6 +802,7 @@ const styles = (theme, width, color, isDarkmode) =>
       borderRadius: 20,
     },
     publishedTxt: {
+      ...defaultTextFont,
       color: 'white',
       fontSize: 10,
       fontWeight: '600',
@@ -835,6 +841,7 @@ const styles = (theme, width, color, isDarkmode) =>
 
     },
     pageTitle: {
+      ...defaultTextFont,
       fontSize: 18,
       fontWeight: '500'
 
@@ -844,11 +851,11 @@ const styles = (theme, width, color, isDarkmode) =>
       height: 200,
     },
     resultNotFound: {
-
       justifyContent: 'center',
       alignItems: 'center'
     },
     resultNotFoundTxt: {
+      ...defaultTextFont,
       fontSize: 15,
       fontWeight: '400',
     },

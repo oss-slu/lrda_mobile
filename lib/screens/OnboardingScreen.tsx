@@ -3,6 +3,7 @@ import { StyleSheet, Dimensions, TouchableOpacity, Text } from 'react-native';
 import Onboarding from 'react-native-onboarding-swiper';
 import { Video } from 'expo-av';
 import { setItem } from '../utils/async_storage';
+import { defaultTextFont } from '../../styles/globalStyles';
 
 const { width, height } = Dimensions.get('window');
 
@@ -121,12 +122,14 @@ const OnboardingScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   title: {
+    ...defaultTextFont,
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
     textAlign: 'center',
   },
   subtitle: {
+    ...defaultTextFont,
     fontSize: 16,
     color: '#666',
     textAlign: 'center',
@@ -157,11 +160,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   doneButtonText: {
+    ...defaultTextFont,
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,
   },
   buttonText: {
+    ...defaultTextFont,
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,

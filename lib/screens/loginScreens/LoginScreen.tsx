@@ -20,6 +20,7 @@ import { setNavState } from "../../../redux/slice/navigationSlice";
 import { RootState } from "../../../redux/store/store";
 import { User } from "../../models/user_class";
 import { removeItem } from "../../utils/async_storage";
+import { defaultTextFont } from "../../../styles/globalStyles";
 
 const user = User.getInstance();
 
@@ -146,7 +147,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
             backgroundColor: "white",
           }}
         >
-          <Text style={{ textAlign: "center" }}>Invalid User Credentials</Text>
+          <Text style={{ ...defaultTextFont, textAlign: "center" }}>Invalid User Credentials</Text>
         </Snackbar>
         {firstClick ? (
           <TouchableOpacity
@@ -190,15 +191,16 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
             <View style={styles.forgotPasswordContainer}><Text style={styles.forgotText}>Forgot Password?</Text></View>
 </TouchableOpacity>
             <TouchableOpacity onPress={onLoginPress} style={styles.buttons} testID="login-button">
-              {!loading && <Text style={{color: "white", fontWeight: "600", fontSize: 15}}>
+              {!loading && <Text style={{...defaultTextFont, color: "white", fontWeight: "600", fontSize: 15}}>
                 Login
                 </Text>}
               {loading && <ActivityIndicator size="small" color="white" />}
             </TouchableOpacity>
-            <View style={styles.signUpStatement}>
-              <Text style={styles.signUpQuery}>Don't have an account?</Text>
-              <TouchableOpacity onPress={handleGoRegister}><Text style={styles.signUp}>Sign Up</Text></TouchableOpacity>
-            </View>
+            <TouchableOpacity onPress={handleGoRegister} style={styles.buttons} testID="register-button">
+              <Text style={{ ...defaultTextFont, color: "white", fontWeight: "600", fontSize: 15 }}>
+                Register
+              </Text>
+            </TouchableOpacity>
           </View>
         )}
       </ImageBackground>
@@ -214,6 +216,7 @@ const styles = StyleSheet.create({
     alignItems: "stretch",
   },
   logo: {
+    ...defaultTextFont,
     fontWeight: "bold",
     fontSize: 50,
     color: "#111111",
@@ -232,12 +235,22 @@ const styles = StyleSheet.create({
     borderWidth: 2,
   },
   inputText: {
+    ...defaultTextFont,
     height: 50,
     color: "#111111",
     fontSize: 16,
     width: "100%",
     borderRadius: 25,
   },
+
+  forgot: {
+    ...defaultTextFont,
+    color: "#111111",
+    fontSize: 12,
+    fontWeight: "400",
+    marginBottom: 20,
+  },
+
   imageBackground: {
     flex: 1,
     resizeMode: "cover",

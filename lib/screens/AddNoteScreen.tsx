@@ -42,6 +42,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import { Button } from "react-native-paper";
+import {defaultTextFont} from "../../styles/globalStyles";
 
 const user = User.getInstance();
 
@@ -514,6 +515,7 @@ const styles = StyleSheet.create({
     height: 200,
   },
   closeButton: {
+    ...defaultTextFont,
     color: "blue",
     marginTop: 20,
   },
@@ -527,6 +529,7 @@ const styles = StyleSheet.create({
     borderColor: "#ddd",
   },
   doneText: {
+    ...defaultTextFont,
     color: "blue",
     fontSize: 14,
     padding: 0,

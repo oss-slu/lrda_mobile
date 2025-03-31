@@ -11,6 +11,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { useTheme } from "../../components/ThemeProvider";
+import { defaultTextFont } from '../../../styles/globalStyles';
 
 interface ImageType {
   uri: string;
@@ -54,6 +55,7 @@ const ImageModal: React.FC<Props> = ({ isVisible, onClose, images }) => {
       height: width,
     },
     noImagesText: {
+      ...defaultTextFont,
       alignSelf: 'center',
       justifyContent: 'center',
       marginTop: 200,
@@ -98,7 +100,7 @@ const ImageModal: React.FC<Props> = ({ isVisible, onClose, images }) => {
         </ScrollView>
 
         <TouchableOpacity style={styles.closeButton} onPress={onClose} testID='image-component' >
-          <Text testID='close-button'>Close</Text>
+          <Text style={{...defaultTextFont}} testID='close-button'>Close</Text>
         </TouchableOpacity>
       </View>
     </Modal>

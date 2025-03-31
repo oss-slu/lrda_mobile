@@ -325,4 +325,26 @@ describe('HomeScreen', () => {
       expect(getByTestId("no-results-animation")).toBeTruthy();
     });
   });
+
+  it("applies the default font style to the 'Notes' title", async () => {
+    const routeMock = { params: { untitledNumber: 1 } };
+  
+    const { getByText } = render(
+      <Provider store={store}>
+        <AddNoteProvider>
+          <HomeScreen route={routeMock as any} showTooltip={false} />
+        </AddNoteProvider>
+      </Provider>
+    );
+  
+    const notesText = await waitFor(() => getByText("Notes"));
+  
+    // Safely flatten the style
+    const flattenedStyle = Array.isArray(notesText.props.style)
+      ? Object.assign({}, ...notesText.props.style)
+      : notesText.props.style;
+  
+    expect(flattenedStyle.fontFamily).toBe("Inter"); // Update this as needed based on your globalStyles file
+  });
+  
 });

@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { SwipeListView } from "react-native-swipe-list-view";
 import { Ionicons } from "@expo/vector-icons";
+import { defaultTextFont } from "../../styles/globalStyles";
 
 function TagWindow({
   tags,
@@ -110,6 +111,7 @@ const styles = StyleSheet.create({
     paddingVertical: 1,
   },
   text: {
+    ...defaultTextFont,
     fontSize: 18,
     fontWeight: "500",
   },
