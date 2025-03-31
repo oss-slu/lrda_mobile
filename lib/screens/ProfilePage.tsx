@@ -14,6 +14,7 @@ import DataConversion from "../utils/data_conversion";
 import ApiService from "../utils/api_calls";
 import { useTheme } from "../components/ThemeProvider";
 import Feather from 'react-native-vector-icons/Feather';
+import { defaultTextFont } from "../../styles/globalStyles";
 
 const user = User.getInstance();
 
@@ -146,7 +147,7 @@ const createStyles = (theme) =>
       backgroundColor: theme.primaryColor,
     },
     text: {
-      fontFamily: "HelveticaNeue",
+      ...defaultTextFont,
       color: theme.text,
     },
     userPhoto: {
@@ -172,6 +173,7 @@ const createStyles = (theme) =>
       flex: 1,
     },
     subText: {
+      ...defaultTextFont,
       fontSize: 12,
       color: theme.text,
       textTransform: "uppercase",

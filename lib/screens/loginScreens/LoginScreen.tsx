@@ -20,6 +20,7 @@ import { setNavState } from "../../../redux/slice/navigationSlice";
 import { RootState } from "../../../redux/store/store";
 import { User } from "../../models/user_class";
 import { removeItem } from "../../utils/async_storage";
+import { defaultTextFont } from "../../../styles/globalStyles";
 
 const user = User.getInstance();
 
@@ -146,7 +147,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
             backgroundColor: "white",
           }}
         >
-          <Text style={{ textAlign: "center" }}>Invalid User Credentials</Text>
+          <Text style={{ ...defaultTextFont, textAlign: "center" }}>Invalid User Credentials</Text>
         </Snackbar>
         {firstClick ? (
           <TouchableOpacity
@@ -190,13 +191,13 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
               <Text style={styles.forgot}>Forgot Password?</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={onLoginPress} style={styles.buttons} testID="login-button">
-              {!loading && <Text style={{color: "white", fontWeight: "600", fontSize: 15}}>
+              {!loading && <Text style={{...defaultTextFont, color: "white", fontWeight: "600", fontSize: 15}}>
                 Login
                 </Text>}
               {loading && <ActivityIndicator size="small" color="white" />}
             </TouchableOpacity>
             <TouchableOpacity onPress={handleGoRegister} style={styles.buttons} testID="register-button">
-              <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
+              <Text style={{ ...defaultTextFont, color: "white", fontWeight: "600", fontSize: 15 }}>
                 Register
               </Text>
             </TouchableOpacity>
@@ -215,6 +216,7 @@ const styles = StyleSheet.create({
     alignItems: "stretch",
   },
   logo: {
+    ...defaultTextFont,
     fontWeight: "bold",
     fontSize: 50,
     color: "#111111",
@@ -233,6 +235,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
   },
   inputText: {
+    ...defaultTextFont,
     height: 50,
     color: "#111111",
     fontSize: 16,
@@ -240,6 +243,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
   },
   forgot: {
+    ...defaultTextFont,
     color: "#111111",
     fontSize: 12,
     fontWeight: "400",

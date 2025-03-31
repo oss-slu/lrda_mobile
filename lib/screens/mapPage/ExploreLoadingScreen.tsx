@@ -1,5 +1,6 @@
 import { ActivityIndicator, View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '../../components/ThemeProvider';
+import { defaultTextFont } from '../../../styles/globalStyles';
 
 const ExploreLoadingScreen = () => {
   const { theme, isDarkmode } = useTheme();
@@ -8,7 +9,7 @@ const ExploreLoadingScreen = () => {
     <View style={styles.centered}>
       <ActivityIndicator size="large" color="#0000ff" />
       <View style={{padding: 5}}></View>
-      <Text style={{ color: theme.text }}>Loading your location...</Text>
+      <Text style={{ ...defaultTextFont, color: theme.text }}>Loading your location...</Text>
     </View>
   );
 }
