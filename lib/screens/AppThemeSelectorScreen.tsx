@@ -5,6 +5,7 @@ import { useTheme } from '../components/ThemeProvider';
 import { appTheme } from '../components/colors';
 import { useDispatch, UseDispatch } from 'react-redux';
 import { themeReducer } from '../../redux/slice/ThemeSlice';
+import { defaultTextFont } from '../../styles/globalStyles';
 
 function AppThemeSelectorScreen() {
 
@@ -44,7 +45,7 @@ function AppThemeSelectorScreen() {
                 }
                 <TouchableOpacity>
                     <View style={[styles.themeContainer, { backgroundColor: '#a3a3a3', justifyContent: 'center', alignItems: 'center' }]}>
-                        <Text style={{ fontSize: 35, }}>+</Text>
+                        <Text style={{ ...defaultTextFont ,fontSize: 35,  }}>+</Text>
                     </View>
                 </TouchableOpacity>
             </View>
@@ -65,6 +66,7 @@ const styles = StyleSheet.create({
         paddingVertical: 10
     },
     currentThemeTxt: {
+        ...defaultTextFont,
         fontSize: 18,
         fontWeight: '600',
         color: '#999898',

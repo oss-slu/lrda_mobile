@@ -2,6 +2,7 @@ import { StyleSheet } from "react-native";
 import { lightTheme, darkTheme } from "../colors";
 import Constants from "expo-constants";
 import { Dimensions } from "react-native";
+import { defaultTextFont } from "../globalStyles";
 
 // build out settings for dark/light mode configuration
 const globalStyle = lightTheme;
@@ -46,6 +47,7 @@ export const PhotoStyles = StyleSheet.create({
         borderRadius: 10,
       },
       footerText: {
+        ...defaultTextFont,
         textAlign: "center",
         fontSize: 16,
         fontWeight: "700",
