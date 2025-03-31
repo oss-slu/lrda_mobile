@@ -20,7 +20,8 @@ import { setNavState } from "../../../redux/slice/navigationSlice";
 import { RootState } from "../../../redux/store/store";
 import { User } from "../../models/user_class";
 import { removeItem } from "../../utils/async_storage";
-import { LinearGradient } from "expo-linear-gradient";
+import * as Font from "expo-font";
+import AppLoading from "expo-app-loading";
 
 const user = User.getInstance();
 
@@ -139,7 +140,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
                 backgroundColor: "white",
               }}
           >
-            <Text style={{ textAlign: "center" }}>Invalid User Credentials</Text>
+            <Text style={{ textAlign: "center", fontFamily: "Espial-Regular"}}>Invalid User Credentials</Text>
           </Snackbar>
           {firstClick ? (
               <TouchableOpacity activeOpacity={1} style={styles.title} onPress={fadeOut}>
@@ -216,10 +217,11 @@ const styles = StyleSheet.create({
     width: "80%",
     borderBottomWidth: 1,
     borderColor: "black",
-    marginBottom: 20,
+    marginBottom: 10,
+    marginTop: 40,
   },
   inputText: {
-    height: 50,
+    height: 30,
     color: "#111111",
     fontSize: 14,
     width: "100%",
@@ -227,10 +229,11 @@ const styles = StyleSheet.create({
   forgot: {
     color: "#0000EE",
     fontSize: 12,
-    fontWeight: "400",
+    fontWeight: "600",
     alignSelf: "flex-end",
-    marginBottom: 10,
-    marginRight: -100,
+    marginTop: 20,
+    marginRight: -115,
+
   },
   imageBackground: {
     flex: 1,
@@ -247,14 +250,14 @@ const styles = StyleSheet.create({
   },
   loginTitle: {
     alignSelf: "flex-start",
-    marginLeft: 20,
+    marginLeft: 30,
     marginBottom: 30,
-    fontSize: 36,
+    fontSize: 32,
   },
   loginBox: {
     backgroundColor: "rgba(245,245,245,0.8)",
-    width: 290,
-    height: 500,
+    width: 350,
+    height: 650,
     borderRadius: 20,
     alignSelf: "center",
     alignItems: "center",
@@ -266,19 +269,20 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
   },
   primaryButton: {
-    backgroundColor: "#A020F0", // Vibrant purple
+    backgroundColor: "#6A0DAD", // Vibrant purple
     width: "90%", // Full-width (matching inputs)
-    height: 45,
+    height: 43,
     borderRadius: 10,
     alignItems: "center", // Left-align text
     justifyContent: "center",
-    marginTop: 60,
+    marginTop: 70,
   },
   registerButton: {
     alignSelf: "flex-end",
-    marginRight: 30,
+    marginRight: 62,
     fontSize: 12,
     fontWeight: "400",
+    marginTop: 8,
   },
   linkText: {
     color: "#0000EE", // Blue text for secondary action
