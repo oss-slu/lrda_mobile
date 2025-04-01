@@ -74,13 +74,14 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
   const [videoUri, setVideoUri] = useState<string | null>(null);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const { setPublishNote } = useAddNoteContext();
-
+  const bodyTextRef = useRef(bodyText);
+  const tagsRef = useRef(tags);
+  const mediaRef = useRef(newMedia);
+  const audioRef = useRef(newAudio);
+  const titleTxtRef = useRef(titleText);
   const addNoteState = useSelector(
     (state) => state?.addNoteState?.isAddNoteOpned
   );
-  useEffect(() => {
-    console.log("Updated isAddNoteOpened state:", addNoteState);
-  }, [addNoteState]);
 
   const dispatch = useDispatch();
 
@@ -89,6 +90,66 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
     avoidIosKeyboard: true,
   });
 
+
+  useEffect(() => {
+    console.log("Updated isAddNoteOpened state:", addNoteState);
+  }, [addNoteState]);
+
+  useEffect(() => {
+    titleTxtRef.current = titleText;
+  }, [titleText]);
+  
+  useEffect(() => {
+    bodyTextRef.current = bodyText;
+  }, [bodyText]);
+  
+  useEffect(() => {
+    tagsRef.current = tags;
+  }, [tags]);
+  
+  useEffect(() => {
+    mediaRef.current = newMedia;
+  }, [newMedia]);
+  
+  useEffect(() => {
+    audioRef.current = newAudio;
+  }, [newAudio]);
+
+  
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('blur', () => {
+      console.log("Blur listener triggered...");
+  
+      setTimeout(async () => {
+        const latestContent = await editor.getHTML();
+        bodyTextRef.current = latestContent;
+        console.log("Delayed content fetch:", latestContent);
+  
+        const bodyIsEmpty = isBodyEmpty(latestContent);
+        console.log("Is body empty?", bodyIsEmpty);
+  
+        if (
+          titleTxtRef.current.length !== 0 ||
+          !bodyIsEmpty ||
+          tagsRef.current.length !== 0 ||
+          mediaRef.current.length !== 0 ||
+          audioRef.current.length !== 0
+        ) {
+          console.log("Saving note...");
+          saveNote();
+        } else {
+          console.log("Nothing to save, toggling state.");
+          dispatch(toogleAddNoteState());
+        }
+      }, 300); // <-- 300ms delay gives WebView enough time
+    });
+  
+    return unsubscribe;
+  }, [navigation, editor]);
+  
+  
+  
+  
   const { theme } = useTheme();
   const titleTextRef = useRef<TextInput>(null);
   const scrollViewRef = useRef<KeyboardAwareScrollView>(null);
@@ -132,6 +193,13 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
     }
   }, [editor]);
 
+  const isBodyEmpty = (htmlString: string) => {
+    // Remove all tags and whitespace
+    const textOnly = htmlString.replace(/<\/?[^>]+(>|$)/g, "").trim();
+    return textOnly.length === 0;
+  };
+
+  
   const setLocationToZero = () => {
     setLocation({ latitude: 0, longitude: 0 });
     setLocationButtonColor("red");
@@ -181,6 +249,7 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
   const toggleLocationToZero = () => {
     setLocationToZero();
   };
+  
 
   // Function to display an error message inside the editor
   const displayErrorInEditor = async (errorMessage) => {
@@ -228,23 +297,37 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
   };
 
   const handleShareButtonPress = async () => {
-    setIsPublished(!isPublished);
-    console.log("This is title in handleShare button ", titleText);
-    ToastMessage.show({
-      type: "success",
-      text1: isPublished ? "Note Unpublished" : "Note Published",
-      visibilityTime: 3000,
-    });
-    await saveNote();
+    await syncEditorContent(); // Force sync before saving
+  
+    const bodyIsEmpty = isBodyEmpty(bodyTextRef.current);
+  
+    if (
+      titleTxtRef.current.length !== 0 ||
+      !bodyIsEmpty ||
+      tagsRef.current.length !== 0 ||
+      mediaRef.current.length !== 0 ||
+      audioRef.current.length !== 0
+    ) {
+      setIsPublished(!isPublished);
+      ToastMessage.show({
+        type: "success",
+        text1: isPublished ? "Note Unpublished" : "Note Published",
+        visibilityTime: 3000,
+      });
+      await saveNote();
+    } else {
+      console.log("Empty note. Nothing to save/publish.");
+    }
   };
+  
 
   const getTitle = () => {
     console.log(titleText);
     const title = titleText.trim()
       ? titleText.trim()
       : route.params.untitledNumber
-      ? `Untitled ${route.params.untitledNumber}`
-      : "Untitled";
+        ? `Untitled ${route.params.untitledNumber}`
+        : "Untitled";
     console.log(title);
 
     return title;
@@ -303,6 +386,15 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
     editor.blur(); // Close TenTap editor keyboard
     Keyboard.dismiss(); //close keyboard when title is being edited
   };
+
+  const syncEditorContent = async () => {
+    const latestContent = await editor.getHTML();
+    setBodyText(latestContent);
+    bodyTextRef.current = latestContent;
+    console.log("Synced editor content:", latestContent);
+  };
+
+  
 
   return (
     <View style={{ flex: 1 }}>
@@ -414,7 +506,6 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
             >
               <RichText
                 editor={editor}
-                placeholder="Write Content Here..."
                 style={[
                   NotePageStyles().editor,
                   {
@@ -432,12 +523,12 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
               <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
             )}
           </View>
-          {keyboardVisible &&(
-          <View style={styles.doneButton} testID="doneButton">
-            <TouchableOpacity onPress={handleDonePress}>
-              <Text style={styles.doneText}>Done</Text>
-            </TouchableOpacity>
-          </View>
+          {keyboardVisible && (
+            <View style={styles.doneButton} testID="doneButton">
+              <TouchableOpacity onPress={handleDonePress}>
+                <Text style={styles.doneText}>Done</Text>
+              </TouchableOpacity>
+            </View>
           )}
         </KeyboardAwareScrollView>
         {/* Video Player Modal */}
