@@ -69,7 +69,7 @@ const EditNoteScreen = ({ route, navigation }) => {
       editor.injectCSS(combinedCSS);
     }
   }, [editor, theme.text]);
-
+  
   const setLocationToZero = () => {
     setLocation({ latitude: 0, longitude: 0 });
     setLocationButtonColor("red");
@@ -105,6 +105,38 @@ const EditNoteScreen = ({ route, navigation }) => {
   useEffect(() => {
     fetchCurrentLocation();
   }, []);
+
+  const insertImageToEditor = async (imageUri: string) => {
+    try {
+      const currentContent = await editor.getHTML();
+      const imageTag = `<img src="${imageUri}" style="max-width: 200px; max-height: 200px; object-fit: cover;" /><br />`;
+      editor.setContent(currentContent + imageTag);
+      editor.focus();
+    } catch (error) {
+      console.error("Error inserting image:", error);
+      displayErrorInEditor(`Error inserting image: ${error.message}`);
+    }
+  };
+
+  const addVideoToEditor = async (videoUri: string) => {
+    try {
+      const currentContent = await editor.getHTML();
+      const videoLink = `${currentContent}<a href="${videoUri}">${videoUri}</a><br>`;
+      editor.setContent(videoLink);
+      editor.focus();
+    } catch (error) {
+      console.error("Error adding video:", error);
+      displayErrorInEditor(`Error adding video: ${error.message}`);
+    }
+  };
+    // Function to display an error message inside the editor
+    const displayErrorInEditor = async (errorMessage) => {
+      const currentContent = await editor.getHTML();
+      const errorTag = `<p style="color: red; font-weight: bold;">${errorMessage}</p><br />`;
+      editor.setContent(currentContent + errorTag);
+      editor.focus();
+    };
+  
 
   const insertAudioToEditor = async (audioUri: string) => {
     try {
@@ -183,7 +215,7 @@ const EditNoteScreen = ({ route, navigation }) => {
             </View>
           </View>
           <View style={NotePageStyles().container}>
-            <PhotoScroller active={viewMedia} newMedia={media} setNewMedia={setMedia} />
+            <PhotoScroller active={viewMedia} newMedia={media} setNewMedia={setMedia} insertImageToEditor={insertImageToEditor} addVideoToEditor={addVideoToEditor}/>
             {viewAudio && (
               <AudioContainer
                 newAudio={newAudio}
@@ -194,11 +226,18 @@ const EditNoteScreen = ({ route, navigation }) => {
             {isTagging && <TagWindow tags={tags} setTags={setTags} />}
           </View>
           <View style={NotePageStyles().richTextContainer}>
-            <RichText
-              editor={editor}
-              placeholder="Write Content Here..."
-              style={[NotePageStyles().editor, { backgroundColor: Platform.OS === "android" ? "white" : undefined }]}
-            />
+          <RichText
+    editor={editor}
+    placeholder="Write Content Here..."
+    style={[
+      NotePageStyles().editor,
+      {
+        backgroundColor: theme.backgroundColor,
+        minHeight: 200, // gives initial space to type
+        paddingBottom: 120, // prevents content from being hidden behind keyboard/toolbar
+      },
+    ]}
+  />
           </View>
           <View style={NotePageStyles().toolBar}>
             <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />

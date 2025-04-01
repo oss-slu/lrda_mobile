@@ -335,13 +335,14 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
         style={{ flex: 1 }}
       >
         <KeyboardAwareScrollView
-          ref={scrollViewRef}
-          contentContainerStyle={{ flexGrow: 1 }}
-          enableOnAndroid={true}
-          extraScrollHeight={Platform.OS === "ios" ? 80 : 0}
-          keyboardOpeningTime={0}
-          keyboardShouldPersistTaps="handled"
-        >
+  ref={scrollViewRef}
+  contentContainerStyle={{ flexGrow: 1 }}
+  enableOnAndroid
+  extraScrollHeight={Platform.OS === 'ios' ? 80 : 100}
+  keyboardOpeningTime={0}
+  keyboardShouldPersistTaps="handled"
+>
+
           <View style={{ flex: 1 }}>
             <View style={[NotePageStyles().topContainer]}>
               <View
@@ -433,21 +434,24 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
               {isTime && <TimeWindow time={time} setTime={setTime} />}
             </View>
             <View
-              style={NotePageStyles().richTextContainer}
-              testID="TenTapEditor"
-            >
-              <RichText
-                editor={editor}
-                placeholder="Write Content Here..."
-                style={[
-                  NotePageStyles().editor,
-                  {
-                    backgroundColor:
-                      Platform.OS === "android" ? "white" : undefined,
-                  },
-                ]}
-              />
-            </View>
+  style={[NotePageStyles().richTextContainer]}
+  testID="TenTapEditor"
+>
+  <RichText
+    editor={editor}
+    placeholder="Write Content Here..."
+    style={[
+      NotePageStyles().editor,
+      {
+        backgroundColor: theme.backgroundColor,
+        minHeight: 200, // gives initial space to type
+        paddingBottom: 120, // prevents content from being hidden behind keyboard/toolbar
+      },
+    ]}
+  />
+</View>
+
+
 
             <View style={styles.toolbar} testID="RichEditor">
               <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />

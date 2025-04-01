@@ -122,6 +122,7 @@ exports[`LoginScreen renders without crashing 1`] = `
             style={
               {
                 "color": "#111111",
+                "fontFamily": "Inter",
                 "fontSize": 50,
                 "fontWeight": "bold",
                 "marginBottom": 70,

@@ -155,11 +155,20 @@ const NotePageStyles = () => {
       justifyContent: "center",
       alignSelf: "center",
     },
-
-    //editor styles
     richTextContainer: {
-      height: Platform.OS == "android"? "90%" : "100%" 
+      flexGrow: 1,
+      minHeight: 300,
+      paddingBottom: 120,
+      ...Platform.select({
+        android: {
+          flex: 1, // ensures scroll fills screen but still scrollable
+        },
+        ios: {
+          height: '100%',
+        }
+      }),
     },
+    
     toolbar: {
       position: 'absolute', // Keep toolbar at the bottom of the screen
       bottom: 0, // Align toolbar with the bottom edge

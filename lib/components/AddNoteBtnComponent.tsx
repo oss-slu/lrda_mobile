@@ -8,6 +8,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import Feather from 'react-native-vector-icons/Feather'
 import { toogleAddNoteState } from '../../redux/slice/AddNoteStateSlice'
 import { useTheme } from './ThemeProvider'
+import { useNavigationState } from '@react-navigation/native'
 
 function AddNoteBtnComponent() {
 
@@ -15,11 +16,14 @@ function AddNoteBtnComponent() {
 
     const {navigateToAddNote, publishNote} = useAddNoteContext();
     const { theme, isDarkmode } = useTheme();
-
     const appThemeColor = useSelector((state) => state.themeSlice.theme);
-
-
     const addNoteState = useSelector((state) => state?.addNoteState?.isAddNoteOpned);
+
+    // 🔍 Detect if we're on the Home screen
+  const currentRouteName = useNavigationState((state) => state.routes[state.index].name);
+  const isHomeScreen = currentRouteName === "Home";
+
+  const isAddButtonMode = isHomeScreen || !addNoteState;
     
     const handleAddNote = () => {
         dispatch(toogleAddNoteState())
@@ -41,9 +45,9 @@ function AddNoteBtnComponent() {
             shadowColor: isDarkmode ? '#fff' : '#000', // ⬅️ Dynamically set shadow color
           } 
         ]}
-        onPress={!addNoteState ? handleAddNote : handlePublish}
+        onPress={isAddButtonMode ? handleAddNote : handlePublish}
       >
-           {!addNoteState ? (
+           {isAddButtonMode ? (
    <IonIcons
    name="add"
    size={25}
@@ -60,7 +64,7 @@ function AddNoteBtnComponent() {
   )}
       </TouchableOpacity>
       <Text style={[styles.label, { color: appThemeColor || 'gray' }]}>
-  {!addNoteState ? 'Add' : 'Publish'}
+  {isAddButtonMode ? 'Add' : 'Publish'}
 </Text>
 
     </View>
