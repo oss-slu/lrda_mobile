@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   View,
   TextInput,
@@ -25,6 +25,7 @@ import LoadingModal from "../components/LoadingModal";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import { useDispatch } from "react-redux";
 import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
+import { useFocusEffect } from "@react-navigation/native";
 
 const user = User.getInstance();
 const EditNoteScreen = ({ route, navigation }) => {
@@ -52,6 +53,10 @@ const EditNoteScreen = ({ route, navigation }) => {
     avoidIosKeyboard: true,
   });
   const { setPublishNote } = useAddNoteContext();
+
+  const [initialTitle, setInitialTitle] = useState(note.title || "");
+  const [initialText, setInitialText] = useState(note.text || "");
+
 
   useEffect(() => {
     setPublishNote(() => handleSaveNote);
@@ -177,6 +182,29 @@ const EditNoteScreen = ({ route, navigation }) => {
       dispatch(toogleAddNoteState());
     }
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        const maybeSaveOnExit = async () => {
+          try {
+            const currentContent = await editor.getHTML();
+            const hasChanged =
+              title.trim() !== initialTitle.trim() ||
+              currentContent.replace(/<[^>]*>/g, "").trim() !== initialText.replace(/<[^>]*>/g, "").trim();
+
+            if (hasChanged) {
+              console.log("Auto-saving edited note on exit...");
+              await handleSaveNote();
+            }
+          } catch (e) {
+            console.warn("Auto-save failed:", e);
+          }
+        };
+        maybeSaveOnExit();
+      };
+    }, [title, initialTitle, initialText, editor])
+  );
 
   return (
     <View style={{ flex: 1 }}>
