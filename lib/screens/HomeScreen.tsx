@@ -514,7 +514,7 @@ const handleSortOption = ({ option }) => {
 
             <View testID="greeting-component" style={styles(theme, width).userWishContainer}>
               <Greeting />
-              <Text style={styles(theme, width).userName}>{userName.length > 8? `${userName.slice(0, 5)}...` : userName}</Text>
+              <Text style={styles(theme, width).userName}>{(userName || "").length > 8 ? `${(userName || "").slice(0, 5)}...` : userName || ""}</Text>
             </View>
           </View>
 
