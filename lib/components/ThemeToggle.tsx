@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { defaultTextFont } from "../../styles/globalStyles";
 
 interface ThemeToggleProps {
     isDarkmode: boolean;
@@ -45,6 +46,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   text: {
+    ...defaultTextFont,
     fontSize: 10,
     fontWeight: "bold",
   },
@@ -64,6 +66,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   toggleText: {
+    ...defaultTextFont,
     fontSize: 14,
     fontWeight: 'bold',
   },

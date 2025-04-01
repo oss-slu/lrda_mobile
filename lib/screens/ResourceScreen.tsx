@@ -13,6 +13,7 @@ import {
 import { useTheme } from '../components/ThemeProvider';
 import Feather from 'react-native-vector-icons/Feather';
 import { onlineResources, analogueResources } from '../data'; // Update path as needed
+import { defaultTextFont } from '../../styles/globalStyles';
 
 const { width, height } = Dimensions.get('window');
 

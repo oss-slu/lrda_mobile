@@ -8,6 +8,7 @@ import {
   Button,
 } from "react-native";
 import * as Location from "expo-location";
+import { defaultTextFont } from "../../styles/globalStyles";
 
 interface LocationProps {
   location: {
@@ -181,11 +182,13 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   distanceText: {
+    ...defaultTextFont,
     color: "#000",
     fontSize: 14,
     fontWeight: "bold",
   },
   label: {
+    ...defaultTextFont,
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 5,

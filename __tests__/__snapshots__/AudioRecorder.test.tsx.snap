@@ -45,6 +45,7 @@ exports[`AudioContainer renders with audio 1`] = `
     <Text
       style={
         {
+          "fontFamily": "Inter",
           "fontSize": 24,
           "fontWeight": "600",
         }
@@ -131,7 +132,13 @@ exports[`AudioContainer renders with audio 1`] = `
         }
       }
     >
-      <Text>
+      <Text
+        style={
+          {
+            "fontFamily": "Inter",
+          }
+        }
+      >
         test
       </Text>
       <View
@@ -240,6 +247,7 @@ exports[`AudioContainer renders without crashing 1`] = `
     <Text
       style={
         {
+          "fontFamily": "Inter",
           "fontSize": 24,
           "fontWeight": "600",
         }
