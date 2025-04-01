@@ -43,11 +43,6 @@ const data = [
   { source: require("../../assets/Pond_395.jpg") },
   { source: require("../../assets/Pond_048.jpg") },
   { source: require("../../assets/Pond_049.jpg") },
-  { source: require("../../assets/Pond_062.jpg") },
-  { source: require("../../assets/Pond_221.jpg") },
-  { source: require("../../assets/Pond_290.jpg") },
-  { source: require("../../assets/Pond_021.jpg") },
-  { source: require("../../assets/Pond_883.jpg") },
 ];
 
 
