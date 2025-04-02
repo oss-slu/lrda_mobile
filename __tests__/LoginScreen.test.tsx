@@ -77,5 +77,36 @@ describe('LoginScreen', () => {
 
 
   });
-  
+
+  it('renders login button with correct styling from Figma update', async () => {
+    const navigationMock = { navigate: jest.fn() };
+    const routeMock = { params: {} };
+
+    const { getByTestId } = render(
+        <Provider store={store}>
+          <SafeAreaProvider>
+            <LoginScreen navigation={navigationMock} route={routeMock} />
+          </SafeAreaProvider>
+        </Provider>
+    );
+
+    const loginButton = getByTestId('login-button');
+    const loginButtonStyle = loginButton.props.style;
+
+    // Check backgroundColor from your new primaryButton style
+    const buttonColor = Array.isArray(loginButtonStyle)
+        ? loginButtonStyle.find((style) => style?.backgroundColor)?.backgroundColor
+        : loginButtonStyle.backgroundColor;
+
+    expect(buttonColor).toBe("rgb(17,47,187)");
+
+    // Check alignment & sizing from your Figma redesign
+    expect(loginButtonStyle.width).toBe("90%");
+    expect(loginButtonStyle.height).toBe(43);
+    expect(loginButtonStyle.borderRadius).toBe(10);
+    expect(loginButtonStyle.alignItems).toBe("center");
+    expect(loginButtonStyle.justifyContent).toBe("center");
+  });
+
+
 });
