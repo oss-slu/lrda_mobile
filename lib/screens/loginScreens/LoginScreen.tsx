@@ -180,7 +180,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
                 </TouchableOpacity>
                 <TouchableOpacity onPress={onLoginPress} style={styles.primaryButton} testID="login-button">
                   {!loading && (
-                      <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
+                      <Text style={{ color: "white", fontWeight: "600", fontSize: 18 }}>
                         Sign In
                       </Text>
                   )}
@@ -221,14 +221,14 @@ const styles = StyleSheet.create({
     marginTop: 40,
   },
   inputText: {
-    height: 30,
+    height: 40,
     color: "#111111",
     fontSize: 14,
     width: "100%",
   },
   forgot: {
     color: "#0000EE",
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "600",
     alignSelf: "flex-end",
     marginTop: 20,
@@ -252,13 +252,13 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     marginLeft: 30,
     marginBottom: 30,
-    fontSize: 32,
+    fontSize: 35,
   },
   loginBox: {
     backgroundColor: "rgba(245,245,245,0.8)",
-    width: 350,
+    width: "85%",
     height: 650,
-    borderRadius: 20,
+    borderRadius: 10,
     alignSelf: "center",
     alignItems: "center",
     paddingVertical: 30,
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
   },
   primaryButton: {
-    backgroundColor: "#6A0DAD", // Vibrant purple
+    backgroundColor: "rgb(17,47,187)", // Vibrant purple
     width: "90%", // Full-width (matching inputs)
     height: 43,
     borderRadius: 10,
@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
   },
   registerText: {
     color: "#111111", // Default text color for the register message
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "600",
     textAlign: "center",
     marginTop: 20,
