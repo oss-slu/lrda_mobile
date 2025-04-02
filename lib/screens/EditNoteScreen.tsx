@@ -53,14 +53,16 @@ const EditNoteScreen = ({ route, navigation }) => {
     avoidIosKeyboard: true,
   });
   const { setPublishNote } = useAddNoteContext();
+  const hasFocusedRef = useRef(false);
 
-  const [initialTitle, setInitialTitle] = useState(note.title || "");
-  const [initialText, setInitialText] = useState(note.text || "");
 
+  const initialTitle = useRef(note.title || "");
+  const initialText = useRef(note.text || "");
 
   useEffect(() => {
     setPublishNote(() => handleSaveNote);
-  },[])
+  }, []);
+
   const scrollViewRef = useRef(null);
 
   useEffect(() => {
@@ -183,28 +185,43 @@ const EditNoteScreen = ({ route, navigation }) => {
     }
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      return () => {
-        const maybeSaveOnExit = async () => {
-          try {
-            const currentContent = await editor.getHTML();
-            const hasChanged =
-              title.trim() !== initialTitle.trim() ||
-              currentContent.replace(/<[^>]*>/g, "").trim() !== initialText.replace(/<[^>]*>/g, "").trim();
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("blur", () => {
+      setTimeout(async () => {
+        try {
+          const textContent = await editor.getHTML();
 
-            if (hasChanged) {
-              console.log("Auto-saving edited note on exit...");
-              await handleSaveNote();
-            }
-          } catch (e) {
-            console.warn("Auto-save failed:", e);
-          }
-        };
-        maybeSaveOnExit();
-      };
-    }, [title, initialTitle, initialText, editor])
-  );
+          const updatedNote = {
+            ...note,
+            title,
+            text: textContent,
+            media,
+            audio: newAudio,
+            tags,
+            published: isPublished,
+            latitude: location.latitude.toString(),
+            longitude: location.longitude.toString(),
+            time: new Date(),
+          };
+
+          console.log("Auto-saving EditNote on exit...");
+          setIsUpdating(true);
+          await ApiService.overwriteNote(updatedNote);
+          onSave(updatedNote);
+        } catch (e) {
+          console.warn("Auto-save failed:", e);
+        } finally {
+          setIsUpdating(false);
+          dispatch(toogleAddNoteState());
+        }
+      }, 300); // allow WebView to flush
+    });
+
+    return unsubscribe;
+  }, [navigation, title, editor, media, newAudio, tags, isPublished, location]);
+
+  
+
 
   return (
     <View style={{ flex: 1 }}>

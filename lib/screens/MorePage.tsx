@@ -44,11 +44,6 @@ const data = [
   { source: require("../../assets/Pond_395.jpg") },
   { source: require("../../assets/Pond_048.jpg") },
   { source: require("../../assets/Pond_049.jpg") },
-  { source: require("../../assets/Pond_062.jpg") },
-  { source: require("../../assets/Pond_221.jpg") },
-  { source: require("../../assets/Pond_290.jpg") },
-  { source: require("../../assets/Pond_021.jpg") },
-  { source: require("../../assets/Pond_883.jpg") },
 ];
 
 
@@ -56,9 +51,9 @@ const data = [
 
 export default function MorePage() {
   const { theme, isDarkmode, toggleDarkmode } = useTheme();
-  const navigation = useNavigation(); // Get navigation instance
   const dispatch = useDispatch();
   const userObject = User.getInstance();
+  const navigation = useNavigation();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isThemeOpen, setIsThemeOpen] = useState(false)
   const [userName, setUserName] = useState('');
@@ -127,36 +122,42 @@ const toggleReason = (reason) => {
         Alert.alert("Error", "Please select at least one reason for account deletion.");
         return;
       }
-  
+
       const currentUser = auth.currentUser;
       if (!currentUser) {
         Alert.alert("Error", "No user is logged in. Please log in to delete your account.");
         return;
       }
-  
+
       const userId = currentUser.uid;
-  
-      // Check if the document exists before trying to delete it
+
+      // Save review to Firestore
+      const reviewContent = {
+        userId,
+        reasons,
+        additionalDetails: additionalDetails || "None",
+        timestamp: new Date().toISOString(),
+      };
+
+      await addDoc(collection(db, "accountDeletionReviews"), reviewContent);
+
+      // Check if the user exists in Firestore
       const userDocRef = doc(db, "users", userId);
       const userDoc = await getDoc(userDocRef);
-  
-      if (!userDoc.exists()) {
-        console.log("Firestore document not found for user:", userId);
-        Alert.alert("Error", "No Firestore data found for the user. Cannot delete.");
-        return;
+
+      if (userDoc.exists()) {
+        // User exists in Firestore, proceed to delete their Firestore record
+        console.log("User found in Firestore. Deleting Firestore record...");
+        await deleteDoc(userDocRef);
+      } else {
+        console.log("No Firestore data found for the user. Proceeding to delete only authentication...");
       }
-  
-      console.log("User document exists, proceeding with deletion...");
-  
-      // Proceed with deletion
-      await deleteDoc(userDocRef);
-      console.log("Firestore document deleted successfully");
-  
-      // Try to delete the user from Firebase Authentication
+
+      // Delete the authenticated user
       try {
         await deleteUser(currentUser);
-        Alert.alert("Success", "Your account has been successfully deleted.");
-        onLogoutPress();
+        Alert.alert("Success", "Your account and feedback have been successfully recorded and deleted.");
+        onLogoutPress(); // Call your existing logout function
       } catch (error) {
         if (error.code === "auth/requires-recent-login") {
           console.log("Session expired. Reauthenticating the user...");
@@ -166,12 +167,13 @@ const toggleReason = (reason) => {
           Alert.alert("Error", "Failed to delete account. Please try again.");
         }
       }
+
+      setShowDeleteModal(false);
     } catch (error) {
       console.error("Error deleting account:", error);
       Alert.alert("Error", "Failed to delete account. Please try again.");
     }
   };
-  
 
   
   const handleEmail = () => {
@@ -304,7 +306,7 @@ const toggleReason = (reason) => {
             </View>
             {/* Menu Items */}
             <View style={{ marginTop: 40, }}>
-              <MenuItem title="About" iconName="information-circle-outline" onPress={()=> {}}/>
+              <MenuItem title="About" iconName="information-circle-outline" onPress={()=> {navigation.navigate("AboutScreen")}}/>
               <MenuItem title="Resource" iconName="link-outline" onPress={() => navigation.navigate("Resource")} />
               <MenuItem title="Meet our team" iconName="people-outline" onPress={() => navigation.navigate("TeamPage")} />
               <MenuItem title="Settings" iconName="settings-outline" onPress={handleSettingsToggle} />
@@ -675,4 +677,3 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
 });
-

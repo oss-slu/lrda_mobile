@@ -14,7 +14,6 @@ import {
   Text,
   StyleSheet,
 } from "react-native";
-import { WebViewMessageEvent } from "react-native-webview";
 import * as Location from "expo-location";
 import ToastMessage from "react-native-toast-message";
 import AudioContainer from "../components/audio";
@@ -34,14 +33,12 @@ import { useTheme } from "../components/ThemeProvider";
 import LoadingModal from "../components/LoadingModal";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Video } from "expo-av";
-import { Link } from "@react-navigation/native";
 import { User } from "../models/user_class";
 import { AudioType, Media } from "../models/media_class";
 import ApiService from "../utils/api_calls";
 import { useDispatch, useSelector } from "react-redux";
 import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
 import { useAddNoteContext } from "../context/AddNoteContext";
-import { Button } from "react-native-paper";
 import {defaultTextFont} from "../../styles/globalStyles";
 
 const user = User.getInstance();
@@ -75,6 +72,11 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
   const [videoUri, setVideoUri] = useState<string | null>(null);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const { setPublishNote } = useAddNoteContext();
+  const bodyTextRef = useRef(bodyText);
+  const tagsRef = useRef(tags);
+  const mediaRef = useRef(newMedia);
+  const audioRef = useRef(newAudio);
+  const titleTxtRef = useRef(titleText);
 
   const addNoteState = useSelector(
     (state) => state?.addNoteState?.isAddNoteOpned
@@ -90,9 +92,71 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
     avoidIosKeyboard: true,
   });
 
+  useEffect(() => {
+    console.log("Updated isAddNoteOpened state:", addNoteState);
+  }, [addNoteState]);
+
+  useEffect(() => {
+    titleTxtRef.current = titleText;
+  }, [titleText]);
+  
+  useEffect(() => {
+    bodyTextRef.current = bodyText;
+  }, [bodyText]);
+  
+  useEffect(() => {
+    tagsRef.current = tags;
+  }, [tags]);
+  
+  useEffect(() => {
+    mediaRef.current = newMedia;
+  }, [newMedia]);
+  
+  useEffect(() => {
+    audioRef.current = newAudio;
+  }, [newAudio]);
+
+  
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('blur', () => {
+      console.log("Blur listener triggered...");
+  
+      setTimeout(async () => {
+        const latestContent = await editor.getHTML();
+        bodyTextRef.current = latestContent;
+        console.log("Delayed content fetch:", latestContent);
+  
+        const bodyIsEmpty = isBodyEmpty(latestContent);
+        console.log("Is body empty?", bodyIsEmpty);
+  
+        if (
+          titleTxtRef.current.length !== 0 ||
+          !bodyIsEmpty ||
+          tagsRef.current.length !== 0 ||
+          mediaRef.current.length !== 0 ||
+          audioRef.current.length !== 0
+        ) {
+          console.log("Saving note...");
+          saveNote();
+        } else {
+          console.log("Nothing to save, toggling state.");
+          dispatch(toogleAddNoteState());
+        }
+      }, 300); // <-- 300ms delay gives WebView enough time
+    });
+  
+    return unsubscribe;
+  }, [navigation, editor]);
+
   const { theme } = useTheme();
   const titleTextRef = useRef<TextInput>(null);
   const scrollViewRef = useRef<KeyboardAwareScrollView>(null);
+
+   useEffect(() => {
+    // Save the correct reference to handleShareButtonPress
+    console.log("useeffect called when to hit save button");
+    setPublishNote(() => handleShareButtonPress);
+  }, [titleText]);
 
 
   useEffect(() => {
@@ -108,7 +172,12 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
     }
   }, [editor, theme.text]);
   
-  
+  const isBodyEmpty = (htmlString: string) => {
+    // Remove all tags and whitespace
+    const textOnly = htmlString.replace(/<\/?[^>]+(>|$)/g, "").trim();
+    return textOnly.length === 0;
+  };
+
   
 
 
@@ -327,6 +396,14 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
     editor.blur(); // Close TenTap editor keyboard
     Keyboard.dismiss(); //close keyboard when title is being edited
   };
+
+  const syncEditorContent = async () => {
+    const latestContent = await editor.getHTML();
+    setBodyText(latestContent);
+    bodyTextRef.current = latestContent;
+    console.log("Synced editor content:", latestContent);
+  };
+
 
   return (
     <View style={{ flex: 1 }}>

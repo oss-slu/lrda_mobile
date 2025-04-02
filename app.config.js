@@ -4,7 +4,7 @@ export default {
   expo: {
     name: "Where's Religion?",
     slug: "lrda_mobile",
-    version: "1.0.6",
+    version: "1.0.7",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -21,7 +21,7 @@ export default {
       config: {
         googleMapsApiKey: process.env.MAP_API_KEY
       },
-      buildNumber: "21",
+      buildNumber: "2",
       newArchEnabled: true, // Enable New Architecture for iOS
       infoPlist: {
         NSAppTransportSecurity: {
@@ -55,7 +55,7 @@ export default {
         }
       },
       package: "register.edu.slu.cs.oss.lrda",
-      versionCode: 23,
+      versionCode: 24,
       newArchEnabled: true // Enable New Architecture for Android
     },
     web: {
@@ -69,15 +69,15 @@ export default {
     },
     crashReporter: true, // Add this line to enable crash reporting
     extra: {
-      apiKey: process.env.FIREBASE_API_KEY,
-      authDomain: process.env.AUTH_DOMAIN,
-      projectId: process.env.PROJECT_ID,
-      storageBucket: process.env.STORAGE_BUCKET,
-      messagingSenderId: process.env.MESSAGING_SENDER_ID,
-      appId: process.env.APP_ID,
-      measurementId: process.env.MEASUREMENT_ID,
-      apiBaseUrl: process.env.API_BASE_URL,
-      s3ProxyPrefix: process.env.S3_PROXY_PREFIX,
+      apiKey: "AIzaSyAdPkGTowU6RANDTH2u1z1Zc2w1xrhmKgI",
+      authDomain: "lrda-75cf4.firebaseapp.com",
+      projectId: "lrda-75cf4",
+      storageBucket: "lrda-75cf4.appspot.com",
+      messagingSenderId: "840259501846",
+      appId: "1:840259501846:web:7bda1da9535d6f746a1a37",
+      measurementId:" G-Z4NM1MFGPS",
+      apiBaseUrl: "https://lived-religion-dev.rerum.io/deer-lr/",
+      s3ProxyPrefix: "http://s3-proxy.rerum.io/S3/",
       eas: {
         "projectId": "801029ef-db83-4668-a97a-5adcc4c333e2"
       }
