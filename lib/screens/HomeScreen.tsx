@@ -122,45 +122,57 @@ const refreshPage = () => {
   }, [updateCounter, published]);
 
 
- const fetchMessages = async (pageNum: number) => {
+  const fetchMessages = async (pageNum: number) => {
     try {
-      // Calculate skip using the current page number
-      const skip = (pageNum - 1) * limit;
-      // Get userId if needed
-      const userId = await user.getId();
-      // Use batch-fetching with skip and limit; note we use isPrivate state
-      const data = await ApiService.fetchMessagesBatch(
-          isPrivate,
-          published,
-          isPrivate ? userId : "",
-          limit,
-          skip
-      );
-      // Filter out archived notes; assume notes without `isArchived` are not archived
-      const publicNotes = data.filter((note: Note) => !note.isArchived && note.published);
-      // Convert data and sort notes by date (latest first)
-      const fetchedNotes = DataConversion.convertMediaTypes(publicNotes)
-        .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-      const finalNotes = reversed ? fetchedNotes.reverse() : fetchedNotes;
-  
-      if (pageNum === 1) {
-        setNotes(finalNotes);
-      } else {
-        setNotes((prev) => [...prev, ...finalNotes]);
-      }
-  
-      setHasMore(finalNotes.length === limit);
-      setRendering(false);
+        if (pageNum === 1) {
+            setRendering(true); // Only for first load
+        } else {
+            setIsLoadingMore(true); // Only for load more
+        }
+
+        const skip = (pageNum - 1) * limit;
+        const userId = await user.getId();
+
+        const data = await ApiService.fetchMessagesBatch(
+            false,
+            published,
+            isPrivate ? userId : "",
+            limit,
+            skip
+        );
+
+        const filteredNotes = data.filter((note: Note) => {
+            if (note.isArchived) return false;
+            return isPrivate ? !note.published : note.published;
+        });
+
+        const convertedNotes = DataConversion.convertMediaTypes(filteredNotes)
+            .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+
+        const finalNotes = reversed ? convertedNotes.reverse() : convertedNotes;
+
+        if (pageNum === 1) {
+            setNotes(finalNotes);
+        } else {
+            setNotes(prev => [...prev, ...finalNotes]);
+        }
+
+        setHasMore(finalNotes.length === limit);
+
     } catch (error) {
-      console.error("Error fetching public notes:", error);
-      ToastMessage.show({
-        type: "error",
-        text1: "Error fetching notes",
-        text2: error.message,
-      });
-      setRendering(false);
+        console.error("Error fetching notes:", error);
+        ToastMessage.show({
+            type: "error",
+            text1: "Error fetching notes",
+            text2: error.message,
+        });
+    } finally {
+        setRendering(false);       // <-- Ends initial loading
+        setIsLoadingMore(false);   // <-- Ends load more spinner
     }
-  };
+};
+
+  
 
   const updateNote = (note: Note) => {
     setNotes((prevNotes) =>
