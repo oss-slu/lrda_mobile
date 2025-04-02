@@ -11,7 +11,8 @@ import {
   Pressable,
   Animated,
   StatusBar,
-  Keyboard
+  Keyboard,
+  ActivityIndicator
 } from "react-native";
 import { useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -41,6 +42,7 @@ import { defaultTextFont } from "../../styles/globalStyles";
 
 const { width, height } = Dimensions.get("window");
 const user = User.getInstance();
+const limit = 20;
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -72,6 +74,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   let textLength = 18;
   const dispatch = useDispatch();
   
+  // Pagination states
+  const [page, setPage] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
   useEffect(() => {
     const navigateToAddNote = () => {
       const untitledNumber = findNextUntitledNumber(notes);
@@ -99,46 +106,59 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     })();
   }, []);
   
-
-  const refreshPage = () => {
-    setUpdateCounter(updateCounter + 1);
+const refreshPage = () => {
+    setPage(1);
+    setHasMore(true);
+    setUpdateCounter((prev) => prev + 1);
   };
+
 
   // Fetch notes, either all published or user-specific based on filter
   useEffect(() => {
     setRendering(true);
-    fetchMessages();
-  }, [updateCounter, published, value]);
+    setPage(1);
+    setHasMore(true);
+    fetchMessages(1);
+  }, [updateCounter, published]);
 
-  const fetchMessages = async () => {
+
+ const fetchMessages = async (pageNum: number) => {
     try {
+      // Calculate skip using the current page number
+      const skip = (pageNum - 1) * limit;
+      // Get userId if needed
       const userId = await user.getId();
-      const data = await ApiService.fetchMessages(
-        false,
-        published,
-        isPrivate ? userId : "",
+      // Use batch-fetching with skip and limit; note we use isPrivate state
+      const data = await ApiService.fetchMessagesBatch(
+          isPrivate,
+          published,
+          isPrivate ? userId : "",
+          limit,
+          skip
       );
-
       // Filter out archived notes; assume notes without `isArchived` are not archived
-      const unarchivedNotes = data.filter((note: Note) => !note.isArchived);
-
-      setMessages(unarchivedNotes);
-
+      const publicNotes = data.filter((note: Note) => !note.isArchived && note.published);
       // Convert data and sort notes by date (latest first)
-      const fetchedNotes = DataConversion.convertMediaTypes(unarchivedNotes)
+      const fetchedNotes = DataConversion.convertMediaTypes(publicNotes)
         .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-
-      // Apply reverse logic if 'reversed' is true
-      setNotes(reversed ? fetchedNotes.reverse() : fetchedNotes);
+      const finalNotes = reversed ? fetchedNotes.reverse() : fetchedNotes;
+  
+      if (pageNum === 1) {
+        setNotes(finalNotes);
+      } else {
+        setNotes((prev) => [...prev, ...finalNotes]);
+      }
+  
+      setHasMore(finalNotes.length === limit);
       setRendering(false);
-      
     } catch (error) {
-      console.error("Error fetching messages:", error);
+      console.error("Error fetching public notes:", error);
       ToastMessage.show({
         type: "error",
-        text1: "Error fetching messages",
+        text1: "Error fetching notes",
         text2: error.message,
       });
+      setRendering(false);
     }
   };
 
@@ -149,10 +169,52 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     refreshPage();
   };
 
-  const handleReverseOrder = () => {
-    setNotes(notes.reverse());
-    setReversed(!reversed);
-    setUpdateCounter(updateCounter + 1);
+  const handleLoadMore = async () => {
+    if (hasMore && !isLoadingMore) {
+      setIsLoadingMore(true);
+      const nextPage = page + 1;
+      await fetchMessages(nextPage);
+      setPage(nextPage);
+      setIsLoadingMore(false);
+    }
+  };
+
+  const renderFooter = () => {
+    if (isLoadingMore) {
+      return (
+        <View  style={{ paddingVertical: 50, alignItems: "center", marginBottom: 100 }}>
+          <ActivityIndicator size="small" color={theme.text} />
+        </View>
+      );
+    }
+    if (hasMore) {
+      return (
+        <TouchableOpacity
+        testID="load-more"
+        onPress={handleLoadMore}
+        style={{
+          paddingVertical: 20,
+          width: "65%",
+          alignItems: "center",
+          alignSelf: "center",
+          borderRadius: 20,
+          marginVertical: 4, // reduced from 8
+          backgroundColor: theme.homeColor,
+        }}
+      >
+        <Text testID="load-more-button" style={{ ...defaultTextFont ,color: theme.text, fontSize: 16, fontWeight: "400" }}>
+          Load More
+        </Text>
+      </TouchableOpacity>
+      );
+    }
+    return (
+      <View style={{ padding: 20, alignItems: "center" }}>
+        <Text testID="empty-state-text" style={{ ...defaultTextFont, color: "gray", fontSize: 14 }}>
+          No Results Found
+        </Text>
+      </View>
+    );
   };
 
   const handleArchiveNote = async (note: Note | undefined, user: User) => {
@@ -336,6 +398,7 @@ const handleSortOption = ({ option }) => {
         onRightAction={(data, rowMap) => deleteNote(data, rowMap)}
         onLeftAction={(data, rowMap) => publishNote(data, rowMap)}
         contentContainerStyle={{paddingBottom: 150}}
+        ListFooterComponent={renderFooter}
       />)
         : (<View style={styles(theme, width).resultNotFound}>
 
@@ -356,6 +419,7 @@ const handleSortOption = ({ option }) => {
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{paddingBottom: 150}}
+        ListFooterComponent={renderFooter}
       />) :
         (<View style={styles(theme, width).resultNotFound}>
 

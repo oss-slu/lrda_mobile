@@ -72,7 +72,7 @@ jest.mock('expo-location', () => ({
 const mockWriteNewNote = jest.fn();
 jest.mock('../lib/utils/api_calls', () => ({
   writeNewNote: mockWriteNewNote,
-  fetchMessages: jest.fn(() => Promise.resolve([])),
+  fetchMessagesBatch: jest.fn(() => Promise.resolve([])),
 }));
 
 // Create a mock store
@@ -305,7 +305,7 @@ describe('HomeScreen', () => {
     const routeMock = { params: { untitledNumber: 1 } };
 
     // Mock the API call to return an empty array (No notes found)
-    jest.spyOn(ApiService, "fetchMessages").mockResolvedValueOnce([]);
+    jest.spyOn(ApiService, "fetchMessagesBatch").mockResolvedValueOnce([]);
   
     const { getByTestId } = render(
       <Provider store={store}> {/* Wrap with Provider */}
@@ -317,8 +317,9 @@ describe('HomeScreen', () => {
   
     // Ensure the API call was triggered
     await waitFor(() => {
-      expect(ApiService.fetchMessages).toHaveBeenCalled();
-    });
+      expect(ApiService.fetchMessagesBatch).toHaveBeenCalled();
+   });
+   
   
     // Ensure the Lottie animation appears
     await waitFor(() => {
