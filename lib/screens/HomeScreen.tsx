@@ -125,9 +125,9 @@ const refreshPage = () => {
   const fetchMessages = async (pageNum: number) => {
     try {
         if (pageNum === 1) {
-            setRendering(true); // Only for first load
+            setRendering(true); 
         } else {
-            setIsLoadingMore(true); // Only for load more
+            setIsLoadingMore(true); 
         }
 
         const skip = (pageNum - 1) * limit;
@@ -167,8 +167,8 @@ const refreshPage = () => {
             text2: error.message,
         });
     } finally {
-        setRendering(false);       // <-- Ends initial loading
-        setIsLoadingMore(false);   // <-- Ends load more spinner
+        setRendering(false);      
+        setIsLoadingMore(false);  
     }
 };
 
