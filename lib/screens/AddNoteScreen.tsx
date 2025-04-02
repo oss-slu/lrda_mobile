@@ -40,6 +40,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import {defaultTextFont} from "../../styles/globalStyles";
+import { Button } from "react-native-paper";
 
 const user = User.getInstance();
 

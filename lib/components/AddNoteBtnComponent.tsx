@@ -7,13 +7,21 @@ import { useAddNoteContext } from '../context/AddNoteContext'
 import { useSelector, useDispatch } from 'react-redux'
 import Feather from 'react-native-vector-icons/Feather'
 import { toogleAddNoteState } from '../../redux/slice/AddNoteStateSlice'
+import { useTheme } from './ThemeProvider'
+import { useNavigationState } from '@react-navigation/native'
+
 function AddNoteBtnComponent() {
 
     const dispatch = useDispatch();
 
     const {navigateToAddNote, publishNote} = useAddNoteContext();
-    const appThemeColor = useSelector((state) => state?.themeSlice?.theme)
+    const { theme, isDarkmode } = useTheme();
+    const appThemeColor = useSelector((state) => state.themeSlice.theme);
     const addNoteState = useSelector((state) => state?.addNoteState?.isAddNoteOpned);
+    const currentRouteName = useNavigationState((state) => state.routes[state.index].name);
+    const isHomeScreen = currentRouteName === "Home";
+
+  const isAddButtonMode = isHomeScreen || !addNoteState;
     
     const handleAddNote = () => {
         dispatch(toogleAddNoteState())
@@ -27,16 +35,37 @@ function AddNoteBtnComponent() {
 
   return (
    <View style={[styles.conatiner,]} >
-        <SvgIcon style={[styles.backgroung,]}/>
-        <TouchableOpacity style={styles.button} onPress={!addNoteState ? handleAddNote : handlePublish}>
-            {
-                !addNoteState ? 
-                (<IonIcons style={styles.buttonIcon} name = 'add' size={25}/>)
-                :
-                (<Feather style={styles.buttonIcon} name = 'upload-cloud' size={25}/>)
-            }
-        </TouchableOpacity>
-   </View>
+        <SvgIcon style={[styles.backgroung, {width:60}]}/>
+        <TouchableOpacity
+        style={[
+          styles.button,
+          { backgroundColor: theme.primaryColor, // ⬅️ Apply theme color
+            shadowColor: isDarkmode ? '#fff' : '#000', // ⬅️ Dynamically set shadow color
+          } 
+        ]}
+        onPress={isAddButtonMode ? handleAddNote : handlePublish}
+      >
+           {isAddButtonMode ? (
+   <IonIcons
+   name="add"
+   size={25}
+   style={[styles.buttonIcon, { color: appThemeColor }]}
+ />
+ 
+  ) : (
+    <Feather
+    name="upload-cloud"
+    size={25}
+    style={[styles.buttonIcon, { color: appThemeColor }]}
+  />
+  
+  )}
+      </TouchableOpacity>
+      <Text style={[styles.label, { color: appThemeColor || 'gray' }]}>
+  {isAddButtonMode ? 'Add' : 'Publish'}
+</Text>
+
+    </View>
   )
 }
 
@@ -49,7 +78,9 @@ const styles = StyleSheet.create({
     },
     backgroung:{
         position: 'absolute',
-        backgroundColor: 'transparent'
+        backgroundColor: 'transparent',
+        bottom:-35,
+        transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }], // Scale width inward
     },
     button: {
         backgroundColor: '#f0f0f0',
@@ -59,17 +90,21 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderRadius: 50,
         top: -25,
-        shadowColor: '#000', 
         shadowOffset: { width: 0, height: 2 }, 
         shadowOpacity: 0.25, 
         shadowRadius: 4, 
         // Android elevation
-        elevation: 5, 
+        elevation: 4, 
     },
     buttonIcon: {
         fontWeight: '800',
         fontSize: 30
     },
+    label: {
+        fontSize: 12,
+        color: 'grey',
+        marginTop: -13 // Adds space between button and label
+      },
 })
 
 export default AddNoteBtnComponent

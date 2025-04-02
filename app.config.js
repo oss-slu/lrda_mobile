@@ -19,9 +19,9 @@ export default {
       supportsTablet: true,
       bundleIdentifier: "register.edu.slu.cs.oss.lrda",
       config: {
-        googleMapsApiKey: process.env.MAP_API_KEY
+        googleMapsApiKey: "AIzaSyAdPkGTowU6RANDTH2u1z1Zc2w1xrhmKgI"
       },
-      buildNumber: "2",
+      buildNumber: "4",
       newArchEnabled: true, // Enable New Architecture for iOS
       infoPlist: {
         NSAppTransportSecurity: {
@@ -51,7 +51,7 @@ export default {
       },
       config: {
         googleMaps: {
-          apiKey: process.env.MAP_API_KEY
+          apiKey: "AIzaSyAdPkGTowU6RANDTH2u1z1Zc2w1xrhmKgI"
         }
       },
       package: "register.edu.slu.cs.oss.lrda",

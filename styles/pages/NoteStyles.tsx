@@ -55,6 +55,23 @@ const NotePageStyles = () => {
       justifyContent: "center",
       zIndex: 99,
     },
+    doneButton: {
+      position: "absolute",
+      bottom: 0,
+      width: "100%",
+      backgroundColor: "#fff",
+      paddingVertical: 5,
+      zIndex: 10,
+      borderColor: "#ddd",
+    },
+    doneText: {
+      color: "blue",
+      fontSize: 14,
+      padding: 0,
+      textAlign: "right",
+      marginRight: 25,
+    },
+    
     container: {
       backgroundColor: theme.tertiaryColor,
       marginBottom: 4,
