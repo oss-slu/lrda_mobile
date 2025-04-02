@@ -69,15 +69,15 @@ export default {
     },
     crashReporter: true, // Add this line to enable crash reporting
     extra: {
-      apiKey: "AIzaSyAdPkGTowU6RANDTH2u1z1Zc2w1xrhmKgI",
-      authDomain: "lrda-75cf4.firebaseapp.com",
-      projectId: "lrda-75cf4",
-      storageBucket: "lrda-75cf4.appspot.com",
-      messagingSenderId: "840259501846",
-      appId: "1:840259501846:web:7bda1da9535d6f746a1a37",
-      measurementId:" G-Z4NM1MFGPS",
-      apiBaseUrl: "https://lived-religion-dev.rerum.io/deer-lr/",
-      s3ProxyPrefix: "http://s3-proxy.rerum.io/S3/",
+      apiKey: process.env.FIREBASE_API_KEY,
+      authDomain: process.env.AUTH_DOMAIN,
+      projectId: process.env.PROJECT_ID,
+      storageBucket: process.env.STORAGE_BUCKET,
+      messagingSenderId: process.env.MESSAGING_SENDER_ID,
+      appId: process.env.APP_ID,
+      measurementId: process.env.MEASUREMENT_ID,
+      apiBaseUrl: process.env.API_BASE_URL,
+      s3ProxyPrefix: process.env.S3_PROXY_PREFIX,
       eas: {
         "projectId": "801029ef-db83-4668-a97a-5adcc4c333e2"
       }
