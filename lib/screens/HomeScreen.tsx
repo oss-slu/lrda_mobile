@@ -140,7 +140,6 @@ const refreshPage = () => {
             limit,
             skip
         );
-
         const filteredNotes = data.filter((note: Note) => !note.isArchived);
 
         const convertedNotes = DataConversion.convertMediaTypes(filteredNotes)
@@ -220,7 +219,7 @@ const refreshPage = () => {
     return (
       <View style={{ padding: 20, alignItems: "center" }}>
         <Text testID="empty-state-text" style={{ ...defaultTextFont, color: "gray", fontSize: 14 }}>
-          No Results Found
+         End of the Page
         </Text>
       </View>
     );

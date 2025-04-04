@@ -123,7 +123,9 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
       console.log("Blur listener triggered...");
   
       setTimeout(async () => {
-        const latestContent = await editor.getHTML();
+        console.log("===========================\n is published\n",isPublished)
+       if(!isPublished){
+         const latestContent = await editor.getHTML();
         bodyTextRef.current = latestContent;
         console.log("Delayed content fetch:", latestContent);
   
@@ -138,11 +140,15 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
           audioRef.current.length !== 0
         ) {
           console.log("Saving note...");
-          saveNote();
-        } else {
+          await saveNote(false);
+        } 
+        else {
           console.log("Nothing to save, toggling state.");
           dispatch(toogleAddNoteState());
+          navigation.goBack();
         }
+       }
+
       }, 300); // <-- 300ms delay gives WebView enough time
     });
   
@@ -322,25 +328,27 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
   };
 
   const handleShareButtonPress = async () => {
+    console.log("Publish pressed...")
     await syncEditorContent();
 
     const bodyIsEmpty = isBodyEmpty(bodyTextRef.current);
 
     if(
-      titleTextRef.current.length!==0||
+      titleTextRef.current?.length !==0 ||
       !bodyIsEmpty|| 
       tagsRef.current.length! == 0 ||
       mediaRef.current.length! == 0 ||
       audioRef.current.length! == 0
     )
     {
+      console.log("inside if Publish pressed...")
     setIsPublished(!isPublished);
     ToastMessage.show({
       type: "success",
       text1: isPublished ? "Note Unpublished" : "Note Published",
       visibilityTime: 3000,
     });
-    await saveNote();
+    await saveNote(true);
   }
   else{
     console.log("Empty Note. Nothing to Save/Publish")
@@ -358,7 +366,7 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
 
     return title;
   };
-  const prepareNoteData = async () => {
+  const prepareNoteData = async (published: boolean) => {
     const userLocation = await Location.getCurrentPositionAsync({});
     const finalLocation = userLocation
       ? userLocation.coords
@@ -375,16 +383,16 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
       tags: tags || [],
       latitude: finalLocation.latitude.toString(),
       longitude: finalLocation.longitude.toString(),
-      published: isPublished,
+      published: published,
       time: new Date().toISOString(),
       creator: uid,
     };
   };
 
-  const saveNote = async () => {
+  const saveNote = async (published: boolean) => {
     console.log("Saving note...");
     console.log("Title Text:", titleText.length); // Log the title to ensure it's what you expect
-    const noteData = await prepareNoteData();
+    const noteData = await prepareNoteData(published);
     console.log("Note Data Prepared:", noteData); // Check if title is being passed correctly
 
     // Proceed with saving the note
