@@ -25,17 +25,17 @@ jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
 // Silence console warnings during the test
 beforeEach(() => {
   jest.clearAllMocks();
-  jest.spyOn(console, 'warn').mockImplementation(() => {});  // Silences console.warn
+  jest.useFakeTimers();
   jest.spyOn(console, 'log').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
+  jest.spyOn(console, 'warn').mockImplementation(() => {});
   moxios.install();
 });
 
 afterEach(() => {
-  console.warn.mockRestore();  // Restores original behavior after each test
-  console.log.mockRestore();
-  console.error.mockRestore();
-  moxios.uninstall()
+  jest.restoreAllMocks();
+  jest.useRealTimers();
+  moxios.uninstall();
 });
 
 describe('AudioContainer', () => {

@@ -52,6 +52,7 @@ exports[`RegisterScreen renders correctly 1`] = `
         style={
           {
             "color": "#000",
+            "fontFamily": "Inter",
             "fontSize": 32,
             "fontWeight": "bold",
             "marginBottom": 0,
@@ -206,6 +207,7 @@ exports[`RegisterScreen renders correctly 1`] = `
           style={
             {
               "color": "white",
+              "fontFamily": "Inter",
               "fontSize": 22,
               "fontWeight": "bold",
             }
@@ -218,6 +220,7 @@ exports[`RegisterScreen renders correctly 1`] = `
         style={
           {
             "color": "#000",
+            "fontFamily": "Inter",
             "fontSize": 14,
             "marginTop": 20,
             "textAlign": "center",
@@ -230,6 +233,7 @@ exports[`RegisterScreen renders correctly 1`] = `
           style={
             {
               "color": "rgb(17,47,187)",
+              "fontFamily": "Inter",
               "fontWeight": "bold",
             }
           }

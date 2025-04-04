@@ -7,6 +7,7 @@ exports[`AudioContainer renders with audio 1`] = `
       "alignItems": "center",
       "backgroundColor": "#fff",
       "marginBottom": 10,
+      "padding": 10,
       "width": "100%",
     }
   }
@@ -45,6 +46,7 @@ exports[`AudioContainer renders with audio 1`] = `
     <Text
       style={
         {
+          "fontFamily": "Inter",
           "fontSize": 24,
           "fontWeight": "600",
         }
@@ -109,89 +111,141 @@ exports[`AudioContainer renders with audio 1`] = `
       </Text>
     </View>
   </View>
-  <View
-    style={
+  <RCTScrollView
+    ListEmptyComponent={
+      <Text
+        style={
+          {
+            "color": "#888",
+            "fontSize": 16,
+            "marginTop": 20,
+          }
+        }
+      >
+        No recordings available
+      </Text>
+    }
+    contentContainerStyle={
       {
         "alignItems": "center",
         "width": "100%",
       }
     }
-  >
-    <View
-      style={
+    data={
+      [
         {
-          "alignItems": "center",
-          "backgroundColor": "#f0f2f3",
-          "borderRadius": 5,
-          "flexDirection": "row",
-          "justifyContent": "space-between",
-          "marginBottom": 10,
-          "padding": 10,
-          "width": "90%",
-        }
-      }
-    >
-      <Text>
-        test
-      </Text>
+          "name": "test",
+          "uri": "test",
+        },
+      ]
+    }
+    getItem={[Function]}
+    getItemCount={[Function]}
+    keyExtractor={[Function]}
+    onContentSizeChange={[Function]}
+    onLayout={[Function]}
+    onMomentumScrollBegin={[Function]}
+    onMomentumScrollEnd={[Function]}
+    onScroll={[Function]}
+    onScrollBeginDrag={[Function]}
+    onScrollEndDrag={[Function]}
+    removeClippedSubviews={false}
+    renderItem={[Function]}
+    scrollEventThrottle={0.0001}
+    stickyHeaderIndices={[]}
+    viewabilityConfigCallbackPairs={[]}
+  >
+    <View>
       <View
-        accessibilityState={
-          {
-            "busy": undefined,
-            "checked": undefined,
-            "disabled": undefined,
-            "expanded": undefined,
-            "selected": undefined,
-          }
-        }
-        accessibilityValue={
-          {
-            "max": undefined,
-            "min": undefined,
-            "now": undefined,
-            "text": undefined,
-          }
-        }
-        accessible={true}
-        collapsable={false}
-        focusable={true}
-        onClick={[Function]}
-        onResponderGrant={[Function]}
-        onResponderMove={[Function]}
-        onResponderRelease={[Function]}
-        onResponderTerminate={[Function]}
-        onResponderTerminationRequest={[Function]}
-        onStartShouldSetResponder={[Function]}
-        style={
-          {
-            "opacity": 1,
-          }
-        }
+        onFocusCapture={[Function]}
+        onLayout={[Function]}
+        style={null}
       >
-        <Text
-          allowFontScaling={false}
-          selectable={false}
+        <View
           style={
-            [
-              {
-                "color": undefined,
-                "fontSize": 25,
-              },
-              undefined,
-              {
-                "fontFamily": "ionicons",
-                "fontStyle": "normal",
-                "fontWeight": "normal",
-              },
-              {},
-            ]
+            {
+              "alignItems": "center",
+              "backgroundColor": "#f0f2f3",
+              "borderRadius": 5,
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+              "marginBottom": 10,
+              "padding": 10,
+              "width": "90%",
+            }
           }
         >
-          
-        </Text>
+          <Text
+            style={
+              {
+                "color": "#333",
+                "fontSize": 16,
+                "fontWeight": "500",
+              }
+            }
+          >
+            test
+          </Text>
+          <View
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onClick={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "opacity": 1,
+              }
+            }
+          >
+            <Text
+              allowFontScaling={false}
+              selectable={false}
+              style={
+                [
+                  {
+                    "color": "#111111",
+                    "fontSize": 30,
+                  },
+                  undefined,
+                  {
+                    "fontFamily": "ionicons",
+                    "fontStyle": "normal",
+                    "fontWeight": "normal",
+                  },
+                  {},
+                ]
+              }
+            >
+              
+            </Text>
+          </View>
+        </View>
       </View>
     </View>
-  </View>
+  </RCTScrollView>
 </View>
 `;
 
@@ -202,6 +256,7 @@ exports[`AudioContainer renders without crashing 1`] = `
       "alignItems": "center",
       "backgroundColor": "#fff",
       "marginBottom": 10,
+      "padding": 10,
       "width": "100%",
     }
   }
@@ -240,6 +295,7 @@ exports[`AudioContainer renders without crashing 1`] = `
     <Text
       style={
         {
+          "fontFamily": "Inter",
           "fontSize": 24,
           "fontWeight": "600",
         }
@@ -304,13 +360,57 @@ exports[`AudioContainer renders without crashing 1`] = `
       </Text>
     </View>
   </View>
-  <View
-    style={
+  <RCTScrollView
+    ListEmptyComponent={
+      <Text
+        style={
+          {
+            "color": "#888",
+            "fontSize": 16,
+            "marginTop": 20,
+          }
+        }
+      >
+        No recordings available
+      </Text>
+    }
+    contentContainerStyle={
       {
         "alignItems": "center",
         "width": "100%",
       }
     }
-  />
+    data={[]}
+    getItem={[Function]}
+    getItemCount={[Function]}
+    keyExtractor={[Function]}
+    onContentSizeChange={[Function]}
+    onLayout={[Function]}
+    onMomentumScrollBegin={[Function]}
+    onMomentumScrollEnd={[Function]}
+    onScroll={[Function]}
+    onScrollBeginDrag={[Function]}
+    onScrollEndDrag={[Function]}
+    removeClippedSubviews={false}
+    renderItem={[Function]}
+    scrollEventThrottle={0.0001}
+    stickyHeaderIndices={[]}
+    viewabilityConfigCallbackPairs={[]}
+  >
+    <View>
+      <Text
+        onLayout={[Function]}
+        style={
+          {
+            "color": "#888",
+            "fontSize": 16,
+            "marginTop": 20,
+          }
+        }
+      >
+        No recordings available
+      </Text>
+    </View>
+  </RCTScrollView>
 </View>
 `;

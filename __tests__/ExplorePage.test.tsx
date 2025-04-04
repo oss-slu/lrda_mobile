@@ -64,6 +64,7 @@ jest.mock('../lib/utils/api_calls', () => {
     writeNewNote: jest.fn(),
     fetchMessages: jest.fn(() => Promise.resolve([])),
     fetchMessagesBatch: jest.fn(() => Promise.resolve(dummyNotes)),
+    fetchMapsMessagesBatch: jest.fn(() => Promise.resolve(dummyNotes)),
   };
 });
 
@@ -124,13 +125,13 @@ describe('ExploreScreen - Load More Button Rendering', () => {
 
     await waitFor(() => expect(getByTestId('loadMoreButton')).toBeTruthy());
 
-    ApiService.fetchMessagesBatch.mockClear();
+    ApiService.fetchMapsMessagesBatch.mockClear();
 
     const loadMoreButton = getByText('Load More');
     fireEvent.press(loadMoreButton);
 
     await waitFor(() =>
-      expect(ApiService.fetchMessagesBatch).toHaveBeenCalled()
+      expect(ApiService.fetchMapsMessagesBatch).toHaveBeenCalled()
     );
   });
 });

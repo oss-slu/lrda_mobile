@@ -43,11 +43,11 @@ function AppThemeSelectorScreen() {
                         </TouchableOpacity>
                     ))
                 }
-                <TouchableOpacity>
+                {/* <TouchableOpacity>
                     <View style={[styles.themeContainer, { backgroundColor: '#a3a3a3', justifyContent: 'center', alignItems: 'center' }]}>
                         <Text style={{ ...defaultTextFont ,fontSize: 35,  }}>+</Text>
                     </View>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
             </View>
 
             

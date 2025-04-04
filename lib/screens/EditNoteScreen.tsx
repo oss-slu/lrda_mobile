@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   View,
   TextInput,
@@ -8,30 +8,29 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import * as Location from "expo-location";
 import PhotoScroller from "../components/photoScroller";
 import { User } from "../models/user_class";
 import AudioContainer from "../components/audio";
 import { Media, AudioType } from "../models/media_class";
 import ApiService from "../utils/api_calls";
 import TagWindow from "../components/tagging";
-import LocationWindow from "../components/location";
-import TimeWindow from "../components/time";
 import { DEFAULT_TOOLBAR_ITEMS, RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
 import NotePageStyles, { customImageCSS } from "../../styles/pages/NoteStyles";
 import { useTheme } from "../components/ThemeProvider";
 import LoadingModal from "../components/LoadingModal";
-import * as Location from "expo-location";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import { useDispatch } from "react-redux";
 import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
+import { useFocusEffect } from "@react-navigation/native";
 
 const user = User.getInstance();
 const EditNoteScreen = ({ route, navigation }) => {
   const { note, onSave } = route.params;
 
-  // State management for all note properties
   const [title, setTitle] = useState(note.title || "Untitled");
   const [time, setTime] = useState(new Date(note.time));
   const [tags, setTags] = useState(note.tags || []);
@@ -42,7 +41,7 @@ const EditNoteScreen = ({ route, navigation }) => {
     latitude: parseFloat(note.latitude) || 0,
     longitude: parseFloat(note.longitude) || 0,
   });
-  const [isLocationVisible, setIsLocationVisible] = useState(false);
+  const [locationButtonColor, setLocationButtonColor] = useState<string>("#000");
   const [isTagging, setIsTagging] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [viewMedia, setViewMedia] = useState(false);
@@ -54,47 +53,121 @@ const EditNoteScreen = ({ route, navigation }) => {
     avoidIosKeyboard: true,
   });
   const { setPublishNote } = useAddNoteContext();
+  const hasFocusedRef = useRef(false);
+
+
+  const initialTitle = useRef(note.title || "");
+  const initialText = useRef(note.text || "");
 
   useEffect(() => {
     setPublishNote(() => handleSaveNote);
-  },[])
+  }, []);
+
   const scrollViewRef = useRef(null);
 
-  // Inject custom CSS for images in the editor
   useEffect(() => {
     if (editor) {
-      editor.injectCSS(customImageCSS);
+      const combinedCSS = `
+        ${customImageCSS}
+        body {
+          color: ${theme.text};
+        }
+      `;
+      editor.injectCSS(combinedCSS);
     }
-  }, [editor]);
+  }, [editor, theme.text]);
+  
+  const setLocationToZero = () => {
+    setLocation({ latitude: 0, longitude: 0 });
+    setLocationButtonColor("red");
+  };
 
-  // Fetch the user's current location
-  const fetchLocation = async () => {
+  const syncEditorContent = async () => {
+    const latestContent = await editor.getHTML();
+    initialText.current = latestContent;
+  };
+  const handleShareButtonPress = async () => {
+    await syncEditorContent();
+  
+    const bodyIsEmpty = initialText.current.replace(/<\/?[^>]+(>|$)/g, "").trim().length === 0;
+    const titleIsEmpty = title.trim().length === 0;
+  
+    if (
+      titleIsEmpty &&
+      bodyIsEmpty &&
+      tags.length === 0 &&
+      media.length === 0 &&
+      newAudio.length === 0
+    ) {
+      console.log("Nothing to publish.");
+      return;
+    }
+  
+    const toggledPublish = !isPublished;
+  
+    setIsPublished(toggledPublish);
+  
+    const userId = await user.getId();
+    const editedNote = {
+      id: note.id,
+      title,
+      text: initialText.current,
+      creator: userId,
+      media,
+      latitude: location.latitude.toString(),
+      longitude: location.longitude.toString(),
+      audio: newAudio,
+      published: toggledPublish,
+      time,
+      tags,
+    };
+  
     try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        console.log("Location permission denied");
-        return;
-      }
-      const userLocation = await Location.getCurrentPositionAsync({});
-      setLocation({
-        latitude: userLocation.coords.latitude,
-        longitude: userLocation.coords.longitude,
-      });
-      setIsLocationVisible(true);
+      setIsUpdating(true);
+      await ApiService.overwriteNote(editedNote);
+      onSave(editedNote);
+      console.log(toggledPublish ? "Note Published" : "Note Unpublished");
     } catch (error) {
-      console.error("Error fetching location:", error);
+      console.error("Error publishing the note:", error);
+    } finally {
+      setIsUpdating(false);
+      dispatch(toogleAddNoteState());
+    }
+  };
+    
+
+  const fetchCurrentLocation = async () => {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+
+    if (status === "granted") {
+      try {
+        const userLocation = await Location.getCurrentPositionAsync({});
+        setLocation({
+          latitude: userLocation.coords.latitude,
+          longitude: userLocation.coords.longitude,
+        });
+        setLocationButtonColor(theme.text);
+      } catch (error) {
+        Alert.alert("Error", "Failed to retrieve location.");
+      }
+    } else {
+      setLocationToZero();
     }
   };
 
-  // Error handling for media and content addition
-  const displayErrorInEditor = async (errorMessage) => {
-    const currentContent = await editor.getHTML();
-    const errorTag = `<p style="color: red; font-weight: bold;">${errorMessage}</p><br />`;
-    editor.setContent(currentContent + errorTag);
-    editor.focus();
+  const toggleLocation = () => {
+    if (location.latitude === 0 && location.longitude === 0) {
+      fetchCurrentLocation();
+    } else {
+      setLocationToZero();
+    }
   };
 
-  const insertImageToEditor = async (imageUri) => {
+  useEffect(() => {
+    fetchCurrentLocation();
+  }, []);
+
+  const insertImageToEditor = async (imageUri: string) => {
     try {
       const currentContent = await editor.getHTML();
       const imageTag = `<img src="${imageUri}" style="max-width: 200px; max-height: 200px; object-fit: cover;" /><br />`;
@@ -106,7 +179,7 @@ const EditNoteScreen = ({ route, navigation }) => {
     }
   };
 
-  const addVideoToEditor = async (videoUri) => {
+  const addVideoToEditor = async (videoUri: string) => {
     try {
       const currentContent = await editor.getHTML();
       const videoLink = `${currentContent}<a href="${videoUri}">${videoUri}</a><br>`;
@@ -117,8 +190,16 @@ const EditNoteScreen = ({ route, navigation }) => {
       displayErrorInEditor(`Error adding video: ${error.message}`);
     }
   };
+    // Function to display an error message inside the editor
+    const displayErrorInEditor = async (errorMessage) => {
+      const currentContent = await editor.getHTML();
+      const errorTag = `<p style="color: red; font-weight: bold;">${errorMessage}</p><br />`;
+      editor.setContent(currentContent + errorTag);
+      editor.focus();
+    };
+  
 
-  const insertAudioToEditor = async (audioUri) => {
+  const insertAudioToEditor = async (audioUri: string) => {
     try {
       const currentContent = await editor.getHTML();
       const audioLink = `${currentContent}<a href="${audioUri}">${audioUri}</a><br>`;
@@ -126,11 +207,9 @@ const EditNoteScreen = ({ route, navigation }) => {
       editor.focus();
     } catch (error) {
       console.error("Error adding audio:", error);
-      displayErrorInEditor(`Error adding audio: ${error.message}`);
     }
   };
 
-  // Save edited note
   const handleSaveNote = async () => {
     setIsUpdating(true);
     try {
@@ -160,6 +239,44 @@ const EditNoteScreen = ({ route, navigation }) => {
     }
   };
 
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("blur", () => {
+      setTimeout(async () => {
+        try {
+          const textContent = await editor.getHTML();
+
+          const updatedNote = {
+            ...note,
+            title,
+            text: textContent,
+            media,
+            audio: newAudio,
+            tags,
+            published: isPublished,
+            latitude: location.latitude.toString(),
+            longitude: location.longitude.toString(),
+            time: new Date(),
+          };
+
+          console.log("Auto-saving EditNote on exit...");
+          setIsUpdating(true);
+          await ApiService.overwriteNote(updatedNote);
+          onSave(updatedNote);
+        } catch (e) {
+          console.warn("Auto-save failed:", e);
+        } finally {
+          setIsUpdating(false);
+          dispatch(toogleAddNoteState());
+        }
+      }, 300); // allow WebView to flush
+    });
+
+    return unsubscribe;
+  }, [navigation, title, editor, media, newAudio, tags, isPublished, location]);
+
+  
+
+
   return (
     <View style={{ flex: 1 }}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
@@ -184,8 +301,12 @@ const EditNoteScreen = ({ route, navigation }) => {
               <TouchableOpacity onPress={() => setViewAudio(!viewAudio)}>
                 <Ionicons name="mic-outline" size={30} color={NotePageStyles().saveText.color} />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setIsLocationVisible(!isLocationVisible)}>
-                <Ionicons name="location-outline" size={30} color={isLocationVisible ? "red" : NotePageStyles().saveText.color} />
+              <TouchableOpacity onPress={toggleLocation}>
+                <Ionicons
+                  name="location-outline"
+                  size={30}
+                  color={location.latitude === 0 && location.longitude === 0 ? "red" : theme.text}
+                />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => setIsTagging(!isTagging)}>
                 <Ionicons name="pricetag-outline" size={30} color={NotePageStyles().saveText.color} />
@@ -193,20 +314,29 @@ const EditNoteScreen = ({ route, navigation }) => {
             </View>
           </View>
           <View style={NotePageStyles().container}>
-            <PhotoScroller active={viewMedia} newMedia={media} setNewMedia={setMedia} insertImageToEditor={insertImageToEditor} addVideoToEditor={addVideoToEditor} />
-            {viewAudio && <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} insertAudioToEditor={insertAudioToEditor} />}
+            <PhotoScroller active={viewMedia} newMedia={media} setNewMedia={setMedia} insertImageToEditor={insertImageToEditor} addVideoToEditor={addVideoToEditor}/>
+            {viewAudio && (
+              <AudioContainer
+                newAudio={newAudio}
+                setNewAudio={setNewAudio}
+                insertAudioToEditor={insertAudioToEditor} // Pass functionality here
+              />
+            )}
             {isTagging && <TagWindow tags={tags} setTags={setTags} />}
-            {isLocationVisible && <LocationWindow location={location} setLocation={setLocation} />}
           </View>
           <View style={NotePageStyles().richTextContainer}>
-            <RichText
-              editor={editor}
-              placeholder="Write Content Here..."
-              style={[
-                NotePageStyles().editor,
-                { backgroundColor: Platform.OS === "android" ? "white" : undefined },
-              ]}
-            />
+          <RichText
+    editor={editor}
+    placeholder="Write Content Here..."
+    style={[
+      NotePageStyles().editor,
+      {
+        backgroundColor: theme.backgroundColor,
+        minHeight: 200, // gives initial space to type
+        paddingBottom: 120, // prevents content from being hidden behind keyboard/toolbar
+      },
+    ]}
+  />
           </View>
           <View style={NotePageStyles().toolBar}>
             <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
@@ -217,12 +347,5 @@ const EditNoteScreen = ({ route, navigation }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  editorContainer: {
-    flex: 1,
-    minHeight: 400,
-  },
-});
 
 export default EditNoteScreen;

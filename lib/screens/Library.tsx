@@ -105,7 +105,7 @@ const Library = ({ navigation, route }) => {
       // Get userId if needed
       const userId = await user.getId();
       // Use batch-fetching with skip and limit; note we use isPrivate state
-      const data = await ApiService.fetchMessagesBatch(
+      const data = await ApiService.fetchMapsMessagesBatch(
           isPrivate,
           published,
           isPrivate ? userId : "",

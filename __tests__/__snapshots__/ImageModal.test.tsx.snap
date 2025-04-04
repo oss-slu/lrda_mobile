@@ -131,6 +131,11 @@ exports[`ImageModal renders without crashing 1`] = `
       testID="image-component"
     >
       <Text
+        style={
+          {
+            "fontFamily": "Inter",
+          }
+        }
         testID="close-button"
       >
         Close

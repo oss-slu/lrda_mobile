@@ -34,9 +34,8 @@ export const appTheme = [
   {id: 1, themeColor: 'rgb(196,115,115)'},
   {id: 2, themeColor: 'rgb(82,214,168)'},
   {id: 3, themeColor: 'rgb(195,142,132)'},
-  {id: 4, themeColor: 'rgb(235,22,139)'},
-  {id: 5, themeColor: 'rgb(96, 113, 209)'},
-  {id: 6, themeColor: 'rgb(127, 173, 225)'},
-  {id: 7, themeColor: 'rgb(195,142,232)'},
+  {id: 4, themeColor: 'rgb(96, 113, 209)'},
+  {id: 5, themeColor: 'rgb(127, 173, 225)'},
+  {id: 6, themeColor: 'rgb(195,142,232)'},
 ]
 // #F7F8F9

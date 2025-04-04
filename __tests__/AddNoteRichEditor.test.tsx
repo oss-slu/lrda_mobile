@@ -6,6 +6,14 @@ import { AddNoteProvider } from '../lib/context/AddNoteContext'; // Import the p
 import { Provider } from 'react-redux';
 import { store } from '../redux/store/store';
 
+
+const navigationMock = {
+  navigate: jest.fn(),
+  goBack: jest.fn(),
+  addListener: jest.fn(() => jest.fn()), 
+  canGoBack: jest.fn(() => true),
+};
+
 // Mock redux-persist to avoid persistence logic in tests
 jest.mock('redux-persist', () => {
   const real = jest.requireActual('redux-persist');
@@ -142,13 +150,13 @@ describe("AddNoteScreen", () => {
   });
 
   it("renders without crashing", () => {
-    renderWithProviders(<AddNoteScreen route={{ params: { untitledNumber: 1 }}} />);
+    renderWithProviders(<AddNoteScreen navigation={navigationMock as any} route={{ params: { untitledNumber: 1 }}} />);
     // Instead of using toBeInTheDocument (which is DOM-specific), use toBeTruthy
     expect(screen.getByTestId('RichEditor')).toBeTruthy();
   });
 
   it('calls setNoteContent when the Rich Text Editor content changes', () => {
-    renderWithProviders(<AddNoteScreen route={{ params: { untitledNumber: 1 }}} />);
+    renderWithProviders(<AddNoteScreen navigation={navigationMock as any} route={{ params: { untitledNumber: 1 }}} />);
 
     const richTextEditor = screen.getByTestId('RichEditor'); // Ensure the element is rendered
     const newText = 'New content';
