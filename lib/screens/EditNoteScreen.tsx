@@ -82,6 +82,60 @@ const EditNoteScreen = ({ route, navigation }) => {
     setLocationButtonColor("red");
   };
 
+  const syncEditorContent = async () => {
+    const latestContent = await editor.getHTML();
+    initialText.current = latestContent;
+  };
+  const handleShareButtonPress = async () => {
+    await syncEditorContent();
+  
+    const bodyIsEmpty = initialText.current.replace(/<\/?[^>]+(>|$)/g, "").trim().length === 0;
+    const titleIsEmpty = title.trim().length === 0;
+  
+    if (
+      titleIsEmpty &&
+      bodyIsEmpty &&
+      tags.length === 0 &&
+      media.length === 0 &&
+      newAudio.length === 0
+    ) {
+      console.log("Nothing to publish.");
+      return;
+    }
+  
+    const toggledPublish = !isPublished;
+  
+    setIsPublished(toggledPublish);
+  
+    const userId = await user.getId();
+    const editedNote = {
+      id: note.id,
+      title,
+      text: initialText.current,
+      creator: userId,
+      media,
+      latitude: location.latitude.toString(),
+      longitude: location.longitude.toString(),
+      audio: newAudio,
+      published: toggledPublish,
+      time,
+      tags,
+    };
+  
+    try {
+      setIsUpdating(true);
+      await ApiService.overwriteNote(editedNote);
+      onSave(editedNote);
+      console.log(toggledPublish ? "Note Published" : "Note Unpublished");
+    } catch (error) {
+      console.error("Error publishing the note:", error);
+    } finally {
+      setIsUpdating(false);
+      dispatch(toogleAddNoteState());
+    }
+  };
+    
+
   const fetchCurrentLocation = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
 

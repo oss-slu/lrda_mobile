@@ -136,15 +136,12 @@ const refreshPage = () => {
         const data = await ApiService.fetchMessagesBatch(
             false,
             published,
-            isPrivate ? userId : "",
+            userId,
             limit,
             skip
         );
 
-        const filteredNotes = data.filter((note: Note) => {
-            if (note.isArchived) return false;
-            return isPrivate ? !note.published : note.published;
-        });
+        const filteredNotes = data.filter((note: Note) => !note.isArchived);
 
         const convertedNotes = DataConversion.convertMediaTypes(filteredNotes)
             .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
@@ -284,11 +281,18 @@ const refreshPage = () => {
 
 
   const sideMenu = (data: any, rowMap: any) => {
+    const note = data.item;
+    const isNotePublished = note.published;
+
     return (
       <View style={styles(theme, width).rowBack} key={data.index}>
         <TouchableOpacity>
           <TouchableOpacity onPress={() => publishNote(data.item.id, rowMap)}>
-            <Ionicons name="share" size={30} color={"green"} />
+          <Ionicons
+          name={isNotePublished ? "arrow-undo" : "share"}
+          size={30}
+          color={"green"}
+        />
           </TouchableOpacity>
         </TouchableOpacity>
         <View
@@ -426,12 +430,18 @@ const handleSortOption = ({ option }) => {
         )
 
     ) : (
-      publicData.length > 0 ? (<SwipeListView
-        data={publicData}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{paddingBottom: 150}}
-        ListFooterComponent={renderFooter}
+      publicData.length > 0 ? (
+        <SwipeListView
+          data={publicData}
+          renderItem={renderItem}
+          renderHiddenItem={sideMenu}
+          leftActivationValue={160}
+          leftOpenValue={75}
+          stopLeftSwipe={175}
+          keyExtractor={(item) => item.id}
+          onLeftAction={(data, rowMap) => publishNote(data, rowMap)}
+          contentContainerStyle={{ paddingBottom: 150 }}
+          ListFooterComponent={renderFooter}
       />) :
         (<View style={styles(theme, width).resultNotFound}>
 
@@ -614,7 +624,7 @@ const handleSortOption = ({ option }) => {
                   setPublished(true);
                 }}>
                   <View testID="public-btn" style={[styles(theme, width).publishedTxtContainer, { backgroundColor: isPrivate ? 'transparent' : 'black' },]}>
-                    <Text style={[styles(theme, width).publishedTxt, { color: isPrivate ? 'black' : 'white' }]}>Published</Text>
+                    <Text style={[styles(theme, width).publishedTxt, { color: isPrivate ? 'black' : 'white' }]}> Published</Text>
                   </View>
                 </Pressable>
                 <Pressable onPress={() => {
@@ -703,35 +713,41 @@ const handleSortOption = ({ option }) => {
       />
 
 {isSortOpened && isSearchVisible== false && <View testID="sort-options" style={{
-        height: "100%",
-        width: '100%',
-        backgroundColor: isDarkmode? '#525252' : 'white',
-        position: 'absolute',
-        top: '19%',
-        borderRadius: 20,
-        padding: 20,
+         position: 'absolute',
+         top: 120, // adjust based on your layout
+         right: 20,
+         width: 200,
+         backgroundColor: isDarkmode ? '#525252' : 'white',
+         borderRadius: 12,
+         padding: 10,
+         zIndex: 10,
+         elevation: 10,
+         shadowColor: '#000',
+         shadowOffset: { width: 0, height: 2 },
+         shadowOpacity: 0.2,
+         shadowRadius: 4,
       }}>
-        <Text style={{ ...defaultTextFont,fontSize: 20, color: isDarkmode? '#c7c7c7' : 'black', fontWeight: 600}}>Sort by</Text>
+        <Text style={{  ...defaultTextFont, fontSize: 16, fontWeight: '600', marginBottom: 10, color: isDarkmode ? '#c7c7c7' : 'black',}}>Sort by</Text>
         <View style={{ height: '50%', justifyContent: 'space-evenly', alignItems: 'center'}}>
           <TouchableOpacity
             onPress={() => handleSortOption({ option: 1 })}
           >
             <View style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 1 ? theme.homeColor : 'none', width: 200 }]}>
-              <Text style={{ ...defaultTextFont,fontSize: 20, color: isDarkmode && selectedSortOption != 1 ? '#c7c7c7' : 'black' }}>Date & Time(latest)</Text>
+              <Text style={{ ...defaultTextFont, fontSize: 14, paddingVertical: 6, color: selectedSortOption === 1 ? theme.primary : (isDarkmode ? '#ccc' : '#000'), }}>Date & Time(latest)</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => handleSortOption({ option: 2 })}
           >
             <View style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 2 ? theme.homeColor : 'none' }]}>
-              <Text style={{ ...defaultTextFont,fontSize: 20, color: isDarkmode && selectedSortOption != 2 ? '#c7c7c7' : 'black' }}>A-Z</Text>
+              <Text style={{ ...defaultTextFont, fontSize: 14, paddingVertical: 6, color: selectedSortOption === 2 ? theme.primary : (isDarkmode ? '#ccc' : '#000'),}}>A-Z</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => handleSortOption({ option: 3 })}
           >
             <View style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 3 ? theme.homeColor : 'none' }]}>
-              <Text style={{ ...defaultTextFont,fontSize: 20, color: isDarkmode && selectedSortOption != 3 ? '#c7c7c7' : 'black' }}>Z-A</Text>
+              <Text style={{ ...defaultTextFont, fontSize: 14, paddingVertical: 6, color: selectedSortOption === 2 ? theme.primary : (isDarkmode ? '#ccc' : '#000'),}}>Z-A</Text>
             </View>
           </TouchableOpacity>
         </View>

@@ -322,14 +322,29 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
   };
 
   const handleShareButtonPress = async () => {
+    await syncEditorContent();
+
+    const bodyIsEmpty = isBodyEmpty(bodyTextRef.current);
+
+    if(
+      titleTextRef.current.length!==0||
+      !bodyIsEmpty|| 
+      tagsRef.current.length! == 0 ||
+      mediaRef.current.length! == 0 ||
+      audioRef.current.length! == 0
+    )
+    {
     setIsPublished(!isPublished);
-    console.log("This is title in handleShare button ", titleText);
     ToastMessage.show({
       type: "success",
       text1: isPublished ? "Note Unpublished" : "Note Published",
       visibilityTime: 3000,
     });
     await saveNote();
+  }
+  else{
+    console.log("Empty Note. Nothing to Save/Publish")
+  }
   };
 
   const getTitle = () => {

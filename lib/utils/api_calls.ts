@@ -81,13 +81,11 @@ try {
     type: "message",
   };
 
-  if (global) {
-    body = { type: "message" };
-  } else if (published) {
-    body = { type: "message", published: true };
-  } else {
-    body = { type: "message", creator: userId };
-  }
+  body = {
+    type: "message",
+    creator: userId,
+    published,
+  };
 
   const response = await fetch(url, {
     method: "POST",
@@ -101,6 +99,42 @@ try {
   throw error;
 }
 }
+
+static async fetchMapsMessagesBatch(
+  global: boolean,
+  published: boolean,
+  userId: string,
+  limit = 20,
+  skip = 0
+): Promise<any[]> {
+try {
+  const url = `${API_BASE_URL}query?limit=${limit}&skip=${skip}`;
+  const headers = {
+    "Content-Type": "application/json",
+  };
+
+  let body: { type: string; published?: boolean; creator?: string } = {
+    type: "message",
+  };
+
+  body = {
+    type: "message",
+    published,
+  };
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+  });
+  const data = await response.json();
+  return data;
+} catch (error) {
+  console.error("Error fetching messages:", error);
+  throw error;
+}
+}
+
  /**
    * Fetches user data from Firestore first, then the API if Firestore data is not found.
    * @param {string} uid - The UID of the user.

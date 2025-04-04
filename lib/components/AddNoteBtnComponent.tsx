@@ -18,8 +18,8 @@ function AddNoteBtnComponent() {
     const { theme, isDarkmode } = useTheme();
     const appThemeColor = useSelector((state) => state.themeSlice.theme);
     const addNoteState = useSelector((state) => state?.addNoteState?.isAddNoteOpned);
-    const currentRouteName = useNavigationState((state) => state.routes[state.index].name);
-    const isHomeScreen = currentRouteName === "Home";
+  const currentRouteName = useNavigationState((state) => state.routes[state.index].name);
+  const isHomeScreen = currentRouteName === "Home";
 
   const isAddButtonMode = isHomeScreen || !addNoteState;
     

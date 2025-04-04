@@ -21,7 +21,7 @@ export default {
       config: {
         googleMapsApiKey: "AIzaSyAdPkGTowU6RANDTH2u1z1Zc2w1xrhmKgI"
       },
-      buildNumber: "4",
+      buildNumber: "5",
       newArchEnabled: true, // Enable New Architecture for iOS
       infoPlist: {
         NSAppTransportSecurity: {
