@@ -317,7 +317,7 @@ describe('Library Component', () => {
     };
     const routeMock = { params: {} };
 
-    jest.spyOn(ApiService, 'fetchMessagesBatch').mockResolvedValue([]);
+    jest.spyOn(ApiService, 'fetchMapsMessagesBatch').mockResolvedValue([]);
 
     const { getByText } = render(
       <Library navigation={navigationMock} route={routeMock} />
@@ -338,7 +338,7 @@ describe('Library Component', () => {
     };
     const routeMock = { params: {} };
 
-    jest.spyOn(ApiService, 'fetchMessagesBatch').mockResolvedValue([]);
+    jest.spyOn(ApiService, 'fetchMapsMessagesBatch').mockResolvedValue([]);
 
     const { getByText } = render(
       <Library navigation={navigationMock} route={routeMock} />
@@ -374,7 +374,7 @@ describe('Library Component', () => {
       ],
     }));
   
-    jest.spyOn(ApiService, 'fetchMessagesBatch').mockResolvedValue(dummyNotes);
+    jest.spyOn(ApiService, 'fetchMapsMessagesBatch').mockResolvedValue(dummyNotes);
   
     const { getByText } = render(
       <Library navigation={navigationMock} route={routeMock} />
