@@ -35,7 +35,8 @@ import NotesComponent from "../components/NotesComponent";
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import LottieView from 'lottie-react-native';
 import { defaultTextFont } from "../../styles/globalStyles";
-
+import Tooltip from 'react-native-walkthrough-tooltip';
+import TooltipContent from "../onboarding/TooltipComponent";
 const user = User.getInstance();
 const { width, height } = Dimensions.get("window");
 
@@ -353,6 +354,19 @@ const Library = ({ navigation, route }) => {
     setIsSortOpened(false);
   };
 
+    const [userTutorial, setUserTutorial] = useState(User.getHasDoneTutorial("Explore")); //set to false initially.
+  
+    User.getHasDoneTutorial("Explore").then(userTutorial => {
+      console.log("USER TUTORIAL: " + userTutorial); // This will log true or false
+    });
+    
+    const [accountTip, setAccontTip] = useState(true); //2nd tip
+    const [filterToolTip, setFilterToolTip] = useState(false); //this is the first tip
+    const [searchTip, setSearchTip] = useState(false); //2nd tip
+
+
+  
+
   return (
     <View testID="Library" style={{ flex: 1, backgroundColor: isDarkmode ? 'black' : '#e4e4e4' }}>
       <StatusBar translucent backgroundColor="transparent" />
@@ -369,6 +383,26 @@ const Library = ({ navigation, route }) => {
             }}
           >
             <View style={styles(theme, width).userAccountAndPageTitle}>
+            <Tooltip
+                topAdjustment={Platform.OS === 'android' ? -StatusBar.currentHeight : 0}
+                isVisible={accountTip}
+                content={
+                <TooltipContent
+                      message="View Account Here!"
+                      onPressOk={() => {
+                        setAccontTip(false);
+                        setSearchTip(true);
+                    }}
+                    onSkip={() => {
+                      // Disable all tutorial tips when Skip is pressed
+                      setAccontTip(false);
+                      setSearchTip(false);
+                      setFilterToolTip(false);
+                    }}
+                  />
+              }
+              placement="bottom"
+      >
               <TouchableOpacity 
                 testID="account-page"
                 style={[
@@ -385,6 +419,7 @@ const Library = ({ navigation, route }) => {
               >
                 <Text style={styles(theme, width).pfpText}>{userInitials}</Text>
               </TouchableOpacity>
+            </Tooltip>
               <Text style={styles(theme, width).pageTitle}>Library</Text>
             </View>
   
@@ -398,10 +433,30 @@ const Library = ({ navigation, route }) => {
         <View testID="Filter" style={[styles(theme, width).toolContainer, { marginHorizontal: 20 }]}>
           {
             !isSearchVisible && (
+              <Tooltip
+              topAdjustment={Platform.OS === 'android' ? -StatusBar.currentHeight : 0}
+              isVisible={filterToolTip}
+              content={
+              <TooltipContent
+                message="Filter notes"
+                  onPressOk={() => {
+                    setFilterToolTip(false);
+                }}
+                onSkip={() => {
+                  // Disable all tutorial tips when Skip is pressed
+                  setAccontTip(false);
+                  setSearchTip(false);
+                  setFilterToolTip(false);
+                }}
+            />
+          }
+          placement="bottom"
+          >
               <View>
                 {
                   !isSortOpened ? (
                     <TouchableOpacity onPress={handleSort}>
+        
                       <MaterialIcons name='sort' size={30} />
                     </TouchableOpacity>
                   ) : (
@@ -411,6 +466,7 @@ const Library = ({ navigation, route }) => {
                   )
                 }
               </View>
+            </Tooltip>
             )
           }
           <View testID="SearchBar" style={[styles(theme, width).searchParentContainer, { width: isSearchVisible ? '95%' : 40 }]}>
@@ -442,7 +498,28 @@ const Library = ({ navigation, route }) => {
               ) : (
                 <View style={styles(theme, width).seachIcon}>
                   <TouchableOpacity onPress={toggleSearchBar} testID="search-button">
+                  <Tooltip
+                      topAdjustment={Platform.OS === 'android' ? -StatusBar.currentHeight : 0}
+                      isVisible={searchTip}
+                      content={
+                      <TooltipContent
+                        message="Search Notes!"
+                          onPressOk={() => {
+                            setSearchTip(false);
+                            setFilterToolTip(true);
+                        }}
+                        onSkip={() => {
+                          // Disable all tutorial tips when Skip is pressed
+                          setAccontTip(false);
+                          setSearchTip(false);
+                          setFilterToolTip(false);
+                        }}
+                    />
+                  }
+                  placement="bottom"
+                  >
                     <Ionicons name="search" size={25} />
+                  </Tooltip>
                   </TouchableOpacity>
                 </View>
               )
