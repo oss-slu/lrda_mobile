@@ -196,6 +196,10 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
       const currentContent = await editor.getHTML();
       const imageTag = `<img src="${imageUri}" style="max-width: 200px; max-height: 200px; object-fit: cover;" /><br />`;
       editor.setContent(currentContent + imageTag);
+
+      // Add this line to update the toolbar preview state
+      setNewMedia((prevMedia) => [...prevMedia, { uri: imageUri, type: "image" }]);
+
       editor.focus();
     } catch (error) {
       console.error("Error inserting image:", error);
