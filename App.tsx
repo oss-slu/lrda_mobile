@@ -6,6 +6,7 @@ import Toast from 'react-native-toast-message';
 import { Provider } from 'react-redux';
 import { store, persistor } from './redux/store/store';
 import { AddNoteProvider } from './lib/context/AddNoteContext';
+import { EditNoteProvider } from './lib/context/EditNoteContext';
 import 'react-native-gesture-handler';
 import { useFonts } from 'expo-font';
 import { PersistGate } from 'redux-persist/lib/integration/react'; 
@@ -26,8 +27,10 @@ export default function App() {
       <PersistGate loading={null} persistor={persistor}>
         <ThemeProvider>
           <AddNoteProvider>
+            <EditNoteProvider>
             <AppNavigator />
             <Toast />
+            </EditNoteProvider>
           </AddNoteProvider>
         </ThemeProvider>
       </PersistGate>
