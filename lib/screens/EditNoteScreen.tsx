@@ -10,6 +10,7 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
+import ToastMessage from "react-native-toast-message";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import PhotoScroller from "../components/photoScroller";
@@ -61,8 +62,9 @@ const EditNoteScreen = ({ route, navigation }) => {
   const initialText = useRef(note.text || "");
 
   useEffect(() => {
-    setPublishNote(() => handleSaveNote);
+    setPublishNote(() => handlePublishPress);
   }, []);
+  
 
   const scrollViewRef = useRef(null);
 
@@ -162,6 +164,61 @@ const EditNoteScreen = ({ route, navigation }) => {
       console.error("Error adding audio:", error);
     }
   };
+
+  const handlePublishPress = async () => {
+    console.log("📤 Publish button pressed in EditNoteScreen");
+  
+    const latestContent = await editor.getHTML();
+    initialText.current = latestContent;
+  
+    const titleIsEmpty = !title.trim();
+    const bodyIsEmpty = latestContent.replace(/<\/?[^>]+(>|$)/g, "").trim().length === 0;
+  
+    if (!titleIsEmpty || !bodyIsEmpty || tags.length !== 0 || media.length !== 0 || newAudio.length !== 0) {
+      console.log("✅ Valid content found. Proceeding to publish...");
+  
+      setIsPublished(true); // Only publish if explicitly pressed
+      setIsUpdating(true);
+  
+      try {
+        const userId = await user.getId();
+        const editedNote = {
+          id: note.id,
+          title,
+          text: latestContent,
+          creator: userId,
+          media,
+          latitude: location.latitude.toString(),
+          longitude: location.longitude.toString(),
+          audio: newAudio,
+          published: true,
+          time,
+          tags,
+        };
+  
+        await ApiService.overwriteNote(editedNote);
+        onSave(editedNote);
+        setIsPublishBtnClicked(true);
+  
+        ToastMessage.show({
+          type: "success",
+          text1: "Note Published",
+          visibilityTime: 3000,
+        });
+  
+        console.log("🧭 Navigating back after publish");
+        navigation.goBack();
+      } catch (error) {
+        console.error("❌ Error publishing note:", error);
+      } finally {
+        setIsUpdating(false);
+        dispatch(toogleAddNoteState());
+      }
+    } else {
+      console.log("⚠️ Empty note — publish skipped.");
+    }
+  };
+  
 
   const handleSaveNote = async () => {
     setIsUpdating(true);
