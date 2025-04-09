@@ -38,7 +38,8 @@ import { green } from "react-native-reanimated/lib/typescript/Colors";
 import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
 import { useSelector, useDispatch } from 'react-redux'
 import { defaultTextFont } from "../../styles/globalStyles";
-
+import Tooltip from "react-native-walkthrough-tooltip";
+import TooltipContent from "../onboarding/TooltipComponent";
 const { width, height } = Dimensions.get("window");
 const user = User.getInstance();
 
@@ -479,6 +480,23 @@ const handleSortOption = ({ option }) => {
     });
   }, [notes, searchQuery]);
 
+  const [userTutorial, setUserTutorial] = useState<boolean | null>(null);
+  const [accountTip, setAccontTip] = useState(false); // Start false
+  const [filterToolTip, setFilterToolTip] = useState(false); 
+  const [searchTip, setSearchTip] = useState(false); 
+  const [pubPrivTip, setPubPrivTip] = useState(false); 
+
+  
+  useEffect(() => {
+    User.getHasDoneTutorial("Explore").then(tutorialDone => {
+      setUserTutorial(tutorialDone);
+      if (!tutorialDone) {
+        setAccontTip(true); // Enable tooltips only if user hasn't seen them
+      }
+    });
+  }, []);
+
+
   return (
     <View style={{ flex: 1, backgroundColor : isDarkmode? 'black' : '#e4e4e4'}}>
       <StatusBar translucent backgroundColor="transparent" />
@@ -495,6 +513,27 @@ const handleSortOption = ({ option }) => {
             }}
           >
             <View style={styles(theme, width).userAccountAndPageTitle}>
+            <Tooltip
+                topAdjustment={Platform.OS === 'android' ? -StatusBar.currentHeight : 0}
+                showChildInTooltip = {false}
+                isVisible={accountTip}
+                content={
+                <TooltipContent
+                      message="View Account Here!"
+                      onPressOk={() => {
+                        setAccontTip(false);
+                        setSearchTip(true);
+                    }}
+                    onSkip={() => {
+                      // Disable all tutorial tips when Skip is pressed
+                      setAccontTip(false);
+                      setSearchTip(false);
+                      setFilterToolTip(false);
+                    }}
+                  />
+              }
+              placement="bottom"
+      >
               <TouchableOpacity testID="user-account"
                 style={[
                   styles(theme, width).userPhoto,
@@ -510,6 +549,7 @@ const handleSortOption = ({ option }) => {
               >
                 <Text style={styles(theme, width).pfpText}>{userInitials}</Text>
               </TouchableOpacity>
+            </Tooltip>
               <Text style={styles(theme, width).pageTitle}>Notes</Text>
             </View>
 
@@ -526,6 +566,26 @@ const handleSortOption = ({ option }) => {
           {
             !isSearchVisible && (
             <View style={styles(theme, width).publishedAndSortContainer}>
+          <Tooltip
+              topAdjustment={Platform.OS === 'android' ? -StatusBar.currentHeight : 0}
+              showChildInTooltip = {false}
+              isVisible={pubPrivTip}
+              content={
+              <TooltipContent
+                message="Switch between public and private notes"
+                  onPressOk={() => {
+                    setPubPrivTip(false);
+                }}
+                onSkip={() => {
+                  // Disable all tutorial tips when Skip is pressed
+                  setAccontTip(false);
+                  setSearchTip(false);
+                  setFilterToolTip(false);
+                }}
+            />
+          }
+          placement="bottom"
+          >
               <View style={styles(theme, width).publishedOrPrivateContainer}>
                 <Pressable onPress={() => {
                   setIsPrivate(false);
@@ -544,13 +604,37 @@ const handleSortOption = ({ option }) => {
                   </View>
                 </Pressable>
               </View>
+              </Tooltip>
               <View>
                 {
-                  !isSortOpened ? (<TouchableOpacity testID="sort-button"
+                  !isSortOpened ? (
+                    <Tooltip
+                    topAdjustment={Platform.OS === 'android' ? -StatusBar.currentHeight : 0}
+                    isVisible={filterToolTip}
+                    content={
+                    <TooltipContent
+                      message="Filter notes"
+                        onPressOk={() => {
+                          setFilterToolTip(false);
+                          setPubPrivTip(true);
+                      }}
+                      onSkip={() => {
+                        // Disable all tutorial tips when Skip is pressed
+                        setAccontTip(false);
+                        setSearchTip(false);
+                        setFilterToolTip(false);
+                      }}
+                  />
+                }
+                placement="bottom"
+                >
+                <TouchableOpacity testID="sort-button"
                     onPress={handleSort}
                   >
+      
                     <MaterialIcons name='sort' size={30} />
-                  </TouchableOpacity>)
+                  </TouchableOpacity>
+                  </Tooltip>)
                     : (
                       <TouchableOpacity
                         onPress={handleSort}
@@ -599,7 +683,28 @@ const handleSortOption = ({ option }) => {
               ) : (
                 <View style={styles(theme, width).searchIcon}>
                   <TouchableOpacity testID="searchButton" onPress={toggleSearchBar}>
+                  <Tooltip
+                      topAdjustment={Platform.OS === 'android' ? -StatusBar.currentHeight : 0}
+                      isVisible={searchTip}
+                      content={
+                      <TooltipContent
+                        message="Search Notes!"
+                          onPressOk={() => {
+                            setSearchTip(false);
+                            setFilterToolTip(true);
+                        }}
+                        onSkip={() => {
+                          // Disable all tutorial tips when Skip is pressed
+                          setAccontTip(false);
+                          setSearchTip(false);
+                          setFilterToolTip(false);
+                        }}
+                    />
+                  }
+                  placement="bottom"
+                  >
                     <Ionicons name='search' size={25} />
+                  </Tooltip>
                   </TouchableOpacity>
                 </View>
               )

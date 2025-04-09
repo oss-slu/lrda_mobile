@@ -110,6 +110,7 @@ jest.mock('../lib/components/ThemeProvider', () => ({
   })),
 }));
 
+
 // Mock expo-location module with TypeScript type support
 jest.mock('expo-location', () => ({
   getForegroundPermissionsAsync: jest.fn(),
