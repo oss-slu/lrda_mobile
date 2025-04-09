@@ -220,7 +220,7 @@ const refreshPage = () => {
     return (
       <View style={{ padding: 20, alignItems: "center" }}>
         <Text testID="empty-state-text" style={{ ...defaultTextFont, color: "gray", fontSize: 14 }}>
-          No Results Found
+          End of the Page 
         </Text>
       </View>
     );

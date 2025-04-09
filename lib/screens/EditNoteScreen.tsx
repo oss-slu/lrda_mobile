@@ -37,6 +37,7 @@ const EditNoteScreen = ({ route, navigation }) => {
   const [media, setMedia] = useState<Media[]>(note.media || []);
   const [newAudio, setNewAudio] = useState<AudioType[]>(note.audio || []);
   const [isPublished, setIsPublished] = useState(note.published || false);
+  const [ispublishBtnClicked, setIsPublishBtnClicked] = useState(false);
   const [location, setLocation] = useState({
     latitude: parseFloat(note.latitude) || 0,
     longitude: parseFloat(note.longitude) || 0,
@@ -86,55 +87,7 @@ const EditNoteScreen = ({ route, navigation }) => {
     const latestContent = await editor.getHTML();
     initialText.current = latestContent;
   };
-  const handleShareButtonPress = async () => {
-    await syncEditorContent();
   
-    const bodyIsEmpty = initialText.current.replace(/<\/?[^>]+(>|$)/g, "").trim().length === 0;
-    const titleIsEmpty = title.trim().length === 0;
-  
-    if (
-      titleIsEmpty &&
-      bodyIsEmpty &&
-      tags.length === 0 &&
-      media.length === 0 &&
-      newAudio.length === 0
-    ) {
-      console.log("Nothing to publish.");
-      return;
-    }
-  
-    const toggledPublish = !isPublished;
-  
-    setIsPublished(toggledPublish);
-  
-    const userId = await user.getId();
-    const editedNote = {
-      id: note.id,
-      title,
-      text: initialText.current,
-      creator: userId,
-      media,
-      latitude: location.latitude.toString(),
-      longitude: location.longitude.toString(),
-      audio: newAudio,
-      published: toggledPublish,
-      time,
-      tags,
-    };
-  
-    try {
-      setIsUpdating(true);
-      await ApiService.overwriteNote(editedNote);
-      onSave(editedNote);
-      console.log(toggledPublish ? "Note Published" : "Note Unpublished");
-    } catch (error) {
-      console.error("Error publishing the note:", error);
-    } finally {
-      setIsUpdating(false);
-      dispatch(toogleAddNoteState());
-    }
-  };
-    
 
   const fetchCurrentLocation = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
@@ -230,45 +183,48 @@ const EditNoteScreen = ({ route, navigation }) => {
       };
       await ApiService.overwriteNote(editedNote);
       onSave(editedNote);
-      navigation.goBack();
     } catch (error) {
       console.error("Error updating the note:", error);
     } finally {
       setIsUpdating(false);
       dispatch(toogleAddNoteState());
+      setIsPublishBtnClicked(true);
+      navigation.goBack();
     }
   };
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("blur", () => {
-      setTimeout(async () => {
-        try {
-          const textContent = await editor.getHTML();
-
-          const updatedNote = {
-            ...note,
-            title,
-            text: textContent,
-            media,
-            audio: newAudio,
-            tags,
-            published: isPublished,
-            latitude: location.latitude.toString(),
-            longitude: location.longitude.toString(),
-            time: new Date(),
-          };
-
-          console.log("Auto-saving EditNote on exit...");
-          setIsUpdating(true);
-          await ApiService.overwriteNote(updatedNote);
-          onSave(updatedNote);
-        } catch (e) {
-          console.warn("Auto-save failed:", e);
-        } finally {
-          setIsUpdating(false);
-          dispatch(toogleAddNoteState());
-        }
-      }, 300); // allow WebView to flush
+      if(!ispublishBtnClicked){
+        setTimeout(async () => {
+          try {
+            const textContent = await editor.getHTML();
+  
+            const updatedNote = {
+              ...note,
+              title,
+              text: textContent,
+              media,
+              audio: newAudio,
+              tags,
+              published: isPublished,
+              latitude: location.latitude.toString(),
+              longitude: location.longitude.toString(),
+              time: new Date(),
+            };
+  
+            console.log("Auto-saving EditNote on exit...");
+            setIsUpdating(true);
+            await ApiService.overwriteNote(updatedNote);
+            onSave(updatedNote);
+          } catch (e) {
+            console.warn("Auto-save failed:", e);
+          } finally {
+            setIsUpdating(false);
+            dispatch(toogleAddNoteState());
+          }
+        }, 300); // allow WebView to flush
+      }
     });
 
     return unsubscribe;
