@@ -105,7 +105,7 @@ const Library = ({ navigation, route }) => {
       // Get userId if needed
       const userId = await user.getId();
       // Use batch-fetching with skip and limit; note we use isPrivate state
-      const data = await ApiService.fetchMessagesBatch(
+      const data = await ApiService.fetchMapsMessagesBatch(
           isPrivate,
           published,
           isPrivate ? userId : "",
@@ -180,7 +180,7 @@ const Library = ({ navigation, route }) => {
     return (
       <View style={{ padding: 20, alignItems: "center" }}>
         <Text testID="empty-state-text" style={{ ...defaultTextFont, color: "gray", fontSize: 14 }}>
-          No Results Found
+          End of the Page
         </Text>
       </View>
     );

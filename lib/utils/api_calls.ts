@@ -81,13 +81,11 @@ try {
     type: "message",
   };
 
-  if (global) {
-    body = { type: "message" };
-  } else if (published) {
-    body = { type: "message", published: true };
-  } else {
-    body = { type: "message", creator: userId };
-  }
+  body = {
+    type: "message",
+    creator: userId,
+    published,
+  };
 
   const response = await fetch(url, {
     method: "POST",
@@ -101,6 +99,42 @@ try {
   throw error;
 }
 }
+
+static async fetchMapsMessagesBatch(
+  global: boolean,
+  published: boolean,
+  userId: string,
+  limit = 20,
+  skip = 0
+): Promise<any[]> {
+try {
+  const url = `${API_BASE_URL}query?limit=${limit}&skip=${skip}`;
+  const headers = {
+    "Content-Type": "application/json",
+  };
+
+  let body: { type: string; published?: boolean; creator?: string } = {
+    type: "message",
+  };
+
+  body = {
+    type: "message",
+    published,
+  };
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+  });
+  const data = await response.json();
+  return data;
+} catch (error) {
+  console.error("Error fetching messages:", error);
+  throw error;
+}
+}
+
  /**
    * Fetches user data from Firestore first, then the API if Firestore data is not found.
    * @param {string} uid - The UID of the user.
@@ -108,48 +142,67 @@ try {
    */
  static async fetchUserData(uid: string): Promise<UserData | null> {
   try {
-    // Step 1: Attempt to retrieve data from Firestore
-    const userDocRef = doc(db, "users", uid); // Assume users collection
+    // Step 1: Firestore fetch
+    console.log(`Attempting to fetch user data from Firestore for UID: ${uid}`);
+    const userDocRef = doc(db, "users", uid);
     const userDoc = await getDoc(userDocRef);
 
     if (userDoc.exists()) {
-      const firestoreData = userDoc.data() as UserData;
-      console.log("User data retrieved from Firestore:", firestoreData);
-      return firestoreData; // Return data from Firestore as UserData
+      console.log("Firestore user data found:", userDoc.data());
+      return userDoc.data() as UserData;
     } else {
-      console.log("No user data found in Firestore, using API fallback.");
+      console.log("No user data in Firestore for UID:", uid);
     }
-    
-    // Step 2: Fall back to API call if Firestore has no data
+
+    // Step 2: API fetch as fallback
+    console.log("Falling back to API fetch for user data.");
     const url = `${API_BASE_URL}query`;
     const headers = {
       "Content-Type": "application/json",
     };
-    const body = {
+    const body = JSON.stringify({
       "$or": [
         { "@type": "Agent", "uid": uid },
         { "@type": "foaf:Agent", "uid": uid },
       ],
-    };
-
-    console.log(`Querying API for user data with UID: ${uid}`);
-
-    const response = await fetch(url, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(body),
     });
 
-    const data = await response.json();
-    console.log("User data from API:", data);
+    console.log("API Request Body:", body);
 
-    // Convert API response to UserData type if it exists
-    return data.length ? (data[0] as UserData) : null;
+    const response = await fetch(url, { method: "POST", headers, body });
+    console.log(`API Response Status (${url}):`, response.status);
+
+    // Ensure the response is not empty
+    const text = await response.text();
+    console.log("Raw API Response Body:", text);
+
+    if (text.trim() === "") {
+      console.error("Empty response body received from API.");
+      return null;
+    }
+
+    // Attempt to parse the response as JSON
+    try {
+      const data = JSON.parse(text);
+      console.log("Parsed API Response JSON:", data);
+
+      if (Array.isArray(data) && data.length > 0) {
+        return data[0] as UserData;
+      } else {
+        console.log("No valid user data found in API response.");
+        return null;
+      }
+    } catch (parseError) {
+      console.error("Error parsing API response as JSON:", parseError);
+      console.error("Response body causing error:", text);
+      return null;
+    }
   } catch (error) {
     console.error("Error fetching user data:", error);
     return null;
   }
 }
+
 
 
 

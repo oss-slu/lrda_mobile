@@ -72,7 +72,7 @@ jest.mock('expo-location', () => ({
 const mockWriteNewNote = jest.fn();
 jest.mock('../lib/utils/api_calls', () => ({
   writeNewNote: mockWriteNewNote,
-  fetchMessages: jest.fn(() => Promise.resolve([])),
+  fetchMessagesBatch: jest.fn(() => Promise.resolve([])),
 }));
 
 // Create a mock store
@@ -97,7 +97,7 @@ describe('HomeScreen', () => {
     const { getByTestId } = render(
       <Provider store={store}> {/* Wrap with Provider */}
         <AddNoteProvider>
-          <HomeScreen route={routeMock as any} showTooltip={false} />
+          <HomeScreen route={routeMock as any} showTooltip={false} navigation={undefined} />
         </AddNoteProvider>
       </Provider>
     );
@@ -113,7 +113,7 @@ describe('HomeScreen', () => {
     const { getByTestId } = render(
       <Provider store={store}> {/* Wrap with Provider */}
         <AddNoteProvider>
-          <HomeScreen route={routeMock as any} showTooltip={false} />
+          <HomeScreen route={routeMock as any} showTooltip={false} navigation={undefined} />
         </AddNoteProvider>
       </Provider>
     );
@@ -129,6 +129,29 @@ describe('HomeScreen', () => {
     const searchBar = await waitFor(() => getByTestId('search-input'));
     expect(searchBar).toBeTruthy();
   });
+
+  it("applies correct styles to the user name text", async () => {
+    const routeMock = { params: { untitledNumber: 1 } };
+  
+    const { getByTestId } = render(
+      <Provider store={store}>
+        <AddNoteProvider>
+          <HomeScreen route={routeMock as any} showTooltip={false} />
+        </AddNoteProvider>
+      </Provider>
+    );
+  
+    const userNameText = await waitFor(() => getByTestId("user-name"));
+    const styles = userNameText.props.style;
+  
+    expect(styles).toEqual(
+      expect.objectContaining({
+        textAlign: 'center',
+        alignSelf: 'center',
+      })
+    );
+  });
+  
 
   it('renders sort button', async () => {
     const routeMock = { params: { untitledNumber: 1 } };
@@ -282,7 +305,7 @@ describe('HomeScreen', () => {
     const routeMock = { params: { untitledNumber: 1 } };
 
     // Mock the API call to return an empty array (No notes found)
-    jest.spyOn(ApiService, "fetchMessages").mockResolvedValueOnce([]);
+    jest.spyOn(ApiService, "fetchMessagesBatch").mockResolvedValueOnce([]);
   
     const { getByTestId } = render(
       <Provider store={store}> {/* Wrap with Provider */}
@@ -294,8 +317,9 @@ describe('HomeScreen', () => {
   
     // Ensure the API call was triggered
     await waitFor(() => {
-      expect(ApiService.fetchMessages).toHaveBeenCalled();
-    });
+      expect(ApiService.fetchMessagesBatch).toHaveBeenCalled();
+   });
+   
   
     // Ensure the Lottie animation appears
     await waitFor(() => {
