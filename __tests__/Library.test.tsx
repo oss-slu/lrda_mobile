@@ -15,17 +15,6 @@ jest.mock('firebase/database', () => ({
     getDatabase: jest.fn(),
 }));
 
-jest.mock('firebase/firestore', () => ({
-  getFirestore: jest.fn(() => ({})), 
-  doc: jest.fn(() => ({})), 
-  getDoc: jest.fn(() => Promise.resolve({ exists: () => false })),
-}));
-
-
-jest.mock("firebase/storage", () => ({
-  getStorage: jest.fn(),
-}));
-
 jest.mock('../lib/utils/data_conversion', () => {
   return {
     convertMediaTypes: (data: any[]) => {
@@ -105,7 +94,6 @@ const store = mockStore({
   },
 });
 
-
 const mockToggleDarkmode = jest.fn();
 
 jest.mock('../lib/components/ThemeProvider', () => ({
@@ -122,6 +110,7 @@ jest.mock('../lib/components/ThemeProvider', () => ({
   })),
 }));
 
+
 // Mock expo-location module with TypeScript type support
 jest.mock('expo-location', () => ({
   getForegroundPermissionsAsync: jest.fn(),
@@ -132,17 +121,14 @@ jest.mock('expo-location', () => ({
 // Silence console warnings during the test
 beforeEach(() => {
   jest.clearAllMocks();
-  jest.useFakeTimers();
+
   jest.spyOn(console, 'log').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
   jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(User, "getHasDoneTutorial").mockResolvedValue(true);
   moxios.install();
 });
 
 afterEach(() => {
-  jest.restoreAllMocks();
-  jest.useRealTimers();
   moxios.uninstall();
 });
 
@@ -319,7 +305,7 @@ describe('Library Component', () => {
     };
     const routeMock = { params: {} };
 
-    jest.spyOn(ApiService, 'fetchMapsMessagesBatch').mockResolvedValue([]);
+    jest.spyOn(ApiService, 'fetchMessagesBatch').mockResolvedValue([]);
 
     const { getByText } = render(
       <Library navigation={navigationMock} route={routeMock} />
@@ -340,7 +326,7 @@ describe('Library Component', () => {
     };
     const routeMock = { params: {} };
 
-    jest.spyOn(ApiService, 'fetchMapsMessagesBatch').mockResolvedValue([]);
+    jest.spyOn(ApiService, 'fetchMessagesBatch').mockResolvedValue([]);
 
     const { getByText } = render(
       <Library navigation={navigationMock} route={routeMock} />
@@ -376,7 +362,7 @@ describe('Library Component', () => {
       ],
     }));
   
-    jest.spyOn(ApiService, 'fetchMapsMessagesBatch').mockResolvedValue(dummyNotes);
+    jest.spyOn(ApiService, 'fetchMessagesBatch').mockResolvedValue(dummyNotes);
   
     const { getByText } = render(
       <Library navigation={navigationMock} route={routeMock} />
@@ -387,4 +373,3 @@ describe('Library Component', () => {
     });
   });
 });
-
