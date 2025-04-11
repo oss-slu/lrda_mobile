@@ -105,6 +105,7 @@ const store = mockStore({
   },
 });
 
+
 const mockToggleDarkmode = jest.fn();
 
 jest.mock('../lib/components/ThemeProvider', () => ({
@@ -135,6 +136,7 @@ beforeEach(() => {
   jest.spyOn(console, 'log').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
   jest.spyOn(console, 'warn').mockImplementation(() => {});
+  jest.spyOn(User, "getHasDoneTutorial").mockResolvedValue(true);
   moxios.install();
 });
 

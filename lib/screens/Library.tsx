@@ -35,7 +35,8 @@ import NotesComponent from "../components/NotesComponent";
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import LottieView from 'lottie-react-native';
 import { defaultTextFont } from "../../styles/globalStyles";
-
+import Tooltip from 'react-native-walkthrough-tooltip';
+import TooltipContent from "../onboarding/TooltipComponent";
 const user = User.getInstance();
 const { width, height } = Dimensions.get("window");
 
@@ -105,7 +106,7 @@ const Library = ({ navigation, route }) => {
       // Get userId if needed
       const userId = await user.getId();
       // Use batch-fetching with skip and limit; note we use isPrivate state
-      const data = await ApiService.fetchMapsMessagesBatch(
+      const data = await ApiService.fetchMessagesBatch(
           isPrivate,
           published,
           isPrivate ? userId : "",
@@ -180,7 +181,7 @@ const Library = ({ navigation, route }) => {
     return (
       <View style={{ padding: 20, alignItems: "center" }}>
         <Text testID="empty-state-text" style={{ ...defaultTextFont, color: "gray", fontSize: 14 }}>
-          End of the Page
+          No Results Found
         </Text>
       </View>
     );
@@ -353,9 +354,28 @@ const Library = ({ navigation, route }) => {
     setIsSortOpened(false);
   };
 
+  const [userTutorial, setUserTutorial] = useState<boolean | null>(null);
+  // Initialize libraryTip as false (not active) by default.
+  const [libraryTip, setLibraryTip] = useState<boolean>(false);
+
+  useEffect(() => {
+    User.getHasDoneTutorial("Library").then((tutorialDone: boolean) => {
+      setUserTutorial(tutorialDone);
+      // If the tutorial has not been completed, enable the libraryTip.
+      if (!tutorialDone) {
+        setLibraryTip(true);
+      }
+    });
+  }, []);
+
+
+
+
   return (
     <View testID="Library" style={{ flex: 1, backgroundColor: isDarkmode ? 'black' : '#e4e4e4' }}>
+  
       <StatusBar translucent backgroundColor="transparent" />
+
       <View style={styles(theme, width).container}>
         <View style={styles(theme, width).topView}>
           <View
@@ -368,6 +388,7 @@ const Library = ({ navigation, route }) => {
               paddingTop: 10,
             }}
           >
+     
             <View style={styles(theme, width).userAccountAndPageTitle}>
               <TouchableOpacity 
                 testID="account-page"
@@ -387,7 +408,6 @@ const Library = ({ navigation, route }) => {
               </TouchableOpacity>
               <Text style={styles(theme, width).pageTitle}>Library</Text>
             </View>
-  
             <View testID="greeting-component" style={styles(theme, width).userWishContainer}>
               <Greeting />
               <Text style={styles(theme, width).userName}>{userName}</Text>
@@ -450,10 +470,39 @@ const Library = ({ navigation, route }) => {
           </View>
         </View>
       </View>
-  
+     
       <View testID="notes-list" style={styles(theme, width).scrollerBackgroundColor}>
-        {rendering ? <NoteSkeleton /> : renderList(notes)}
-      </View>
+  {rendering ? (
+    <NoteSkeleton />
+  ) : (
+    <Tooltip 
+      isVisible={libraryTip && !userTutorial}
+      showChildInTooltip={false}
+      topAdjustment={Platform.OS === 'android' ? -500 : 0}
+      content={
+        <TooltipContent
+          message="Welcome to library! Scroll to view all published notes from other creators."
+          onPressOk={() => {
+            setUserTutorial(true);
+            setLibraryTip(false);
+            User.setUserTutorialDone("Library", true);
+          }
+
+          }
+          onSkip={() => {
+            setUserTutorial(true);
+            setLibraryTip(false);
+            User.setUserTutorialDone("Library", true);
+          }}
+        />
+      }
+      placement="bottom"
+    >
+      {renderList(notes)}
+    </Tooltip>
+  )}
+</View>
+
   
       {isSortOpened && isSearchVisible == false && (
         <View style={{
@@ -478,7 +527,7 @@ const Library = ({ navigation, route }) => {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => handleSortOption({ option: 2 })}>
               <View style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 2 ? theme.homeColor : 'none' }]}>
-                <Text style={{ ...defaultTextFont,fontSize: 20, color: isDarkmode && selectedSortOption != 2 ? '#c7c7c7' : 'black' }}>
+                <Text style={{ ...defaultTextFont, fontSize: 20, color: isDarkmode && selectedSortOption != 2 ? '#c7c7c7' : 'black' }}>
                   A-Z
                 </Text>
               </View>
@@ -499,10 +548,15 @@ const Library = ({ navigation, route }) => {
         onClose={() => setModalVisible(false)}
         note={selectedNote}
       />
+
+  
     </View>
   );
+  
 };
   
+
+
 const styles = (theme, width, color, isDarkmode) =>
   StyleSheet.create({
     container: {
