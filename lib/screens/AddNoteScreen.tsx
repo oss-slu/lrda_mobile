@@ -13,6 +13,7 @@ import {
   Modal,
   Text,
   StyleSheet,
+  StatusBar,
 } from "react-native";
 import * as Location from "expo-location";
 import ToastMessage from "react-native-toast-message";
@@ -461,7 +462,7 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
           <Tooltip
               topAdjustment={Platform.OS === 'android' ? -StatusBar.currentHeight : 0}
                 isVisible={mediaTip === true &&  userTutorial === false  }
-                showChildInTooltip = {false}
+                showChildInTooltip = {true }
         content={
           <TooltipContent
             message="Upload media to your notes! Hit publish once you are ready."

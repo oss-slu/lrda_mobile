@@ -474,6 +474,7 @@ const Library = ({ navigation, route }) => {
       isVisible={libraryTip && !userTutorial}
       showChildInTooltip={false}
       topAdjustment={Platform.OS === 'android' ? -400 : -400}
+      displayInsets={{ top: 20, bottom: 20, left: 10, right: 10 }}
       content={
         <TooltipContent
           message="Welcome to library! Scroll to view all published notes from other creators."
