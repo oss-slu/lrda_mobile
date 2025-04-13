@@ -44,11 +44,6 @@ const data = [
   { source: require("../../assets/Pond_395.jpg") },
   { source: require("../../assets/Pond_048.jpg") },
   { source: require("../../assets/Pond_049.jpg") },
-  { source: require("../../assets/Pond_062.jpg") },
-  { source: require("../../assets/Pond_221.jpg") },
-  { source: require("../../assets/Pond_290.jpg") },
-  { source: require("../../assets/Pond_021.jpg") },
-  { source: require("../../assets/Pond_883.jpg") },
 ];
 
 
@@ -311,7 +306,7 @@ const toggleReason = (reason) => {
             </View>
             {/* Menu Items */}
             <View style={{ marginTop: 40, }}>
-              <MenuItem title="About" iconName="information-circle-outline" onPress={()=> {}}/>
+              <MenuItem title="About" iconName="information-circle-outline" onPress={()=> {navigation.navigate("AboutScreen")}}/>
               <MenuItem title="Resource" iconName="link-outline" onPress={() => navigation.navigate("Resource")} />
               <MenuItem title="Meet our team" iconName="people-outline" onPress={() => navigation.navigate("TeamPage")} />
               <MenuItem title="Settings" iconName="settings-outline" onPress={handleSettingsToggle} />
@@ -682,4 +677,3 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
 });
-

@@ -26,8 +26,10 @@ export default function App() {
       <PersistGate loading={null} persistor={persistor}>
         <ThemeProvider>
           <AddNoteProvider>
+           
             <AppNavigator />
             <Toast />
+            
           </AddNoteProvider>
         </ThemeProvider>
       </PersistGate>
