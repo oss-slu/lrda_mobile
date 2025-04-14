@@ -298,6 +298,8 @@ const toggleReason = (reason) => {
             </View>
           </View>
 
+ 
+
           <ScrollView
 
             contentContainerStyle={[styles.menuContainer, { paddingBottom: 200, }]}
@@ -305,6 +307,8 @@ const toggleReason = (reason) => {
             showsVerticalScrollIndicator={false}
           >
             {/* Carousel */}
+
+
             <View style={styles.carouselContainer}>
               <Carousel
                 width={width}
@@ -318,39 +322,39 @@ const toggleReason = (reason) => {
                 scrollAnimationDuration={800}
               />
             </View>
-            {/* Menu Items */}
-            <View style={{ marginTop: 40, }}>
-            <Tooltip 
-      isVisible={morePageTip && !userTutorial}
-      showChildInTooltip={false}
-      topAdjustment={Platform.OS === 'android' ? -StatusBar.currentHeight : 0}
-      content={
-        <TooltipContent
-          message="Welcome to our more page! Here you can find settings, FAQ, logout, switch themes, and more!"
-          onPressOk={() => {
-            setUserTutorial(true);
-            setMorePageTip(false);
-            User.setUserTutorialDone("MorePage", true);
-          }
 
-          }
-          onSkip={() => {
-            setUserTutorial(true);
-            setMorePageTip(false);
-            User.setUserTutorialDone("MorePage", true);
-          }}
-        />
-      }
-      placement="top"
-    >
+            {/* Menu Items */}
+            <Tooltip 
+  isVisible={morePageTip && !userTutorial}
+  showChildInTooltip={false} // Changed from false to true
+  topAdjustment={Platform.OS === 'android' ? -StatusBar.currentHeight : 0}
+  content={
+    <TooltipContent
+      message="Welcome to our more page! Here you can find settings, FAQ, logout, switch themes, and more!"
+      onPressOk={() => {
+        setUserTutorial(true);
+        setMorePageTip(false);
+        User.setUserTutorialDone("MorePage", true);
+      }}
+      onSkip={() => {
+        setUserTutorial(true);
+        setMorePageTip(false);
+        User.setUserTutorialDone("MorePage", true);
+      }}
+    />
+  }
+  placement="top"
+>
+            <View style={{ marginTop: 40, alignItems: 'center' }}>
+
               <MenuItem title="About" iconName="information-circle-outline" onPress={()=> {navigation.navigate("AboutScreen")}}/>
               <MenuItem title="Resource" iconName="link-outline" onPress={() => navigation.navigate("Resource")} />
               <MenuItem title="Meet our team" iconName="people-outline" onPress={() => navigation.navigate("TeamPage")} />
               <MenuItem title="Settings" iconName="settings-outline" onPress={handleSettingsToggle} />
               <MenuItem title="FAQ" iconName="help-circle-outline" onPress={()=> {}}/>
               <MenuItem title="Logout" iconName="exit-outline" onPress={onLogoutPress} />
-            </Tooltip>
             </View>
+            </Tooltip>
 
 
           </ScrollView>
@@ -368,6 +372,8 @@ const toggleReason = (reason) => {
           </View>
           {/** header content ends here */}
           <ScrollView>
+
+ 
             <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 60 }}>
 
 
