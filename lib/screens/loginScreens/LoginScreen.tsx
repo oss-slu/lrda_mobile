@@ -39,6 +39,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   const navState = useSelector((state: RootState) => state.navigation.navState);
   const dispatch = useDispatch()
   const [hasNavigated, setHasNavigated] = useState(false);
+  const [snackMessage, setSnackMessage] = useState("");
 
   const fadeOut = () => {
     Animated.timing(fadeAnim, {
@@ -84,8 +85,6 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
       toggleSnack(!snackState);
     } else {
 
-      
-
       try {
         const status = await user.login(username, password)
         if (status == "success") {
@@ -100,6 +99,15 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
       }
       catch (error) {
         console.log("login failed :", error);
+        let message = "Login failed. Please try again.";
+
+        if(error.message.includes("network")) {
+          message = "Network error. Please check your connection.";
+        }else if (error.message.includes("auth/invalid-email") || error.message.includes("auth/invalid-credential")) {
+          message = "Invalid username or password.";
+
+        }
+        setSnackMessage(message);
         toggleSnack(true)
       }
 
@@ -147,7 +155,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
             backgroundColor: "white",
           }}
         >
-          <Text style={{ ...defaultTextFont, textAlign: "center" }}>Invalid User Credentials</Text>
+          <Text style={{ ...defaultTextFont, textAlign: "center" }}>{snackMessage}</Text>
         </Snackbar>
         {firstClick ? (
           <TouchableOpacity

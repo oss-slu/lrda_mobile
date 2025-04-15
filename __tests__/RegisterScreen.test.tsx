@@ -126,4 +126,37 @@ describe('RegisterScreen', () => {
     fireEvent.press(getByText('Sign In'));
     expect(navigationMock.navigate).toHaveBeenCalledWith('Login');
   });
+
+  it('shows error message when email is already in use', async () => {
+
+    // Override the mock for this specific test to reject with an "email in use" error
+    const { createUserWithEmailAndPassword } = require('firebase/auth');
+    createUserWithEmailAndPassword.mockImplementationOnce(() =>
+      Promise.reject({
+        code: 'auth/email-already-in-use',
+        message: 'The email address is already in use by another account.',
+      })
+    );
+  
+    const { getByPlaceholderText, getByText } = render(
+      <SafeAreaProvider>
+        <RegistrationScreen navigation={navigationMock} route={routeMock} />
+      </SafeAreaProvider>
+    );
+  
+    fireEvent.changeText(getByPlaceholderText('First Name'), 'John');
+    fireEvent.changeText(getByPlaceholderText('Last Name'), 'Doe');
+    fireEvent.changeText(getByPlaceholderText('Email'), 'taken@email.com');
+    fireEvent.changeText(getByPlaceholderText('Password'), 'password123');
+    fireEvent.changeText(getByPlaceholderText('Confirm Password'), 'password123');
+  
+    fireEvent.press(getByText('Sign Up'));
+  
+    await waitFor(() => {
+      expect(
+        getByText('The email address is already in use by another account.')
+      ).toBeTruthy();
+    });
+  });
+  
 });
