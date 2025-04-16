@@ -612,7 +612,7 @@ const handleSortOption = ({ option }) => {
                 isVisible={accountTip && !userTutorial}
                 content={
                 <TooltipContent
-                      message="View Account Here!"
+                      message="See account information here."
                       onPressOk={() => {
                         setAccountTip(false);
                         setSearchTip(true);
@@ -666,7 +666,7 @@ const handleSortOption = ({ option }) => {
               isVisible={pubPrivTip && !userTutorial}
               content={
               <TooltipContent
-                message="Switch between public and private notes"
+                message="Switch between your published and privated notes with this switch"
                   onPressOk={() => {
                     setPubPrivTip(false);
                     User.setUserTutorialDone("HomeScreen", true)
@@ -709,7 +709,7 @@ const handleSortOption = ({ option }) => {
                     isVisible={filterToolTip && !userTutorial}
                     content={
                     <TooltipContent
-                      message="Filter notes"
+                      message="Filter your notes with this!"
                         onPressOk={() => {
                           setFilterToolTip(false);
                           setPubPrivTip(true);
@@ -785,7 +785,7 @@ const handleSortOption = ({ option }) => {
                       isVisible={searchTip && !userTutorial}
                       content={
                       <TooltipContent
-                        message="Search Notes!"
+                        message="Try out our search bar!"
                           onPressOk={() => {
                             setSearchTip(false);
                             setFilterToolTip(true);
