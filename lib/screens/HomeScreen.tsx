@@ -622,6 +622,7 @@ const handleSortOption = ({ option }) => {
                       setAccountTip(false);
                       setSearchTip(false);
                       setFilterToolTip(false);
+                      setPubPrivTip(false);
                       User.setUserTutorialDone("HomeScreen", true)
                     }}
                   />
@@ -676,6 +677,7 @@ const handleSortOption = ({ option }) => {
                   setAccountTip(false);
                   setSearchTip(false);
                   setFilterToolTip(false);
+                  setPubPrivTip(false);
                   User.setUserTutorialDone("HomeScreen", true)
                 }}
             />
@@ -719,6 +721,7 @@ const handleSortOption = ({ option }) => {
                         setAccountTip(false);
                         setSearchTip(false);
                         setFilterToolTip(false);
+                        setPubPrivTip(false);
                         User.setUserTutorialDone("HomeScreen", true)
                       }}
                   />
@@ -795,6 +798,7 @@ const handleSortOption = ({ option }) => {
                           setAccountTip(false);
                           setSearchTip(false);
                           setFilterToolTip(false);
+                          setPubPrivTip(false);
                           User.setUserTutorialDone("HomeScreen", true)
                         }}
                     />
