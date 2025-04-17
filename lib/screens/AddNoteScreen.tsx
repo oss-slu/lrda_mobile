@@ -13,6 +13,7 @@ import {
   Modal,
   Text,
   StyleSheet,
+  StatusBar,
 } from "react-native";
 import * as Location from "expo-location";
 import ToastMessage from "react-native-toast-message";
@@ -41,6 +42,8 @@ import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import {defaultTextFont} from "../../styles/globalStyles";
 import { Button } from "react-native-paper";
+import TooltipContent from "../onboarding/TooltipComponent";
+import Tooltip from 'react-native-walkthrough-tooltip';
 
 const user = User.getInstance();
 
@@ -427,6 +430,18 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
     console.log("Synced editor content:", latestContent);
   };
 
+      /* CHECKING IF USER HAS DONE TUTORIAL */ 
+      const [userTutorial, setUserTutorial] = useState<boolean>(false);
+      const [mediaTip, setMediaTip] = useState<boolean>(true); // This is the first tip.
+      
+      // Update the userTutorial state once the async function resolves.
+      useEffect(() => {
+        // For the "AddNote" tutorial
+        User.getHasDoneTutorial("AddNote").then((result: boolean) => {
+          setUserTutorial(result);
+        });
+      }, []);
+
 
   return (
     <View style={{ flex: 1 }}>
@@ -444,6 +459,27 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
 >
 
           <View style={{ flex: 1 }}>
+          <Tooltip
+              topAdjustment={Platform.OS === 'android' ? -StatusBar.currentHeight : 0}
+                isVisible={mediaTip === true &&  userTutorial === false  }
+                showChildInTooltip = {true }
+        content={
+          <TooltipContent
+            message="Upload media to your notes! Hit publish once you are ready."
+            onPressOk={() => {
+              setMediaTip(false);
+              setUserTutorial(true)
+              User.setUserTutorialDone("AddNote", true)
+            }}
+            onSkip={() => {
+              setMediaTip(false);
+              setUserTutorial(true)
+              User.setUserTutorialDone("AddNote", true)
+            }}
+          />
+        }
+        placement="bottom"
+      >
             <View style={[NotePageStyles().topContainer]}>
               <View
                 style={[
@@ -512,6 +548,8 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
                 </TouchableOpacity>
               </View>
             </View>
+            </Tooltip>
+
             <View style={NotePageStyles().container}>
               <PhotoScroller
                 active={viewMedia}

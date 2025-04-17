@@ -30,6 +30,25 @@ jest.mock('../lib/components/ThemeProvider', () => ({
     theme: 'mockedTheme', // Provide a mocked theme object
   }),
 }));
+jest.mock('../lib/models/user_class', () => {
+  return {
+    User: {
+      getInstance: () => ({
+        getId: jest.fn(() => Promise.resolve("mock-user-id")),
+        setUserTutorialDone: jest.fn(),
+      }),
+      getHasDoneTutorial: jest.fn(() => Promise.resolve(true)), 
+      setUserTutorialDone: jest.fn(() => Promise.resolve()),    
+    },
+  };
+});
+
+/** ADD THIS TO ANY TOOLTIP THAT SHOWS CHILDREN ELEMENT. */
+jest.mock('react-native-walkthrough-tooltip', () => {
+  return ({ children }) => children; // render only the children, no tooltip wrapper
+});
+
+
 
 jest.mock('expo-font', () => ({
   loadAsync: jest.fn(() => Promise.resolve()),

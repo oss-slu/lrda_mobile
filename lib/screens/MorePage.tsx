@@ -38,7 +38,8 @@ import { reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import { collection, addDoc, getDoc,} from "firebase/firestore";
 import { KeyboardAvoidingView, Keyboard, TouchableWithoutFeedback } from "react-native"; // Import necessary components
 import { defaultTextFont } from "../../styles/globalStyles";
-
+import Tooltip from 'react-native-walkthrough-tooltip';
+import TooltipContent from "../onboarding/TooltipComponent";
 const { width, height } = Dimensions.get("window");
 const data = [
   { source: require("../../assets/Pond_395.jpg") },
@@ -253,6 +254,19 @@ const toggleReason = (reason) => {
     </TouchableOpacity>
   );
 
+  const [userTutorial, setUserTutorial] = useState<boolean | null>(null);
+  // Initialize libraryTip as false (not active) by default.
+  const [morePageTip, setMorePageTip] = useState<boolean>(false);
+
+  useEffect(() => {
+    User.getHasDoneTutorial("MorePage").then((tutorialDone: boolean) => {
+      setUserTutorial(tutorialDone);
+      if (!tutorialDone) {
+        setMorePageTip(true);
+      }
+    });
+  }, []);
+
 
   return (
     <View style={{ flex: 1 }}>
@@ -284,6 +298,8 @@ const toggleReason = (reason) => {
             </View>
           </View>
 
+ 
+
           <ScrollView
 
             contentContainerStyle={[styles.menuContainer, { paddingBottom: 200, }]}
@@ -291,6 +307,8 @@ const toggleReason = (reason) => {
             showsVerticalScrollIndicator={false}
           >
             {/* Carousel */}
+
+
             <View style={styles.carouselContainer}>
               <Carousel
                 width={width}
@@ -304,8 +322,31 @@ const toggleReason = (reason) => {
                 scrollAnimationDuration={800}
               />
             </View>
+
             {/* Menu Items */}
-            <View style={{ marginTop: 40, }}>
+            <Tooltip 
+  isVisible={morePageTip && !userTutorial}
+  showChildInTooltip={false} // Changed from false to true
+  topAdjustment={Platform.OS === 'android' ? -StatusBar.currentHeight : 0}
+  content={
+    <TooltipContent
+      message="Welcome to our more page! Here you can find settings, FAQ, logout, switch themes, and more!"
+      onPressOk={() => {
+        setUserTutorial(true);
+        setMorePageTip(false);
+        User.setUserTutorialDone("MorePage", true);
+      }}
+      onSkip={() => {
+        setUserTutorial(true);
+        setMorePageTip(false);
+        User.setUserTutorialDone("MorePage", true);
+      }}
+    />
+  }
+  placement="top"
+>
+            <View style={{ marginTop: 40, alignItems: 'center' }}>
+
               <MenuItem title="About" iconName="information-circle-outline" onPress={()=> {navigation.navigate("AboutScreen")}}/>
               <MenuItem title="Resource" iconName="link-outline" onPress={() => navigation.navigate("Resource")} />
               <MenuItem title="Meet our team" iconName="people-outline" onPress={() => navigation.navigate("TeamPage")} />
@@ -313,6 +354,7 @@ const toggleReason = (reason) => {
               <MenuItem title="FAQ" iconName="help-circle-outline" onPress={()=> {}}/>
               <MenuItem title="Logout" iconName="exit-outline" onPress={onLogoutPress} />
             </View>
+            </Tooltip>
 
 
           </ScrollView>
@@ -330,6 +372,8 @@ const toggleReason = (reason) => {
           </View>
           {/** header content ends here */}
           <ScrollView>
+
+ 
             <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 60 }}>
 
 

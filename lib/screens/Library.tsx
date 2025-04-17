@@ -35,7 +35,8 @@ import NotesComponent from "../components/NotesComponent";
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import LottieView from 'lottie-react-native';
 import { defaultTextFont } from "../../styles/globalStyles";
-
+import Tooltip from 'react-native-walkthrough-tooltip';
+import TooltipContent from "../onboarding/TooltipComponent";
 const user = User.getInstance();
 const { width, height } = Dimensions.get("window");
 
@@ -353,6 +354,20 @@ const Library = ({ navigation, route }) => {
     setIsSortOpened(false);
   };
 
+  const [userTutorial, setUserTutorial] = useState<boolean | null>(null);
+  // Initialize libraryTip as false (not active) by default.
+  const [libraryTip, setLibraryTip] = useState<boolean>(false);
+
+  useEffect(() => {
+    User.getHasDoneTutorial("Library").then((tutorialDone: boolean) => {
+      setUserTutorial(tutorialDone);
+      // If the tutorial has not been completed, enable the libraryTip.
+      if (!tutorialDone) {
+        setLibraryTip(true);
+      }
+    });
+  }, []);
+
   return (
     <View testID="Library" style={{ flex: 1, backgroundColor: isDarkmode ? 'black' : '#e4e4e4' }}>
       <StatusBar translucent backgroundColor="transparent" />
@@ -452,8 +467,38 @@ const Library = ({ navigation, route }) => {
       </View>
   
       <View testID="notes-list" style={styles(theme, width).scrollerBackgroundColor}>
-        {rendering ? <NoteSkeleton /> : renderList(notes)}
-      </View>
+  {rendering ? (
+    <NoteSkeleton />
+  ) : (
+    <Tooltip 
+      isVisible={libraryTip && !userTutorial}
+      showChildInTooltip={false}
+      topAdjustment={Platform.OS === 'android' ? -400 : -400}
+      displayInsets={{ top: 20, bottom: 20, left: 10, right: 10 }}
+      content={
+        <TooltipContent
+          message="Welcome to library! Scroll to view all published notes from other creators."
+          onPressOk={() => {
+            setUserTutorial(true);
+            setLibraryTip(false);
+            User.setUserTutorialDone("Library", true);
+          }
+
+          }
+          onSkip={() => {
+            setUserTutorial(true);
+            setLibraryTip(false);
+            User.setUserTutorialDone("Library", true);
+          }}
+        />
+      }
+      placement="bottom"
+    >
+      {renderList(notes)}
+    </Tooltip>
+
+       )}
+</View>
   
       {isSortOpened && isSearchVisible == false && (
         <View style={{

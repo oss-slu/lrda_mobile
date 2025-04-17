@@ -14,10 +14,31 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, Timestamp } from "firebase/firestore";
 import { validateEmail, validatePassword } from "../../utils/validation";
 import { defaultTextFont } from "../../../styles/globalStyles";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type RegisterProps = {
   navigation: any;
   route: any;
+};
+
+/**
+ * Clears the navigation-related keys from AsyncStorage.
+ * Keys include: "Explore", "AddNote", "MorePage", "Library", and "HomeScreen".
+ */
+const clearNavigationKeys = async (): Promise<void> => {
+  try {
+    const keysToRemove = [
+      "Explore",
+      "AddNote",
+      "MorePage",
+      "Library",
+      "HomeScreen",
+    ];
+    await AsyncStorage.multiRemove(keysToRemove);
+    console.log("Navigation keys removed successfully");
+  } catch (error) {
+    console.error("Error removing navigation keys:", error);
+  }
 };
 
 const RegistrationScreen: React.FC<RegisterProps> = ({ navigation }) => {
@@ -70,6 +91,9 @@ const RegistrationScreen: React.FC<RegisterProps> = ({ navigation }) => {
         createdAt: Timestamp.now(),
       };
       await setDoc(doc(db, "users", user.uid), firestoreData);
+
+      await clearNavigationKeys(); //Clear Async Tutorial
+
 
       // Set success message and navigate to login screen
       setRegistrationSuccess(true);

@@ -62,7 +62,7 @@ const teamMembers = [
     id: 7,
     name: "Adem Durakovic",
     role: "Developer",
-    image: require("../../assets/stock_person.jpg"),
+    image: require("../../assets/Adem.jpg"),
   },
   {
     id: 8,
