@@ -99,10 +99,14 @@ const RegistrationScreen: React.FC<RegisterProps> = ({ navigation }) => {
       setRegistrationSuccess(true);
       setSnackMessage("Signup successful!");
       setSnackState(true);
-
       } catch (error) {
         setRegistrationSuccess(false);
-        setSnackMessage(`Signup failed: ${error}`);
+        let message = error.message || "Signup failed. Please try again.";
+        console.log(message);
+        if (error.message.includes("auth/email-already-in-use")) {
+          message = "The email address is already in use by another account.";
+        }
+        setSnackMessage(message);
         setSnackState(true);
       }
   };
