@@ -20,6 +20,7 @@ import { setNavState } from "../../../redux/slice/navigationSlice";
 import { RootState } from "../../../redux/store/store";
 import { User } from "../../models/user_class";
 import { removeItem } from "../../utils/async_storage";
+import { defaultTextFont } from "../../../styles/globalStyles";
 
 const user = User.getInstance();
 
@@ -38,6 +39,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   const navState = useSelector((state: RootState) => state.navigation.navState);
   const dispatch = useDispatch()
   const [hasNavigated, setHasNavigated] = useState(false);
+  const [snackMessage, setSnackMessage] = useState("");
 
   const fadeOut = () => {
     Animated.timing(fadeAnim, {
@@ -83,8 +85,6 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
       toggleSnack(!snackState);
     } else {
 
-      
-
       try {
         const status = await user.login(username, password)
         if (status == "success") {
@@ -99,6 +99,15 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
       }
       catch (error) {
         console.log("login failed :", error);
+        let message = "Login failed. Please try again.";
+
+        if(error.message.includes("network")) {
+          message = "Network error. Please check your connection.";
+        }else if (error.message.includes("auth/invalid-email") || error.message.includes("auth/invalid-credential")) {
+          message = "Invalid username or password.";
+
+        }
+        setSnackMessage(message);
         toggleSnack(true)
       }
 
@@ -146,7 +155,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
             backgroundColor: "white",
           }}
         >
-          <Text style={{ textAlign: "center" }}>Invalid User Credentials</Text>
+          <Text style={{ ...defaultTextFont, textAlign: "center" }}>{snackMessage}</Text>
         </Snackbar>
         {firstClick ? (
           <TouchableOpacity
@@ -186,17 +195,17 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
                 testID="password-input"
               />
             </View>
-            <TouchableOpacity>
-              <Text style={styles.forgot}>Forgot Password?</Text>
-            </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
+            <View style={styles.forgotPasswordContainer}><Text style={styles.forgotText}>Forgot Password?</Text></View>
+</TouchableOpacity>
             <TouchableOpacity onPress={onLoginPress} style={styles.buttons} testID="login-button">
-              {!loading && <Text style={{color: "white", fontWeight: "600", fontSize: 15}}>
+              {!loading && <Text style={{...defaultTextFont, color: "white", fontWeight: "600", fontSize: 15}}>
                 Login
                 </Text>}
               {loading && <ActivityIndicator size="small" color="white" />}
             </TouchableOpacity>
             <TouchableOpacity onPress={handleGoRegister} style={styles.buttons} testID="register-button">
-              <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
+              <Text style={{ ...defaultTextFont, color: "white", fontWeight: "600", fontSize: 15 }}>
                 Register
               </Text>
             </TouchableOpacity>
@@ -215,6 +224,7 @@ const styles = StyleSheet.create({
     alignItems: "stretch",
   },
   logo: {
+    ...defaultTextFont,
     fontWeight: "bold",
     fontSize: 50,
     color: "#111111",
@@ -233,18 +243,22 @@ const styles = StyleSheet.create({
     borderWidth: 2,
   },
   inputText: {
+    ...defaultTextFont,
     height: 50,
     color: "#111111",
     fontSize: 16,
     width: "100%",
     borderRadius: 25,
   },
+
   forgot: {
+    ...defaultTextFont,
     color: "#111111",
     fontSize: 12,
     fontWeight: "400",
     marginBottom: 20,
   },
+
   imageBackground: {
     flex: 1,
     resizeMode: "cover",
@@ -275,7 +289,7 @@ const styles = StyleSheet.create({
     alignContent: "center",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "white",
+    backgroundColor: "rgba(255, 255, 255, 0.6)", // Transparent white background
     height: 500,
     width: 300,
     borderRadius: 10,
@@ -284,6 +298,39 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 10,
   },
+
+  forgotPasswordContainer: {
+    width: 300,
+    justifyContent: 'center',
+    alignItems: "flex-end",
+
+  },
+  forgotText: {
+    color: "#111111",
+    fontSize: 12,
+    fontWeight: "400",
+    marginBottom: 20,
+    marginRight: 40
+  },
+  signUpStatement: {
+      position: "absolute",
+      top: 450,
+      display: "flex",
+      flexDirection: "row",
+      justifyContent: 'center',
+      alignItems: 'center'
+     
+  },
+  signUpQuery: {
+    color: "black",
+    fontWeight: "600",
+  },
+  signUp:{
+    color: "blue",
+    fontWeight: "500",
+    marginTop: 0,
+
+  }
 });
 
 export default LoginScreen;

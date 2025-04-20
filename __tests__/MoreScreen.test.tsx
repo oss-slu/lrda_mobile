@@ -1,11 +1,12 @@
 import React from 'react';
+import { fireEvent, render } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
 import { NavigationContainer } from '@react-navigation/native'; // Added NavigationContainer
 import configureStore from 'redux-mock-store';
 import MorePage from '../lib/screens/MorePage';
-import { Linking,TouchableOpacity } from 'react-native';
+import { Linking, TouchableOpacity } from 'react-native';
 import HomeScreen from '../lib/screens/HomeScreen';
-import { fireEvent, render, waitFor } from "@testing-library/react-native";
+import { waitFor } from '@testing-library/react-native';
 
 jest.mock('firebase/database', () => ({
   getDatabase: jest.fn(),
@@ -36,6 +37,19 @@ jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
   })),
 }));
 
+jest.mock('firebase/firestore', () => ({
+  getFirestore: jest.fn(),
+  doc: jest.fn(() => ({
+    id: 'mocked-doc-id',
+  })),
+  getDoc: jest.fn(() =>
+    Promise.resolve({
+      exists: () => true,
+      data: () => ({ name: 'Mocked User' }),
+    })
+  ),
+}));
+
 //mock carousel
 jest.mock('react-native-reanimated-carousel', () => {
   const React = require('react');
@@ -53,8 +67,6 @@ jest.mock('@react-navigation/native', () => {
     }),
   };
 });
-
-
 
 const mockToggleDarkmode = jest.fn();
 jest.mock('../lib/components/ThemeProvider', () => ({
@@ -81,6 +93,8 @@ const mockUserInstance = {
 
 jest.mock('../lib/models/user_class', () => ({
   User: {
+    // Added mock for getHasDoneTutorial to simulate user has done the tutorial.
+    getHasDoneTutorial: jest.fn(() => Promise.resolve(true)),
     // Always return the same mock instance
     getInstance: jest.fn(() => mockUserInstance)
   }
@@ -98,7 +112,6 @@ const store = mockStore({
   },
 });
 
-
 beforeEach(() => {
   jest.clearAllMocks();
 });
@@ -111,11 +124,11 @@ beforeAll(() => {
 describe('MorePage - Main View', () => {
   it('should render the carousel', async () => {
     const { getByTestId } = render(
-        <Provider store={store}>
-          <NavigationContainer>
-            <MorePage />
-          </NavigationContainer>
-        </Provider>
+      <Provider store={store}>
+        <NavigationContainer>
+          <MorePage />
+        </NavigationContainer>
+      </Provider>
     );
     await waitFor(() => {
       expect(getByTestId('carousel')).toBeTruthy();
@@ -124,11 +137,11 @@ describe('MorePage - Main View', () => {
 
   it('should toggle dark mode when theme switch is pressed', async () => {
     const { getByTestId } = render(
-        <Provider store={store}>
-          <NavigationContainer>
-            <MorePage />
-          </NavigationContainer>
-        </Provider>
+      <Provider store={store}>
+        <NavigationContainer>
+          <MorePage />
+        </NavigationContainer>
+      </Provider>
     );
     const toggleSwitch = getByTestId('dark-mode-toggle');
     fireEvent.press(toggleSwitch);
@@ -137,11 +150,11 @@ describe('MorePage - Main View', () => {
 
   it('should display user and navigate to AccountPage when avatar is pressed', async () => {
     const { getByText } = render(
-        <Provider store={store}>
-          <NavigationContainer>
-            <MorePage />
-          </NavigationContainer>
-        </Provider>
+      <Provider store={store}>
+        <NavigationContainer>
+          <MorePage />
+        </NavigationContainer>
+      </Provider>
     );
 
     // Wait until the asynchronous useEffect sets the initials
@@ -155,11 +168,11 @@ describe('MorePage - Main View', () => {
 
   it('should call logout when the Logout menu item is pressed', async () => {
     const { getByText } = render(
-        <Provider store={store}>
-          <NavigationContainer>
-            <MorePage />
-          </NavigationContainer>
-        </Provider>
+      <Provider store={store}>
+        <NavigationContainer>
+          <MorePage />
+        </NavigationContainer>
+      </Provider>
     );
 
     // Wait until the asynchronous useEffect sets the user initials
@@ -178,11 +191,11 @@ describe('MorePage - Main View', () => {
 
   it('should navigate to Resource page when Resource menu item is pressed', async () => {
     const { getByText } = render(
-        <Provider store={store}>
-          <NavigationContainer>
-            <MorePage />
-          </NavigationContainer>
-        </Provider>
+      <Provider store={store}>
+        <NavigationContainer>
+          <MorePage />
+        </NavigationContainer>
+      </Provider>
     );
 
     await waitFor(() => {
@@ -196,11 +209,11 @@ describe('MorePage - Main View', () => {
 
   it('should navigate to TeamPage when "Meet our team" menu item is pressed', async () => {
     const { getByText } = render(
-        <Provider store={store}>
-          <NavigationContainer>
-            <MorePage />
-          </NavigationContainer>
-        </Provider>
+      <Provider store={store}>
+        <NavigationContainer>
+          <MorePage />
+        </NavigationContainer>
+      </Provider>
     );
 
     await waitFor(() => {
@@ -213,89 +226,87 @@ describe('MorePage - Main View', () => {
   });
 });
 
-  describe('MorePage - Settings View and Modals', () => {
-    // Render the component
-    const renderAndOpenSettings = async () => {
-      const utils = render(
-          <Provider store={store}>
-            <NavigationContainer>
-              <MorePage />
-            </NavigationContainer>
-          </Provider>
-      );
-      // Wait for the main view to load
-      await waitFor(() => {
-        expect(utils.getByText('JD')).toBeTruthy();
-      });
-      // Open settings view by pressing the "Settings" menu item
-      const settingsBtn = utils.getByText('Settings');
-      fireEvent.press(settingsBtn);
-      // Now  settings header should be visible with "Settings" title
-      await waitFor(() => {
-        expect(utils.getByText('Settings')).toBeTruthy();
-      });
-      return utils;
-    };
-
-    it('should render the settings view with correct options', async () => {
-      const { getByText } = await renderAndOpenSettings();
-
-      // Check that settings options are visible
-      expect(getByText('App Theme')).toBeTruthy();
-      expect(getByText('Delete My Account')).toBeTruthy();
-      expect(getByText('Report an Issue')).toBeTruthy();
+describe('MorePage - Settings View and Modals', () => {
+  // Render the component
+  const renderAndOpenSettings = async () => {
+    const utils = render(
+      <Provider store={store}>
+        <NavigationContainer>
+          <MorePage />
+        </NavigationContainer>
+      </Provider>
+    );
+    // Wait for the main view to load
+    await waitFor(() => {
+      expect(utils.getByText('JD')).toBeTruthy();
     });
-
-    it('should open the App Theme modal when App Theme option is pressed', async () => {
-      const { getByText, queryByText, getByTestId } = await renderAndOpenSettings();
-      expect(queryByText('Customize your app')).toBeNull();
-
-      // Press the "App Theme" option
-      const appThemeOption = getByText('App Theme');
-      fireEvent.press(appThemeOption);
-
-      // Modal should now be visible with the heading "Customize your app"
-      await waitFor(() => {
-        expect(getByText('Customize your app')).toBeTruthy();
-      });
-
+    // Open settings view by pressing the "Settings" menu item
+    const settingsBtn = utils.getByText('Settings');
+    fireEvent.press(settingsBtn);
+    // Now settings header should be visible with "Settings" title
+    await waitFor(() => {
+      expect(utils.getByText('Settings')).toBeTruthy();
     });
+    return utils;
+  };
 
-   
-    it('should call Linking.openURL when Report an Issue is pressed', async () => {
-      const { getByText } = await renderAndOpenSettings();
+  it('should render the settings view with correct options', async () => {
+    const { getByText } = await renderAndOpenSettings();
 
-      // Press the "Report an Issue" option
-      const reportIssueOption = getByText('Report an Issue');
-      fireEvent.press(reportIssueOption);
+    // Check that settings options are visible
+    expect(getByText('App Theme')).toBeTruthy();
+    expect(getByText('Delete My Account')).toBeTruthy();
+    expect(getByText('Report an Issue')).toBeTruthy();
+  });
 
-      // Check that Linking.openURL was called with the correct mailto URL
-      const expectedEmail = 'yashkamal.bhatia@slu.edu';
-      const expectedSubject = encodeURIComponent("Bug Report on 'Where's Religion?");
-      const expectedBody = encodeURIComponent('Please provide details of your issue you are facing here.');
-      const expectedMailto = `mailto:${expectedEmail}?subject=${expectedSubject}&body=${expectedBody}`;
+  it('should open the App Theme modal when App Theme option is pressed', async () => {
+    const { getByText, queryByText } = await renderAndOpenSettings();
+    expect(queryByText('Customize your app')).toBeNull();
 
-      await waitFor(() => {
-        expect(Linking.openURL).toHaveBeenCalledWith(expectedMailto);
-      });
+    // Press the "App Theme" option
+    const appThemeOption = getByText('App Theme');
+    fireEvent.press(appThemeOption);
+
+    // Modal should now be visible with the heading "Customize your app"
+    await waitFor(() => {
+      expect(getByText('Customize your app')).toBeTruthy();
     });
+  });
 
-    it('should return to the main view when the back arrow in Settings is pressed', async () => {
-      const { getByText, queryByTestId, UNSAFE_getAllByType } = await renderAndOpenSettings();
+  it('should call Linking.openURL when Report an Issue is pressed', async () => {
+    const { getByText } = await renderAndOpenSettings();
 
-      // In settings view, the header shows "Settings"
-      expect(getByText('Settings')).toBeTruthy();
+    // Press the "Report an Issue" option
+    const reportIssueOption = getByText('Report an Issue');
+    fireEvent.press(reportIssueOption);
 
-      const touchableComponents = UNSAFE_getAllByType(TouchableOpacity);
-      // Assuming the first TouchableOpacity in settings header is the back arrow.
-      const backArrowBtn = touchableComponents[0];
-      fireEvent.press(backArrowBtn);
+    // Check that Linking.openURL was called with the correct mailto URL
+    const expectedEmail = 'yashkamal.bhatia@slu.edu';
+    const expectedSubject = encodeURIComponent("Bug Report on 'Where's Religion?");
+    const expectedBody = encodeURIComponent('Please provide details of your issue you are facing here.');
+    const expectedMailto = `mailto:${expectedEmail}?subject=${expectedSubject}&body=${expectedBody}`;
 
-      // After pressing back, the main view header ("More") should be visible.
-      await waitFor(() => {
-        expect(getByText('More')).toBeTruthy();
-        // And the Settings header should no longer be visible.
-        expect(queryByTestId('settings-header')).toBeNull();
-      });
+    await waitFor(() => {
+      expect(Linking.openURL).toHaveBeenCalledWith(expectedMailto);
     });
+  });
+
+  it('should return to the main view when the back arrow in Settings is pressed', async () => {
+    const { getByText, queryByTestId, UNSAFE_getAllByType } = await renderAndOpenSettings();
+
+    // In settings view, the header shows "Settings"
+    expect(getByText('Settings')).toBeTruthy();
+
+    const touchableComponents = UNSAFE_getAllByType(TouchableOpacity);
+    // Assuming the first TouchableOpacity in settings header is the back arrow.
+    const backArrowBtn = touchableComponents[0];
+    fireEvent.press(backArrowBtn);
+
+    // After pressing back, the main view header ("More") should be visible.
+    await waitFor(() => {
+      expect(getByText('More')).toBeTruthy();
+      // And the Settings header should no longer be visible.
+      expect(queryByTestId('settings-header')).toBeNull();
+    });
+  });
 });

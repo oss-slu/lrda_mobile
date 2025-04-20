@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Modal, Text, StyleSheet } from 'react-native';
+import { defaultTextFont } from '../../styles/globalStyles';
 
 const LoadingModal = ({ visible }) => (
   <Modal
@@ -9,7 +10,7 @@ const LoadingModal = ({ visible }) => (
   >
     <View style={styles.centeredView}>
       <View style={styles.modalView}>
-        <Text>Please wait, saving changes to the note</Text>
+        <Text style={{...defaultTextFont}}>Please wait, saving changes to the note</Text>
       </View>
     </View>
   </Modal>

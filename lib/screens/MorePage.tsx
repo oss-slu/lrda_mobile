@@ -37,17 +37,14 @@ import { db, realtimeDb, storage } from "../config/firebase";
 import { reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import { collection, addDoc, getDoc,} from "firebase/firestore";
 import { KeyboardAvoidingView, Keyboard, TouchableWithoutFeedback } from "react-native"; // Import necessary components
-
+import { defaultTextFont } from "../../styles/globalStyles";
+import Tooltip from 'react-native-walkthrough-tooltip';
+import TooltipContent from "../onboarding/TooltipComponent";
 const { width, height } = Dimensions.get("window");
 const data = [
   { source: require("../../assets/Pond_395.jpg") },
   { source: require("../../assets/Pond_048.jpg") },
   { source: require("../../assets/Pond_049.jpg") },
-  { source: require("../../assets/Pond_062.jpg") },
-  { source: require("../../assets/Pond_221.jpg") },
-  { source: require("../../assets/Pond_290.jpg") },
-  { source: require("../../assets/Pond_021.jpg") },
-  { source: require("../../assets/Pond_883.jpg") },
 ];
 
 
@@ -239,7 +236,7 @@ const toggleReason = (reason) => {
       borderRadius: 10,
 
     }}>
-      <Text style={{ fontSize: 14, fontWeight: '500', color: icon === 'delete' ? 'red' : 'black' }}>{optionName}</Text>
+      <Text style={{ ...defaultTextFont,fontSize: 14, fontWeight: '500', color: icon === 'delete' ? 'red' : 'black' }}>{optionName}</Text>
       {
         icon === 'none' ? (
           <View style={{ height: 25, width: 25, backgroundColor: theme.homeColor, borderRadius: 50, borderWidth: 0.5 }}>
@@ -256,6 +253,19 @@ const toggleReason = (reason) => {
       </View>
     </TouchableOpacity>
   );
+
+  const [userTutorial, setUserTutorial] = useState<boolean | null>(null);
+  // Initialize libraryTip as false (not active) by default.
+  const [morePageTip, setMorePageTip] = useState<boolean>(false);
+
+  useEffect(() => {
+    User.getHasDoneTutorial("MorePage").then((tutorialDone: boolean) => {
+      setUserTutorial(tutorialDone);
+      if (!tutorialDone) {
+        setMorePageTip(true);
+      }
+    });
+  }, []);
 
 
   return (
@@ -288,6 +298,8 @@ const toggleReason = (reason) => {
             </View>
           </View>
 
+ 
+
           <ScrollView
 
             contentContainerStyle={[styles.menuContainer, { paddingBottom: 200, }]}
@@ -295,6 +307,8 @@ const toggleReason = (reason) => {
             showsVerticalScrollIndicator={false}
           >
             {/* Carousel */}
+
+
             <View style={styles.carouselContainer}>
               <Carousel
                 width={width}
@@ -308,15 +322,39 @@ const toggleReason = (reason) => {
                 scrollAnimationDuration={800}
               />
             </View>
+
             {/* Menu Items */}
-            <View style={{ marginTop: 40, }}>
-              <MenuItem title="About" iconName="information-circle-outline" onPress={()=> {}}/>
+            <Tooltip 
+  isVisible={morePageTip && !userTutorial}
+  showChildInTooltip={false} // Changed from false to true
+  topAdjustment={Platform.OS === 'android' ? -StatusBar.currentHeight : 0}
+  content={
+    <TooltipContent
+      message="Welcome to our more page! Here you can find settings, FAQ, logout, switch themes, and more!"
+      onPressOk={() => {
+        setUserTutorial(true);
+        setMorePageTip(false);
+        User.setUserTutorialDone("MorePage", true);
+      }}
+      onSkip={() => {
+        setUserTutorial(true);
+        setMorePageTip(false);
+        User.setUserTutorialDone("MorePage", true);
+      }}
+    />
+  }
+  placement="top"
+>
+            <View style={{ marginTop: 40, alignItems: 'center' }}>
+
+              <MenuItem title="About" iconName="information-circle-outline" onPress={()=> {navigation.navigate("AboutScreen")}}/>
               <MenuItem title="Resource" iconName="link-outline" onPress={() => navigation.navigate("Resource")} />
               <MenuItem title="Meet our team" iconName="people-outline" onPress={() => navigation.navigate("TeamPage")} />
               <MenuItem title="Settings" iconName="settings-outline" onPress={handleSettingsToggle} />
               <MenuItem title="FAQ" iconName="help-circle-outline" onPress={()=> {}}/>
               <MenuItem title="Logout" iconName="exit-outline" onPress={onLogoutPress} />
             </View>
+            </Tooltip>
 
 
           </ScrollView>
@@ -328,12 +366,14 @@ const toggleReason = (reason) => {
                 <Feather name={'arrow-left'} size={30} />
               </TouchableOpacity>
               <View style={styles.headerHeading} testID="settings-header">
-                <Text style={{ fontSize: 17, fontWeight: 'bold' }}>Settings</Text>
+                <Text style={{ ...defaultTextFont, fontSize: 17, fontWeight: 'bold' }}>Settings</Text>
               </View>
             </View>
           </View>
           {/** header content ends here */}
           <ScrollView>
+
+ 
             <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 60 }}>
 
 
@@ -490,12 +530,14 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   pfpText: {
+    ...defaultTextFont,
     fontWeight: "600",
     fontSize: 14,
     alignSelf: "center",
     color: 'white',
   },
   pageTitle: {
+    ...defaultTextFont,
     fontSize: 18,
     fontWeight: '500'
 
@@ -540,15 +582,16 @@ const styles = StyleSheet.create({
     width: "90%", // Ensure full width usage
   },
   menuText: {
+    ...defaultTextFont,
     fontSize: 20, // Larger text size
     fontWeight: "bold", // Bold text
     color: "#000", // Black text color
     marginLeft: 30, // Additional space on the left of text
   },
   menuIcon: {
+    ...defaultTextFont,
     fontSize: 28, // Icon size for visual balance
   },
-
 
   settingsHeader: {
     height: height * 0.15,
@@ -578,6 +621,7 @@ const styles = StyleSheet.create({
     height: '50%'
   },
   heading: {
+    ...defaultTextFont,
     fontSize: 18,
     fontWeight: '600'
   },
@@ -587,6 +631,7 @@ const styles = StyleSheet.create({
   },
 
   deleteAccountBulletPoints: {
+    ...defaultTextFont,
     fontSize: 8,
   },
   deleteAccountActionButtons: {
@@ -597,9 +642,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 12,
   },
-  switchText: { fontSize: 18, fontWeight: "500" },
+  switchText: { ...defaultTextFont, fontSize: 18, fontWeight: "500" },
   logout: { flexDirection: "row", justifyContent: "center", alignItems: "center", height: 50, width: "90%", borderRadius: 15, marginTop:10},
-  logoutText: { fontSize: 20, fontWeight: "600", marginRight: 10 },
+  logoutText: { ...defaultTextFont, fontSize: 20, fontWeight: "600", marginRight: 10 },
 
   modalOverlay: {
     flex: 1,
@@ -618,6 +663,7 @@ const styles = StyleSheet.create({
     elevation: 5, // Android shadow
   },
   modalTitle: {
+    ...defaultTextFont,
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 20,
@@ -628,6 +674,7 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   radioText: {
+    ...defaultTextFont,
     fontSize: 18,
     marginLeft: 10,
   },
@@ -651,6 +698,7 @@ const styles = StyleSheet.create({
     width: "45%",
   },
   modalButtonText: {
+    ...defaultTextFont,
     color: "#fff",
     textAlign: "center",
     fontWeight: "600",
@@ -665,10 +713,11 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   checkboxSymbol: {
+    ...defaultTextFont,
     fontSize: 20,
   },
   checkboxText: {
+    ...defaultTextFont,
     fontSize: 18,
   },
 });
-

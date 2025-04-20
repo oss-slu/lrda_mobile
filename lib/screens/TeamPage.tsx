@@ -15,6 +15,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../components/ThemeProvider";
 import Feather from 'react-native-vector-icons/Feather';
+import { defaultTextFont } from "../../styles/globalStyles";
 
 
 
@@ -61,13 +62,13 @@ const teamMembers = [
     id: 7,
     name: "Adem Durakovic",
     role: "Developer",
-    image: require("../../assets/stock_person.jpg"),
+    image: require("../../assets/Adem.jpg"),
   },
   {
     id: 8,
     name: "Amar Hadzic",
     role: "Developer",
-    image: require("../../assets/stock_person.jpg"),
+    image: require("../../assets/Amar.png"),
   },
 
   {
@@ -115,7 +116,7 @@ export default function TeamPage({ navigation }) {
             <Feather name={'arrow-left'} size={30} />
           </TouchableOpacity>
           <View style={styles.headerHeading}>
-            <Text style={{ fontSize: 17, fontWeight: 'bold' }}>Team</Text>
+            <Text style={{ ...defaultTextFont, fontSize: 17, fontWeight: 'bold' }}>Team</Text>
           </View>
         </View>
       </View>
@@ -169,6 +170,7 @@ const styles = StyleSheet.create({
     marginLeft: 20,
   },
   headerTitle: {
+    ...defaultTextFont,
     fontSize: 20,
     fontWeight: "bold",
     marginLeft: 10,
@@ -178,11 +180,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   title: {
+    ...defaultTextFont,
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
   },
   subtitle: {
+    ...defaultTextFont,
     fontSize: 16,
     marginTop: 8,
     textAlign: "center",
@@ -207,11 +211,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   memberName: {
+    ...defaultTextFont,
     fontSize: 14,
     fontWeight: "bold",
     textAlign: "center",
   },
   memberRole: {
+    ...defaultTextFont,
     fontSize: 12,
     textAlign: "center",
   },
