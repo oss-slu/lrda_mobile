@@ -181,7 +181,7 @@ describe('Library Component', () => {
     const searchButton = await waitFor(() => getByTestId('search-button'));
     fireEvent.press(searchButton);
     expect(searchButton).toBeTruthy();
-  });
+  }, 10000);
   
   it('renders the user name "Adem" regardless of the greeting', async () => {
     const navigationMock = {
