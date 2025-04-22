@@ -57,10 +57,14 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   }, [navState, hasNavigated]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      fadeOut();
-    }, 2000);
-    return () => clearTimeout(timer);
+    if (process.env.NODE_ENV === 'test') {
+      setFirstClick(false);
+    } else {
+      const timer = setTimeout(() => {
+        fadeOut();
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
   }, []);
 
   console.log("in login page the redux value is ", navState);
@@ -229,7 +233,7 @@ const styles = StyleSheet.create({
   forgot: {
     color: "#0000EE",
     fontSize: 13,
-    fontWeight: "600",
+    fontWeight: "700",
     alignSelf: "flex-end",
     marginTop: 20,
     marginRight: -115,
@@ -257,12 +261,12 @@ const styles = StyleSheet.create({
   loginBox: {
     backgroundColor: "rgba(245,245,245,0.8)",
     width: "85%",
-    height: 650,
+    height: 600,
     borderRadius: 10,
     alignSelf: "center",
     alignItems: "center",
-    paddingVertical: 30,
-    paddingHorizontal: 20,
+    paddingHorizontal: 25,
+    paddingVertical: 40,
     elevation: 10,
     shadowColor: "#000",
     shadowOpacity: .2,
@@ -285,7 +289,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   linkText: {
-    color: "#0000EE", // Blue text for secondary action
+    color: "rgb(17,47,187)", // Blue text for secondary action
     fontSize: 15,
     fontWeight: "600",
     textAlign: "center",
@@ -299,8 +303,9 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   registerLink: {
-    color: "#0000EE", // Blue color for the clickable "Register now" link
+    color: "rgb(17,47,187)", // Blue color for the clickable "Register now" link
   },
 });
 
+export { styles };
 export default LoginScreen;

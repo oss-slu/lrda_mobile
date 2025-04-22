@@ -5,4 +5,7 @@ import '@testing-library/jest-native/extend-expect'; // Provides useful matchers
 jest.mock('firebase/auth', () => ({
   initializeAuth: jest.fn(),
   getReactNativePersistence: jest.fn(() => jest.fn()),
+  getFirestore: jest.fn(),
+  doc: jest.fn(),
+  getDoc: jest.fn(() => Promise.reslve({ exists: () => false })),
 }));
