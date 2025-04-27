@@ -8,7 +8,9 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
+  Keyboard,
   Alert,
+  Text
 } from "react-native";
 import ToastMessage from "react-native-toast-message";
 import { Ionicons } from "@expo/vector-icons";
@@ -31,6 +33,7 @@ import { useFocusEffect } from "@react-navigation/native";
 const user = User.getInstance();
 const EditNoteScreen = ({ route, navigation }) => {
   const { note, onSave } = route.params;
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   const [title, setTitle] = useState(note.title || "Untitled");
   const [time, setTime] = useState(new Date(note.time));
@@ -57,6 +60,40 @@ const EditNoteScreen = ({ route, navigation }) => {
   const { setPublishNote } = useAddNoteContext();
   const hasFocusedRef = useRef(false);
 
+  // ─── ADD: custom toolbar with a “close” icon that also dismisses keyboard ───
+  const customToolbarItems = [
+    ...DEFAULT_TOOLBAR_ITEMS,
+    {
+      icon: () => <Ionicons name="close" size={24} color={theme.text} />,
+      onPress: () => {
+        if (editor?.blur) editor.blur();
+        Keyboard.dismiss();
+      },
+      id: "closeKeyboard",
+    },
+  ];
+
+  useEffect(() => {
+    // ─── LISTEN on all platforms for show / hide ───
+    const showSub = Keyboard.addListener("keyboardDidShow", () => {
+      console.log("➡️ Keyboard shown");
+      setKeyboardVisible(true);
+    });
+    const hideSub = Keyboard.addListener("keyboardDidHide", () => {
+      console.log("⬅️ Keyboard hidden");
+      setKeyboardVisible(false);
+    });
+    console.log("KEYBOARD VIS:", keyboardVisible);
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  const handleDonePress = () => {
+    if (editor?.blur) editor.blur();   // blur the rich-text editor
+    Keyboard.dismiss();                // dismiss the native keyboard
+  };
 
   const initialTitle = useRef(note.title || "");
   const initialText = useRef(note.text || "");
@@ -64,7 +101,6 @@ const EditNoteScreen = ({ route, navigation }) => {
   useEffect(() => {
     setPublishNote(() => handlePublishPress);
   }, []);
-  
 
   const scrollViewRef = useRef(null);
 
@@ -79,7 +115,7 @@ const EditNoteScreen = ({ route, navigation }) => {
       editor.injectCSS(combinedCSS);
     }
   }, [editor, theme.text]);
-  
+
   const setLocationToZero = () => {
     setLocation({ latitude: 0, longitude: 0 });
     setLocationButtonColor("red");
@@ -89,11 +125,9 @@ const EditNoteScreen = ({ route, navigation }) => {
     const latestContent = await editor.getHTML();
     initialText.current = latestContent;
   };
-  
 
   const fetchCurrentLocation = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
-
     if (status === "granted") {
       try {
         const userLocation = await Location.getCurrentPositionAsync({});
@@ -145,14 +179,14 @@ const EditNoteScreen = ({ route, navigation }) => {
       displayErrorInEditor(`Error adding video: ${error.message}`);
     }
   };
-    // Function to display an error message inside the editor
-    const displayErrorInEditor = async (errorMessage) => {
-      const currentContent = await editor.getHTML();
-      const errorTag = `<p style="color: red; font-weight: bold;">${errorMessage}</p><br />`;
-      editor.setContent(currentContent + errorTag);
-      editor.focus();
-    };
-  
+
+  // Function to display an error message inside the editor
+  const displayErrorInEditor = async (errorMessage) => {
+    const currentContent = await editor.getHTML();
+    const errorTag = `<p style="color: red; font-weight: bold;">${errorMessage}</p><br />`;
+    editor.setContent(currentContent + errorTag);
+    editor.focus();
+  };
 
   const insertAudioToEditor = async (audioUri: string) => {
     try {
@@ -167,19 +201,19 @@ const EditNoteScreen = ({ route, navigation }) => {
 
   const handlePublishPress = async () => {
     console.log("📤 Publish button pressed in EditNoteScreen");
-  
+
     const latestContent = await editor.getHTML();
     initialText.current = latestContent;
-  
+
     const titleIsEmpty = !title.trim();
     const bodyIsEmpty = latestContent.replace(/<\/?[^>]+(>|$)/g, "").trim().length === 0;
-  
+
     if (!titleIsEmpty || !bodyIsEmpty || tags.length !== 0 || media.length !== 0 || newAudio.length !== 0) {
       console.log("✅ Valid content found. Proceeding to publish...");
-  
+
       setIsPublished(true); // Only publish if explicitly pressed
       setIsUpdating(true);
-  
+
       try {
         const userId = await user.getId();
         const editedNote = {
@@ -195,17 +229,17 @@ const EditNoteScreen = ({ route, navigation }) => {
           time,
           tags,
         };
-  
+
         await ApiService.overwriteNote(editedNote);
         onSave(editedNote);
         setIsPublishBtnClicked(true);
-  
+
         ToastMessage.show({
           type: "success",
           text1: "Note Published",
           visibilityTime: 3000,
         });
-  
+
         console.log("🧭 Navigating back after publish");
         navigation.goBack();
       } catch (error) {
@@ -218,7 +252,6 @@ const EditNoteScreen = ({ route, navigation }) => {
       console.log("⚠️ Empty note — publish skipped.");
     }
   };
-  
 
   const handleSaveNote = async () => {
     setIsUpdating(true);
@@ -252,11 +285,11 @@ const EditNoteScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("blur", () => {
-      if(!ispublishBtnClicked){
+      if (!ispublishBtnClicked) {
         setTimeout(async () => {
           try {
             const textContent = await editor.getHTML();
-  
+
             const updatedNote = {
               ...note,
               title,
@@ -269,7 +302,7 @@ const EditNoteScreen = ({ route, navigation }) => {
               longitude: location.longitude.toString(),
               time: new Date(),
             };
-  
+
             console.log("Auto-saving EditNote on exit...");
             setIsUpdating(true);
             await ApiService.overwriteNote(updatedNote);
@@ -287,17 +320,28 @@ const EditNoteScreen = ({ route, navigation }) => {
     return unsubscribe;
   }, [navigation, title, editor, media, newAudio, tags, isPublished, location]);
 
-  
-
 
   return (
     <View style={{ flex: 1 }}>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-        <ScrollView ref={scrollViewRef} contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
-          <View style={[NotePageStyles().topContainer, {backgroundColor: theme.homeColor}]}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+            
+        <ScrollView
+          ref={scrollViewRef}
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Top bar with back arrow + title input */}
+          <View style={[NotePageStyles().topContainer, { backgroundColor: theme.homeColor }]}>
             <View style={NotePageStyles().topButtonsContainer}>
               <TouchableOpacity style={NotePageStyles().topButtons} onPress={handleSaveNote}>
-                <Ionicons name="arrow-back-outline" size={30} color={NotePageStyles().title.color} />
+                <Ionicons
+                  name="arrow-back-outline"
+                  size={30}
+                  color={NotePageStyles().title.color}
+                />
               </TouchableOpacity>
               <TextInput
                 style={NotePageStyles().title}
@@ -305,7 +349,6 @@ const EditNoteScreen = ({ route, navigation }) => {
                 value={title}
                 onChangeText={setTitle}
               />
-             
             </View>
             <View style={NotePageStyles().keyContainer}>
               <TouchableOpacity onPress={() => setViewMedia(!viewMedia)}>
@@ -326,39 +369,103 @@ const EditNoteScreen = ({ route, navigation }) => {
               </TouchableOpacity>
             </View>
           </View>
+
+          {/* Media / Audio / Tagging panels */}
           <View style={NotePageStyles().container}>
-            <PhotoScroller active={viewMedia} newMedia={media} setNewMedia={setMedia} insertImageToEditor={insertImageToEditor} addVideoToEditor={addVideoToEditor}/>
+            <PhotoScroller
+              active={viewMedia}
+              newMedia={media}
+              setNewMedia={setMedia}
+              insertImageToEditor={insertImageToEditor}
+              addVideoToEditor={addVideoToEditor}
+            />
             {viewAudio && (
               <AudioContainer
                 newAudio={newAudio}
                 setNewAudio={setNewAudio}
-                insertAudioToEditor={insertAudioToEditor} // Pass functionality here
+                insertAudioToEditor={insertAudioToEditor}
               />
             )}
             {isTagging && <TagWindow tags={tags} setTags={setTags} />}
           </View>
+
+          {/* Rich-text editor */}
           <View style={NotePageStyles().richTextContainer}>
-          <RichText
-    editor={editor}
-    placeholder="Write Content Here..."
-    style={[
-      NotePageStyles().editor,
-      {
-        backgroundColor: theme.backgroundColor,
-        minHeight: 200, // gives initial space to type
-        paddingBottom: 120, // prevents content from being hidden behind keyboard/toolbar
-      },
-    ]}
-  />
+            <RichText
+              editor={editor}
+              placeholder="Write Content Here..."
+              style={[
+                NotePageStyles().editor,
+                {
+                  backgroundColor: theme.backgroundColor,
+                  minHeight: 200,
+                  paddingBottom: 120,
+                },
+              ]}
+            />
           </View>
-          <View style={NotePageStyles().toolBar}>
+
+        </ScrollView>
+
+        {/* Floating toolbar above the keyboard */}
+        {Platform.OS === "android" && (
+          <View style={styles.toolbar} testID="RichEditor">
             <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
           </View>
-        </ScrollView>
+        )}
+
+    {keyboardVisible && (
+          <View style={styles.doneButton} testID="doneButton">
+            <TouchableOpacity onPress={handleDonePress}>
+              <Text style={styles.doneText}>Done</Text>
+            </TouchableOpacity>
+          </View>
+    )}
+     
+        {/* Always-on iOS toolbar */}
+        {Platform.OS === "ios" && (
+          <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
+        )}
+        
+
+   
+
+        {/* Loading spinner */}
         <LoadingModal visible={isUpdating} />
       </KeyboardAvoidingView>
     </View>
   );
 };
+const styles = StyleSheet.create({
+  doneButton: {
+    position: "absolute",
+    paddingVertical: 8,
+    borderColor: "#ccc",
+    zIndex: 10,            // make sure it floats above the keyboard toolbar
+    marginTop: 555,
+    marginLeft: 350
+  },
+  doneText: {
+    color: "blue",
+    fontSize: 14,
+    textAlign: "right",
+    marginRight: 0,
+  },
+  toolbar: {
+    position: 'absolute', // Keep toolbar at the bottom of the screen
+    bottom: 27,
+    width: '100%', // Full-width toolbar
+    justifyContent: 'center', // Center items in the toolbar
+    zIndex: 10, // Ensure it stays above other elements
+    ...Platform.select({
+      android: {
+        height: 50,
+      },
+      ios: {
+        height: 70,
+      },
+    }),
+  },
+});
 
 export default EditNoteScreen;
