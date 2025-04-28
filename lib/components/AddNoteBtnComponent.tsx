@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";             
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { SvgIcon } from "./SvgIcon";
 import IonIcons from "react-native-vector-icons/Ionicons";
 import Feather from "react-native-vector-icons/Feather";
@@ -21,15 +16,21 @@ function AddNoteBtnComponent() {
   const appThemeColor = useSelector((s) => s.themeSlice.theme);
   const addNoteState = useSelector((s) => s.addNoteState.isAddNoteOpned);
 
+  // grab the entire nav state
   const navState = useNavigationState((state) => state);
-  const tabRoute = navState.routes[navState.index];            
-  const nested   = tabRoute.state;                             
-  const currentScreen = nested
-    ? nested.routes[nested.index].name                         
-    : tabRoute.name;                                          
 
-  const isHomeScreen    = currentScreen === "Home";
-  const isAddButtonMode = isHomeScreen || !addNoteState;
+  // pick out the active tab
+  const tabRoute = navState.routes[navState.index];
+
+  const nested = tabRoute.state;
+
+  const currentScreen = nested
+    ? nested.routes[nested.index].name
+    : tabRoute.name;
+
+  // if the current screen is "AddNote" or "EditNote", we show the publish button
+  const isAddButtonMode =
+    currentScreen !== "AddNote" && currentScreen !== "EditNote";
 
   const handleAdd = () => {
     dispatch(toogleAddNoteState());
