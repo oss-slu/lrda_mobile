@@ -322,7 +322,7 @@ const EditNoteScreen = ({ route, navigation }) => {
 
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1 }} testID="EditNoteScreen">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
@@ -409,7 +409,7 @@ const EditNoteScreen = ({ route, navigation }) => {
 
         {/* Floating toolbar above the keyboard */}
         {Platform.OS === "android" && (
-          <View style={styles.toolbar} testID="RichEditor">
+          <View style={styles.toolbar} testID="Toolbar">
             <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
           </View>
         )}
@@ -422,14 +422,12 @@ const EditNoteScreen = ({ route, navigation }) => {
           </View>
     )}
      
-        {/* Always-on iOS toolbar */}
-        {Platform.OS === "ios" && (
-          <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
-        )}
-        
 
-   
+     {Platform.OS === "ios" && (
+    <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
+)}
 
+  
         {/* Loading spinner */}
         <LoadingModal visible={isUpdating} />
       </KeyboardAvoidingView>
@@ -442,7 +440,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderColor: "#ccc",
     zIndex: 10,            // make sure it floats above the keyboard toolbar
-    marginTop: 555,
+    marginTop: Platform.OS === "ios" ? 500 : 555,
     marginLeft: 350
   },
   doneText: {
@@ -452,19 +450,14 @@ const styles = StyleSheet.create({
     marginRight: 0,
   },
   toolbar: {
-    position: 'absolute', // Keep toolbar at the bottom of the screen
-    bottom: 27,
-    width: '100%', // Full-width toolbar
-    justifyContent: 'center', // Center items in the toolbar
-    zIndex: 10, // Ensure it stays above other elements
-    ...Platform.select({
-      android: {
-        height: 50,
-      },
-      ios: {
-        height: 70,
-      },
-    }),
+    position: "absolute",
+    bottom: 27,         // same as your floating toolbar
+    left: 0,
+    right: 0,
+    height: 70,         // or whatever your toolbar’s height is
+    justifyContent: "center",
+    paddingHorizontal: 10,
+    zIndex: 10,
   },
 });
 
