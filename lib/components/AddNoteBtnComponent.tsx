@@ -4,7 +4,7 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-} from "react-native";                      // ← merged imports
+} from "react-native";             
 import { SvgIcon } from "./SvgIcon";
 import IonIcons from "react-native-vector-icons/Ionicons";
 import Feather from "react-native-vector-icons/Feather";
@@ -21,15 +21,13 @@ function AddNoteBtnComponent() {
   const appThemeColor = useSelector((s) => s.themeSlice.theme);
   const addNoteState = useSelector((s) => s.addNoteState.isAddNoteOpned);
 
-  // ─── FULL NAVIGATION TREE ───────────────────────────────────────────────
   const navState = useNavigationState((state) => state);
-  const tabRoute = navState.routes[navState.index];            // active tab
-  const nested   = tabRoute.state;                             // its nested stack
+  const tabRoute = navState.routes[navState.index];            
+  const nested   = tabRoute.state;                             
   const currentScreen = nested
-    ? nested.routes[nested.index].name                         // e.g. "Home", "AddNote", "EditNote"
-    : tabRoute.name;                                           // fallback
+    ? nested.routes[nested.index].name                         
+    : tabRoute.name;                                          
 
-  // only on the real Home screen do we force “Add” mode
   const isHomeScreen    = currentScreen === "Home";
   const isAddButtonMode = isHomeScreen || !addNoteState;
 
