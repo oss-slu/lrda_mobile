@@ -9,6 +9,7 @@ import {
   ScrollView,
   StyleSheet,
   Alert,
+  useColorScheme
 } from "react-native";
 import ToastMessage from "react-native-toast-message";
 import { Ionicons } from "@expo/vector-icons";
@@ -27,6 +28,8 @@ import { useAddNoteContext } from "../context/AddNoteContext";
 import { useDispatch } from "react-redux";
 import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
 import { useFocusEffect } from "@react-navigation/native";
+
+
 
 const user = User.getInstance();
 const EditNoteScreen = ({ route, navigation }) => {
@@ -57,9 +60,27 @@ const EditNoteScreen = ({ route, navigation }) => {
   const { setPublishNote } = useAddNoteContext();
   const hasFocusedRef = useRef(false);
 
+  const scheme = useColorScheme();
 
   const initialTitle = useRef(note.title || "");
   const initialText = useRef(note.text || "");
+
+  const scheme = useColorScheme(); // Get the current theme (light or dark)
+
+  // You can define styles conditionally using the current theme (scheme)
+  const containerStyle = {
+    flex: 1,
+    backgroundColor: scheme === 'dark' ? '#333' : '#fff', // Background color
+    padding: 20,
+  };
+
+  const textInputStyle = {
+    color: scheme === 'dark' ? 'white' : 'black', // Text color based on theme
+    borderWidth: 1,
+    borderColor: scheme === 'dark' ? '#555' : '#ddd', // Border color (optional)
+    padding: 10,
+    marginBottom: 10,
+  };
 
   useEffect(() => {
     setPublishNote(() => handlePublishPress);
@@ -117,6 +138,8 @@ const EditNoteScreen = ({ route, navigation }) => {
       setLocationToZero();
     }
   };
+
+
 
   useEffect(() => {
     fetchCurrentLocation();
@@ -300,7 +323,7 @@ const EditNoteScreen = ({ route, navigation }) => {
                 <Ionicons name="arrow-back-outline" size={30} color={NotePageStyles().title.color} />
               </TouchableOpacity>
               <TextInput
-                style={NotePageStyles().title}
+                  style={[textInputStyle, styles.titleInput]}
                 placeholder="Title Field Note"
                 value={title}
                 onChangeText={setTitle}
@@ -341,14 +364,7 @@ const EditNoteScreen = ({ route, navigation }) => {
           <RichText
     editor={editor}
     placeholder="Write Content Here..."
-    style={[
-      NotePageStyles().editor,
-      {
-        backgroundColor: theme.backgroundColor,
-        minHeight: 200, // gives initial space to type
-        paddingBottom: 120, // prevents content from being hidden behind keyboard/toolbar
-      },
-    ]}
+    style={[textInputStyle, styles.bodyInput]}
   />
           </View>
           <View style={NotePageStyles().toolBar}>
@@ -360,5 +376,16 @@ const EditNoteScreen = ({ route, navigation }) => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  titleInput: {
+    // Add any additional styles specific to title input here
+    fontSize: 20,
+  },
+  bodyInput: {
+    // Add any additional styles specific to body input here
+    fontSize: 16,
+  },
+});
 
 export default EditNoteScreen;

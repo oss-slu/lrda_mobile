@@ -96,6 +96,25 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
     avoidIosKeyboard: true,
   });
 
+  const { theme } = useTheme(); // Access the theme from the context
+  const scheme = useColorScheme(); // Detect current system theme (light or dark)
+
+  // Dynamic styling based on theme
+  const containerStyle = {
+    flex: 1,
+    backgroundColor: scheme === 'dark' ? '#333' : '#fff', // Dark mode: dark background, light mode: white background
+    padding: 20,
+  };
+
+  const textInputStyle = {
+    color: scheme === 'dark' ? 'white' : 'black', // Dark mode: white text, light mode: black text
+    borderWidth: 1,
+    borderColor: scheme === 'dark' ? '#555' : '#ddd', // Dark mode: darker border, light mode: lighter border
+    padding: 10,
+    marginBottom: 10,
+  };
+
+
   useEffect(() => {
     console.log("Updated isAddNoteOpened state:", addNoteState);
   }, [addNoteState]);
@@ -163,7 +182,7 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
 
    useEffect(() => {
     // Save the correct reference to handleShareButtonPress
-    console.log("useeffect called when to hit save button");
+    console.log("useEffect called when to hit save button");
     setPublishNote(() => handleShareButtonPress);
   }, [titleText]);
 
@@ -210,7 +229,7 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
 
   useEffect(() => {
     // Save the correct reference to handleShareButtonPress
-    console.log("useeffect called when to hit save button");
+    console.log("useEffect called when to hit save button");
     setPublishNote(() => handleShareButtonPress);
   }, [titleText]);
 
@@ -498,7 +517,7 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
                   />
                 </TouchableOpacity>
                 <TextInput
-                  style={NotePageStyles().title}
+                    style={[textInputStyle, NotePageStyles().title]}
                   placeholder="Title Field Note"
                   placeholderTextColor={NotePageStyles().title.color}
                   onChangeText={setTitleText}
@@ -581,9 +600,8 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
     style={[
       NotePageStyles().editor,
       {
-        backgroundColor: theme.backgroundColor,
-        minHeight: 200, // gives initial space to type
-        paddingBottom: 120, // prevents content from being hidden behind keyboard/toolbar
+        backgroundColor: theme.backgroundColor, // Set background based on the theme
+        color: scheme === 'dark' ? 'white' : 'black', // Text color for dark mode
       },
     ]}
   />

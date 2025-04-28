@@ -14,10 +14,12 @@ function AppThemeSelectorScreen() {
     // const [selectedColor, setSelectedColor] = useState('#ff0000'); // Default color
     // const [sliderValue, setSliderValue] = useState(0.5); // Slider value state
 
-    // const handleColorChange = (color) => {
-    //     console.log('Selected Color:', color);
-    //     setSelectedColor(color);
-    // };
+    const handleColorSelected = (color) => {
+        setSelectedColor(color);
+        updateThemeColor(color);
+        setColorPickerVisible(false);
+    }
+
 
     return (
         <View style={styles.container}>
@@ -34,7 +36,7 @@ function AppThemeSelectorScreen() {
             <View style={styles.ThemeSection}>
                 {
                     appTheme.map((theme, key) => (
-                        <TouchableOpacity key={key} 
+                        <TouchableOpacity key={key}
                             onPress={() => {
                                 dispatch(themeReducer(theme.themeColor))
                             }}
@@ -50,8 +52,8 @@ function AppThemeSelectorScreen() {
                 </TouchableOpacity> */}
             </View>
 
-            
-          
+
+
         </View>
     )
 }
