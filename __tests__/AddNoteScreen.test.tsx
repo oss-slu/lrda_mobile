@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import { Alert, EmitterSubscription, Keyboard } from 'react-native';
+import { Alert, EmitterSubscription, Keyboard, useColorScheme } from 'react-native';
 import AddNoteScreen from '../lib/screens/AddNoteScreen';
 import { AddNoteProvider } from '../lib/context/AddNoteContext'; // Import the provider
 import { Provider } from 'react-redux';
