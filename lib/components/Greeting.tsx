@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Text, StyleSheet, View } from 'react-native';
+import { defaultTextFont } from '../../styles/globalStyles';
 
 const Greeting: React.FC = () => {
   const [greeting, setGreeting] = useState<string>("");
@@ -36,6 +37,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   greetingText: {
+    ...defaultTextFont,
     fontSize: 13,
     fontWeight: '600',
   },

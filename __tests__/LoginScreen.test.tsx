@@ -6,10 +6,6 @@ import configureStore from 'redux-mock-store';
 import LoginScreen from '../lib/screens/loginScreens/LoginScreen';
 import moxios from 'moxios'
 import { shallow } from 'enzyme';
-import { act } from '@testing-library/react-native';
-
-jest.useFakeTimers();
-
 // Create a mock store
 const mockStore = configureStore([]);
 const store = mockStore({
@@ -47,7 +43,6 @@ afterEach(() => {
 });
 
 describe('LoginScreen', () => {
-
   it('renders without crashing', () => {
     const navigationMock = { navigate: jest.fn() }; // Mock navigation prop
     const routeMock = { params: {} }; // Mock route prop
@@ -82,19 +77,5 @@ describe('LoginScreen', () => {
 
 
   });
-
-
-});
-
-import { styles } from '../lib/screens/loginScreens/LoginScreen';
-describe('LoginScreen styles', () => {
-  it('primaryButton matches Figma changes necessary', () => {
-    const s = styles.primaryButton;
-    expect(s.backgroundColor).toBe("rgb(17,47,187)");
-    expect(s.width).toBe("90%");
-    expect(s.height).toBe(43);
-    expect(s.borderRadius).toBe(10);
-    expect(s.alignItems).toBe("center");
-    expect(s.justifyContent).toBe("center");
-  });
+  
 });

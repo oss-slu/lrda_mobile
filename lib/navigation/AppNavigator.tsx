@@ -29,6 +29,8 @@ import ResourceScreen from "../screens/ResourceScreen";
 import ReadMoreScreen from "../screens/ReadMoreScreen";
 import AppThemeSelectorScreen from "../screens/AppThemeSelectorScreen";
 import { Keyboard } from "react-native";
+import ForgotPassword from "../screens/loginScreens/ForgotPassword";
+import AboutScreen from "../screens/AboutScreen";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -36,6 +38,8 @@ const user = User.getInstance();
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
+
+
 
 const HomeStack = () => (
   <Stack.Navigator>
@@ -74,6 +78,11 @@ const MoreStack = () => (
       component={MorePage}
       options={{ headerShown: false }}
     />
+     <Stack.Screen
+      name="AboutScreen"
+      component={AboutScreen}
+      options={{ headerShown: false }}
+    />
     <Stack.Screen
       name="TeamPage"
       component={TeamPage}
@@ -103,6 +112,8 @@ const AppNavigator: React.FC = () => {
   const dispatch = useDispatch();
   const navState = useSelector((state: RootState) => state.navigation.navState);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const appThemeColor = useSelector((state: RootState) => state.themeSlice.theme);
+
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
@@ -156,6 +167,11 @@ const AppNavigator: React.FC = () => {
             component={RegisterScreen}
             options={{ headerShown: false }}
           />
+          <Stack.Screen
+            name="ForgotPassword"
+            component={ForgotPassword}
+            options={{ headerShown: false }}
+          />
         </Stack.Navigator>
       )}
       {navState === "login" && (
@@ -170,36 +186,44 @@ const AppNavigator: React.FC = () => {
             component={RegisterScreen}
             options={{ headerShown: false }}
           />
+             <Stack.Screen
+            name="ForgotPassword"
+            component={ForgotPassword}
+            options={{ headerShown: false }}
+          />
         </Stack.Navigator>
       )}
       {navState === "home" && (
-        <Tab.Navigator screenOptions={{
-          tabBarShowLabel: false,
-          tabBarHideOnKeyboard: true,
-          tabBarStyle: {
-            backgroundColor: 'transparent',
-            position: 'absolute',
-            bottom: Platform.OS === 'ios' ? -20 : 0,
-            left: 0,
-            right: 0,
-            elevation: 0,
-            borderTopWidth: 0,
-            paddingBottom: Platform.OS === 'ios' ? 20 : 0,
-            height: Platform.OS === 'ios' ? '9%' : '7%',
-          },
-          tabBarItemStyle: {
-            backgroundColor: theme.primaryColor,
-            height: '100%'
-          }
-        }}>
+       <Tab.Navigator
+       screenOptions={{
+         tabBarShowLabel: true, // Enable default labels
+         tabBarHideOnKeyboard: true,
+         tabBarStyle: {
+          backgroundColor: theme.primaryColor,  // Ensure it's visible
+          position: 'absolute',
+          bottom: 0,  // Fully extend to the bottom
+          left: 0,
+          right: 0,
+          height: Platform.OS === 'ios' ? 80 : 70, // Increase height for full coverage
+          paddingBottom: Platform.OS === 'ios' ? 30 : 20, // Ensure space for gestures
+          borderTopWidth: 0,  // Remove any top borders
+          elevation: 0,  // Remove shadow
+        },
+         tabBarItemStyle: {
+           backgroundColor: theme.primaryColor,
+           height: '100%'
+         }
+       }}
+     >
           <Tab.Screen
             name="HomeTab"
             component={HomeStack}
             // component={AppThemeSelectorScreen}
             options={{
               headerShown: false,
+              tabBarLabel: 'Home',
               tabBarIcon: ({ color, size, focused }) => (
-                <Ionicons name="home" color={isDarkmode ? focused ? 'white' : 'grey' : focused ? 'black' : 'grey'} size={size} />
+                <Ionicons name="home" size={size}color={focused ? isDarkmode ? 'white' : 'black'  : appThemeColor }/>
               ),
             }}
           />
@@ -209,8 +233,9 @@ const AppNavigator: React.FC = () => {
             component={Library}
             options={{
               headerShown: false,
+              tabBarLabel: 'Library',
               tabBarIcon: ({ color, size, focused }) => (
-                <Ionicons name="library" color={isDarkmode ? focused ? 'white' : 'grey' : focused ? 'black' : 'grey'} size={size} />
+                <Ionicons name="library" size={size}color={focused ? isDarkmode ? 'white' : 'black'  : appThemeColor }/>
               ),
             }}
           />
@@ -220,21 +245,22 @@ const AppNavigator: React.FC = () => {
             component={AddNoteScreen}
             options={{
               headerShown: false,
-              // tabBarIcon: ({ color, size }) => (
-              //   <Ionicons name="library" color={color} size={size} />
-              // ),
+              tabBarLabel: 'Add Note',
+              tabBarIcon: ({ color, size, focused }) => (
+                <Ionicons name="library" color={color} size={size} />
+              ),
               tabBarButton: (props) => (<AddNoteBtnComponent />)
             }}
           />
           }
 
           <Tab.Screen
-            name="Explore"
+            name="Map"
             component={ExploreScreen}
             options={{
               headerShown: false,
               tabBarIcon: ({ color, size, focused }) => (
-                <Ionicons name="map" color={isDarkmode ? focused ? 'white' : 'grey' : focused ? 'black' : 'grey'} size={size} />
+                <Ionicons name="map" size={size}color={focused ? isDarkmode ? 'white' : 'black'  : appThemeColor } />
               ),
             }}
           />
@@ -244,7 +270,7 @@ const AppNavigator: React.FC = () => {
             options={{
               headerShown: false,
               tabBarIcon: ({ color, size, focused }) => (
-                <Ionicons name="menu-outline" color={isDarkmode ? focused ? 'white' : 'grey' : focused ? 'black' : 'grey'} size={size + 10} />
+                <Ionicons name="menu-outline" size={size + 10}color={focused ? isDarkmode ? 'white' : 'black'  : appThemeColor } />
               ),
             }}
           />

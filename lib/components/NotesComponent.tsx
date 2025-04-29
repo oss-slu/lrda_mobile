@@ -3,6 +3,7 @@ import { View, Text, Image, StyleSheet, Alert, Dimensions } from 'react-native'
 import LoadingImage from './loadingImage'
 import * as Location from "expo-location";
 import axios from 'axios';
+import { defaultTextFont } from '../../styles/globalStyles';
 
 
 const {width, height} = Dimensions.get('window');
@@ -127,6 +128,13 @@ const styles = StyleSheet.create({
        paddingHorizontal: height * 0.02,
        borderRadius: 10,
        
+    },
+    noteTitle: {
+        ...defaultTextFont,
+
+    },
+    noteText: {
+        ...defaultTextFont,
     },
 
     notesTxtContent: {

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import { useTheme } from './ThemeProvider';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import { defaultTextFont } from '../../styles/globalStyles';
 
 
 const { width } = Dimensions.get("window");
@@ -45,7 +46,7 @@ export const MapNotesComponent = ({ index, marker, onViewNote }) => {
 // Styles
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  selectedMapTypeText: { fontWeight: "bold", color: "blue" },
+  selectedMapTypeText: { ...defaultTextFont, fontWeight: "bold", color: "blue" },
   scrollView: { position: "absolute", bottom: 60, left: 0, right: 0, paddingVertical: 10 },
   card: {
     elevation: 2,
@@ -82,12 +83,12 @@ const styles = StyleSheet.create({
     width: CARD_WIDTH,
     justifyContent: 'space-evenly',
   },
-  cardtitle: { fontSize: 12, fontWeight: "bold", color: 'white' },
-  cardDescription: { fontSize: 12, color: 'white' },
+  cardtitle: { ...defaultTextFont, fontSize: 12, fontWeight: "bold", color: 'white' },
+  cardDescription: { ...defaultTextFont, fontSize: 12, color: 'white' },
   markerWrap: { alignItems: "center", justifyContent: "center", width: 50, height: 50 },
   marker: { width: 30, height: 30 },
   signIn: { width: "100%", padding: 5, justifyContent: "center", alignItems: "center", borderRadius: 3 },
-  textSign: { fontSize: 14, fontWeight: "bold" },
+  textSign: { ...defaultTextFont, fontSize: 14, fontWeight: "bold" },
   leftContent: {
     width: '70%',
   },

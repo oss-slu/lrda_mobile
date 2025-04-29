@@ -21,6 +21,7 @@ import ImageModal from "./ImageModal";
 import VideoModal from "./VideoModal";
 import { Audio, Video } from "expo-av";
 import { VideoType } from "../../models/media_class";
+import { defaultTextFont } from "../../../styles/globalStyles";
 
 // Audio component.
 const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
@@ -271,6 +272,7 @@ const loadingImageStyles = StyleSheet.create({
     padding: 10,
   },
   errorText: {
+    ...defaultTextFont,
     marginTop: 10,
     color: "black",
     fontSize: 16,
@@ -284,7 +286,7 @@ const LoadingDots: React.FC = () => {
 
   // Skip animation if in Jest environment
   if (!!process.env.JEST_WORKER_ID) {
-    return <Text testID="loadingDotsStatic">...</Text>;
+    return <Text style={{...defaultTextFont}} testID="loadingDotsStatic">...</Text>;
   }
 
   useEffect(() => {
@@ -349,6 +351,7 @@ const loadingDotsStyles = StyleSheet.create({
     alignItems: "center",
   },
   dot: {
+    ...defaultTextFont,
     fontSize: 18,
     color: "333",
     marginHorizontal: 2,
@@ -439,6 +442,7 @@ const loadingVideoStyles = StyleSheet.create({
     padding: 10,
   },
   errorText: {
+    ...defaultTextFont,
     marginTop: 10,
     color: "red",
     fontSize: 16,
@@ -530,7 +534,7 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
         }
 
         // Otherwise, just render text
-        return <Text style={{ color: theme.text, marginVertical: 10 }}>{tnode.data}</Text>;
+        return <Text style={{ ...defaultTextFont, color: theme.text, marginVertical: 10 }}>{tnode.data}</Text>;
       },
     }),
     [theme, width]
@@ -632,6 +636,7 @@ const styles = StyleSheet.create({
     paddingTop: 100,
   },
   modalTitle: {
+    ...defaultTextFont,
     fontSize: 22,
     fontWeight: "bold",
     color: "#333",
@@ -651,6 +656,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   creatorText: {
+    ...defaultTextFont,
     fontSize: 16,
     color: "#333",
     marginLeft: 5,
@@ -662,6 +668,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   dateText: {
+    ...defaultTextFont,
     fontSize: 16,
     color: "#333",
     marginLeft: 5,
@@ -687,11 +694,13 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
   audioTimer: {
+    ...defaultTextFont,
     color: "#333",
     textAlign: "right",
     width: 60,
   },
   errorText: {
+    ...defaultTextFont,
     marginLeft: 10,
     color: "#333",
     fontSize: 16,

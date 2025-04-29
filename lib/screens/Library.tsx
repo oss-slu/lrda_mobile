@@ -34,7 +34,9 @@ import Greeting from "../components/Greeting";
 import NotesComponent from "../components/NotesComponent";
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import LottieView from 'lottie-react-native';
-
+import { defaultTextFont } from "../../styles/globalStyles";
+import Tooltip from 'react-native-walkthrough-tooltip';
+import TooltipContent from "../onboarding/TooltipComponent";
 const user = User.getInstance();
 const { width, height } = Dimensions.get("window");
 
@@ -104,7 +106,7 @@ const Library = ({ navigation, route }) => {
       // Get userId if needed
       const userId = await user.getId();
       // Use batch-fetching with skip and limit; note we use isPrivate state
-      const data = await ApiService.fetchMessagesBatch(
+      const data = await ApiService.fetchMapsMessagesBatch(
           isPrivate,
           published,
           isPrivate ? userId : "",
@@ -170,7 +172,7 @@ const Library = ({ navigation, route }) => {
           backgroundColor: theme.homeColor,
         }}
       >
-        <Text testID="load-more-button" style={{ color: theme.text, fontSize: 16, fontWeight: "400" }}>
+        <Text testID="load-more-button" style={{ ...defaultTextFont ,color: theme.text, fontSize: 16, fontWeight: "400" }}>
           Load More
         </Text>
       </TouchableOpacity>
@@ -178,8 +180,8 @@ const Library = ({ navigation, route }) => {
     }
     return (
       <View style={{ padding: 20, alignItems: "center" }}>
-        <Text testID="empty-state-text" style={{ color: "gray", fontSize: 14 }}>
-          No Results Found
+        <Text testID="empty-state-text" style={{ ...defaultTextFont, color: "gray", fontSize: 14 }}>
+          End of the Page
         </Text>
       </View>
     );
@@ -352,6 +354,20 @@ const Library = ({ navigation, route }) => {
     setIsSortOpened(false);
   };
 
+  const [userTutorial, setUserTutorial] = useState<boolean | null>(null);
+  // Initialize libraryTip as false (not active) by default.
+  const [libraryTip, setLibraryTip] = useState<boolean>(false);
+
+  useEffect(() => {
+    User.getHasDoneTutorial("Library").then((tutorialDone: boolean) => {
+      setUserTutorial(tutorialDone);
+      // If the tutorial has not been completed, enable the libraryTip.
+      if (!tutorialDone) {
+        setLibraryTip(true);
+      }
+    });
+  }, []);
+
   return (
     <View testID="Library" style={{ flex: 1, backgroundColor: isDarkmode ? 'black' : '#e4e4e4' }}>
       <StatusBar translucent backgroundColor="transparent" />
@@ -451,8 +467,38 @@ const Library = ({ navigation, route }) => {
       </View>
   
       <View testID="notes-list" style={styles(theme, width).scrollerBackgroundColor}>
-        {rendering ? <NoteSkeleton /> : renderList(notes)}
-      </View>
+  {rendering ? (
+    <NoteSkeleton />
+  ) : (
+    <Tooltip 
+      isVisible={libraryTip && !userTutorial}
+      showChildInTooltip={false}
+      topAdjustment={Platform.OS === 'android' ? -400 : -400}
+      displayInsets={{ top: 20, bottom: 20, left: 10, right: 10 }}
+      content={
+        <TooltipContent
+          message="Welcome to library! Scroll to view all published notes from other creators."
+          onPressOk={() => {
+            setUserTutorial(true);
+            setLibraryTip(false);
+            User.setUserTutorialDone("Library", true);
+          }
+
+          }
+          onSkip={() => {
+            setUserTutorial(true);
+            setLibraryTip(false);
+            User.setUserTutorialDone("Library", true);
+          }}
+        />
+      }
+      placement="bottom"
+    >
+      {renderList(notes)}
+    </Tooltip>
+
+       )}
+</View>
   
       {isSortOpened && isSearchVisible == false && (
         <View style={{
@@ -464,27 +510,27 @@ const Library = ({ navigation, route }) => {
           borderRadius: 20,
           padding: 20,
         }}>
-          <Text style={{ fontSize: 20, color: isDarkmode ? '#c7c7c7' : 'black', fontWeight: 600 }}>
+          <Text style={{ ...defaultTextFont ,fontSize: 20, color: isDarkmode ? '#c7c7c7' : 'black', fontWeight: 600 }}>
             Sort by
           </Text>
           <View style={{ height: '50%', justifyContent: 'space-evenly', alignItems: 'center' }}>
             <TouchableOpacity onPress={() => handleSortOption({ option: 1 })}>
               <View style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 1 ? theme.homeColor : 'none', width: 200 }]}>
-                <Text style={{ fontSize: 20, color: isDarkmode && selectedSortOption != 1 ? '#c7c7c7' : 'black' }}>
+                <Text style={{ ...defaultTextFont, fontSize: 20, color: isDarkmode && selectedSortOption != 1 ? '#c7c7c7' : 'black' }}>
                   Date & Time(latest)
                 </Text>
               </View>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => handleSortOption({ option: 2 })}>
               <View style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 2 ? theme.homeColor : 'none' }]}>
-                <Text style={{ fontSize: 20, color: isDarkmode && selectedSortOption != 2 ? '#c7c7c7' : 'black' }}>
+                <Text style={{ ...defaultTextFont,fontSize: 20, color: isDarkmode && selectedSortOption != 2 ? '#c7c7c7' : 'black' }}>
                   A-Z
                 </Text>
               </View>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => handleSortOption({ option: 3 })}>
               <View style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 3 ? theme.homeColor : 'none' }]}>
-                <Text style={{ fontSize: 20, color: isDarkmode && selectedSortOption != 3 ? '#c7c7c7' : 'black' }}>
+                <Text style={{ ...defaultTextFont, fontSize: 20, color: isDarkmode && selectedSortOption != 3 ? '#c7c7c7' : 'black' }}>
                   Z-A
                 </Text>
               </View>
@@ -510,6 +556,7 @@ const styles = (theme, width, color, isDarkmode) =>
       backgroundColor: theme.homeColor,
     },
     pfpText: {
+      ...defaultTextFont,
       fontWeight: "600",
       fontSize: 14,
       alignSelf: "center",
@@ -534,6 +581,7 @@ const styles = (theme, width, color, isDarkmode) =>
       marginLeft: 8,
     },
     noteTitle: {
+      ...defaultTextFont,
       fontSize: 22,
       fontWeight: "700",
       maxWidth: "100%",
@@ -541,6 +589,7 @@ const styles = (theme, width, color, isDarkmode) =>
       color: theme.text,
     },
     noteText: {
+      ...defaultTextFont,
       marginTop: 10,
       fontSize: 18,
       color: theme.text,
@@ -620,6 +669,7 @@ const styles = (theme, width, color, isDarkmode) =>
       marginRight: 10,
     },
     userName: {
+      ...defaultTextFont,
       fontWeight: "500",
       height: "50%",
     },
@@ -640,6 +690,7 @@ const styles = (theme, width, color, isDarkmode) =>
       overflow: "hidden",
     },
     searchInput: {
+      ...defaultTextFont,
       flex: 1,
       fontSize: 16,
       color: "black",
@@ -659,6 +710,7 @@ const styles = (theme, width, color, isDarkmode) =>
       width: width > 500 ? "13%" : "27%",
     },
     pageTitle: {
+      ...defaultTextFont,
       fontSize: 18,
       fontWeight: "500",
     },
@@ -671,6 +723,7 @@ const styles = (theme, width, color, isDarkmode) =>
       alignItems: "center",
     },
     resultNotFoundTxt: {
+      ...defaultTextFont,
       fontSize: 15,
       fontWeight: "400",
     },

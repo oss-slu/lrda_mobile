@@ -7,6 +7,14 @@ import { Provider } from 'react-redux';
 import { store } from '../redux/store/store';
 import * as Location from 'expo-location';
 
+
+const navigationMock = {
+  navigate: jest.fn(),
+  goBack: jest.fn(),
+  addListener: jest.fn(() => jest.fn()), 
+  canGoBack: jest.fn(() => true),
+};
+
 // Mock redux-persist to avoid persistence logic in tests
 jest.mock('redux-persist', () => {
   const real = jest.requireActual('redux-persist');
@@ -22,6 +30,25 @@ jest.mock('../lib/components/ThemeProvider', () => ({
     theme: 'mockedTheme', // Provide a mocked theme object
   }),
 }));
+jest.mock('../lib/models/user_class', () => {
+  return {
+    User: {
+      getInstance: () => ({
+        getId: jest.fn(() => Promise.resolve("mock-user-id")),
+        setUserTutorialDone: jest.fn(),
+      }),
+      getHasDoneTutorial: jest.fn(() => Promise.resolve(true)), 
+      setUserTutorialDone: jest.fn(() => Promise.resolve()),    
+    },
+  };
+});
+
+/** ADD THIS TO ANY TOOLTIP THAT SHOWS CHILDREN ELEMENT. */
+jest.mock('react-native-walkthrough-tooltip', () => {
+  return ({ children }) => children; // render only the children, no tooltip wrapper
+});
+
+
 
 jest.mock('expo-font', () => ({
   loadAsync: jest.fn(() => Promise.resolve()),
@@ -133,7 +160,7 @@ describe('AddNoteScreen', () => {
   it('renders without crashing', () => {
     const routeMock = { params: { untitledNumber: 1 } };
     const { getByTestId } = renderWithProviders(
-      <AddNoteScreen route={routeMock as any} />
+      <AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />
     );
 
     // Check if the RichEditor is rendered
@@ -152,7 +179,7 @@ describe('AddNoteScreen', () => {
     mockWriteNewNote.mockRejectedValueOnce(new Error('Error saving note'));
 
     const { getByTestId } = renderWithProviders(
-      <AddNoteScreen route={routeMock as any} />
+      <AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />
     );
 
     // Simulate the save action by pressing the button
@@ -176,7 +203,7 @@ describe('AddNoteScreen', () => {
     mockWriteNewNote.mockResolvedValueOnce({ success: true });
 
     const { getByTestId } = renderWithProviders(
-      <AddNoteScreen route={routeMock as any} />
+      <AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />
     );
 
     // Simulate the save action by pressing the button
@@ -191,7 +218,7 @@ describe('AddNoteScreen', () => {
   it('renders the title input field', () => {
     const routeMock = { params: { untitledNumber: 1 } };
     const { getByPlaceholderText } = renderWithProviders(
-      <AddNoteScreen route={routeMock as any} />
+      <AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />
     );
 
     // Check if the title input is rendered
@@ -212,7 +239,7 @@ describe('AddNoteScreen', () => {
     });
   
     const { findByTestId } = renderWithProviders(
-      <AddNoteScreen route={routeMock as any} />
+      <AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />
     );
   
     // Expect the "Done" button to appear when keyboard opens
@@ -238,7 +265,7 @@ describe("AddNoteScreen's checkLocationPermission method", () => {
     const mockAlert = jest.spyOn(Alert, 'alert');
 
     const { getByTestId } = renderWithProviders(
-      <AddNoteScreen route={routeMock as any} />
+      <AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />
     );
 
     // Simulate the button press to trigger permission check
@@ -262,7 +289,7 @@ describe("AddNoteScreen's checkLocationPermission method", () => {
     mockWriteNewNote.mockResolvedValueOnce({ success: true });
 
     const { getByTestId } = renderWithProviders(
-      <AddNoteScreen route={routeMock as any} />
+      <AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />
     );
 
     // Simulate the button press to trigger location permission check
@@ -295,7 +322,7 @@ describe('AddNoteScreen - insertAudioToEditor', () => {
 
     // Render the component
     const { getByTestId } = renderWithProviders(
-      <AddNoteScreen route={{ params: { untitledNumber: 1 } }} />
+      <AddNoteScreen navigation={navigationMock as any} route={{ params: { untitledNumber: 1 } }} />
     );
 
     // Mock the audio URI

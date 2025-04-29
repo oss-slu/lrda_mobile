@@ -13,10 +13,32 @@ import { auth, db } from "../../config/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, Timestamp } from "firebase/firestore";
 import { validateEmail, validatePassword } from "../../utils/validation";
+import { defaultTextFont } from "../../../styles/globalStyles";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type RegisterProps = {
   navigation: any;
   route: any;
+};
+
+/**
+ * Clears the navigation-related keys from AsyncStorage.
+ * Keys include: "Explore", "AddNote", "MorePage", "Library", and "HomeScreen".
+ */
+const clearNavigationKeys = async (): Promise<void> => {
+  try {
+    const keysToRemove = [
+      "Explore",
+      "AddNote",
+      "MorePage",
+      "Library",
+      "HomeScreen",
+    ];
+    await AsyncStorage.multiRemove(keysToRemove);
+    console.log("Navigation keys removed successfully");
+  } catch (error) {
+    console.error("Error removing navigation keys:", error);
+  }
 };
 
 const RegistrationScreen: React.FC<RegisterProps> = ({ navigation }) => {
@@ -70,14 +92,21 @@ const RegistrationScreen: React.FC<RegisterProps> = ({ navigation }) => {
       };
       await setDoc(doc(db, "users", user.uid), firestoreData);
 
+      await clearNavigationKeys(); //Clear Async Tutorial
+
+
       // Set success message and navigate to login screen
       setRegistrationSuccess(true);
       setSnackMessage("Signup successful!");
       setSnackState(true);
-
       } catch (error) {
         setRegistrationSuccess(false);
-        setSnackMessage(`Signup failed: ${error}`);
+        let message = error.message || "Signup failed. Please try again.";
+        console.log(message);
+        if (error.message.includes("auth/email-already-in-use")) {
+          message = "The email address is already in use by another account.";
+        }
+        setSnackMessage(message);
         setSnackState(true);
       }
   };
@@ -93,7 +122,7 @@ const RegistrationScreen: React.FC<RegisterProps> = ({ navigation }) => {
     <KeyboardAwareScrollView contentContainerStyle={styles.container}>
       <ImageBackground source={require("../../../assets/splash.jpg")} style={styles.imageBackground}>
         <Snackbar visible={snackState} onDismiss={onDismissSnackBar} duration={1500} style={styles.snackbar}>
-          <Text style={{ textAlign: "center" }}>{snackMessage}</Text>
+          <Text style={{...defaultTextFont, textAlign: "center" }}>{snackMessage}</Text>
         </Snackbar>
         <View style={styles.registerBox}>
           <Text style={styles.title}>Register</Text>
@@ -136,6 +165,7 @@ const styles = StyleSheet.create({
     elevation: 0,
   },
   title: {
+    ...defaultTextFont,
     fontSize: 32,
     fontWeight: "bold",
     color: "#000",
@@ -162,17 +192,20 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   buttonText: {
+    ...defaultTextFont,
     color: "white",
     fontSize: 22,
     fontWeight: "bold",
   },
   loginText: {
+    ...defaultTextFont,
     marginTop: 20,
     textAlign: "center",
     fontSize: 14,
     color: "#000",
   },
   signIn: {
+    ...defaultTextFont,
     color: "rgb(17,47,187)",
     fontWeight: "bold",
   },
