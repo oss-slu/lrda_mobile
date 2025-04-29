@@ -42,6 +42,7 @@ function AddNoteBtnComponent() {
     <View style={styles.container}>
       <SvgIcon style={[styles.background, { width: 60 }]} />
       <TouchableOpacity
+        testID="fab-button"
         style={[
           styles.button,
           {
@@ -54,12 +55,14 @@ function AddNoteBtnComponent() {
         {isAddButtonMode ? (
           <IonIcons
             name="add"
+            testID="add-icon"
             size={25}
             style={[styles.buttonIcon, { color: appThemeColor }]}
           />
         ) : (
           <Feather
             name="upload-cloud"
+            testID="publish-icon"
             size={25}
             style={[styles.buttonIcon, { color: appThemeColor }]}
           />
