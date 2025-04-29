@@ -129,6 +129,15 @@ jest.mock('expo-location', () => ({
   ),
 }));
 
+jest.mock('../lib/components/photoScroller', () => {
+  return (props) => {
+    // Expose the props globally so our test can inspect them
+    global.photoScrollerProps = props;
+    return null;
+  };
+});
+
+
 // Mock API calls directly
 const mockWriteNewNote = jest.fn();
 jest.mock('../lib/utils/api_calls', () => ({
@@ -339,4 +348,35 @@ describe('AddNoteScreen - insertAudioToEditor', () => {
     expect(mockSetContent).toHaveBeenCalledWith(newContent); // Ensure new content was set
     expect(mockFocus).toHaveBeenCalledTimes(1); // Ensure focus was triggered
   });
+
+  describe('Insert image updates toolbar preview', () => {
+    beforeEach(() => {
+      // Reset global value before each test
+      global.photoScrollerProps = {};
+    });
+
+    it('should update newMedia state when an image is inserted', async () => {
+      const routeMock = { params: { untitledNumber: 1 } };
+      const { getByTestId, rerender } = renderWithProviders(
+          <AddNoteScreen route={routeMock as any} />
+      );
+
+      fireEvent.press(getByTestId('imageButton'));
+
+      await waitFor(() => {
+        expect(global.photoScrollerProps).toBeDefined();
+      });
+
+      // Define a test image URI (Add this by looking through)
+      const testImageUri = '';
+      await global.photoScrollerProps.insertImageToEditor(testImageUri);
+      rerender(<AddNoteScreen route={routeMock as any} />);
+
+      expect(global.photoScrollerProps.newMedia).toEqual(
+          expect.arrayContaining([{ uri: testImageUri, type: 'image' }])
+      );
+    });
+  });
+
+
 });
