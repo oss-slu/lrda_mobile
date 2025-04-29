@@ -867,12 +867,40 @@ const handleSortOption = ({ option }) => {
           </TouchableOpacity>
         </View>
       </View>}
+      <TouchableOpacity
+          testID="add-note-fab"
+          style={styles(theme, width).addNoteFab}
+          onPress={() => {
+            setTimeout(() => {
+              const untitledNumber = findNextUntitledNumber(notes);
+              navigation.navigate("AddNote", { untitledNumber, refreshPage });
+            }, 50); // Small delay helps prevent UI race conditions
+          }}
+      >
+        <Ionicons name="add" size={30} color="white" />
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = (theme, width, color, isDarkmode) =>
   StyleSheet.create({
+    addNoteFab: {
+      position: "absolute",
+      bottom: 25,
+      right: 20,
+      backgroundColor: "#1E88E5",
+      borderRadius: 30,
+      width: 60,
+      height: 60,
+      alignItems: "center",
+      justifyContent: "center",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.3,
+      shadowRadius: 3.5,
+      elevation: 5,
+    },
     container: {
       paddingTop: Constants.statusBarHeight - 20,
       backgroundColor: theme.homeColor,
