@@ -34,12 +34,13 @@ exports[`LocationWindow renders without crashing 1`] = `
       <Text
         style={
           {
+            "fontFamily": "Inter",
             "fontSize": 16,
           }
         }
       >
-        2/11/2025
-12:49 AM
+        4/9/2025
+12:59 PM
       </Text>
     </View>
     <View
