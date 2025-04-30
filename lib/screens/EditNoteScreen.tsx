@@ -420,14 +420,13 @@ const EditNoteScreen = ({ route, navigation }) => {
           </View>
           
     )}
-        </KeyboardAwareScrollView>
-
-
-        {Platform.OS === "android" && (
+           {Platform.OS === "android" && (
           <View style={styles.toolbar} testID="Toolbar">
             <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
           </View>
         )}
+        </KeyboardAwareScrollView>
+
 
 
         {/* Loading spinner */}
@@ -446,7 +445,7 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     zIndex: 10,            // float above the keyboard toolbar
     // these % values are relative to the **parent** container’s dimensions
-    marginTop: Platform.OS === "ios" ? "135%" : "130%",
+    marginTop: Platform.OS === "ios" ? "135%" : "137%",
     marginLeft: "83%",
   },
   
