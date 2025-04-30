@@ -29,11 +29,14 @@ import { useAddNoteContext } from "../context/AddNoteContext";
 import { useDispatch } from "react-redux";
 import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
 import { useFocusEffect } from "@react-navigation/native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 const user = User.getInstance();
 const EditNoteScreen = ({ route, navigation }) => {
   const { note, onSave } = route.params;
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const insets = useSafeAreaInsets()
 
   const [title, setTitle] = useState(note.title || "Untitled");
   const [time, setTime] = useState(new Date(note.time));
@@ -76,11 +79,11 @@ const EditNoteScreen = ({ route, navigation }) => {
   useEffect(() => {
     // ─── LISTEN on all platforms for show / hide ───
     const showSub = Keyboard.addListener("keyboardDidShow", () => {
-      console.log("➡️ Keyboard shown");
+      console.log(" Keyboard shown");
       setKeyboardVisible(true);
     });
     const hideSub = Keyboard.addListener("keyboardDidHide", () => {
-      console.log("⬅️ Keyboard hidden");
+      console.log("Keyboard hidden");
       setKeyboardVisible(false);
     });
     console.log("KEYBOARD VIS:", keyboardVisible);
@@ -325,10 +328,11 @@ const EditNoteScreen = ({ route, navigation }) => {
     <View style={{ flex: 1 }} testID="EditNoteScreen">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS==='ios' ? 0 : 0}   // ← bigger offset
         style={{ flex: 1 }}
       >
             
-        <ScrollView
+        <KeyboardAwareScrollView
           ref={scrollViewRef}
           contentContainerStyle={{ flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
@@ -405,33 +409,36 @@ const EditNoteScreen = ({ route, navigation }) => {
             />
           </View>
 
-        </ScrollView>
+          {Platform.OS === "ios" && (
+          <View style={styles.toolbar} testID="Toolbar">
+            <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
+          </View>
+        )}
+          {keyboardVisible && (
+          <View style={styles.doneButton} testID="doneButton">
+            <TouchableOpacity onPress={handleDonePress}>
+              <Text style={styles.doneText}>Done</Text>
+            </TouchableOpacity>
+          </View>
+          
+    )}
+        </KeyboardAwareScrollView>
 
-        {/* Floating toolbar above the keyboard */}
+
         {Platform.OS === "android" && (
           <View style={styles.toolbar} testID="Toolbar">
             <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
           </View>
         )}
 
-    {keyboardVisible && (
-          <View style={styles.doneButton} testID="doneButton">
-            <TouchableOpacity onPress={handleDonePress}>
-              <Text style={styles.doneText}>Done</Text>
-            </TouchableOpacity>
-          </View>
-    )}
-     
 
-     {Platform.OS === "ios" && (
-    <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
-)}
-
-  
         {/* Loading spinner */}
         <LoadingModal visible={isUpdating} />
       </KeyboardAvoidingView>
+
+
     </View>
+    
   );
 };
 const styles = StyleSheet.create({
@@ -439,10 +446,12 @@ const styles = StyleSheet.create({
     position: "absolute",
     paddingVertical: 8,
     borderColor: "#ccc",
-    zIndex: 10,            // make sure it floats above the keyboard toolbar
-    marginTop: Platform.OS === "ios" ? 500 : 555,
-    marginLeft: 350
+    zIndex: 10,            // float above the keyboard toolbar
+    // these % values are relative to the **parent** container’s dimensions
+    marginTop: Platform.OS === "ios" ? "135%" : "130%",
+    marginLeft: "83%",
   },
+  
   doneText: {
     color: "blue",
     fontSize: 14,
@@ -450,14 +459,20 @@ const styles = StyleSheet.create({
     marginRight: 0,
   },
   toolbar: {
-    position: "absolute",
-    bottom: 27,         // same as your floating toolbar
-    left: 0,
-    right: 0,
-    height: 70,         // or whatever your toolbar’s height is
-    justifyContent: "center",
+    position: 'absolute', // Keep toolbar at the bottom of the screen
+    bottom: 27, // Align toolbar with the bottom edge
+    width: '100%', // Full-width toolbar
+    justifyContent: 'center', // Center items in the toolbar
     paddingHorizontal: 10,
-    zIndex: 10,
+    zIndex: 10, // Ensure it stays above other elements
+    ...Platform.select({
+      android: {
+        height: 70,
+      },
+      ios: {
+        height: 50,
+      },
+    }),
   },
 });
 
