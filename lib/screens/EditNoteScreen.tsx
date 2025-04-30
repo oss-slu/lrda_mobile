@@ -29,14 +29,12 @@ import { useAddNoteContext } from "../context/AddNoteContext";
 import { useDispatch } from "react-redux";
 import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
 import { useFocusEffect } from "@react-navigation/native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 const user = User.getInstance();
 const EditNoteScreen = ({ route, navigation }) => {
   const { note, onSave } = route.params;
   const [keyboardVisible, setKeyboardVisible] = useState(false);
-  const insets = useSafeAreaInsets()
 
   const [title, setTitle] = useState(note.title || "Untitled");
   const [time, setTime] = useState(new Date(note.time));
