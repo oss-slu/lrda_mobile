@@ -464,7 +464,7 @@ const styles = StyleSheet.create({
     zIndex: 10, // Ensure it stays above other elements
     ...Platform.select({
       android: {
-        height: 70,
+        height: 60,
       },
       ios: {
         height: 50,
