@@ -81,18 +81,20 @@ const EditNoteScreen = ({ route, navigation }) => {
     };
   }, []);
 //find the keyboards height
-  useEffect(() => {
-    const showSub = Keyboard.addListener("keyboardDidShow", e => {
-      setKeyboardHeight(e.endCoordinates.height);
-    });
-    const hideSub = Keyboard.addListener("keyboardDidHide", () => {
-      setKeyboardHeight(0);
-    });
-    return () => {
-      showSub.remove();
-      hideSub.remove();
-    };
-  }, []);
+useEffect(() => {
+  const showSub = Keyboard.addListener("keyboardDidShow", ({ endCoordinates }) => {
+    setKeyboardVisible(true);
+    setKeyboardHeight(endCoordinates.height);
+  });
+  const hideSub = Keyboard.addListener("keyboardDidHide", () => {
+    setKeyboardVisible(false);
+    setKeyboardHeight(0);
+  });
+  return () => {
+    showSub.remove();
+    hideSub.remove();
+  };
+}, []);
 
   const handleDonePress = () => {
     if (editor?.blur) editor.blur();   // blur the rich-text editor
