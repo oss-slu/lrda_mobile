@@ -35,6 +35,8 @@ const user = User.getInstance();
 const EditNoteScreen = ({ route, navigation }) => {
   const { note, onSave } = route.params;
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
 
   const [title, setTitle] = useState(note.title || "Untitled");
   const [time, setTime] = useState(new Date(note.time));
@@ -61,18 +63,6 @@ const EditNoteScreen = ({ route, navigation }) => {
   const { setPublishNote } = useAddNoteContext();
   const hasFocusedRef = useRef(false);
 
-  // ─── ADD: custom toolbar with a “close” icon that also dismisses keyboard ───
-  const customToolbarItems = [
-    ...DEFAULT_TOOLBAR_ITEMS,
-    {
-      icon: () => <Ionicons name="close" size={24} color={theme.text} />,
-      onPress: () => {
-        if (editor?.blur) editor.blur();
-        Keyboard.dismiss();
-      },
-      id: "closeKeyboard",
-    },
-  ];
 
   useEffect(() => {
     // ─── LISTEN on all platforms for show / hide ───
@@ -85,6 +75,19 @@ const EditNoteScreen = ({ route, navigation }) => {
       setKeyboardVisible(false);
     });
     console.log("KEYBOARD VIS:", keyboardVisible);
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+//find the keyboards height
+  useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardDidShow", e => {
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+    const hideSub = Keyboard.addListener("keyboardDidHide", () => {
+      setKeyboardHeight(0);
+    });
     return () => {
       showSub.remove();
       hideSub.remove();
@@ -413,13 +416,18 @@ const EditNoteScreen = ({ route, navigation }) => {
           </View>
         )}
           {keyboardVisible && (
-          <View style={styles.doneButton} testID="doneButton">
-            <TouchableOpacity onPress={handleDonePress}>
-              <Text style={styles.doneText}>Done</Text>
-            </TouchableOpacity>
-          </View>
-          
-    )}
+  <View
+    style={[
+      styles.doneButton,
+      { bottom: 7 }  // 10px of padding above the keyboard
+    ]}
+    testID="doneButton"
+  >
+    <TouchableOpacity onPress={handleDonePress}>
+      <Text style={styles.doneText}>Done</Text>
+    </TouchableOpacity>
+  </View>
+)}
            {Platform.OS === "android" && (
           <View style={styles.toolbar} testID="Toolbar">
             <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
@@ -441,19 +449,13 @@ const EditNoteScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   doneButton: {
     position: "absolute",
-    paddingVertical: 8,
-    borderColor: "#ccc",
-    zIndex: 10,            // float above the keyboard toolbar
-    // these % values are relative to the **parent** container’s dimensions
-    marginTop: Platform.OS === "ios" ? "135%" : "137%",
-    marginLeft: "83%",
+    right: 16,       // fixed distance from the right edge
+    zIndex: 10,
   },
-  
   doneText: {
     color: "blue",
     fontSize: 14,
     textAlign: "right",
-    marginRight: 0,
   },
   toolbar: {
     position: 'absolute', // Keep toolbar at the bottom of the screen
@@ -464,7 +466,7 @@ const styles = StyleSheet.create({
     zIndex: 10, // Ensure it stays above other elements
     ...Platform.select({
       android: {
-        height: 60,
+        height: 50,
       },
       ios: {
         height: 50,
