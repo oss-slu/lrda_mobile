@@ -42,6 +42,7 @@ import { defaultTextFont } from "../../styles/globalStyles";
 import Tooltip from 'react-native-walkthrough-tooltip';
 import TooltipContent from "../onboarding/TooltipComponent";
 
+
 const { width, height } = Dimensions.get("window");
 const user = User.getInstance();
 const limit = 20;
@@ -73,9 +74,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const animation = useRef(new Animated.Value(0)).current; // Animation value
   const [isSortOpened, setIsSortOpened] = useState(false);
   const [selectedSortOption, setSelectedSortOption] = useState(1);
+
+  const [page, setPage] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+
   let textLength = 18;
   const dispatch = useDispatch();
-  
+
   // Pagination states
   const [page, setPage] = useState(1);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -86,7 +92,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       const untitledNumber = findNextUntitledNumber(notes);
       console.log("in homescreen untitled numbe ", untitledNumber);
       navigation.navigate("AddNote", { untitledNumber, refreshPage });
-  
     }
     setNavigateToAddNote(() => navigateToAddNote)
   }, [navigation, notes])
@@ -98,7 +103,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       if (name) {
         const firstName = name.split(" ")[0];
         setUserName(firstName);
-  
+
         const initials = name
           .split(" ")
           .map((namePart) => namePart[0])
@@ -107,7 +112,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       }
     })();
   }, []);
-  
+
 const refreshPage = () => {
     setPage(1);
     setHasMore(true);
@@ -120,16 +125,30 @@ const refreshPage = () => {
     setRendering(true);
     setPage(1);
     setHasMore(true);
+    fetchNotes(1);
+  }, [updateCounter, published, value]);
+    setPage(1);
+    setHasMore(true);
     fetchMessages(1);
   }, [updateCounter, published]);
 
+  const fetchNotes = async (pageNumber: number) => {
 
   const fetchMessages = async (pageNum: number) => {
     try {
+      const userId = await user.getId();
+      const skip = (pageNumber - 1) * 20;
+      const data = await ApiService.fetchMessagesBatch(
+          false,
+          published,
+          isPrivate ? userId : "",
+          20,
+          skip
+      );
         if (pageNum === 1) {
-            setRendering(true); 
+            setRendering(true);
         } else {
-            setIsLoadingMore(true); 
+            setIsLoadingMore(true);
         }
 
         const skip = (pageNum - 1) * limit;
@@ -143,11 +162,37 @@ const refreshPage = () => {
             skip
         );
 
+      // Filter out archived notes:
+      const unarchivedNotes = data.filter((note: Note) => !note.isArchived);
         const filteredNotes = data.filter((note: Note) => !note.isArchived);
 
+      // Convert and sort the notes:
+      let fetchedNotes = DataConversion.convertMediaTypes(unarchivedNotes)
+          .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
         const convertedNotes = DataConversion.convertMediaTypes(filteredNotes)
             .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
 
+      if (reversed) {
+        fetchedNotes = fetchedNotes.reverse();
+      }
+
+      // For the first page, replace the notes; otherwise, append:
+      if (pageNumber === 1) {
+        setNotes(fetchedNotes);
+      } else {
+        setNotes((prevNotes) => [...prevNotes, ...fetchedNotes]);
+      }
+
+      // If fewer than 20 notes are returned, there are no more to load:
+      setHasMore(fetchedNotes.length === 20);
+      setRendering(false);
+    } catch (error: any) {
+      console.error("Error fetching messages:", error);
+      ToastMessage.show({
+        type: "error",
+        text1: "Error fetching messages",
+        text2: error.message,
+      });
         const finalNotes = reversed ? convertedNotes.reverse() : convertedNotes;
 
         if (pageNum === 1) {
@@ -166,12 +211,23 @@ const refreshPage = () => {
             text2: error.message,
         });
     } finally {
-        setRendering(false);      
-        setIsLoadingMore(false);  
+        setRendering(false);
+        setIsLoadingMore(false);
     }
 };
 
-  
+
+
+
+  const handleLoadMore = async () => {
+    if (hasMore && !isLoadingMore) {
+      setIsLoadingMore(true);
+      const nextPage = page + 1;
+      await fetchNotes(nextPage);
+      setPage(nextPage);
+      setIsLoadingMore(false);
+    }
+  };
 
   const updateNote = (note: Note) => {
     setNotes((prevNotes) =>
@@ -180,52 +236,10 @@ const refreshPage = () => {
     refreshPage();
   };
 
-  const handleLoadMore = async () => {
-    if (hasMore && !isLoadingMore) {
-      setIsLoadingMore(true);
-      const nextPage = page + 1;
-      await fetchMessages(nextPage);
-      setPage(nextPage);
-      setIsLoadingMore(false);
-    }
-  };
-
-  const renderFooter = () => {
-    if (isLoadingMore) {
-      return (
-        <View  style={{ paddingVertical: 50, alignItems: "center", marginBottom: 100 }}>
-          <ActivityIndicator size="small" color={theme.text} />
-        </View>
-      );
-    }
-    if (hasMore) {
-      return (
-        <TouchableOpacity
-        testID="load-more"
-        onPress={handleLoadMore}
-        style={{
-          paddingVertical: 20,
-          width: "65%",
-          alignItems: "center",
-          alignSelf: "center",
-          borderRadius: 20,
-          marginVertical: 4, // reduced from 8
-          backgroundColor: theme.homeColor,
-        }}
-      >
-        <Text testID="load-more-button" style={{ ...defaultTextFont ,color: theme.text, fontSize: 16, fontWeight: "400" }}>
-          Load More
-        </Text>
-      </TouchableOpacity>
-      );
-    }
-    return (
-      <View style={{ padding: 20, alignItems: "center" }}>
-        <Text testID="empty-state-text" style={{ ...defaultTextFont, color: "gray", fontSize: 14 }}>
-          End of the Page 
-        </Text>
-      </View>
-    );
+  const handleReverseOrder = () => {
+    setNotes(notes.reverse());
+    setReversed(!reversed);
+    setUpdateCounter(updateCounter + 1);
   };
 
   const handleArchiveNote = async (note: Note | undefined, user: User) => {
@@ -401,7 +415,72 @@ const handleSortOption = ({ option }) => {
     });
     const privateData = filteredNotes.filter((eachNotes) => eachNotes.published === false);
     const publicData = filteredNotes.filter((eachNotes) => eachNotes.published != false);
+
+      const renderFooter = (
+          isLoadingMore ? (
+              <View style={{ padding: 20 }}>
+                  <ActivityIndicator size="small" color={theme.text} />
+              </View>
+          ) : hasMore ? (
+              <TouchableOpacity
+                  onPress={handleLoadMore}
+                  style={{
+                      paddingVertical: 13,
+                      paddingHorizontal: 40,
+                      alignItems: "center",
+                      alignSelf: "center",
+                      borderWidth: 1,
+                      borderColor: "white",
+                      borderRadius: 10,
+                      marginVertical: 10,
+                      backgroundColor: theme.homeColor,
+                  }}
+              >
+                  <Text style={{ color: theme.text, fontSize: 14 }}>
+                      Load More
+                  </Text>
+              </TouchableOpacity>
+          ) : (
+              <View style={{ padding: 20, alignItems: "center" }}>
+                <Text style={{ color: "gray", fontSize: 14 }}>
+                  No more notes.
+                </Text>
+              </View>
+          )
+      );
+
     return isPrivate ? (
+        privateData.length > 0 ? (
+            <SwipeListView
+                testID="swipe-list"
+                data={privateData}
+                renderItem={renderItem}
+                renderHiddenItem={sideMenu}
+                leftActivationValue={160}
+                rightActivationValue={-160}
+                leftOpenValue={75}
+                rightOpenValue={-75}
+                stopLeftSwipe={175}
+                stopRightSwipe={-175}
+                keyExtractor={(item) => item.id}
+                onRightAction={(data, rowMap) => deleteNote(data, rowMap)}
+                onLeftAction={(data, rowMap) => publishNote(data, rowMap)}
+                contentContainerStyle={{ paddingBottom: 150 }}
+                ListFooterComponent={renderFooter}
+                initialNumToRender={21}
+                disableVirtualization={true}
+            />
+        ) : (
+            <View style={styles(theme, width).resultNotFound}>
+              <LottieView
+                  testID="no-results-animation"
+                  source={require('../../assets/animations/noResultFound.json')}
+                  autoPlay
+                  loop
+                  style={styles(theme, width).lottie}
+              />
+              <Text style={styles(theme, width).resultNotFoundTxt}>No Results Found</Text>
+            </View>
       privateData.length > 0 ? (<SwipeListView
         data={privateData}
         renderItem={renderItem}
@@ -430,8 +509,28 @@ const handleSortOption = ({ option }) => {
           <Text style={styles(theme, width).resultNotFoundTxt}>No Results Found</Text>
         </View>
         )
-
     ) : (
+        publicData.length > 0 ? (
+            <SwipeListView
+                data={publicData}
+                renderItem={renderItem}
+                keyExtractor={(item) => item.id}
+                contentContainerStyle={{ paddingBottom: 150 }}
+                ListFooterComponent={renderFooter}
+                initialNumToRender={21}
+                disableVirtualization={true}
+            />
+        ) : (
+            <View style={styles(theme, width).resultNotFound}>
+              <LottieView
+                  testID="no-results-animation"
+                  source={require('../../assets/animations/noResultFound.json')}
+                  autoPlay
+                  loop
+                  style={styles(theme, width).lottie}
+              />
+              <Text style={styles(theme, width).resultNotFoundTxt}>No Results Found</Text>
+            </View>
       publicData.length > 0 ? (
         <SwipeListView
           data={publicData}
@@ -502,7 +601,7 @@ const handleSortOption = ({ option }) => {
                 updateNote(editedNote);
                 refreshPage();
               },
-            });            
+            });
           } else {
             const formattedNote = {
               ...item,
@@ -705,7 +804,7 @@ const handleSortOption = ({ option }) => {
               </Tooltip>
               <View>
                 {
-                  !isSortOpened ? (            
+                  !isSortOpened ? (
                   <Tooltip
                     topAdjustment={Platform.OS === 'android' ? -StatusBar.currentHeight : 0}
                     isVisible={filterToolTip && !userTutorial}
@@ -731,7 +830,7 @@ const handleSortOption = ({ option }) => {
                 <TouchableOpacity testID="sort-button"
                     onPress={handleSort}
                   >
-      
+
                     <MaterialIcons name='sort' size={30} />
                   </TouchableOpacity>
                   </Tooltip>)
@@ -978,10 +1077,10 @@ const styles = (theme, width, color, isDarkmode) =>
       ...defaultTextFont,
       fontWeight: '500',
       height: "50%",
-      textAlign: 'center',       
-      alignSelf: 'center',       
+      textAlign: 'center',
+      alignSelf: 'center',
     },
-    
+
     toolContainer: {
       flexDirection: 'row',
       justifyContent: 'space-between',
