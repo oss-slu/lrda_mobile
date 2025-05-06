@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { useTheme } from '../components/ThemeProvider';
 import { appTheme } from '../components/colors';
-import { useDispatch, UseDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { themeReducer } from '../../redux/slice/ThemeSlice';
-
-import ColorWheel from 'react-native-wheel-color-picker';
+import { ColorPicker } from 'react-native-color-picker';
 
 function AppThemeSelectorScreen() {
 
@@ -13,27 +12,18 @@ function AppThemeSelectorScreen() {
     const { theme, updateThemeColor } = useTheme();
     const [colorPickerVisible, setColorPickerVisible] = useState(false);
     const [selectedColor, setSelectedColor] = useState(theme.homeColor);
-    // const [selectedColor, setSelectedColor] = useState('#ff0000'); // Default color
-    // const [sliderValue, setSliderValue] = useState(0.5); // Slider value state
 
-    const handleColorSelected = (color) => {
-        setSelectedColor(color);
-        updateThemeColor(color);
+    const handleConfirmColor = () => {
+        updateThemeColor(selectedColor);              // Context
+        dispatch(themeReducer(selectedColor));        // Redux
         setColorPickerVisible(false);
-    }
-    // const handleColorChange = (color) => {
-    //     console.log('Selected Color:', color);
-    //     setSelectedColor(color);
-    // };
+    };
 
     return (
         <View style={styles.container}>
-
             <Text style={[styles.currentThemeTxt, { color: 'green' }]}>Current Theme</Text>
-
             {/** Theme Box */}
-            <View
-                style={[
+            <View style={[
                     styles.themeContainer,
                     {
                         backgroundColor: theme.homeColor,
@@ -72,17 +62,17 @@ function AppThemeSelectorScreen() {
             >
                 <View style={styles.colorPickerContainer}>
                     <Text style={styles.modalTitle}>Pick a Color</Text>
-                    <ColorWheel
-                        initialColor={selectedColor}
-                        onColorChangeComplete={(color) => setSelectedColor(color)}
+                    <ColorPicker
+                        onColorChange={setSelectedColor}
                         style={styles.colorWheel}
-                        thumbStyle={{ borderWidth: 2, borderColor: '#fff'}}
                     />
+
                     <TouchableOpacity onPress={handleConfirmColor} style={styles.confirmButton}>
                         <Text style={styles.buttonText}>Confirm</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setColorPickerVisible(false)}
-                                      style={styles.closeButton}
+                    <TouchableOpacity
+                        onPress={() => setColorPickerVisible(false)}
+                        style={styles.closeButton}
                     >
                         <Text style={styles.closeButtonText}>Cancel</Text>
                     </TouchableOpacity>
@@ -125,6 +115,14 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
+    modalTitle: {
+        fontSize: 20,
+        marginBottom: 20
+    },
+    colorWheel: {
+        width: '90%',
+        height: 300
+    },
     colorPicker: {
         width: '90%',
         height: 30,
@@ -145,5 +143,15 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         alignSelf: 'center',
         marginTop: 20,
+    },
+    buttonText: {
+        color: '#fff',
+        fontSize: 16,
+    },
+    confirmButton: {
+        marginTop: 20,
+        padding: 10,
+        backgroundColor: '#007AFF',
+        borderRadius: 5,
     },
 });
