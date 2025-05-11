@@ -2,8 +2,10 @@ import React from 'react';
 import { render } from '@testing-library/react-native';
 import AddNoteScreen from '../lib/screens/AddNoteScreen';
 import * as Location from 'expo-location';
+import PhotoScroller from '../lib/components/PhotoScroller';
 import moxios from 'moxios';
 import { AddNoteProvider } from '../lib/context/AddNoteContext'; // Import the provider
+import { PhotoType } from '../lib/models/media_class';
 import { Provider } from 'react-redux';
 import { store } from '../redux/store/store';
 
@@ -104,6 +106,18 @@ jest.mock('expo-location', () => ({
     })
   ),
 }));
+
+jest.mock('../lib/components/loadingImage', () => {
+  const React = require('react');
+  const { Image } = require('react-native');
+  return {
+    __esModule: true,
+    default: ({ imageURI }: { imageURI: string }) =>
+        // you can still use JSX because React and Image are in scope here
+        <Image testID="loading-image" source={{ uri: imageURI }} />
+  };
+});
+
 // Helper function to render the component with providers
 const renderWithProviders = (component: React.ReactElement) => {
   return render(
@@ -147,7 +161,7 @@ describe('AddNoteScreen', () => {
     jest.mock('@10play/tentap-editor', () => ({
       useEditorBridge: jest.fn(() => mockEditor),
     }));
-  
+
     renderWithProviders(<AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />);
   
     const imageUri = '__tests__/TestResources/TestImage.jpg';
@@ -161,6 +175,35 @@ describe('AddNoteScreen', () => {
   
     // Assert that insertImage was called with the correct argument
     expect(mockEditor.insertImage).toHaveBeenCalledWith(imageUri);
+  });
+
+  describe('PhotoScroller toolbar preview', () => {
+    it('renders a thumbnail for each image in newMedia', () => {
+      const sampleUri = 'https://example.com/test.jpg';
+      const photo = new PhotoType({
+        uuid: 'uuid-1234',
+        type: 'image',
+        uri: sampleUri,
+      });
+
+      const setNewMedia = jest.fn();
+      const insertImageToEditor = jest.fn();
+      const addVideoToEditor = jest.fn();
+
+      const { getByTestId } = render(
+          <PhotoScroller
+              newMedia={[photo]}
+              setNewMedia={setNewMedia}
+              active={true}
+              insertImageToEditor={insertImageToEditor}
+              addVideoToEditor={addVideoToEditor}
+          />
+      );
+
+      // Should find our mocked LoadingImage and pass the correct URI
+      const thumbnail = getByTestId('loading-image');
+      expect(thumbnail.props.source.uri).toBe(sampleUri);
+    });
   });
   
 });

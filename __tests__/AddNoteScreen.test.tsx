@@ -10,9 +10,12 @@ import * as Location from 'expo-location';
 
 const navigationMock = {
   navigate: jest.fn(),
-  goBack: jest.fn(),
-  addListener: jest.fn(() => jest.fn()), 
+  goBack:   jest.fn(),
   canGoBack: jest.fn(() => true),
+  addListener: jest.fn((_event: string, cb: Function) => {
+    // you can optionally call `cb()` here if you want to test blur behavior
+    return () => {};       // unsubscribe
+  }),
 };
 
 // Mock redux-persist to avoid persistence logic in tests
@@ -187,7 +190,7 @@ describe('AddNoteScreen', () => {
     // Mock the API call to simulate a failure
     mockWriteNewNote.mockRejectedValueOnce(new Error('Error saving note'));
 
-    const { getByTestId } = renderWithProviders(
+    const { getByTestId, rerender } = renderWithProviders(
       <AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />
     );
 
