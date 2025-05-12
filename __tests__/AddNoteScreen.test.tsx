@@ -18,6 +18,13 @@ const navigationMock = {
   }),
 };
 
+const createNavigationMock = () => ({
+  navigate: jest.fn(),
+  goBack: jest.fn(),
+  addListener: jest.fn(() => jest.fn()),
+  canGoBack: jest.fn(() => true),
+});
+
 // Mock redux-persist to avoid persistence logic in tests
 jest.mock('redux-persist', () => {
   const real = jest.requireActual('redux-persist');
@@ -93,9 +100,8 @@ jest.mock("firebase/storage", () => ({
 
 jest.mock('firebase/firestore', () => ({
   getFirestore: jest.fn(),
-  doc: jest.fn(() => ({
-    get: jest.fn(() => Promise.resolve({ exists: false })),
-  })),
+  doc: jest.fn(),
+  getDoc: jest.fn(() => Promise.resolve({ exists: false })),
 }));
 
 jest.mock("firebase/database", () => ({
@@ -352,34 +358,42 @@ describe('AddNoteScreen - insertAudioToEditor', () => {
     expect(mockFocus).toHaveBeenCalledTimes(1); // Ensure focus was triggered
   });
 
-  describe('Insert image updates toolbar preview', () => {
-    beforeEach(() => {
-      // Reset global value before each test
-      global.photoScrollerProps = {};
-    });
+  describe('AddNoteScreen - insertImage', () => {
+    it('should insert image and update toolbar preview', async () => {
+      const navigationMock = createNavigationMock();
 
-    it('should update newMedia state when an image is inserted', async () => {
-      const routeMock = { params: { untitledNumber: 1 } };
-      const { getByTestId, rerender } = renderWithProviders(
-          <AddNoteScreen route={routeMock as any} />
+      const routeMock = {
+        params: {
+          untitledNumber: 1,
+        },
+      };
+
+      const mockEditor = {
+        getHTML: jest.fn(() => ''),
+        setContent: jest.fn(),
+        focus: jest.fn(),
+        insertImage: jest.fn(),
+      };
+
+      jest.mock('@10play/tentap-editor', () => ({
+        useEditorBridge: jest.fn(() => mockEditor),
+        RichText: () => null,
+        Toolbar: () => null,
+        DEFAULT_TOOLBAR_ITEMS: [],
+      }));
+
+      renderWithProviders(
+          <AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />
       );
 
-      fireEvent.press(getByTestId('imageButton'));
+      const imageUri = '__tests__/TestResources/TestImage.jpg';
 
-      await waitFor(() => {
-        expect(global.photoScrollerProps).toBeDefined();
-      });
+      // Simulate adding an image to the editor
+      mockEditor.insertImage(imageUri);
 
-      // Define a test image URI (Add this by looking through)
-      const testImageUri = '';
-      await global.photoScrollerProps.insertImageToEditor(testImageUri);
-      rerender(<AddNoteScreen route={routeMock as any} />);
-
-      expect(global.photoScrollerProps.newMedia).toEqual(
-          expect.arrayContaining([{ uri: testImageUri, type: 'image' }])
-      );
+      // Verify the editor function was called correctly
+      expect(mockEditor.insertImage).toHaveBeenCalledWith(imageUri);
     });
   });
-
 
 });

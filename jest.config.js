@@ -6,9 +6,10 @@ module.exports = {
     '<rootDir>/setupTests.js', // Your setup file
   ],
   transformIgnorePatterns: [
-    'node_modules/(?!react-native|@react-native|expo|@expo|@unimodules)' // Ensure proper transformation of React Native modules
+    'node_modules/(?!react-native|@react-native|@react-navigation|expo|@expo|@unimodules)'// Ensure proper transformation of React Native modules
   ],
   moduleNameMapper: {
     '^react-native/Libraries/Animated/NativeAnimatedHelper$': '<rootDir>/__mocks__/NativeAnimatedHelper.js',
   },
+
 };

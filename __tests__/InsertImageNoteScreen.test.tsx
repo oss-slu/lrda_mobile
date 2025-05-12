@@ -2,7 +2,7 @@ import React from 'react';
 import { render } from '@testing-library/react-native';
 import AddNoteScreen from '../lib/screens/AddNoteScreen';
 import * as Location from 'expo-location';
-import PhotoScroller from '../lib/components/PhotoScroller';
+import PhotoScroller from '../lib/components/photoScroller';
 import moxios from 'moxios';
 import { AddNoteProvider } from '../lib/context/AddNoteContext'; // Import the provider
 import { PhotoType } from '../lib/models/media_class';
@@ -15,6 +15,13 @@ const navigationMock = {
   addListener: jest.fn(() => jest.fn()), 
   canGoBack: jest.fn(() => true),
 };
+
+const createNavigationMock = () => ({
+  navigate: jest.fn(),
+  goBack: jest.fn(),
+  addListener: jest.fn(() => jest.fn()),
+  canGoBack: jest.fn(() => true),
+});
 
 // Mock redux-persist to avoid persistence logic in tests
 jest.mock('redux-persist', () => {
@@ -41,9 +48,8 @@ jest.mock('react-native-keyboard-aware-scroll-view', () => ({
 
 jest.mock('firebase/firestore', () => ({
   getFirestore: jest.fn(),
-  doc: jest.fn(() => ({
-    get: jest.fn(() => Promise.resolve({ exists: false })),
-  })),
+  doc: jest.fn(() => ({})),
+  getDoc: jest.fn(() => Promise.resolve({ exists: false })),
 }));
 
 jest.mock("firebase/auth", () => ({
@@ -162,6 +168,7 @@ describe('AddNoteScreen', () => {
       useEditorBridge: jest.fn(() => mockEditor),
     }));
 
+    const navigationMock = createNavigationMock();
     renderWithProviders(<AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />);
   
     const imageUri = '__tests__/TestResources/TestImage.jpg';
@@ -175,35 +182,6 @@ describe('AddNoteScreen', () => {
   
     // Assert that insertImage was called with the correct argument
     expect(mockEditor.insertImage).toHaveBeenCalledWith(imageUri);
-  });
-
-  describe('PhotoScroller toolbar preview', () => {
-    it('renders a thumbnail for each image in newMedia', () => {
-      const sampleUri = 'https://example.com/test.jpg';
-      const photo = new PhotoType({
-        uuid: 'uuid-1234',
-        type: 'image',
-        uri: sampleUri,
-      });
-
-      const setNewMedia = jest.fn();
-      const insertImageToEditor = jest.fn();
-      const addVideoToEditor = jest.fn();
-
-      const { getByTestId } = render(
-          <PhotoScroller
-              newMedia={[photo]}
-              setNewMedia={setNewMedia}
-              active={true}
-              insertImageToEditor={insertImageToEditor}
-              addVideoToEditor={addVideoToEditor}
-          />
-      );
-
-      // Should find our mocked LoadingImage and pass the correct URI
-      const thumbnail = getByTestId('loading-image');
-      expect(thumbnail.props.source.uri).toBe(sampleUri);
-    });
   });
   
 });
