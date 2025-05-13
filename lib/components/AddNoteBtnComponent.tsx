@@ -1,110 +1,113 @@
-import React from 'react'
-import { TouchableOpacity } from 'react-native'
-import { View, Text, Pressable, StyleSheet } from 'react-native'
-import { SvgIcon } from './SvgIcon'
-import IonIcons from 'react-native-vector-icons/Ionicons'
-import { useAddNoteContext } from '../context/AddNoteContext'
-import { useSelector, useDispatch } from 'react-redux'
-import Feather from 'react-native-vector-icons/Feather'
-import { toogleAddNoteState } from '../../redux/slice/AddNoteStateSlice'
-import { useTheme } from './ThemeProvider'
-import { useNavigationState } from '@react-navigation/native'
+import React from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { SvgIcon } from "./SvgIcon";
+import IonIcons from "react-native-vector-icons/Ionicons";
+import Feather from "react-native-vector-icons/Feather";
+import { useAddNoteContext } from "../context/AddNoteContext";
+import { useSelector, useDispatch } from "react-redux";
+import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
+import { useTheme } from "./ThemeProvider";
+import { useNavigationState } from "@react-navigation/native";
 
 function AddNoteBtnComponent() {
+  const dispatch = useDispatch();
+  const { navigateToAddNote, publishNote } = useAddNoteContext();
+  const { theme, isDarkmode } = useTheme();
+  const appThemeColor = useSelector((s) => s.themeSlice.theme);
+  const addNoteState = useSelector((s) => s.addNoteState.isAddNoteOpned);
 
-    const dispatch = useDispatch();
+  // grab the entire nav state
+  const navState = useNavigationState((state) => state);
 
-    const {navigateToAddNote, publishNote} = useAddNoteContext();
-    const { theme, isDarkmode } = useTheme();
-    const appThemeColor = useSelector((state) => state.themeSlice.theme);
-    const addNoteState = useSelector((state) => state?.addNoteState?.isAddNoteOpned);
-  const currentRouteName = useNavigationState((state) => state.routes[state.index].name);
-  const isHomeScreen = currentRouteName === "Home";
+  // pick out the active tab
+  const tabRoute = navState.routes[navState.index];
 
-  const isAddButtonMode = isHomeScreen || !addNoteState;
-    
-    const handleAddNote = () => {
-        dispatch(toogleAddNoteState())
-        navigateToAddNote();
+  const nested = tabRoute.state;
 
-    }
+  const currentScreen = nested
+    ? nested.routes[nested.index].name
+    : tabRoute.name;
 
-    const handlePublish = () => {
-        publishNote();
-    }
+  // if the current screen is "AddNote" or "EditNote", we show the publish button
+  const isAddButtonMode =
+    currentScreen !== "AddNote" && currentScreen !== "EditNote";
+
+  const handleAdd = () => {
+    dispatch(toogleAddNoteState());
+    navigateToAddNote();
+  };
+  const handlePublish = () => publishNote();
 
   return (
-   <View style={[styles.conatiner,]} >
-        <SvgIcon style={[styles.backgroung, {width:60}]}/>
-        <TouchableOpacity
+    <View style={styles.container}>
+      <SvgIcon style={[styles.background, { width: 60 }]} />
+      <TouchableOpacity
+        testID="fab-button"
         style={[
           styles.button,
-          { backgroundColor: theme.primaryColor, // ⬅️ Apply theme color
-            shadowColor: isDarkmode ? '#fff' : '#000', // ⬅️ Dynamically set shadow color
-          } 
+          {
+            backgroundColor: theme.primaryColor,
+            shadowColor: isDarkmode ? "#fff" : "#000",
+          },
         ]}
-        onPress={isAddButtonMode ? handleAddNote : handlePublish}
+        onPress={isAddButtonMode ? handleAdd : handlePublish}
       >
-           {isAddButtonMode ? (
-   <IonIcons
-   name="add"
-   size={25}
-   style={[styles.buttonIcon, { color: appThemeColor }]}
- />
- 
-  ) : (
-    <Feather
-    name="upload-cloud"
-    size={25}
-    style={[styles.buttonIcon, { color: appThemeColor }]}
-  />
-  
-  )}
+        {isAddButtonMode ? (
+          <IonIcons
+            name="add"
+            testID="add-icon"
+            size={25}
+            style={[styles.buttonIcon, { color: appThemeColor }]}
+          />
+        ) : (
+          <Feather
+            name="upload-cloud"
+            testID="publish-icon"
+            size={25}
+            style={[styles.buttonIcon, { color: appThemeColor }]}
+          />
+        )}
       </TouchableOpacity>
-      <Text style={[styles.label, { color: appThemeColor || 'gray' }]}>
-  {isAddButtonMode ? 'Add' : 'Publish'}
-</Text>
-
+      <Text style={[styles.label, { color: appThemeColor || "gray" }]}>
+        {isAddButtonMode ? "Add" : "Publish"}
+      </Text>
     </View>
-  )
+  );
 }
 
-
 const styles = StyleSheet.create({
-    conatiner: {
-        position: 'relative',
-        width: 75,
-        alignItems: 'center'
-    },
-    backgroung:{
-        position: 'absolute',
-        backgroundColor: 'transparent',
-        bottom:-35,
-        transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }], // Scale width inward
-    },
-    button: {
-        backgroundColor: '#f0f0f0',
-        height: 50,
-        width: 50,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: 50,
-        top: -25,
-        shadowOffset: { width: 0, height: 2 }, 
-        shadowOpacity: 0.25, 
-        shadowRadius: 4, 
-        // Android elevation
-        elevation: 4, 
-    },
-    buttonIcon: {
-        fontWeight: '800',
-        fontSize: 30
-    },
-    label: {
-        fontSize: 12,
-        color: 'grey',
-        marginTop: -13 // Adds space between button and label
-      },
-})
+  container: {
+    position: "relative",
+    width: 75,
+    alignItems: "center",
+  },
+  background: {
+    position: "absolute",
+    backgroundColor: "transparent",
+    bottom: -35,
+    transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }],
+  },
+  button: {
+    backgroundColor: "#f0f0f0",
+    height: 50,
+    width: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 50,
+    top: -25,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  buttonIcon: {
+    fontWeight: "800",
+    fontSize: 30,
+  },
+  label: {
+    fontSize: 12,
+    marginTop: -13,
+  },
+});
 
-export default AddNoteBtnComponent
+export default AddNoteBtnComponent;
