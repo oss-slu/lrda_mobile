@@ -489,7 +489,7 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
               >
                 <TouchableOpacity
                   style={NotePageStyles().topButtons}
-                  onPress={saveNote}
+                  onPress={()=> saveNote(false)}
                 >
                   <Ionicons
                     name="arrow-back-outline"
