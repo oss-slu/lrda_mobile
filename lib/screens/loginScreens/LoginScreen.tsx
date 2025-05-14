@@ -222,22 +222,16 @@ const styles = StyleSheet.create({
   },
   inputView: {
     width: "80%",
-    backgroundColor: "#fff",
-    borderRadius: 25,
-    height: 50,
-    marginBottom: 20,
-    padding: 20,
-    justifyContent: "center",
-    alignItems: "flex-start",
-    borderColor: "gray",
-    borderWidth: 2,
+    borderBottomWidth: 1,
+    borderColor: "black",
+    marginBottom: 10,
+    marginTop: 40,
   },
   inputText: {
-    height: 50,
+    height: 40,
     color: "#111111",
-    fontSize: 16,
+    fontSize: 14,
     width: "100%",
-    borderRadius: 25,
   },
   forgot: {
     color: "#111111",
@@ -257,33 +251,60 @@ const styles = StyleSheet.create({
     marginBottom: 200,
     paddingVertical: 200,
   },
-  buttons: {
-    backgroundColor: "rgb(17,47,187)",
-    width: 200,
-    height: 50,
-    borderRadius: 30,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 10,
-    elevation: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
+  loginTitle: {
+    alignSelf: "flex-start",
+    marginLeft: 30,
+    marginBottom: 30,
+    fontSize: 35,
   },
   loginBox: {
-    alignSelf: "center",
-    alignContent: "center",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "white",
-    height: 500,
-    width: 300,
+    backgroundColor: "rgba(245,245,245,0.8)",
+    width: "85%",
+    height: 600,
     borderRadius: 10,
+    alignSelf: "center",
+    alignItems: "center",
+    paddingHorizontal: 25,
+    paddingVertical: 40,
     elevation: 10,
     shadowColor: "#000",
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
+    shadowOpacity: .2,
+    shadowRadius: 5,
+  },
+  primaryButton: {
+    backgroundColor: "rgb(17,47,187)", // Vibrant purple
+    width: "90%", // Full-width (matching inputs)
+    height: 43,
+    borderRadius: 10,
+    alignItems: "center", // Left-align text
+    justifyContent: "center",
+    marginTop: 70,
+  },
+  registerButton: {
+    alignSelf: "flex-end",
+    marginRight: 62,
+    fontSize: 12,
+    fontWeight: "400",
+    marginTop: 8,
+  },
+  linkText: {
+    color: "rgb(17,47,187)", // Blue text for secondary action
+    fontSize: 15,
+    fontWeight: "600",
+    textAlign: "center",
+    paddingTop: 20,
+  },
+  registerText: {
+    color: "#111111", // Default text color for the register message
+    fontSize: 14,
+    fontWeight: "600",
+    textAlign: "center",
+    marginTop: 20,
+  },
+  registerLink: {
+    color: "rgb(17,47,187)", // Blue color for the clickable "Register now" link
   },
 });
+
 
 export default LoginScreen;
