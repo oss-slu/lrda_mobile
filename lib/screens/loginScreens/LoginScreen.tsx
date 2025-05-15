@@ -190,7 +190,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
               <Text style={styles.forgot}>Forgot Password?</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={onLoginPress} style={styles.buttons} testID="login-button">
-              {!loading && <Text style={{color: "white", fontWeight: "600", fontSize: 15}}>
+              {!loading && <Text style={{color: "white", fontWeight: "600", fontSize: 20}}>
                 Login
                 </Text>}
               {loading && <ActivityIndicator size="small" color="white" />}
@@ -260,6 +260,22 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     fontSize: 35,
   },
+  buttons: {
+    backgroundColor: "rgb(17,47,187)",
+    width: 200,
+    height: 50,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 10,
+    elevation: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    borderRadius: 15,
+    paddingVertical: 10,
+    alignItems: "center",
+    marginTop: 20,
+  },
   loginBox: {
     backgroundColor: "rgba(245,245,245,0.8)",
     width: "85%",
@@ -307,13 +323,6 @@ const styles = StyleSheet.create({
   registerLink: {
     color: "rgb(17,47,187)", // Blue color for the clickable "Register now" link
   },
-  buttons: {
-    backgroundColor: "rgb(17,47,187)",
-    borderRadius: 15,
-    paddingVertical: 10,
-    alignItems: "center",
-    marginTop: 20,
-  }
 });
 
 

@@ -923,8 +923,9 @@ const styles = (theme, width, color, isDarkmode) =>
     },
     addButton: {
       position: "absolute",
-      bottom: 20,
+      bottom: 5,
       right: 20,
+      marginTop: 20,
       backgroundColor: theme.text,
       borderRadius: 50,
       width: 50,
