@@ -820,6 +820,24 @@ const handleSortOption = ({ option }) => {
         {rendering ? <NoteSkeleton /> : renderList(notes)}
       </View>
 
+      <TouchableOpacity
+          testID="add-note-button"
+          onPress={() => {
+            const untitledNumber = findNextUntitledNumber(notes);
+            navigation.navigate("AddNote", { untitledNumber, refreshPage });
+          }}
+          style={[
+            styles(theme, width).addButton,
+            {
+              bottom: Platform.OS === 'ios' ? 100 : 80, // ← raises it above tab bar
+              zIndex: 100,
+              elevation: 10,
+            }
+          ]}
+      >
+        <Ionicons name="add" size={30} color="white" />
+      </TouchableOpacity>
+
 
       <NoteDetailModal
         isVisible={isModalVisible}
@@ -923,16 +941,16 @@ const styles = (theme, width, color, isDarkmode) =>
     },
     addButton: {
       position: "absolute",
-      bottom: 5,
       right: 20,
-      marginTop: 20,
-      backgroundColor: theme.text,
-      borderRadius: 50,
-      width: 50,
-      height: 50,
-      alignItems: "center",
+      bottom: Platform.OS === 'ios' ? 100 : 80,
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      backgroundColor: "rgba(128, 128, 128, 0.4)", // semi-transparent gray
       justifyContent: "center",
-      color: theme.text,
+      alignItems: "center",
+      zIndex: 100,
+      elevation: 10,
     },
     topView: {
       flexDirection: "row",
