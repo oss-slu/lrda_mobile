@@ -7,6 +7,9 @@ import moxios from 'moxios';
 import { onAuthStateChanged } from 'firebase/auth';
 import ApiService from '../lib/utils/api_calls';
 
+jest.spyOn(ApiService, 'fetchCreatorName').mockResolvedValue('Test User');
+
+
 jest.mock('react-native/Libraries/Animated/Easing', () => ({
   linear: (t: number) => t,
   ease: (t: number) => t,
