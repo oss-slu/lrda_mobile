@@ -195,9 +195,12 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
                 </Text>}
               {loading && <ActivityIndicator size="small" color="white" />}
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleGoRegister} style={styles.buttons} testID="register-button">
-              <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
-                Register
+            <TouchableOpacity onPress={handleGoRegister} style={styles.registerButton} testID="register-button">
+              <Text style={[styles.registerText, { fontFamily: "CustomFont" }]}>
+                Don't have an account?{' '}
+                <Text style={styles.registerLink} onPress={handleGoRegister}>
+                  Sign up
+                </Text>
               </Text>
             </TouchableOpacity>
           </View>
@@ -304,6 +307,13 @@ const styles = StyleSheet.create({
   registerLink: {
     color: "rgb(17,47,187)", // Blue color for the clickable "Register now" link
   },
+  buttons: {
+    backgroundColor: "rgb(17,47,187)",
+    borderRadius: 15,
+    paddingVertical: 10,
+    alignItems: "center",
+    marginTop: 20,
+  }
 });
 
 
