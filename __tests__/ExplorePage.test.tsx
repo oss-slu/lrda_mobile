@@ -6,6 +6,7 @@ import { Dimensions } from 'react-native';
 import ExploreScreen from '../lib/screens/mapPage/ExploreScreen';
 import { AddNoteProvider } from '../lib/context/AddNoteContext';
 import ApiService from '../lib/utils/api_calls';
+import { act } from 'react-test-renderer';
 
 // Get screen width for scroll simulation
 const { width } = Dimensions.get('window');
@@ -73,6 +74,8 @@ jest.mock('../lib/utils/api_calls', () => {
   };
 });
 
+jest.useFakeTimers();
+
 // 1) Mock AsyncStorage so getHasDoneTutorial("Explore") returns a valid string
 jest.mock('@react-native-async-storage/async-storage', () => ({
   __esModule: true,
@@ -137,9 +140,11 @@ describe('ExploreScreen - Load More Button Rendering', () => {
       },
     });
 
-    const loadMoreButton = await waitFor(() => getByText('Load More'));
-    fireEvent.press(loadMoreButton);
-
+    const loadMore = await waitFor(() => getByText('Load More'));
+    await act(async () => {
+      fireEvent.press(loadMore);
+      jest.runOnlyPendingTimers();
+    });
     await waitFor(() => {
       expect(ApiService.fetchMapsMessagesBatch).toHaveBeenCalledTimes(2);
     });
