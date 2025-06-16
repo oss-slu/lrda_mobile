@@ -10,5 +10,6 @@ export default {
     multiSet: jest.fn(),
     multiRemove: jest.fn(),
     multiMerge: jest.fn(),
+    createAsync: jest.fn(),
   };
   
