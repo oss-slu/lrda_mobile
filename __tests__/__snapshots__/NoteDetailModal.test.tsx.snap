@@ -418,68 +418,6 @@ exports[`NoteDetailModal renders without crashing 1`] = `
                 >
                   <View
                     style={
-                      [
-                        {
-                          "overflow": "hidden",
-                          "pointerEvents": "box-none",
-                        },
-                        {
-                          "height": "100%",
-                          "width": "100%",
-                        },
-                      ]
-                    }
-                  >
-                    <ViewManagerAdapter_ExpoVideoView
-                      onError={[Function]}
-                      onFullscreenUpdate={[Function]}
-                      onLoad={[Function]}
-                      onLoadEnd={[Function]}
-                      onLoadStart={[Function]}
-                      onReadyForDisplay={[Function]}
-                      onStatusUpdate={[Function]}
-                      resizeMode="mock"
-                      source={
-                        {
-                          "headers": undefined,
-                          "overridingExtension": null,
-                          "uri": "https://example.com/video.mp4",
-                        }
-                      }
-                      status={
-                        {
-                          "isLooping": false,
-                          "shouldPlay": false,
-                        }
-                      }
-                      style={
-                        [
-                          {
-                            "bottom": 0,
-                            "left": 0,
-                            "position": "absolute",
-                            "right": 0,
-                            "top": 0,
-                          },
-                          undefined,
-                        ]
-                      }
-                      videoStyle={
-                        [
-                          {
-                            "bottom": 0,
-                            "left": 0,
-                            "position": "absolute",
-                            "right": 0,
-                            "top": 0,
-                          },
-                          undefined,
-                        ]
-                      }
-                    />
-                  </View>
-                  <View
-                    style={
                       {
                         "alignItems": "center",
                         "bottom": 0,

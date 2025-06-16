@@ -28,9 +28,10 @@ jest.mock('@react-native-community/datetimepicker', () => {
 });
 
 jest.mock('react-native/Libraries/Utilities/Platform', () => ({
-    OS: 'ios', // Default to iOS
-    select: jest.fn(),
+  OS: 'ios',
+  select: (objs) => objs.ios,
 }));
+
 
 beforeAll(() => {
     jest.spyOn(console, 'log').mockImplementation(() => {});
@@ -75,16 +76,16 @@ describe('LocationWindow (iOS)', () => {
     expect(selectButton).toBeTruthy();
   });
 
-  // it('shows time picker when the button is clicked on iOS', async () => {
-  //   const { getByText, queryByTestId } = render(<LocationWindow time={mockTime} setTime={mockSetTime} />);
+  it('shows time picker when the button is clicked on iOS', async () => {
+    const { getByText, queryByTestId } = render(<LocationWindow time={mockTime} setTime={mockSetTime} />);
     
-  //   const selectButton = getByText('Select Date & Time');
-  //   fireEvent.press(selectButton);
+    const selectButton = getByText('Select Date & Time');
+    fireEvent.press(selectButton);
 
-  //   await waitFor(() => {
-  //     expect(queryByTestId('timePicker')).toBeTruthy(); // Assuming the picker has testID 'timePicker'
-  //   });
-  // });
+    await waitFor(() => {
+      expect(queryByTestId('timePicker')).toBeTruthy(); // Assuming the picker has testID 'timePicker'
+    });
+  });
 });
 
 describe('LocationWindow (Android)', () => {
