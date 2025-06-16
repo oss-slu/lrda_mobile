@@ -73,6 +73,17 @@ jest.mock('../lib/utils/api_calls', () => {
   };
 });
 
+// 1) Mock AsyncStorage so getHasDoneTutorial("Explore") returns a valid string
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  __esModule: true,
+  default: {
+    getItem: jest.fn(() => Promise.resolve('false')),   // tutorial not done
+    setItem: jest.fn(() => Promise.resolve()),
+    removeItem: jest.fn(() => Promise.resolve()),
+    clear:   jest.fn(() => Promise.resolve()),
+  },
+}));
+
 describe('ExploreScreen - Load More Button Rendering', () => {
   it('renders Explore screen', async () => {
     const { getByTestId } = render(
