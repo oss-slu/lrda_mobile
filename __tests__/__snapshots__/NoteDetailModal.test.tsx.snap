@@ -416,6 +416,25 @@ exports[`NoteDetailModal renders without crashing 1`] = `
                     ]
                   }
                 >
+                  <Video
+                    isLooping={false}
+                    onError={[Function]}
+                    onLoad={[Function]}
+                    onLoadEnd={[Function]}
+                    resizeMode="contain"
+                    shouldPlay={false}
+                    source={
+                      {
+                        "uri": "https://example.com/video.mp4",
+                      }
+                    }
+                    style={
+                      {
+                        "height": "100%",
+                        "width": "100%",
+                      }
+                    }
+                  />
                   <View
                     style={
                       {
