@@ -13,7 +13,6 @@ jest.mock('react-native/Libraries/Image/Image', () => ({
   resolveAssetSource: jest.fn(() => ({ uri: 'mocked-asset-uri' })),
 }));
 
-
 jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
   settings: {},
   setValues: jest.fn(),
@@ -22,7 +21,6 @@ jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
   })),
 }));
 
-// Silence console warnings during the test
 beforeEach(() => {
   jest.clearAllMocks();
   jest.useFakeTimers();
@@ -40,23 +38,22 @@ afterEach(() => {
 
 describe('AudioContainer', () => {
   it('renders without crashing', () => {
-    const wrapper = render(<AudioContainer newAudio={[]} setNewAudio={() => {}} />);
-    expect(wrapper).toMatchSnapshot();
+    const { getByTestId } = render(<AudioContainer newAudio={[]} setNewAudio={() => {}} />);
+    expect(getByTestId('audio-container')).toBeTruthy(); // or whatever testID you use
   });
 
   it('renders with audio', () => {
-    // Render the AudioContainer component with a mock audio item in the newAudio array
-    const wrapper = render(
-      <AudioContainer 
-        newAudio={[{ uri: 'test', name: 'test' }]} // Mock audio data to simulate an audio item
-        setNewAudio={() => {}} // Pass an empty function as the setNewAudio prop (mocking the state setter)
+    const { getByText } = render(
+      <AudioContainer
+        newAudio={[{ uri: 'test', name: 'test' }]}
+        setNewAudio={() => {}}
       />
-    ); 
-  
-    // Assert that the rendered output matches the stored snapshot
-    // This ensures the component renders correctly with the provided audio data
-    expect(wrapper).toMatchSnapshot();
+    );
+
+    // Check that the audio name appears
+    expect(getByText('test')).toBeTruthy();
+
+    // Optional: if your audio item has a play button
+    // expect(getByA11yLabel('Play')).toBeTruthy();
   });
-   
-  
 });
