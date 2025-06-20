@@ -4,7 +4,7 @@ export default {
   expo: {
     name: "Where's Religion?",
     slug: "lrda_mobile",
-    version: "1.0.7",
+    version: "1.0.8",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -19,9 +19,9 @@ export default {
       supportsTablet: true,
       bundleIdentifier: "register.edu.slu.cs.oss.lrda",
       config: {
-        googleMapsApiKey: ""
+        googleMapsApiKey: "AIzaSyAdPkGTowU6RANDTH2u1z1Zc2w1xrhmKgI"
       },
-      buildNumber: "5",
+      buildNumber: "1",
       newArchEnabled: true, // Enable New Architecture for iOS
       infoPlist: {
         NSAppTransportSecurity: {
@@ -46,12 +46,12 @@ export default {
     
     android: {
       adaptiveIcon: {
-        foregroundImage: "./assets/adaptive-icon.png",
+        foregroundImage: "./assets/icon.png",
         backgroundColor: "#ffffff"
       },
       config: {
         googleMaps: {
-          apiKey: ""
+          apiKey: "AIzaSyAdPkGTowU6RANDTH2u1z1Zc2w1xrhmKgI"
         }
       },
       package: "register.edu.slu.cs.oss.lrda",

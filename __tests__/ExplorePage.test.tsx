@@ -1,5 +1,3 @@
-// __tests__/ExplorePage.test.tsx
-
 import React from 'react';
 import { render, waitFor, fireEvent } from '@testing-library/react-native';
 import { Dimensions } from 'react-native';
@@ -122,31 +120,36 @@ describe('ExploreScreen - Load More Button Rendering', () => {
     });
   });
 
-  it('calls fetchMapsMessagesBatch when Load More is pressed', async () => {
-    const { getByTestId, getByText } = render(
-      <AddNoteProvider>
-        <ExploreScreen />
-      </AddNoteProvider>
-    );
+ it('calls fetchMapsMessagesBatch when Load More is pressed', async () => {
+  const { getByTestId } = render(
+    <AddNoteProvider>
+      <ExploreScreen />
+    </AddNoteProvider>
+  );
 
-    const scrollView = await waitFor(() => getByTestId('cardScrollView'));
+  const scrollView = await waitFor(() => getByTestId('cardScrollView'));
 
-    // Scroll to simulate user reaching the end of the scroll view
-    fireEvent.scroll(scrollView, {
-      nativeEvent: {
-        contentOffset: {
-          x: (CARD_WIDTH + 20) * 19,
-        },
+  fireEvent.scroll(scrollView, {
+    nativeEvent: {
+      contentOffset: {
+        x: (CARD_WIDTH + 20) * 19,
       },
-    });
-
-    const loadMore = await waitFor(() => getByText('Load More'));
-    await act(async () => {
-      fireEvent.press(loadMore);
-      jest.runOnlyPendingTimers();
-    });
-    await waitFor(() => {
-      expect(ApiService.fetchMapsMessagesBatch).toHaveBeenCalledTimes(2);
-    });
+    },
   });
+
+  // Wait for Load More button to appear
+  const loadMore = await waitFor(() => getByTestId('loadMoreTouchable'));
+
+  // Trigger the press
+  await act(async () => {
+    fireEvent.press(loadMore);
+    jest.runOnlyPendingTimers(); // for debounce or internal timers
+  });
+
+  // Assert API was called again
+  await waitFor(() => {
+    expect(ApiService.fetchMapsMessagesBatch).toHaveBeenCalledTimes(2);
+  });
+});
+
 });
