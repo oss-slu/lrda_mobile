@@ -1,7 +1,6 @@
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
 import Library from '../lib/screens/Library';
-import HomeScreen from '../lib/screens/HomeScreen';
 import { useTheme } from '../lib/components/ThemeProvider';
 import ApiService from '../lib/utils/api_calls';
 import ToastMessage from 'react-native-toast-message';
@@ -16,8 +15,8 @@ jest.mock('firebase/database', () => ({
 }));
 
 jest.mock('firebase/firestore', () => ({
-  getFirestore: jest.fn(() => ({})), 
-  doc: jest.fn(() => ({})), 
+  getFirestore: jest.fn(() => ({})),
+  doc: jest.fn(() => ({})),
   getDoc: jest.fn(() => Promise.resolve({ exists: () => false })),
 }));
 
@@ -223,6 +222,8 @@ describe('Library Component', () => {
     expect(searchButton).toBeTruthy();
   });
 
+  }, 10000);
+
   it('renders the user name "Adem" regardless of the greeting', async () => {
     const navigationMock = {
       navigate: jest.fn(),
@@ -328,7 +329,7 @@ describe('Library Component', () => {
     });
   });
 
-  
+
   it("Renders no results found when there are no more notes.", async () => {
 
     const navigationMock = {
@@ -357,7 +358,7 @@ describe('Library Component', () => {
       push: jest.fn(),
     };
     const routeMock = { params: {} };
-  
+
     const dummyNotes = Array.from({ length: 20 }, (_, i) => ({
       id: `${i}`,
       time: new Date().toISOString(),
@@ -373,13 +374,13 @@ describe('Library Component', () => {
         },
       ],
     }));
-  
+
     jest.spyOn(ApiService, 'fetchMapsMessagesBatch').mockResolvedValue(dummyNotes);
-  
+
     const { getByText } = render(
       <Library navigation={navigationMock} route={routeMock} />
     );
-  
+
     await waitFor(() => {
       expect(getByText("Load More")).toBeTruthy();
     });

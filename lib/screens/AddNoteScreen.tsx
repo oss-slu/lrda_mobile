@@ -157,7 +157,6 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
     return unsubscribe;
   }, [navigation, editor]);
 
-  const { theme } = useTheme();
   const titleTextRef = useRef<TextInput>(null);
   const scrollViewRef = useRef<KeyboardAwareScrollView>(null);
 
