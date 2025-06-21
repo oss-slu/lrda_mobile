@@ -20,7 +20,6 @@ import { setNavState } from "../../../redux/slice/navigationSlice";
 import { RootState } from "../../../redux/store/store";
 import { User } from "../../models/user_class";
 import { removeItem } from "../../utils/async_storage";
-import { defaultTextFont } from "../../../styles/globalStyles";
 
 const user = User.getInstance();
 
@@ -39,7 +38,6 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   const navState = useSelector((state: RootState) => state.navigation.navState);
   const dispatch = useDispatch()
   const [hasNavigated, setHasNavigated] = useState(false);
-  const [snackMessage, setSnackMessage] = useState("");
 
   const fadeOut = () => {
     Animated.timing(fadeAnim, {
@@ -85,6 +83,8 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
       toggleSnack(!snackState);
     } else {
 
+      
+
       try {
         const status = await user.login(username, password)
         if (status == "success") {
@@ -99,15 +99,6 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
       }
       catch (error) {
         console.log("login failed :", error);
-        let message = "Login failed. Please try again.";
-
-        if(error.message.includes("network")) {
-          message = "Network error. Please check your connection.";
-        }else if (error.message.includes("auth/invalid-email") || error.message.includes("auth/invalid-credential")) {
-          message = "Invalid username or password.";
-
-        }
-        setSnackMessage(message);
         toggleSnack(true)
       }
 
@@ -155,7 +146,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
             backgroundColor: "white",
           }}
         >
-          <Text style={{ ...defaultTextFont, textAlign: "center" }}>{snackMessage}</Text>
+          <Text style={{ textAlign: "center" }}>Invalid User Credentials</Text>
         </Snackbar>
         {firstClick ? (
           <TouchableOpacity
@@ -195,18 +186,21 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
                 testID="password-input"
               />
             </View>
-            <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
-            <View style={styles.forgotPasswordContainer}><Text style={styles.forgotText}>Forgot Password?</Text></View>
-</TouchableOpacity>
+            <TouchableOpacity>
+              <Text style={styles.forgot}>Forgot Password?</Text>
+            </TouchableOpacity>
             <TouchableOpacity onPress={onLoginPress} style={styles.buttons} testID="login-button">
-              {!loading && <Text style={{...defaultTextFont, color: "white", fontWeight: "600", fontSize: 15}}>
+              {!loading && <Text style={{color: "white", fontWeight: "600", fontSize: 20}}>
                 Login
                 </Text>}
               {loading && <ActivityIndicator size="small" color="white" />}
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleGoRegister} style={styles.buttons} testID="register-button">
-              <Text style={{ ...defaultTextFont, color: "white", fontWeight: "600", fontSize: 15 }}>
-                Register
+            <TouchableOpacity onPress={handleGoRegister} style={styles.registerButton} testID="register-button">
+              <Text style={[styles.registerText, { fontFamily: "CustomFont" }]}>
+                Don't have an account?{' '}
+                <Text style={styles.registerLink} onPress={handleGoRegister}>
+                  Sign up
+                </Text>
               </Text>
             </TouchableOpacity>
           </View>
@@ -224,7 +218,6 @@ const styles = StyleSheet.create({
     alignItems: "stretch",
   },
   logo: {
-    ...defaultTextFont,
     fontWeight: "bold",
     fontSize: 50,
     color: "#111111",
@@ -232,33 +225,23 @@ const styles = StyleSheet.create({
   },
   inputView: {
     width: "80%",
-    backgroundColor: "#fff",
-    borderRadius: 25,
-    height: 50,
-    marginBottom: 20,
-    padding: 20,
-    justifyContent: "center",
-    alignItems: "flex-start",
-    borderColor: "gray",
-    borderWidth: 2,
+    borderBottomWidth: 1,
+    borderColor: "black",
+    marginBottom: 10,
+    marginTop: 40,
   },
   inputText: {
-    ...defaultTextFont,
-    height: 50,
+    height: 40,
     color: "#111111",
-    fontSize: 16,
+    fontSize: 14,
     width: "100%",
-    borderRadius: 25,
   },
-
   forgot: {
-    ...defaultTextFont,
     color: "#111111",
     fontSize: 12,
     fontWeight: "400",
     marginBottom: 20,
   },
-
   imageBackground: {
     flex: 1,
     resizeMode: "cover",
@@ -271,11 +254,16 @@ const styles = StyleSheet.create({
     marginBottom: 200,
     paddingVertical: 200,
   },
+  loginTitle: {
+    alignSelf: "flex-start",
+    marginLeft: 30,
+    marginBottom: 30,
+    fontSize: 35,
+  },
   buttons: {
     backgroundColor: "rgb(17,47,187)",
     width: 200,
     height: 50,
-    borderRadius: 30,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 10,
@@ -283,54 +271,59 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowRadius: 3,
+    borderRadius: 15,
+    paddingVertical: 10,
+    alignItems: "center",
+    marginTop: 20,
   },
   loginBox: {
-    alignSelf: "center",
-    alignContent: "center",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.6)", // Transparent white background
-    height: 500,
-    width: 300,
+    backgroundColor: "rgba(245,245,245,0.8)",
+    width: "85%",
+    height: 600,
     borderRadius: 10,
+    alignSelf: "center",
+    alignItems: "center",
+    paddingHorizontal: 25,
+    paddingVertical: 40,
     elevation: 10,
     shadowColor: "#000",
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
+    shadowOpacity: .2,
+    shadowRadius: 5,
   },
-
-  forgotPasswordContainer: {
-    width: 300,
-    justifyContent: 'center',
-    alignItems: "flex-end",
-
+  primaryButton: {
+    backgroundColor: "rgb(17,47,187)", // Vibrant purple
+    width: "90%", // Full-width (matching inputs)
+    height: 43,
+    borderRadius: 10,
+    alignItems: "center", // Left-align text
+    justifyContent: "center",
+    marginTop: 70,
   },
-  forgotText: {
-    color: "#111111",
+  registerButton: {
+    alignSelf: "flex-end",
+    marginRight: 62,
     fontSize: 12,
     fontWeight: "400",
-    marginBottom: 20,
-    marginRight: 40
+    marginTop: 8,
   },
-  signUpStatement: {
-      position: "absolute",
-      top: 450,
-      display: "flex",
-      flexDirection: "row",
-      justifyContent: 'center',
-      alignItems: 'center'
-     
-  },
-  signUpQuery: {
-    color: "black",
+  linkText: {
+    color: "rgb(17,47,187)", // Blue text for secondary action
+    fontSize: 15,
     fontWeight: "600",
+    textAlign: "center",
+    paddingTop: 20,
   },
-  signUp:{
-    color: "blue",
-    fontWeight: "500",
-    marginTop: 0,
-
-  }
+  registerText: {
+    color: "#111111", // Default text color for the register message
+    fontSize: 14,
+    fontWeight: "600",
+    textAlign: "center",
+    marginTop: 20,
+  },
+  registerLink: {
+    color: "rgb(17,47,187)", // Blue color for the clickable "Register now" link
+  },
 });
+
 
 export default LoginScreen;

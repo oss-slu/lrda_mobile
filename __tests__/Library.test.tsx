@@ -95,6 +95,7 @@ jest.mock('react-native-reanimated-carousel', () => {
   return (props) => <View>{props.children}</View>;
 });
 
+
 const mockStore = configureStore([]);
 const store = mockStore({
   navigation: {
@@ -128,6 +129,10 @@ jest.mock('expo-location', () => ({
   getCurrentPositionAsync: jest.fn(),
 }));
 
+jest.mock('lottie-react-native', () => {
+  const React = require('react');
+  return () => React.createElement('View', { testID: 'mockLottieView' });
+});
 // Silence console warnings during the test
 beforeEach(() => {
   jest.clearAllMocks();
