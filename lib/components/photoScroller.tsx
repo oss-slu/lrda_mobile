@@ -208,16 +208,14 @@ const PhotoScroller = forwardRef(
             delayLongPress={100}
             onPress={() => goBig(index)}
           >
-            <View style={styles.mediaItem}>
-              {IsImage ? (
-                <LoadingImage
+            <View style={styles.thumbnailWrapper}>
+              <LoadingImage
                   imageURI={ImageURI}
                   type={ImageType}
-                  isImage={true}
-                />
-              ) : (
-                <LoadingImage imageURI={""} type={ImageType} isImage={false} />
-              )}
+                  isImage={IsImage}
+                  width={60}
+                  height={60}
+              />
             </View>
           </TouchableOpacity>
         </View>
@@ -390,6 +388,7 @@ const PhotoScroller = forwardRef(
                 {
                   backgroundColor: "rgb(240,240,240)",
                   justifyContent: "center",
+                  alignItems: "center",
                 },
               ]}
               onPress={handleNewMedia}
@@ -397,7 +396,7 @@ const PhotoScroller = forwardRef(
               <Ionicons
                 style={{ alignSelf: "center" }}
                 name="camera-outline"
-                size={60}
+                size={50}
                 color="#111111"
               />
             </TouchableOpacity>
@@ -427,4 +426,19 @@ const styles = StyleSheet.create({
     height: 100,
     marginRight: 5, // Spacing between images
   },
+  thumbnailWrapper: {
+    width: 60,
+    height: 60,
+    borderRadius: 12,
+    overflow: "hidden",
+    backgroundColor: "#ddd",
+    marginRight: 10,
+    alignItems: "center",
+  },
+  thumbnailImage: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
+
 });

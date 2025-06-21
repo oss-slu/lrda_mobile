@@ -40,7 +40,11 @@ const EditNoteScreen = ({ route, navigation }) => {
 
   const [title, setTitle] = useState(note.title || "Untitled");
   const [time, setTime] = useState(new Date(note.time));
-  const [tags, setTags] = useState(note.tags || []);
+  const [tags, setTags] = useState<string[]>(
+      (note.tags || []).map(tag =>
+          typeof tag === 'string' ? tag : tag.label
+      )
+  );
   const [media, setMedia] = useState<Media[]>(note.media || []);
   const [newAudio, setNewAudio] = useState<AudioType[]>(note.audio || []);
   const [isPublished, setIsPublished] = useState(note.published || false);

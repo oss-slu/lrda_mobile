@@ -2,8 +2,10 @@ import React from 'react';
 import { render } from '@testing-library/react-native';
 import AddNoteScreen from '../lib/screens/AddNoteScreen';
 import * as Location from 'expo-location';
+import PhotoScroller from '../lib/components/photoScroller';
 import moxios from 'moxios';
 import { AddNoteProvider } from '../lib/context/AddNoteContext'; // Import the provider
+import { PhotoType } from '../lib/models/media_class';
 import { Provider } from 'react-redux';
 import { store } from '../redux/store/store';
 
@@ -13,6 +15,13 @@ const navigationMock = {
   addListener: jest.fn(() => jest.fn()), 
   canGoBack: jest.fn(() => true),
 };
+
+const createNavigationMock = () => ({
+  navigate: jest.fn(),
+  goBack: jest.fn(),
+  addListener: jest.fn(() => jest.fn()),
+  canGoBack: jest.fn(() => true),
+});
 
 // Mock redux-persist to avoid persistence logic in tests
 jest.mock('redux-persist', () => {
@@ -39,9 +48,8 @@ jest.mock('react-native-keyboard-aware-scroll-view', () => ({
 
 jest.mock('firebase/firestore', () => ({
   getFirestore: jest.fn(),
-  doc: jest.fn(() => ({
-    get: jest.fn(() => Promise.resolve({ exists: false })),
-  })),
+  doc: jest.fn(() => ({})),
+  getDoc: jest.fn(() => Promise.resolve({ exists: false })),
 }));
 
 jest.mock("firebase/auth", () => ({
@@ -104,6 +112,18 @@ jest.mock('expo-location', () => ({
     })
   ),
 }));
+
+jest.mock('../lib/components/loadingImage', () => {
+  const React = require('react');
+  const { Image } = require('react-native');
+  return {
+    __esModule: true,
+    default: ({ imageURI }: { imageURI: string }) =>
+        // you can still use JSX because React and Image are in scope here
+        <Image testID="loading-image" source={{ uri: imageURI }} />
+  };
+});
+
 // Helper function to render the component with providers
 const renderWithProviders = (component: React.ReactElement) => {
   return render(
@@ -147,7 +167,8 @@ describe('AddNoteScreen', () => {
     jest.mock('@10play/tentap-editor', () => ({
       useEditorBridge: jest.fn(() => mockEditor),
     }));
-  
+
+    const navigationMock = createNavigationMock();
     renderWithProviders(<AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />);
   
     const imageUri = '__tests__/TestResources/TestImage.jpg';

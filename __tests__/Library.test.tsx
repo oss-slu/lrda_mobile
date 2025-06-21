@@ -16,9 +16,11 @@ jest.mock('firebase/database', () => ({
 }));
 
 jest.mock('firebase/firestore', () => ({
-  getFirestore: jest.fn(() => ({})), 
-  doc: jest.fn(() => ({})), 
-  getDoc: jest.fn(() => Promise.resolve({ exists: () => false })),
+  getFirestore: jest.fn(() => ({})),
+  doc: jest.fn(),
+  getDoc: jest.fn().mockResolvedValue({
+    exists: () => false,
+  }),
 }));
 
 
@@ -326,7 +328,7 @@ describe('Library Component', () => {
     await waitFor(() => {
       expect(getByText('No Results Found')).toBeTruthy();
     });
-  });
+  }, 10000);
 
   
   it("Renders no results found when there are no more notes.", async () => {

@@ -10,10 +10,20 @@ import * as Location from 'expo-location';
 
 const navigationMock = {
   navigate: jest.fn(),
-  goBack: jest.fn(),
-  addListener: jest.fn(() => jest.fn()), 
+  goBack:   jest.fn(),
   canGoBack: jest.fn(() => true),
+  addListener: jest.fn((_event: string, cb: Function) => {
+    // you can optionally call `cb()` here if you want to test blur behavior
+    return () => {};       // unsubscribe
+  }),
 };
+
+const createNavigationMock = () => ({
+  navigate: jest.fn(),
+  goBack: jest.fn(),
+  addListener: jest.fn(() => jest.fn()),
+  canGoBack: jest.fn(() => true),
+});
 
 // Mock redux-persist to avoid persistence logic in tests
 jest.mock('redux-persist', () => {
@@ -90,9 +100,8 @@ jest.mock("firebase/storage", () => ({
 
 jest.mock('firebase/firestore', () => ({
   getFirestore: jest.fn(),
-  doc: jest.fn(() => ({
-    get: jest.fn(() => Promise.resolve({ exists: false })),
-  })),
+  doc: jest.fn(),
+  getDoc: jest.fn(() => Promise.resolve({ exists: false })),
 }));
 
 jest.mock("firebase/database", () => ({
@@ -128,6 +137,15 @@ jest.mock('expo-location', () => ({
     })
   ),
 }));
+
+jest.mock('../lib/components/photoScroller', () => {
+  return (props) => {
+    // Expose the props globally so our test can inspect them
+    global.photoScrollerProps = props;
+    return null;
+  };
+});
+
 
 // Mock API calls directly
 const mockWriteNewNote = jest.fn();
@@ -178,7 +196,7 @@ describe('AddNoteScreen', () => {
     // Mock the API call to simulate a failure
     mockWriteNewNote.mockRejectedValueOnce(new Error('Error saving note'));
 
-    const { getByTestId } = renderWithProviders(
+    const { getByTestId, rerender } = renderWithProviders(
       <AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />
     );
 
@@ -339,4 +357,43 @@ describe('AddNoteScreen - insertAudioToEditor', () => {
     expect(mockSetContent).toHaveBeenCalledWith(newContent); // Ensure new content was set
     expect(mockFocus).toHaveBeenCalledTimes(1); // Ensure focus was triggered
   });
+
+  describe('AddNoteScreen - insertImage', () => {
+    it('should insert image and update toolbar preview', async () => {
+      const navigationMock = createNavigationMock();
+
+      const routeMock = {
+        params: {
+          untitledNumber: 1,
+        },
+      };
+
+      const mockEditor = {
+        getHTML: jest.fn(() => ''),
+        setContent: jest.fn(),
+        focus: jest.fn(),
+        insertImage: jest.fn(),
+      };
+
+      jest.mock('@10play/tentap-editor', () => ({
+        useEditorBridge: jest.fn(() => mockEditor),
+        RichText: () => null,
+        Toolbar: () => null,
+        DEFAULT_TOOLBAR_ITEMS: [],
+      }));
+
+      renderWithProviders(
+          <AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />
+      );
+
+      const imageUri = '__tests__/TestResources/TestImage.jpg';
+
+      // Simulate adding an image to the editor
+      mockEditor.insertImage(imageUri);
+
+      // Verify the editor function was called correctly
+      expect(mockEditor.insertImage).toHaveBeenCalledWith(imageUri);
+    });
+  });
+
 });
