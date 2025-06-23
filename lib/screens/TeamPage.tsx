@@ -6,20 +6,30 @@ import {
   Image,
   FlatList,
   TouchableOpacity,
-  SafeAreaView,
-  Platform,
   Dimensions,
+  StatusBar,
   ScrollView,
-  StatusBar
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "../components/ThemeProvider";
 import Feather from 'react-native-vector-icons/Feather';
+import { useTheme } from "../components/ThemeProvider";
 import { defaultTextFont } from "../../styles/globalStyles";
 
-
-
 const { width, height } = Dimensions.get('window');
+
+const WR_team = [
+  {
+    id: 1,
+    name: "Rachel Lindsey",
+    role: "Director of Center on Lived Religion",
+    image: require("../../assets/Rachel.jpg"),
+  },
+  {
+    id: 2,
+    name: "Adam Park",
+    role: "Associate Director of Research (COLR)",
+    image: require("../../assets/Adam.jpg"),
+  },
+];
 
 const teamMembers = [
   {
@@ -37,21 +47,22 @@ const teamMembers = [
   {
     id: 3,
     name: "Yash Bhatia",
-    role: "Software Engineer",
+    role: "Software Developer (COLR)",
     image: require("../../assets/Yash.jpg"),
   },
-  {
+    {
     id: 4,
-    name: "Izak Robles",
-    role: "Developer",
-    image: require("../../assets/Izak.jpg"),
-  },
-  {
-    id: 5,
     name: "Stuart Ray",
     role: "Developer",
     image: require("../../assets/Stuart.jpg"),
   },
+  {
+    id: 5,
+    name: "Izak Robles",
+    role: "Developer",
+    image: require("../../assets/Izak.jpg"),
+  },
+
   {
     id: 6,
     name: "Karthik Mangineni",
@@ -70,13 +81,36 @@ const teamMembers = [
     role: "Developer",
     image: require("../../assets/Amar.png"),
   },
-
   {
     id: 9,
-    name: "Nikhil Muthukumar",
-    role: "Developer",
-    image: require("../../assets/stock_person.jpg"),
+    name: "Zanxiang Wang",
+    role: "Tech Lead",
+    image: require("../../assets/Zanxiang.jpg"),
   },
+  {
+    id: 10,
+    name: "Amy Chen",
+    role: "Developer",
+    image: require("../../assets/Amy.jpg"),
+  },
+  {
+    id: 11,
+    name: "Justin Wang",
+    role: "Developer",
+    image: require("../../assets/Justin.jpg"),
+  },
+  {
+    id: 12,
+    name: "Sam Sheppard",
+    role: "Developer",
+    image: require("../../assets/Sam.jpg"),
+  },
+  {
+    id:13, 
+    name: "Josh Hogan",
+    role: "Developer",
+    image: require("../../assets/F-22.jpg")
+  }
 ];
 
 export default function TeamPage({ navigation }) {
@@ -90,26 +124,16 @@ export default function TeamPage({ navigation }) {
         accessible
         accessibilityLabel={`${item.name}, ${item.role}`}
       />
-      <Text style={[styles.memberName, { color: theme.text || "#ffffff" }]}>
-        {item.name}
-      </Text>
-      <Text
-        style={[
-          styles.memberRole,
-          { color: theme.secondaryText || "#aaaaaa" },
-        ]}
-      >
-        {item.role}
-      </Text>
+      <Text style={[styles.memberName, { color: theme.text || "#ffffff" }]}>{item.name}</Text>
+      <Text style={[styles.memberRole, { color: theme.secondaryText || "#aaaaaa" }]}>{item.role}</Text>
     </View>
   );
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: theme.background }]}
-    >
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar translucent backgroundColor="transparent" />
-      {/** header content starts here */}
+
+      {/* Header */}
       <View style={[styles.header, { backgroundColor: theme.homeColor }]}>
         <View style={styles.headerContent}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -120,34 +144,46 @@ export default function TeamPage({ navigation }) {
           </View>
         </View>
       </View>
-      {/** header content ends here */}
 
-        {/* About Our Team */}
+      {/* Scrollable Body */}
+      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+        {/* Title */}
         <View style={styles.titleContainer}>
-          <Text style={[styles.title, { color: theme.text || "#ffffff" }]}>
-            About Our Team
-          </Text>
-          <Text
-            style={[
-              styles.subtitle,
-              { color: theme.secondaryText || "#aaaaaa" },
-            ]}
-          >
-            The Development Team
-          </Text>
+          <Text style={[styles.title, { color: theme.text || "#ffffff" }]}>About Our Team</Text>
         </View>
 
-        {/* Team Members Grid */}
-        <FlatList
-          data={teamMembers}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id.toString()}
-          numColumns={2}
-          contentContainerStyle={[styles.teamContainer, {paddingBottom: 200}]}
-          columnWrapperStyle={styles.teamRow}
-          showsVerticalScrollIndicator={false}
-          
-        />
+        {/* WR Team Section */}
+        <View style={styles.sectionContainer}>
+          <Text style={[styles.subtitle, { color: theme.secondaryText || "#aaaaaa", marginBottom: 12 }]}>
+            The Saint Louis University Where's Religion Team
+          </Text>
+          <FlatList
+            data={WR_team}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id.toString()}
+            numColumns={2}
+            scrollEnabled={false}
+            contentContainerStyle={styles.teamContainer}
+            columnWrapperStyle={styles.teamRow}
+          />
+        </View>
+
+        {/* Development Team Section */}
+        <View style={styles.sectionContainer}>
+          <Text style={[styles.subtitle, { color: theme.secondaryText || "#aaaaaa", marginBottom: 12 }]}>
+            The Development Team
+          </Text>
+          <FlatList
+            data={teamMembers}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id.toString()}
+            numColumns={2}
+            scrollEnabled={false}
+            contentContainerStyle={[styles.teamContainer, { paddingBottom: 40 }]}
+            columnWrapperStyle={styles.teamRow}
+          />
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -156,11 +192,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  scrollContainer: {
+    paddingBottom: 60,
+  },
   header: {
     height: width > 500 ? height * 0.12 : height * 0.19,
   },
   headerContent: {
-    marginTop: width > 500? '5%' :'20%',
+    marginTop: width > 500 ? '5%' : '20%',
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'center',
@@ -179,6 +218,10 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     alignItems: "center",
   },
+  sectionContainer: {
+    paddingHorizontal: 16,
+    marginBottom: 24,
+  },
   title: {
     ...defaultTextFont,
     fontSize: 24,
@@ -188,11 +231,9 @@ const styles = StyleSheet.create({
   subtitle: {
     ...defaultTextFont,
     fontSize: 16,
-    marginTop: 8,
     textAlign: "center",
   },
   teamContainer: {
-    paddingHorizontal: 16,
     paddingBottom: 20,
   },
   teamRow: {
