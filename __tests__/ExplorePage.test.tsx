@@ -4,7 +4,11 @@ import { Dimensions } from 'react-native';
 import ExploreScreen from '../lib/screens/mapPage/ExploreScreen';
 import { AddNoteProvider } from '../lib/context/AddNoteContext';
 import ApiService from '../lib/utils/api_calls';
+import { act } from 'react-test-renderer';
 
+// Get screen width for scroll simulation
+const { width } = Dimensions.get('window');
+const CARD_WIDTH = width * 0.8;
 
 jest.mock('../lib/components/ThemeProvider', () => ({
   useTheme: () => ({
@@ -68,8 +72,21 @@ jest.mock('../lib/utils/api_calls', () => {
   };
 });
 
+jest.useFakeTimers();
+
+// 1) Mock AsyncStorage so getHasDoneTutorial("Explore") returns a valid string
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  __esModule: true,
+  default: {
+    getItem: jest.fn(() => Promise.resolve('false')),   // tutorial not done
+    setItem: jest.fn(() => Promise.resolve()),
+    removeItem: jest.fn(() => Promise.resolve()),
+    clear:   jest.fn(() => Promise.resolve()),
+  },
+}));
+
 describe('ExploreScreen - Load More Button Rendering', () => {
-  it('renders Explore', async () => {
+  it('renders Explore screen', async () => {
     const { getByTestId } = render(
       <AddNoteProvider>
         <ExploreScreen />
@@ -80,58 +97,59 @@ describe('ExploreScreen - Load More Button Rendering', () => {
     expect(explore).toBeTruthy();
   });
 
-  it('renders the Load More button after scrolling to the last card', async () => {
-    const { getByTestId } = render(
-      <AddNoteProvider>
-        <ExploreScreen />
-      </AddNoteProvider>
-    );
-
-    await waitFor(() => {
-      expect(getByTestId('cardScrollView')).toBeTruthy();
-    });
-
-    const { width } = Dimensions.get('window');
-    const CARD_WIDTH = width * 0.8;
-
-    fireEvent.scroll(getByTestId('cardScrollView'), {
-      nativeEvent: {
-        contentOffset: {
-          x: (CARD_WIDTH + 20) * 19, // This should update currentIndex to 19
-        },
-      },
-    });
-
-    await waitFor(() => expect(getByTestId('loadMoreButton')).toBeTruthy());
-  });
-
-  it('calls fetchMessagesBatch when the Load More button is pressed', async () => {
+  it('shows Load More button after scrolling to the last card', async () => {
     const { getByTestId, getByText } = render(
       <AddNoteProvider>
         <ExploreScreen />
       </AddNoteProvider>
     );
 
-    await waitFor(() => expect(getByTestId('cardScrollView')).toBeTruthy());
+    const scrollView = await waitFor(() => getByTestId('cardScrollView'));
 
-    const { width } = Dimensions.get('window');
-    const CARD_WIDTH = width * 0.8;
-
-    fireEvent.scroll(getByTestId('cardScrollView'), {
+    // Simulate scroll to 20th card (index 19) — enough to satisfy currentIndex >= page * LIMIT - 1
+    fireEvent.scroll(scrollView, {
       nativeEvent: {
-        contentOffset: { x: (CARD_WIDTH + 20) * 19 },
+        contentOffset: {
+          x: (CARD_WIDTH + 20) * 19,
+        },
       },
     });
 
-    await waitFor(() => expect(getByTestId('loadMoreButton')).toBeTruthy());
-
-    ApiService.fetchMapsMessagesBatch.mockClear();
-
-    const loadMoreButton = getByText('Load More');
-    fireEvent.press(loadMoreButton);
-
-    await waitFor(() =>
-      expect(ApiService.fetchMapsMessagesBatch).toHaveBeenCalled()
-    );
+    await waitFor(() => {
+      expect(getByTestId('loadMoreButton')).toBeTruthy();
+    });
   });
+
+ it('calls fetchMapsMessagesBatch when Load More is pressed', async () => {
+  const { getByTestId } = render(
+    <AddNoteProvider>
+      <ExploreScreen />
+    </AddNoteProvider>
+  );
+
+  const scrollView = await waitFor(() => getByTestId('cardScrollView'));
+
+  fireEvent.scroll(scrollView, {
+    nativeEvent: {
+      contentOffset: {
+        x: (CARD_WIDTH + 20) * 19,
+      },
+    },
+  });
+
+  // Wait for Load More button to appear
+  const loadMore = await waitFor(() => getByTestId('loadMoreTouchable'));
+
+  // Trigger the press
+  await act(async () => {
+    fireEvent.press(loadMore);
+    jest.runOnlyPendingTimers(); // for debounce or internal timers
+  });
+
+  // Assert API was called again
+  await waitFor(() => {
+    expect(ApiService.fetchMapsMessagesBatch).toHaveBeenCalledTimes(2);
+  });
+});
+
 });

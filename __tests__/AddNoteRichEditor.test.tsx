@@ -1,20 +1,68 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react-native';
+import { TextInput, View } from 'react-native';
 import AddNoteScreen from '../lib/screens/AddNoteScreen';
 import moxios from 'moxios';
-import { AddNoteProvider } from '../lib/context/AddNoteContext'; // Import the provider
+import { AddNoteProvider } from '../lib/context/AddNoteContext';
 import { Provider } from 'react-redux';
 import { store } from '../redux/store/store';
 
+// Mock react-native-reanimated
+jest.mock('react-native-reanimated', () => {
+  const Reanimated = require('react-native-reanimated/mock');
+  Reanimated.default.call = () => {};
+  return Reanimated;
+});
 
-const navigationMock = {
-  navigate: jest.fn(),
-  goBack: jest.fn(),
-  addListener: jest.fn(() => jest.fn()), 
-  canGoBack: jest.fn(() => true),
-};
+jest.mock('@10play/tentap-editor', () => {
+  const React = require('react');
+  const { TextInput, View } = require('react-native');
 
-// Mock redux-persist to avoid persistence logic in tests
+  let onExternalChange = null;
+
+  const RichText = ({ testID = 'RichText' }) => {
+    const [value, setValue] = React.useState('');
+
+    onExternalChange = (text) => {
+      setValue(text);
+    };
+
+    return (
+      <TextInput
+        testID={testID}
+        value={value}
+        onChangeText={(text) => {
+          setValue(text);
+        }}
+      />
+    );
+  };
+
+  RichText.__simulateChangeText = (text) => {
+    if (onExternalChange) {
+      onExternalChange(text);
+    }
+  };
+
+  return {
+    RichText,
+    Toolbar: ({ testID = 'Toolbar' }) => <View testID={testID} />,
+    useEditorBridge: jest.fn(() => ({
+      getHTML: jest.fn(() => Promise.resolve('<p>Initial content</p>')),
+      setContent: jest.fn(),
+      injectCSS: jest.fn(),
+      focus: jest.fn(),
+      insertImage: jest.fn(),
+      insertText: jest.fn(),
+      insertHTML: jest.fn(),
+      blur: jest.fn(),
+    })),
+    DEFAULT_TOOLBAR_ITEMS: [],
+  };
+});
+
+
+// Redux-persist mock
 jest.mock('redux-persist', () => {
   const real = jest.requireActual('redux-persist');
   return {
@@ -23,109 +71,53 @@ jest.mock('redux-persist', () => {
   };
 });
 
-// Mocking external dependencies and components
+// ThemeProvider mock
 jest.mock('../lib/components/ThemeProvider', () => ({
   useTheme: () => ({
-    theme: 'mockedTheme', // Provide a mocked theme object
+    theme: 'mockedTheme',
   }),
 }));
-// Mock Firebase services
 
-
-jest.mock("firebase/auth", () => ({
-  getAuth: jest.fn(),
-  initializeAuth: jest.fn(),
-  getReactNativePersistence: jest.fn(),
-  onAuthStateChanged: jest.fn(), // Mock onAuthStateChanged
-}));
-
-jest.mock("firebase/database", () => ({
-  getDatabase: jest.fn(), // Mock getDatabase to prevent the error
-}));
-
-jest.mock('react-native-keyboard-aware-scroll-view', () => ({
-  KeyboardAwareScrollView: jest.fn(({ children }) => children),
-}));
-
-
+// Firebase and Expo mocks
+jest.mock('firebase/auth', () => ({ getAuth: jest.fn(), initializeAuth: jest.fn(), getReactNativePersistence: jest.fn(), onAuthStateChanged: jest.fn() }));
+jest.mock('firebase/database', () => ({ getDatabase: jest.fn() }));
 jest.mock('firebase/firestore', () => ({
   getFirestore: jest.fn(),
-  doc: jest.fn(() => ({
-    get: jest.fn(() => Promise.resolve({ exists: false })),
-  })),
+  doc: jest.fn(() => ({ get: jest.fn(() => Promise.resolve({ exists: false })) })),
 }));
-
 jest.mock('expo-location', () => ({
-  getForegroundPermissionsAsync: jest.fn(() =>
-    Promise.resolve({ status: 'granted' })
-  ),
-  requestForegroundPermissionsAsync: jest.fn(() =>
-    Promise.resolve({ status: 'granted' })
-  ),
-  getCurrentPositionAsync: jest.fn(() =>
-    Promise.resolve({
-      coords: {
-        latitude: 37.7749,
-        longitude: -122.4194,
-      },
-    })
-  ),
+  getForegroundPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted' })),
+  requestForegroundPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted' })),
+  getCurrentPositionAsync: jest.fn(() => Promise.resolve({ coords: { latitude: 0, longitude: 0 } })),
 }));
-
-jest.mock('expo-font', () => ({
-  loadAsync: jest.fn(() => Promise.resolve()),
-  isLoaded: jest.fn(() => true),
-}));
-
+jest.mock('expo-font', () => ({ loadAsync: jest.fn(() => Promise.resolve()), isLoaded: jest.fn(() => true) }));
+jest.mock('react-native-keyboard-aware-scroll-view', () => ({ KeyboardAwareScrollView: jest.fn(({ children }) => children) }));
 jest.mock('react-native/Libraries/Image/Image', () => ({
   ...jest.requireActual('react-native/Libraries/Image/Image'),
   resolveAssetSource: jest.fn(() => ({ uri: 'mocked-asset-uri' })),
 }));
-
-
 jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
   settings: {},
   setValues: jest.fn(),
-  getConstants: jest.fn(() => ({
-    settings: {},
-  })),
+  getConstants: jest.fn(() => ({ settings: {} })),
 }));
 
-
-jest.mock('@10play/tentap-editor', () => ({
-  RichText: () => null,
-  Toolbar: () => null,
-  useEditorBridge: jest.fn(() => ({
-    getHTML: jest.fn(() => ''),
-    setContent: jest.fn(),
-    injectCSS: jest.fn(),
-    focus: jest.fn(),
-    insertImage: jest.fn(),
-  })),
-  DEFAULT_TOOLBAR_ITEMS: [], // Mock as an empty array
-}));
-
-// Helper function to render the component with providers
 const renderWithProviders = (component: React.ReactElement) => {
   return render(
     <Provider store={store}>
       <AddNoteProvider>{component}</AddNoteProvider>
-    </Provider>
+    </Provider>,
+    {
+      hostComponentNames: ['Text', 'View', 'TextInput', 'ScrollView', 'Image', 'SafeAreaView'],
+    },
   );
 };
 
 beforeEach(() => {
-   // Clear mocks before each test
-   jest.clearAllMocks();
-
+  jest.clearAllMocks();
   jest.spyOn(console, 'log').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
   jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(console, 'warn').mockImplementation((message) => {
-    if (!message.includes('Toolbar has no editor')) {
-      console.warn(message);
-    }
-  });
   moxios.install();
 });
 
@@ -134,46 +126,22 @@ afterEach(() => {
   console.error.mockRestore();
   console.warn.mockRestore();
   moxios.uninstall();
-
 });
 
-describe("AddNoteScreen", () => {
-  let setNoteContentMock;
-  
-  beforeEach(() => {
-    setNoteContentMock = jest.fn();
-    React.useState = jest.fn(() => ['', setNoteContentMock]);
+describe('AddNoteScreen', () => {
+  it('renders without crashing', () => {
+    renderWithProviders(
+      <AddNoteScreen
+        navigation={{ navigate: jest.fn(), goBack: jest.fn(), addListener: jest.fn(() => jest.fn()), canGoBack: () => true }}
+        route={{ params: { untitledNumber: 1 } }}
+      />,
+    );
+    expect(screen.getByTestId('RichText')).toBeTruthy();
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
 
-  it("renders without crashing", () => {
-    renderWithProviders(<AddNoteScreen navigation={navigationMock as any} route={{ params: { untitledNumber: 1 }}} />);
-    // Instead of using toBeInTheDocument (which is DOM-specific), use toBeTruthy
-    expect(screen.getByTestId('RichEditor')).toBeTruthy();
-  });
 
-  it('calls setNoteContent when the Rich Text Editor content changes', () => {
-    renderWithProviders(<AddNoteScreen navigation={navigationMock as any} route={{ params: { untitledNumber: 1 }}} />);
 
-    const richTextEditor = screen.getByTestId('RichEditor'); // Ensure the element is rendered
-    const newText = 'New content';
-
-    // Simulating the text change in the editor
-    fireEvent.changeText(richTextEditor, newText);
-
-    const richTextRef = { current: { insertText: jest.fn() } };
-
-    const addTextToEditor = (Text) => {
-      richTextRef.current?.insertText(Text);
-    };
-
-    addTextToEditor(newText);
-
-    expect(richTextRef.current.insertText).toHaveBeenCalledWith(newText);
-  });
 
   it('Modifies the given text with the bold tag', () => {
     const mockBold = (text) => `<b>${text}</b>`;

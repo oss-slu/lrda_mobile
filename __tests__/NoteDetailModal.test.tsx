@@ -66,6 +66,9 @@ jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
   })),
 }));
 
+
+
+
 onAuthStateChanged.mockImplementation((auth, callback) => {
   const mockUser = { uid: "12345", email: "test@example.com" };
   callback(mockUser); // Simulate a logged-in user
@@ -89,6 +92,41 @@ afterEach(() => {
   console.warn.mockRestore();
   moxios.uninstall();
 });
+
+
+jest.mock('expo-av', () => {
+  const React = require('react');
+  return {
+    // Minimal Video stub so VideoModal renders without error
+    Video: (props) => React.createElement('Video', props),
+    // Minimal Audio.Sound.createAsync stub that immediately resolves
+    Audio: {
+      Sound: {
+        createAsync: jest.fn(() =>
+          Promise.resolve({
+            sound: {
+              getStatusAsync: jest.fn(() => Promise.resolve({ isLoaded: true, durationMillis: 1000 })),
+              setOnPlaybackStatusUpdate: jest.fn(),
+              playAsync: jest.fn(),
+              pauseAsync: jest.fn(),
+              stopAsync: jest.fn(),
+              unloadAsync: jest.fn(),
+              replayAsync: jest.fn(),
+            },
+          })
+        ),
+      },
+    },
+    // Provide ResizeMode so VideoModal.resizeMode={ResizeMode.CONTAIN} works
+    ResizeMode: { CONTAIN: 'contain' },
+  };
+});
+jest.mock('firebase/firestore', () => ({
+  getFirestore: jest.fn(),
+  doc: jest.fn(),
+  getDoc: jest.fn(() => Promise.resolve({ exists: false })),
+}));
+
 
 describe('NoteDetailModal', () => {
   const mockNote = {
@@ -193,6 +231,8 @@ describe('NoteDetailModal', () => {
     
     expect(getByTestId('audioLoadingIndicator')).toBeTruthy();
     jest.useRealTimers();
+  // Our mock of createAsync never resolves, so LoadingAudio stays in "loading" state
+  // (No need to redeclare audioNote or getByTestId here)
   });
   
 
