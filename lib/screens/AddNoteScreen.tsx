@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-
 import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
@@ -41,7 +40,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import {defaultTextFont} from "../../styles/globalStyles";
-import { Button } from "react-native-paper";
+import { Button, Menu, Provider as PaperProvider } from "react-native-paper";
 import TooltipContent from "../onboarding/TooltipComponent";
 import Tooltip from 'react-native-walkthrough-tooltip';
 
@@ -51,6 +50,7 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
   navigation,
   route,
 }) => {
+   const noteStyles = NotePageStyles(); 
   const [titleText, setTitleText] = useState<string>("");
   const [isSaveButtonEnabled, setIsSaveButtonEnabled] = useState<boolean>(true);
   const [bodyText, setBodyText] = useState<string>("<p></p>");
@@ -81,6 +81,16 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
   const mediaRef = useRef(newMedia);
   const audioRef = useRef(newAudio);
   const titleTxtRef = useRef(titleText);
+   const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+   const [attachMenuVisible, setAttachMenuVisible] = useState(false);
+  const openAttachMenu = () => setAttachMenuVisible(true);
+  const closeAttachMenu = () => setAttachMenuVisible(false);
+  const handlePickVideo = async () => {
+    // TODO: integrate your video picker here, then call addVideoToEditor(uri)
+    editor.focus();
+  };
+
 
   const addNoteState = useSelector(
     (state) => state?.addNoteState?.isAddNoteOpned
@@ -188,25 +198,31 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
   };
 
   
+  // done/bar height constant
+  const DONE_BAR_HEIGHT = 30;
 
+  // now push menu up by keyboard + done bar + small padding
+  const menuMarginBottom = keyboardHeight + DONE_BAR_HEIGHT ;
 
+// MODIFY: enhance existing keyboard listeners to capture height
   useEffect(() => {
-    // Listen for keyboard events to show/hide toolbar
-    const showKeyboardListener = Keyboard.addListener("keyboardDidShow", () => {
+    const showSub = Keyboard.addListener("keyboardDidShow", e => {
       setKeyboardVisible(true);
+      setKeyboardHeight(e.endCoordinates.height);  // ADD: store height
     });
-    const hideKeyboardListener = Keyboard.addListener("keyboardDidHide", () => {
+    const hideSub = Keyboard.addListener("keyboardDidHide", () => {
       setKeyboardVisible(false);
+      setKeyboardHeight(0);                        // ADD: reset height
     });
 
-    // Save the correct reference to handleShareButtonPress
+    // your existing publish-note sync
     setPublishNote(() => handleShareButtonPress);
 
     return () => {
-      showKeyboardListener.remove();
-      hideKeyboardListener.remove();
+      showSub.remove();
+      hideSub.remove();
     };
-  }, []);
+  }, [setPublishNote]);
 
   useEffect(() => {
     // Save the correct reference to handleShareButtonPress
@@ -598,13 +614,128 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
               <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
             )}
           </View>
-          {keyboardVisible &&(
-          <View style={styles.doneButton} testID="doneButton">
-            <TouchableOpacity onPress={handleDonePress}>
+         {/* …inside your component’s return… */}
+ {/* CUSTOM ICON BAR UNDER KEYBOARD */}
+       {keyboardVisible && (
+        <View style={styles.doneButton}>
+          <View style={styles.doneInnerContainer}>
+
+            {/* PAPERCLIP + MENU */}
+            <Menu
+              visible={attachMenuVisible}
+              onDismiss={closeAttachMenu}
+              anchor={
+                <TouchableOpacity
+                  onPress={openAttachMenu}
+                  style={styles.iconButton}
+                >
+                  <Ionicons
+                    name="attach-outline"
+                    size={24}
+                    color={noteStyles.saveText.color}
+                  />
+                </TouchableOpacity>
+              }
+              // UPDATED: push menu content up above the keyboard and limit its height
+              contentStyle={{
+                marginBottom:  menuMarginBottom,
+                maxHeight: 180,      // <— reduce overall menu height
+              }}
+            >
+              {/* Formatting options */}
+             <Menu.Item
+               title="Bold"
+               onPress={() => {
+                 editor.exec("bold");      // ← toggle bold
+                 closeAttachMenu();
+                 editor.focus();
+               }}
+             />
+            <Menu.Item
+              title="Italic"
+               onPress={() => {
+                 editor.exec("italic");    // ← toggle italic
+                closeAttachMenu();
+                 editor.focus();
+               }}
+             />
+            <Menu.Item
+               title="Underline"
+               onPress={() => {
+                 editor.exec("underline"); // ← toggle underline
+                 closeAttachMenu();
+                 editor.focus();
+               }}
+             />
+             <Menu.Item
+               title="Bullet List"
+               onPress={() => {
+                 editor.exec("insertUnorderedList"); // ← bullet points
+                 closeAttachMenu();
+                 editor.focus();
+             }}
+            />
+
+              <Menu.Item
+                title="Media (photos/videos)"
+                onPress={() => {
+                  setViewMedia(v => !v);
+                  closeAttachMenu();
+                  editor.focus();
+                }}
+              />
+              <Menu.Item
+                title="Audio"
+                onPress={() => {
+                  setViewAudio(v => !v);
+                  closeAttachMenu();
+                  editor.focus();
+                }}
+              />
+              <Menu.Item
+                title="Video"
+                onPress={() => {
+                  handlePickVideo();
+                  closeAttachMenu();
+                }}
+              />
+              <Menu.Item
+                title="Tags"
+                onPress={() => {
+                  setIsTagging(t => !t);
+                  closeAttachMenu();
+                  editor.focus();
+                }}
+              />
+            </Menu>
+
+            {/* LOCATION ICON */}
+            <TouchableOpacity
+              onPress={() => {
+                toggleLocation();
+                editor.focus();
+              }}
+              style={styles.iconButton}
+            >
+              <Ionicons
+                name="location-outline"
+                size={24}
+                color={locationButtonColor}
+              />
+            </TouchableOpacity>
+
+            {/* DONE BUTTON */}
+            <TouchableOpacity
+              onPress={handleDonePress}
+              style={styles.doneTouchable}
+            >
               <Text style={styles.doneText}>Done</Text>
             </TouchableOpacity>
           </View>
-          )}
+        </View>
+      )}
+
+      
         </KeyboardAwareScrollView>
         {/* Video Player Modal */}
         <Modal
@@ -666,9 +797,39 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: "100%",
     backgroundColor: "#fff",
-    paddingVertical: 5, // Increase padding for better tap area
-    zIndex: 10, // Ensures it appears above other elements
+    paddingVertical: 5,
+    zIndex: 10,
     borderColor: "#ddd",
+  },
+  doneInnerContainer: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    justifyContent: "space-between",
+  },
+  iconButton: {
+    padding: 8,
+  },
+  doneTouchable: {
+    padding: 8,
+  },
+
+  attachModalContent: {
+    position: "absolute",
+    top: (StatusBar.currentHeight || 0) + 10,
+    left: 16,
+    right: 16,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    padding: 12,
+    elevation: 4,
+  },
+  modalOption: {
+    paddingVertical: 10,
+  },
+  modalOptionText: {
+    fontSize: 16,
   },
   doneText: {
     ...defaultTextFont,
@@ -690,6 +851,7 @@ const styles = StyleSheet.create({
         height: 70,
       },
       ios: {
+        marginBottom:18,
         height: 50,
       },
     }),
