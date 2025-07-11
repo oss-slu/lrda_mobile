@@ -27,6 +27,12 @@ import {
   RichText,
   Toolbar,
   useEditorBridge,
+  useBridgeState,
+  useKeyboard,
+  CustomKeyboard,
+  ColorKeyboard,
+  Images,
+  ToolbarItem,
 } from "@10play/tentap-editor";
 import NotePageStyles, { customImageCSS } from "../../styles/pages/NoteStyles";
 import { useTheme } from "../components/ThemeProvider";
@@ -44,7 +50,95 @@ import { Button, Menu, Provider as PaperProvider } from "react-native-paper";
 import TooltipContent from "../onboarding/TooltipComponent";
 import Tooltip from 'react-native-walkthrough-tooltip';
 
+
+
 const user = User.getInstance();
+
+interface ToolbarWithAttachProps {
+  editor: ReturnType<typeof useEditorBridge>;
+  onOpenAttach: () => void;
+}
+
+const ToolbarWithAttach = ({
+  editor,
+  onOpenAttach,
+}: ToolbarWithAttachProps) => {
+  const editorState = useBridgeState(editor);
+  const { isKeyboardUp } = useKeyboard();
+  const hideToolbar = !isKeyboardUp || !editorState.isFocused;
+
+  const items = [
+    {
+      onPress: ({ editor }) => () => {
+        onOpenAttach();
+        editor.focus();
+      },
+      active: () => false,
+      disabled: () => false,
+      image: () => Images.link,    // paperclip‐style icon
+    },
+    ...DEFAULT_TOOLBAR_ITEMS,
+  ] as ToolbarItem[];
+
+  return <Toolbar editor={editor} items={items} />;
+};
+
+
+const AttachmentPopupMenu = ({ 
+  visible, 
+  onDismiss, 
+  onSelectMedia, 
+  onSelectAudio, 
+  onSelectVideo,
+  anchorPosition 
+}) => {
+  const { theme } = useTheme();
+  
+  return (
+    <Menu
+      visible={visible}
+      onDismiss={onDismiss}
+      anchor={anchorPosition}
+      contentStyle={{
+        backgroundColor: theme.backgroundColor,
+        borderRadius: 8,
+        elevation: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+      }}
+    >
+      <Menu.Item
+        onPress={() => {
+          onSelectMedia();
+          onDismiss();
+        }}
+        title="Images"
+        leadingIcon="image-outline"
+        titleStyle={{ color: theme.text }}
+      />
+      <Menu.Item
+        onPress={() => {
+          onSelectAudio();
+          onDismiss();
+        }}
+        title="Audio"
+        leadingIcon="microphone-outline"
+        titleStyle={{ color: theme.text }}
+      />
+      <Menu.Item
+        onPress={() => {
+          onSelectVideo();
+          onDismiss();
+        }}
+        title="Video"
+        leadingIcon="video-outline"
+        titleStyle={{ color: theme.text }}
+      />
+    </Menu>
+  );
+};
 
 const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
   navigation,
@@ -82,15 +176,40 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
   const audioRef = useRef(newAudio);
   const titleTxtRef = useRef(titleText);
    const [keyboardHeight, setKeyboardHeight] = useState(0);
-
    const [attachMenuVisible, setAttachMenuVisible] = useState(false);
+  const [menuAnchorPosition, setMenuAnchorPosition] = useState({ x: 0, y: 0 });
+
   const openAttachMenu = () => setAttachMenuVisible(true);
   const closeAttachMenu = () => setAttachMenuVisible(false);
+  const handleToolbarAttach = () => {
+  setAttachMenuVisible(true);      // open the menu
+  setKeyboardVisible(true);  
+  setMenuAnchorPosition({ x: 50, y: 100 });      // force the bottom bar to render
+  editor.focus();                  // make sure the editor is focused
+};
+
+const handleSelectMedia = () => {
+    setViewMedia(true);
+    console.log('Media selected');
+  };
+
+  const handleSelectAudio = () => {
+    setViewAudio(true);
+    console.log('Audio selected');
+  };
+
+  const handleSelectVideo = () => {
+    // Add your video selection logic here
+    console.log('Video selected');
+    // You can call your existing video picker function here
+  };
+
   const handlePickVideo = async () => {
     // TODO: integrate your video picker here, then call addVideoToEditor(uri)
     editor.focus();
   };
-
+const rootRef = useRef<SafeAreaView>(null);
+  const [activeKeyboard, setActiveKeyboard] = useState<string|undefined>(undefined);
 
   const addNoteState = useSelector(
     (state) => state?.addNoteState?.isAddNoteOpned
@@ -459,8 +578,16 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
       }, []);
 
 
+      
+console.log("CustomKeyboard:", CustomKeyboard);
+console.log("ColorKeyboard:", ColorKeyboard);
+console.log("Images:", Images);
+
+
+
+
   return (
-    <View style={{ flex: 1 }}>
+   <SafeAreaView ref={rootRef} style={{ flex: 1 }}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
@@ -607,135 +734,26 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
 
 
 
-            <View style={styles.toolbar} testID="RichEditor">
-              <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
-            </View>
-            {Platform.OS === "ios" && (
-              <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
-            )}
-          </View>
+           
+   <View style={styles.toolbar} testID="RichEditor">
+   <ToolbarWithAttach
+     editor={editor}
+     onOpenAttach={handleToolbarAttach}
+   />
+ </View>
+       
+
+          {/* ── The custom keyboard itself ── */}
+         <CustomKeyboard
+            rootRef={rootRef}
+            activeKeyboardID={activeKeyboard}
+            setActiveKeyboardID={setActiveKeyboard}
+            keyboards={[ColorKeyboard]}
+            editor={editor}
+          />
          {/* …inside your component’s return… */}
- {/* CUSTOM ICON BAR UNDER KEYBOARD */}
-       {keyboardVisible && (
-        <View style={styles.doneButton}>
-          <View style={styles.doneInnerContainer}>
 
-            {/* PAPERCLIP + MENU */}
-            <Menu
-              visible={attachMenuVisible}
-              onDismiss={closeAttachMenu}
-              anchor={
-                <TouchableOpacity
-                  onPress={openAttachMenu}
-                  style={styles.iconButton}
-                >
-                  <Ionicons
-                    name="attach-outline"
-                    size={24}
-                    color={noteStyles.saveText.color}
-                  />
-                </TouchableOpacity>
-              }
-              // UPDATED: push menu content up above the keyboard and limit its height
-              contentStyle={{
-                marginBottom:  menuMarginBottom,
-                maxHeight: 180,      // <— reduce overall menu height
-              }}
-            >
-              {/* Formatting options */}
-             <Menu.Item
-               title="Bold"
-               onPress={() => {
-                 editor.exec("bold");      // ← toggle bold
-                 closeAttachMenu();
-                 editor.focus();
-               }}
-             />
-            <Menu.Item
-              title="Italic"
-               onPress={() => {
-                 editor.exec("italic");    // ← toggle italic
-                closeAttachMenu();
-                 editor.focus();
-               }}
-             />
-            <Menu.Item
-               title="Underline"
-               onPress={() => {
-                 editor.exec("underline"); // ← toggle underline
-                 closeAttachMenu();
-                 editor.focus();
-               }}
-             />
-             <Menu.Item
-               title="Bullet List"
-               onPress={() => {
-                 editor.exec("insertUnorderedList"); // ← bullet points
-                 closeAttachMenu();
-                 editor.focus();
-             }}
-            />
-
-              <Menu.Item
-                title="Media (photos/videos)"
-                onPress={() => {
-                  setViewMedia(v => !v);
-                  closeAttachMenu();
-                  editor.focus();
-                }}
-              />
-              <Menu.Item
-                title="Audio"
-                onPress={() => {
-                  setViewAudio(v => !v);
-                  closeAttachMenu();
-                  editor.focus();
-                }}
-              />
-              <Menu.Item
-                title="Video"
-                onPress={() => {
-                  handlePickVideo();
-                  closeAttachMenu();
-                }}
-              />
-              <Menu.Item
-                title="Tags"
-                onPress={() => {
-                  setIsTagging(t => !t);
-                  closeAttachMenu();
-                  editor.focus();
-                }}
-              />
-            </Menu>
-
-            {/* LOCATION ICON */}
-            <TouchableOpacity
-              onPress={() => {
-                toggleLocation();
-                editor.focus();
-              }}
-              style={styles.iconButton}
-            >
-              <Ionicons
-                name="location-outline"
-                size={24}
-                color={locationButtonColor}
-              />
-            </TouchableOpacity>
-
-            {/* DONE BUTTON */}
-            <TouchableOpacity
-              onPress={handleDonePress}
-              style={styles.doneTouchable}
-            >
-              <Text style={styles.doneText}>Done</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
-
-      
+      </View> 
         </KeyboardAwareScrollView>
         {/* Video Player Modal */}
         <Modal
@@ -763,7 +781,7 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
 
         <LoadingModal visible={isUpdating} />
       </KeyboardAvoidingView>
-    </View>
+    </SafeAreaView>
   );
 };
 
