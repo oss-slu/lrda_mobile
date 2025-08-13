@@ -55,8 +55,9 @@ export default {
         }
       },
       package: "register.edu.slu.cs.oss.lrda",
-      versionCode: 26,
-      newArchEnabled: true // Enable New Architecture for Android
+      versionCode: 28,
+      newArchEnabled: true, // Enable New Architecture for Android
+      
     },
     web: {
       favicon: "./assets/favicon.png"
@@ -81,6 +82,16 @@ export default {
       eas: {
         "projectId": "801029ef-db83-4668-a97a-5adcc4c333e2"
       }
-    }
+    },
+      plugins: [
+      [
+        "expo-build-properties",
+        {
+          android: {
+            minSdkVersion: 25
+          }
+        }
+      ]
+    ]
   }
 };
