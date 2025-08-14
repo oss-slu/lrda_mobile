@@ -4,7 +4,7 @@ export default {
   expo: {
     name: "Where's Religion?",
     slug: "lrda_mobile",
-    version: "1.0.7",
+    version: "1.0.8",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -21,7 +21,7 @@ export default {
       config: {
         googleMapsApiKey: ""
       },
-      buildNumber: "5",
+      buildNumber: "1",
       newArchEnabled: true, // Enable New Architecture for iOS
       infoPlist: {
         NSAppTransportSecurity: {
@@ -46,7 +46,7 @@ export default {
     
     android: {
       adaptiveIcon: {
-        foregroundImage: "./assets/adaptive-icon.png",
+        foregroundImage: "./assets/icon.png",
         backgroundColor: "#ffffff"
       },
       config: {
@@ -55,8 +55,9 @@ export default {
         }
       },
       package: "register.edu.slu.cs.oss.lrda",
-      versionCode: 24,
-      newArchEnabled: true // Enable New Architecture for Android
+      versionCode: 28,
+      newArchEnabled: true, // Enable New Architecture for Android
+      
     },
     web: {
       favicon: "./assets/favicon.png"
@@ -81,6 +82,16 @@ export default {
       eas: {
         "projectId": "801029ef-db83-4668-a97a-5adcc4c333e2"
       }
-    }
+    },
+      plugins: [
+      [
+        "expo-build-properties",
+        {
+          android: {
+            minSdkVersion: 25
+          }
+        }
+      ]
+    ]
   }
 };

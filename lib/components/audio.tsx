@@ -126,7 +126,7 @@ const AudioContainer = ({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="audio-container">
       <View style={styles.header}>
         {isRecording ? (
           <Ionicons name="mic-outline" size={60} color="red" />

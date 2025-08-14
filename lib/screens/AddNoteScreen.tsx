@@ -148,7 +148,7 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
         } else {
           console.log("Nothing to save, toggling state.");
           dispatch(toogleAddNoteState());
-          navigation.goBack()
+          navigation.navigate("Home");
         }
         }
       }, 300); // <-- 300ms delay gives WebView enough time
@@ -489,7 +489,7 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
               >
                 <TouchableOpacity
                   style={NotePageStyles().topButtons}
-                  onPress={saveNote}
+                  onPress={()=> saveNote(false)}
                 >
                   <Ionicons
                     name="arrow-back-outline"
