@@ -1,0 +1,9 @@
+{
+  "trailingComma": "es5",
+  "tabWidth": 2,
+  "experimentalTernaries": true,
+  "singleAttributePerLine": false,
+  "singleQuote": false,
+  "useTabs": false,
+  "printWidth": 140
+}

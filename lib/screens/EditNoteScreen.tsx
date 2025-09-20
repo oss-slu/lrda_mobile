@@ -1,17 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import {
-  View,
-  TextInput,
-  TouchableOpacity,
-  SafeAreaView,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Keyboard,
-  Alert,
-  Text
-} from "react-native";
+import React, { useState, useEffect, useRef } from "react";
+import { View, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, StyleSheet, Keyboard, Alert } from "react-native";
 import ToastMessage from "react-native-toast-message";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
@@ -28,18 +16,14 @@ import LoadingModal from "../components/LoadingModal";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import { useDispatch } from "react-redux";
 import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
-import { useFocusEffect } from "@react-navigation/native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 const user = User.getInstance();
 const EditNoteScreen = ({ route, navigation }) => {
   const { note, onSave } = route.params;
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
-
-
   const [title, setTitle] = useState(note.title || "Untitled");
-  const [time, setTime] = useState(new Date(note.time));
+  const time = new Date(note.time);
   const [tags, setTags] = useState(note.tags || []);
   const [media, setMedia] = useState<Media[]>(note.media || []);
   const [newAudio, setNewAudio] = useState<AudioType[]>(note.audio || []);
@@ -49,7 +33,6 @@ const EditNoteScreen = ({ route, navigation }) => {
     latitude: parseFloat(note.latitude) || 0,
     longitude: parseFloat(note.longitude) || 0,
   });
-  const [locationButtonColor, setLocationButtonColor] = useState<string>("#000");
   const [isTagging, setIsTagging] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [viewMedia, setViewMedia] = useState(false);
@@ -61,54 +44,36 @@ const EditNoteScreen = ({ route, navigation }) => {
     avoidIosKeyboard: true,
   });
   const { setPublishNote } = useAddNoteContext();
-  const hasFocusedRef = useRef(false);
-
 
   useEffect(() => {
-    // ─── LISTEN on all platforms for show / hide ───
-    const showSub = Keyboard.addListener("keyboardDidShow", () => {
-      console.log(" Keyboard shown");
+    const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+    const showSub = Keyboard.addListener(showEvent, (e) => {
       setKeyboardVisible(true);
+      setKeyboardHeight(e?.endCoordinates?.height || 0);
     });
-    const hideSub = Keyboard.addListener("keyboardDidHide", () => {
-      console.log("Keyboard hidden");
+    const hideSub = Keyboard.addListener(hideEvent, () => {
       setKeyboardVisible(false);
+      setKeyboardHeight(0);
     });
-    console.log("KEYBOARD VIS:", keyboardVisible);
+
     return () => {
       showSub.remove();
       hideSub.remove();
     };
   }, []);
-//find the keyboards height
-useEffect(() => {
-  const showSub = Keyboard.addListener("keyboardDidShow", ({ endCoordinates }) => {
-    setKeyboardVisible(true);
-    setKeyboardHeight(endCoordinates.height);
-  });
-  const hideSub = Keyboard.addListener("keyboardDidHide", () => {
-    setKeyboardVisible(false);
-    setKeyboardHeight(0);
-  });
-  return () => {
-    showSub.remove();
-    hideSub.remove();
-  };
-}, []);
 
   const handleDonePress = () => {
-    if (editor?.blur) editor.blur();   // blur the rich-text editor
-    Keyboard.dismiss();                // dismiss the native keyboard
+    if (editor?.blur) editor.blur(); // blur the rich-text editor
+    Keyboard.dismiss(); // dismiss the native keyboard
   };
 
-  const initialTitle = useRef(note.title || "");
   const initialText = useRef(note.text || "");
 
   useEffect(() => {
     setPublishNote(() => handlePublishPress);
   }, []);
-
-  const scrollViewRef = useRef(null);
 
   useEffect(() => {
     if (editor) {
@@ -124,12 +89,6 @@ useEffect(() => {
 
   const setLocationToZero = () => {
     setLocation({ latitude: 0, longitude: 0 });
-    setLocationButtonColor("red");
-  };
-
-  const syncEditorContent = async () => {
-    const latestContent = await editor.getHTML();
-    initialText.current = latestContent;
   };
 
   const fetchCurrentLocation = async () => {
@@ -141,7 +100,6 @@ useEffect(() => {
           latitude: userLocation.coords.latitude,
           longitude: userLocation.coords.longitude,
         });
-        setLocationButtonColor(theme.text);
       } catch (error) {
         Alert.alert("Error", "Failed to retrieve location.");
       }
@@ -319,161 +277,122 @@ useEffect(() => {
             setIsUpdating(false);
             dispatch(toogleAddNoteState());
           }
-        }, 300); // allow WebView to flush
+        }, 300); // allow WebView to flush (note: react native doesnt use a webview - jacob)
       }
     });
 
     return unsubscribe;
   }, [navigation, title, editor, media, newAudio, tags, isPublished, location]);
 
-
   return (
-    <View style={{ flex: 1 }} testID="EditNoteScreen">
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS==='ios' ? 0 : 0}   // ← bigger offset
-        style={{ flex: 1 }}
-      >
-            
-        <KeyboardAwareScrollView
-          ref={scrollViewRef}
-          contentContainerStyle={{ flexGrow: 1 }}
-          keyboardShouldPersistTaps="handled"
-        >
-          {/* Top bar with back arrow + title input */}
-          <View style={[NotePageStyles().topContainer, { backgroundColor: theme.homeColor }]}>
-            <View style={NotePageStyles().topButtonsContainer}>
-              <TouchableOpacity style={NotePageStyles().topButtons} onPress={handleSaveNote}>
-                <Ionicons
-                  name="arrow-back-outline"
-                  size={30}
-                  color={NotePageStyles().title.color}
-                />
-              </TouchableOpacity>
-              <TextInput
-                style={NotePageStyles().title}
-                placeholder="Title Field Note"
-                value={title}
-                onChangeText={setTitle}
+    <View style={{ flex: 1 }}>
+      <KeyboardAvoidingView behavior={"padding"} style={{ flex: 1 }}>
+        {/* Top bar with back arrow + title input */}
+        <View style={[NotePageStyles().topContainer, { backgroundColor: theme.homeColor }]}>
+          <View style={NotePageStyles().topButtonsContainer}>
+            <TouchableOpacity style={NotePageStyles().topButtons} onPress={handleSaveNote}>
+              <Ionicons name="arrow-back-outline" size={30} color={NotePageStyles().title.color} />
+            </TouchableOpacity>
+            <TextInput style={NotePageStyles().title} placeholder="Title Field Note" value={title} onChangeText={setTitle} />
+          </View>
+          <View style={NotePageStyles().keyContainer}>
+            <TouchableOpacity onPress={() => setViewMedia(!viewMedia)}>
+              <Ionicons name="images-outline" size={30} color={NotePageStyles().saveText.color} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setViewAudio(!viewAudio)}>
+              <Ionicons name="mic-outline" size={30} color={NotePageStyles().saveText.color} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={toggleLocation}>
+              <Ionicons
+                name="location-outline"
+                size={30}
+                color={location.latitude === 0 && location.longitude === 0 ? "red" : theme.text}
               />
-            </View>
-            <View style={NotePageStyles().keyContainer}>
-              <TouchableOpacity onPress={() => setViewMedia(!viewMedia)}>
-                <Ionicons name="images-outline" size={30} color={NotePageStyles().saveText.color} />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => setViewAudio(!viewAudio)}>
-                <Ionicons name="mic-outline" size={30} color={NotePageStyles().saveText.color} />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={toggleLocation}>
-                <Ionicons
-                  name="location-outline"
-                  size={30}
-                  color={location.latitude === 0 && location.longitude === 0 ? "red" : theme.text}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => setIsTagging(!isTagging)}>
-                <Ionicons name="pricetag-outline" size={30} color={NotePageStyles().saveText.color} />
-              </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setIsTagging(!isTagging)}>
+              <Ionicons name="pricetag-outline" size={30} color={NotePageStyles().saveText.color} />
+            </TouchableOpacity>
           </View>
+        </View>
 
-          {/* Media / Audio / Tagging panels */}
-          <View style={NotePageStyles().container}>
-            <PhotoScroller
-              active={viewMedia}
-              newMedia={media}
-              setNewMedia={setMedia}
-              insertImageToEditor={insertImageToEditor}
-              addVideoToEditor={addVideoToEditor}
-            />
-            {viewAudio && (
-              <AudioContainer
-                newAudio={newAudio}
-                setNewAudio={setNewAudio}
-                insertAudioToEditor={insertAudioToEditor}
-              />
-            )}
-            {isTagging && <TagWindow tags={tags} setTags={setTags} />}
-          </View>
+        {/* Media / Audio / Tagging panels */}
+        <View style={NotePageStyles().container}>
+          <PhotoScroller
+            active={viewMedia}
+            newMedia={media}
+            setNewMedia={setMedia}
+            insertImageToEditor={insertImageToEditor}
+            addVideoToEditor={addVideoToEditor}
+          />
+          {viewAudio && <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} insertAudioToEditor={insertAudioToEditor} />}
+          {isTagging && <TagWindow tags={tags} setTags={setTags} />}
+        </View>
 
-          {/* Rich-text editor */}
-          <View style={NotePageStyles().richTextContainer}>
-            <RichText
-              editor={editor}
-              placeholder="Write Content Here..."
-              style={[
-                NotePageStyles().editor,
-                {
-                  backgroundColor: theme.backgroundColor,
-                  minHeight: 200,
-                  paddingBottom: 120,
-                },
-              ]}
-            />
-          </View>
-
-          {Platform.OS === "ios" && (
-          <View style={styles.toolbar} testID="Toolbar">
-            <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
-          </View>
-        )}
-          {keyboardVisible && (
-  <View
-    style={[
-      styles.doneButton,
-      { bottom: 7 }  // 10px of padding above the keyboard
-    ]}
-    testID="doneButton"
-  >
-    <TouchableOpacity onPress={handleDonePress}>
-      <Text style={styles.doneText}>Done</Text>
-    </TouchableOpacity>
-  </View>
-)}
-           {Platform.OS === "android" && (
-          <View style={styles.toolbar} testID="Toolbar">
-            <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
-          </View>
-        )}
-        </KeyboardAwareScrollView>
-
-
+        {/* Rich-text editor */}
+        <View style={NotePageStyles().richTextContainer}>
+          <RichText
+            editor={editor}
+            style={[
+              NotePageStyles().editor,
+              {
+                backgroundColor: theme.backgroundColor,
+                minHeight: 200,
+                // paddingBottom: 120,
+              },
+            ]}
+          />
+        </View>
 
         {/* Loading spinner */}
         <LoadingModal visible={isUpdating} />
       </KeyboardAvoidingView>
-
-
+      <View
+        style={[
+          styles.toolbar,
+          {
+            bottom: keyboardVisible ? (Platform.OS === "android" ? keyboardHeight + 20 : keyboardHeight) : 0,
+            display: keyboardVisible ? "flex" : "none",
+          },
+        ]}
+        pointerEvents={keyboardVisible ? "auto" : "none"}
+      >
+        {/* Wrap in a second View to nudge it up to hide the Toolbar border since it doesnt seem like we can style the Toolbar element directly */}
+        <View style={styles.toolbarInner}>
+          <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
+        </View>
+        <TouchableOpacity onPress={handleDonePress} style={[styles.doneButton, !keyboardVisible && { display: "none" }]}>
+          <Ionicons name="chevron-down" size={28} color={"#007AFF"} />
+        </TouchableOpacity>
+      </View>
     </View>
-    
   );
 };
 const styles = StyleSheet.create({
-  doneButton: {
-    position: "absolute",
-    right: 16,       // fixed distance from the right edge
-    zIndex: 10,
-  },
-  doneText: {
-    color: "blue",
-    fontSize: 14,
-    textAlign: "right",
-  },
   toolbar: {
-    position: 'absolute', // Keep toolbar at the bottom of the screen
-    bottom: 27, // Align toolbar with the bottom edge
-    width: '100%', // Full-width toolbar
-    justifyContent: 'center', // Center items in the toolbar
-    paddingHorizontal: 10,
-    zIndex: 10, // Ensure it stays above other elements
-    ...Platform.select({
-      android: {
-        height: 50,
-      },
-      ios: {
-        height: 50,
-      },
-    }),
+    position: "absolute",
+    width: "100%",
+    height: 50,
+    zIndex: 20,
+    overflow: "hidden",
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 18,
+    borderTopRightRadius: 18,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  toolbarInner: {
+    height: "105%", // Important to hide default toolbar border
+    justifyContent: "center",
+    flex: 1,
+  },
+  doneButton: {
+    height: "100%",
+    borderRadius: 4,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    backgroundColor: "#00000000",
+    zIndex: 30,
   },
 });
 
