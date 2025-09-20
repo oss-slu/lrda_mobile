@@ -391,7 +391,7 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({ navigation, 
   }, []);
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1 }} testID="AddNoteScreen">
       <KeyboardAvoidingView behavior={"padding"} style={{ flex: 1 }}>
         <Tooltip
           topAdjustment={Platform.OS === "android" ? -StatusBar.currentHeight : 0}
@@ -490,7 +490,11 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({ navigation, 
           <View style={styles.toolbarInner}>
             <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
           </View>
-          <TouchableOpacity onPress={handleDonePress} style={[styles.doneButton, !keyboardVisible && { display: "none" }]}>
+          <TouchableOpacity
+            testID="doneButton"
+            onPress={handleDonePress}
+            style={[styles.doneButton, !keyboardVisible && { display: "none" }]}
+          >
             <Ionicons name="chevron-down" size={28} color={"#007AFF"} />
           </TouchableOpacity>
         </View>

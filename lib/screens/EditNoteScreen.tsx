@@ -285,7 +285,7 @@ const EditNoteScreen = ({ route, navigation }) => {
   }, [navigation, title, editor, media, newAudio, tags, isPublished, location]);
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1 }} testID="EditNoteScreen">
       <KeyboardAvoidingView behavior={"padding"} style={{ flex: 1 }}>
         {/* Top bar with back arrow + title input */}
         <View style={[NotePageStyles().topContainer, { backgroundColor: theme.homeColor }]}>
@@ -360,7 +360,11 @@ const EditNoteScreen = ({ route, navigation }) => {
         <View style={styles.toolbarInner}>
           <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
         </View>
-        <TouchableOpacity onPress={handleDonePress} style={[styles.doneButton, !keyboardVisible && { display: "none" }]}>
+        <TouchableOpacity
+          testID="doneButton"
+          onPress={handleDonePress}
+          style={[styles.doneButton, !keyboardVisible && { display: "none" }]}
+        >
           <Ionicons name="chevron-down" size={28} color={"#007AFF"} />
         </TouchableOpacity>
       </View>
