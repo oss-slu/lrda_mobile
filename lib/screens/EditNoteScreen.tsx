@@ -277,7 +277,7 @@ const EditNoteScreen = ({ route, navigation }) => {
             setIsUpdating(false);
             dispatch(toogleAddNoteState());
           }
-        }, 300); // allow WebView to flush (note: react native doesnt use a webview - jacob)
+        }, 300); // allow WebView to flush
       }
     });
 
