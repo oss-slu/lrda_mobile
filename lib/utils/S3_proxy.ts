@@ -1,5 +1,5 @@
 import { Platform } from "react-native";
-import { getThumbnailAsync } from "expo-video-thumbnails";
+import * as VideoThumbnails from "expo-video-thumbnails";
 import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
 import { File, Paths } from "expo-file-system";
 
@@ -9,9 +9,42 @@ const S3_PROXY_PREFIX = process.env.S3_PROXY_PREFIX || "http://s3-proxy.rerum.io
 let attempts = 0;
 
 async function getThumbnail(uri: string): Promise<string> {
-  const { uri: thumbnailUri } = await getThumbnailAsync(uri);
-  const address = await uploadMedia(thumbnailUri, "image");
-  return address;
+  console.log("🎬 [getThumbnail] Starting thumbnail generation for video:", uri);
+  
+  try {
+    console.log("🎬 [getThumbnail] Calling VideoThumbnails.getThumbnailAsync with options:", {
+      time: 15000,
+      quality: 0.8
+    });
+    
+    const result = await VideoThumbnails.getThumbnailAsync(uri, {
+      time: 15000, // Get thumbnail at 15 seconds
+      quality: 0.8, // 80% quality
+    });
+    
+    console.log("🎬 [getThumbnail] VideoThumbnails.getThumbnailAsync result:", result);
+    console.log("🎬 [getThumbnail] Thumbnail URI:", result.uri);
+    console.log("🎬 [getThumbnail] Thumbnail dimensions:", { width: result.width, height: result.height });
+    
+    if (!result.uri) {
+      console.error("❌ [getThumbnail] No thumbnail URI returned from VideoThumbnails.getThumbnailAsync");
+      throw new Error("No thumbnail URI returned");
+    }
+    
+    console.log("🎬 [getThumbnail] Uploading thumbnail to S3...");
+    const address = await uploadMedia(result.uri, "image");
+    console.log("🎬 [getThumbnail] Thumbnail uploaded successfully to S3:", address);
+    
+    return address;
+  } catch (error) {
+    console.error("❌ [getThumbnail] Error generating thumbnail:", error);
+    console.error("❌ [getThumbnail] Error details:", {
+      message: error.message,
+      stack: error.stack,
+      videoUri: uri
+    });
+    throw error;
+  }
 }
 
 async function convertHeicToJpg(uri: string): Promise<string> {

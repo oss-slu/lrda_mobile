@@ -89,12 +89,26 @@ const PhotoScroller = forwardRef(
       []
     );
 
-    useEffect(() => {
-      console.log("PhotoScroller mounted");
-      return () => {
-        console.log("PhotoScroller unmounted");
-      };
-    }, []);
+  useEffect(() => {
+    console.log("PhotoScroller mounted");
+    console.log("PhotoScroller initial media:", newMedia);
+    return () => {
+      console.log("PhotoScroller unmounted");
+    };
+  }, []);
+
+  useEffect(() => {
+    console.log("🎬 [PhotoScroller] Media array updated:", {
+      mediaCount: newMedia.length,
+      mediaTypes: newMedia.map(m => m.getType()),
+      videoItems: newMedia.filter(m => m.getType() === "video").map(m => ({
+        uuid: m.getUuid(),
+        uri: m.getUri(),
+        isVideoType: m instanceof VideoType,
+        thumbnail: m instanceof VideoType ? m.getThumbnail() : 'N/A'
+      }))
+    });
+  }, [newMedia]);
     
 
     const handleImageSelection = async (result: {
@@ -141,10 +155,28 @@ const PhotoScroller = forwardRef(
           uri.endsWith(".mp4")
         ) {
           console.log("🎥 [PhotoScroller] Processing video:", uri);
+          console.log("🎥 [PhotoScroller] Video file details:", {
+            uri: uri,
+            fileName: uri.split('/').pop(),
+            fileExtension: uri.split('.').pop()
+          });
+          
+          console.log("🎥 [PhotoScroller] Starting video upload to S3...");
           const uploadedUrl = await uploadMedia(uri, "video");
-          console.log("✅ [PhotoScroller] Video uploaded successfully:", uploadedUrl);
+          console.log("✅ [PhotoScroller] Video uploaded successfully to S3:", uploadedUrl);
+          
+          console.log("🎥 [PhotoScroller] Starting thumbnail generation...");
           const thumbnail = await getThumbnail(uri);
-          console.log("🖼️ [PhotoScroller] Video thumbnail generated:", thumbnail);
+          console.log("🖼️ [PhotoScroller] Video thumbnail generated and uploaded:", thumbnail);
+          
+          console.log("🎥 [PhotoScroller] Creating VideoType instance with:", {
+            uuid: uuid.v4().toString(),
+            type: "video",
+            uri: uploadedUrl,
+            thumbnail: thumbnail,
+            duration: "0:00"
+          });
+          
           const newMediaItem = new VideoType({
             uuid: uuid.v4().toString(),
             type: "video",
@@ -152,6 +184,10 @@ const PhotoScroller = forwardRef(
             thumbnail: thumbnail,
             duration: "0:00",
           });
+          
+          console.log("🎥 [PhotoScroller] VideoType instance created:", newMediaItem);
+          console.log("🎥 [PhotoScroller] VideoType thumbnail getter:", newMediaItem.getThumbnail());
+          
           setNewMedia([...newMedia, newMediaItem]);
           addVideoToEditor(uploadedUrl);
         }
@@ -202,21 +238,36 @@ const PhotoScroller = forwardRef(
         if (mediaType === "image") {
           curImages.push(mediaItem.getUri());
         } else if (mediaType === "video") {
+          console.log("🎬 [PhotoScroller] Processing video for goBig:", {
+            mediaItem: mediaItem,
+            isVideoType: mediaItem instanceof VideoType,
+            videoUri: mediaItem.getUri()
+          });
+          
           try {
             if (mediaItem instanceof VideoType) {
               const thumbnail = mediaItem.getThumbnail();
+              console.log("🎬 [PhotoScroller] VideoType thumbnail:", thumbnail);
               curImages.push(thumbnail);
             } else {
               // Fallback: try to access thumbnail property directly
               const videoItem = mediaItem as any;
+              console.log("🎬 [PhotoScroller] Fallback video item:", {
+                hasThumbnail: !!videoItem.thumbnail,
+                thumbnail: videoItem.thumbnail,
+                videoUri: mediaItem.getUri()
+              });
+              
               if (videoItem.thumbnail) {
                 curImages.push(videoItem.thumbnail);
               } else {
                 // Last resort: use the video URI itself
+                console.log("🎬 [PhotoScroller] Using video URI as fallback:", mediaItem.getUri());
                 curImages.push(mediaItem.getUri());
               }
             }
           } catch (error) {
+            console.error("❌ [PhotoScroller] Error processing video thumbnail:", error);
             curImages.push(mediaItem.getUri());
           }
         }
@@ -247,14 +298,27 @@ const PhotoScroller = forwardRef(
         ImageURI = mediaItem.getUri();
         IsImage = true;
       } else if (ImageType === "video") {
+        console.log("🎬 [PhotoScroller] renderItem processing video:", {
+          mediaItem: mediaItem,
+          isVideoType: mediaItem instanceof VideoType,
+          videoUri: mediaItem.getUri()
+        });
+        
         try {
           // Check if it's actually a VideoType instance
           if (mediaItem instanceof VideoType) {
             ImageURI = mediaItem.getThumbnail();
+            console.log("🎬 [PhotoScroller] renderItem VideoType thumbnail:", ImageURI);
             IsImage = true;
           } else {
             // Fallback: try to access thumbnail property directly
             const videoItem = mediaItem as any;
+            console.log("🎬 [PhotoScroller] renderItem fallback video item:", {
+              hasThumbnail: !!videoItem.thumbnail,
+              thumbnail: videoItem.thumbnail,
+              videoUri: mediaItem.getUri()
+            });
+            
             if (videoItem.thumbnail) {
               ImageURI = videoItem.thumbnail;
               IsImage = true;
@@ -265,11 +329,20 @@ const PhotoScroller = forwardRef(
             }
           }
         } catch (error) {
+          console.error("❌ [PhotoScroller] renderItem error processing video thumbnail:", error);
           // Fallback to video URI
           ImageURI = mediaItem.getUri();
           IsImage = true;
         }
       }
+      
+      console.log("🎬 [PhotoScroller] renderItem final values:", {
+        ImageType: ImageType,
+        ImageURI: ImageURI,
+        IsImage: IsImage,
+        key: key
+      });
+      
       return (
         <TouchableOpacity
           key={key}
@@ -284,6 +357,8 @@ const PhotoScroller = forwardRef(
                 imageURI={ImageURI}
                 type={ImageType}
                 isImage={true}
+                width={100}
+                height={100}
               />
             ) : (
               <View style={[styles.mediaItem, { 
@@ -301,8 +376,40 @@ const PhotoScroller = forwardRef(
                 </Text>
               </View>
             )}
+            
+            {/* Delete/Archive X Button */}
+            <TouchableOpacity
+              style={PhotoStyles.deleteButton}
+              onPress={() => handleDeleteMedia(index)}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Ionicons name="close" size={16} color="#fff" />
+            </TouchableOpacity>
           </View>
         </TouchableOpacity>
+      );
+    };
+
+    const handleDeleteMedia = (index: number) => {
+      Alert.alert(
+        'Delete Media',
+        'Are you sure you want to delete this media item?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'Delete',
+            style: 'destructive',
+            onPress: () => {
+              console.log("🗑️ [PhotoScroller] Deleting media at index:", index);
+              const updatedMedia = newMedia.filter((_, i) => i !== index);
+              setNewMedia(updatedMedia);
+              console.log("🗑️ [PhotoScroller] Media deleted. Remaining items:", updatedMedia.length);
+            },
+          },
+        ]
       );
     };
 
@@ -417,12 +524,6 @@ const PhotoScroller = forwardRef(
         </TouchableOpacity>
       );
     }
-
-    const handleDeleteMedia = (index: number) => {
-      const updatedMedia = [...newMedia];
-      updatedMedia.splice(index, 1);
-      setNewMedia(updatedMedia);
-    };
 
     const renderImageView = () => (
       <View>

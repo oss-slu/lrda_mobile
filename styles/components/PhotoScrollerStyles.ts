@@ -96,4 +96,24 @@ export const PhotoStyles = StyleSheet.create({
         borderRadius: 10,
         overflow: "hidden", // Prevent content from overflowing
       },
+      deleteButton: {
+        position: "absolute",
+        top: 5,
+        right: 5,
+        zIndex: 30, // Higher than other elements
+        height: 24,
+        width: 24,
+        backgroundColor: "rgba(255,0,0,0.8)",
+        borderRadius: 12,
+        justifyContent: "center",
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+      },
   });

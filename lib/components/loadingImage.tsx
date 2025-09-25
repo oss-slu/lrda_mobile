@@ -20,6 +20,15 @@ export default function LoadingImage({
 }: LoadingImageProps) {
   const [isLoading, setIsLoading] = useState(true);
 
+  console.log("🖼️ [LoadingImage] Props received:", {
+    imageURI: imageURI,
+    type: type,
+    isImage: isImage,
+    height: height,
+    width: width,
+    willRender: isImage && imageURI !== ""
+  });
+
   if (isImage && imageURI !== "") {
     return (
       <View
@@ -51,7 +60,12 @@ export default function LoadingImage({
             <Image
               style={[styles.preview, { width: width, height: height }]}
               source={{ uri: imageURI }}
-              onLoadEnd={() => setIsLoading(false)}
+              onLoadStart={() => console.log("🖼️ [LoadingImage] Video thumbnail load started for:", imageURI)}
+              onLoadEnd={() => {
+                console.log("🖼️ [LoadingImage] Video thumbnail load completed for:", imageURI);
+                setIsLoading(false);
+              }}
+              onError={(error) => console.error("❌ [LoadingImage] Video thumbnail load error for:", imageURI, error)}
             />
             <View style={styles.playUnderlay}>
               <Ionicons
