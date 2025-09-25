@@ -23,7 +23,7 @@ console.error = (...args) => {
   ) {
     return;
   }
-  originalError.apply(console, args);
+  originalError.call(console, ...args);
 };
 
 // Note: Individual test files handle their own mocks and cleanup

@@ -1,6 +1,7 @@
 import { doc, getDoc } from "firebase/firestore";
 import { UserData } from "../../types";
 import  {db} from "../config/firebase";
+import { validateTitle, validateNoteContent } from "./validation";
 
 /**
  * Provides methods for interacting with the API to fetch, create, update, and delete notes.
@@ -334,6 +335,17 @@ static async fetchCreatorName(creatorId: string): Promise<string> {
   static async writeNewNote(note: any) {
     console.log("🚀 [API] writeNewNote called with data:", JSON.stringify(note, null, 2));
     
+    // Validate input data
+    const titleError = validateTitle(note.title);
+    if (titleError) {
+      throw new Error(`Title validation failed: ${titleError}`);
+    }
+    
+    const contentError = validateNoteContent(note.text);
+    if (contentError) {
+      throw new Error(`Content validation failed: ${contentError}`);
+    }
+    
     const url = `${API_BASE_URL}create`;
     console.log("🌐 [API] Request URL:", url);
     
@@ -401,6 +413,17 @@ static async fetchCreatorName(creatorId: string): Promise<string> {
    */
   static async overwriteNote(note: any) {
     console.log("🔄 [API] overwriteNote called with data:", JSON.stringify(note, null, 2));
+    
+    // Validate input data
+    const titleError = validateTitle(note.title);
+    if (titleError) {
+      throw new Error(`Title validation failed: ${titleError}`);
+    }
+    
+    const contentError = validateNoteContent(note.text);
+    if (contentError) {
+      throw new Error(`Content validation failed: ${contentError}`);
+    }
     
     const url = `${API_BASE_URL}overwrite`;
     console.log("🌐 [API] Request URL:", url);

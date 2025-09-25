@@ -35,6 +35,7 @@ import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import { defaultTextFont } from "../../styles/globalStyles";
 import TooltipContent from "../onboarding/TooltipComponent";
+import { sanitizeHTML } from "../utils/htmlSanitizer";
 import Tooltip from "react-native-walkthrough-tooltip";
 
 const user = User.getInstance();
@@ -324,7 +325,7 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({ navigation, 
     const userLocation = await Location.getCurrentPositionAsync({});
     const finalLocation = userLocation ? userLocation.coords : { latitude: 0, longitude: 0 };
     const textContent = await editor.getHTML();
-    const sanitizedContent = textContent.replace(/<\/?p>/g, ""); // Remove <p> tags
+    const sanitizedContent = sanitizeHTML(textContent); // Properly sanitize HTML content
     const uid = await user.getId();
     const title = getTitle();
     return {

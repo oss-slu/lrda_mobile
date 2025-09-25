@@ -16,6 +16,7 @@ import LoadingModal from "../components/LoadingModal";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import { useDispatch } from "react-redux";
 import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
+import { sanitizeHTML } from "../utils/htmlSanitizer";
 
 const user = User.getInstance();
 
@@ -282,10 +283,11 @@ const EditNoteScreen = ({ route, navigation }) => {
     try {
       const userId = await user.getId();
       const textContent = await editor.getHTML();
+      const sanitizedContent = sanitizeHTML(textContent); // Properly sanitize HTML content
       const editedNote = {
         id: note.id,
         title,
-        text: textContent,
+        text: sanitizedContent,
         creator: userId,
         media,
         latitude: location.latitude.toString(),
@@ -322,11 +324,12 @@ const EditNoteScreen = ({ route, navigation }) => {
         setTimeout(async () => {
           try {
             const textContent = await editor.getHTML();
+            const sanitizedContent = sanitizeHTML(textContent); // Properly sanitize HTML content
 
             const updatedNote = {
               ...note,
               title,
-              text: textContent,
+              text: sanitizedContent,
               media,
               audio: newAudio,
               tags,
