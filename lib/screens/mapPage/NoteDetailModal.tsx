@@ -19,7 +19,8 @@ import ApiService from "../../utils/api_calls";
 import { useTheme } from "../../components/ThemeProvider";
 import ImageModal from "./ImageModal";
 import VideoModal from "./VideoModal";
-import { Audio, Video } from "expo-av";
+import { Audio } from "expo-av";
+import { VideoView, useVideoPlayer } from "expo-video";
 import { VideoType } from "../../models/media_class";
 import { defaultTextFont } from "../../../styles/globalStyles";
 
@@ -382,17 +383,14 @@ const LoadingVideo: React.FC<LoadingVideoProps> = ({ uri, onPress, width }) => {
     );
   }
 
+  const player = useVideoPlayer({ uri });
+
   return (
     <View style={[loadingVideoStyles.container, { width: containerWidth, height: containerHeight }]}>
-      <Video
-        source={{ uri }}
+      <VideoView
+        player={player}
         style={loadingVideoStyles.video}
-        resizeMode="contain"
-        shouldPlay={false}
-        isLooping={false}
-        onLoad={() => setLoading(false)}
-        onError={() => setError(true)}
-        onLoadEnd={() => setLoading(false)}
+        contentFit="contain"
       />
       {loading && (
         <View style={loadingVideoStyles.loadingOverlay}>

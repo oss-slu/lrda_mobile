@@ -94,11 +94,8 @@ afterEach(() => {
 });
 
 
-jest.mock('expo-av', () => {
-  const React = require('react');
+jest.mock('expo-audio', () => {
   return {
-    // Minimal Video stub so VideoModal renders without error
-    Video: (props) => React.createElement('Video', props),
     // Minimal Audio.Sound.createAsync stub that immediately resolves
     Audio: {
       Sound: {
@@ -117,8 +114,15 @@ jest.mock('expo-av', () => {
         ),
       },
     },
-    // Provide ResizeMode so VideoModal.resizeMode={ResizeMode.CONTAIN} works
-    ResizeMode: { CONTAIN: 'contain' },
+  };
+});
+
+jest.mock('expo-video', () => {
+  const React = require('react');
+  return {
+    // Minimal VideoView stub so VideoModal renders without error
+    VideoView: (props) => React.createElement('VideoView', props),
+    useVideoPlayer: jest.fn(() => ({})),
   };
 });
 jest.mock('firebase/firestore', () => ({
@@ -222,8 +226,8 @@ describe('NoteDetailModal', () => {
       description: '<div><a href="https://example.com/audio.mp3">Audio</a></div>',
     };
   
-    const expoAV = require('expo-av');
-    jest.spyOn(expoAV.Audio.Sound, 'createAsync').mockReturnValue(new Promise(() => {}));
+    const expoAudio = require('expo-audio');
+    jest.spyOn(expoAudio.Audio.Sound, 'createAsync').mockReturnValue(new Promise(() => {}));
   
     const { getByTestId } = render(
       <NoteDetailModal isVisible={true} note={audioNote} onClose={() => {}} />

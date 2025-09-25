@@ -6,7 +6,7 @@ import * as Location from "expo-location";
 import PhotoScroller from "../components/photoScroller";
 import { User } from "../models/user_class";
 import AudioContainer from "../components/audio";
-import { Media, AudioType } from "../models/media_class";
+import { Media, AudioType, VideoType, PhotoType } from "../models/media_class";
 import ApiService from "../utils/api_calls";
 import TagWindow from "../components/tagging";
 import { DEFAULT_TOOLBAR_ITEMS, RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
@@ -18,14 +18,63 @@ import { useDispatch } from "react-redux";
 import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
 
 const user = User.getInstance();
+
+// 🔧 FUNCTION TO CONVERT MEDIA ITEMS TO PROPER TYPES
+const convertMediaItems = (mediaArray: any[]): Media[] => {
+  if (!mediaArray || !Array.isArray(mediaArray)) {
+    return [];
+  }
+  
+  return mediaArray.map((item, index) => {
+    try {
+      if (item.type === "video") {
+        const videoItem = new VideoType({
+          uuid: item.uuid || `video-${index}`,
+          type: "video",
+          uri: item.uri,
+          thumbnail: item.thumbnail || item.uri, // Fallback to URI if no thumbnail
+          duration: item.duration || "00:00"
+        });
+        return videoItem;
+      } else if (item.type === "image") {
+        const photoItem = new PhotoType({
+          uuid: item.uuid || `photo-${index}`,
+          type: "image",
+          uri: item.uri
+        });
+        return photoItem;
+      } else {
+        // Fallback to base Media class
+        const mediaItem = new Media({
+          uuid: item.uuid || `media-${index}`,
+          type: item.type || "unknown",
+          uri: item.uri
+        });
+        return mediaItem;
+      }
+    } catch (error) {
+      // Fallback to base Media class
+      return new Media({
+        uuid: item.uuid || `media-${index}`,
+        type: item.type || "unknown",
+        uri: item.uri
+      });
+    }
+  });
+};
+
 const EditNoteScreen = ({ route, navigation }) => {
   const { note, onSave } = route.params;
+  
+  
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [title, setTitle] = useState(note.title || "Untitled");
   const time = new Date(note.time);
   const [tags, setTags] = useState(note.tags || []);
-  const [media, setMedia] = useState<Media[]>(note.media || []);
+  const [media, setMedia] = useState<Media[]>(convertMediaItems(note.media || []));
+  
+
   const [newAudio, setNewAudio] = useState<AudioType[]>(note.audio || []);
   const [isPublished, setIsPublished] = useState(note.published || false);
   const [ispublishBtnClicked, setIsPublishBtnClicked] = useState(false);
@@ -37,6 +86,7 @@ const EditNoteScreen = ({ route, navigation }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [viewMedia, setViewMedia] = useState(false);
   const [viewAudio, setViewAudio] = useState(false);
+  
   const { theme } = useTheme();
   const dispatch = useDispatch();
   const editor = useEditorBridge({
@@ -44,6 +94,7 @@ const EditNoteScreen = ({ route, navigation }) => {
     avoidIosKeyboard: true,
   });
   const { setPublishNote } = useAddNoteContext();
+  
 
   useEffect(() => {
     const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
@@ -194,9 +245,18 @@ const EditNoteScreen = ({ route, navigation }) => {
           tags,
         };
 
-        await ApiService.overwriteNote(editedNote);
-        onSave(editedNote);
-        setIsPublishBtnClicked(true);
+        console.log("💾 [EditNoteScreen] Publishing note with data:", JSON.stringify(editedNote, null, 2));
+        
+        const response = await ApiService.overwriteNote(editedNote);
+        console.log("✅ [EditNoteScreen] Note published successfully, response:", response);
+        
+        if (response.ok) {
+          onSave(editedNote);
+          setIsPublishBtnClicked(true);
+        } else {
+          console.error("❌ [EditNoteScreen] Failed to publish note, status:", response.status);
+          throw new Error(`Failed to publish note: ${response.status} ${response.statusText}`);
+        }
 
         ToastMessage.show({
           type: "success",
@@ -235,8 +295,17 @@ const EditNoteScreen = ({ route, navigation }) => {
         time,
         tags,
       };
-      await ApiService.overwriteNote(editedNote);
-      onSave(editedNote);
+      console.log("💾 [EditNoteScreen] Updating note with data:", JSON.stringify(editedNote, null, 2));
+      
+      const response = await ApiService.overwriteNote(editedNote);
+      console.log("✅ [EditNoteScreen] Note updated successfully, response:", response);
+      
+      if (response.ok) {
+        onSave(editedNote);
+      } else {
+        console.error("❌ [EditNoteScreen] Failed to update note, status:", response.status);
+        throw new Error(`Failed to update note: ${response.status} ${response.statusText}`);
+      }
     } catch (error) {
       console.error("Error updating the note:", error);
     } finally {
@@ -267,10 +336,17 @@ const EditNoteScreen = ({ route, navigation }) => {
               time: new Date(),
             };
 
-            console.log("Auto-saving EditNote on exit...");
+            console.log("💾 [EditNoteScreen] Auto-saving EditNote on exit with data:", JSON.stringify(updatedNote, null, 2));
             setIsUpdating(true);
-            await ApiService.overwriteNote(updatedNote);
-            onSave(updatedNote);
+            
+            const response = await ApiService.overwriteNote(updatedNote);
+            console.log("✅ [EditNoteScreen] Auto-save successful, response:", response);
+            
+            if (response.ok) {
+              onSave(updatedNote);
+            } else {
+              console.error("❌ [EditNoteScreen] Auto-save failed, status:", response.status);
+            }
           } catch (e) {
             console.warn("Auto-save failed:", e);
           } finally {

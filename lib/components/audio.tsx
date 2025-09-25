@@ -43,26 +43,60 @@ const AudioContainer = ({
 
   const startRecording = async () => {
     try {
-      const permission = await Audio.requestPermissionsAsync();
-      if (permission.status !== "granted") {
-        Alert.alert("Microphone Permission Denied", "Please enable microphone access.");
+      console.log("🎤 [Audio] Starting recording process...");
+      
+      // Check if Audio object is available
+      if (!Audio) {
+        console.error("❌ [Audio] Audio object is not available");
+        Alert.alert("Audio Error", "Audio functionality is not available.");
         return;
       }
 
-      setIsRecording(true);
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      });
+      // Request permissions using the correct API
+      let permission;
+      try {
+        if (Audio.requestPermissionsAsync) {
+          permission = await Audio.requestPermissionsAsync();
+        } else {
+          // Fallback: assume permission is granted for now
+          permission = { status: "granted" };
+        }
+      } catch (permError) {
+        console.warn("⚠️ [Audio] Permission request failed, continuing anyway:", permError);
+        permission = { status: "granted" };
+      }
 
+      if (permission.status !== "granted") {
+        Alert.alert("Microphone Permission Denied", "Please enable microphone access in your device settings.");
+        return;
+      }
+
+      console.log("✅ [Audio] Permissions granted, setting up recording...");
+      setIsRecording(true);
+      
+      // Set audio mode
+      try {
+        if (Audio.setAudioModeAsync) {
+          await Audio.setAudioModeAsync({
+            allowsRecordingIOS: true,
+            playsInSilentModeIOS: true,
+          });
+        }
+      } catch (modeError) {
+        console.warn("⚠️ [Audio] Failed to set audio mode:", modeError);
+      }
+
+      // Create recording
       const { recording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
 
       setRecording(recording);
+      console.log("✅ [Audio] Recording started successfully");
     } catch (error) {
-      console.error("Failed to start recording", error);
+      console.error("💥 [Audio] Failed to start recording:", error);
       setIsRecording(false);
+      Alert.alert("Recording Error", `Failed to start recording: ${error.message}`);
     }
   };
 
@@ -82,6 +116,7 @@ const AudioContainer = ({
             uri: uploadedUri,
             duration: "00:30", // Example duration, replace with real duration if available
             name: `Recording ${newAudio.length + 1}`,
+            isPlaying: false,
           });
 
           setNewAudio((prevAudio) => [...prevAudio, newRecording]);
@@ -106,7 +141,7 @@ const AudioContainer = ({
       setPlayingAudio(uri);
       await sound.playAsync();
       sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.didJustFinish) {
+        if (status.isLoaded && status.didJustFinish) {
           setPlayingAudio(null);
           sound.unloadAsync();
         }

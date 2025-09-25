@@ -89,6 +89,15 @@ export default {
     },
     plugins: [
       "expo-font",
+      "expo-audio",
+      "expo-av",
+      [
+        "expo-video",
+        {
+          supportsBackgroundPlayback: true,
+          supportsPictureInPicture: true,
+        },
+      ],
       [
         "expo-build-properties",
         {

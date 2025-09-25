@@ -26,7 +26,7 @@ import { DEFAULT_TOOLBAR_ITEMS, RichText, Toolbar, useEditorBridge } from "@10pl
 import NotePageStyles, { customImageCSS } from "../../styles/pages/NoteStyles";
 import { useTheme } from "../components/ThemeProvider";
 import LoadingModal from "../components/LoadingModal";
-import { Video } from "expo-av";
+import { VideoView, useVideoPlayer } from "expo-video";
 import { User } from "../models/user_class";
 import { AudioType, Media } from "../models/media_class";
 import ApiService from "../utils/api_calls";
@@ -351,15 +351,27 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({ navigation, 
     setIsUpdating(true);
 
     try {
-      await ApiService.writeNewNote(noteData);
-      if (route.params.refreshPage) {
-        route.params.refreshPage();
-      }
-      if (navigation.canGoBack()) {
-        navigation.goBack();
+      console.log("💾 [AddNoteScreen] Attempting to save note with data:", JSON.stringify(noteData, null, 2));
+      
+      const response = await ApiService.writeNewNote(noteData);
+      console.log("✅ [AddNoteScreen] Note saved successfully, response:", response);
+      
+      if (response.ok) {
+        console.log("🎉 [AddNoteScreen] API call successful, refreshing page and navigating back");
+        if (route.params.refreshPage) {
+          route.params.refreshPage();
+        }
+        if (navigation.canGoBack()) {
+          navigation.goBack();
+        }
+      } else {
+        console.error("❌ [AddNoteScreen] API call failed with status:", response.status);
+        throw new Error(`Failed to save note: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
-      console.error("Error saving the note:", error);
+      console.error("💥 [AddNoteScreen] Error saving the note:", error);
+      // You might want to show a user-friendly error message here
+      // Alert.alert("Error", "Failed to save note. Please try again.");
     } finally {
       setIsUpdating(false);
       dispatch(toogleAddNoteState());
@@ -502,7 +514,14 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({ navigation, 
         <Modal animationType="slide" transparent={true} visible={isVideoModalVisible} onRequestClose={() => setIsVideoModalVisible(false)}>
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-              {videoUri && <Video source={{ uri: videoUri }} useNativeControls style={styles.videoPlayer} />}
+              {videoUri && (
+                <VideoView
+                  player={useVideoPlayer({ uri: videoUri })}
+                  contentFit="contain"
+                  nativeControls
+                  style={styles.videoPlayer}
+                />
+              )}
               <TouchableOpacity onPress={() => setIsVideoModalVisible(false)}>
                 <Text style={styles.closeButton}>Close</Text>
               </TouchableOpacity>

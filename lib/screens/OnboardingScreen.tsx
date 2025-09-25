@@ -1,7 +1,8 @@
 import React from 'react';
 import { StyleSheet, Dimensions, TouchableOpacity, Text } from 'react-native';
 import Onboarding from 'react-native-onboarding-swiper';
-import { Video } from 'expo-av';
+import { VideoView, useVideoPlayer } from 'expo-video';
+import { useEvent } from 'expo';
 import { setItem } from '../utils/async_storage';
 import { defaultTextFont } from '../../styles/globalStyles';
 
@@ -42,13 +43,15 @@ const OnboardingScreen = ({ navigation }) => {
         {
           backgroundColor: '#87ceeb',
           image: (
-            <Video
-              source={require('../../assets/videos/v3_1.mp4')}
+            <VideoView
+              player={useVideoPlayer(require('../../assets/videos/v3_1.mp4'), (player) => {
+                player.loop = true;
+                player.muted = true;
+                player.play();
+              })}
               style={{ width, height }}
-              resizeMode="cover"
-              shouldPlay
-              isLooping
-              isMuted={true}
+              contentFit="cover"
+              nativeControls={false}
             />
           ),
           title: 'Welcome to Our App!',
@@ -57,13 +60,15 @@ const OnboardingScreen = ({ navigation }) => {
         {
           backgroundColor: '#ff7f50',
           image: (
-            <Video
-              source={require('../../assets/videos/v1.mp4')}
+            <VideoView
+              player={useVideoPlayer(require('../../assets/videos/v1.mp4'), (player) => {
+                player.loop = true;
+                player.muted = true;
+                player.play();
+              })}
               style={{ width, height }}
-              resizeMode="cover"
-              shouldPlay
-              isLooping
-              isMuted={true}
+              contentFit="cover"
+              nativeControls={false}
             />
           ),
           title: 'Stay Connected',
@@ -72,13 +77,15 @@ const OnboardingScreen = ({ navigation }) => {
         {
           backgroundColor: '#ffe135',
           image: (
-            <Video
-              source={require('../../assets/videos/v4_1.mp4')}
+            <VideoView
+              player={useVideoPlayer(require('../../assets/videos/v4_1.mp4'), (player) => {
+                player.loop = true;
+                player.muted = true;
+                player.play();
+              })}
               style={{ width, height }}
-              resizeMode="cover"
-              shouldPlay
-              isLooping
-              isMuted={true}
+              contentFit="cover"
+              nativeControls={false}
             />
           ),
           title: 'Get Notified',
@@ -87,13 +94,15 @@ const OnboardingScreen = ({ navigation }) => {
         {
           backgroundColor: '#ffa280',
           image: (
-            <Video
-              source={require('../../assets/videos/v2.mp4')}
+            <VideoView
+              player={useVideoPlayer(require('../../assets/videos/v2.mp4'), (player) => {
+                player.loop = true;
+                player.muted = true;
+                player.play();
+              })}
               style={{ width, height }}
-              resizeMode="cover"
-              shouldPlay
-              isLooping
-              isMuted={true}
+              contentFit="cover"
+              nativeControls={false}
             />
           ),
           title: 'Explore Features',
@@ -102,13 +111,15 @@ const OnboardingScreen = ({ navigation }) => {
         {
           backgroundColor: '#90ee90',
           image: (
-            <Video
-              source={require('../../assets/videos/v5_2.mp4')}
+            <VideoView
+              player={useVideoPlayer(require('../../assets/videos/v5_2.mp4'), (player) => {
+                player.loop = true;
+                player.muted = true;
+                player.play();
+              })}
               style={{ width, height}}
-              resizeMode="cover"
-              shouldPlay
-              isLooping
-              isMuted={true}
+              contentFit="cover"
+              nativeControls={false}
             />
           ),
           title: 'Get Started!',

@@ -332,25 +332,66 @@ static async fetchCreatorName(creatorId: string): Promise<string> {
    * @returns {Promise<Response>} The response from the API.
    */
   static async writeNewNote(note: any) {
-    return fetch(`${API_BASE_URL}/create`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        type: "message",
-        title: note.title,
-        media: note.media,
-        BodyText: note.text,
-        creator: note.creator,
-        latitude: note.latitude || "",
-        longitude: note.longitude || "",
-        audio: note.audio,
-        published: note.published,
-        tags: note.tags,
-        time: note.time || new Date (),
-      }),
-    });
+    console.log("🚀 [API] writeNewNote called with data:", JSON.stringify(note, null, 2));
+    
+    const url = `${API_BASE_URL}create`;
+    console.log("🌐 [API] Request URL:", url);
+    
+    const requestBody = {
+      type: "message",
+      title: note.title,
+      media: note.media,
+      BodyText: note.text,
+      creator: note.creator,
+      latitude: note.latitude || "",
+      longitude: note.longitude || "",
+      audio: note.audio,
+      published: note.published,
+      tags: note.tags,
+      time: note.time || new Date(),
+    };
+    
+    console.log("📤 [API] Request body:", JSON.stringify(requestBody, null, 2));
+    
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+      
+      console.log("📊 [API] Response status:", response.status);
+      console.log("📊 [API] Response headers:", Object.fromEntries(response.headers.entries()));
+      
+      const responseText = await response.text();
+      console.log("📥 [API] Raw response body:", responseText);
+      
+      if (!response.ok) {
+        console.error("❌ [API] Error response:", {
+          status: response.status,
+          statusText: response.statusText,
+          body: responseText
+        });
+        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+      }
+      
+      // Try to parse JSON response
+      let responseData;
+      try {
+        responseData = responseText ? JSON.parse(responseText) : null;
+        console.log("✅ [API] Parsed response data:", responseData);
+      } catch (parseError) {
+        console.log("⚠️ [API] Response is not JSON, raw text:", responseText);
+        responseData = responseText;
+      }
+      
+      return response;
+    } catch (error) {
+      console.error("💥 [API] writeNewNote error:", error);
+      throw error;
+    }
   }
 
   /**
@@ -359,27 +400,68 @@ static async fetchCreatorName(creatorId: string): Promise<string> {
    * @returns {Promise<Response>} The response from the API.
    */
   static async overwriteNote(note: any) {
-    return await fetch(`${API_BASE_URL}overwrite`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        "@id": note.id,
-        title: note.title,
-        BodyText: note.text,
-        type: "message",
-        creator: note.creator,
-        media: note.media,
-        latitude: note.latitude,
-        longitude: note.longitude,
-        audio: note.audio,
-        published: note.published,
-        tags: note.tags,
-        time: note.time,
-        isArchived:note.isArchived,
-      }),
-    });
+    console.log("🔄 [API] overwriteNote called with data:", JSON.stringify(note, null, 2));
+    
+    const url = `${API_BASE_URL}overwrite`;
+    console.log("🌐 [API] Request URL:", url);
+    
+    const requestBody = {
+      "@id": note.id,
+      title: note.title,
+      BodyText: note.text,
+      type: "message",
+      creator: note.creator,
+      media: note.media,
+      latitude: note.latitude,
+      longitude: note.longitude,
+      audio: note.audio,
+      published: note.published,
+      tags: note.tags,
+      time: note.time,
+      isArchived: note.isArchived,
+    };
+    
+    console.log("📤 [API] Request body:", JSON.stringify(requestBody, null, 2));
+    
+    try {
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+      
+      console.log("📊 [API] Response status:", response.status);
+      console.log("📊 [API] Response headers:", Object.fromEntries(response.headers.entries()));
+      
+      const responseText = await response.text();
+      console.log("📥 [API] Raw response body:", responseText);
+      
+      if (!response.ok) {
+        console.error("❌ [API] Error response:", {
+          status: response.status,
+          statusText: response.statusText,
+          body: responseText
+        });
+        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+      }
+      
+      // Try to parse JSON response
+      let responseData;
+      try {
+        responseData = responseText ? JSON.parse(responseText) : null;
+        console.log("✅ [API] Parsed response data:", responseData);
+      } catch (parseError) {
+        console.log("⚠️ [API] Response is not JSON, raw text:", responseText);
+        responseData = responseText;
+      }
+      
+      return response;
+    } catch (error) {
+      console.error("💥 [API] overwriteNote error:", error);
+      throw error;
+    }
   }
 
   static async searchMessages(query: string): Promise<any[]> {

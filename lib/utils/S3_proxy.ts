@@ -1,7 +1,7 @@
 import { Platform } from "react-native";
 import { getThumbnailAsync } from "expo-video-thumbnails";
-import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
-import * as FileSystem from "expo-file-system";
+import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
+import { File, Paths } from "expo-file-system";
 
 // const S3_PROXY_PREFIX = "http://99.7.218.98:8080/S3/";
 const S3_PROXY_PREFIX = process.env.S3_PROXY_PREFIX || "http://s3-proxy.rerum.io/S3/";
@@ -16,68 +16,101 @@ async function getThumbnail(uri: string): Promise<string> {
 
 async function convertHeicToJpg(uri: string): Promise<string> {
   console.log("Converting HEIC to JPG...");
-  const convertedImage = await manipulateAsync(uri, [], {
-    format: SaveFormat.JPEG,
-  });
-  console.log("Converted image URI: ", convertedImage.uri);
-  return convertedImage.uri;
+  
+  try {
+    // Use the new ImageManipulator API
+    const context = ImageManipulator.manipulate(uri);
+    const imageRef = await context.renderAsync();
+    const result = await imageRef.saveAsync({
+      format: SaveFormat.JPEG,
+    });
+    
+    console.log("Converted image URI: ", result.uri);
+    return result.uri;
+  } catch (error) {
+    console.error("Error converting HEIC to JPG:", error);
+    throw error;
+  }
 }
 
 async function uploadMedia(uri: string, mediaType: string): Promise<string> {
-  console.log("uploadMedia - Input URI:", uri);
+  console.log("🚀 [S3] uploadMedia called with:", {
+    uri,
+    mediaType,
+    platform: Platform.OS,
+    s3ProxyPrefix: S3_PROXY_PREFIX
+  });
 
   let data = new FormData();
   const uniqueName = `media-${Date.now()}.${
     mediaType === "image" ? "jpg" : "mp4"
   }`;
 
+  console.log("📝 [S3] Creating FormData with unique name:", uniqueName);
+
   if (Platform.OS === "web") {
+    console.log("🌐 [S3] Processing for web platform");
     const response = await fetch(uri);
     const blob = await response.blob();
-    const file = new File([blob], uniqueName, {
+    const webFile = new (globalThis as any).File([blob], uniqueName, {
       type: mediaType === "image" ? "image/jpeg" : "video/mp4",
     });
-    data.append("file", file);
+    data.append("file", webFile);
+    console.log("✅ [S3] Web file appended to FormData");
   } else if (Platform.OS == "ios") {
-    let base64 = await FileSystem.readAsStringAsync(uri, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
-    base64 = `data:${
-      mediaType === "image" ? "image/jpeg" : "video/mp4"
-    };base64,${base64}`;
+    console.log("🍎 [S3] Processing for iOS platform");
+    // For iOS, use the file directly instead of converting to base64
     data.append("file", {
+      uri: uri,
       type: mediaType === "image" ? "image/jpeg" : "video/mp4",
-      uri: base64,
       name: uniqueName,
-    });
+    } as any);
+    console.log("✅ [S3] iOS file appended to FormData");
   } else if (Platform.OS == "android") {
+    console.log("🤖 [S3] Processing for Android platform");
     data.append("file", {
       uri: uri,
       type: "video/mp4",
       name: uniqueName,
-    });
+    } as any);
+    console.log("✅ [S3] Android file appended to FormData");
   }
 
-  console.log("uploadMedia - Starting fetch with S3_PROXY_PREFIX:", S3_PROXY_PREFIX);
+  const uploadUrl = S3_PROXY_PREFIX + "uploadFile";
+  console.log("🌐 [S3] Starting upload to:", uploadUrl);
 
-  return fetch(S3_PROXY_PREFIX + "uploadFile", {
+  return fetch(uploadUrl, {
     method: "POST",
     mode: "cors",
     body: data,
   })
     .then(async (resp) => {
+      console.log("📊 [S3] Response received:", {
+        status: resp.status,
+        statusText: resp.statusText,
+        headers: Object.fromEntries(resp.headers.entries())
+      });
+
       if (resp.ok) {
         const location = resp.headers.get("Location");
-        console.log("uploadMedia - Uploaded successfully, Location:", location);
+        console.log("✅ [S3] Upload successful! Location:", location);
         return location;
       } else {
-        const errorText = await resp.text(); // Retrieve response text for errors
-        console.log("uploadMedia - Failed response:", errorText);
+        const errorText = await resp.text();
+        console.error("❌ [S3] Upload failed:", {
+          status: resp.status,
+          statusText: resp.statusText,
+          errorText: errorText
+        });
         throw new Error(`Failed to upload. Status: ${resp.status}, Error: ${errorText}`);
       }
     })
     .catch((err) => {
-      console.error("uploadMedia - Network request failed:", err.message);
+      console.error("💥 [S3] Network request failed:", {
+        message: err.message,
+        stack: err.stack,
+        name: err.name
+      });
       throw err; // Re-throw error to be caught in the AddNoteScreen
     });
 }
@@ -86,64 +119,94 @@ async function uploadMedia(uri: string, mediaType: string): Promise<string> {
 export { getThumbnail, convertHeicToJpg, uploadMedia };
 
 export async function uploadAudio(uri: string): Promise<string> {
+  console.log("🎵 [S3] uploadAudio called with:", {
+    uri,
+    platform: Platform.OS,
+    s3ProxyPrefix: S3_PROXY_PREFIX,
+    attempts
+  });
+
   let type = "video/3gp.";
   let data = new FormData();
   const uniqueName = `media-${Date.now()}.3gp`;
 
+  console.log("📝 [S3] Creating FormData for audio with unique name:", uniqueName);
+
   if (Platform.OS === "web") {
+    console.log("🌐 [S3] Processing audio for web platform");
     const response = await fetch(uri);
     const blob = await response.blob();
-    const file = new File([blob], uniqueName, {
+    const webFile = new (globalThis as any).File([blob], uniqueName, {
       type: `audio/mp3`,
     });
 
-    data.append("file", file);
+    data.append("file", webFile);
+    console.log("✅ [S3] Web audio file appended to FormData");
   } else if (Platform.OS === "android") {
+    console.log("🤖 [S3] Processing audio for Android platform");
     // Handle Android upload differently
-    const fileInfo = await FileSystem.getInfoAsync(uri);
-    const fileUri = fileInfo.uri;
-
+    const file = new File(uri);
     data.append("file", {
-      uri: fileUri,
+      uri: file.uri,
       type: type,
       name: uniqueName,
-    });
+    } as any);
+    console.log("✅ [S3] Android audio file appended to FormData");
   } else {
-    let base64 = await FileSystem.readAsStringAsync(uri, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
-    base64 = `data:audio/mp3;base64,${base64}`;
+    console.log("🍎 [S3] Processing audio for iOS platform");
+    // For iOS, use the file directly instead of converting to base64
     data.append("file", {
-      type: `audio/mp3`,
-      uri: base64,
+      uri: uri,
+      type: "audio/mp3",
       name: uniqueName,
-    });
-    console.log("base64===",base64)
+    } as any);
+    console.log("✅ [S3] iOS audio file appended to FormData");
   }
 
-  return fetch(S3_PROXY_PREFIX + "uploadFile", {
+  const uploadUrl = S3_PROXY_PREFIX + "uploadFile";
+  console.log("🌐 [S3] Starting audio upload to:", uploadUrl);
+
+  return fetch(uploadUrl, {
     method: "POST",
     mode: "cors",
     body: data,
   })
-    .then((resp) => {
-      console.log("Got the response from the upload file servlet");
-      console.log("uploadMedia - Server response status:", resp.status);
+    .then(async (resp) => {
+      console.log("📊 [S3] Audio upload response received:", {
+        status: resp.status,
+        statusText: resp.statusText,
+        headers: Object.fromEntries(resp.headers.entries())
+      });
+
       if (resp.ok) {
         const location = resp.headers.get("Location");
-        console.log("uploadMedia - Uploaded successfully, Location:", location);
+        console.log("✅ [S3] Audio upload successful! Location:", location);
         attempts = 0;
         return location;
       } else {
-        console.log("uploadMedia - Server response body:", resp.body);
+        const errorText = await resp.text();
+        console.error("❌ [S3] Audio upload failed:", {
+          status: resp.status,
+          statusText: resp.statusText,
+          errorText: errorText
+        });
+        throw new Error(`Failed to upload audio. Status: ${resp.status}, Error: ${errorText}`);
       }
     })
     .catch((err) => {
+      console.error("💥 [S3] Audio upload network request failed:", {
+        message: err.message,
+        stack: err.stack,
+        name: err.name,
+        attempts
+      });
+
       if (attempts > 3) {
-        console.error("uploadMedia - Error:", err);
-        return err;
+        console.error("❌ [S3] Max retry attempts reached for audio upload");
+        throw err;
       }
       attempts++;
+      console.log("🔄 [S3] Retrying audio upload, attempt:", attempts);
       return uploadAudio(uri);
     });
 }
