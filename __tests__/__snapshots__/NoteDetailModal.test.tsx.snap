@@ -3,7 +3,6 @@
 exports[`NoteDetailModal renders without crashing 1`] = `
 <Modal
   animationType="slide"
-  hardwareAccelerated={false}
   transparent={false}
   visible={true}
 >
@@ -81,7 +80,7 @@ exports[`NoteDetailModal renders without crashing 1`] = `
           ]
         }
       >
-        
+        
       </Text>
     </View>
   </View>
@@ -155,7 +154,7 @@ exports[`NoteDetailModal renders without crashing 1`] = `
             ]
           }
         >
-          
+          
         </Text>
         <Text
           style={
@@ -197,7 +196,7 @@ exports[`NoteDetailModal renders without crashing 1`] = `
             ]
           }
         >
-          
+          
         </Text>
         <Text
           style={
@@ -416,18 +415,9 @@ exports[`NoteDetailModal renders without crashing 1`] = `
                     ]
                   }
                 >
-                  <Video
-                    isLooping={false}
-                    onError={[Function]}
-                    onLoad={[Function]}
-                    onLoadEnd={[Function]}
-                    resizeMode="contain"
-                    shouldPlay={false}
-                    source={
-                      {
-                        "uri": "https://example.com/video.mp4",
-                      }
-                    }
+                  <VideoView
+                    contentFit="contain"
+                    player={{}}
                     style={
                       {
                         "height": "100%",
@@ -515,7 +505,7 @@ exports[`NoteDetailModal renders without crashing 1`] = `
                         ]
                       }
                     >
-                      
+                      
                     </Text>
                   </View>
                 </View>

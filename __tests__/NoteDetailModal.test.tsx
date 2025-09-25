@@ -94,7 +94,7 @@ afterEach(() => {
 });
 
 
-jest.mock('expo-audio', () => {
+jest.mock('expo-av', () => {
   return {
     // Minimal Audio.Sound.createAsync stub that immediately resolves
     Audio: {
@@ -125,6 +125,10 @@ jest.mock('expo-video', () => {
     useVideoPlayer: jest.fn(() => ({})),
   };
 });
+
+jest.mock('expo', () => ({
+  useEvent: jest.fn(() => ({})),
+}));
 jest.mock('firebase/firestore', () => ({
   getFirestore: jest.fn(),
   doc: jest.fn(),
@@ -220,23 +224,23 @@ describe('NoteDetailModal', () => {
   });
 
   it('should display audio loading indicator while audio is loading', () => {
-    jest.useFakeTimers();
     const audioNote = {
       ...mockNote,
       description: '<div><a href="https://example.com/audio.mp3">Audio</a></div>',
     };
   
-    const expoAudio = require('expo-audio');
-    jest.spyOn(expoAudio.Audio.Sound, 'createAsync').mockReturnValue(new Promise(() => {}));
+    // Mock Audio.Sound.createAsync to return a promise that never resolves
+    const expoAv = require('expo-av');
+    jest.spyOn(expoAv.Audio.Sound, 'createAsync').mockReturnValue(new Promise(() => {}));
   
     const { getByTestId } = render(
       <NoteDetailModal isVisible={true} note={audioNote} onClose={() => {}} />
     );
     
     expect(getByTestId('audioLoadingIndicator')).toBeTruthy();
-    jest.useRealTimers();
-  // Our mock of createAsync never resolves, so LoadingAudio stays in "loading" state
-  // (No need to redeclare audioNote or getByTestId here)
+    
+    // Clean up the spy
+    expoAv.Audio.Sound.createAsync.mockRestore();
   });
   
 
