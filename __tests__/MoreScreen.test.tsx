@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react-native';
+import { fireEvent, render, act } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
 import { NavigationContainer } from '@react-navigation/native'; // Added NavigationContainer
 import configureStore from 'redux-mock-store';
@@ -28,6 +28,10 @@ jest.mock('react-native/Libraries/Image/Image', () => ({
   ...jest.requireActual('react-native/Libraries/Image/Image'),
   resolveAssetSource: jest.fn(() => ({ uri: 'mocked-asset-uri' })),
 }));
+
+afterEach(() => {
+  jest.restoreAllMocks();
+});
 
 jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
   settings: {},
@@ -123,64 +127,86 @@ beforeAll(() => {
 
 describe('MorePage - Main View', () => {
   it('should render the carousel', async () => {
-    const { getByTestId } = render(
+    const component = render(
       <Provider store={store}>
         <NavigationContainer>
           <MorePage />
         </NavigationContainer>
       </Provider>
     );
+    
+    await act(async () => {
+      // Wait for any async operations to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+    });
+    
     await waitFor(() => {
-      expect(getByTestId('carousel')).toBeTruthy();
+      expect(component.getByTestId('carousel')).toBeTruthy();
     });
   });
 
   it('should toggle dark mode when theme switch is pressed', async () => {
-    const { getByTestId } = render(
+    const component = render(
       <Provider store={store}>
         <NavigationContainer>
           <MorePage />
         </NavigationContainer>
       </Provider>
     );
-    const toggleSwitch = getByTestId('dark-mode-toggle');
+    
+    await act(async () => {
+      // Wait for any async operations to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+    });
+    
+    const toggleSwitch = component.getByTestId('dark-mode-toggle');
     fireEvent.press(toggleSwitch);
     expect(mockToggleDarkmode).toHaveBeenCalled();
   });
 
   it('should display user and navigate to AccountPage when avatar is pressed', async () => {
-    const { getByText } = render(
+    const component = render(
       <Provider store={store}>
         <NavigationContainer>
           <MorePage />
         </NavigationContainer>
       </Provider>
     );
+    
+    await act(async () => {
+      // Wait for any async operations to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+    });
 
     // Wait until the asynchronous useEffect sets the initials
     await waitFor(() => {
-      expect(getByText('JD')).toBeTruthy();
+      expect(component.getByText('JD')).toBeTruthy();
     });
 
-    fireEvent.press(getByText('JD'));
+    fireEvent.press(component.getByText('JD'));
     expect(mockNavigate).toHaveBeenCalledWith("AccountPage");
   });
 
   it('should call logout when the Logout menu item is pressed', async () => {
-    const { getByText } = render(
+    const component = render(
       <Provider store={store}>
         <NavigationContainer>
           <MorePage />
         </NavigationContainer>
       </Provider>
     );
+    
+    await act(async () => {
+      // Wait for any async operations to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+    });
 
     // Wait until the asynchronous useEffect sets the user initials
     await waitFor(() => {
-      expect(getByText('JD')).toBeTruthy();
+      expect(component.getByText('JD')).toBeTruthy();
     });
 
-    const logoutBtn = getByText('Logout');
+    const logoutBtn = component.getByText('Logout');
     fireEvent.press(logoutBtn);
 
     // Wait for the asynchronous logout function to be called
@@ -208,19 +234,24 @@ describe('MorePage - Main View', () => {
   });
 
   it('should navigate to TeamPage when "Meet our team" menu item is pressed', async () => {
-    const { getByText } = render(
+    const component = render(
       <Provider store={store}>
         <NavigationContainer>
           <MorePage />
         </NavigationContainer>
       </Provider>
     );
-
-    await waitFor(() => {
-      expect(getByText('JD')).toBeTruthy();
+    
+    await act(async () => {
+      // Wait for any async operations to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
     });
 
-    const teamBtn = getByText('Meet our team');
+    await waitFor(() => {
+      expect(component.getByText('JD')).toBeTruthy();
+    });
+
+    const teamBtn = component.getByText('Meet our team');
     fireEvent.press(teamBtn);
     expect(mockNavigate).toHaveBeenCalledWith("TeamPage");
   });
@@ -236,6 +267,11 @@ describe('MorePage - Settings View and Modals', () => {
         </NavigationContainer>
       </Provider>
     );
+    
+    await act(async () => {
+      // Wait for any async operations to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+    });
     // Wait for the main view to load
     await waitFor(() => {
       expect(utils.getByText('JD')).toBeTruthy();

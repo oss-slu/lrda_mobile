@@ -46,7 +46,10 @@ jest.mock("firebase/storage", () => ({
 jest.mock('firebase/firestore', () => ({
   getFirestore: jest.fn(() => ({})), 
   doc: jest.fn(() => ({})), 
-  getDoc: jest.fn(() => Promise.resolve({ exists: () => false })),
+  getDoc: jest.fn(() => Promise.resolve({ 
+    exists: jest.fn(() => false),
+    data: jest.fn(() => ({}))
+  })),
 }));
 
 // Stub SplashScreen to bypass it entirely

@@ -37,8 +37,7 @@ beforeEach(() => {
 
 afterEach(() => {
   // Restore the original console methods
-  console.log.mockRestore();
-  console.error.mockRestore();
+  jest.restoreAllMocks();
 });
 
 jest.mock('@10play/tentap-editor', () => ({

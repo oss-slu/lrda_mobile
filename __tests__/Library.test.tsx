@@ -18,12 +18,32 @@ jest.mock('firebase/database', () => ({
 jest.mock('firebase/firestore', () => ({
   getFirestore: jest.fn(() => ({})), 
   doc: jest.fn(() => ({})), 
-  getDoc: jest.fn(() => Promise.resolve({ exists: () => false })),
+  getDoc: jest.fn(() => Promise.resolve({ 
+    exists: jest.fn(() => false),
+    data: jest.fn(() => ({}))
+  })),
 }));
 
 
 jest.mock("firebase/storage", () => ({
   getStorage: jest.fn(),
+}));
+
+// Mock ApiService to prevent async leaks
+jest.mock('../lib/utils/api_calls', () => ({
+  __esModule: true,
+  default: {
+    fetchCreatorName: jest.fn(() => Promise.resolve('Mock Creator')),
+    fetchMapsMessagesBatch: jest.fn(() => Promise.resolve([])),
+    searchMessages: jest.fn(() => Promise.resolve([])),
+    writeNewNote: jest.fn(() => Promise.resolve({})),
+    overwriteNote: jest.fn(() => Promise.resolve({})),
+    deleteNoteFromAPI: jest.fn(() => Promise.resolve(true)),
+    createUserData: jest.fn(() => Promise.resolve({})),
+    fetchUserData: jest.fn(() => Promise.resolve(null)),
+    fetchMessages: jest.fn(() => Promise.resolve([])),
+    fetchMessagesBatch: jest.fn(() => Promise.resolve([])),
+  },
 }));
 
 jest.mock('../lib/utils/data_conversion', () => {

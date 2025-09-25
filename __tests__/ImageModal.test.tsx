@@ -33,9 +33,7 @@ beforeEach(() => {
 
 afterEach(() => {
   // Restore the original console methods
-  console.log.mockRestore();
-  console.error.mockRestore();
-  console.warn.mockRestore();
+  jest.restoreAllMocks();
 });
 
 describe('ImageModal', () => {

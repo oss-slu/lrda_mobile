@@ -106,10 +106,7 @@ const renderWithProviders = (component: React.ReactElement) => {
   return render(
     <Provider store={store}>
       <AddNoteProvider>{component}</AddNoteProvider>
-    </Provider>,
-    {
-      hostComponentNames: ['Text', 'View', 'TextInput', 'ScrollView', 'Image', 'SafeAreaView'],
-    },
+    </Provider>
   );
 };
 
@@ -122,9 +119,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  console.log.mockRestore();
-  console.error.mockRestore();
-  console.warn.mockRestore();
+  jest.restoreAllMocks();
   moxios.uninstall();
 });
 

@@ -153,8 +153,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  console.log.mockRestore();
-  console.error.mockRestore();
+  jest.restoreAllMocks();
 });
 
 // Helper function to render the component with providers
@@ -180,7 +179,10 @@ describe("AddNoteScreen", () => {
 
     // Mock location permission to be granted
     jest.spyOn(Location, "getForegroundPermissionsAsync").mockResolvedValueOnce({
-      status: "granted",
+      status: "granted" as any,
+      expires: "never",
+      granted: true,
+      canAskAgain: true,
     });
 
     // Mock the API call to simulate a failure
@@ -202,7 +204,10 @@ describe("AddNoteScreen", () => {
 
     // Mock location permission to be granted
     jest.spyOn(Location, "getForegroundPermissionsAsync").mockResolvedValueOnce({
-      status: "granted",
+      status: "granted" as any,
+      expires: "never",
+      granted: true,
+      canAskAgain: true,
     });
 
     // Mock the API call to succeed
@@ -254,20 +259,38 @@ describe("AddNoteScreen", () => {
   it('renders the "Done" button when the keyboard is open', async () => {
     const routeMock = { params: { untitledNumber: 1 } };
 
-    // Render first, so AddNoteScreen sets up the keyboard listener
-    const { getByTestId } = renderWithProviders(<AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />);
-
-    // trigger the keyboardDidShow event
-    act(() => {
-      if (typeof keyboardListeners["keyboardDidShow"] === "function") {
-        keyboardListeners["keyboardDidShow"]({ endCoordinates: { height: 300 } });
+    // Mock the Keyboard.addListener to immediately trigger the show event
+    const originalAddListener = Keyboard.addListener;
+    jest.spyOn(Keyboard, 'addListener').mockImplementation((event, callback) => {
+      // If it's a show event, immediately call the callback
+      if (event === 'keyboardDidShow' || event === 'keyboardWillShow') {
+        setTimeout(() => callback({ endCoordinates: { height: 300 } }), 0);
       }
-      if (typeof keyboardListeners["keyboardWillShow"] === "function") {
-        keyboardListeners["keyboardWillShow"]({ endCoordinates: { height: 300 } });
-      }
+      return {
+        remove: jest.fn(),
+        emitter: null,
+        listener: callback,
+        context: null,
+        eventType: event,
+        target: null,
+        key: null,
+      } as unknown as EmitterSubscription;
     });
 
-    expect(getByTestId("doneButton")).toBeTruthy();
+    // Render the component
+    const { getByTestId, queryByTestId } = renderWithProviders(<AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />);
+
+    // Wait for the keyboard event to be triggered
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    });
+
+    // Now the Done button should be visible
+    const doneButton = queryByTestId("doneButton");
+    expect(doneButton).toBeTruthy();
+
+    // Restore the original addListener
+    Keyboard.addListener = originalAddListener;
   });
 
   describe("AddNoteScreen's checkLocationPermission method", () => {
@@ -298,7 +321,10 @@ describe("AddNoteScreen", () => {
 
       // Mock location permission to be granted
       jest.spyOn(Location, "getForegroundPermissionsAsync").mockResolvedValueOnce({
-        status: "granted",
+        status: "granted" as any,
+      expires: "never",
+      granted: true,
+      canAskAgain: true,
       });
 
       // Mock the API call to succeed

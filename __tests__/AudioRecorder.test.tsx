@@ -38,15 +38,16 @@ afterEach(() => {
 
 describe('AudioContainer', () => {
   it('renders without crashing', () => {
-    const { getByTestId } = render(<AudioContainer newAudio={[]} setNewAudio={() => {}} />);
+    const { getByTestId } = render(<AudioContainer newAudio={[]} setNewAudio={() => {}} insertAudioToEditor={() => {}} />);
     expect(getByTestId('audio-container')).toBeTruthy(); // or whatever testID you use
   });
 
   it('renders with audio', () => {
     const { getByText } = render(
       <AudioContainer
-        newAudio={[{ uri: 'test', name: 'test' }]}
+        newAudio={[{ uri: 'test', name: 'test', duration: '00:00', isPlaying: false, isAudio: true, getDuration: () => '00:00', getUuid: () => 'test-uuid', getUri: () => 'test', getType: () => 'audio', getIsPlaying: () => false, setIsPlaying: () => {}, getName: () => 'test' } as any]}
         setNewAudio={() => {}}
+        insertAudioToEditor={() => {}}
       />
     );
 

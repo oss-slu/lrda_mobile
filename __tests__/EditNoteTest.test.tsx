@@ -112,7 +112,7 @@ afterEach(() => {
 });
 
 describe("EditNoteScreen", () => {
-  it("renders without crashing", () => {
+  it("renders without crashing", async () => {
     const onSaveMock = jest.fn();
     render(
       <Provider store={store}>
@@ -121,10 +121,16 @@ describe("EditNoteScreen", () => {
         </AddNoteProvider>
       </Provider>
     );
+
+    await act(async () => {
+      // Wait for any async operations to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+    });
+
     expect(screen.getByTestId("EditNoteScreen")).toBeTruthy();
   });
 
-  it("renders the done button when keyboard is shown", () => {
+  it("renders the done button when keyboard is shown", async () => {
     const onSaveMock = jest.fn();
 
     render(
@@ -134,6 +140,11 @@ describe("EditNoteScreen", () => {
         </AddNoteProvider>
       </Provider>
     );
+
+    await act(async () => {
+      // Wait for any async operations to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+    });
 
     // Simulate both possible keyboard events
     act(() => {

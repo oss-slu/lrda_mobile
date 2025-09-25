@@ -34,6 +34,23 @@ jest.mock("firebase/database", () => ({
   getDatabase: jest.fn(),
 }));
 
+// Mock ApiService to prevent async leaks
+jest.mock('../lib/utils/api_calls', () => ({
+  __esModule: true,
+  default: {
+    fetchCreatorName: jest.fn(() => Promise.resolve('Mock Creator')),
+    fetchMapsMessagesBatch: jest.fn(() => Promise.resolve([])),
+    searchMessages: jest.fn(() => Promise.resolve([])),
+    writeNewNote: jest.fn(() => Promise.resolve({})),
+    overwriteNote: jest.fn(() => Promise.resolve({})),
+    deleteNoteFromAPI: jest.fn(() => Promise.resolve(true)),
+    createUserData: jest.fn(() => Promise.resolve({})),
+    fetchUserData: jest.fn(() => Promise.resolve(null)),
+    fetchMessages: jest.fn(() => Promise.resolve([])),
+    fetchMessagesBatch: jest.fn(() => Promise.resolve([])),
+  },
+}));
+
 jest.mock("firebase/storage", () => ({
   getStorage: jest.fn(),
 }));
@@ -56,7 +73,7 @@ jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
   })),
 }));
 
-onAuthStateChanged.mockImplementation((auth, callback) => {
+(onAuthStateChanged as jest.Mock).mockImplementation((auth, callback) => {
   const mockUser = { uid: "12345", email: "test@example.com" };
   callback(mockUser);
 });
@@ -86,8 +103,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  console.log.mockRestore();
-  console.error.mockRestore();
+  jest.restoreAllMocks();
 });
 
 describe('HomeScreen', () => {
@@ -136,7 +152,7 @@ describe('HomeScreen', () => {
     const { getByTestId } = render(
       <Provider store={store}>
         <AddNoteProvider>
-          <HomeScreen route={routeMock as any} showTooltip={false} />
+          <HomeScreen route={routeMock as any} showTooltip={false} navigation={undefined} />
         </AddNoteProvider>
       </Provider>
     );
@@ -159,7 +175,7 @@ describe('HomeScreen', () => {
     const { getByTestId } = render(
       <Provider store={store}> {/* Wrap with Provider */}
         <AddNoteProvider>
-          <HomeScreen route={routeMock as any} showTooltip={false} />
+          <HomeScreen route={routeMock as any} showTooltip={false} navigation={undefined} />
         </AddNoteProvider>
       </Provider>
     );
@@ -175,7 +191,7 @@ describe('HomeScreen', () => {
     const { getByTestId } = render(
       <Provider store={store}> {/* Wrap with Provider */}
         <AddNoteProvider>
-          <HomeScreen route={routeMock as any} showTooltip={false} />
+          <HomeScreen route={routeMock as any} showTooltip={false} navigation={undefined} />
         </AddNoteProvider>
       </Provider>
     );
@@ -197,7 +213,7 @@ describe('HomeScreen', () => {
     const { getByTestId } = render(
       <Provider store={store}> {/* Wrap with Provider */}
         <AddNoteProvider>
-          <HomeScreen route={routeMock as any} showTooltip={false} />
+          <HomeScreen route={routeMock as any} showTooltip={false} navigation={undefined} />
         </AddNoteProvider>
       </Provider>
     );
@@ -216,7 +232,7 @@ describe('HomeScreen', () => {
     const { getByTestId } = render(
       <Provider store={store}> {/* Wrap with Provider */}
         <AddNoteProvider>
-          <HomeScreen route={routeMock as any} showTooltip={false} />
+          <HomeScreen route={routeMock as any} showTooltip={false} navigation={undefined} />
         </AddNoteProvider>
       </Provider>
     );
@@ -235,7 +251,7 @@ describe('HomeScreen', () => {
     const { getByTestId } = render(
       <Provider store={store}> {/* Wrap with Provider */}
         <AddNoteProvider>
-          <HomeScreen route={routeMock as any} showTooltip={false} />
+          <HomeScreen route={routeMock as any} showTooltip={false} navigation={undefined} />
         </AddNoteProvider>
       </Provider>
     );
@@ -251,7 +267,7 @@ describe('HomeScreen', () => {
     const { getByTestId } = render(
       <Provider store={store}> {/* Wrap with Provider */}
         <AddNoteProvider>
-          <HomeScreen route={routeMock as any} showTooltip={false} />
+          <HomeScreen route={routeMock as any} showTooltip={false} navigation={undefined} />
         </AddNoteProvider>
       </Provider>
     );
@@ -290,7 +306,7 @@ describe('HomeScreen', () => {
     const { getByText } = render(
       <Provider store={store}> {/* Wrap with Provider */}
         <AddNoteProvider>
-          <HomeScreen route={routeMock as any} showTooltip={false} />
+          <HomeScreen route={routeMock as any} showTooltip={false} navigation={undefined} />
         </AddNoteProvider>
       </Provider>
     );
@@ -310,7 +326,7 @@ describe('HomeScreen', () => {
     const { getByTestId } = render(
       <Provider store={store}> {/* Wrap with Provider */}
         <AddNoteProvider>
-          <HomeScreen route={routeMock as any} showTooltip={false} />
+          <HomeScreen route={routeMock as any} showTooltip={false} navigation={undefined} />
         </AddNoteProvider>
       </Provider>
     );
@@ -333,7 +349,7 @@ describe('HomeScreen', () => {
     const { getByText } = render(
       <Provider store={store}>
         <AddNoteProvider>
-          <HomeScreen route={routeMock as any} showTooltip={false} />
+          <HomeScreen route={routeMock as any} showTooltip={false} navigation={undefined} />
         </AddNoteProvider>
       </Provider>
     );
