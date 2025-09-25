@@ -11,7 +11,32 @@ import {
   Dimensions,
   Button,
 } from 'react-native';
-import { Video, ResizeMode, Audio } from 'expo-av';
+import { VideoView, useVideoPlayer } from 'expo-video';
+import { useEvent } from 'expo';
+
+// Video Item Component
+const VideoItem = ({ video }) => {
+  const player = useVideoPlayer({ uri: video.uri }, (player) => {
+    player.loop = true;
+  });
+  
+  // Listen to player events for better state management
+  const { isPlaying } = useEvent(player, 'playingChange', { isPlaying: player.playing });
+  const { status } = useEvent(player, 'statusChange', { status: player.status });
+  
+  return (
+    <View style={styles.videoContainer}>
+      <VideoView
+        player={player}
+        style={styles.video}
+        nativeControls
+        contentFit="contain"
+        allowsFullscreen
+        allowsPictureInPicture
+      />
+    </View>
+  );
+};
 import { useTheme } from "../../components/ThemeProvider";
 import { defaultTextFont } from '../../../styles/globalStyles';
 
@@ -38,21 +63,6 @@ const VideoModal: React.FC<Props> = ({ isVisible, onClose, videos }) => {
     setImageLoadedState((prev) => ({ ...prev, [uri]: true }));
   };
 
-  async function configureAudioPlayback() {
-    try {
-      await Audio.setAudioModeAsync({
-        playsInSilentModeIOS: true,
-        allowsRecordingIOS: false,
-        staysActiveInBackground: false,
-        shouldDuckAndroid: true,
-        playThroughEarpieceAndroid: false,
-      });
-      console.log('Audio playback configured to play in silent mode.');
-    } catch (error) {
-      console.error('Failed to configure audio mode:', error);
-    }
-  }
-  configureAudioPlayback();
 
   console.log(videos);
 
@@ -67,15 +77,7 @@ const VideoModal: React.FC<Props> = ({ isVisible, onClose, videos }) => {
         >
           {videos && videos.length > 0 ? (
             videos.map((video, index) => (
-              <View key={index} style={styles.videoContainer}>
-                <Video
-                  source={{ uri: video.uri }}
-                  style={styles.video}
-                  useNativeControls
-                  resizeMode={ResizeMode.CONTAIN}
-                  isLooping
-                  onPlaybackStatusUpdate={status => setStatus(() => status)} />
-              </View>
+              <VideoItem key={index} video={video} />
             ))
           ) : (
             <Text style={styles.noVideosText}>No Videos</Text>

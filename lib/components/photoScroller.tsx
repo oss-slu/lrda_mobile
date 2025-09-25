@@ -13,14 +13,15 @@ import {
   requestMediaLibraryPermissionsAsync
 } from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
-import { ResizeMode, Video } from "expo-av";
+import { VideoView, useVideoPlayer } from "expo-video";
+import { useEvent } from "expo";
 import { Media, VideoType, PhotoType } from "../models/media_class";
 import uuid from "react-native-uuid";
 import { getThumbnail, convertHeicToJpg, uploadMedia } from "../utils/S3_proxy";
 import LoadingImage from "./loadingImage";
 import DraggableFlatList from "react-native-draggable-flatlist";
 import ImageView from "react-native-image-viewing";
-import * as FileSystem from "expo-file-system";
+import { File, Paths } from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
 import { PhotoStyles } from "../../styles/components/PhotoScrollerStyles"
 
@@ -55,6 +56,31 @@ const PhotoScroller = forwardRef(
       setShowVideo(false);
     }, [currentImageIndex]);
 
+
+
+    // 🎥 VIDEO COMPONENT
+    const VideoComponent = ({ mediaItem }) => {
+      if (!mediaItem || mediaItem.getType() !== "video") return null;
+      
+      const player = useVideoPlayer({ uri: mediaItem.getUri() }, (player) => {
+        player.loop = true;
+        player.muted = true;
+      });
+
+      // Listen to player events
+      const { isPlaying } = useEvent(player, 'playingChange', { isPlaying: player.playing });
+      const { status } = useEvent(player, 'statusChange', { status: player.status });
+
+      return (
+        <VideoView
+          player={player}
+          contentFit="contain"
+          nativeControls
+          style={PhotoStyles.video}
+        />
+      );
+    };
+
     useImperativeHandle(
       ref,
       () => ({
@@ -63,12 +89,15 @@ const PhotoScroller = forwardRef(
       []
     );
 
-    useEffect(() => {
-      console.log("PhotoScroller mounted");
-      return () => {
-        console.log("PhotoScroller unmounted");
-      };
-    }, []);
+  useEffect(() => {
+    return () => {
+      // Component cleanup
+    };
+  }, []);
+
+  useEffect(() => {
+    // Media array updated
+  }, [newMedia]);
     
 
     const handleImageSelection = async (result: {
@@ -76,52 +105,54 @@ const PhotoScroller = forwardRef(
       assets: any;
     }) => {
       const { uri } = result.assets[0];
-      console.log("Selected image URI: ", uri);
 
-      if (uri.endsWith(".heic") || uri.endsWith(".HEIC")) {
-        const jpgUri = await convertHeicToJpg(uri);
-        const uploadedUrl = await uploadMedia(jpgUri, "image");
-        console.log("After URL is retrieved from upload Media ", uploadedUrl);
-        const newMediaItem = new PhotoType({
-          uuid: uuid.v4().toString(),
-          type: "image",
-          uri: uploadedUrl,
-        });
-        setNewMedia([...newMedia, newMediaItem]);
-        insertImageToEditor(uploadedUrl);
-      } else if (
-        uri.endsWith(".jpg") ||
-        uri.endsWith("png") ||
-        uri.endsWith(".jpeg")
-      ) {
-        const uploadedUrl = await uploadMedia(uri, "image");
-        console.log("After URL is retrieved from upload Media ", uploadedUrl);
-        const newMediaItem = new PhotoType({
-          uuid: uuid.v4().toString(),
-          type: "image",
-          uri: uploadedUrl,
-        });
-        setNewMedia([...newMedia, newMediaItem]);
-        if (insertImageToEditor) {
-          insertImageToEditor(uploadedUrl, 'Captured Image');
+      try {
+        if (uri.endsWith(".heic") || uri.endsWith(".HEIC")) {
+          const jpgUri = await convertHeicToJpg(uri);
+          const uploadedUrl = await uploadMedia(jpgUri, "image");
+          const newMediaItem = new PhotoType({
+            uuid: uuid.v4().toString(),
+            type: "image",
+            uri: uploadedUrl,
+          });
+          setNewMedia([...newMedia, newMediaItem]);
+          insertImageToEditor(uploadedUrl);
+        } else if (
+          uri.endsWith(".jpg") ||
+          uri.endsWith("png") ||
+          uri.endsWith(".jpeg")
+        ) {
+          const uploadedUrl = await uploadMedia(uri, "image");
+          const newMediaItem = new PhotoType({
+            uuid: uuid.v4().toString(),
+            type: "image",
+            uri: uploadedUrl,
+          });
+          setNewMedia([...newMedia, newMediaItem]);
+          if (insertImageToEditor) {
+            insertImageToEditor(uploadedUrl, 'Captured Image');
+          }
+        } else if (
+          uri.endsWith(".MOV") ||
+          uri.endsWith(".mov") ||
+          uri.endsWith(".mp4")
+        ) {
+          const uploadedUrl = await uploadMedia(uri, "video");
+          const thumbnail = await getThumbnail(uri);
+          
+          const newMediaItem = new VideoType({
+            uuid: uuid.v4().toString(),
+            type: "video",
+            uri: uploadedUrl,
+            thumbnail: thumbnail,
+            duration: "0:00",
+          });
+          
+          setNewMedia([...newMedia, newMediaItem]);
+          addVideoToEditor(uploadedUrl);
         }
-      } else if (
-        uri.endsWith(".MOV") ||
-        uri.endsWith(".mov") ||
-        uri.endsWith(".mp4")
-      ) {
-        const uploadedUrl = await uploadMedia(uri, "video");
-        const thumbnail = await getThumbnail(uri);
-        console.log("After URL is retrieved from upload Media ", uploadedUrl);
-        const newMediaItem = new VideoType({
-          uuid: uuid.v4().toString(),
-          type: "video",
-          uri: uploadedUrl,
-          thumbnail: thumbnail,
-          duration: "0:00",
-        });
-        setNewMedia([...newMedia, newMediaItem]);
-        addVideoToEditor(uploadedUrl);
+      } catch (error) {
+        displayErrorInEditor(`Failed to upload media: ${error.message}`);
       }
     };
 
@@ -133,20 +164,21 @@ const PhotoScroller = forwardRef(
     const handleSaveMedia = async (imageURI: string) => {
       try {
         const fileName = imageURI.replace(/^.*[\\\/]/, "");
-        const imageFullPathInLocalStorage =
-          FileSystem.documentDirectory + fileName;
-
-        FileSystem.downloadAsync(imageURI, imageFullPathInLocalStorage).then(
-          async ({ uri }) => {
-            await MediaLibrary.saveToLibraryAsync(imageFullPathInLocalStorage);
-          }
-        );
+        // Use the new FileSystem API for saving media
+        const sourceFile = new File(imageURI);
+        const destinationFile = new File(Paths.cache, fileName);
+        
+        // Copy the file to cache directory
+        sourceFile.copy(destinationFile);
+        
+        // Save to media library
+        await MediaLibrary.saveToLibraryAsync(destinationFile.uri);
+        
         setShowFooter(true);
         setTimeout(() => {
           setShowFooter(false);
         }, 2000);
       } catch (error) {
-        console.error("Error saving media:", error);
         displayErrorInEditor(`Error uploading media: ${error.message}`);
       }
     };
@@ -157,15 +189,36 @@ const PhotoScroller = forwardRef(
       let curImages: string[] = [];
 
       for (let x = 0; x < newMedia.length; x++) {
-        if (newMedia[x].getType() === "image") {
-          curImages.push(newMedia[x].getUri());
-        } else if (newMedia[x].getType() === "video") {
-          curImages.push((newMedia[x] as VideoType).getThumbnail());
+        const mediaItem = newMedia[x];
+        const mediaType = mediaItem.getType();
+        
+        if (mediaType === "image") {
+          curImages.push(mediaItem.getUri());
+        } else if (mediaType === "video") {
+          try {
+            if (mediaItem instanceof VideoType) {
+              const thumbnail = mediaItem.getThumbnail();
+              curImages.push(thumbnail);
+            } else {
+              // Fallback: try to access thumbnail property directly
+              const videoItem = mediaItem as any;
+              
+              if (videoItem.thumbnail) {
+                curImages.push(videoItem.thumbnail);
+              } else {
+                // Last resort: use the video URI itself
+                curImages.push(mediaItem.getUri());
+              }
+            }
+          } catch (error) {
+            curImages.push(mediaItem.getUri());
+          }
         }
       }
 
       setImages(curImages);
       setPlaying(true);
+      setShowVideo(false); // Ensure video overlay is hidden when going to full view
     };
 
     const renderItem = ({
@@ -181,46 +234,104 @@ const PhotoScroller = forwardRef(
       const key = `media-${index}`;
       const mediaItem = media;
       const ImageType = mediaItem?.getType();
+      
       let ImageURI = "";
       let IsImage = false;
       if (ImageType === "image") {
         ImageURI = mediaItem.getUri();
         IsImage = true;
       } else if (ImageType === "video") {
-        ImageURI = (mediaItem as VideoType).getThumbnail();
-        IsImage = true;
+        try {
+          // Check if it's actually a VideoType instance
+          if (mediaItem instanceof VideoType) {
+            ImageURI = mediaItem.getThumbnail();
+            IsImage = true;
+          } else {
+            // Fallback: try to access thumbnail property directly
+            const videoItem = mediaItem as any;
+            
+            if (videoItem.thumbnail) {
+              ImageURI = videoItem.thumbnail;
+              IsImage = true;
+            } else {
+              // Last resort: use the video URI itself
+              ImageURI = mediaItem.getUri();
+              IsImage = true;
+            }
+          }
+        } catch (error) {
+          // Fallback to video URI
+          ImageURI = mediaItem.getUri();
+          IsImage = true;
+        }
       }
+      
+      
       return (
-        <View key={key}>
-          <TouchableOpacity
-            style={PhotoStyles.trash}
-            onPress={() => handleDeleteMedia(index)}
-          >
-            <Ionicons
-              name="close-outline"
-              size={15}
-              color="white"
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.5}
-            onLongPress={drag}
-            delayLongPress={100}
-            onPress={() => goBig(index)}
-          >
-            <View style={styles.mediaItem}>
-              {IsImage ? (
-                <LoadingImage
-                  imageURI={ImageURI}
-                  type={ImageType}
-                  isImage={true}
+        <TouchableOpacity
+          key={key}
+          activeOpacity={0.5}
+          onLongPress={drag}
+          delayLongPress={100}
+          onPress={() => goBig(index)}
+        >
+          <View style={styles.mediaItem}>
+            {IsImage ? (
+              <LoadingImage
+                imageURI={ImageURI}
+                type={ImageType}
+                isImage={true}
+                width={100}
+                height={100}
+              />
+            ) : (
+              <View style={[styles.mediaItem, { 
+                backgroundColor: '#f0f0f0', 
+                justifyContent: 'center', 
+                alignItems: 'center' 
+              }]}>
+                <Ionicons 
+                  name={ImageType === "video" ? "play-circle-outline" : "image-outline"} 
+                  size={40} 
+                  color="#666" 
                 />
-              ) : (
-                <LoadingImage imageURI={""} type={ImageType} isImage={false} />
-              )}
-            </View>
-          </TouchableOpacity>
-        </View>
+                <Text style={{ fontSize: 10, color: '#666', marginTop: 5 }}>
+                  {ImageType === "video" ? "Video" : "Media"}
+                </Text>
+              </View>
+            )}
+            
+            {/* Delete/Archive X Button */}
+            <TouchableOpacity
+              style={PhotoStyles.deleteButton}
+              onPress={() => handleDeleteMedia(index)}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Ionicons name="close" size={16} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      );
+    };
+
+    const handleDeleteMedia = (index: number) => {
+      Alert.alert(
+        'Delete Media',
+        'Are you sure you want to delete this media item?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'Delete',
+            style: 'destructive',
+            onPress: () => {
+              const updatedMedia = newMedia.filter((_, i) => i !== index);
+              setNewMedia(updatedMedia);
+            },
+          },
+        ]
       );
     };
 
@@ -249,7 +360,7 @@ const PhotoScroller = forwardRef(
                 videoMaxDuration: 300,
               });
               if (!cameraResult.canceled) {
-                handleImageSelection(cameraResult);
+                handleImageSelection(cameraResult as any);
               }
             },
           },
@@ -270,7 +381,7 @@ const PhotoScroller = forwardRef(
               });
               if (!galleryResult.canceled) {
                 // Pass the selected image to handleImageSelection
-                handleImageSelection(galleryResult);
+                handleImageSelection(galleryResult as any);
               }
             },
           },
@@ -315,16 +426,9 @@ const PhotoScroller = forwardRef(
               style={PhotoStyles.icon}
             />
           </TouchableOpacity>
-          {showVideo && (
-            <View style={PhotoStyles.videoContainer}>
-              <Video
-                source={{ uri: newMedia[imageIndex].getUri() }}
-                resizeMode={ResizeMode.CONTAIN}
-                shouldPlay={true}
-                useNativeControls={true}
-                isLooping={true}
-                style={PhotoStyles.video}
-              />
+          {showVideo && newMedia && newMedia.length > 0 && currentImageIndex < newMedia.length && (
+            <View style={[PhotoStyles.videoContainer, { marginTop: 10 }]}>
+              <VideoComponent mediaItem={newMedia[currentImageIndex]} />
             </View>
           )}
         </View>
@@ -342,12 +446,6 @@ const PhotoScroller = forwardRef(
         </TouchableOpacity>
       );
     }
-
-    const handleDeleteMedia = (index: number) => {
-      const updatedMedia = [...newMedia];
-      updatedMedia.splice(index, 1);
-      setNewMedia(updatedMedia);
-    };
 
     const renderImageView = () => (
       <View>
@@ -378,11 +476,17 @@ const PhotoScroller = forwardRef(
               marginBottom: playing ? 100 : 0,
               marginTop: playing ? 30 : 0,
               height: playing ? "auto" : 110,
+              position: "relative", // Ensure proper positioning context
             },
           ]}
         >
           {playing && renderImageView()}
-          <View style={{ flexDirection: "row" }}>
+          <View style={{ 
+            flexDirection: "row",
+            flexWrap: "wrap", // Allow wrapping if needed
+            alignItems: "center",
+            justifyContent: "flex-start",
+          }}>
             <TouchableOpacity
               testID="photoScrollerButton"
               style={[
@@ -423,8 +527,11 @@ export default PhotoScroller;
 
 const styles = StyleSheet.create({
   mediaItem: {
-    width: 100, // You can adjust these values
+    width: 100,
     height: 100,
-    marginRight: 5, // Spacing between images
+    marginRight: 5,
+    borderRadius: 10,
+    overflow: "hidden", // Prevent content from overflowing
+    position: "relative", // Ensure proper positioning context
   },
 });

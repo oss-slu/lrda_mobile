@@ -162,7 +162,7 @@ export class User {
 
   public async logout(dispatch: any) {
     try {
-      const auth = getAuth();
+      // const auth = getAuth();
       await signOut(auth);
   
       this.userData = null;

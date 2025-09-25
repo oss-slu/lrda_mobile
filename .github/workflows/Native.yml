@@ -12,16 +12,29 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
-    - name: Install Node.js
-      uses: actions/setup-node@v2
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
       with:
         node-version: '20'
+        cache: 'yarn'
+
+    - name: Clear yarn cache
+      run: yarn cache clean
 
     - name: Install dependencies
       run: |
-        yarn install 
+        for i in {1..3}; do
+          yarn install --frozen-lockfile --network-timeout 100000 && break
+          echo "Attempt $i failed, retrying in 10 seconds..."
+          sleep 10
+        done
+      env:
+        NODE_ENV: test
+
     - name: Run tests
       run: |
         yarn test -u
+      env:
+        NODE_ENV: test

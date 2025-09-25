@@ -2,9 +2,31 @@
 import 'react-native'; 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import NoteDetailModal from '../lib/screens/mapPage/NoteDetailModal';
 import moxios from 'moxios';
 import { onAuthStateChanged } from 'firebase/auth';
+
+// Mock ApiService with explicit implementation
+jest.mock('../lib/utils/api_calls', () => {
+  const mockApiService = {
+    fetchCreatorName: jest.fn(() => Promise.resolve('Mock Creator')),
+    fetchMapsMessagesBatch: jest.fn(() => Promise.resolve([])),
+    searchMessages: jest.fn(() => Promise.resolve([])),
+    writeNewNote: jest.fn(() => Promise.resolve({})),
+    overwriteNote: jest.fn(() => Promise.resolve({})),
+    deleteNoteFromAPI: jest.fn(() => Promise.resolve(true)),
+    createUserData: jest.fn(() => Promise.resolve({})),
+    fetchUserData: jest.fn(() => Promise.resolve(null)),
+    fetchMessages: jest.fn(() => Promise.resolve([])),
+    fetchMessagesBatch: jest.fn(() => Promise.resolve([])),
+  };
+  
+  return {
+    __esModule: true,
+    default: mockApiService,
+  };
+});
+
+import NoteDetailModal from '../lib/screens/mapPage/NoteDetailModal';
 import ApiService from '../lib/utils/api_calls';
 
 jest.mock('react-native/Libraries/Animated/Easing', () => ({
@@ -38,6 +60,11 @@ jest.mock("firebase/auth", () => ({
 
 jest.mock("firebase/firestore", () => ({
   getFirestore: jest.fn(),
+  doc: jest.fn(() => ({})),
+  getDoc: jest.fn(() => Promise.resolve({ 
+    exists: jest.fn(() => false),
+    data: jest.fn(() => ({}))
+  })),
 }));
 
 jest.mock("firebase/database", () => ({
@@ -69,7 +96,7 @@ jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
 
 
 
-onAuthStateChanged.mockImplementation((auth, callback) => {
+(onAuthStateChanged as jest.Mock).mockImplementation((auth, callback) => {
   const mockUser = { uid: "12345", email: "test@example.com" };
   callback(mockUser); // Simulate a logged-in user
 });
@@ -87,18 +114,13 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  console.log.mockRestore();
-  console.error.mockRestore();
-  console.warn.mockRestore();
+  jest.restoreAllMocks();
   moxios.uninstall();
 });
 
 
 jest.mock('expo-av', () => {
-  const React = require('react');
   return {
-    // Minimal Video stub so VideoModal renders without error
-    Video: (props) => React.createElement('Video', props),
     // Minimal Audio.Sound.createAsync stub that immediately resolves
     Audio: {
       Sound: {
@@ -117,18 +139,34 @@ jest.mock('expo-av', () => {
         ),
       },
     },
-    // Provide ResizeMode so VideoModal.resizeMode={ResizeMode.CONTAIN} works
-    ResizeMode: { CONTAIN: 'contain' },
   };
 });
-jest.mock('firebase/firestore', () => ({
-  getFirestore: jest.fn(),
-  doc: jest.fn(),
-  getDoc: jest.fn(() => Promise.resolve({ exists: false })),
+
+jest.mock('expo-video', () => {
+  const React = require('react');
+  return {
+    // Minimal VideoView stub so VideoModal renders without error
+    VideoView: (props) => React.createElement('VideoView', props),
+    useVideoPlayer: jest.fn(() => ({})),
+  };
+});
+
+jest.mock('expo', () => ({
+  useEvent: jest.fn(() => ({})),
 }));
 
 
+
 describe('NoteDetailModal', () => {
+  // Debug: Check if ApiService is properly mocked
+  beforeEach(() => {
+    const ApiService = require('../lib/utils/api_calls').default;
+    console.log('ApiService in test:', ApiService);
+    console.log('ApiService.fetchCreatorName:', ApiService?.fetchCreatorName);
+    console.log('ApiService type:', typeof ApiService);
+    console.log('ApiService keys:', ApiService ? Object.keys(ApiService) : 'undefined');
+  });
+
   const mockNote = {
     title: 'Test Note Title',
     description:
@@ -184,8 +222,8 @@ describe('NoteDetailModal', () => {
     // and your component renders <LoadingDots /> which in test mode returns static text.
     expect(getByTestId('loadingDotsStatic')).toBeTruthy();
   
-    // Restore the spy after the test.
-    fetchCreatorNameSpy.mockRestore();
+    // Don't restore the spy - keep the mock for other tests
+    // fetchCreatorNameSpy.mockRestore();
   });
   it('should display error message if image fails to load', () => {
     const { getByTestId, getByText } = render(
@@ -216,23 +254,23 @@ describe('NoteDetailModal', () => {
   });
 
   it('should display audio loading indicator while audio is loading', () => {
-    jest.useFakeTimers();
     const audioNote = {
       ...mockNote,
       description: '<div><a href="https://example.com/audio.mp3">Audio</a></div>',
     };
   
-    const expoAV = require('expo-av');
-    jest.spyOn(expoAV.Audio.Sound, 'createAsync').mockReturnValue(new Promise(() => {}));
+    // Mock Audio.Sound.createAsync to return a promise that never resolves
+    const expoAv = require('expo-av');
+    jest.spyOn(expoAv.Audio.Sound, 'createAsync').mockReturnValue(new Promise(() => {}));
   
     const { getByTestId } = render(
       <NoteDetailModal isVisible={true} note={audioNote} onClose={() => {}} />
     );
     
     expect(getByTestId('audioLoadingIndicator')).toBeTruthy();
-    jest.useRealTimers();
-  // Our mock of createAsync never resolves, so LoadingAudio stays in "loading" state
-  // (No need to redeclare audioNote or getByTestId here)
+    
+    // Clean up the spy
+    expoAv.Audio.Sound.createAsync.mockRestore();
   });
   
 

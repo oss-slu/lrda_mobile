@@ -1,23 +1,22 @@
-import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import { Alert, EmitterSubscription, Keyboard } from 'react-native';
-import AddNoteScreen from '../lib/screens/AddNoteScreen';
-import { AddNoteProvider } from '../lib/context/AddNoteContext'; // Import the provider
-import { Provider } from 'react-redux';
-import { store } from '../redux/store/store';
-import * as Location from 'expo-location';
-
+import React from "react";
+import { render, fireEvent, waitFor, act } from "@testing-library/react-native";
+import { Alert, EmitterSubscription, Keyboard } from "react-native";
+import AddNoteScreen from "../lib/screens/AddNoteScreen";
+import { AddNoteProvider } from "../lib/context/AddNoteContext"; // Import the provider
+import { Provider } from "react-redux";
+import { store } from "../redux/store/store";
+import * as Location from "expo-location";
 
 const navigationMock = {
   navigate: jest.fn(),
   goBack: jest.fn(),
-  addListener: jest.fn(() => jest.fn()), 
+  addListener: jest.fn(() => jest.fn()),
   canGoBack: jest.fn(() => true),
 };
 
 // Mock redux-persist to avoid persistence logic in tests
-jest.mock('redux-persist', () => {
-  const real = jest.requireActual('redux-persist');
+jest.mock("redux-persist", () => {
+  const real = jest.requireActual("redux-persist");
   return {
     ...real,
     persistReducer: jest.fn().mockImplementation((config, reducers) => reducers),
@@ -25,42 +24,40 @@ jest.mock('redux-persist', () => {
 });
 
 // Mock other external dependencies
-jest.mock('../lib/components/ThemeProvider', () => ({
+jest.mock("../lib/components/ThemeProvider", () => ({
   useTheme: () => ({
-    theme: 'mockedTheme', // Provide a mocked theme object
+    theme: "mockedTheme", // Provide a mocked theme object
   }),
 }));
-jest.mock('../lib/models/user_class', () => {
+jest.mock("../lib/models/user_class", () => {
   return {
     User: {
       getInstance: () => ({
         getId: jest.fn(() => Promise.resolve("mock-user-id")),
         setUserTutorialDone: jest.fn(),
       }),
-      getHasDoneTutorial: jest.fn(() => Promise.resolve(true)), 
-      setUserTutorialDone: jest.fn(() => Promise.resolve()),    
+      getHasDoneTutorial: jest.fn(() => Promise.resolve(true)),
+      setUserTutorialDone: jest.fn(() => Promise.resolve()),
     },
   };
 });
 
 /** ADD THIS TO ANY TOOLTIP THAT SHOWS CHILDREN ELEMENT. */
-jest.mock('react-native-walkthrough-tooltip', () => {
+jest.mock("react-native-walkthrough-tooltip", () => {
   return ({ children }) => children; // render only the children, no tooltip wrapper
 });
 
-
-
-jest.mock('expo-font', () => ({
+jest.mock("expo-font", () => ({
   loadAsync: jest.fn(() => Promise.resolve()),
   isLoaded: jest.fn(() => true),
 }));
 
-jest.mock('react-native/Libraries/Image/Image', () => ({
-  ...jest.requireActual('react-native/Libraries/Image/Image'),
-  resolveAssetSource: jest.fn(() => ({ uri: 'mocked-asset-uri' })),
+jest.mock("react-native/Libraries/Image/Image", () => ({
+  ...jest.requireActual("react-native/Libraries/Image/Image"),
+  resolveAssetSource: jest.fn(() => ({ uri: "mocked-asset-uri" })),
 }));
 
-jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
+jest.mock("react-native/Libraries/Settings/NativeSettingsManager", () => ({
   settings: {},
   setValues: jest.fn(),
   getConstants: jest.fn(() => ({
@@ -73,7 +70,7 @@ jest.mock("firebase/app", () => ({
   initializeApp: jest.fn(),
 }));
 
-jest.mock('react-native-keyboard-aware-scroll-view', () => ({
+jest.mock("react-native-keyboard-aware-scroll-view", () => ({
   KeyboardAwareScrollView: jest.fn(({ children }) => children),
 }));
 
@@ -88,7 +85,7 @@ jest.mock("firebase/storage", () => ({
   getStorage: jest.fn(),
 }));
 
-jest.mock('firebase/firestore', () => ({
+jest.mock("firebase/firestore", () => ({
   getFirestore: jest.fn(),
   doc: jest.fn(() => ({
     get: jest.fn(() => Promise.resolve({ exists: false })),
@@ -99,11 +96,11 @@ jest.mock("firebase/database", () => ({
   getDatabase: jest.fn(), // Mock getDatabase to prevent the error
 }));
 
-jest.mock('@10play/tentap-editor', () => ({
+jest.mock("@10play/tentap-editor", () => ({
   RichText: () => null,
   Toolbar: () => null,
   useEditorBridge: jest.fn(() => ({
-    getHTML: jest.fn(() => ''),
+    getHTML: jest.fn(() => ""),
     setContent: jest.fn(),
     injectCSS: jest.fn(),
     focus: jest.fn(),
@@ -112,13 +109,9 @@ jest.mock('@10play/tentap-editor', () => ({
   DEFAULT_TOOLBAR_ITEMS: [], // Mock as an empty array
 }));
 
-jest.mock('expo-location', () => ({
-  getForegroundPermissionsAsync: jest.fn(() =>
-    Promise.resolve({ status: 'granted' })
-  ),
-  requestForegroundPermissionsAsync: jest.fn(() =>
-    Promise.resolve({ status: 'granted' })
-  ),
+jest.mock("expo-location", () => ({
+  getForegroundPermissionsAsync: jest.fn(() => Promise.resolve({ status: "granted" })),
+  requestForegroundPermissionsAsync: jest.fn(() => Promise.resolve({ status: "granted" })),
   getCurrentPositionAsync: jest.fn(() =>
     Promise.resolve({
       coords: {
@@ -131,20 +124,36 @@ jest.mock('expo-location', () => ({
 
 // Mock API calls directly
 const mockWriteNewNote = jest.fn();
-jest.mock('../lib/utils/api_calls', () => ({
+jest.mock("../lib/utils/api_calls", () => ({
   writeNewNote: mockWriteNewNote,
 }));
+
+// --- Capture Keyboard listeners ---
+const keyboardListeners = {};
+beforeAll(() => {
+  jest.spyOn(Keyboard, "addListener").mockImplementation((event, cb) => {
+    keyboardListeners[event] = cb;
+    return {
+      remove: jest.fn(),
+      emitter: null,
+      listener: cb,
+      context: null,
+      eventType: event,
+      target: null,
+      key: null,
+    } as unknown as EmitterSubscription;
+  });
+});
 
 // Mock console methods to avoid unnecessary log outputs in tests
 beforeEach(() => {
   jest.clearAllMocks();
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  jest.spyOn(console, "log").mockImplementation(() => {});
+  jest.spyOn(console, "error").mockImplementation(() => {});
 });
 
 afterEach(() => {
-  console.log.mockRestore();
-  console.error.mockRestore();
+  jest.restoreAllMocks();
 });
 
 // Helper function to render the component with providers
@@ -156,34 +165,33 @@ const renderWithProviders = (component: React.ReactElement) => {
   );
 };
 
-describe('AddNoteScreen', () => {
-  it('renders without crashing', () => {
+describe("AddNoteScreen", () => {
+  it("renders without crashing", () => {
     const routeMock = { params: { untitledNumber: 1 } };
-    const { getByTestId } = renderWithProviders(
-      <AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />
-    );
+    const { getByTestId } = renderWithProviders(<AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />);
 
     // Check if the RichEditor is rendered
-    expect(getByTestId('TenTapEditor')).toBeTruthy();
+    expect(getByTestId("TenTapEditor")).toBeTruthy();
   });
 
-  it('handles saveNote API error', async () => {
+  it("handles saveNote API error", async () => {
     const routeMock = { params: { untitledNumber: 1 } };
 
     // Mock location permission to be granted
-    jest.spyOn(Location, 'getForegroundPermissionsAsync').mockResolvedValueOnce({
-      status: 'granted',
+    jest.spyOn(Location, "getForegroundPermissionsAsync").mockResolvedValueOnce({
+      status: "granted" as any,
+      expires: "never",
+      granted: true,
+      canAskAgain: true,
     });
 
     // Mock the API call to simulate a failure
-    mockWriteNewNote.mockRejectedValueOnce(new Error('Error saving note'));
+    mockWriteNewNote.mockRejectedValueOnce(new Error("Error saving note"));
 
-    const { getByTestId } = renderWithProviders(
-      <AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />
-    );
+    const { getByTestId } = renderWithProviders(<AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />);
 
     // Simulate the save action by pressing the button
-    fireEvent.press(getByTestId('checklocationpermission'));
+    fireEvent.press(getByTestId("checklocationpermission"));
 
     // Wait to check that the function was not called
     await waitFor(() => {
@@ -191,23 +199,24 @@ describe('AddNoteScreen', () => {
     });
   });
 
-  it('handles saveNote API success', async () => {
+  it("handles saveNote API success", async () => {
     const routeMock = { params: { untitledNumber: 1 } };
 
     // Mock location permission to be granted
-    jest.spyOn(Location, 'getForegroundPermissionsAsync').mockResolvedValueOnce({
-      status: 'granted',
+    jest.spyOn(Location, "getForegroundPermissionsAsync").mockResolvedValueOnce({
+      status: "granted" as any,
+      expires: "never",
+      granted: true,
+      canAskAgain: true,
     });
 
     // Mock the API call to succeed
     mockWriteNewNote.mockResolvedValueOnce({ success: true });
 
-    const { getByTestId } = renderWithProviders(
-      <AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />
-    );
+    const { getByTestId } = renderWithProviders(<AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />);
 
     // Simulate the save action by pressing the button
-    fireEvent.press(getByTestId('checklocationpermission'));
+    fireEvent.press(getByTestId("checklocationpermission"));
 
     // Wait to check that the function was called
     await waitFor(() => {
@@ -215,128 +224,160 @@ describe('AddNoteScreen', () => {
     });
   });
 
-  it('renders the title input field', () => {
+  it("renders the title input field", () => {
     const routeMock = { params: { untitledNumber: 1 } };
-    const { getByPlaceholderText } = renderWithProviders(
-      <AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />
-    );
+    const { getByPlaceholderText } = renderWithProviders(<AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />);
 
     // Check if the title input is rendered
-    expect(getByPlaceholderText('Title Field Note')).toBeTruthy();
+    expect(getByPlaceholderText("Title Field Note")).toBeTruthy();
   });
+
+  //   it('renders the "Done" button when the keyboard is open', async () => {
+  //     const routeMock = { params: { untitledNumber: 1 } };
+
+  //     // Mock `Keyboard.addListener` to simulate keyboard opening
+  //     const mockKeyboardListener = jest.spyOn(Keyboard, "addListener").mockImplementation((event, callback) => {
+  //       if (event === "keyboardDidShow") {
+  //         setTimeout(callback, 0);
+  //       }
+  //       return {
+  //         remove: jest.fn(),
+  //       } as unknown as EmitterSubscription;
+  //     });
+
+  //     const { findByTestId } = renderWithProviders(<AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />);
+
+  //     // Expect the "Done" button to appear when keyboard opens
+  //     const doneButton = await findByTestId("doneButton");
+  //     expect(doneButton).toBeTruthy();
+
+  //     // Cleanup mock
+  //     mockKeyboardListener.mockRestore();
+  //   });
+  // });
 
   it('renders the "Done" button when the keyboard is open', async () => {
     const routeMock = { params: { untitledNumber: 1 } };
-  
-    // Mock `Keyboard.addListener` to simulate keyboard opening
-    const mockKeyboardListener = jest.spyOn(Keyboard, 'addListener').mockImplementation((event, callback) => {
-      if (event === 'keyboardDidShow') {
-        setTimeout(callback, 0); 
+
+    // Mock the Keyboard.addListener to immediately trigger the show event
+    const originalAddListener = Keyboard.addListener;
+    jest.spyOn(Keyboard, 'addListener').mockImplementation((event, callback) => {
+      // If it's a show event, immediately call the callback
+      if (event === 'keyboardDidShow' || event === 'keyboardWillShow') {
+        setTimeout(() => callback({ endCoordinates: { height: 300 } }), 0);
       }
       return {
         remove: jest.fn(),
+        emitter: null,
+        listener: callback,
+        context: null,
+        eventType: event,
+        target: null,
+        key: null,
       } as unknown as EmitterSubscription;
     });
-  
-    const { findByTestId } = renderWithProviders(
-      <AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />
-    );
-  
-    // Expect the "Done" button to appear when keyboard opens
-    const doneButton = await findByTestId("doneButton");
-    expect(doneButton).toBeTruthy();
-  
-    // Cleanup mock
-    mockKeyboardListener.mockRestore();
-  });
-  
-});
-
-describe("AddNoteScreen's checkLocationPermission method", () => {
-  it('should call Alert when location permission is denied', async () => {
-    const routeMock = { params: { untitledNumber: 1 } };
-
-    // Mock location permission to be denied
-    jest.spyOn(Location, 'getForegroundPermissionsAsync').mockResolvedValueOnce({
-      status: 'denied',
-    });
-
-    // Mock Alert
-    const mockAlert = jest.spyOn(Alert, 'alert');
-
-    const { getByTestId } = renderWithProviders(
-      <AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />
-    );
-
-    // Simulate the button press to trigger permission check
-    fireEvent.press(getByTestId('checklocationpermission'));
-
-    // Wait for the Alert to be called and expect it to have been called 0 times
-    await waitFor(() => {
-      expect(mockAlert).toHaveBeenCalledTimes(0); // Adjust expected to 0
-    });
-  });
-
-  it('handles location permission granted', async () => {
-    const routeMock = { params: { untitledNumber: 1 } };
-
-    // Mock location permission to be granted
-    jest.spyOn(Location, 'getForegroundPermissionsAsync').mockResolvedValueOnce({
-      status: 'granted',
-    });
-
-    // Mock the API call to succeed
-    mockWriteNewNote.mockResolvedValueOnce({ success: true });
-
-    const { getByTestId } = renderWithProviders(
-      <AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />
-    );
-
-    // Simulate the button press to trigger location permission check
-    fireEvent.press(getByTestId('checklocationpermission'));
-
-    // Wait for the API call and expect it to be called 0 times
-    await waitFor(() => {
-      expect(mockWriteNewNote).toHaveBeenCalledTimes(0); // Adjust expected to 0
-    });
-  });
-});
-
-describe('AddNoteScreen - insertAudioToEditor', () => {
-  it('inserts audio link into the editor content', async () => {
-    // Mock editor bridge methods
-    const mockGetHTML = jest.fn().mockResolvedValue('<p>Existing content</p>');
-    const mockSetContent = jest.fn();
-    const mockFocus = jest.fn();
-
-    // Properly mock useEditorBridge
-    jest.mock('@10play/tentap-editor', () => ({
-      RichText: () => null,
-      Toolbar: () => null,
-      useEditorBridge: () => ({
-        getHTML: mockGetHTML,
-        setContent: mockSetContent,
-        focus: mockFocus,
-      }),
-    }));
 
     // Render the component
-    const { getByTestId } = renderWithProviders(
-      <AddNoteScreen navigation={navigationMock as any} route={{ params: { untitledNumber: 1 } }} />
-    );
+    const { getByTestId, queryByTestId } = renderWithProviders(<AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />);
 
-    // Mock the audio URI
-    const audioUri = 'https://example.com/test-audio.mp3';
+    // Wait for the keyboard event to be triggered
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    });
 
-    // Simulate the process of inserting audio
-    const currentContent = await mockGetHTML();
-    const newContent = `${currentContent}<a href="${audioUri}">${audioUri}</a><br>`;
-    mockSetContent(newContent); // Simulate setting content
-    mockFocus(); // Simulate focusing the editor
+    // Now the Done button should be visible
+    const doneButton = queryByTestId("doneButton");
+    expect(doneButton).toBeTruthy();
 
-    // Verify that the methods were called correctly
-    expect(mockGetHTML).toHaveBeenCalledTimes(1); // Ensure content was fetched
-    expect(mockSetContent).toHaveBeenCalledWith(newContent); // Ensure new content was set
-    expect(mockFocus).toHaveBeenCalledTimes(1); // Ensure focus was triggered
+    // Restore the original addListener
+    Keyboard.addListener = originalAddListener;
+  });
+
+  describe("AddNoteScreen's checkLocationPermission method", () => {
+    it("should call Alert when location permission is denied", async () => {
+      const routeMock = { params: { untitledNumber: 1 } };
+
+      // Mock location permission to be denied
+      jest.spyOn(Location, "getForegroundPermissionsAsync").mockResolvedValueOnce({
+        status: "denied",
+      });
+
+      // Mock Alert
+      const mockAlert = jest.spyOn(Alert, "alert");
+
+      const { getByTestId } = renderWithProviders(<AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />);
+
+      // Simulate the button press to trigger permission check
+      fireEvent.press(getByTestId("checklocationpermission"));
+
+      // Wait for the Alert to be called and expect it to have been called 0 times
+      await waitFor(() => {
+        expect(mockAlert).toHaveBeenCalledTimes(0); // Adjust expected to 0
+      });
+    });
+
+    it("handles location permission granted", async () => {
+      const routeMock = { params: { untitledNumber: 1 } };
+
+      // Mock location permission to be granted
+      jest.spyOn(Location, "getForegroundPermissionsAsync").mockResolvedValueOnce({
+        status: "granted" as any,
+      expires: "never",
+      granted: true,
+      canAskAgain: true,
+      });
+
+      // Mock the API call to succeed
+      mockWriteNewNote.mockResolvedValueOnce({ success: true });
+
+      const { getByTestId } = renderWithProviders(<AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />);
+
+      // Simulate the button press to trigger location permission check
+      fireEvent.press(getByTestId("checklocationpermission"));
+
+      // Wait for the API call and expect it to be called 0 times
+      await waitFor(() => {
+        expect(mockWriteNewNote).toHaveBeenCalledTimes(0); // Adjust expected to 0
+      });
+    });
+  });
+
+  describe("AddNoteScreen - insertAudioToEditor", () => {
+    it("inserts audio link into the editor content", async () => {
+      // Mock editor bridge methods
+      const mockGetHTML = jest.fn().mockResolvedValue("<p>Existing content</p>");
+      const mockSetContent = jest.fn();
+      const mockFocus = jest.fn();
+
+      // Properly mock useEditorBridge
+      jest.mock("@10play/tentap-editor", () => ({
+        RichText: () => null,
+        Toolbar: () => null,
+        useEditorBridge: () => ({
+          getHTML: mockGetHTML,
+          setContent: mockSetContent,
+          focus: mockFocus,
+        }),
+      }));
+
+      // Render the component
+      const { getByTestId } = renderWithProviders(
+        <AddNoteScreen navigation={navigationMock as any} route={{ params: { untitledNumber: 1 } }} />
+      );
+
+      // Mock the audio URI
+      const audioUri = "https://example.com/test-audio.mp3";
+
+      // Simulate the process of inserting audio
+      const currentContent = await mockGetHTML();
+      const newContent = `${currentContent}<a href="${audioUri}">${audioUri}</a><br>`;
+      mockSetContent(newContent); // Simulate setting content
+      mockFocus(); // Simulate focusing the editor
+
+      // Verify that the methods were called correctly
+      expect(mockGetHTML).toHaveBeenCalledTimes(1); // Ensure content was fetched
+      expect(mockSetContent).toHaveBeenCalledWith(newContent); // Ensure new content was set
+      expect(mockFocus).toHaveBeenCalledTimes(1); // Ensure focus was triggered
+    });
   });
 });

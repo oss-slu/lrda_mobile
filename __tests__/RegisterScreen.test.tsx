@@ -105,8 +105,8 @@ describe('RegisterScreen', () => {
     fireEvent.changeText(getByPlaceholderText('First Name'), 'John');
     fireEvent.changeText(getByPlaceholderText('Last Name'), 'Doe');
     fireEvent.changeText(getByPlaceholderText('Email'), 'test@gmail.com');
-    fireEvent.changeText(getByPlaceholderText('Password'), 'password123');
-    fireEvent.changeText(getByPlaceholderText('Confirm Password'), 'password123');
+    fireEvent.changeText(getByPlaceholderText('Password'), 'SecurePass123');
+    fireEvent.changeText(getByPlaceholderText('Confirm Password'), 'SecurePass123');
   
     // Submit the form
     fireEvent.press(getByText('Sign Up'));
@@ -147,8 +147,8 @@ describe('RegisterScreen', () => {
     fireEvent.changeText(getByPlaceholderText('First Name'), 'John');
     fireEvent.changeText(getByPlaceholderText('Last Name'), 'Doe');
     fireEvent.changeText(getByPlaceholderText('Email'), 'taken@email.com');
-    fireEvent.changeText(getByPlaceholderText('Password'), 'password123');
-    fireEvent.changeText(getByPlaceholderText('Confirm Password'), 'password123');
+    fireEvent.changeText(getByPlaceholderText('Password'), 'SecurePass123');
+    fireEvent.changeText(getByPlaceholderText('Confirm Password'), 'SecurePass123');
   
     fireEvent.press(getByText('Sign Up'));
   

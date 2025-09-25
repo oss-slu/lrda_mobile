@@ -20,6 +20,7 @@ export default function LoadingImage({
 }: LoadingImageProps) {
   const [isLoading, setIsLoading] = useState(true);
 
+
   if (isImage && imageURI !== "") {
     return (
       <View
@@ -51,7 +52,11 @@ export default function LoadingImage({
             <Image
               style={[styles.preview, { width: width, height: height }]}
               source={{ uri: imageURI }}
-              onLoadEnd={() => setIsLoading(false)}
+              onLoadStart={() => {}}
+              onLoadEnd={() => {
+                setIsLoading(false);
+              }}
+              onError={(error) => {}}
             />
             <View style={styles.playUnderlay}>
               <Ionicons
