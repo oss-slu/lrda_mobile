@@ -44,7 +44,6 @@ import Tooltip from 'react-native-walkthrough-tooltip';
 import TooltipContent from "../onboarding/TooltipComponent";
 import SyncStatusIndicator from "../components/SyncStatusIndicator";
 import SyncService from "../utils/syncService";
-import OfflineTestPanel from "../components/OfflineTestPanel";
 
 const { width, height } = Dimensions.get("window");
 const user = User.getInstance();
@@ -844,8 +843,7 @@ const handleSortOption = ({ option }) => {
         }}
       />
 
-      {/* Offline Test Panel - Remove this in production */}
-      <OfflineTestPanel />
+      {/* Offline Test Panel removed for production */}
 
       <View testID="notes-list" style={styles(theme, width).scrollerBackgroundColor}>
         {rendering ? <NoteSkeleton /> : renderList(notes)}
