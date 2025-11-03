@@ -12,17 +12,22 @@ export default class DataConversion {
    */
   static convertMediaTypes(data: any[]): Note[] {
     const fetchedNotes: Note[] = data.map((message: any) => {
-      let time = new Date(message.__rerum.createdAt);
-      if (message.time === undefined) {
+      let time: Date;
+      if (message.time !== undefined) {
+        // Use message.time if available
+        time = new Date(message.time);
+      } else if (message.__rerum?.createdAt) {
+        // Use __rerum.createdAt if available
         time = new Date(message.__rerum.createdAt);
         var date = new Date();
         var offsetInHours = date.getTimezoneOffset() / 60;
         time.setHours(time.getHours() - offsetInHours);
       } else {
-        time = new Date (message.time);
+        // Fallback to current date if neither is available
+        time = new Date();
       }
 
-      const mediaItems = message.media.map((item: any) => {
+      const mediaItems = (message.media || []).map((item: any) => {
         if (item.type === "video") {
           return new VideoType({
             uuid: item.uuid,
@@ -61,10 +66,10 @@ export default class DataConversion {
       });
 
       return {
-        id: message["@id"],
+        id: message["@id"] || message.id || "",
         title: message.title || "",
-        text: message.BodyText || "",
-        time: time || "",
+        text: message.BodyText || message.text || "",
+        time: time,
         creator: message.creator || "",
         media: mediaItems || [],
         audio: audioItems || [],
@@ -163,7 +168,7 @@ export default class DataConversion {
                 }
               }),
               audio: note.audio || [],
-              time: note.time || "",
+              time: note.time || new Date(),
               creator: note.creator || "",
               latitude: note.latitude,
               longitude: note.longitude,
@@ -196,7 +201,7 @@ export default class DataConversion {
                 }
               }),
               audio: note.audio || [],
-              time: note.time || "",
+              time: note.time || new Date(),
               creator: note.creator || "",
               latitude: note.latitude,
               longitude: note.longitude,
