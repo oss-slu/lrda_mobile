@@ -8,6 +8,7 @@ import { User } from "../models/user_class";
 import AudioContainer from "../components/audio";
 import { Media, AudioType, VideoType, PhotoType } from "../models/media_class";
 import ApiService from "../utils/api_calls";
+import EnhancedApiService from "../utils/enhancedApiService";
 import TagWindow from "../components/tagging";
 import { DEFAULT_TOOLBAR_ITEMS, RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
 import NotePageStyles, { customImageCSS } from "../../styles/pages/NoteStyles";
@@ -279,7 +280,6 @@ const EditNoteScreen = ({ route, navigation }) => {
   };
 
   const handleSaveNote = async () => {
-    setIsUpdating(true);
     try {
       const userId = await user.getId();
       const textContent = await editor.getHTML();
@@ -299,19 +299,24 @@ const EditNoteScreen = ({ route, navigation }) => {
       };
       console.log("💾 [EditNoteScreen] Updating note with data:", JSON.stringify(editedNote, null, 2));
       
-      const response = await ApiService.overwriteNote(editedNote);
-      console.log("✅ [EditNoteScreen] Note updated successfully, response:", response);
+      // Use enhanced API service for offline support
+      const enhancedApi = EnhancedApiService.getInstance();
+      const result = await enhancedApi.saveNote(editedNote, false);
+      console.log("✅ [EditNoteScreen] Note updated successfully:", result);
       
-      if (response.ok) {
+      if (result.success) {
+        if (result.isOffline) {
+          console.log("📱 [EditNoteScreen] Note saved offline, will sync when connection is restored");
+        } else {
+          console.log("🌐 [EditNoteScreen] Note saved online successfully");
+        }
         onSave(editedNote);
       } else {
-        console.error("❌ [EditNoteScreen] Failed to update note, status:", response.status);
-        throw new Error(`Failed to update note: ${response.status} ${response.statusText}`);
+        console.error("❌ [EditNoteScreen] Failed to update note");
       }
     } catch (error) {
       console.error("Error updating the note:", error);
     } finally {
-      setIsUpdating(false);
       dispatch(toogleAddNoteState());
       setIsPublishBtnClicked(true);
       navigation.goBack();
@@ -340,15 +345,21 @@ const EditNoteScreen = ({ route, navigation }) => {
             };
 
             console.log("💾 [EditNoteScreen] Auto-saving EditNote on exit with data:", JSON.stringify(updatedNote, null, 2));
-            setIsUpdating(true);
             
-            const response = await ApiService.overwriteNote(updatedNote);
-            console.log("✅ [EditNoteScreen] Auto-save successful, response:", response);
+            // Use enhanced API service for offline support
+            const enhancedApi = EnhancedApiService.getInstance();
+            const result = await enhancedApi.saveNote(updatedNote, false);
+            console.log("✅ [EditNoteScreen] Auto-save successful:", result);
             
-            if (response.ok) {
+            if (result.success) {
+              if (result.isOffline) {
+                console.log("📱 [EditNoteScreen] Auto-save completed offline, will sync when connection is restored");
+              } else {
+                console.log("🌐 [EditNoteScreen] Auto-save completed online successfully");
+              }
               onSave(updatedNote);
             } else {
-              console.error("❌ [EditNoteScreen] Auto-save failed, status:", response.status);
+              console.error("❌ [EditNoteScreen] Auto-save failed");
             }
           } catch (e) {
             console.warn("Auto-save failed:", e);
@@ -423,7 +434,7 @@ const EditNoteScreen = ({ route, navigation }) => {
         </View>
 
         {/* Loading spinner */}
-        <LoadingModal visible={isUpdating} />
+        {/* Loading spinner removed - saves are now non-blocking */}
       </KeyboardAvoidingView>
       <View
         style={[

@@ -20,6 +20,7 @@ import { User } from "../models/user_class";
 import { Note } from "../../types";
 import { HomeScreenProps } from "../../types";
 import ApiService from "../utils/api_calls";
+import EnhancedApiService from "../utils/enhancedApiService";
 import DataConversion from "../utils/data_conversion";
 import { SwipeListView } from "react-native-swipe-list-view";
 import NoteSkeleton from "../components/noteSkeleton";
@@ -41,6 +42,9 @@ import { useSelector, useDispatch } from 'react-redux'
 import { defaultTextFont } from "../../styles/globalStyles";
 import Tooltip from 'react-native-walkthrough-tooltip';
 import TooltipContent from "../onboarding/TooltipComponent";
+import SyncStatusIndicator from "../components/SyncStatusIndicator";
+import SyncService from "../utils/syncService";
+import OfflineTestPanel from "../components/OfflineTestPanel";
 
 const { width, height } = Dimensions.get("window");
 const user = User.getInstance();
@@ -135,13 +139,24 @@ const refreshPage = () => {
         const skip = (pageNum - 1) * limit;
         const userId = await user.getId();
 
-        const data = await ApiService.fetchMessagesBatch(
+        // Use enhanced API service for offline support
+        const enhancedApi = EnhancedApiService.getInstance();
+        const result = await enhancedApi.fetchNotes(
             false,
             published,
             userId,
             limit,
             skip
         );
+
+        const data = result.notes;
+        const isOffline = result.isOffline;
+
+        if (isOffline) {
+            console.log("📱 [HomeScreen] Loading notes from offline storage");
+        } else {
+            console.log("🌐 [HomeScreen] Loading notes from online API");
+        }
 
         const filteredNotes = data.filter((note: Note) => !note.isArchived);
 
@@ -505,9 +520,10 @@ const handleSortOption = ({ option }) => {
             });            
           } else {
             const formattedNote = {
-              ...item,
-              time: formatToLocalDateString(new Date(item.time)),
+              title: item.title,
               description: item.text,
+              creator: item.creator,
+              time: formatToLocalDateString(new Date(item.time)),
               images: item.media.map((mediaItem: { uri: any }) => ({
                 uri: mediaItem.uri,
               })),
@@ -517,7 +533,7 @@ const handleSortOption = ({ option }) => {
           }
         }}
       >
-        <NotesComponent IsImage={IsImage} resolvedImageURI={resolvedImageURI} ImageType={ImageType} textLength={textLength} showTime={showTime} item={item} isDarkmode={isDarkmode}/>
+        <NotesComponent IsImage={IsImage} resolvedImageURI={resolvedImageURI} ImageType={ImageType} textLength={textLength} showTime={showTime} item={item} isPublished={item.published} isDarkmode={isDarkmode}/>
       </TouchableOpacity>
     );
   };
@@ -816,6 +832,21 @@ const handleSortOption = ({ option }) => {
         </View>
       </View>
 
+      {/* Sync Status Indicator */}
+      <SyncStatusIndicator 
+        onPress={async () => {
+          try {
+            const syncService = SyncService.getInstance();
+            await syncService.forceSync();
+          } catch (error) {
+            console.error('❌ [HomeScreen] Failed to force sync:', error);
+          }
+        }}
+      />
+
+      {/* Offline Test Panel - Remove this in production */}
+      <OfflineTestPanel />
+
       <View testID="notes-list" style={styles(theme, width).scrollerBackgroundColor}>
         {rendering ? <NoteSkeleton /> : renderList(notes)}
       </View>
@@ -871,7 +902,7 @@ const handleSortOption = ({ option }) => {
   );
 };
 
-const styles = (theme, width, color, isDarkmode) =>
+const styles = (theme, width) =>
   StyleSheet.create({
     container: {
       paddingTop: Constants.statusBarHeight - 20,

@@ -30,6 +30,7 @@ import { VideoView, useVideoPlayer } from "expo-video";
 import { User } from "../models/user_class";
 import { AudioType, Media } from "../models/media_class";
 import ApiService from "../utils/api_calls";
+import EnhancedApiService from "../utils/enhancedApiService";
 import { useDispatch } from "react-redux";
 import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
 import { useAddNoteContext } from "../context/AddNoteContext";
@@ -329,6 +330,7 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({ navigation, 
     const uid = await user.getId();
     const title = getTitle();
     return {
+      id: `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, // Temporary ID for offline storage
       title,
       text: sanitizedContent,
       media: newMedia || [],
@@ -348,17 +350,25 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({ navigation, 
     const noteData = await prepareNoteData(published);
     console.log("Note Data Prepared:", noteData); // Check if title is being passed correctly
 
-    // Proceed with saving the note
-    setIsUpdating(true);
-
+    // Use enhanced API service for offline support
+    const enhancedApi = EnhancedApiService.getInstance();
+    
     try {
-      console.log("💾 [AddNoteScreen] Attempting to save note with data:", JSON.stringify(noteData, null, 2));
+      console.log("💾 [AddNoteScreen] Attempting to save note with enhanced API service");
       
-      const response = await ApiService.writeNewNote(noteData);
-      console.log("✅ [AddNoteScreen] Note saved successfully, response:", response);
+      const result = await enhancedApi.saveNote(noteData, true);
+      console.log("✅ [AddNoteScreen] Note saved successfully:", result);
       
-      if (response.ok) {
-        console.log("🎉 [AddNoteScreen] API call successful, refreshing page and navigating back");
+      if (result.success) {
+        if (result.isOffline) {
+          console.log("📱 [AddNoteScreen] Note saved offline, will sync when connection is restored");
+          // Show a subtle notification that note was saved offline
+          // You could add a toast notification here
+        } else {
+          console.log("🌐 [AddNoteScreen] Note saved online successfully");
+        }
+        
+        // Navigate back regardless of online/offline status
         if (route.params.refreshPage) {
           route.params.refreshPage();
         }
@@ -366,15 +376,15 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({ navigation, 
           navigation.goBack();
         }
       } else {
-        console.error("❌ [AddNoteScreen] API call failed with status:", response.status);
-        throw new Error(`Failed to save note: ${response.status} ${response.statusText}`);
+        console.error("❌ [AddNoteScreen] Failed to save note");
+        // You might want to show a user-friendly error message here
+        // Alert.alert("Error", "Failed to save note. Please try again.");
       }
     } catch (error) {
       console.error("💥 [AddNoteScreen] Error saving the note:", error);
       // You might want to show a user-friendly error message here
       // Alert.alert("Error", "Failed to save note. Please try again.");
     } finally {
-      setIsUpdating(false);
       dispatch(toogleAddNoteState());
     }
   };
@@ -530,7 +540,7 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({ navigation, 
           </View>
         </Modal>
 
-        <LoadingModal visible={isUpdating} />
+        {/* Loading spinner removed - saves are now non-blocking */}
       </KeyboardAvoidingView>
     </View>
   );
