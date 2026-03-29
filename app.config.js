@@ -4,6 +4,7 @@ export default {
   expo: {
     name: "Where's Religion?",
     slug: "lrda_mobile",
+    scheme: "lrda",
     version: "1.0.8",
     orientation: "portrait",
     icon: "./assets/icon.png",
@@ -93,7 +94,8 @@ export default {
         }
       ],
       "@react-native-community/datetimepicker",
-      "expo-font"
+      "expo-font",
+      "expo-router"
     ]
   }
 };

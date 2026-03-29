@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   View,
   TextInput,
@@ -28,12 +28,18 @@ import LoadingModal from "../components/LoadingModal";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import { useDispatch } from "react-redux";
 import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
-import { useFocusEffect } from "@react-navigation/native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
 
 const user = User.getInstance();
-const EditNoteScreen = ({ route, navigation }) => {
-  const { note, onSave } = route.params;
+const EditNoteScreen = () => {
+  const router = useRouter();
+  const navigation = useNavigation();
+  const { noteData } = useLocalSearchParams<{ noteData: string }>();
+  const note = useMemo(() => {
+    try { return JSON.parse(noteData || "{}"); }
+    catch { return {}; }
+  }, [noteData]);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
@@ -237,7 +243,6 @@ useEffect(() => {
         };
 
         await ApiService.overwriteNote(editedNote);
-        onSave(editedNote);
         setIsPublishBtnClicked(true);
 
         ToastMessage.show({
@@ -247,7 +252,7 @@ useEffect(() => {
         });
 
         console.log("🧭 Navigating back after publish");
-        navigation.goBack();
+        router.back();
       } catch (error) {
         console.error("❌ Error publishing note:", error);
       } finally {
@@ -278,14 +283,13 @@ useEffect(() => {
         tags,
       };
       await ApiService.overwriteNote(editedNote);
-      onSave(editedNote);
     } catch (error) {
       console.error("Error updating the note:", error);
     } finally {
       setIsUpdating(false);
       dispatch(toogleAddNoteState());
       setIsPublishBtnClicked(true);
-      navigation.goBack();
+      router.back();
     }
   };
 
@@ -312,7 +316,6 @@ useEffect(() => {
             console.log("Auto-saving EditNote on exit...");
             setIsUpdating(true);
             await ApiService.overwriteNote(updatedNote);
-            onSave(updatedNote);
           } catch (e) {
             console.warn("Auto-save failed:", e);
           } finally {

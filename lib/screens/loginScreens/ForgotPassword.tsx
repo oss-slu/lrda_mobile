@@ -11,6 +11,7 @@ import {
 import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../../config"; // Firebase auth instance
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { useRouter } from "expo-router";
 
 // Utility function to validate email format
 const validateEmail = (email: string): boolean => {
@@ -18,7 +19,8 @@ const validateEmail = (email: string): boolean => {
   return emailRegex.test(email);
 };
 
-const ForgotPassword: React.FC<{ navigation: any }> = ({ navigation }) => {
+const ForgotPassword: React.FC = () => {
+  const router = useRouter();
   const [email, setEmail] = useState("");
 
   const handlePasswordReset = async () => {
@@ -38,7 +40,7 @@ const ForgotPassword: React.FC<{ navigation: any }> = ({ navigation }) => {
         "Success",
         `A password reset link has been sent to ${email}.`
       );
-      navigation.navigate("Login");
+      router.back();
     } catch (error: any) {
       Alert.alert("Error", error.message || "Failed to send reset email.");
     }
@@ -77,7 +79,7 @@ const ForgotPassword: React.FC<{ navigation: any }> = ({ navigation }) => {
           </TouchableOpacity>
           <TouchableOpacity
             style={{ marginTop: 20 }}
-            onPress={() => navigation.navigate("Login")}
+            onPress={() => router.back()}
           >
             <Text style={styles.backToLoginText}>Back to Login</Text>
           </TouchableOpacity>

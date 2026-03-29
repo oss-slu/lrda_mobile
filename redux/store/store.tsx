@@ -2,20 +2,18 @@ import { configureStore } from '@reduxjs/toolkit';
 import { persistStore, persistReducer } from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { combineReducers } from 'redux';
-import navigationReducer from '../slice/navigationSlice';
 import ThemeSlice from '../slice/ThemeSlice';
 import AddNoteStateSlice from '../slice/AddNoteStateSlice';
 
 // Persist Config
 const persistConfig = {
   key: 'root',
-  storage: AsyncStorage, // Use AsyncStorage for React Native
-  blacklist: ['register'], // Exclude the "register" key from persistence
+  storage: AsyncStorage,
+  blacklist: ['register'],
 };
 
 // Combine Reducers
 const rootReducer = combineReducers({
-  navigation: navigationReducer,
   themeSlice: ThemeSlice,
   addNoteState: AddNoteStateSlice,
 });

@@ -1,7 +1,7 @@
 {
   "name": "lrda_mobile",
   "version": "1.0.6",
-  "main": "node_modules/expo/AppEntry.js",
+  "main": "expo-router/entry",
   "scripts": {
     "build:android": "NODE_ENV=production eas build -p android",
     "start": "expo start",
@@ -17,9 +17,6 @@
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/datetimepicker": "8.4.4",
     "@react-native-community/slider": "5.0.1",
-    "@react-navigation/bottom-tabs": "^6.5.20",
-    "@react-navigation/native": "^6.1.17",
-    "@react-navigation/stack": "^6.3.29",
     "@reduxjs/toolkit": "^2.2.7",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.5.0",
@@ -47,6 +44,7 @@
     "expo-image-picker": "~17.0.10",
     "expo-location": "~19.0.8",
     "expo-media-library": "~18.2.1",
+    "expo-router": "~6.0.23",
     "expo-splash-screen": "~31.0.13",
     "expo-status-bar": "~3.0.9",
     "expo-updates": "~29.0.16",

@@ -153,7 +153,7 @@ describe('Library Component', () => {
     };
     const routeMock = { params: {} }; // Mock route prop
     const { getByTestId } = render(
-      <Library navigation={navigationMock as any} route={routeMock as any} />
+      <Library />
     );
     await waitFor(() => expect(getByTestId('Library')).toBeTruthy());
   });
@@ -166,7 +166,7 @@ describe('Library Component', () => {
     };
     const routeMock = { params: {} };
     const { getByTestId } = render(
-      <Library navigation={navigationMock as any} route={routeMock as any} />
+      <Library />
     );
     await waitFor(() => expect(getByTestId('SearchBar')).toBeTruthy());
   });
@@ -179,7 +179,7 @@ describe('Library Component', () => {
     };
     const routeMock = { params: {} };
     const { getByTestId } = render(
-      <Library navigation={navigationMock as any} route={routeMock as any} />
+      <Library />
     );
     await waitFor(() => expect(getByTestId('Filter')).toBeTruthy());
   });
@@ -193,7 +193,7 @@ describe('Library Component', () => {
     const routeMock = { params: {} };
 
     const { getByTestId } = render(
-      <Library navigation={navigationMock} route={routeMock} />
+      <Library />
     );
 
     const accountComponent = await waitFor(() => getByTestId('account-page'));
@@ -201,7 +201,8 @@ describe('Library Component', () => {
 
     fireEvent.press(accountComponent);
 
-    expect(navigationMock.navigate).toHaveBeenCalledWith("AccountPage");
+    const { useRouter } = require('expo-router');
+    expect(useRouter().push).toHaveBeenCalledWith("/account");
   });
 
   it('Toggles Search Bar and clicks it', async () => {
@@ -215,7 +216,7 @@ describe('Library Component', () => {
     jest.spyOn(ApiService, 'fetchMessages').mockResolvedValue([]);
 
     const { getByTestId } = render(
-      <Library navigation={navigationMock as any} route={routeMock as any} />
+      <Library />
     );
 
     const searchButton = await waitFor(() => getByTestId('search-button'));
@@ -235,7 +236,7 @@ describe('Library Component', () => {
     jest.spyOn(userInstance, 'getName').mockResolvedValue('Adem');
 
     const { getByText } = render(
-      <Library navigation={navigationMock as any} route={routeMock as any} />
+      <Library />
     );
 
     await waitFor(() => {
@@ -254,7 +255,7 @@ describe('Library Component', () => {
     jest.spyOn(ApiService, 'fetchMessages').mockResolvedValue([]);
 
     const { getByTestId } = render(
-      <Library navigation={navigationMock as any} route={routeMock as any} />
+      <Library />
     );
 
     const searchButton = await waitFor(() => getByTestId('search-button'));
@@ -275,7 +276,7 @@ describe('Library Component', () => {
     const routeMock = { params: {} };
 
     const { getByText } = render(
-      <Library navigation={navigationMock as any} route={routeMock as any} />
+      <Library />
     );
 
     await waitFor(() => {
@@ -291,7 +292,7 @@ describe('Library Component', () => {
     };
     const routeMock = { params: {} };
     const { getByTestId } = render(
-      <Library navigation={navigationMock as any} route={routeMock as any} />
+      <Library />
     );
     await waitFor(() => expect(getByTestId('notes-list')).toBeTruthy());
   });
@@ -304,7 +305,7 @@ describe('Library Component', () => {
     };
     const routeMock = { params: {} };
     const { getByTestId } = render(
-      <Library navigation={navigationMock as any} route={routeMock as any} />
+      <Library />
     );
     await waitFor(() => expect(getByTestId('greeting-component')).toBeTruthy());
   });
@@ -320,7 +321,7 @@ describe('Library Component', () => {
     jest.spyOn(ApiService, 'fetchMapsMessagesBatch').mockResolvedValue([]);
 
     const { getByText } = render(
-      <Library navigation={navigationMock} route={routeMock} />
+      <Library />
     );
 
     await waitFor(() => {
@@ -341,7 +342,7 @@ describe('Library Component', () => {
     jest.spyOn(ApiService, 'fetchMapsMessagesBatch').mockResolvedValue([]);
 
     const { getByText } = render(
-      <Library navigation={navigationMock} route={routeMock} />
+      <Library />
     );
 
     await waitFor(() => {
@@ -377,7 +378,7 @@ describe('Library Component', () => {
     jest.spyOn(ApiService, 'fetchMapsMessagesBatch').mockResolvedValue(dummyNotes);
   
     const { getByText } = render(
-      <Library navigation={navigationMock} route={routeMock} />
+      <Library />
     );
   
     await waitFor(() => {

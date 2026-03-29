@@ -15,30 +15,21 @@ import {
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Snackbar } from "react-native-paper";
-import { useDispatch, useSelector } from 'react-redux';
-import { setNavState } from "../../../redux/slice/navigationSlice";
-import { RootState } from "../../../redux/store/store";
 import { User } from "../../models/user_class";
 import { removeItem } from "../../utils/async_storage";
 import { defaultTextFont } from "../../../styles/globalStyles";
+import { useRouter } from "expo-router";
 
 const user = User.getInstance();
 
-type LoginProps = {
-  navigation: any;
-  route: any;
-};
-
-const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
+const LoginScreen: React.FC = () => {
+  const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [firstClick, setFirstClick] = useState(true);
   const [snackState, toggleSnack] = useState(false);
   const [loading, setLoading] = useState(false);
   const fadeAnim = useRef(new Animated.Value(1)).current;
-  const navState = useSelector((state: RootState) => state.navigation.navState);
-  const dispatch = useDispatch()
-  const [hasNavigated, setHasNavigated] = useState(false);
   const [snackMessage, setSnackMessage] = useState("");
 
   const fadeOut = () => {
@@ -50,13 +41,6 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   };
 
   useEffect(() => {
-    if (navState === "home" && !hasNavigated) {
-      setHasNavigated(true); // Prevent repeated navigation
-      navigation.navigate("HomeTab");
-    }
-  }, [navState, hasNavigated]);
-  
-  useEffect(() => {
     const timer = setTimeout(() => {
       fadeOut();
     }, 2000);
@@ -64,9 +48,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
     return () => clearTimeout(timer);
   }, []);
 
-  console.log("in login page the redux value is ", navState)
-
-  useEffect(() => {
+useEffect(() => {
     (async () => {
       await SplashScreen.preventAutoHideAsync();
       await SplashScreen.hideAsync();
@@ -74,7 +56,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   }, []);
 
   const handleGoRegister = () => {
-    navigation.navigate("Register");
+    router.push("/(auth)/register");
   };
 
   const onDismissSnackBar = () => toggleSnack(false);
@@ -93,7 +75,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
           if (userId !== null) {
               setUsername("")
               setPassword("")
-              dispatch(setNavState('home'));
+              router.replace('/(tabs)');
           }
         }
       }
@@ -195,7 +177,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
                 testID="password-input"
               />
             </View>
-            <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
+            <TouchableOpacity onPress={() => router.push("/(auth)/forgot-password")}>
             <View style={styles.forgotPasswordContainer}><Text style={styles.forgotText}>Forgot Password?</Text></View>
 </TouchableOpacity>
             <TouchableOpacity onPress={onLoginPress} style={styles.buttons} testID="login-button">

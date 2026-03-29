@@ -15,10 +15,12 @@ import ApiService from "../utils/api_calls";
 import { useTheme } from "../components/ThemeProvider";
 import Feather from 'react-native-vector-icons/Feather';
 import { defaultTextFont } from "../../styles/globalStyles";
+import { useRouter } from "expo-router";
 
 const user = User.getInstance();
 
-export default function ProfilePage({ navigation }: ProfilePageProps) {
+export default function ProfilePage() {
+  const navigation = useRouter();
   const [allImages, setAllImages] = useState<ImageNote[]>([]);
   const [userInitials, setUserInitials] = useState("N/A");
   const [userName, setUserName] = useState("");
@@ -59,7 +61,7 @@ export default function ProfilePage({ navigation }: ProfilePageProps) {
   }, []);
 
   const navigateToEditNoteScreen = (note: Note) => {
-    navigation.navigate("EditNote", { note });
+    navigation.push({ pathname: "/edit-note", params: { noteData: JSON.stringify(note) } });
   };
 
   const styles = createStyles(theme); // Pass theme to the style generator
@@ -73,7 +75,7 @@ export default function ProfilePage({ navigation }: ProfilePageProps) {
         contentContainerStyle={{ paddingBottom: 200 }}
         ListHeaderComponent={() => (
           <View>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
+            <TouchableOpacity onPress={() => navigation.back()}>
               <Feather name={'arrow-left'} size={30} style={{marginLeft: 20}}/>
             </TouchableOpacity>
             <View style={{ alignSelf: "center" }}>

@@ -5,7 +5,6 @@ import { signInWithEmailAndPassword, onAuthStateChanged, signOut, getAuth } from
 import { auth, db } from "../config/firebase"; // Import Firestore database
 import { doc, getDoc } from "firebase/firestore"; // Firestore imports
 import ApiService from "../utils/api_calls";
-import { setNavState } from "../../redux/slice/navigationSlice";
 
 
 export class User {
@@ -160,18 +159,17 @@ export class User {
     }
   }
 
-  public async logout(dispatch: any) {
+  public async logout() {
     try {
       const auth = getAuth();
       await signOut(auth);
-  
+
       this.userData = null;
       this.clearUser();
       this.notifyLoginState();
-  
+
       await AsyncStorage.removeItem('authToken');
-  
-      dispatch(setNavState("login"));
+
       console.log("User successfully logged out");
     } catch (error) {
       console.error("Error during Firebase logout", error);

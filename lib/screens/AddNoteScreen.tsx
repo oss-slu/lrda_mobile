@@ -44,13 +44,14 @@ import {defaultTextFont} from "../../styles/globalStyles";
 import { Button } from "react-native-paper";
 import TooltipContent from "../onboarding/TooltipComponent";
 import Tooltip from 'react-native-walkthrough-tooltip';
+import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
 
 const user = User.getInstance();
 
-const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
-  navigation,
-  route,
-}) => {
+const AddNoteScreen: React.FC = () => {
+  const router = useRouter();
+  const navigation = useNavigation();
+  const params = useLocalSearchParams<{ untitledNumber?: string }>();
   const [titleText, setTitleText] = useState<string>("");
   const [isSaveButtonEnabled, setIsSaveButtonEnabled] = useState<boolean>(true);
   const [bodyText, setBodyText] = useState<string>("<p></p>");
@@ -148,7 +149,7 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
         } else {
           console.log("Nothing to save, toggling state.");
           dispatch(toogleAddNoteState());
-          navigation.navigate("Home");
+          router.back();
         }
         }
       }, 300); // <-- 300ms delay gives WebView enough time
@@ -361,8 +362,8 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
     console.log(titleText);
     const title = titleText.trim()
       ? titleText.trim()
-      : route.params.untitledNumber
-      ? `Untitled ${route.params.untitledNumber}`
+      : params.untitledNumber
+      ? `Untitled ${params.untitledNumber}`
       : "Untitled";
     console.log(title);
 
@@ -404,11 +405,8 @@ const AddNoteScreen: React.FC<{ navigation: any; route: any }> = ({
     try {
       const response = await ApiService.writeNewNote(noteData);
       const responseJson = await response.json();
-      if (route.params.refreshPage) {
-        route.params.refreshPage();
-      }
-      if (navigation.canGoBack()) {
-        navigation.goBack();
+      if (router.canGoBack()) {
+        router.back();
       }
     } catch (error) {
       console.error("Error saving the note:", error);

@@ -19,7 +19,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../components/ThemeProvider";
 import { useDispatch } from "react-redux";
 import { User } from "../models/user_class";
-import { useNavigation } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 import Carousel from "react-native-reanimated-carousel";
 import ThemeToggle from "../components/ThemeToggle";
 import Feather from 'react-native-vector-icons/Feather';
@@ -54,7 +54,7 @@ export default function MorePage() {
   const { theme, isDarkmode, toggleDarkmode } = useTheme();
   const dispatch = useDispatch();
   const userObject = User.getInstance();
-  const navigation = useNavigation();
+  const router = useRouter();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isThemeOpen, setIsThemeOpen] = useState(false)
   const [userName, setUserName] = useState('');
@@ -192,8 +192,9 @@ const toggleReason = (reason) => {
 
   const onLogoutPress = async () => {
     try {
-      await User.getInstance().logout(dispatch);
-      dispatch(clearThemeReducer())
+      await User.getInstance().logout();
+      dispatch(clearThemeReducer());
+      router.replace("/(auth)/login");
     } catch (e) {
       console.log(e);
     }
@@ -287,7 +288,7 @@ const toggleReason = (reason) => {
                      },
                   ]}
                   onPress={() => {
-                    navigation.navigate("AccountPage");
+                    router.push("/account");
                   }}
                 >
                   <Text style={styles.pfpText}>{userInitials}</Text>
@@ -347,9 +348,9 @@ const toggleReason = (reason) => {
 >
             <View style={{ marginTop: 40, alignItems: 'center' }}>
 
-              <MenuItem title="About" iconName="information-circle-outline" onPress={()=> {navigation.navigate("AboutScreen")}}/>
-              <MenuItem title="Resource" iconName="link-outline" onPress={() => navigation.navigate("Resource")} />
-              <MenuItem title="Meet our team" iconName="people-outline" onPress={() => navigation.navigate("TeamPage")} />
+              <MenuItem title="About" iconName="information-circle-outline" onPress={()=> {router.push("/more/about")}}/>
+              <MenuItem title="Resource" iconName="link-outline" onPress={() => router.push("/more/resource")} />
+              <MenuItem title="Meet our team" iconName="people-outline" onPress={() => router.push("/more/team")} />
               <MenuItem title="Settings" iconName="settings-outline" onPress={handleSettingsToggle} />
               <MenuItem title="FAQ" iconName="help-circle-outline" onPress={()=> {}}/>
               <MenuItem title="Logout" iconName="exit-outline" onPress={onLogoutPress} />
