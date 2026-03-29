@@ -30,7 +30,7 @@ jest.mock('../lib/components/ThemeProvider', () => ({
   }),
 }));
 
-jest.mock("firebase/app", () => ({ initializeApp: jest.fn() }));
+jest.mock("firebase/app", () => ({ initializeApp: jest.fn(), getApps: jest.fn(() => []) }));
 jest.mock("firebase/auth", () => ({
   getAuth: jest.fn(),
   initializeAuth: jest.fn(),

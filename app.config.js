@@ -91,7 +91,9 @@ export default {
             minSdkVersion: 25
           }
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker",
+      "expo-font"
     ]
   }
 };

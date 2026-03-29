@@ -20,7 +20,7 @@ import { getThumbnail, convertHeicToJpg, uploadMedia } from "../utils/S3_proxy";
 import LoadingImage from "./loadingImage";
 import DraggableFlatList from "react-native-draggable-flatlist";
 import ImageView from "react-native-image-viewing";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import * as MediaLibrary from "expo-media-library";
 import { PhotoStyles } from "../../styles/components/PhotoScrollerStyles"
 

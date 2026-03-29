@@ -35,7 +35,6 @@ import Greeting from "../components/Greeting";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import LottieView from 'lottie-react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { green } from "react-native-reanimated/lib/typescript/Colors";
 import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
 import { useSelector, useDispatch } from 'react-redux'
 import { defaultTextFont } from "../../styles/globalStyles";
