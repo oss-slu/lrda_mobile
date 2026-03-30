@@ -6,7 +6,7 @@
       "es6"
     ],
     "jsx": "react",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
   },
@@ -16,4 +16,3 @@
   ],
   "extends": "expo/tsconfig.base"
 }
-

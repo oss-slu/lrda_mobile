@@ -43,7 +43,7 @@ export default {
         NSPhotoLibraryAddUsageDescription: "Allowing access to photo library enables you to select, upload, and/or share your chosen photos or videos with other app users. ",
       }
     },
-    
+
     android: {
       adaptiveIcon: {
         foregroundImage: "./assets/icon.png",
@@ -57,7 +57,7 @@ export default {
       package: "register.edu.slu.cs.oss.lrda",
       versionCode: 28,
       newArchEnabled: true, // Enable New Architecture for Android
-      
+
     },
     web: {
       favicon: "./assets/favicon.png"
@@ -78,12 +78,13 @@ export default {
       appId: process.env.APP_ID,
       measurementId: process.env.MEASUREMENT_ID,
       apiBaseUrl: process.env.API_BASE_URL,
+      authApiUrl: process.env.AUTH_API_URL,
       s3ProxyPrefix: process.env.S3_PROXY_PREFIX,
       eas: {
         "projectId": "801029ef-db83-4668-a97a-5adcc4c333e2"
       }
     },
-      plugins: [
+    plugins: [
       [
         "expo-build-properties",
         {

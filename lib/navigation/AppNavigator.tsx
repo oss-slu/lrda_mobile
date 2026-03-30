@@ -78,7 +78,7 @@ const MoreStack = () => (
       component={MorePage}
       options={{ headerShown: false }}
     />
-     <Stack.Screen
+    <Stack.Screen
       name="AboutScreen"
       component={AboutScreen}
       options={{ headerShown: false }}
@@ -126,6 +126,7 @@ const AppNavigator: React.FC = () => {
   }, []);
   useEffect(() => {
     const checkOnboarding = async () => {
+      await user.initializeUser();
       const onboarded = await getItem("onboarded");
       const userId = await user.getId();
 
@@ -140,13 +141,13 @@ const AppNavigator: React.FC = () => {
     };
 
     checkOnboarding();
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     user.setLoginCallback((isLoggedIn) => {
-      setNavState(isLoggedIn ? "home" : "login");
+      dispatch(setNavState(isLoggedIn ? "home" : "login"));
     });
-  }, []);
+  }, [dispatch]);
 
   return (
     <NavigationContainer theme={isDarkmode ? DarkTheme : DefaultTheme}>
@@ -186,7 +187,7 @@ const AppNavigator: React.FC = () => {
             component={RegisterScreen}
             options={{ headerShown: false }}
           />
-             <Stack.Screen
+          <Stack.Screen
             name="ForgotPassword"
             component={ForgotPassword}
             options={{ headerShown: false }}
@@ -194,27 +195,27 @@ const AppNavigator: React.FC = () => {
         </Stack.Navigator>
       )}
       {navState === "home" && (
-       <Tab.Navigator
-       screenOptions={{
-         tabBarShowLabel: true, // Enable default labels
-         tabBarHideOnKeyboard: true,
-         tabBarStyle: {
-          backgroundColor: theme.primaryColor,  // Ensure it's visible
-          position: 'absolute',
-          bottom: 0,  // Fully extend to the bottom
-          left: 0,
-          right: 0,
-          height: Platform.OS === 'ios' ? 80 : 70, // Increase height for full coverage
-          paddingBottom: Platform.OS === 'ios' ? 30 : 20, // Ensure space for gestures
-          borderTopWidth: 0,  // Remove any top borders
-          elevation: 0,  // Remove shadow
-        },
-         tabBarItemStyle: {
-           backgroundColor: theme.primaryColor,
-           height: '100%'
-         }
-       }}
-     >
+        <Tab.Navigator
+          screenOptions={{
+            tabBarShowLabel: true, // Enable default labels
+            tabBarHideOnKeyboard: true,
+            tabBarStyle: {
+              backgroundColor: theme.primaryColor,  // Ensure it's visible
+              position: 'absolute',
+              bottom: 0,  // Fully extend to the bottom
+              left: 0,
+              right: 0,
+              height: Platform.OS === 'ios' ? 80 : 70, // Increase height for full coverage
+              paddingBottom: Platform.OS === 'ios' ? 30 : 20, // Ensure space for gestures
+              borderTopWidth: 0,  // Remove any top borders
+              elevation: 0,  // Remove shadow
+            },
+            tabBarItemStyle: {
+              backgroundColor: theme.primaryColor,
+              height: '100%'
+            }
+          }}
+        >
           <Tab.Screen
             name="HomeTab"
             component={HomeStack}
@@ -223,7 +224,7 @@ const AppNavigator: React.FC = () => {
               headerShown: false,
               tabBarLabel: 'Home',
               tabBarIcon: ({ color, size, focused }) => (
-                <Ionicons name="home" size={size}color={focused ? isDarkmode ? 'white' : 'black'  : appThemeColor }/>
+                <Ionicons name="home" size={size} color={focused ? isDarkmode ? 'white' : 'black' : appThemeColor} />
               ),
             }}
           />
@@ -235,7 +236,7 @@ const AppNavigator: React.FC = () => {
               headerShown: false,
               tabBarLabel: 'Library',
               tabBarIcon: ({ color, size, focused }) => (
-                <Ionicons name="library" size={size}color={focused ? isDarkmode ? 'white' : 'black'  : appThemeColor }/>
+                <Ionicons name="library" size={size} color={focused ? isDarkmode ? 'white' : 'black' : appThemeColor} />
               ),
             }}
           />
@@ -260,7 +261,7 @@ const AppNavigator: React.FC = () => {
             options={{
               headerShown: false,
               tabBarIcon: ({ color, size, focused }) => (
-                <Ionicons name="map" size={size}color={focused ? isDarkmode ? 'white' : 'black'  : appThemeColor } />
+                <Ionicons name="map" size={size} color={focused ? isDarkmode ? 'white' : 'black' : appThemeColor} />
               ),
             }}
           />
@@ -270,7 +271,7 @@ const AppNavigator: React.FC = () => {
             options={{
               headerShown: false,
               tabBarIcon: ({ color, size, focused }) => (
-                <Ionicons name="menu-outline" size={size + 10}color={focused ? isDarkmode ? 'white' : 'black'  : appThemeColor } />
+                <Ionicons name="menu-outline" size={size + 10} color={focused ? isDarkmode ? 'white' : 'black' : appThemeColor} />
               ),
             }}
           />
