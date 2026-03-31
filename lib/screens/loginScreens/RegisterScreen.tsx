@@ -15,11 +15,7 @@ import { doc, setDoc, Timestamp } from "firebase/firestore";
 import { validateEmail, validatePassword } from "../../utils/validation";
 import { defaultTextFont } from "../../../styles/globalStyles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-type RegisterProps = {
-  navigation: any;
-  route: any;
-};
+import { useRouter } from "expo-router";
 
 /**
  * Clears the navigation-related keys from AsyncStorage.
@@ -41,7 +37,8 @@ const clearNavigationKeys = async (): Promise<void> => {
   }
 };
 
-const RegistrationScreen: React.FC<RegisterProps> = ({ navigation }) => {
+const RegistrationScreen: React.FC = () => {
+  const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -114,7 +111,7 @@ const RegistrationScreen: React.FC<RegisterProps> = ({ navigation }) => {
   const onDismissSnackBar = () => {
     setSnackState(false);
     if (registrationSuccess) {
-      navigation.navigate("Login");
+      router.replace("/(auth)/login");
     }
   };
 
@@ -137,7 +134,7 @@ const RegistrationScreen: React.FC<RegisterProps> = ({ navigation }) => {
             <Text style={styles.buttonText}>Sign Up</Text>
           </TouchableOpacity>
           <Text style={styles.loginText}>
-            Already have an account? <Text style={styles.signIn} onPress={() => navigation.navigate("Login")}>Sign In</Text>
+            Already have an account? <Text style={styles.signIn} onPress={() => router.replace("/(auth)/login")}>Sign In</Text>
           </Text>
         </View>
       </ImageBackground>

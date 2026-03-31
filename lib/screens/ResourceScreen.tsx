@@ -17,7 +17,10 @@ import { defaultTextFont } from '../../styles/globalStyles';
 
 const { width, height } = Dimensions.get('window');
 
-function ResourceScreen({ navigation }) {
+import { useRouter } from "expo-router";
+
+function ResourceScreen() {
+  const router = useRouter();
   const { theme } = useTheme();
 
   const renderOnlineResource = ({ item }) => (
@@ -41,7 +44,7 @@ function ResourceScreen({ navigation }) {
       {/* Header */}
       <View style={[styles.header, { backgroundColor: theme.homeColor }]}>
         <View style={styles.headerContent}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity onPress={() => router.back()}>
             <Feather name="arrow-left" size={30} />
           </TouchableOpacity>
           <View style={styles.headerHeading}>

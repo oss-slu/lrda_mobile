@@ -8,12 +8,6 @@ import { store } from '../redux/store/store';
 import * as Location from 'expo-location';
 
 
-const navigationMock = {
-  navigate: jest.fn(),
-  goBack: jest.fn(),
-  addListener: jest.fn(() => jest.fn()), 
-  canGoBack: jest.fn(() => true),
-};
 
 // Mock redux-persist to avoid persistence logic in tests
 jest.mock('redux-persist', () => {
@@ -71,6 +65,7 @@ jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
 // Mock Firebase services
 jest.mock("firebase/app", () => ({
   initializeApp: jest.fn(),
+  getApps: jest.fn(() => []),
 }));
 
 jest.mock('react-native-keyboard-aware-scroll-view', () => ({
@@ -158,9 +153,8 @@ const renderWithProviders = (component: React.ReactElement) => {
 
 describe('AddNoteScreen', () => {
   it('renders without crashing', () => {
-    const routeMock = { params: { untitledNumber: 1 } };
     const { getByTestId } = renderWithProviders(
-      <AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />
+      <AddNoteScreen />
     );
 
     // Check if the RichEditor is rendered
@@ -168,7 +162,6 @@ describe('AddNoteScreen', () => {
   });
 
   it('handles saveNote API error', async () => {
-    const routeMock = { params: { untitledNumber: 1 } };
 
     // Mock location permission to be granted
     jest.spyOn(Location, 'getForegroundPermissionsAsync').mockResolvedValueOnce({
@@ -179,7 +172,7 @@ describe('AddNoteScreen', () => {
     mockWriteNewNote.mockRejectedValueOnce(new Error('Error saving note'));
 
     const { getByTestId } = renderWithProviders(
-      <AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />
+      <AddNoteScreen />
     );
 
     // Simulate the save action by pressing the button
@@ -192,7 +185,6 @@ describe('AddNoteScreen', () => {
   });
 
   it('handles saveNote API success', async () => {
-    const routeMock = { params: { untitledNumber: 1 } };
 
     // Mock location permission to be granted
     jest.spyOn(Location, 'getForegroundPermissionsAsync').mockResolvedValueOnce({
@@ -203,7 +195,7 @@ describe('AddNoteScreen', () => {
     mockWriteNewNote.mockResolvedValueOnce({ success: true });
 
     const { getByTestId } = renderWithProviders(
-      <AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />
+      <AddNoteScreen />
     );
 
     // Simulate the save action by pressing the button
@@ -216,9 +208,8 @@ describe('AddNoteScreen', () => {
   });
 
   it('renders the title input field', () => {
-    const routeMock = { params: { untitledNumber: 1 } };
     const { getByPlaceholderText } = renderWithProviders(
-      <AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />
+      <AddNoteScreen />
     );
 
     // Check if the title input is rendered
@@ -226,7 +217,6 @@ describe('AddNoteScreen', () => {
   });
 
   it('renders the "Done" button when the keyboard is open', async () => {
-    const routeMock = { params: { untitledNumber: 1 } };
   
     // Mock `Keyboard.addListener` to simulate keyboard opening
     const mockKeyboardListener = jest.spyOn(Keyboard, 'addListener').mockImplementation((event, callback) => {
@@ -239,7 +229,7 @@ describe('AddNoteScreen', () => {
     });
   
     const { findByTestId } = renderWithProviders(
-      <AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />
+      <AddNoteScreen />
     );
   
     // Expect the "Done" button to appear when keyboard opens
@@ -254,7 +244,6 @@ describe('AddNoteScreen', () => {
 
 describe("AddNoteScreen's checkLocationPermission method", () => {
   it('should call Alert when location permission is denied', async () => {
-    const routeMock = { params: { untitledNumber: 1 } };
 
     // Mock location permission to be denied
     jest.spyOn(Location, 'getForegroundPermissionsAsync').mockResolvedValueOnce({
@@ -265,7 +254,7 @@ describe("AddNoteScreen's checkLocationPermission method", () => {
     const mockAlert = jest.spyOn(Alert, 'alert');
 
     const { getByTestId } = renderWithProviders(
-      <AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />
+      <AddNoteScreen />
     );
 
     // Simulate the button press to trigger permission check
@@ -278,7 +267,6 @@ describe("AddNoteScreen's checkLocationPermission method", () => {
   });
 
   it('handles location permission granted', async () => {
-    const routeMock = { params: { untitledNumber: 1 } };
 
     // Mock location permission to be granted
     jest.spyOn(Location, 'getForegroundPermissionsAsync').mockResolvedValueOnce({
@@ -289,7 +277,7 @@ describe("AddNoteScreen's checkLocationPermission method", () => {
     mockWriteNewNote.mockResolvedValueOnce({ success: true });
 
     const { getByTestId } = renderWithProviders(
-      <AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />
+      <AddNoteScreen />
     );
 
     // Simulate the button press to trigger location permission check
@@ -322,7 +310,7 @@ describe('AddNoteScreen - insertAudioToEditor', () => {
 
     // Render the component
     const { getByTestId } = renderWithProviders(
-      <AddNoteScreen navigation={navigationMock as any} route={{ params: { untitledNumber: 1 } }} />
+      <AddNoteScreen />
     );
 
     // Mock the audio URI

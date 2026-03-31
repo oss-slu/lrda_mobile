@@ -20,12 +20,10 @@ jest.mock('react-redux', () => ({
   useDispatch: () => jest.fn(),
 }));
 
-jest.mock('@react-navigation/native', () => ({
-  useNavigationState: jest.fn(),
+let mockPathname = '/';
+jest.mock('expo-router', () => ({
+  usePathname: () => mockPathname,
 }));
-
-const mockUseNavState = require('@react-navigation/native')
-  .useNavigationState as jest.Mock;
 
 const mockNavigateToAddNote = jest.fn();
 const mockPublishNote       = jest.fn();
@@ -51,32 +49,14 @@ describe('AddNoteBtnComponent', () => {
     jest.resetAllMocks();
   });
 
-  // helper to fake “Home” vs “EditNote”
-  function setActiveScreen(name: string) {
-    mockUseNavState.mockImplementation((fn) =>
-      fn({
-        index: 0,
-        routes: [
-          {
-            name: 'HomeTab',
-            state: {
-              index: 0,
-              routes: [{ name }],
-            },
-          },
-        ],
-      })
-    );
-  }
-
   it('renders without crashing', () => {
-    setActiveScreen('Home');
+    mockPathname = '/';
     const { getByTestId } = render(<AddNoteBtnComponent />);
     expect(getByTestId('fab-button')).toBeTruthy();
   });
 
   it('shows Add and calls navigateToAddNote on Home', () => {
-    setActiveScreen('Home');
+    mockPathname = '/';
     const { getByTestId, queryByTestId } = render(<AddNoteBtnComponent />);
 
     expect(getByTestId('add-icon')).toBeTruthy();
@@ -88,7 +68,7 @@ describe('AddNoteBtnComponent', () => {
   });
 
   it('shows Publish and calls publishNote on EditNote', () => {
-    setActiveScreen('EditNote');
+    mockPathname = '/edit-note';
     const { getByTestId, queryByTestId } = render(<AddNoteBtnComponent />);
 
     expect(getByTestId('publish-icon')).toBeTruthy();

@@ -73,7 +73,7 @@ describe('RegisterScreen', () => {
   it('renders correctly', () => {
     const { toJSON } = render(
       <SafeAreaProvider>
-        <RegistrationScreen navigation={navigationMock} route={routeMock} />
+        <RegistrationScreen />
       </SafeAreaProvider>
     );
 
@@ -83,7 +83,7 @@ describe('RegisterScreen', () => {
   it('renders input fields', () => {
     const { getByPlaceholderText } = render(
       <SafeAreaProvider>
-        <RegistrationScreen navigation={navigationMock} route={routeMock} />
+        <RegistrationScreen />
       </SafeAreaProvider>
     );
 
@@ -97,7 +97,7 @@ describe('RegisterScreen', () => {
   it('registers a user successfully', async () => {
     const { getByPlaceholderText, getByText } = render(
       <SafeAreaProvider>
-        <RegistrationScreen navigation={navigationMock} route={routeMock} />
+        <RegistrationScreen />
       </SafeAreaProvider>
     );
   
@@ -119,12 +119,13 @@ describe('RegisterScreen', () => {
   it('succesfully navigates to the login screen when the "Already have an account? Sign in" text is pressed', () => {
     const { getByText } = render(
       <SafeAreaProvider>
-        <RegistrationScreen navigation={navigationMock} route={routeMock} />
+        <RegistrationScreen />
       </SafeAreaProvider> 
     );
 
     fireEvent.press(getByText('Sign In'));
-    expect(navigationMock.navigate).toHaveBeenCalledWith('Login');
+    const { useRouter } = require('expo-router');
+    expect(useRouter().replace).toHaveBeenCalledWith("/(auth)/login");
   });
 
   it('shows error message when email is already in use', async () => {
@@ -140,7 +141,7 @@ describe('RegisterScreen', () => {
   
     const { getByPlaceholderText, getByText } = render(
       <SafeAreaProvider>
-        <RegistrationScreen navigation={navigationMock} route={routeMock} />
+        <RegistrationScreen />
       </SafeAreaProvider>
     );
   

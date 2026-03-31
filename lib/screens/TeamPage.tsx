@@ -113,7 +113,10 @@ const teamMembers = [
   }
 ];
 
-export default function TeamPage({ navigation }) {
+import { useRouter } from "expo-router";
+
+export default function TeamPage() {
+  const router = useRouter();
   const { theme } = useTheme();
 
   const renderItem = ({ item }) => (
@@ -136,7 +139,7 @@ export default function TeamPage({ navigation }) {
       {/* Header */}
       <View style={[styles.header, { backgroundColor: theme.homeColor }]}>
         <View style={styles.headerContent}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity onPress={() => router.back()}>
             <Feather name={'arrow-left'} size={30} />
           </TouchableOpacity>
           <View style={styles.headerHeading}>

@@ -2,7 +2,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { UserData } from "../../types";
 import { getItem } from "../utils/async_storage";
 import { authFetch } from "../config";
-import { setNavState } from "../../redux/slice/navigationSlice";
 
 const USER_DATA_KEY = "userData";
 const AUTH_TOKEN_KEY = "authToken";
@@ -179,7 +178,7 @@ export class User {
     }
   }
 
-  public async logout(dispatch: any) {
+  public async logout(dispatch?: any) {
     try {
       await authFetch("/api/auth/sign-out", {
         method: "POST",
@@ -189,7 +188,9 @@ export class User {
     } finally {
       await this.clearSession();
       this.notifyLoginState();
-      dispatch(setNavState("login"));
+      if (dispatch) {
+        console.log("logout dispatch received, but navigation state is now router-managed");
+      }
     }
   }
 

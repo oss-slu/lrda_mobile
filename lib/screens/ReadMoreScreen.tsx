@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity, ActivityIndicator, StatusBar } from 'react-native';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import WebView from 'react-native-webview';
 import { useTheme } from '../components/ThemeProvider';
 import Feather from 'react-native-vector-icons/Feather';
@@ -9,7 +8,10 @@ import { defaultTextFont } from '../../styles/globalStyles';
 
 
 const { width, height } = Dimensions.get("window");
-function ReadMoreScreen({ navigation }) {
+import { useRouter } from "expo-router";
+
+function ReadMoreScreen() {
+  const router = useRouter();
 
     const { theme, isDarkmode } = useTheme();
     const [isContentLoading, setIsContentLoading] = useState(true);
@@ -25,7 +27,7 @@ function ReadMoreScreen({ navigation }) {
             {/** header content starts here */}
             <View style={[styles.header, { backgroundColor: theme.homeColor }]}>
                 <View style={styles.headerContent}>
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
+                    <TouchableOpacity onPress={() => router.back()}>
                         <Feather name={'arrow-left'} size={30} />
                     </TouchableOpacity>
                     <View style={styles.headerHeading}>

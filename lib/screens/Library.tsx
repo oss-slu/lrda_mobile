@@ -14,10 +14,10 @@ import {
   ActivityIndicator
 } from "react-native";
 import { useCallback } from "react";
+import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
 import { Note } from "../../types";
-import { HomeScreenProps } from "../../types";
 import ApiService from "../utils/api_calls";
 import DataConversion from "../utils/data_conversion";
 import { SwipeListView } from "react-native-swipe-list-view";
@@ -42,7 +42,8 @@ const { width, height } = Dimensions.get("window");
 
 const limit = 20;
 
-const Library = ({ navigation, route }) => {
+const Library = () => {
+  const router = useRouter();
   const [notes, setNotes] = useState<Note[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
   const [updateCounter, setUpdateCounter] = useState(0);
@@ -86,11 +87,18 @@ const Library = ({ navigation, route }) => {
     })();
   }, []);
 
-  const refreshPage = () => {
+  const refreshPage = useCallback(() => {
     setPage(1);
     setHasMore(true);
     setUpdateCounter((prev) => prev + 1);
-  };
+  }, []);
+
+  // Refresh when screen regains focus (e.g. returning from EditNote)
+  useFocusEffect(
+    useCallback(() => {
+      refreshPage();
+    }, [refreshPage])
+  );
 
   useEffect(() => {
     setRendering(true);
@@ -297,11 +305,13 @@ const Library = ({ navigation, route }) => {
         style={{ backgroundColor: isDarkmode ? 'black' : '#e6e6e6' }}
         onPress={() => {
           if (!item.published) {
-            navigation.navigate("EditNote", {
-              note: item,
-              onSave: (editedNote: Note) => {
-                updateNote(editedNote);
-                refreshPage();
+            router.push({
+              pathname: "/edit-note",
+              params: {
+                noteData: JSON.stringify({
+                  ...item,
+                  time: item.time instanceof Date ? item.time.toISOString() : item.time,
+                }),
               },
             });
           } else {
@@ -395,7 +405,7 @@ const Library = ({ navigation, route }) => {
                   },
                 ]}
                 onPress={() => {
-                  navigation.navigate("AccountPage");
+                  router.push("/account");
                 }}
               >
                 <Text style={styles(theme, width).pfpText}>{userInitials}</Text>

@@ -18,7 +18,6 @@ import { useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
 import { Note } from "../../types";
-import { HomeScreenProps } from "../../types";
 import ApiService from "../utils/api_calls";
 import DataConversion from "../utils/data_conversion";
 import { SwipeListView } from "react-native-swipe-list-view";
@@ -35,18 +34,19 @@ import Greeting from "../components/Greeting";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import LottieView from 'lottie-react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { green } from "react-native-reanimated/lib/typescript/Colors";
 import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
 import { useSelector, useDispatch } from 'react-redux'
 import { defaultTextFont } from "../../styles/globalStyles";
 import Tooltip from 'react-native-walkthrough-tooltip';
 import TooltipContent from "../onboarding/TooltipComponent";
+import { useRouter, useFocusEffect } from "expo-router";
 
 const { width, height } = Dimensions.get("window");
 const user = User.getInstance();
 const limit = 20;
 
-const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
+const HomeScreen: React.FC = () => {
+  const router = useRouter();
   const [notes, setNotes] = useState<Note[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
   const [updateCounter, setUpdateCounter] = useState(0);
@@ -85,11 +85,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     const navigateToAddNote = () => {
       const untitledNumber = findNextUntitledNumber(notes);
       console.log("in homescreen untitled numbe ", untitledNumber);
-      navigation.navigate("AddNote", { untitledNumber, refreshPage });
+      router.push({ pathname: "/add-note", params: { untitledNumber: String(untitledNumber) } });
   
     }
     setNavigateToAddNote(() => navigateToAddNote)
-  }, [navigation, notes])
+  }, [router, notes])
 
 
   useEffect(() => {
@@ -108,11 +108,18 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     })();
   }, []);
   
-const refreshPage = () => {
+const refreshPage = useCallback(() => {
     setPage(1);
     setHasMore(true);
     setUpdateCounter((prev) => prev + 1);
-  };
+  }, []);
+
+  // Refresh notes when screen regains focus (e.g. returning from AddNote/EditNote)
+  useFocusEffect(
+    useCallback(() => {
+      refreshPage();
+    }, [refreshPage])
+  );
 
 
   // Fetch notes, either all published or user-specific based on filter
@@ -493,14 +500,13 @@ const handleSortOption = ({ option }) => {
         onPress={() => {
           if (!item.published) {
             dispatch(toogleAddNoteState());
-            navigation.navigate("EditNote", {
-              note: {
-                ...item,
-                time: item.time.toISOString(), // Convert Date to ISO string
-              },
-              onSave: (editedNote: Note) => {
-                updateNote(editedNote);
-                refreshPage();
+            router.push({
+              pathname: "/edit-note",
+              params: {
+                noteData: JSON.stringify({
+                  ...item,
+                  time: item.time.toISOString(),
+                }),
               },
             });            
           } else {
@@ -639,7 +645,7 @@ const handleSortOption = ({ option }) => {
                   },
                 ]}
                 onPress={() => {
-                  navigation.navigate("AccountPage");
+                  router.push("/account");
                 }}
               >
                 <Text style={styles(theme, width).pfpText}>{userInitials}</Text>

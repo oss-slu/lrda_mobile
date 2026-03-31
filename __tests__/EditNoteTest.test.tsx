@@ -70,21 +70,10 @@ beforeAll(() => {
   });
 });
 
-// --- Navigation mock ---
-const navigationMock = {
-  navigate: jest.fn(),
-  goBack: jest.fn(),
-  addListener: jest.fn().mockImplementation((_evt: string, cb: Function) => {
-    // Immediately return unsubscribe
-    return () => {};
-  }),
-  canGoBack: jest.fn().mockReturnValue(true),
-};
-
 const fakeNote = {
   id: '1',
   title: 'Test Title',
-  time: new Date().toISOString(),
+  time: '2024-01-15T12:00:00.000Z',
   text: '<p>Hello World</p>',
   tags: ['tag1'],
   media: [],
@@ -93,6 +82,43 @@ const fakeNote = {
   latitude: '0',
   longitude: '0',
 };
+
+// Override the global expo-router mock so useLocalSearchParams returns the fake note.
+// Note: jest.mock is hoisted above variable declarations, so we inline the note JSON here.
+jest.mock('expo-router', () => {
+  const noteData = JSON.stringify({
+    id: '1',
+    title: 'Test Title',
+    time: '2024-01-15T12:00:00.000Z',
+    text: '<p>Hello World</p>',
+    tags: ['tag1'],
+    media: [],
+    audio: [],
+    published: false,
+    latitude: '0',
+    longitude: '0',
+  });
+  const mockRouter = {
+    push: jest.fn(),
+    replace: jest.fn(),
+    back: jest.fn(),
+    canGoBack: () => true,
+  };
+  return {
+    useRouter: () => mockRouter,
+    useLocalSearchParams: () => ({ noteData }),
+    usePathname: () => '/',
+    useSegments: () => [],
+    useFocusEffect: jest.fn(),
+    useNavigation: () => ({
+      addListener: jest.fn(() => jest.fn()),
+    }),
+    Link: 'Link',
+    Redirect: 'Redirect',
+    Stack: { Screen: 'Screen', Protected: 'Protected' },
+    Tabs: { Screen: 'Screen' },
+  };
+});
 
 beforeEach(() => {
   moxios.install();
@@ -105,14 +131,10 @@ afterEach(() => {
 
 describe('EditNoteScreen', () => {
   it('renders without crashing', () => {
-    const onSaveMock = jest.fn();
     render(
       <Provider store={store}>
         <AddNoteProvider>
-          <EditNoteScreen
-            navigation={navigationMock as any}
-            route={{ params: { note: fakeNote, onSave: onSaveMock } }}
-          />
+          <EditNoteScreen />
         </AddNoteProvider>
       </Provider>
     );
@@ -120,14 +142,10 @@ describe('EditNoteScreen', () => {
   });
 
   it('renders the done button when keyboard is shown', () => {
-    const onSaveMock = jest.fn();
     render(
       <Provider store={store}>
         <AddNoteProvider>
-          <EditNoteScreen
-            navigation={navigationMock as any}
-            route={{ params: { note: fakeNote, onSave: onSaveMock } }}
-          />
+          <EditNoteScreen />
         </AddNoteProvider>
       </Provider>
     );

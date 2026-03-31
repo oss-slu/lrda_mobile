@@ -2,9 +2,11 @@ import React from 'react';
 import { View, Text, Button } from 'react-native';
 import { Audio } from 'expo-av';
 import { defaultTextFont } from '../../styles/globalStyles';
+import { useRouter, useLocalSearchParams } from "expo-router";
 
-const AudioPlayerScreen: React.FC<{ route: any, navigation: any }> = ({ route, navigation }) => {
-  const { audioUri } = route.params;
+const AudioPlayerScreen: React.FC = () => {
+  const router = useRouter();
+  const { audioUri } = useLocalSearchParams<{ audioUri: string }>();
   const [sound, setSound] = React.useState<Audio.Sound | null>(null);
 
   React.useEffect(() => {
@@ -24,7 +26,7 @@ const AudioPlayerScreen: React.FC<{ route: any, navigation: any }> = ({ route, n
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Text style={{ ...defaultTextFont  }}>Audio Playback</Text>
-      <Button title="Go Back" onPress={() => navigation.goBack()} />
+      <Button title="Go Back" onPress={() => router.back()} />
     </View>
   );
 };

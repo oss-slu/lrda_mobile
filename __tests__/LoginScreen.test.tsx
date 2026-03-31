@@ -73,13 +73,10 @@ afterEach(() => {
 
 describe('LoginScreen', () => {
   it('renders without crashing', async () => {
-    const navigationMock = { navigate: jest.fn() };
-    const routeMock = { params: {} };
-
     const { toJSON } = render(
       <Provider store={store}>
         <SafeAreaProvider>
-          <LoginScreen navigation={navigationMock} route={routeMock} />
+          <LoginScreen />
         </SafeAreaProvider>
       </Provider>
     );
@@ -89,8 +86,6 @@ describe('LoginScreen', () => {
 
   it('renders input fields and handles login', async () => {
     jest.setTimeout(20000); // Increase timeout to 10 seconds for this test
-    const navigationMock = { navigate: jest.fn() };
-    const routeMock = { params: {} };
 
     // Stub any potential API responses before rendering
     moxios.stubRequest('/login', {
@@ -101,7 +96,7 @@ describe('LoginScreen', () => {
     const { getByTestId, queryByTestId, getByText } = render(
       <Provider store={store}>
         <SafeAreaProvider>
-          <LoginScreen navigation={navigationMock} route={routeMock} />
+          <LoginScreen />
         </SafeAreaProvider>
       </Provider>
     );

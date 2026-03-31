@@ -7,7 +7,7 @@ import { useAddNoteContext } from "../context/AddNoteContext";
 import { useSelector, useDispatch } from "react-redux";
 import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
 import { useTheme } from "./ThemeProvider";
-import { useNavigationState } from "@react-navigation/native";
+import { usePathname } from "expo-router";
 
 function AddNoteBtnComponent() {
   const dispatch = useDispatch();
@@ -16,21 +16,11 @@ function AddNoteBtnComponent() {
   const appThemeColor = useSelector((s) => s.themeSlice.theme);
   const addNoteState = useSelector((s) => s.addNoteState.isAddNoteOpned);
 
-  // grab the entire nav state
-  const navState = useNavigationState((state) => state);
+  const pathname = usePathname();
 
-  // pick out the active tab
-  const tabRoute = navState.routes[navState.index];
-
-  const nested = tabRoute.state;
-
-  const currentScreen = nested
-    ? nested.routes[nested.index].name
-    : tabRoute.name;
-
-  // if the current screen is "AddNote" or "EditNote", we show the publish button
+  // if the current screen is add-note or edit-note, we show the publish button
   const isAddButtonMode =
-    currentScreen !== "AddNote" && currentScreen !== "EditNote";
+    !pathname.includes("/add-note") && !pathname.includes("/edit-note");
 
   const handleAdd = () => {
     dispatch(toogleAddNoteState());

@@ -3,7 +3,6 @@
 exports[`ImageModal renders without crashing 1`] = `
 <Modal
   animationType="slide"
-  hardwareAccelerated={false}
   onRequestClose={[Function]}
   transparent={false}
   visible={true}

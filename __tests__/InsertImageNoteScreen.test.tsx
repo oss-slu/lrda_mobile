@@ -7,12 +7,6 @@ import { AddNoteProvider } from '../lib/context/AddNoteContext'; // Import the p
 import { Provider } from 'react-redux';
 import { store } from '../redux/store/store';
 
-const navigationMock = {
-  navigate: jest.fn(),
-  goBack: jest.fn(),
-  addListener: jest.fn(() => jest.fn()), 
-  canGoBack: jest.fn(() => true),
-};
 
 // Mock redux-persist to avoid persistence logic in tests
 jest.mock('redux-persist', () => {
@@ -131,12 +125,6 @@ afterEach(() => {
 
 describe('AddNoteScreen', () => {
   it('adds image to editor', async () => {
-    const routeMock = {
-      params: {
-        untitledNumber: 1,
-      },
-    };
-  
     const mockEditor = {
       getHTML: jest.fn(() => ''),
       setContent: jest.fn(),
@@ -148,7 +136,7 @@ describe('AddNoteScreen', () => {
       useEditorBridge: jest.fn(() => mockEditor),
     }));
   
-    renderWithProviders(<AddNoteScreen navigation={navigationMock as any} route={routeMock as any} />);
+    renderWithProviders(<AddNoteScreen />);
   
     const imageUri = '__tests__/TestResources/TestImage.jpg';
   

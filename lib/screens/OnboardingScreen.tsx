@@ -4,13 +4,15 @@ import Onboarding from 'react-native-onboarding-swiper';
 import { Video } from 'expo-av';
 import { setItem } from '../utils/async_storage';
 import { defaultTextFont } from '../../styles/globalStyles';
+import { useRouter } from "expo-router";
 
 const { width, height } = Dimensions.get('window');
 
-const OnboardingScreen = ({ navigation }) => {
+const OnboardingScreen = () => {
+  const router = useRouter();
   const handleDone = () => {
-    navigation.navigate('Login');
     setItem('onboarded', '1');
+    router.replace('/(auth)/login');
   };
 
   const doneButton = ({ ...props }) => (
