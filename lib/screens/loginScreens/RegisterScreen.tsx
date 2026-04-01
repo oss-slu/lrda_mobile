@@ -9,9 +9,7 @@ import {
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Snackbar } from "react-native-paper";
-import { auth, db } from "../../config/firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc, Timestamp } from "firebase/firestore";
+import { authFetch } from "../../config/auth";
 import { validateEmail, validatePassword } from "../../utils/validation";
 import { defaultTextFont } from "../../../styles/globalStyles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -70,42 +68,41 @@ const RegistrationScreen: React.FC = () => {
     }
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      
-      // Combine firstName and lastName for name field
       const fullName = `${firstName} ${lastName}`;
+      const response = await authFetch("/api/auth/sign-up/email", {
+        method: "POST",
+        skipAuth: true,
+        body: JSON.stringify({
+          email,
+          password,
+          name: fullName.trim(),
+        }),
+      });
 
-      // Firestore user data creation
-      const firestoreData = {
-        uid: user.uid,
-        email,
-        name: fullName,
-        roles: {
-          administrator: true,
-          contributor: true,
-        },
-        createdAt: Timestamp.now(),
-      };
-      await setDoc(doc(db, "users", user.uid), firestoreData);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Signup failed. Please try again.");
+      }
 
-      await clearNavigationKeys(); //Clear Async Tutorial
+      await clearNavigationKeys();
 
 
       // Set success message and navigate to login screen
       setRegistrationSuccess(true);
-      setSnackMessage("Signup successful!");
+      setSnackMessage("Signup successful! Please verify your email before logging in.");
       setSnackState(true);
-      } catch (error) {
-        setRegistrationSuccess(false);
-        let message = error.message || "Signup failed. Please try again.";
-        console.log(message);
-        if (error.message.includes("auth/email-already-in-use")) {
-          message = "The email address is already in use by another account.";
-        }
-        setSnackMessage(message);
-        setSnackState(true);
+    } catch (error: any) {
+      setRegistrationSuccess(false);
+      let message = error?.message || "Signup failed. Please try again.";
+      console.log(message);
+      if (message.includes("auth/email-already-in-use") || message.includes("User already exists")) {
+        message = "The email address is already in use by another account.";
+      } else if (message.includes("Password too weak")) {
+        message = "Password must include upper/lowercase letters, a number, and a special character.";
       }
+      setSnackMessage(message);
+      setSnackState(true);
+    }
   };
 
   const onDismissSnackBar = () => {
@@ -119,16 +116,16 @@ const RegistrationScreen: React.FC = () => {
     <KeyboardAwareScrollView contentContainerStyle={styles.container}>
       <ImageBackground source={require("../../../assets/splash.jpg")} style={styles.imageBackground}>
         <Snackbar visible={snackState} onDismiss={onDismissSnackBar} duration={1500} style={styles.snackbar}>
-          <Text style={{...defaultTextFont, textAlign: "center" }}>{snackMessage}</Text>
+          <Text style={{ ...defaultTextFont, textAlign: "center" }}>{snackMessage}</Text>
         </Snackbar>
         <View style={styles.registerBox}>
           <Text style={styles.title}>Register</Text>
-          <View style={{marginTop: 40}} >
-          <TextInput style={styles.input} placeholder="First Name" placeholderTextColor="#7D7D7D" value={firstName} onChangeText={setFirstName} />
-          <TextInput style={styles.input} placeholder="Last Name" placeholderTextColor="#7D7D7D" value={lastName} onChangeText={setLastName} />
-          <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#7D7D7D" value={email} onChangeText={setEmail} />
-          <TextInput style={styles.input} placeholder="Password" secureTextEntry placeholderTextColor="#7D7D7D" value={password} onChangeText={setPassword} />
-          <TextInput style={styles.input} placeholder="Confirm Password" secureTextEntry placeholderTextColor="#7D7D7D" value={confirmPassword} onChangeText={setConfirmPassword} />
+          <View style={{ marginTop: 40 }} >
+            <TextInput style={styles.input} placeholder="First Name" placeholderTextColor="#7D7D7D" value={firstName} onChangeText={setFirstName} />
+            <TextInput style={styles.input} placeholder="Last Name" placeholderTextColor="#7D7D7D" value={lastName} onChangeText={setLastName} />
+            <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#7D7D7D" value={email} onChangeText={setEmail} />
+            <TextInput style={styles.input} placeholder="Password" secureTextEntry placeholderTextColor="#7D7D7D" value={password} onChangeText={setPassword} />
+            <TextInput style={styles.input} placeholder="Confirm Password" secureTextEntry placeholderTextColor="#7D7D7D" value={confirmPassword} onChangeText={setConfirmPassword} />
           </View>
           <TouchableOpacity onPress={handleRegister} style={styles.button}>
             <Text style={styles.buttonText}>Sign Up</Text>
