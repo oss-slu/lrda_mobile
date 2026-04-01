@@ -1,4 +1,17 @@
 import 'dotenv/config';
+import { networkInterfaces } from 'os';
+
+function getLocalIP() {
+  const nets = networkInterfaces();
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name]) {
+      if (net.family === 'IPv4' && !net.internal) return net.address;
+    }
+  }
+  return 'localhost';
+}
+
+const AUTH_API_URL = process.env.AUTH_API_URL?.replace('localhost', getLocalIP());
 
 export default {
   expo: {
@@ -79,7 +92,7 @@ export default {
       appId: process.env.APP_ID,
       measurementId: process.env.MEASUREMENT_ID,
       apiBaseUrl: process.env.API_BASE_URL,
-      authApiUrl: process.env.AUTH_API_URL,
+      authApiUrl: AUTH_API_URL,
       s3ProxyPrefix: process.env.S3_PROXY_PREFIX,
       eas: {
         "projectId": "801029ef-db83-4668-a97a-5adcc4c333e2"
