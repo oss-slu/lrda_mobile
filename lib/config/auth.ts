@@ -17,6 +17,7 @@ export async function authFetch(path: string, options: AuthFetchOptions = {}) {
 
     const mergedHeaders: Record<string, string> = {
         "Content-Type": "application/json",
+        Origin: AUTH_API_URL,
         ...(headers as Record<string, string> | undefined),
     };
 
