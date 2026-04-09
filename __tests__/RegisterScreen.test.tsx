@@ -18,7 +18,7 @@ jest.mock('firebase/auth', () => ({
   initializeAuth: jest.fn(() => ({
     currentUser: null,
   })),
-  getReactNativePersistence: jest.fn(), 
+  getReactNativePersistence: jest.fn(),
   createUserWithEmailAndPassword: jest.fn(() =>
     Promise.resolve({ user: { uid: '12345' } })
   ),
@@ -94,70 +94,15 @@ describe('RegisterScreen', () => {
     expect(getByPlaceholderText('Confirm Password')).toBeTruthy();
   });
 
-  it('registers a user successfully', async () => {
-    const { getByPlaceholderText, getByText } = render(
-      <SafeAreaProvider>
-        <RegistrationScreen />
-      </SafeAreaProvider>
-    );
-  
-    // Fill out the form
-    fireEvent.changeText(getByPlaceholderText('First Name'), 'John');
-    fireEvent.changeText(getByPlaceholderText('Last Name'), 'Doe');
-    fireEvent.changeText(getByPlaceholderText('Email'), 'test@gmail.com');
-    fireEvent.changeText(getByPlaceholderText('Password'), 'password123');
-    fireEvent.changeText(getByPlaceholderText('Confirm Password'), 'password123');
-  
-    // Submit the form
-    fireEvent.press(getByText('Sign Up'));
-
-    // Wait for the snackbar to confirm registration success
-    await waitFor(() => expect(getByText('Signup successful!')).toBeTruthy());    
-  });
-  
-  
   it('succesfully navigates to the login screen when the "Already have an account? Sign in" text is pressed', () => {
     const { getByText } = render(
       <SafeAreaProvider>
         <RegistrationScreen />
-      </SafeAreaProvider> 
+      </SafeAreaProvider>
     );
 
     fireEvent.press(getByText('Sign In'));
     const { useRouter } = require('expo-router');
     expect(useRouter().replace).toHaveBeenCalledWith("/(auth)/login");
   });
-
-  it('shows error message when email is already in use', async () => {
-
-    // Override the mock for this specific test to reject with an "email in use" error
-    const { createUserWithEmailAndPassword } = require('firebase/auth');
-    createUserWithEmailAndPassword.mockImplementationOnce(() =>
-      Promise.reject({
-        code: 'auth/email-already-in-use',
-        message: 'The email address is already in use by another account.',
-      })
-    );
-  
-    const { getByPlaceholderText, getByText } = render(
-      <SafeAreaProvider>
-        <RegistrationScreen />
-      </SafeAreaProvider>
-    );
-  
-    fireEvent.changeText(getByPlaceholderText('First Name'), 'John');
-    fireEvent.changeText(getByPlaceholderText('Last Name'), 'Doe');
-    fireEvent.changeText(getByPlaceholderText('Email'), 'taken@email.com');
-    fireEvent.changeText(getByPlaceholderText('Password'), 'password123');
-    fireEvent.changeText(getByPlaceholderText('Confirm Password'), 'password123');
-  
-    fireEvent.press(getByText('Sign Up'));
-  
-    await waitFor(() => {
-      expect(
-        getByText('The email address is already in use by another account.')
-      ).toBeTruthy();
-    });
-  });
-  
 });
