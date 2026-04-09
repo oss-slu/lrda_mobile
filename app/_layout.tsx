@@ -24,9 +24,9 @@ function RootLayoutInner() {
   useEffect(() => {
     const checkState = async () => {
       const onboarded = await getItem("onboarded");
-      const userId = await user.getId();
-      setIsOnboarded(onboarded === "1");
-      setIsAuthenticated(!!userId);
+      const isValid = await user.initializeUser();
+      setIsOnboarded(onboarded === '1');
+      setIsAuthenticated(isValid);
       setIsReady(true);
       await SplashScreen.hideAsync();
     };
