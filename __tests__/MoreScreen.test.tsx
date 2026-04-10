@@ -1,7 +1,6 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
-import { NavigationContainer } from '@react-navigation/native'; // Added NavigationContainer
 import configureStore from 'redux-mock-store';
 import MorePage from '../lib/screens/MorePage';
 import { Linking, TouchableOpacity } from 'react-native';
@@ -57,16 +56,16 @@ jest.mock('react-native-reanimated-carousel', () => {
   return (props) => <View testID="carousel">{props.children}</View>;
 });
 
-const mockNavigate = jest.fn();
-jest.mock('@react-navigation/native', () => {
-  const actualNav = jest.requireActual('@react-navigation/native');
-  return {
-    ...actualNav,
-    useNavigation: () => ({
-      navigate: mockNavigate,
-    }),
-  };
-});
+const mockPush = jest.fn();
+const mockReplace = jest.fn();
+const mockBack = jest.fn();
+jest.mock('expo-router', () => ({
+  useRouter: () => ({
+    push: mockPush,
+    replace: mockReplace,
+    back: mockBack,
+  }),
+}));
 
 const mockToggleDarkmode = jest.fn();
 jest.mock('../lib/components/ThemeProvider', () => ({
@@ -125,9 +124,7 @@ describe('MorePage - Main View', () => {
   it('should render the carousel', async () => {
     const { getByTestId } = render(
       <Provider store={store}>
-        <NavigationContainer>
           <MorePage />
-        </NavigationContainer>
       </Provider>
     );
     await waitFor(() => {
@@ -138,9 +135,7 @@ describe('MorePage - Main View', () => {
   it('should toggle dark mode when theme switch is pressed', async () => {
     const { getByTestId } = render(
       <Provider store={store}>
-        <NavigationContainer>
           <MorePage />
-        </NavigationContainer>
       </Provider>
     );
     const toggleSwitch = getByTestId('dark-mode-toggle');
@@ -151,9 +146,7 @@ describe('MorePage - Main View', () => {
   it('should display user and navigate to AccountPage when avatar is pressed', async () => {
     const { getByText } = render(
       <Provider store={store}>
-        <NavigationContainer>
           <MorePage />
-        </NavigationContainer>
       </Provider>
     );
 
@@ -163,15 +156,13 @@ describe('MorePage - Main View', () => {
     });
 
     fireEvent.press(getByText('JD'));
-    expect(mockNavigate).toHaveBeenCalledWith("AccountPage");
+    expect(mockPush).toHaveBeenCalledWith("/account");
   });
 
   it('should call logout when the Logout menu item is pressed', async () => {
     const { getByText } = render(
       <Provider store={store}>
-        <NavigationContainer>
           <MorePage />
-        </NavigationContainer>
       </Provider>
     );
 
@@ -192,9 +183,7 @@ describe('MorePage - Main View', () => {
   it('should navigate to Resource page when Resource menu item is pressed', async () => {
     const { getByText } = render(
       <Provider store={store}>
-        <NavigationContainer>
           <MorePage />
-        </NavigationContainer>
       </Provider>
     );
 
@@ -204,15 +193,13 @@ describe('MorePage - Main View', () => {
 
     const resourceBtn = getByText('Resource');
     fireEvent.press(resourceBtn);
-    expect(mockNavigate).toHaveBeenCalledWith("Resource");
+    expect(mockPush).toHaveBeenCalledWith("/more/resource");
   });
 
   it('should navigate to TeamPage when "Meet our team" menu item is pressed', async () => {
     const { getByText } = render(
       <Provider store={store}>
-        <NavigationContainer>
           <MorePage />
-        </NavigationContainer>
       </Provider>
     );
 
@@ -222,7 +209,7 @@ describe('MorePage - Main View', () => {
 
     const teamBtn = getByText('Meet our team');
     fireEvent.press(teamBtn);
-    expect(mockNavigate).toHaveBeenCalledWith("TeamPage");
+    expect(mockPush).toHaveBeenCalledWith("/more/team");
   });
 });
 
@@ -231,9 +218,7 @@ describe('MorePage - Settings View and Modals', () => {
   const renderAndOpenSettings = async () => {
     const utils = render(
       <Provider store={store}>
-        <NavigationContainer>
           <MorePage />
-        </NavigationContainer>
       </Provider>
     );
     // Wait for the main view to load

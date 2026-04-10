@@ -15,30 +15,21 @@ import {
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Snackbar } from "react-native-paper";
-import { useDispatch, useSelector } from 'react-redux';
-import { setNavState } from "../../../redux/slice/navigationSlice";
-import { RootState } from "../../../redux/store/store";
 import { User } from "../../models/user_class";
 import { removeItem } from "../../utils/async_storage";
 import { defaultTextFont } from "../../../styles/globalStyles";
+import { useRouter } from "expo-router";
 
 const user = User.getInstance();
 
-type LoginProps = {
-  navigation: any;
-  route: any;
-};
-
-const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
+const LoginScreen: React.FC = () => {
+  const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [firstClick, setFirstClick] = useState(true);
   const [snackState, toggleSnack] = useState(false);
   const [loading, setLoading] = useState(false);
   const fadeAnim = useRef(new Animated.Value(1)).current;
-  const navState = useSelector((state: RootState) => state.navigation.navState);
-  const dispatch = useDispatch()
-  const [hasNavigated, setHasNavigated] = useState(false);
   const [snackMessage, setSnackMessage] = useState("");
 
   const fadeOut = () => {
@@ -50,21 +41,12 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   };
 
   useEffect(() => {
-    if (navState === "home" && !hasNavigated) {
-      setHasNavigated(true); // Prevent repeated navigation
-      navigation.navigate("HomeTab");
-    }
-  }, [navState, hasNavigated]);
-  
-  useEffect(() => {
     const timer = setTimeout(() => {
       fadeOut();
     }, 2000);
 
     return () => clearTimeout(timer);
   }, []);
-
-  console.log("in login page the redux value is ", navState)
 
   useEffect(() => {
     (async () => {
@@ -74,7 +56,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
   }, []);
 
   const handleGoRegister = () => {
-    navigation.navigate("Register");
+    router.push("/(auth)/register");
   };
 
   const onDismissSnackBar = () => toggleSnack(false);
@@ -91,9 +73,9 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
           const userId = await user.getId();
           // console.log("in login page, Inside the is statement of success ", userId)
           if (userId !== null) {
-              setUsername("")
-              setPassword("")
-              dispatch(setNavState('home'));
+            setUsername("")
+            setPassword("")
+            router.replace('/(tabs)');
           }
         }
       }
@@ -101,9 +83,19 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
         console.log("login failed :", error);
         let message = "Login failed. Please try again.";
 
-        if(error.message.includes("network")) {
+        if (error.message.includes("network") || error.message.includes("Network request failed")) {
           message = "Network error. Please check your connection.";
-        }else if (error.message.includes("auth/invalid-email") || error.message.includes("auth/invalid-credential")) {
+        } else if (
+          error.message.includes("EMAIL_NOT_VERIFIED") ||
+          error.message.includes("Email not verified")
+        ) {
+          message = "Please verify your email before logging in. Check your inbox and spam folder.";
+        } else if (
+          error.message.includes("auth/invalid-email") ||
+          error.message.includes("auth/invalid-credential") ||
+          error.message.includes("INVALID_EMAIL_OR_PASSWORD") ||
+          error.message.includes("Invalid email or password")
+        ) {
           message = "Invalid username or password.";
 
         }
@@ -195,13 +187,13 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation, route }) => {
                 testID="password-input"
               />
             </View>
-            <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
-            <View style={styles.forgotPasswordContainer}><Text style={styles.forgotText}>Forgot Password?</Text></View>
-</TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push("/(auth)/forgot-password")}>
+              <View style={styles.forgotPasswordContainer}><Text style={styles.forgotText}>Forgot Password?</Text></View>
+            </TouchableOpacity>
             <TouchableOpacity onPress={onLoginPress} style={styles.buttons} testID="login-button">
-              {!loading && <Text style={{...defaultTextFont, color: "white", fontWeight: "600", fontSize: 15}}>
+              {!loading && <Text style={{ ...defaultTextFont, color: "white", fontWeight: "600", fontSize: 15 }}>
                 Login
-                </Text>}
+              </Text>}
               {loading && <ActivityIndicator size="small" color="white" />}
             </TouchableOpacity>
             <TouchableOpacity onPress={handleGoRegister} style={styles.buttons} testID="register-button">
@@ -313,19 +305,19 @@ const styles = StyleSheet.create({
     marginRight: 40
   },
   signUpStatement: {
-      position: "absolute",
-      top: 450,
-      display: "flex",
-      flexDirection: "row",
-      justifyContent: 'center',
-      alignItems: 'center'
-     
+    position: "absolute",
+    top: 450,
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: 'center',
+    alignItems: 'center'
+
   },
   signUpQuery: {
     color: "black",
     fontWeight: "600",
   },
-  signUp:{
+  signUp: {
     color: "blue",
     fontWeight: "500",
     marginTop: 0,

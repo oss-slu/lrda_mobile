@@ -1,9 +1,23 @@
 import 'dotenv/config';
+import { networkInterfaces } from 'os';
+
+function getLocalIP() {
+  const nets = networkInterfaces();
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name]) {
+      if (net.family === 'IPv4' && !net.internal) return net.address;
+    }
+  }
+  return 'localhost';
+}
+
+const AUTH_API_URL = process.env.AUTH_API_URL?.replace('localhost', getLocalIP());
 
 export default {
   expo: {
     name: "Where's Religion?",
     slug: "lrda_mobile",
+    scheme: "lrda",
     version: "1.0.8",
     orientation: "portrait",
     icon: "./assets/icon.png",
@@ -43,7 +57,7 @@ export default {
         NSPhotoLibraryAddUsageDescription: "Allowing access to photo library enables you to select, upload, and/or share your chosen photos or videos with other app users. ",
       }
     },
-    
+
     android: {
       adaptiveIcon: {
         foregroundImage: "./assets/icon.png",
@@ -57,7 +71,7 @@ export default {
       package: "register.edu.slu.cs.oss.lrda",
       versionCode: 28,
       newArchEnabled: true, // Enable New Architecture for Android
-      
+
     },
     web: {
       favicon: "./assets/favicon.png"
@@ -78,12 +92,13 @@ export default {
       appId: process.env.APP_ID,
       measurementId: process.env.MEASUREMENT_ID,
       apiBaseUrl: process.env.API_BASE_URL,
+      authApiUrl: AUTH_API_URL,
       s3ProxyPrefix: process.env.S3_PROXY_PREFIX,
       eas: {
         "projectId": "801029ef-db83-4668-a97a-5adcc4c333e2"
       }
     },
-      plugins: [
+    plugins: [
       [
         "expo-build-properties",
         {
@@ -91,7 +106,10 @@ export default {
             minSdkVersion: 25
           }
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker",
+      "expo-font",
+      "expo-router"
     ]
   }
 };

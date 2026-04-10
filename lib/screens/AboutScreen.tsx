@@ -13,7 +13,10 @@ import { useTheme } from "../components/ThemeProvider";
 
 const { width, height } = Dimensions.get('window');
 
-export default function AboutScreen({ navigation }) {
+import { useRouter } from "expo-router";
+
+export default function AboutScreen() {
+  const router = useRouter();
   const { theme } = useTheme();
 
   return (
@@ -23,7 +26,7 @@ export default function AboutScreen({ navigation }) {
       {/* Header */}
       <View style={[styles.header, { backgroundColor: theme.homeColor }]}>
         <View style={styles.headerContent}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity onPress={() => router.back()}>
             <Feather name={'arrow-left'} size={30} />
           </TouchableOpacity>
           <View style={styles.headerHeading}>

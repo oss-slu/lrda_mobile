@@ -17,6 +17,7 @@ jest.mock('../lib/components/ThemeProvider', () => ({
 // Mock Firebase services (unchanged)
 jest.mock("firebase/app", () => ({
   initializeApp: jest.fn(),
+  getApps: jest.fn(() => []),
 }));
 
 jest.mock("firebase/auth", () => ({
@@ -92,12 +93,11 @@ afterEach(() => {
 
 describe('HomeScreen', () => {
   it('renders HomeScreen', async () => {
-    const routeMock = { params: { untitledNumber: 1 } };
 
     const { getByTestId } = render(
       <Provider store={store}> {/* Wrap with Provider */}
         <AddNoteProvider>
-          <HomeScreen route={routeMock as any} showTooltip={false} navigation={undefined} />
+          <HomeScreen />
         </AddNoteProvider>
       </Provider>
     );
@@ -108,12 +108,11 @@ describe('HomeScreen', () => {
   });
 
   it('renders toggle search bar', async () => {
-    const routeMock = { params: { untitledNumber: 1 } };
 
     const { getByTestId } = render(
       <Provider store={store}> {/* Wrap with Provider */}
         <AddNoteProvider>
-          <HomeScreen route={routeMock as any} showTooltip={false} navigation={undefined} />
+          <HomeScreen />
         </AddNoteProvider>
       </Provider>
     );
@@ -136,7 +135,7 @@ describe('HomeScreen', () => {
     const { getByTestId } = render(
       <Provider store={store}>
         <AddNoteProvider>
-          <HomeScreen route={routeMock as any} showTooltip={false} />
+          <HomeScreen />
         </AddNoteProvider>
       </Provider>
     );
@@ -154,12 +153,11 @@ describe('HomeScreen', () => {
   
 
   it('renders sort button', async () => {
-    const routeMock = { params: { untitledNumber: 1 } };
 
     const { getByTestId } = render(
       <Provider store={store}> {/* Wrap with Provider */}
         <AddNoteProvider>
-          <HomeScreen route={routeMock as any} showTooltip={false} />
+          <HomeScreen />
         </AddNoteProvider>
       </Provider>
     );
@@ -175,7 +173,7 @@ describe('HomeScreen', () => {
     const { getByTestId } = render(
       <Provider store={store}> {/* Wrap with Provider */}
         <AddNoteProvider>
-          <HomeScreen route={routeMock as any} showTooltip={false} />
+          <HomeScreen />
         </AddNoteProvider>
       </Provider>
     );
@@ -192,12 +190,11 @@ describe('HomeScreen', () => {
   });
 
   it('toggles private notes', async () => {
-    const routeMock = { params: { untitledNumber: 1 } };
 
     const { getByTestId } = render(
       <Provider store={store}> {/* Wrap with Provider */}
         <AddNoteProvider>
-          <HomeScreen route={routeMock as any} showTooltip={false} />
+          <HomeScreen />
         </AddNoteProvider>
       </Provider>
     );
@@ -211,12 +208,11 @@ describe('HomeScreen', () => {
   });
 
   it('toggles public notes', async () => {
-    const routeMock = { params: { untitledNumber: 1 } };
 
     const { getByTestId } = render(
       <Provider store={store}> {/* Wrap with Provider */}
         <AddNoteProvider>
-          <HomeScreen route={routeMock as any} showTooltip={false} />
+          <HomeScreen />
         </AddNoteProvider>
       </Provider>
     );
@@ -230,12 +226,11 @@ describe('HomeScreen', () => {
   });
 
   it('greets the user', async () => {
-    const routeMock = { params: { untitledNumber: 1 } };
 
     const { getByTestId } = render(
       <Provider store={store}> {/* Wrap with Provider */}
         <AddNoteProvider>
-          <HomeScreen route={routeMock as any} showTooltip={false} />
+          <HomeScreen />
         </AddNoteProvider>
       </Provider>
     );
@@ -246,12 +241,11 @@ describe('HomeScreen', () => {
   });
 
   it('renders notes', async () => {
-    const routeMock = { params: { untitledNumber: 1 } };
 
     const { getByTestId } = render(
       <Provider store={store}> {/* Wrap with Provider */}
         <AddNoteProvider>
-          <HomeScreen route={routeMock as any} showTooltip={false} />
+          <HomeScreen />
         </AddNoteProvider>
       </Provider>
     );
@@ -268,7 +262,7 @@ describe('HomeScreen', () => {
     const { getByTestId } = render(
       <Provider store={store}> {/* Wrap with Provider */}
         <AddNoteProvider>
-          <HomeScreen route={routeMock as any} navigation={{ navigate: mockNavigate } as any} showTooltip={false} />
+          <HomeScreen />
         </AddNoteProvider>
       </Provider>
     );
@@ -281,7 +275,9 @@ describe('HomeScreen', () => {
     fireEvent.press(accountComponent);
   
     // Check if navigation was triggered
-    expect(mockNavigate).toHaveBeenCalledWith("AccountPage");
+    // Navigation now uses expo-router's router.push("/account")
+    const { useRouter } = require('expo-router');
+    expect(useRouter().push).toHaveBeenCalledWith("/account");
   });
 
   it("handles and renders the 'Notes' title next to the account component", async () => {
@@ -290,7 +286,7 @@ describe('HomeScreen', () => {
     const { getByText } = render(
       <Provider store={store}> {/* Wrap with Provider */}
         <AddNoteProvider>
-          <HomeScreen route={routeMock as any} showTooltip={false} />
+          <HomeScreen />
         </AddNoteProvider>
       </Provider>
     );
@@ -302,7 +298,6 @@ describe('HomeScreen', () => {
   });
 
   it("renders a Lottie animation when there are no notes found", async () => {
-    const routeMock = { params: { untitledNumber: 1 } };
 
     // Mock the API call to return an empty array (No notes found)
     jest.spyOn(ApiService, "fetchMessagesBatch").mockResolvedValueOnce([]);
@@ -310,7 +305,7 @@ describe('HomeScreen', () => {
     const { getByTestId } = render(
       <Provider store={store}> {/* Wrap with Provider */}
         <AddNoteProvider>
-          <HomeScreen route={routeMock as any} showTooltip={false} />
+          <HomeScreen />
         </AddNoteProvider>
       </Provider>
     );
@@ -333,7 +328,7 @@ describe('HomeScreen', () => {
     const { getByText } = render(
       <Provider store={store}>
         <AddNoteProvider>
-          <HomeScreen route={routeMock as any} showTooltip={false} />
+          <HomeScreen />
         </AddNoteProvider>
       </Provider>
     );

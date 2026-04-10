@@ -131,10 +131,7 @@ afterEach(() => {
 describe('AddNoteScreen', () => {
   it('renders without crashing', () => {
     renderWithProviders(
-      <AddNoteScreen
-        navigation={{ navigate: jest.fn(), goBack: jest.fn(), addListener: jest.fn(() => jest.fn()), canGoBack: () => true }}
-        route={{ params: { untitledNumber: 1 } }}
-      />,
+      <AddNoteScreen />,
     );
     expect(screen.getByTestId('RichText')).toBeTruthy();
   });
