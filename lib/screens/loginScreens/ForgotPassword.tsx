@@ -8,7 +8,7 @@ import {
   Alert,
   ImageBackground,
 } from "react-native";
-import { authFetch } from "../../config/auth";
+import { authFetch, AUTH_API_URL } from "../../config/auth";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useRouter } from "expo-router";
 
@@ -34,10 +34,14 @@ const ForgotPassword: React.FC = () => {
     }
 
     try {
-      const response = await authFetch("/api/auth/forget-password", {
+      const base = AUTH_API_URL ? AUTH_API_URL.replace(/\/$/, "") : "";
+      const response = await authFetch("/api/auth/request-password-reset", {
         method: "POST",
         skipAuth: true,
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({
+          email: email.trim(),
+          redirectTo: `${base}/reset-password`,
+        }),
       });
 
       if (!response.ok) {
