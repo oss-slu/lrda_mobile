@@ -24,30 +24,8 @@ jest.mock('../lib/components/ThemeProvider', () => ({
   }),
 }));
 
-// Mock Firebase services
-
 jest.mock('react-native-keyboard-aware-scroll-view', () => ({
   KeyboardAwareScrollView: jest.fn(({ children }) => children),
-}));
-
-
-jest.mock('firebase/firestore', () => ({
-  getFirestore: jest.fn(),
-  doc: jest.fn(() => ({
-    get: jest.fn(() => Promise.resolve({ exists: false })),
-  })),
-}));
-
-jest.mock("firebase/auth", () => ({
-  getAuth: jest.fn(),
-  initializeAuth: jest.fn(),
-  getReactNativePersistence: jest.fn(),
-  onAuthStateChanged: jest.fn(), // Mock onAuthStateChanged
-}));
-
-
-jest.mock("firebase/database", () => ({
-  getDatabase: jest.fn(),
 }));
 
 
@@ -112,8 +90,8 @@ let consoleErrorSpy: jest.SpyInstance;
 // Silence console logs and errors to avoid noise in test runs
 beforeEach(() => {
   jest.clearAllMocks();
-  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => { });
+  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
   moxios.install();
 });
 
@@ -131,24 +109,24 @@ describe('AddNoteScreen', () => {
       focus: jest.fn(),
       insertImage: jest.fn(),
     };
-  
+
     jest.mock('@10play/tentap-editor', () => ({
       useEditorBridge: jest.fn(() => mockEditor),
     }));
-  
+
     renderWithProviders(<AddNoteScreen />);
-  
+
     const imageUri = '__tests__/TestResources/TestImage.jpg';
-  
+
     // Simulate adding an image to the editor
     const addImageToEditor = async (uri) => {
       mockEditor.insertImage(uri);
     };
-  
+
     await addImageToEditor(imageUri);
-  
+
     // Assert that insertImage was called with the correct argument
     expect(mockEditor.insertImage).toHaveBeenCalledWith(imageUri);
   });
-  
+
 });

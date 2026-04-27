@@ -3,6 +3,17 @@ import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import RegistrationScreen from '../lib/screens/loginScreens/RegisterScreen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+jest.mock('../lib/config/auth', () => ({
+  AUTH_API_URL: 'https://example.com',
+  authFetch: jest.fn(() =>
+    Promise.resolve({
+      ok: true,
+      text: async () => '',
+      json: async () => ({}),
+    })
+  ),
+}));
+
 //mock react-native-safe-area-context
 jest.mock('react-native-safe-area-context', () => {
   return {
@@ -11,34 +22,6 @@ jest.mock('react-native-safe-area-context', () => {
     useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
   };
 });
-
-// Mock Firebase authentication & Firestore
-jest.mock('firebase/auth', () => ({
-  getAuth: jest.fn(),
-  initializeAuth: jest.fn(() => ({
-    currentUser: null,
-  })),
-  getReactNativePersistence: jest.fn(),
-  createUserWithEmailAndPassword: jest.fn(() =>
-    Promise.resolve({ user: { uid: '12345' } })
-  ),
-  onAuthStateChanged: jest.fn(),
-}));
-
-jest.mock('../lib/config/firebase', () => ({
-  auth: {
-    currentUser: null,
-  },
-  db: {}, // Mock Firestore
-  realtimeDb: {}, // Mock Realtime Database
-}));
-
-jest.mock('firebase/firestore', () => ({
-  getFirestore: jest.fn(),
-  doc: jest.fn(),
-  setDoc: jest.fn(() => Promise.resolve()),
-  Timestamp: { now: jest.fn(() => 'mockTimestamp') },
-}));
 
 jest.mock('react-native-keyboard-aware-scroll-view', () => {
   const React = require('react');

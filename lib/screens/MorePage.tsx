@@ -14,7 +14,9 @@ import {
   Linking,
   Alert,
   TextInput,
+  Modal as NativeModal,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../components/ThemeProvider";
 import { useDispatch } from "react-redux";
@@ -24,18 +26,11 @@ import Carousel from "react-native-reanimated-carousel";
 import ThemeToggle from "../components/ThemeToggle";
 import Feather from 'react-native-vector-icons/Feather';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import Modal from 'react-native-modal';
+import ReactNativeModal from 'react-native-modal';
 import AppThemeSelectorScreen from "./AppThemeSelectorScreen";
 import Entypo from 'react-native-vector-icons/Entypo';
 import { clearThemeReducer } from "../../redux/slice/ThemeSlice";
-import { deleteUser } from "firebase/auth";
-import { ref, remove } from "firebase/database";
-import { deleteDoc, doc } from "firebase/firestore";
-import { deleteObject } from "firebase/storage";
-import { auth } from "../config";
-import { db, realtimeDb, storage } from "../config/firebase";
-import { reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
-import { collection, addDoc, getDoc,} from "firebase/firestore";
+import { authFetch } from "../config";
 import { KeyboardAvoidingView, Keyboard, TouchableWithoutFeedback } from "react-native"; // Import necessary components
 import { defaultTextFont } from "../../styles/globalStyles";
 import Tooltip from 'react-native-walkthrough-tooltip';
@@ -86,15 +81,15 @@ export default function MorePage() {
   const [keyboardVisible, setKeyboardVisible] = useState(false); // Track keyboard visibility
 
 
-const [additionalDetails, setAdditionalDetails] = useState("");
+  const [additionalDetails, setAdditionalDetails] = useState("");
 
-const toggleReason = (reason) => {
-  if (reasons.includes(reason)) {
-    setReasons(reasons.filter((r) => r !== reason)); // Remove if already selected
-  } else {
-    setReasons([...reasons, reason]); // Add if not already selected
+  const toggleReason = (reason) => {
+    if (reasons.includes(reason)) {
+      setReasons(reasons.filter((r) => r !== reason)); // Remove if already selected
+    } else {
+      setReasons([...reasons, reason]); // Add if not already selected
+    }
   }
-}
 
   const handleToggleDarkMode = () => {
     if (toggleDarkmode) {
@@ -124,59 +119,69 @@ const toggleReason = (reason) => {
         return;
       }
 
-      const currentUser = auth.currentUser;
-      if (!currentUser) {
-        Alert.alert("Error", "No user is logged in. Please log in to delete your account.");
+      // Debug: Check if token exists
+      const token = await AsyncStorage.getItem("authToken");
+      console.log(`[onDeleteAccount] Token exists: ${!!token}, length: ${token?.length ?? 0}`);
+      if (!token) {
+        console.warn(`[onDeleteAccount] WARNING: No authToken found in AsyncStorage!`);
+        Alert.alert(
+          "Authentication Error",
+          "Your session has expired. Please log in again to delete your account."
+        );
+        setShowDeleteModal(false);
+        // Navigate back to login
+        router.replace('/onboarding');
         return;
       }
 
-      const userId = currentUser.uid;
-
-      // Save review to Firestore
-      const reviewContent = {
-        userId,
+      // Send deletion request to backend
+      const payload = {
         reasons,
-        additionalDetails: additionalDetails || "None",
-        timestamp: new Date().toISOString(),
+        additionalDetails: additionalDetails || "",
       };
 
-      await addDoc(collection(db, "accountDeletionReviews"), reviewContent);
-
-      // Check if the user exists in Firestore
-      const userDocRef = doc(db, "users", userId);
-      const userDoc = await getDoc(userDocRef);
-
-      if (userDoc.exists()) {
-        // User exists in Firestore, proceed to delete their Firestore record
-        console.log("User found in Firestore. Deleting Firestore record...");
-        await deleteDoc(userDocRef);
-      } else {
-        console.log("No Firestore data found for the user. Proceeding to delete only authentication...");
-      }
-
-      // Delete the authenticated user
       try {
-        await deleteUser(currentUser);
-        Alert.alert("Success", "Your account and feedback have been successfully recorded and deleted.");
-        onLogoutPress(); // Call your existing logout function
-      } catch (error) {
-        if (error.code === "auth/requires-recent-login") {
-          console.log("Session expired. Reauthenticating the user...");
-          Alert.alert("Reauthenticate", "Your session has expired. Please log in again to delete your account.");
-        } else {
-          console.error("Error deleting user:", error);
-          Alert.alert("Error", "Failed to delete account. Please try again.");
-        }
-      }
+        const response = await authFetch("/api/account/delete", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
 
-      setShowDeleteModal(false);
+        console.log(`[Account Delete] Response status: ${response.status}, ok: ${response.ok}`);
+
+        if (response.ok) {
+          Alert.alert("Success", "Your account deletion request was received. You will be logged out.");
+          setShowDeleteModal(false);
+          // Perform local logout and cleanup
+          await onLogoutPress();
+          return;
+        }
+
+        // Attempt to parse error body
+        let errText = "Failed to delete account.";
+        try {
+          const errBody = await response.json();
+          console.error("[Account Delete] Error response:", JSON.stringify(errBody, null, 2));
+          if (errBody && errBody.message) errText = errBody.message;
+        } catch (e) {
+          console.error("[Account Delete] Failed to parse error response:", e);
+          // ignore parse errors
+        }
+
+        Alert.alert("Error", errText);
+        setShowDeleteModal(false);
+        return;
+      } catch (networkErr) {
+        console.error("Network error deleting account:", networkErr);
+        Alert.alert("Error", "Network error while attempting to delete account. Please try again.");
+        return;
+      }
     } catch (error) {
       console.error("Error deleting account:", error);
       Alert.alert("Error", "Failed to delete account. Please try again.");
     }
   };
 
-  
+
   const handleEmail = () => {
     const emailAddress = "yashkamal.bhatia@slu.edu";
     const subject = "Bug Report on 'Where's Religion?'";
@@ -201,9 +206,9 @@ const toggleReason = (reason) => {
   };
 
   const handleDeleteUserAccount = () => {
-    setTimeout(()=> {
+    setTimeout(() => {
       onLogoutPress();
-    },3000)
+    }, 3000)
   }
 
   const handleReportClick = () => {
@@ -237,7 +242,7 @@ const toggleReason = (reason) => {
       borderRadius: 10,
 
     }}>
-      <Text style={{ ...defaultTextFont,fontSize: 14, fontWeight: '500', color: icon === 'delete' ? 'red' : 'black' }}>{optionName}</Text>
+      <Text style={{ ...defaultTextFont, fontSize: 14, fontWeight: '500', color: icon === 'delete' ? 'red' : 'black' }}>{optionName}</Text>
       {
         icon === 'none' ? (
           <View style={{ height: 25, width: 25, backgroundColor: theme.homeColor, borderRadius: 50, borderWidth: 0.5 }}>
@@ -282,10 +287,11 @@ const toggleReason = (reason) => {
                 <TouchableOpacity
                   style={[
                     styles.userPhoto,
-                    { backgroundColor: theme.black,
+                    {
+                      backgroundColor: theme.black,
                       width: width > 1000 ? 50 : 30,
                       height: width > 1000 ? 50 : 30,
-                     },
+                    },
                   ]}
                   onPress={() => {
                     router.push("/account");
@@ -295,11 +301,11 @@ const toggleReason = (reason) => {
                 </TouchableOpacity>
                 <Text style={styles.pageTitle}>More</Text>
               </View>
-              <ThemeToggle isDarkmode={isDarkmode} toggleDarkmode={toggleDarkmode} testID="dark-mode-toggle"/>
+              <ThemeToggle isDarkmode={isDarkmode} toggleDarkmode={toggleDarkmode} testID="dark-mode-toggle" />
             </View>
           </View>
 
- 
+
 
           <ScrollView
 
@@ -325,36 +331,36 @@ const toggleReason = (reason) => {
             </View>
 
             {/* Menu Items */}
-            <Tooltip 
-  isVisible={morePageTip && !userTutorial}
-  showChildInTooltip={false} // Changed from false to true
-  topAdjustment={Platform.OS === 'android' ? -StatusBar.currentHeight : 0}
-  content={
-    <TooltipContent
-      message="Welcome to our more page! Here you can find settings, FAQ, logout, switch themes, and more!"
-      onPressOk={() => {
-        setUserTutorial(true);
-        setMorePageTip(false);
-        User.setUserTutorialDone("MorePage", true);
-      }}
-      onSkip={() => {
-        setUserTutorial(true);
-        setMorePageTip(false);
-        User.setUserTutorialDone("MorePage", true);
-      }}
-    />
-  }
-  placement="top"
->
-            <View style={{ marginTop: 40, alignItems: 'center' }}>
+            <Tooltip
+              isVisible={morePageTip && !userTutorial}
+              showChildInTooltip={false} // Changed from false to true
+              topAdjustment={Platform.OS === 'android' ? -StatusBar.currentHeight : 0}
+              content={
+                <TooltipContent
+                  message="Welcome to our more page! Here you can find settings, FAQ, logout, switch themes, and more!"
+                  onPressOk={() => {
+                    setUserTutorial(true);
+                    setMorePageTip(false);
+                    User.setUserTutorialDone("MorePage", true);
+                  }}
+                  onSkip={() => {
+                    setUserTutorial(true);
+                    setMorePageTip(false);
+                    User.setUserTutorialDone("MorePage", true);
+                  }}
+                />
+              }
+              placement="top"
+            >
+              <View style={{ marginTop: 40, alignItems: 'center' }}>
 
-              <MenuItem title="About" iconName="information-circle-outline" onPress={()=> {router.push("/more/about")}}/>
-              <MenuItem title="Resource" iconName="link-outline" onPress={() => router.push("/more/resource")} />
-              <MenuItem title="Meet our team" iconName="people-outline" onPress={() => router.push("/more/team")} />
-              <MenuItem title="Settings" iconName="settings-outline" onPress={handleSettingsToggle} />
-              <MenuItem title="FAQ" iconName="help-circle-outline" onPress={()=> {}}/>
-              <MenuItem title="Logout" iconName="exit-outline" onPress={onLogoutPress} />
-            </View>
+                <MenuItem title="About" iconName="information-circle-outline" onPress={() => { router.push("/more/about") }} />
+                <MenuItem title="Resource" iconName="link-outline" onPress={() => router.push("/more/resource")} />
+                <MenuItem title="Meet our team" iconName="people-outline" onPress={() => router.push("/more/team")} />
+                <MenuItem title="Settings" iconName="settings-outline" onPress={handleSettingsToggle} />
+                <MenuItem title="FAQ" iconName="help-circle-outline" onPress={() => { }} />
+                <MenuItem title="Logout" iconName="exit-outline" onPress={onLogoutPress} />
+              </View>
             </Tooltip>
 
 
@@ -374,7 +380,7 @@ const toggleReason = (reason) => {
           {/** header content ends here */}
           <ScrollView>
 
- 
+
             <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 60 }}>
 
 
@@ -385,7 +391,7 @@ const toggleReason = (reason) => {
                 <SettingOptions optionName={'App Theme'} icon={'none'} />
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={()=>setShowDeleteModal(true)}
+                onPress={() => setShowDeleteModal(true)}
               >
                 <SettingOptions optionName={'Delete My Account'} icon={'delete'} />
               </TouchableOpacity>
@@ -398,7 +404,7 @@ const toggleReason = (reason) => {
 
           </ScrollView>
 
-          <Modal
+          <ReactNativeModal
             isVisible={isThemeOpen}
             backdropColor="#00aa00"
             backdropOpacity={0}
@@ -425,82 +431,82 @@ const toggleReason = (reason) => {
               </View>
               <AppThemeSelectorScreen />
             </View>
-          </Modal>
+          </ReactNativeModal>
 
-          <Modal
-      visible={showDeleteModal}
-      transparent={true}
-      animationType="slide"
-      onRequestClose={() => setShowDeleteModal(false)}
-    >
-      <KeyboardAvoidingView
-        style={[styles.modalOverlay, { justifyContent: keyboardVisible ? "flex-end" : "center" }]}
-        behavior={Platform.OS === "ios" ? "padding" : "height"} // Adjust for iOS and Android
-        keyboardVerticalOffset={Platform.OS === "ios" ? 50 : 0} // Offset for iOS
-      >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={[styles.modalContent, { backgroundColor: isDarkmode ? "#333" : "#fff" }]}>
-            <Text style={[styles.modalTitle, { color: theme.text }]}>Why are you deleting your account?</Text>
+          <NativeModal
+            visible={showDeleteModal}
+            transparent={true}
+            animationType="slide"
+            onRequestClose={() => setShowDeleteModal(false)}
+          >
+            <KeyboardAvoidingView
+              style={[styles.modalOverlay, { justifyContent: keyboardVisible ? "flex-end" : "center" }]}
+              behavior={Platform.OS === "ios" ? "padding" : "height"} // Adjust for iOS and Android
+              keyboardVerticalOffset={Platform.OS === "ios" ? 50 : 0} // Offset for iOS
+            >
+              <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <View style={[styles.modalContent, { backgroundColor: isDarkmode ? "#333" : "#fff" }]}>
+                  <Text style={[styles.modalTitle, { color: theme.text }]}>Why are you deleting your account?</Text>
 
-            {/* Checkbox Options */}
-            <View style={styles.checkboxOption}>
-              <TouchableOpacity style={styles.checkbox} onPress={() => toggleReason("Slow Loading")}>
-                <Text style={[styles.checkboxSymbol, { color: theme.text }]}>
-                  {reasons.includes("Slow Loading") ? "☑" : "☐"}
-                </Text>
-              </TouchableOpacity>
-              <Text style={[styles.checkboxText, { color: theme.text }]}>Slow Loading</Text>
-            </View>
-            <View style={styles.checkboxOption}>
-              <TouchableOpacity style={styles.checkbox} onPress={() => toggleReason("Connectivity Issues")}>
-                <Text style={[styles.checkboxSymbol, { color: theme.text }]}>
-                  {reasons.includes("Connectivity Issues") ? "☑" : "☐"}
-                </Text>
-              </TouchableOpacity>
-              <Text style={[styles.checkboxText, { color: theme.text }]}>Connectivity Issues</Text>
-            </View>
-            <View style={styles.checkboxOption}>
-              <TouchableOpacity style={styles.checkbox} onPress={() => toggleReason("No Reason")}>
-                <Text style={[styles.checkboxSymbol, { color: theme.text }]}>
-                  {reasons.includes("No Reason") ? "☑" : "☐"}
-                </Text>
-              </TouchableOpacity>
-              <Text style={[styles.checkboxText, { color: theme.text }]}>No Reason</Text>
-            </View>
-           
+                  {/* Checkbox Options */}
+                  <View style={styles.checkboxOption}>
+                    <TouchableOpacity style={styles.checkbox} onPress={() => toggleReason("Slow Loading")}>
+                      <Text style={[styles.checkboxSymbol, { color: theme.text }]}>
+                        {reasons.includes("Slow Loading") ? "☑" : "☐"}
+                      </Text>
+                    </TouchableOpacity>
+                    <Text style={[styles.checkboxText, { color: theme.text }]}>Slow Loading</Text>
+                  </View>
+                  <View style={styles.checkboxOption}>
+                    <TouchableOpacity style={styles.checkbox} onPress={() => toggleReason("Connectivity Issues")}>
+                      <Text style={[styles.checkboxSymbol, { color: theme.text }]}>
+                        {reasons.includes("Connectivity Issues") ? "☑" : "☐"}
+                      </Text>
+                    </TouchableOpacity>
+                    <Text style={[styles.checkboxText, { color: theme.text }]}>Connectivity Issues</Text>
+                  </View>
+                  <View style={styles.checkboxOption}>
+                    <TouchableOpacity style={styles.checkbox} onPress={() => toggleReason("No Reason")}>
+                      <Text style={[styles.checkboxSymbol, { color: theme.text }]}>
+                        {reasons.includes("No Reason") ? "☑" : "☐"}
+                      </Text>
+                    </TouchableOpacity>
+                    <Text style={[styles.checkboxText, { color: theme.text }]}>No Reason</Text>
+                  </View>
 
-            {/* Additional Details */}
-            <TextInput
-              placeholder="Additional details (optional)"
-              placeholderTextColor={isDarkmode ? "#aaa" : "#555"}
-              style={[styles.textInput, { borderColor: isDarkmode ? "#555" : "#ccc", color: theme.text }]}
-              value={additionalDetails}
-              onChangeText={setAdditionalDetails}
-            />
 
-            {/* Buttons */}
-            <View style={styles.modalButtonContainer}>
-              <TouchableOpacity style={[styles.modalButton, { backgroundColor: "red" }]} onPress={onDeleteAccount}>
-                <Text style={styles.modalButtonText}>Confirm Delete</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.modalButton,
-                  { backgroundColor: isDarkmode ? "#6c757d" : "#007bff" },
-                ]}
-                onPress={() => setShowDeleteModal(false)}
-              >
-                <Text style={styles.modalButtonText}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
-    </Modal>
+                  {/* Additional Details */}
+                  <TextInput
+                    placeholder="Additional details (optional)"
+                    placeholderTextColor={isDarkmode ? "#aaa" : "#555"}
+                    style={[styles.textInput, { borderColor: isDarkmode ? "#555" : "#ccc", color: theme.text }]}
+                    value={additionalDetails}
+                    onChangeText={setAdditionalDetails}
+                  />
+
+                  {/* Buttons */}
+                  <View style={styles.modalButtonContainer}>
+                    <TouchableOpacity style={[styles.modalButton, { backgroundColor: "red" }]} onPress={onDeleteAccount}>
+                      <Text style={styles.modalButtonText}>Confirm Delete</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[
+                        styles.modalButton,
+                        { backgroundColor: isDarkmode ? "#6c757d" : "#007bff" },
+                      ]}
+                      onPress={() => setShowDeleteModal(false)}
+                    >
+                      <Text style={styles.modalButtonText}>Cancel</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </TouchableWithoutFeedback>
+            </KeyboardAvoidingView>
+          </NativeModal>
 
         </>)
       }
-      </View>
+    </View>
   );
 }
 
@@ -518,7 +524,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    width: width > 500? '13%':'27%',
+    width: width > 500 ? '13%' : '27%',
 
   },
   userPhoto: {
@@ -599,7 +605,7 @@ const styles = StyleSheet.create({
   },
   headerContent: {
     marginLeft: 0,
-    marginTop: width > 500? '5%' : "15%",
+    marginTop: width > 500 ? '5%' : "15%",
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -613,7 +619,7 @@ const styles = StyleSheet.create({
 
   settingsHeaderContent: {
     marginLeft: 0,
-    marginTop: width > 500? '4%' : "15%",
+    marginTop: width > 500 ? '4%' : "15%",
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'center',
@@ -644,7 +650,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   switchText: { ...defaultTextFont, fontSize: 18, fontWeight: "500" },
-  logout: { flexDirection: "row", justifyContent: "center", alignItems: "center", height: 50, width: "90%", borderRadius: 15, marginTop:10},
+  logout: { flexDirection: "row", justifyContent: "center", alignItems: "center", height: 50, width: "90%", borderRadius: 15, marginTop: 10 },
   logoutText: { ...defaultTextFont, fontSize: 20, fontWeight: "600", marginRight: 10 },
 
   modalOverlay: {

@@ -30,19 +30,6 @@ jest.mock('../lib/components/ThemeProvider', () => ({
   }),
 }));
 
-jest.mock("firebase/app", () => ({ initializeApp: jest.fn(), getApps: jest.fn(() => []) }));
-jest.mock("firebase/auth", () => ({
-  getAuth: jest.fn(),
-  initializeAuth: jest.fn(),
-  getReactNativePersistence: jest.fn(),
-  onAuthStateChanged: jest.fn((_, callback) =>
-    callback({ uid: "12345", email: "test@example.com" })
-  ),
-}));
-jest.mock("firebase/firestore", () => ({ getFirestore: jest.fn() }));
-jest.mock("firebase/database", () => ({ getDatabase: jest.fn() }));
-jest.mock("firebase/storage", () => ({ getStorage: jest.fn() }));
-
 jest.mock('expo-font', () => ({
   loadAsync: jest.fn(() => Promise.resolve()),
   isLoaded: jest.fn(() => true),
@@ -111,15 +98,15 @@ jest.mock('../lib/onboarding/TooltipComponent', () => {
   return jest.fn(({ message, onPressOk, onSkip }) => {
     return React.createElement(View, { testID: 'tooltip-content' }, [
       React.createElement(Text, { key: 'message' }, message),
-      React.createElement(TouchableOpacity, { 
+      React.createElement(TouchableOpacity, {
         key: 'ok-button',
         testID: 'tooltip-ok',
-        onPress: onPressOk 
+        onPress: onPressOk
       }, React.createElement(Text, null, 'OK')),
-      React.createElement(TouchableOpacity, { 
+      React.createElement(TouchableOpacity, {
         key: 'skip-button',
         testID: 'tooltip-skip',
-        onPress: onSkip 
+        onPress: onSkip
       }, React.createElement(Text, null, 'Skip'))
     ]);
   });
@@ -130,9 +117,9 @@ jest.mock('react-native-vector-icons/Ionicons', () => {
   const React = require('react');
   const { Text } = require('react-native');
   return jest.fn(({ name, size, color, onPress }) => {
-    return React.createElement(Text, { 
+    return React.createElement(Text, {
       testID: `icon-${name}`,
-      onPress: onPress 
+      onPress: onPress
     }, name);
   });
 });
@@ -141,7 +128,7 @@ jest.mock('react-native-vector-icons/Ionicons', () => {
 jest.mock('react-native-maps', () => {
   const React = require('react');
   const { View } = require('react-native');
-  
+
   const MapView = React.forwardRef((props, ref) => {
     // Add mock methods to the ref
     React.useImperativeHandle(ref, () => ({
@@ -153,17 +140,17 @@ jest.mock('react-native-maps', () => {
       fitToSuppliedMarkers: jest.fn(),
       fitToCoordinates: jest.fn(),
     }));
-    
+
     return React.createElement(View, { testID: 'map-view', ...props }, props.children);
   });
-  
+
   const Marker = jest.fn(({ children, coordinate, onPress }) => {
-    return React.createElement(View, { 
+    return React.createElement(View, {
       testID: 'map-marker',
-      onPress: onPress 
+      onPress: onPress
     }, children);
   });
-  
+
   return {
     __esModule: true,
     default: MapView,
@@ -199,7 +186,7 @@ jest.mock('../lib/utils/api_calls', () => {
     media: [],
     tags: [],
   }));
-  
+
   return {
     __esModule: true,
     default: {
@@ -231,11 +218,11 @@ let animatedListeners = [];
 // Mock Animated.Value and Animated.event
 beforeAll(() => {
   const originalAnimatedValue = Animated.Value;
-  
-  Animated.Value = jest.fn(function(initialValue) {
+
+  Animated.Value = jest.fn(function (initialValue) {
     const instance = new originalAnimatedValue(initialValue);
     const originalAddListener = instance.addListener.bind(instance);
-    
+
     instance.addListener = jest.fn((callback) => {
       // Create a safe wrapper that checks for valid data
       const safeCallback = (event) => {
@@ -252,7 +239,7 @@ beforeAll(() => {
       animatedListeners.push(safeCallback);
       return originalAddListener(safeCallback);
     });
-    
+
     return instance;
   });
 
@@ -339,7 +326,7 @@ describe('ExploreScreen - Load More Button Rendering', () => {
           layoutMeasurement: { width: width },
         },
       });
-      
+
       await new Promise(resolve => setTimeout(resolve, 100));
     });
 
@@ -381,7 +368,7 @@ describe('ExploreScreen - Load More Button Rendering', () => {
 
     // Simulate search
     const searchInput = component.getByPlaceholderText('Search here');
-    
+
     await act(async () => {
       fireEvent.changeText(searchInput, 'test query');
       fireEvent(searchInput, 'submitEditing');
