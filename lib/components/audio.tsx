@@ -66,8 +66,9 @@ const AudioContainer = ({ newAudio, setNewAudio, insertAudioToEditor }: AudioCon
             uuid: uuid.v4().toString(),
             type: "audio",
             uri: uploadedUri,
-            duration: "00:30", // Example duration, replace with real duration if available
+            duration: "00:30",
             name: `Recording ${newAudio.length + 1}`,
+            isPlaying: false,
           });
 
           setNewAudio((prevAudio) => [...prevAudio, newRecording]);
@@ -92,7 +93,7 @@ const AudioContainer = ({ newAudio, setNewAudio, insertAudioToEditor }: AudioCon
       setPlayingAudio(uri);
       await sound.playAsync();
       sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.didJustFinish) {
+        if (status.isLoaded && status.didJustFinish) {
           setPlayingAudio(null);
           sound.unloadAsync();
         }

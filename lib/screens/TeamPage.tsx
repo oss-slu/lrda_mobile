@@ -113,12 +113,12 @@ export default function TeamPage() {
     <View style={styles.teamMember}>
       <Image source={item.image} style={styles.teamImage} accessible accessibilityLabel={`${item.name}, ${item.role}`} />
       <Text style={[styles.memberName, { color: theme.text || "#ffffff" }]}>{item.name}</Text>
-      <Text style={[styles.memberRole, { color: theme.secondaryText || "#aaaaaa" }]}>{item.role}</Text>
+      <Text style={[styles.memberRole, { color: theme.tertiaryColor || "#aaaaaa" }]}>{item.role}</Text>
     </View>
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: theme.primaryColor }]}>
       <StatusBar translucent backgroundColor="transparent" />
 
       {/* Header */}
@@ -142,7 +142,7 @@ export default function TeamPage() {
 
         {/* WR Team Section */}
         <View style={styles.sectionContainer}>
-          <Text style={[styles.subtitle, { color: theme.secondaryText || "#aaaaaa", marginBottom: 12 }]}>
+          <Text style={[styles.subtitle, { color: theme.tertiaryColor || "#aaaaaa", marginBottom: 12 }]}>
             The Saint Louis University Where's Religion Team
           </Text>
           <FlatList
@@ -158,7 +158,7 @@ export default function TeamPage() {
 
         {/* Development Team Section */}
         <View style={styles.sectionContainer}>
-          <Text style={[styles.subtitle, { color: theme.secondaryText || "#aaaaaa", marginBottom: 12 }]}>The Development Team</Text>
+          <Text style={[styles.subtitle, { color: theme.tertiaryColor || "#aaaaaa", marginBottom: 12 }]}>The Development Team</Text>
           <FlatList
             data={teamMembers}
             renderItem={renderItem}

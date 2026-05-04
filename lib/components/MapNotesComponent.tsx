@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
+import { View, Text, Image, ImageStyle, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
 import { useTheme } from "./ThemeProvider";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { defaultTextFont } from "../../styles/globalStyles";
@@ -11,7 +11,7 @@ export const MapNotesComponent = ({ index, marker, onViewNote }) => {
   const { theme, isDarkmode } = useTheme();
   return (
     <View style={[styles.card, isDarkmode && styles.cardDark]} key={index}>
-      {marker.images[0] && <Image source={marker.images[0]} style={styles.cardImage} resizeMode="cover" />}
+      {marker.images[0] && <Image source={marker.images[0]} style={styles.cardImage as ImageStyle} resizeMode="cover" />}
       <View style={styles.textContent}>
         <View style={styles.leftContent}>
           <Text numberOfLines={1} style={[styles.cardtitle]}>
@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowRadius: 5,
     shadowOpacity: 0.3,
-    shadowOffset: { x: 2, y: -2 },
+    shadowOffset: { width: 2, height: -2 },
     height: CARD_HEIGHT,
     width: CARD_WIDTH,
     overflow: "hidden",

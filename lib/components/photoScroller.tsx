@@ -65,7 +65,7 @@ const PhotoScroller = forwardRef(
       };
     }, []);
 
-    const handleImageSelection = async (result: { canceled?: false; assets: any }) => {
+    const handleImageSelection = async (result: { assets: any }) => {
       const { uri } = result.assets[0];
       console.log("Selected image URI: ", uri);
 

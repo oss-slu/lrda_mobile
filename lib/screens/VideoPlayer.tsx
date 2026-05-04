@@ -1,6 +1,6 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import { Video } from "expo-av";
+import { Video, ResizeMode } from "expo-av";
 
 interface VideoPlayerProps {
   videoUri: string;
@@ -16,7 +16,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUri }) => {
         source={{ uri: videoUri }}
         style={styles.videoPlayer}
         useNativeControls
-        resizeMode="contain"
+        resizeMode={ResizeMode.CONTAIN}
         isLooping={false}
         shouldPlay
       />

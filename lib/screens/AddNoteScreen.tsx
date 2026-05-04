@@ -25,7 +25,7 @@ import NotePageStyles, { customImageCSS } from "../../styles/pages/NoteStyles";
 import { useTheme } from "../components/ThemeProvider";
 import LoadingModal from "../components/LoadingModal";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { Video } from "expo-av";
+import { Video, ResizeMode } from "expo-av";
 import { getHasDoneTutorial, setTutorialDone } from "../utils/tutorial";
 import { AudioType, Media } from "../models/media_class";
 import { createNote } from "../utils/api_calls";
@@ -421,11 +421,10 @@ const AddNoteScreen: React.FC = () => {
             <View style={[NotePageStyles().richTextContainer]} testID="TenTapEditor">
               <RichText
                 editor={editor}
-                placeholder="Write Content Here..."
                 style={[
                   NotePageStyles().editor,
                   {
-                    backgroundColor: theme.backgroundColor,
+                    backgroundColor: theme.primaryColor,
                     minHeight: 200, // gives initial space to type
                     paddingBottom: 120, // prevents content from being hidden behind keyboard/toolbar
                   },
@@ -450,7 +449,7 @@ const AddNoteScreen: React.FC = () => {
         <Modal animationType="slide" transparent={true} visible={isVideoModalVisible} onRequestClose={() => setIsVideoModalVisible(false)}>
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-              {videoUri && <Video source={{ uri: videoUri }} useNativeControls resizeMode="contain" style={styles.videoPlayer} />}
+              {videoUri && <Video source={{ uri: videoUri }} useNativeControls resizeMode={ResizeMode.CONTAIN} style={styles.videoPlayer} />}
               <TouchableOpacity onPress={() => setIsVideoModalVisible(false)}>
                 <Text style={styles.closeButton}>Close</Text>
               </TouchableOpacity>

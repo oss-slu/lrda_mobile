@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Dimensions, TouchableOpacity, Text } from "react-native";
 import Onboarding from "react-native-onboarding-swiper";
-import { Video } from "expo-av";
+import { Video, ResizeMode } from "expo-av";
 import { setItem } from "../utils/async_storage";
 import { defaultTextFont } from "../../styles/globalStyles";
 import { useRouter } from "expo-router";
@@ -47,7 +47,7 @@ const OnboardingScreen = () => {
             <Video
               source={require("../../assets/videos/v3_1.mp4")}
               style={{ width, height }}
-              resizeMode="cover"
+              resizeMode={ResizeMode.COVER}
               shouldPlay
               isLooping
               isMuted={true}
@@ -62,7 +62,7 @@ const OnboardingScreen = () => {
             <Video
               source={require("../../assets/videos/v1.mp4")}
               style={{ width, height }}
-              resizeMode="cover"
+              resizeMode={ResizeMode.COVER}
               shouldPlay
               isLooping
               isMuted={true}
@@ -77,7 +77,7 @@ const OnboardingScreen = () => {
             <Video
               source={require("../../assets/videos/v4_1.mp4")}
               style={{ width, height }}
-              resizeMode="cover"
+              resizeMode={ResizeMode.COVER}
               shouldPlay
               isLooping
               isMuted={true}
@@ -92,7 +92,7 @@ const OnboardingScreen = () => {
             <Video
               source={require("../../assets/videos/v2.mp4")}
               style={{ width, height }}
-              resizeMode="cover"
+              resizeMode={ResizeMode.COVER}
               shouldPlay
               isLooping
               isMuted={true}
@@ -107,7 +107,7 @@ const OnboardingScreen = () => {
             <Video
               source={require("../../assets/videos/v5_2.mp4")}
               style={{ width, height }}
-              resizeMode="cover"
+              resizeMode={ResizeMode.COVER}
               shouldPlay
               isLooping
               isMuted={true}

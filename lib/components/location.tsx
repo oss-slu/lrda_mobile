@@ -37,11 +37,7 @@ export default function LocationWindow({ location, setLocation }: LocationProps)
   const [isLocationShown, setIsLocationShown] = useState(true);
 
   useEffect(() => {
-    const updateDistance = async () => {
-      const distance = await getDistance();
-      setDistanceFromEvent(`${distance.toFixed(2)} Mi`);
-    };
-    updateDistance();
+    setDistanceFromEvent("");
   }, [location]);
 
   const handleLatitudeChange = (newLatitude: string) => {

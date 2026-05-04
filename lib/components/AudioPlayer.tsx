@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Button, StyleSheet, Text } from "react-native";
 import Slider from "@react-native-community/slider"; // Corrected import
-import { Audio } from "expo-av";
+import { Audio, AVPlaybackStatus } from "expo-av";
 
 interface AudioPlayerProps {
   audioUri: string;
@@ -33,7 +33,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUri }) => {
     };
   }, [audioUri]);
 
-  const onPlaybackStatusUpdate = (status: Audio.AVPlaybackStatus) => {
+  const onPlaybackStatusUpdate = (status: AVPlaybackStatus) => {
     if (status.isLoaded) {
       setPosition(status.positionMillis || 0);
       if (status.didJustFinish) {

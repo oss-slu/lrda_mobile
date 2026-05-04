@@ -346,11 +346,10 @@ const EditNoteScreen = () => {
           <View style={NotePageStyles().richTextContainer}>
             <RichText
               editor={editor}
-              placeholder="Write Content Here..."
               style={[
                 NotePageStyles().editor,
                 {
-                  backgroundColor: theme.backgroundColor,
+                  backgroundColor: theme.primaryColor,
                   minHeight: 200,
                   paddingBottom: 120,
                 },

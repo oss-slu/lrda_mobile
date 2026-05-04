@@ -37,9 +37,9 @@ const ExploreScreen = () => {
   const { theme, isDarkmode } = useTheme();
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedNote, setSelectedNote] = useState(null);
-  const [globeIcon, setGlobeIcon] = useState("earth-outline");
+  const [globeIcon, setGlobeIcon] = useState<"earth-outline" | "earth">("earth-outline");
   const [searchQuery, setSearchQuery] = useState("");
-  const [mapType, setMapType] = useState("standard");
+  const [mapType, setMapType] = useState<"standard" | "satellite" | "hybrid" | "terrain">("standard");
   const [showMapTypeOptions, setShowMapTypeOptions] = useState(false);
   const [searchResults, setSearchResults] = useState(null);
   const [userLocation, setUserLocation] = useState(null); // Store user's current location
@@ -82,8 +82,8 @@ const ExploreScreen = () => {
         const firstResult = results[0];
         const newRegion = {
           ...state.region,
-          latitude: parseFloat(firstResult.latitude) || 0,
-          longitude: parseFloat(firstResult.longitude) || 0,
+          latitude: Number(firstResult.latitude) || 0,
+          longitude: Number(firstResult.longitude) || 0,
         };
         setState((prevState) => ({ ...prevState, region: newRegion }));
         const sanitizedResults = results.map((result) => ({

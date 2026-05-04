@@ -44,13 +44,13 @@ async function uploadMedia(uri: string, mediaType: string): Promise<string> {
       type: mediaType === "image" ? "image/jpeg" : "video/mp4",
       uri: base64,
       name: uniqueName,
-    });
+    } as any);
   } else if (Platform.OS == "android") {
     data.append("file", {
       uri: uri,
       type: "video/mp4",
       name: uniqueName,
-    });
+    } as any);
   }
 
   console.log("uploadMedia - Starting fetch with S3_PROXY_PREFIX:", S3_PROXY_PREFIX);
@@ -101,18 +101,17 @@ export async function uploadAudio(uri: string): Promise<string> {
       uri: fileUri,
       type: type,
       name: uniqueName,
-    });
+    } as any);
   } else {
     let base64 = await FileSystem.readAsStringAsync(uri, {
       encoding: FileSystem.EncodingType.Base64,
     });
     base64 = `data:audio/mp3;base64,${base64}`;
     data.append("file", {
-      type: `audio/mp3`,
+      type: "audio/mp3",
       uri: base64,
       name: uniqueName,
-    });
-    console.log("base64===", base64);
+    } as any);
   }
 
   return fetch(S3_PROXY_PREFIX + "uploadFile", {

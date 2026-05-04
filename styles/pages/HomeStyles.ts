@@ -1,8 +1,6 @@
 import { StyleSheet } from "react-native";
 import { lightTheme, darkTheme } from "../colors";
 import Constants from "expo-constants";
-import { useTheme } from "../../lib/components/ThemeProvider";
-
 // build out settings for dark/light mode configuration
 const globalStyle = lightTheme;
 // const globalStyle = darkTheme;
@@ -11,7 +9,7 @@ export const HomeStyles = StyleSheet.create({
   container: {
     paddingTop: Constants.statusBarHeight - 20,
     flex: 1,
-    backgroundColor: theme.primaryColor,
+    backgroundColor: globalStyle.backgroundPrimary,
   },
   pfpText: {
     fontWeight: "600",

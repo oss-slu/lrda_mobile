@@ -19,8 +19,7 @@ import { fetchCreatorName } from "../../utils/api_calls";
 import { useTheme } from "../../components/ThemeProvider";
 import ImageModal from "./ImageModal";
 import VideoModal from "./VideoModal";
-import { Audio, Video } from "expo-av";
-import { VideoType } from "../../models/media_class";
+import { Audio, Video, ResizeMode } from "expo-av";
 import { defaultTextFont } from "../../../styles/globalStyles";
 
 // Audio component.
@@ -86,7 +85,7 @@ const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
 
         setPlayingMedia(uri);
         const status = await state.sound.getStatusAsync();
-        if (status.positionMillis === status.durationMillis) {
+        if (status.isLoaded && status.positionMillis === status.durationMillis) {
           await state.sound.replayAsync();
         } else {
           await state.sound.playAsync();
@@ -372,12 +371,11 @@ const LoadingVideo: React.FC<LoadingVideoProps> = ({ uri, onPress, width }) => {
       <Video
         source={{ uri }}
         style={loadingVideoStyles.video}
-        resizeMode="contain"
+        resizeMode={ResizeMode.CONTAIN}
         shouldPlay={false}
         isLooping={false}
         onLoad={() => setLoading(false)}
         onError={() => setError(true)}
-        onLoadEnd={() => setLoading(false)}
       />
       {loading && (
         <View style={loadingVideoStyles.loadingOverlay}>
@@ -441,7 +439,7 @@ interface NoteDetailModalProps {
 
 const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClose, note }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [selectedVideo, setSelectedVideo] = useState<VideoType | null>(null);
+  const [selectedVideo, setSelectedVideo] = useState<{ uri: string } | null>(null);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [isVideoVisible, setIsVideoVisible] = useState<boolean>(false);
   const [creatorName, setCreatorName] = useState<string>("");
@@ -471,7 +469,7 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
     setIsModalVisible(true);
   };
 
-  const onVideoPress = (video: VideoType) => {
+  const onVideoPress = (video: { uri: string }) => {
     setSelectedVideo(video);
     setIsVideoVisible(true);
   };

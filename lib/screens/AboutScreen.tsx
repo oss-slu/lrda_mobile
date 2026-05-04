@@ -12,7 +12,7 @@ export default function AboutScreen() {
   const { theme } = useTheme();
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: theme.primaryColor }]}>
       <StatusBar translucent backgroundColor="transparent" />
 
       {/* Header */}

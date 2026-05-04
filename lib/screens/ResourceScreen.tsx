@@ -26,7 +26,7 @@ function ResourceScreen() {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: theme.primaryColor }]}>
       <StatusBar translucent backgroundColor="transparent" />
       {/* Header */}
       <View style={[styles.header, { backgroundColor: theme.homeColor }]}>
