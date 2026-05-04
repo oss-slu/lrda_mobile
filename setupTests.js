@@ -1,6 +1,3 @@
-// setupTests.js
-import '@testing-library/jest-native/extend-expect'; // Provides useful matchers like toBeInTheDocument for React Native components
-
 // Mock Expo Router globally for all tests
 const mockRouter = {
   push: jest.fn(),

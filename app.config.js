@@ -22,13 +22,11 @@ export default {
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
-    newArchEnabled: true, // Enable New Architecture for iOS
     splash: {
       image: "./assets/splash.png",
       resizeMode: "cover",
       backgroundColor: "#ffffff"
     },
-    assetBundlePatterns: ["**/*"],
     ios: {
       supportsTablet: true,
       bundleIdentifier: "register.edu.slu.cs.oss.lrda",
@@ -36,10 +34,9 @@ export default {
         googleMapsApiKey: ""
       },
       buildNumber: "1",
-      newArchEnabled: true, // Enable New Architecture for iOS
       infoPlist: {
         NSAppTransportSecurity: {
-          NSAllowsArbitraryLoads: true,
+          NSAllowsArbitraryLoads: false,
           NSExceptionDomains: {
             "s3-proxy.rerum.io": {
               NSTemporaryExceptionAllowsInsecureHTTPLoads: true,
@@ -48,7 +45,6 @@ export default {
             }
           }
         },
-        // Add these permission descriptions
         NSLocationWhenInUseUsageDescription: "Allowing location services enables you to see nearby notes and/or share the location of your notes with other app users.",
         NSLocationAlwaysUsageDescription: "Allowing location services enables you to see nearby notes and/or share the location of your notes with other app users.",
         NSCameraUsageDescription: "Allowing camera access enables you to upload and/or share your photos or videos with other app users. ",
@@ -70,8 +66,6 @@ export default {
       },
       package: "register.edu.slu.cs.oss.lrda",
       versionCode: 28,
-      newArchEnabled: true, // Enable New Architecture for Android
-
     },
     web: {
       favicon: "./assets/favicon.png"
@@ -82,7 +76,6 @@ export default {
     updates: {
       "url": "https://u.expo.dev/801029ef-db83-4668-a97a-5adcc4c333e2"
     },
-    crashReporter: true, // Add this line to enable crash reporting
     extra: {
       apiBaseUrl: process.env.API_BASE_URL,
       authApiUrl: AUTH_API_URL,

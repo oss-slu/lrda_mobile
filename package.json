@@ -1,6 +1,6 @@
 {
   "name": "lrda_mobile",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "main": "expo-router/entry",
   "scripts": {
     "build:android": "NODE_ENV=production eas build -p android",
