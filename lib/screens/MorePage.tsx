@@ -17,18 +17,15 @@ import {
   Modal as NativeModal,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Ionicons } from "@expo/vector-icons";
+import { Entypo, Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useTheme } from "../components/ThemeProvider";
 import { useDispatch } from "react-redux";
 import { User } from "../models/user_class";
 import { useRouter } from "expo-router";
 import Carousel from "react-native-reanimated-carousel";
 import ThemeToggle from "../components/ThemeToggle";
-import Feather from 'react-native-vector-icons/Feather';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import ReactNativeModal from 'react-native-modal';
 import AppThemeSelectorScreen from "./AppThemeSelectorScreen";
-import Entypo from 'react-native-vector-icons/Entypo';
 import { clearThemeReducer } from "../../redux/slice/ThemeSlice";
 import { authFetch } from "../config";
 import { KeyboardAvoidingView, Keyboard, TouchableWithoutFeedback } from "react-native"; // Import necessary components
@@ -41,6 +38,19 @@ const data = [
   { source: require("../../assets/Pond_048.jpg") },
   { source: require("../../assets/Pond_049.jpg") },
 ];
+
+type SettingOptionIcon = "none" | "delete" | "report";
+
+type SettingOptionsProps = {
+  optionName: string;
+  icon: SettingOptionIcon;
+};
+
+type MenuItemProps = {
+  title: string;
+  iconName: React.ComponentProps<typeof Ionicons>["name"];
+  onPress: () => void;
+};
 
 
 
@@ -58,7 +68,7 @@ export default function MorePage() {
   useEffect(() => {
     (async () => {
       const name = await userObject.getName();
-      setUserName(name);
+      setUserName(name ?? "");
       if (name) {
         const initials = name
           .split(" ")
@@ -77,13 +87,13 @@ export default function MorePage() {
     setIsSettingsOpen(!isSettingsOpen);
   }
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [reasons, setReasons] = useState([]); // To track selected reasons
+  const [reasons, setReasons] = useState<string[]>([]); // To track selected reasons
   const [keyboardVisible, setKeyboardVisible] = useState(false); // Track keyboard visibility
 
 
   const [additionalDetails, setAdditionalDetails] = useState("");
 
-  const toggleReason = (reason) => {
+  const toggleReason = (reason: string) => {
     if (reasons.includes(reason)) {
       setReasons(reasons.filter((r) => r !== reason)); // Remove if already selected
     } else {
@@ -159,9 +169,22 @@ export default function MorePage() {
         // Attempt to parse error body
         let errText = "Failed to delete account.";
         try {
-          const errBody = await response.json();
-          console.error("[Account Delete] Error response:", JSON.stringify(errBody, null, 2));
-          if (errBody && errBody.message) errText = errBody.message;
+          const rawErrorText = await response.text();
+          if (rawErrorText) {
+            try {
+              const errBody = JSON.parse(rawErrorText);
+              errText =
+                errBody?.message ||
+                errBody?.error?.message ||
+                errBody?.error ||
+                errText;
+              if (response.status === 404 && errText === "Not found") {
+                errText = "The account deletion endpoint is unavailable. Please try again later or contact support.";
+              }
+            } catch {
+              errText = rawErrorText;
+            }
+          }
         } catch (e) {
           console.error("[Account Delete] Failed to parse error response:", e);
           // ignore parse errors
@@ -225,7 +248,7 @@ export default function MorePage() {
   };
 
 
-  const SettingOptions = ({ optionName, icon }) => (
+  const SettingOptions = ({ optionName, icon }: SettingOptionsProps) => (
     <View style={{
       height: 60,
       width: width * 0.8,
@@ -251,7 +274,7 @@ export default function MorePage() {
       }
     </View>
   )
-  const MenuItem = ({ title, iconName, onPress }) => (
+  const MenuItem = ({ title, iconName, onPress }: MenuItemProps) => (
     <TouchableOpacity style={styles.menuButton} onPress={onPress}>
       <View style={styles.menuContent}>
         <Text style={[styles.menuText, { fontSize: 14, fontWeight: '500' }]}>{title}</Text>
@@ -334,7 +357,7 @@ export default function MorePage() {
             <Tooltip
               isVisible={morePageTip && !userTutorial}
               showChildInTooltip={false} // Changed from false to true
-              topAdjustment={Platform.OS === 'android' ? -StatusBar.currentHeight : 0}
+              topAdjustment={Platform.OS === 'android' ? -(StatusBar.currentHeight ?? 0) : 0}
               content={
                 <TooltipContent
                   message="Welcome to our more page! Here you can find settings, FAQ, logout, switch themes, and more!"
