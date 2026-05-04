@@ -2,20 +2,24 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const DEFAULT_THEME = "#7FADE1";
+const DEFAULT_ACCENT = "#7FADE1";
 
 interface ThemeStore {
-  theme: string;
-  setTheme: (color: string) => void;
-  clearTheme: () => void;
+  accentColor: string;
+  isDarkmode: boolean;
+  setAccentColor: (color: string) => void;
+  toggleDarkmode: () => void;
+  reset: () => void;
 }
 
 export const useThemeStore = create<ThemeStore>()(
   persist(
     (set) => ({
-      theme: DEFAULT_THEME,
-      setTheme: (color) => set({ theme: color }),
-      clearTheme: () => set({ theme: DEFAULT_THEME }),
+      accentColor: DEFAULT_ACCENT,
+      isDarkmode: false,
+      setAccentColor: (color) => set({ accentColor: color }),
+      toggleDarkmode: () => set((s) => ({ isDarkmode: !s.isDarkmode })),
+      reset: () => set({ accentColor: DEFAULT_ACCENT, isDarkmode: false }),
     }),
     {
       name: "theme-storage",

@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Dimensions,
   TextInput,
-  StyleSheet,
   Animated,
   StatusBar,
   ActivityIndicator,
@@ -20,20 +19,19 @@ import NoteDetailModal, { NoteDetailData } from "./mapPage/NoteDetailModal";
 import Greeting from "../components/Greeting";
 import NotesComponent from "../components/NotesComponent";
 import LottieView from "lottie-react-native";
-import { defaultTextFont } from "../../styles/globalStyles";
 import Tooltip from "react-native-walkthrough-tooltip";
 import TooltipContent from "../onboarding/TooltipComponent";
 import { getHasDoneTutorial, setTutorialDone } from "../utils/tutorial";
 import { useUserInfo, useNotesList, useAnimatedSearch, sortNotes, filterNotes } from "../hooks/useNotesList";
-import { useNoteListStyles } from "../../styles/noteListStyles";
 import { SwipeListView } from "react-native-swipe-list-view";
+import Constants from "expo-constants";
 
 const TEXT_LENGTH = 18;
+const { width, height } = Dimensions.get("window");
 
 const Library = () => {
   const router = useRouter();
   const { theme, isDarkmode } = useTheme();
-  const styles = useNoteListStyles(theme);
   const { userInitials, userName } = useUserInfo();
 
   const [selectedNote, setSelectedNote] = useState<NoteDetailData | undefined>(undefined);
@@ -70,7 +68,7 @@ const Library = () => {
       <TouchableOpacity
         key={item.id}
         activeOpacity={1}
-        style={{ backgroundColor: isDarkmode ? "black" : "#e6e6e6" }}
+        className="bg-secondary"
         onPress={() => {
           if (!item.isPublished) {
             router.push({
@@ -105,7 +103,7 @@ const Library = () => {
   const renderFooter = () => {
     if (isLoadingMore) {
       return (
-        <View style={{ paddingVertical: 50, alignItems: "center", marginBottom: 100 }}>
+        <View className="py-[50px] items-center mb-[100px]">
           <ActivityIndicator size="small" color={theme.text} />
         </View>
       );
@@ -115,15 +113,15 @@ const Library = () => {
         <TouchableOpacity
           testID="load-more"
           onPress={handleLoadMore}
-          style={{ paddingVertical: 20, width: "65%", alignItems: "center", alignSelf: "center", borderRadius: 20, marginVertical: 4, backgroundColor: theme.homeColor }}
+          className="py-5 w-[65%] items-center self-center rounded-lg my-1 bg-accent"
         >
-          <Text testID="load-more-button" style={{ ...defaultTextFont, color: theme.text, fontSize: 16, fontWeight: "400" }}>Load More</Text>
+          <Text testID="load-more-button" className="font-inter text-foreground text-base font-normal">Load More</Text>
         </TouchableOpacity>
       );
     }
     return (
-      <View style={{ padding: 20, alignItems: "center" }}>
-        <Text testID="empty-state-text" style={{ ...defaultTextFont, color: "gray", fontSize: 14 }}>End of the Page</Text>
+      <View className="p-5 items-center">
+        <Text testID="empty-state-text" className="font-inter text-gray-500 text-sm">End of the Page</Text>
       </View>
     );
   };
@@ -131,9 +129,9 @@ const Library = () => {
   const renderList = () => {
     if (displayNotes.length === 0) {
       return (
-        <View style={styles.resultNotFound}>
-          <LottieView source={require("../../assets/animations/noResultFound.json")} autoPlay loop style={styles.lottie} />
-          <Text style={styles.resultNotFoundTxt}>No Results Found</Text>
+        <View className="justify-center items-center">
+          <LottieView source={require("../../assets/animations/noResultFound.json")} autoPlay loop style={{ width: 100, height: 200 }} />
+          <Text className="font-inter text-[15px] font-normal">No Results Found</Text>
         </View>
       );
     }
@@ -148,7 +146,6 @@ const Library = () => {
     );
   };
 
-  // Tutorial state
   const [userTutorial, setUserTutorial] = useState<boolean | null>(null);
   const [libraryTip, setLibraryTip] = useState(false);
 
@@ -160,29 +157,33 @@ const Library = () => {
   }, []);
 
   return (
-    <View testID="Library" style={{ flex: 1, backgroundColor: isDarkmode ? "black" : "#e4e4e4" }}>
+    <View testID="Library" className="flex-1 bg-secondary">
       <StatusBar translucent backgroundColor="transparent" />
-      <View style={styles.container}>
-        <View style={styles.topView}>
-          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "100%", paddingBottom: 15, paddingTop: 10 }}>
-            <View style={styles.userAccountAndPageTitle}>
+      <View
+        className="bg-accent"
+        style={{ paddingTop: Constants.statusBarHeight - 20, height: width > 500 ? height * 0.12 : height * 0.19 }}
+      >
+        <View className="flex-row items-center justify-between px-[5px] mt-[10px] bg-accent">
+          <View className="flex-row items-center justify-between w-full pb-[15px] pt-[10px]">
+            <View className="flex-row justify-between items-center" style={{ width: width > 500 ? "13%" : "27%" }}>
               <TouchableOpacity
                 testID="account-page"
-                style={[styles.userPhoto, { backgroundColor: theme.black, width: Dimensions.get("window").width > 1000 ? 50 : 30, height: Dimensions.get("window").width > 1000 ? 50 : 30 }]}
+                className="rounded-full items-center justify-center bg-foreground ml-2"
+                style={{ width: width > 1000 ? 50 : 30, height: width > 1000 ? 50 : 30 }}
                 onPress={() => router.push("/account")}
               >
-                <Text style={styles.pfpText}>{userInitials}</Text>
+                <Text className="font-inter font-semibold text-sm self-center text-surface">{userInitials}</Text>
               </TouchableOpacity>
-              <Text style={styles.pageTitle}>Library</Text>
+              <Text className="font-inter text-lg font-medium">Library</Text>
             </View>
-            <View testID="greeting-component" style={styles.userWishContainer}>
+            <View testID="greeting-component" className="mr-[10px]">
               <Greeting />
-              <Text style={styles.userName}>{userName}</Text>
+              <Text className="font-inter font-medium h-[50%] text-center self-center">{userName}</Text>
             </View>
           </View>
         </View>
 
-        <View testID="Filter" style={[styles.toolContainer, { marginHorizontal: 20 }]}>
+        <View testID="Filter" className="flex-row justify-between items-center mt-[10px] mx-5">
           {!isSearchVisible && (
             <View>
               {!isSortOpened ? (
@@ -196,20 +197,31 @@ const Library = () => {
               )}
             </View>
           )}
-          <View testID="SearchBar" style={[styles.searchParentContainer, { width: isSearchVisible ? "95%" : 40 }]}>
+          <View testID="SearchBar" className="flex-row justify-between items-center" style={{ width: isSearchVisible ? "95%" : 40 }}>
             {isSearchVisible && (
-              <Animated.View style={[styles.searchContainer, { width: searchBarWidth, marginBottom: 23 }]}>
-                <TextInput placeholder="Search..." value={searchQuery} placeholderTextColor="#999" onChangeText={setSearchQuery} style={styles.searchInput} cursorColor="black" autoFocus />
+              <Animated.View
+                className="right-0 bottom-0 bg-[#f0f0f0] justify-center items-center h-[36px] rounded-full overflow-hidden mb-[23px]"
+                style={{ width: searchBarWidth }}
+              >
+                <TextInput
+                  placeholder="Search..."
+                  value={searchQuery}
+                  placeholderTextColor="#999"
+                  onChangeText={setSearchQuery}
+                  className="font-inter flex-1 text-base text-black px-[10px] py-0 w-full"
+                  cursorColor="black"
+                  autoFocus
+                />
               </Animated.View>
             )}
             {isSearchVisible ? (
-              <View style={[styles.searchIcon, { marginTop: -25 }]}>
+              <View className="mb-[10px]" style={{ marginTop: -25 }}>
                 <TouchableOpacity onPress={toggleSearchBar} testID="close-button">
                   <Ionicons name="close" size={25} />
                 </TouchableOpacity>
               </View>
             ) : (
-              <View style={styles.searchIcon}>
+              <View className="mb-[10px]">
                 <TouchableOpacity onPress={toggleSearchBar} testID="search-button">
                   <Ionicons name="search" size={25} />
                 </TouchableOpacity>
@@ -219,7 +231,7 @@ const Library = () => {
         </View>
       </View>
 
-      <View testID="notes-list" style={styles.scrollerBackgroundColor}>
+      <View testID="notes-list" className="flex-1 w-full">
         {rendering ? (
           <NoteSkeleton />
         ) : (
@@ -243,17 +255,20 @@ const Library = () => {
       </View>
 
       {isSortOpened && !isSearchVisible && (
-        <View style={[libraryStyles.sortOverlay, { backgroundColor: isDarkmode ? "#525252" : "white" }]}>
-          <Text style={{ ...defaultTextFont, fontSize: 20, color: isDarkmode ? "#c7c7c7" : "black", fontWeight: "600" }}>Sort by</Text>
-          <View style={{ height: "50%", justifyContent: "space-evenly", alignItems: "center" }}>
+        <View className="h-full w-full absolute top-[19%] rounded-lg p-5 bg-surface dark:bg-tertiary">
+          <Text className="font-inter text-xl text-foreground font-semibold">Sort by</Text>
+          <View className="h-[50%] justify-evenly items-center">
             {[
               { option: 1, label: "Date & Time(latest)" },
               { option: 2, label: "A-Z" },
               { option: 3, label: "Z-A" },
             ].map(({ option, label }) => (
               <TouchableOpacity key={option} onPress={() => { setSelectedSortOption(option); setIsSortOpened(false); }}>
-                <View style={[styles.selectedSortOption, { backgroundColor: selectedSortOption === option ? theme.homeColor : "transparent", width: 200 }]}>
-                  <Text style={{ ...defaultTextFont, fontSize: 20, color: isDarkmode && selectedSortOption !== option ? "#c7c7c7" : "black" }}>
+                <View
+                  className="w-[200px] justify-center items-center p-[10px] rounded-[10px]"
+                  style={{ backgroundColor: selectedSortOption === option ? theme.homeColor : "transparent" }}
+                >
+                  <Text className={`font-inter text-xl ${selectedSortOption === option ? "text-black" : "text-foreground"}`}>
                     {label}
                   </Text>
                 </View>
@@ -267,16 +282,5 @@ const Library = () => {
     </View>
   );
 };
-
-const libraryStyles = StyleSheet.create({
-  sortOverlay: {
-    height: "100%",
-    width: "100%",
-    position: "absolute",
-    top: "19%",
-    borderRadius: 20,
-    padding: 20,
-  },
-});
 
 export default Library;

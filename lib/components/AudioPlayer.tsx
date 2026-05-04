@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { View, Button, StyleSheet, Text } from "react-native";
-import Slider from "@react-native-community/slider"; // Corrected import
+import { View, Button, Text } from "react-native";
+import Slider from "@react-native-community/slider";
 import { Audio, AVPlaybackStatus } from "expo-av";
 
 interface AudioPlayerProps {
@@ -71,10 +71,10 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUri }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.sliderWrapper}>
+    <View className="items-center my-5">
+      <View className="w-[90%] items-center">
         <Slider
-          style={styles.slider}
+          style={{ width: "100%" }}
           minimumValue={0}
           maximumValue={duration || 1}
           value={position}
@@ -83,38 +83,14 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUri }) => {
           maximumTrackTintColor="#D3D3D3"
           thumbTintColor="#1DB954"
         />
-        <View style={styles.timeWrapper}>
-          <Text style={styles.time}>{formatTime(position)}</Text>
-          <Text style={styles.time}>{formatTime(duration || 0)}</Text>
+        <View className="flex-row justify-between w-full mt-[5px]">
+          <Text className="text-xs text-[#555]">{formatTime(position)}</Text>
+          <Text className="text-xs text-[#555]">{formatTime(duration || 0)}</Text>
         </View>
       </View>
       <Button title={isPlaying ? "Pause" : "Play"} onPress={handlePlayPause} />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: "center",
-    marginVertical: 20,
-  },
-  sliderWrapper: {
-    width: "90%",
-    alignItems: "center",
-  },
-  slider: {
-    width: "100%",
-  },
-  timeWrapper: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    marginTop: 5,
-  },
-  time: {
-    fontSize: 12,
-    color: "#555",
-  },
-});
 
 export default AudioPlayer;

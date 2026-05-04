@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Image, StyleSheet } from "react-native";
+import { View, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Placeholder, PlaceholderMedia, Progressive } from "rn-placeholder";
 
@@ -16,14 +16,7 @@ export default function LoadingImage({ imageURI, type, isImage, height = 70, wid
 
   if (isImage && imageURI !== "") {
     return (
-      <View
-        style={{
-          width: width,
-          height: height,
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
+      <View style={{ width, height }} className="justify-center items-center">
         {isLoading && (
           <Placeholder
             style={{ top: width / 2 }}
@@ -32,27 +25,22 @@ export default function LoadingImage({ imageURI, type, isImage, height = 70, wid
           />
         )}
         {type === "video" ? (
-          <View
-            style={{
-              width: width,
-              height: height,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
+          <View style={{ width, height }} className="justify-center items-center">
             <Image
-              style={[styles.preview, { width: width, height: height }]}
+              className="rounded-[10px] content-center self-center"
+              style={{ width, height }}
               source={{ uri: imageURI }}
               onLoadEnd={() => setIsLoading(false)}
             />
-            <View style={styles.playUnderlay}>
-              <Ionicons name="play-outline" size={24} color="#dfe5e8" style={styles.icon} />
+            <View className="w-[30px] h-[30px] rounded-[30px] bg-black/50 absolute self-center">
+              <Ionicons name="play-outline" size={24} color="#dfe5e8" className="absolute self-center ml-2.5 mt-[2px]" />
             </View>
           </View>
         ) : (
           <View>
             <Image
-              style={[styles.preview, { width: width, height: height }]}
+              className="rounded-[10px] content-center self-center"
+              style={{ width, height }}
               source={{ uri: imageURI }}
               onLoadEnd={() => setIsLoading(false)}
             />
@@ -62,14 +50,7 @@ export default function LoadingImage({ imageURI, type, isImage, height = 70, wid
     );
   } else {
     return (
-      <View
-        style={{
-          width: width,
-          height: height,
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
+      <View style={{ width, height }} className="justify-center items-center">
         {isLoading && (
           <Placeholder
             style={{ top: width / 2 }}
@@ -78,7 +59,8 @@ export default function LoadingImage({ imageURI, type, isImage, height = 70, wid
           />
         )}
         <Image
-          style={[styles.preview, { width: width, height: height }]}
+          className="rounded-[10px] content-center self-center"
+          style={{ width, height }}
           source={require("./public/noPreview.png")}
           onLoadEnd={() => setIsLoading(false)}
         />
@@ -86,25 +68,3 @@ export default function LoadingImage({ imageURI, type, isImage, height = 70, wid
     );
   }
 }
-
-const styles = StyleSheet.create({
-  preview: {
-    borderRadius: 10,
-    alignContent: "center",
-    alignSelf: "center",
-  },
-  icon: {
-    position: "absolute",
-    alignSelf: "center",
-    marginLeft: 10,
-    marginTop: 2,
-  },
-  playUnderlay: {
-    width: 30,
-    height: 30,
-    borderRadius: 30,
-    backgroundColor: "rgba(5,5,5,0.5)",
-    position: "absolute",
-    alignSelf: "center",
-  },
-});

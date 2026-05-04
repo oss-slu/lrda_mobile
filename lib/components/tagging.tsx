@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, TextInput } from "react-native";
+import { View, Text, TouchableOpacity, TextInput } from "react-native";
 import { SwipeListView } from "react-native-swipe-list-view";
 import { Ionicons } from "@expo/vector-icons";
-import { defaultTextFont } from "../../styles/globalStyles";
 
 function TagWindow({ tags, setTags }: { tags: string[]; setTags: React.Dispatch<React.SetStateAction<string[]>> }) {
   const [inputText, setInputText] = useState("");
@@ -22,7 +21,7 @@ function TagWindow({ tags, setTags }: { tags: string[]; setTags: React.Dispatch<
 
   const renderHiddenItem = (data: any, rowMap: any) => {
     return (
-      <View style={styles.rowBack}>
+      <View className="items-center bg-red-500 flex-1 flex-row justify-between px-4 py-[1px]">
         <TouchableOpacity onPress={() => handleDeleteTag(data.item.key)} testID={`delete-action-${data.item.key}`}>
           <Ionicons name="trash-outline" size={24} color="#111111" style={{ alignSelf: "center" }} />
         </TouchableOpacity>
@@ -31,16 +30,16 @@ function TagWindow({ tags, setTags }: { tags: string[]; setTags: React.Dispatch<
   };
 
   const renderItem = ({ item }: { item: { key: string; tag: string } }) => (
-    <TouchableOpacity activeOpacity={1} style={styles.rowFront}>
-      <Text style={styles.text}>{item.tag}</Text>
+    <TouchableOpacity activeOpacity={1} className="items-center bg-white flex-1 flex-row justify-center py-[1px]">
+      <Text className="font-inter text-lg font-medium">{item.tag}</Text>
     </TouchableOpacity>
   );
 
   return (
-    <View style={{ marginBottom: 10, minHeight: 100 }}>
+    <View className="mb-2.5 min-h-[100px]">
       <TextInput
         testID="tag-input"
-        style={styles.textBox}
+        className="rounded-[30px] h-10 w-full border-b-2 bg-white justify-center text-center text-lg font-medium"
         value={inputText}
         onChangeText={setInputText}
         placeholder="Your Tag Here"
@@ -71,39 +70,3 @@ function TagWindow({ tags, setTags }: { tags: string[]; setTags: React.Dispatch<
 }
 
 export default TagWindow;
-
-const styles = StyleSheet.create({
-  rowBack: {
-    alignItems: "center",
-    backgroundColor: "red",
-    flex: 1,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 15,
-    paddingVertical: 1,
-  },
-  rowFront: {
-    alignItems: "center",
-    backgroundColor: "white",
-    flex: 1,
-    flexDirection: "row",
-    justifyContent: "center",
-    paddingVertical: 1,
-  },
-  text: {
-    ...defaultTextFont,
-    fontSize: 18,
-    fontWeight: "500",
-  },
-  textBox: {
-    borderRadius: 30,
-    height: 40,
-    width: "100%",
-    borderBottomWidth: 2,
-    backgroundColor: "white",
-    justifyContent: "center",
-    textAlign: "center",
-    fontSize: 18,
-    fontWeight: "500",
-  },
-});

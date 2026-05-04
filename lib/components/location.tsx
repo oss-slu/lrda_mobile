@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, TextInput, Button } from "react-native";
+import { View, Text, TextInput, Button } from "react-native";
 import * as Location from "expo-location";
-import { defaultTextFont } from "../../styles/globalStyles";
 
 interface LocationProps {
   location: {
@@ -63,7 +62,6 @@ export default function LocationWindow({ location, setLocation }: LocationProps)
 
   const toggleLocationVisibility = async () => {
     if (isLocationShown) {
-      // Hide Location
       setLocation({
         latitude: 0,
         longitude: 0,
@@ -71,7 +69,6 @@ export default function LocationWindow({ location, setLocation }: LocationProps)
       setLatitude("0");
       setLongitude("0");
     } else {
-      // Show Location
       try {
         let userLocation = await getLocation();
 
@@ -94,52 +91,15 @@ export default function LocationWindow({ location, setLocation }: LocationProps)
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.distanceContainer}>
-        <Text style={styles.distanceText}>{distanceFromEvent && location && distanceFromEvent.toString()}</Text>
+    <View className="h-[210px] justify-center items-center p-5">
+      <View className="absolute top-2.5 right-2.5 bg-white/50 p-[5px] rounded-[5px]">
+        <Text className="font-inter text-black text-sm font-bold">{distanceFromEvent && location && distanceFromEvent.toString()}</Text>
       </View>
-      <Text style={styles.label}>Longitude</Text>
-      <TextInput style={styles.input} value={longitude} onChangeText={handleLongitudeChange} editable={false} />
-      <Text style={styles.label}>Latitude</Text>
-      <TextInput style={styles.input} value={latitude} onChangeText={handleLatitudeChange} editable={false} />
+      <Text className="font-inter text-lg font-bold mb-[5px]">Longitude</Text>
+      <TextInput className="w-full h-10 border border-[#ccc] rounded-[5px] px-2.5" value={longitude} onChangeText={handleLongitudeChange} editable={false} />
+      <Text className="font-inter text-lg font-bold mb-[5px]">Latitude</Text>
+      <TextInput className="w-full h-10 border border-[#ccc] rounded-[5px] px-2.5" value={latitude} onChangeText={handleLatitudeChange} editable={false} />
       <Button title={isLocationShown ? "Hide Location" : "Show Location"} onPress={toggleLocationVisibility} />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    height: 210,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  distanceContainer: {
-    position: "absolute",
-    top: 10,
-    right: 10,
-    backgroundColor: "rgba(255, 255, 255, 0.5)",
-    padding: 5,
-    borderRadius: 5,
-  },
-  distanceText: {
-    ...defaultTextFont,
-    color: "#000",
-    fontSize: 14,
-    fontWeight: "bold",
-  },
-  label: {
-    ...defaultTextFont,
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-  input: {
-    width: "100%",
-    height: 40,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    paddingHorizontal: 10,
-  },
-});

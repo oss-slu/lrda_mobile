@@ -11,17 +11,17 @@ import {
   KeyboardAvoidingView,
   Modal,
   Text,
-  StyleSheet,
   StatusBar,
+  Dimensions,
 } from "react-native";
 import * as Location from "expo-location";
 import ToastMessage from "react-native-toast-message";
 import AudioContainer from "../components/audio";
+import Constants from "expo-constants";
 
 import PhotoScroller from "../components/photoScroller";
 import TagWindow from "../components/tagging";
 import { DEFAULT_TOOLBAR_ITEMS, RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
-import NotePageStyles, { customImageCSS } from "../../styles/pages/NoteStyles";
 import { useTheme } from "../components/ThemeProvider";
 import LoadingModal from "../components/LoadingModal";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -31,10 +31,20 @@ import { AudioType, Media } from "../models/media_class";
 import { createNote } from "../utils/api_calls";
 import { useAddNoteStore } from "../stores/addNoteStore";
 import { useAddNoteContext } from "../context/AddNoteContext";
-import { defaultTextFont } from "../../styles/globalStyles";
 import TooltipContent from "../onboarding/TooltipComponent";
 import Tooltip from "react-native-walkthrough-tooltip";
 import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
+
+const customImageCSS = `
+  .ProseMirror img {
+    max-width: 200px !important;
+    max-height: 200px !important;
+    object-fit: cover !important;
+    display: inline-block;
+  }
+`;
+
+const { height } = Dimensions.get("window");
 
 const AddNoteScreen: React.FC = () => {
   const router = useRouter();
@@ -53,7 +63,7 @@ const AddNoteScreen: React.FC = () => {
     latitude: number;
     longitude: number;
   } | null>(null);
-  const [locationButtonColor, setLocationButtonColor] = useState<string>("#000"); // Default color
+  const [locationButtonColor, setLocationButtonColor] = useState<string>("#000");
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [isVideoModalVisible, setIsVideoModalVisible] = useState<boolean>(false);
   const [videoUri, setVideoUri] = useState<string | null>(null);
@@ -130,25 +140,22 @@ const AddNoteScreen: React.FC = () => {
 
   useEffect(() => {
     if (editor) {
-      // Combine custom image CSS and dark mode CSS
       const combinedCSS = `
         ${customImageCSS}
         body {
-          color: ${theme.text}; /* Text color for dark mode */
+          color: ${theme.text};
         }
       `;
-      editor.injectCSS(combinedCSS); // Inject both styles at once
+      editor.injectCSS(combinedCSS);
     }
   }, [editor, theme.text]);
 
   const isBodyEmpty = (htmlString: string) => {
-    // Remove all tags and whitespace
     const textOnly = htmlString.replace(/<\/?[^>]+(>|$)/g, "").trim();
     return textOnly.length === 0;
   };
 
   useEffect(() => {
-    // Listen for keyboard events to show/hide toolbar
     const showKeyboardListener = Keyboard.addListener("keyboardDidShow", () => {
       setKeyboardVisible(true);
     });
@@ -156,7 +163,6 @@ const AddNoteScreen: React.FC = () => {
       setKeyboardVisible(false);
     });
 
-    // Save the correct reference to handleShareButtonPress
     setPublishNote(() => handleShareButtonPress);
 
     return () => {
@@ -239,7 +245,6 @@ const AddNoteScreen: React.FC = () => {
     }
   };
 
-  // Function to add audio
   const insertAudioToEditor = async (audioUri: string) => {
     try {
       const currentContent = await editor.getHTML();
@@ -316,8 +321,8 @@ const AddNoteScreen: React.FC = () => {
   };
 
   const handleDonePress = () => {
-    editor.blur(); // Close TenTap editor keyboard
-    Keyboard.dismiss(); //close keyboard when title is being edited
+    editor.blur();
+    Keyboard.dismiss();
   };
 
   const syncEditorContent = async () => {
@@ -326,21 +331,18 @@ const AddNoteScreen: React.FC = () => {
     bodyTextRef.current = latestContent;
   };
 
-  /* CHECKING IF USER HAS DONE TUTORIAL */
   const [userTutorial, setUserTutorial] = useState<boolean>(false);
-  const [mediaTip, setMediaTip] = useState<boolean>(true); // This is the first tip.
+  const [mediaTip, setMediaTip] = useState<boolean>(true);
 
-  // Update the userTutorial state once the async function resolves.
   useEffect(() => {
-    // For the "AddNote" tutorial
     getHasDoneTutorial("AddNote").then((result: boolean) => {
       setUserTutorial(result);
     });
   }, []);
 
   return (
-    <View style={{ flex: 1 }}>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+    <View className="flex-1">
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1">
         <KeyboardAwareScrollView
           ref={scrollViewRef}
           contentContainerStyle={{ flexGrow: 1 }}
@@ -349,7 +351,7 @@ const AddNoteScreen: React.FC = () => {
           keyboardOpeningTime={0}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={{ flex: 1 }}>
+          <View className="flex-1">
             <Tooltip
               topAdjustment={Platform.OS === "android" ? -(StatusBar.currentHeight ?? 0) : 0}
               isVisible={mediaTip === true && userTutorial === false}
@@ -371,43 +373,45 @@ const AddNoteScreen: React.FC = () => {
               }
               placement="bottom"
             >
-              <View style={[NotePageStyles().topContainer]}>
-                <View style={[NotePageStyles().topButtonsContainer, { backgroundColor: theme.homeColor }]}>
-                  <TouchableOpacity style={NotePageStyles().topButtons} onPress={() => saveNote(false)}>
-                    <Ionicons name="arrow-back-outline" size={30} color={NotePageStyles().saveText.color} />
+              <View className="min-h-[140px]">
+                <View
+                  className="flex-row items-center justify-between bg-accent px-[5px] text-center"
+                  style={{ paddingTop: Constants.statusBarHeight, height: height * 0.15 }}
+                >
+                  <TouchableOpacity className="z-[99] h-[50px] w-[50px] items-center justify-center rounded-full bg-tertiary" onPress={() => saveNote(false)}>
+                    <Ionicons name="arrow-back-outline" size={30} color="var(--color-foreground)" />
                   </TouchableOpacity>
                   <TextInput
-                    style={NotePageStyles().title}
+                    className="mr-[5%] h-[45px] w-4/5 rounded-[18px] border border-foreground px-[10px] text-center text-[20px] text-foreground"
                     placeholder="Title Field Note"
-                    placeholderTextColor={NotePageStyles().title.color}
+                    placeholderTextColor="var(--color-foreground)"
                     onChangeText={setTitleText}
                     value={titleText}
                     onFocus={() => {
-                      // Remove focus from the editor when the title is being edited
                       if (editor?.blur) {
                         editor.blur();
                       }
                     }}
                   />
                 </View>
-                <View style={NotePageStyles().keyContainer}>
+                <View className="w-full flex-row items-center justify-between bg-primary px-10 py-[5px]">
                   <TouchableOpacity onPress={() => setViewMedia(!viewMedia)} testID="imageButton">
-                    <Ionicons name="images-outline" size={30} color={NotePageStyles().saveText.color} />
+                    <Ionicons name="images-outline" size={30} color="var(--color-foreground)" />
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => setViewAudio(!viewAudio)}>
-                    <Ionicons name="mic-outline" size={30} color={NotePageStyles().saveText.color} />
+                    <Ionicons name="mic-outline" size={30} color="var(--color-foreground)" />
                   </TouchableOpacity>
                   <TouchableOpacity onPress={toggleLocation} testID="checklocationpermission">
                     <Ionicons name="location-outline" size={30} color={locationButtonColor} />
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => setIsTagging(!isTagging)}>
-                    <Ionicons name="pricetag-outline" size={30} color={NotePageStyles().saveText.color} />
+                    <Ionicons name="pricetag-outline" size={30} color="var(--color-foreground)" />
                   </TouchableOpacity>
                 </View>
               </View>
             </Tooltip>
 
-            <View style={NotePageStyles().container}>
+            <View className="mb-1 w-full bg-tertiary">
               <PhotoScroller
                 active={viewMedia}
                 newMedia={newMedia}
@@ -418,40 +422,40 @@ const AddNoteScreen: React.FC = () => {
               {viewAudio && <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} insertAudioToEditor={insertAudioToEditor} />}
               {isTagging && <TagWindow tags={tags} setTags={setTags} />}
             </View>
-            <View style={[NotePageStyles().richTextContainer]} testID="TenTapEditor">
+            <View className="min-h-[300px] grow pb-[120px] ios:h-full android:flex-1" testID="TenTapEditor">
               <RichText
                 editor={editor}
-                style={[
-                  NotePageStyles().editor,
-                  {
-                    backgroundColor: theme.primaryColor,
-                    minHeight: 200, // gives initial space to type
-                    paddingBottom: 120, // prevents content from being hidden behind keyboard/toolbar
-                  },
-                ]}
+                style={{
+                  flex: 1,
+                  width: "100%",
+                  minHeight: 200,
+                  paddingBottom: 120,
+                  padding: 10,
+                  marginBottom: 4,
+                  backgroundColor: theme.primaryColor,
+                }}
               />
             </View>
 
-            <View style={styles.toolbar} testID="RichEditor">
+            <View className="absolute bottom-[27px] z-10 w-full justify-center px-[10px] ios:h-[50px] android:h-[70px]" testID="RichEditor">
               <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
             </View>
             {Platform.OS === "ios" && <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />}
           </View>
           {keyboardVisible && (
-            <View style={styles.doneButton} testID="doneButton">
+            <View className="absolute bottom-0 w-full border-[#ddd] bg-white py-[5px] z-10" testID="doneButton">
               <TouchableOpacity onPress={handleDonePress}>
-                <Text style={styles.doneText}>Done</Text>
+                <Text className="font-inter mr-[25px] p-0 text-right text-[14px] text-blue-500">Done</Text>
               </TouchableOpacity>
             </View>
           )}
         </KeyboardAwareScrollView>
-        {/* Video Player Modal */}
         <Modal animationType="slide" transparent={true} visible={isVideoModalVisible} onRequestClose={() => setIsVideoModalVisible(false)}>
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              {videoUri && <Video source={{ uri: videoUri }} useNativeControls resizeMode={ResizeMode.CONTAIN} style={styles.videoPlayer} />}
+          <View className="flex-1 items-center justify-center bg-black/50">
+            <View className="w-[90%] items-center rounded-[10px] bg-white p-5">
+              {videoUri && <Video source={{ uri: videoUri }} useNativeControls resizeMode={ResizeMode.CONTAIN} style={{ width: "100%", height: 200 }} />}
               <TouchableOpacity onPress={() => setIsVideoModalVisible(false)}>
-                <Text style={styles.closeButton}>Close</Text>
+                <Text className="font-inter mt-5 text-blue-500">Close</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -464,61 +468,3 @@ const AddNoteScreen: React.FC = () => {
 };
 
 export default AddNoteScreen;
-
-const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
-    width: "90%",
-    padding: 20,
-    backgroundColor: "white",
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  videoPlayer: {
-    width: "100%",
-    height: 200,
-  },
-  closeButton: {
-    ...defaultTextFont,
-    color: "blue",
-    marginTop: 20,
-  },
-  doneButton: {
-    position: "absolute",
-    bottom: 0,
-    width: "100%",
-    backgroundColor: "#fff",
-    paddingVertical: 5, // Increase padding for better tap area
-    zIndex: 10, // Ensures it appears above other elements
-    borderColor: "#ddd",
-  },
-  doneText: {
-    ...defaultTextFont,
-    color: "blue",
-    fontSize: 14,
-    padding: 0,
-    textAlign: "right",
-    marginRight: 25,
-  },
-  toolbar: {
-    position: "absolute", // Keep toolbar at the bottom of the screen
-    bottom: 27, // Align toolbar with the bottom edge
-    width: "100%", // Full-width toolbar
-    justifyContent: "center", // Center items in the toolbar
-    paddingHorizontal: 10,
-    zIndex: 10, // Ensure it stays above other elements
-    ...Platform.select({
-      android: {
-        height: 70,
-      },
-      ios: {
-        height: 50,
-      },
-    }),
-  },
-});

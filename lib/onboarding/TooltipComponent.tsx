@@ -1,6 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { useTheme, ThemeColors } from "../components/ThemeProvider";
+import { View, Text, TouchableOpacity } from "react-native";
 
 interface TooltipContentProps {
   message: string;
@@ -9,61 +8,19 @@ interface TooltipContentProps {
 }
 
 const TooltipContent = ({ message, onPressOk, onSkip }: TooltipContentProps) => {
-  const { theme } = useTheme();
-  const styles = createStyles(theme);
-
   return (
-    <View style={styles.container}>
-      <TouchableOpacity style={styles.skipButton} onPress={onSkip}>
-        <Text style={styles.skipText}>Skip Tutorial</Text>
+    <View className="bg-surface min-w-[200px] items-center">
+      <TouchableOpacity className="absolute top-[5px] right-2" onPress={onSkip}>
+        <Text className="text-accent font-bold text-[13px]">Skip Tutorial</Text>
       </TouchableOpacity>
 
-      <Text style={styles.message}>{message}</Text>
+      <Text className="text-base font-semibold mt-10 mb-[30px] text-center text-foreground">{message}</Text>
 
-      <TouchableOpacity style={styles.okButton} onPress={onPressOk}>
-        <Text style={styles.okText}>Okay</Text>
+      <TouchableOpacity className="mt-2.5 bg-accent py-1.5 px-3 rounded-md" onPress={onPressOk}>
+        <Text className="text-white text-base font-semibold">Okay</Text>
       </TouchableOpacity>
     </View>
   );
 };
-
-const createStyles = (theme: ThemeColors & Record<string, string>) =>
-  StyleSheet.create({
-    container: {
-      backgroundColor: theme.tooltipBackground || "#FFF",
-      minWidth: 200,
-      alignItems: "center",
-    },
-    skipButton: {
-      position: "absolute",
-      top: 5,
-      right: 8,
-    },
-    skipText: {
-      color: theme.homeColor || "#007AFF",
-      fontWeight: "bold",
-      fontSize: 13,
-    },
-    message: {
-      fontSize: 16,
-      fontWeight: "600",
-      marginTop: 40, // increased top margin to push the message lower
-      marginBottom: 30, // maintains space below the message
-      textAlign: "center",
-      color: theme.text || "#333",
-    },
-    okButton: {
-      marginTop: 10, // reduced margin so the button is positioned a bit higher
-      backgroundColor: theme.homeColor || "#007AFF",
-      paddingVertical: 6,
-      paddingHorizontal: 12,
-      borderRadius: 6,
-    },
-    okText: {
-      color: "#FFF",
-      fontSize: 16,
-      fontWeight: "600",
-    },
-  });
 
 export default TooltipContent;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Platform,
   View,
@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Dimensions,
   TextInput,
-  StyleSheet,
   Pressable,
   Animated,
   StatusBar,
@@ -26,21 +25,19 @@ import Greeting from "../components/Greeting";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import LottieView from "lottie-react-native";
 import { useAddNoteStore } from "../stores/addNoteStore";
-import { defaultTextFont } from "../../styles/globalStyles";
 import Tooltip from "react-native-walkthrough-tooltip";
 import TooltipContent from "../onboarding/TooltipComponent";
 import { useRouter } from "expo-router";
 import { getHasDoneTutorial, setTutorialDone } from "../utils/tutorial";
 import { useUserInfo, useNotesList, useAnimatedSearch, sortNotes, filterNotes } from "../hooks/useNotesList";
-import { useNoteListStyles } from "../../styles/noteListStyles";
+import Constants from "expo-constants";
 
 const { width } = Dimensions.get("window");
 const TEXT_LENGTH = 18;
 
 const HomeScreen: React.FC = () => {
   const router = useRouter();
-  const { theme, isDarkmode } = useTheme();
-  const styles = useNoteListStyles(theme);
+  const { isDarkmode } = useTheme();
   const { authUser, userInitials, userName } = useUserInfo();
   const { setNavigateToAddNote } = useAddNoteContext();
   const toggleAddNoteState = useAddNoteStore((s) => s.toggleAddNoteState);
@@ -144,7 +141,7 @@ const HomeScreen: React.FC = () => {
       <TouchableOpacity
         key={item.id}
         activeOpacity={1}
-        style={{ backgroundColor: isDarkmode ? "black" : "#e6e6e6", width: "100%" }}
+        className="w-full bg-[#e6e6e6] dark:bg-black"
         onPress={() => {
           if (!item.isPublished) {
             toggleAddNoteState();
@@ -180,14 +177,14 @@ const HomeScreen: React.FC = () => {
   const sideMenu = (data: any, rowMap: any) => {
     const isNotePublished = data.item.isPublished;
     return (
-      <View style={homeStyles.rowBack} key={data.index}>
+      <View className="w-full h-[140px] items-center flex-1 flex-row justify-between mt-px p-2.5 self-center" key={data.index}>
         <TouchableOpacity onPress={() => publishNote(data.item.id, rowMap)}>
           <Ionicons name={isNotePublished ? "arrow-undo" : "share"} size={30} color="green" />
         </TouchableOpacity>
-        <View style={[homeStyles.backRightBtn, { backgroundColor: theme.homeGray }]}>
+        <View className="items-end absolute bottom-0 justify-center top-0 w-1/2 right-0 pr-[17px] bg-brand-gray">
           {isPrivate && (
             <TouchableOpacity
-              style={{ justifyContent: "center", alignItems: "center", position: "absolute", right: 20 }}
+              className="justify-center items-center absolute right-5"
               onPress={() => deleteNote(data.item.id, rowMap)}
             >
               <Ionicons name="trash-outline" size={24} color="red" />
@@ -201,8 +198,8 @@ const HomeScreen: React.FC = () => {
   const renderFooter = () => {
     if (isLoadingMore) {
       return (
-        <View style={{ paddingVertical: 50, alignItems: "center", marginBottom: 100 }}>
-          <ActivityIndicator size="small" color={theme.text} />
+        <View className="py-[50px] items-center mb-[100px]">
+          <ActivityIndicator size="small" className="text-foreground" />
         </View>
       );
     }
@@ -211,15 +208,15 @@ const HomeScreen: React.FC = () => {
         <TouchableOpacity
           testID="load-more"
           onPress={handleLoadMore}
-          style={{ paddingVertical: 20, width: "65%", alignItems: "center", alignSelf: "center", borderRadius: 20, marginVertical: 4, backgroundColor: theme.homeColor }}
+          className="py-5 w-[65%] items-center self-center rounded-lg my-1 bg-accent"
         >
-          <Text testID="load-more-button" style={{ ...defaultTextFont, color: theme.text, fontSize: 16, fontWeight: "400" }}>Load More</Text>
+          <Text testID="load-more-button" className="font-inter text-foreground text-base font-normal">Load More</Text>
         </TouchableOpacity>
       );
     }
     return (
-      <View style={{ padding: 20, alignItems: "center" }}>
-        <Text testID="empty-state-text" style={{ ...defaultTextFont, color: "gray", fontSize: 14 }}>End of the Page</Text>
+      <View className="p-5 items-center">
+        <Text testID="empty-state-text" className="font-inter text-gray-500 text-sm">End of the Page</Text>
       </View>
     );
   };
@@ -227,9 +224,9 @@ const HomeScreen: React.FC = () => {
   const renderList = () => {
     if (listData.length === 0) {
       return (
-        <View style={styles.resultNotFound}>
-          <LottieView testID="no-results-animation" source={require("../../assets/animations/noResultFound.json")} autoPlay loop style={styles.lottie} />
-          <Text style={styles.resultNotFoundTxt}>No Results Found</Text>
+        <View className="justify-center items-center">
+          <LottieView testID="no-results-animation" source={require("../../assets/animations/noResultFound.json")} autoPlay loop style={{ width: 100, height: 200 }} />
+          <Text className="font-inter text-[15px] font-normal">No Results Found</Text>
         </View>
       );
     }
@@ -253,7 +250,6 @@ const HomeScreen: React.FC = () => {
     );
   };
 
-  // Tutorial state
   const [userTutorial, setUserTutorial] = useState<boolean | null>(null);
   const [accountTip, setAccountTip] = useState(false);
   const [filterToolTip, setFilterToolTip] = useState(false);
@@ -276,12 +272,16 @@ const HomeScreen: React.FC = () => {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: isDarkmode ? "black" : "#e4e4e4" }}>
+    <View className="flex-1 bg-[#e4e4e4] dark:bg-black">
       <StatusBar translucent backgroundColor="transparent" />
-      <View testID="HomeScreen" style={styles.container}>
-        <View style={styles.topView}>
-          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "100%", paddingBottom: 15, paddingTop: 10 }}>
-            <View style={styles.userAccountAndPageTitle}>
+      <View
+        testID="HomeScreen"
+        className="bg-accent"
+        style={{ paddingTop: Constants.statusBarHeight - 20, height: width > 500 ? Dimensions.get("window").height * 0.12 : Dimensions.get("window").height * 0.19 }}
+      >
+        <View className="flex-row items-center justify-between px-[5px] mb-0 mt-2.5 bg-accent">
+          <View className="flex-row items-center justify-between pb-[15px] pt-2.5 w-full">
+            <View className="flex-row justify-between items-center" style={{ width: width > 500 ? "13%" : "27%" }}>
               <Tooltip
                 topAdjustment={Platform.OS === "android" ? -(StatusBar.currentHeight ?? 0) : 0}
                 showChildInTooltip={false}
@@ -293,24 +293,25 @@ const HomeScreen: React.FC = () => {
               >
                 <TouchableOpacity
                   testID="user-account"
-                  style={[styles.userPhoto, { backgroundColor: theme.black, width: width > 1000 ? 50 : 30, height: width > 1000 ? 50 : 30 }]}
+                  className="rounded-full items-center justify-center bg-[#161A1D] ml-2"
+                  style={{ width: width > 1000 ? 50 : 30, height: width > 1000 ? 50 : 30 }}
                   onPress={() => router.push("/account")}
                 >
-                  <Text style={styles.pfpText}>{userInitials}</Text>
+                  <Text className="font-inter font-semibold text-sm self-center text-[#F7F8F9]">{userInitials}</Text>
                 </TouchableOpacity>
               </Tooltip>
-              <Text style={styles.pageTitle}>Notes</Text>
+              <Text className="font-inter text-lg font-medium">Notes</Text>
             </View>
-            <View testID="greeting-component" style={styles.userWishContainer}>
+            <View testID="greeting-component" className="mr-2.5">
               <Greeting />
-              <Text testID="user-name" style={styles.userName}>{userName}</Text>
+              <Text testID="user-name" className="font-inter font-medium h-1/2 text-center self-center">{userName}</Text>
             </View>
           </View>
         </View>
 
-        <View style={[styles.toolContainer, { marginHorizontal: 20 }]}>
+        <View className="flex-row justify-between items-center mt-2.5 mx-5">
           {!isSearchVisible && (
-            <View style={homeStyles.publishedAndSortContainer}>
+            <View className="flex-row justify-between" style={{ width: width > 500 ? "20%" : "45%" }}>
               <Tooltip
                 topAdjustment={Platform.OS === "android" ? -(StatusBar.currentHeight ?? 0) : 0}
                 showChildInTooltip={false}
@@ -320,15 +321,29 @@ const HomeScreen: React.FC = () => {
                 }
                 placement="bottom"
               >
-                <View style={homeStyles.publishedOrPrivateContainer}>
+                <View className="bg-[#e7e7e7] h-[30px] w-[120px] rounded-lg mb-2.5 flex-row justify-evenly items-center">
                   <Pressable onPress={() => { setIsPrivate(false); setPublished(true); }}>
-                    <View testID="public-btn" style={[homeStyles.publishedTxtContainer, { backgroundColor: isPrivate ? "transparent" : "black" }]}>
-                      <Text style={[homeStyles.publishedTxt, { color: isPrivate ? "black" : "white" }]}> Published</Text>
+                    <View
+                      testID="public-btn"
+                      className="px-[5px] py-[3px] rounded-lg"
+                      style={{ backgroundColor: isPrivate ? "transparent" : "black" }}
+                    >
+                      <Text
+                        className="font-inter text-[10px] font-semibold"
+                        style={{ color: isPrivate ? "black" : "white" }}
+                      > Published</Text>
                     </View>
                   </Pressable>
                   <Pressable onPress={() => { setIsPrivate(true); setPublished(false); }}>
-                    <View testID="private-btn" style={[homeStyles.publishedTxtContainer, { backgroundColor: isPrivate ? "black" : "transparent" }]}>
-                      <Text style={[homeStyles.publishedTxt, { color: isPrivate ? "white" : "black" }]}>Private</Text>
+                    <View
+                      testID="private-btn"
+                      className="px-[5px] py-[3px] rounded-lg"
+                      style={{ backgroundColor: isPrivate ? "black" : "transparent" }}
+                    >
+                      <Text
+                        className="font-inter text-[10px] font-semibold"
+                        style={{ color: isPrivate ? "white" : "black" }}
+                      >Private</Text>
                     </View>
                   </Pressable>
                 </View>
@@ -355,20 +370,23 @@ const HomeScreen: React.FC = () => {
               </View>
             </View>
           )}
-          <View style={[styles.searchParentContainer, { width: isSearchVisible ? "95%" : 40 }]}>
+          <View className="flex-row justify-between items-center" style={{ width: isSearchVisible ? "95%" : 40 }}>
             {isSearchVisible && (
-              <Animated.View style={[styles.searchContainer, { width: searchBarWidth, marginBottom: 23 }]}>
-                <TextInput testID="search-input" placeholder="Search..." value={searchQuery} placeholderTextColor="#999" onChangeText={setSearchQuery} style={styles.searchInput} cursorColor="black" autoFocus />
+              <Animated.View
+                className="right-0 bottom-0 bg-[#f0f0f0] justify-center items-center h-9 rounded-xl overflow-hidden mb-[23px]"
+                style={{ width: searchBarWidth }}
+              >
+                <TextInput testID="search-input" placeholder="Search..." value={searchQuery} placeholderTextColor="#999" onChangeText={setSearchQuery} className="font-inter flex-1 text-base text-black px-2.5 py-0 w-full" cursorColor="black" autoFocus />
               </Animated.View>
             )}
             {isSearchVisible ? (
-              <View style={[styles.searchIcon, { marginTop: -25 }]}>
+              <View className="mb-2.5 -mt-[25px]">
                 <TouchableOpacity testID="searchButton" onPress={toggleSearchBar}>
                   <Ionicons name="close" size={25} />
                 </TouchableOpacity>
               </View>
             ) : (
-              <View style={styles.searchIcon}>
+              <View className="mb-2.5">
                 <TouchableOpacity testID="searchButton" onPress={toggleSearchBar}>
                   <Tooltip
                     topAdjustment={Platform.OS === "android" ? -(StatusBar.currentHeight ?? 0) : 0}
@@ -387,24 +405,33 @@ const HomeScreen: React.FC = () => {
         </View>
       </View>
 
-      <View testID="notes-list" style={styles.scrollerBackgroundColor}>
+      <View testID="notes-list" className="flex-1 w-full">
         {rendering ? <NoteSkeleton /> : renderList()}
       </View>
 
       <NoteDetailModal isVisible={isModalVisible} onClose={() => setModalVisible(false)} note={selectedNote} />
 
       {isSortOpened && !isSearchVisible && (
-        <View testID="sort-options" style={[homeStyles.sortDropdown, { backgroundColor: isDarkmode ? "#525252" : "white" }]}>
-          <Text style={{ ...defaultTextFont, fontSize: 16, fontWeight: "600", marginBottom: 10, color: isDarkmode ? "#c7c7c7" : "black" }}>Sort by</Text>
-          <View style={{ height: "50%", justifyContent: "space-evenly", alignItems: "center" }}>
+        <View
+          testID="sort-options"
+          className="absolute top-[120px] right-5 w-[200px] rounded-md p-2.5 z-10 shadow-md bg-white dark:bg-[#525252]"
+          style={{ elevation: 10 }}
+        >
+          <Text className="font-inter text-base font-semibold mb-2.5 text-black dark:text-[#c7c7c7]">Sort by</Text>
+          <View className="h-1/2 justify-evenly items-center">
             {[
               { option: 1, label: "Date & Time(latest)" },
               { option: 2, label: "A-Z" },
               { option: 3, label: "Z-A" },
             ].map(({ option, label }) => (
               <TouchableOpacity key={option} onPress={() => { setSelectedSortOption(option); setIsSortOpened(false); }}>
-                <View style={[styles.selectedSortOption, { backgroundColor: selectedSortOption === option ? theme.homeColor : "transparent", width: 200 }]}>
-                  <Text style={{ ...defaultTextFont, fontSize: 14, paddingVertical: 6, color: isDarkmode && selectedSortOption !== option ? "#ccc" : "#000" }}>
+                <View
+                  className={`w-[200px] justify-center items-center p-2.5 rounded-[10px] ${selectedSortOption === option ? "bg-accent" : "bg-transparent"}`}
+                >
+                  <Text
+                    className="font-inter text-sm py-1.5"
+                    style={{ color: isDarkmode && selectedSortOption !== option ? "#ccc" : "#000" }}
+                  >
                     {label}
                   </Text>
                 </View>
@@ -416,69 +443,5 @@ const HomeScreen: React.FC = () => {
     </View>
   );
 };
-
-const homeStyles = StyleSheet.create({
-  rowBack: {
-    width: "100%",
-    height: 140,
-    alignItems: "center",
-    flex: 1,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 1,
-    padding: 10,
-    alignSelf: "center",
-  },
-  backRightBtn: {
-    alignItems: "flex-end",
-    bottom: 0,
-    justifyContent: "center",
-    position: "absolute",
-    top: 0,
-    width: "50%",
-    right: 0,
-    paddingRight: 17,
-  },
-  publishedOrPrivateContainer: {
-    backgroundColor: "#e7e7e7",
-    height: 30,
-    width: 120,
-    borderRadius: 20,
-    marginBottom: 10,
-    flexDirection: "row",
-    justifyContent: "space-evenly",
-    alignItems: "center",
-  },
-  publishedAndSortContainer: {
-    flexDirection: "row",
-    width: Dimensions.get("window").width > 500 ? "20%" : "45%",
-    justifyContent: "space-between",
-  },
-  publishedTxtContainer: {
-    paddingHorizontal: 5,
-    paddingVertical: 3,
-    borderRadius: 20,
-  },
-  publishedTxt: {
-    ...defaultTextFont,
-    color: "white",
-    fontSize: 10,
-    fontWeight: "600",
-  },
-  sortDropdown: {
-    position: "absolute",
-    top: 120,
-    right: 20,
-    width: 200,
-    borderRadius: 12,
-    padding: 10,
-    zIndex: 10,
-    elevation: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-  },
-});
 
 export default HomeScreen;

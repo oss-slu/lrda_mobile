@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View } from "react-native";
 import { Video, ResizeMode } from "expo-av";
 
 interface VideoPlayerProps {
@@ -10,11 +10,11 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUri }) => {
   const videoRef = React.useRef<Video>(null);
 
   return (
-    <View style={styles.videoContainer}>
+    <View className="w-[90%] h-[50%] items-center justify-center">
       <Video
         ref={videoRef}
         source={{ uri: videoUri }}
-        style={styles.videoPlayer}
+        style={{ width: "100%", height: "100%" }}
         useNativeControls
         resizeMode={ResizeMode.CONTAIN}
         isLooping={false}
@@ -25,17 +25,3 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUri }) => {
 };
 
 export default VideoPlayer;
-
-const styles = StyleSheet.create({
-  videoContainer: {
-    width: "90%",
-    height: "50%",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  videoPlayer: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "contain", // Ensures the video scales to fit within container
-  },
-});

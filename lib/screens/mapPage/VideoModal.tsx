@@ -1,8 +1,6 @@
-import React, { useRef, useState } from "react";
-import { Modal, View, ScrollView, Text, Image, ActivityIndicator, StyleSheet, TouchableOpacity, Dimensions, Button } from "react-native";
+import React, { useState } from "react";
+import { Modal, View, ScrollView, Text, TouchableOpacity, Dimensions } from "react-native";
 import { Video, ResizeMode, Audio } from "expo-av";
-import { useTheme } from "../../components/ThemeProvider";
-import { defaultTextFont } from "../../../styles/globalStyles";
 
 interface VideoType {
   uri: string;
@@ -14,14 +12,13 @@ interface Props {
   videos: VideoType[];
 }
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 const VideoModal: React.FC<Props> = ({ isVisible, onClose, videos }) => {
   const [imageLoadedState, setImageLoadedState] = useState<{ [key: string]: boolean }>({});
   const [isImageTouched, setIsImageTouched] = useState(false);
   const [status, setStatus] = React.useState({});
   const video = React.useRef(null);
-  const theme = useTheme();
 
   const handleLoad = (uri: string) => {
     setImageLoadedState((prev) => ({ ...prev, [uri]: true }));
@@ -49,17 +46,17 @@ const VideoModal: React.FC<Props> = ({ isVisible, onClose, videos }) => {
 
   return (
     <Modal animationType="slide" transparent={false} visible={isVisible} onRequestClose={onClose}>
-      <View style={styles.container}>
+      <View className="flex-1 justify-center items-center pt-[45px] w-full">
         <ScrollView
           style={{ height: isImageTouched ? "80%" : "50%" }}
           onTouchStart={videos && videos.length > 2 ? handleImageTouchStart : undefined}
         >
           {videos && videos.length > 0 ? (
             videos.map((video, index) => (
-              <View key={index} style={styles.videoContainer}>
+              <View key={index} className="items-center w-full pb-[1.25px]">
                 <Video
                   source={{ uri: video.uri }}
-                  style={styles.video}
+                  style={{ width, height: width }}
                   useNativeControls
                   resizeMode={ResizeMode.CONTAIN}
                   isLooping
@@ -68,52 +65,19 @@ const VideoModal: React.FC<Props> = ({ isVisible, onClose, videos }) => {
               </View>
             ))
           ) : (
-            <Text style={styles.noVideosText}>No Videos</Text>
+            <Text className="font-inter self-center justify-center mt-[200px]">No Videos</Text>
           )}
         </ScrollView>
 
-        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+        <TouchableOpacity
+          className="h-10 w-[75px] items-center justify-center mt-5 bg-[#ddd] p-2.5 rounded-[5px] mb-[30px]"
+          onPress={onClose}
+        >
           <Text>Close</Text>
         </TouchableOpacity>
       </View>
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingTop: 45,
-    width: "100%",
-  },
-  videoContainer: {
-    alignItems: "center",
-    width: "100%",
-    paddingBottom: 1.25,
-  },
-  video: {
-    width: width,
-    height: width,
-  },
-  noVideosText: {
-    ...defaultTextFont,
-    alignSelf: "center",
-    justifyContent: "center",
-    marginTop: 200,
-  },
-  closeButton: {
-    height: 40,
-    width: 75,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 20,
-    backgroundColor: "#ddd",
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 30,
-  },
-});
 
 export default VideoModal;

@@ -1,9 +1,8 @@
 import React from "react";
-import { StyleSheet, Dimensions, TouchableOpacity, Text } from "react-native";
+import { Dimensions, TouchableOpacity, Text } from "react-native";
 import Onboarding from "react-native-onboarding-swiper";
 import { Video, ResizeMode } from "expo-av";
 import { setItem } from "../utils/async_storage";
-import { defaultTextFont } from "../../styles/globalStyles";
 import { useRouter } from "expo-router";
 
 const { width, height } = Dimensions.get("window");
@@ -15,21 +14,21 @@ const OnboardingScreen = () => {
     router.replace("/(auth)/login");
   };
 
-  const doneButton = ({ ...props }) => (
-    <TouchableOpacity style={styles.doneButton} {...props}>
-      <Text style={styles.doneButtonText}>Done</Text>
+  const doneButton = ({ ...props }: any) => (
+    <TouchableOpacity className="py-2.5 px-5 bg-[#4A90E2] rounded-[30px] items-center justify-center" {...props}>
+      <Text className="font-inter text-white font-bold text-base">Done</Text>
     </TouchableOpacity>
   );
 
-  const skipButton = ({ ...props }) => (
-    <TouchableOpacity style={styles.skipButton} {...props}>
-      <Text style={styles.buttonText}>Skip</Text>
+  const skipButton = ({ ...props }: any) => (
+    <TouchableOpacity className="py-2.5 px-5 bg-[#ccc] rounded-[30px] items-center justify-center" {...props}>
+      <Text className="font-inter text-white font-bold text-base">Skip</Text>
     </TouchableOpacity>
   );
 
-  const nextButton = ({ ...props }) => (
-    <TouchableOpacity style={styles.nextButton} {...props}>
-      <Text style={styles.buttonText}>Next</Text>
+  const nextButton = ({ ...props }: any) => (
+    <TouchableOpacity className="py-2.5 px-5 bg-[#4A90E2] rounded-[30px] items-center justify-center" {...props}>
+      <Text className="font-inter text-white font-bold text-base">Next</Text>
     </TouchableOpacity>
   );
 
@@ -121,58 +120,5 @@ const OnboardingScreen = () => {
     />
   );
 };
-
-const styles = StyleSheet.create({
-  title: {
-    ...defaultTextFont,
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#333",
-    textAlign: "center",
-  },
-  subtitle: {
-    ...defaultTextFont,
-    fontSize: 16,
-    color: "#666",
-    textAlign: "center",
-    paddingHorizontal: 10,
-  },
-  skipButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    backgroundColor: "#ccc",
-    borderRadius: 30,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  nextButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    backgroundColor: "#4A90E2",
-    borderRadius: 30,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  doneButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    backgroundColor: "#4A90E2",
-    borderRadius: 30,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  doneButtonText: {
-    ...defaultTextFont,
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  buttonText: {
-    ...defaultTextFont,
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-});
 
 export default OnboardingScreen;

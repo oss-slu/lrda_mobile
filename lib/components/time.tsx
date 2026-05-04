@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Button, Platform } from "react-native";
+import { View, Text, Button, Platform } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { defaultTextFont } from "../../styles/globalStyles";
 
 export function formatToLocalDateString(date: Date): string {
   const localTime = new Date(date);
@@ -90,10 +89,10 @@ export default function LocationWindow({ time, setTime }: { time: Date; setTime:
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Date & Time</Text>
+    <View className="h-[110px] justify-center items-center p-5">
+      <Text className="font-inter text-lg font-bold mb-[1px]">Date & Time</Text>
       {showPicker ? (
-        <View style={Platform.OS === "ios" ? styles.IOSdateTimePickerContainer : styles.dateTimePickerContainer}>
+        <View className={Platform.OS === "ios" ? "flex-row" : "flex-col"}>
           {showDatePicker && (
             <DateTimePicker testID="datePicker" value={chosenDate} mode="date" is24Hour={true} display="default" onChange={onChangeDate} />
           )}
@@ -101,7 +100,7 @@ export default function LocationWindow({ time, setTime }: { time: Date; setTime:
             <DateTimePicker testID="timePicker" value={chosenTime} mode="time" is24Hour={true} display="default" onChange={onChangeTime} />
           )}
           {isDateTimeSelected && Platform.OS === "android" && (
-            <Text style={styles.selectedDateTimeLabel}>
+            <Text className="font-inter mb-2.5 text-base text-center">
               Selected:{" "}
               {formatToLocalDateString(
                 new Date(
@@ -114,14 +113,14 @@ export default function LocationWindow({ time, setTime }: { time: Date; setTime:
               )}
             </Text>
           )}
-          <View style={styles.button}>
+          <View className="flex-col items-center">
             <Button title="Save" onPress={saveDateTime} testID="Save" />
           </View>
         </View>
       ) : (
         <View>
-          <View style={styles.savedTimeContainer}>
-            <Text style={styles.savedTime}>{formatToLocalDateString(savedDateTime || time)}</Text>
+          <View className="items-center mt-2.5">
+            <Text className="font-inter text-base">{formatToLocalDateString(savedDateTime || time)}</Text>
           </View>
           <Button
             title="Select Date & Time"
@@ -136,50 +135,3 @@ export default function LocationWindow({ time, setTime }: { time: Date; setTime:
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    height: 110,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  label: {
-    ...defaultTextFont,
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 1,
-  },
-  input: {
-    width: "100%",
-    height: 40,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    paddingHorizontal: 10,
-  },
-  IOSdateTimePickerContainer: {
-    flexDirection: "row",
-  },
-  dateTimePickerContainer: {
-    flexDirection: "column",
-  },
-  savedTimeContainer: {
-    alignItems: "center",
-    marginTop: 10,
-  },
-  savedTime: {
-    ...defaultTextFont,
-    fontSize: 16,
-  },
-  selectedDateTimeLabel: {
-    ...defaultTextFont,
-    marginBottom: 10,
-    fontSize: 16,
-    textAlign: "center",
-  },
-  button: {
-    flexDirection: "column",
-    alignItems: "center",
-  },
-});

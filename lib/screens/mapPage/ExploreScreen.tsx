@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -33,7 +32,7 @@ const { width } = Dimensions.get("window");
 const CARD_HEIGHT = 220;
 const CARD_WIDTH = width * 0.8;
 const SPACING_FOR_CARD_INSET = width * 0.1 - 10;
-const LIMIT = 20; // Number of notes per batch
+const LIMIT = 20;
 
 const ExploreScreen = () => {
   const { theme, isDarkmode } = useTheme();
@@ -65,7 +64,7 @@ const ExploreScreen = () => {
 
   const _map = useRef<MapView | null>(null);
   const _scrollView = useRef<ScrollView | null>(null);
-  const mapAnimation = useRef(new Animated.Value(0)).current; // Flag to control interactions between scrolling and marker pressing
+  const mapAnimation = useRef(new Animated.Value(0)).current;
   const scrollEnabled = useRef(true);
 
   const toggleMapTypeOptions = () => setShowMapTypeOptions(!showMapTypeOptions);
@@ -140,7 +139,7 @@ const ExploreScreen = () => {
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     const toRad = (value: number) => (value * Math.PI) / 180;
-    const R = 6371; // Radius of the Earth in km
+    const R = 6371;
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
     const a =
@@ -152,7 +151,6 @@ const ExploreScreen = () => {
     const listenerId = mapAnimation.addListener(({ value }) => {
       if (!scrollEnabled.current) return;
 
-      // Calculate index based on scroll position
       const index = Math.floor(value / (CARD_WIDTH + 20));
       if (index >= state.markers.length || index < 0) {
         return;
@@ -160,7 +158,6 @@ const ExploreScreen = () => {
 
       const marker = state.markers[index];
       if (marker) {
-        // Animate the map to the marker's region
         _map.current?.animateToRegion(
           {
             ...marker.coordinate,
@@ -234,7 +231,6 @@ const ExploreScreen = () => {
 
   useEffect(() => {
     const listenerId = mapAnimation.addListener(({ value }) => {
-      // Calculate index and cap it at the last marker index
       const calculatedIndex = Math.floor(value / (CARD_WIDTH + 20) + 0.3);
       const index = calculatedIndex >= state.markers.length ? state.markers.length - 1 : calculatedIndex;
       setCurrentIndex(index);
@@ -262,7 +258,6 @@ const ExploreScreen = () => {
     );
 
     if (markerIndex !== -1) {
-      // Scroll to the card corresponding to the marker
       const offset = markerIndex * (CARD_WIDTH + 20);
       _scrollView.current?.scrollTo({ x: offset, y: 0, animated: true });
 
@@ -283,41 +278,48 @@ const ExploreScreen = () => {
 
   const shouldShowLoadMore = !searchResults && hasMore && currentIndex >= page * LIMIT - 1;
 
-  /* CHECKING IF USER HAS DONE TUTORIAL */
   const [userTutorial, setUserTutorial] = useState(false);
 
-  // Other state variables.
-  const [searchToolTip, setSearchToolTip] = useState(true); // the first tip
-  const [scrollTip, setScrollTip] = useState(false); // the second tip
+  const [searchToolTip, setSearchToolTip] = useState(true);
+  const [scrollTip, setScrollTip] = useState(false);
 
-  // Use useEffect to update the userTutorial state once the async operation resolves.
   useEffect(() => {
     getHasDoneTutorial("Explore").then((result) => {
-      console.log("USER TUTORIAL: " + result); // This will log true or false
+      console.log("USER TUTORIAL: " + result);
       setUserTutorial(result);
     });
   }, []);
 
   return (
-    <View style={styles.container} testID="Explore">
+    <View className="flex-1" testID="Explore">
       <StatusBar translucent backgroundColor="transparent" />
       <MapView
         ref={_map}
         initialRegion={state.region}
-        style={styles.container}
+        className="flex-1"
         customMapStyle={isDarkmode ? mapDarkStyle : mapStandardStyle}
         mapType={mapType}
       >
         {state.markers.map((marker, index) => (
           <Marker key={index} coordinate={marker.coordinate} onPress={() => onMarkerPress(marker)}>
-            <Animated.View style={styles.markerWrap}>
-              <Animated.Image source={require("../../../assets/marker.png")} style={styles.marker} resizeMode="cover" />
+            <Animated.View style={{ alignItems: "center", justifyContent: "center", width: 50, height: 50 }}>
+              <Animated.Image source={require("../../../assets/marker.png")} style={{ width: 30, height: 30 }} resizeMode="cover" />
             </Animated.View>
           </Marker>
         ))}
       </MapView>
 
-      <View style={[styles.searchBox, isDarkmode && styles.searchBoxDark]}>
+      <View
+        className="absolute flex-row w-[90%] self-center rounded-[5px] p-2.5 shadow-md elevation-[10]"
+        style={{
+          marginTop: Constants.statusBarHeight,
+          backgroundColor: isDarkmode ? "#333" : "#fff",
+          shadowColor: "#ccc",
+          shadowOffset: { width: 0, height: 3 },
+          shadowOpacity: 0.5,
+          shadowRadius: 5,
+        }}
+      >
         <TouchableOpacity onPress={() => setGlobeIcon((prev) => (prev === "earth-outline" ? "earth" : "earth-outline"))}>
           <Ionicons name={globeIcon} size={25} color={globeIcon === "earth" ? "green" : theme.text} style={{ marginRight: 9 }} />
         </TouchableOpacity>
@@ -342,7 +344,6 @@ const ExploreScreen = () => {
                 setScrollTip(true);
               }}
               onSkip={() => {
-                // Disable all tutorial tips when Skip is pressed
                 setSearchToolTip(false);
                 setScrollTip(false);
                 setTutorialDone("Explore", true);
@@ -366,7 +367,6 @@ const ExploreScreen = () => {
               setTutorialDone("Explore", true);
             }}
             onSkip={() => {
-              // Disable all tutorial tips when Skip is pressed
               setSearchToolTip(false);
               setScrollTip(false);
               setTutorialDone("Explore", true);
@@ -384,7 +384,7 @@ const ExploreScreen = () => {
           showsHorizontalScrollIndicator={false}
           snapToInterval={CARD_WIDTH + 20}
           snapToAlignment="center"
-          style={styles.scrollView}
+          style={{ position: "absolute", bottom: 90, left: 0, right: 0, paddingVertical: 10 }}
           contentInset={{ top: 0, left: SPACING_FOR_CARD_INSET, bottom: 0, right: SPACING_FOR_CARD_INSET }}
           contentContainerStyle={{ paddingHorizontal: Platform.OS === "android" ? SPACING_FOR_CARD_INSET : 0 }}
           onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: mapAnimation } } }], {
@@ -396,16 +396,32 @@ const ExploreScreen = () => {
           ))}
 
           {shouldShowLoadMore && (
-            <View style={styles.loadMoreCard} testID="loadMoreButton">
+            <View
+              testID="loadMoreButton"
+              className="justify-center items-center"
+              style={{
+                width: CARD_WIDTH,
+                height: CARD_HEIGHT - 55,
+                marginRight: 30,
+                marginLeft: -30,
+                borderRadius: 3,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.2,
+                shadowRadius: 3,
+                elevation: 0,
+              }}
+            >
               {isLoadingMore ? (
                 <ActivityIndicator size="small" color={theme.text} />
               ) : (
                 <TouchableOpacity
                   testID="loadMoreTouchable"
                   onPress={handleLoadMore}
-                  style={[styles.loadMoreButton, { backgroundColor: theme.homeColor }]}
+                  className="w-[70%] h-[50%] rounded-[3px] justify-center items-center"
+                  style={{ backgroundColor: theme.homeColor }}
                 >
-                  <Text style={[styles.loadMoreButtonText, { color: theme.text }]}>Load More</Text>
+                  <Text className="text-[32px]" style={{ color: theme.text }}>Load More</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -417,84 +433,5 @@ const ExploreScreen = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  searchBox: {
-    position: "absolute",
-    marginTop: Constants.statusBarHeight,
-    flexDirection: "row",
-    backgroundColor: "#fff",
-    width: "90%",
-    alignSelf: "center",
-    borderRadius: 5,
-    padding: 10,
-    shadowColor: "#ccc",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.5,
-    shadowRadius: 5,
-    elevation: 10,
-  },
-  searchBoxDark: {
-    backgroundColor: "#333",
-  },
-  mapTypeSelector: {
-    position: "absolute",
-    top: Constants.statusBarHeight + 50,
-    right: 10,
-    alignItems: "center",
-    backgroundColor: "white",
-    padding: 10,
-    borderRadius: 10,
-  },
-  mapTypeText: { fontSize: 14, fontWeight: "bold" },
-  selectedMapTypeText: { fontWeight: "bold", color: "blue" },
-
-  scrollView: {
-    position: "absolute",
-    bottom: 90,
-    left: 0,
-    right: 0,
-    paddingVertical: 10,
-  },
-
-  markerWrap: {
-    alignItems: "center",
-    justifyContent: "center",
-    width: 50,
-    height: 50,
-  },
-  marker: {
-    width: 30,
-    height: 30,
-  },
-
-  loadMoreCard: {
-    width: CARD_WIDTH,
-    height: CARD_HEIGHT - 55,
-    marginRight: 30,
-    marginLeft: -30,
-    borderRadius: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 0,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  loadMoreButton: {
-    width: "70%",
-    height: "50%",
-    borderRadius: 3,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  loadMoreButtonText: {
-    fontSize: 32,
-  },
-});
 
 export default ExploreScreen;

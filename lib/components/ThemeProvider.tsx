@@ -1,47 +1,31 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import AsyncStorage from "../utils/async_storage";
-import { colors } from "./colors";
+import React, { useEffect } from "react";
+import { View } from "react-native";
+import { vars, useColorScheme } from "nativewind";
 import { useThemeStore } from "../stores/themeStore";
+import { colors } from "./colors";
 
 export type ThemeColors = (typeof colors)["lightColors"];
 
-interface ThemeContextValue {
-  isDarkmode: boolean;
-  toggleDarkmode: () => void;
-  theme: ThemeColors;
-}
-
-const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
-
-export function useTheme(): ThemeContextValue {
-  const ctx = useContext(ThemeContext);
-  if (!ctx) throw new Error("useTheme must be used within a ThemeProvider");
-  return ctx;
+export function useTheme() {
+  const isDarkmode = useThemeStore((s) => s.isDarkmode);
+  const toggleDarkmode = useThemeStore((s) => s.toggleDarkmode);
+  const accentColor = useThemeStore((s) => s.accentColor);
+  const theme: ThemeColors = isDarkmode ? { ...colors.darkColors, homeColor: accentColor } : { ...colors.lightColors, homeColor: accentColor };
+  return { isDarkmode, toggleDarkmode, accentColor, theme };
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const appThemeColor = useThemeStore((state) => state.theme);
-
-  const [isDarkmode, setIsDarkmode] = useState(false);
-  colors.darkColors.homeColor = appThemeColor;
-  colors.lightColors.homeColor = appThemeColor;
-
-  const toggleDarkmode = () => {
-    setIsDarkmode((prevMode) => !prevMode);
-    AsyncStorage.save("themePreference", !isDarkmode ? "dark" : "light");
-  };
+  const isDarkmode = useThemeStore((s) => s.isDarkmode);
+  const accentColor = useThemeStore((s) => s.accentColor);
+  const { setColorScheme } = useColorScheme();
 
   useEffect(() => {
-    AsyncStorage.get<string>("themePreference")
-      .then((theme) => {
-        setIsDarkmode(theme === "dark");
-      })
-      .catch((error: unknown) => {
-        console.error("Error loading theme preference:", error);
-      });
-  }, []);
+    setColorScheme(isDarkmode ? "dark" : "light");
+  }, [isDarkmode]);
 
-  const theme = isDarkmode ? colors.darkColors : colors.lightColors;
-
-  return <ThemeContext.Provider value={{ isDarkmode, toggleDarkmode, theme }}>{children}</ThemeContext.Provider>;
+  return (
+    <View style={[{ flex: 1 }, vars({ "--color-accent": accentColor })]} className={isDarkmode ? "dark" : ""}>
+      {children}
+    </View>
+  );
 }

@@ -1,9 +1,7 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions, FlatList, Linking, StatusBar, ScrollView } from "react-native";
-import { useTheme } from "../components/ThemeProvider";
+import { View, Text, TouchableOpacity, Dimensions, FlatList, Linking, StatusBar, ScrollView } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { onlineResources, analogueResources } from "../data"; // Update path as needed
-import { defaultTextFont } from "../../styles/globalStyles";
+import { onlineResources, analogueResources } from "../data";
 
 import { useRouter } from "expo-router";
 
@@ -11,41 +9,42 @@ const { width, height } = Dimensions.get("window");
 
 function ResourceScreen() {
   const router = useRouter();
-  const { theme } = useTheme();
 
   const renderOnlineResource = ({ item }: { item: { title: string; url: string } }) => (
-    <TouchableOpacity style={styles.resourceBox} onPress={() => Linking.openURL(item.url)}>
-      <Text style={styles.resourceLink}>{item.title}</Text>
+    <TouchableOpacity className="mb-3 bg-white rounded-sm p-3 shadow-sm">
+      <Text className="text-[#1a73e8] text-sm" onPress={() => Linking.openURL(item.url)}>{item.title}</Text>
     </TouchableOpacity>
   );
 
   const renderAnalogueResource = ({ item }: { item: string }) => (
-    <View style={styles.resourceBox}>
-      <Text style={styles.resourceText}>{item}</Text>
+    <View className="mb-3 bg-white rounded-sm p-3 shadow-sm">
+      <Text className="text-sm text-black">{item}</Text>
     </View>
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.primaryColor }]}>
+    <View className="flex-1 bg-primary">
       <StatusBar translucent backgroundColor="transparent" />
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: theme.homeColor }]}>
-        <View style={styles.headerContent}>
+
+      <View className="bg-accent" style={{ height: width > 500 ? height * 0.12 : height * 0.19 }}>
+        <View
+          className="flex-row items-center px-5"
+          style={{ marginTop: width > 500 ? "5%" : "20%" }}
+        >
           <TouchableOpacity onPress={() => router.back()}>
             <Feather name="arrow-left" size={30} />
           </TouchableOpacity>
-          <View style={styles.headerHeading}>
-            <Text style={{ fontSize: 17, fontWeight: "bold" }}>Resources</Text>
+          <View className="ml-5">
+            <Text className="text-[17px] font-bold">Resources</Text>
           </View>
         </View>
       </View>
 
-      {/* Main content */}
-      <ScrollView contentContainerStyle={styles.mainContent}>
-        <Text style={styles.sectionTitle}>Online Resources</Text>
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 200 }}>
+        <Text className="text-lg font-bold my-4">Online Resources</Text>
         <FlatList data={onlineResources} renderItem={renderOnlineResource} keyExtractor={(item) => item.url} scrollEnabled={false} />
 
-        <Text style={styles.sectionTitle}>Analogue Resources</Text>
+        <Text className="text-lg font-bold my-4">Analogue Resources</Text>
         <FlatList
           data={analogueResources}
           renderItem={renderAnalogueResource}
@@ -58,49 +57,3 @@ function ResourceScreen() {
 }
 
 export default ResourceScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    height: width > 500 ? height * 0.12 : height * 0.19,
-  },
-  headerContent: {
-    marginTop: width > 500 ? "5%" : "20%",
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 20,
-  },
-  headerHeading: {
-    marginLeft: 20,
-  },
-  mainContent: {
-    padding: 16,
-    paddingBottom: 200,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginVertical: 16,
-  },
-  resourceBox: {
-    marginBottom: 12,
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 12,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  resourceLink: {
-    color: "#1a73e8",
-    fontSize: 14,
-  },
-  resourceText: {
-    fontSize: 14,
-    color: "#000",
-  },
-});

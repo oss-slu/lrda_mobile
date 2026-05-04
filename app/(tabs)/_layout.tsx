@@ -7,7 +7,7 @@ import AddNoteBtnComponent from "../../lib/components/AddNoteBtnComponent";
 
 export default function TabsLayout() {
   const { theme, isDarkmode } = useTheme();
-  const appThemeColor = useThemeStore((state) => state.theme);
+  const appThemeColor = useThemeStore((state) => state.accentColor);
 
   return (
     <Tabs

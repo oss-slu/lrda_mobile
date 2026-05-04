@@ -5,14 +5,15 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
-  StyleSheet,
   Keyboard,
   Alert,
   Text,
+  Dimensions,
 } from "react-native";
 import ToastMessage from "react-native-toast-message";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
+import Constants from "expo-constants";
 import PhotoScroller from "../components/photoScroller";
 import { useAuthStore } from "../stores/authStore";
 import AudioContainer from "../components/audio";
@@ -20,13 +21,23 @@ import { Media, AudioType } from "../models/media_class";
 import { updateNote as apiUpdateNote } from "../utils/api_calls";
 import TagWindow from "../components/tagging";
 import { DEFAULT_TOOLBAR_ITEMS, RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
-import NotePageStyles, { customImageCSS } from "../../styles/pages/NoteStyles";
 import { useTheme } from "../components/ThemeProvider";
 import LoadingModal from "../components/LoadingModal";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import { useAddNoteStore } from "../stores/addNoteStore";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
+
+const customImageCSS = `
+  .ProseMirror img {
+    max-width: 200px !important;
+    max-height: 200px !important;
+    object-fit: cover !important;
+    display: inline-block;
+  }
+`;
+
+const { height } = Dimensions.get("window");
 
 const EditNoteScreen = () => {
   const router = useRouter();
@@ -79,8 +90,8 @@ const EditNoteScreen = () => {
   }, []);
 
   const handleDonePress = () => {
-    if (editor?.blur) editor.blur(); // blur the rich-text editor
-    Keyboard.dismiss(); // dismiss the native keyboard
+    if (editor?.blur) editor.blur();
+    Keyboard.dismiss();
   };
 
   const initialTitle = useRef(note.title || "");
@@ -166,7 +177,6 @@ const EditNoteScreen = () => {
     }
   };
 
-  // Function to display an error message inside the editor
   const displayErrorInEditor = async (errorMessage: string) => {
     const currentContent = await editor.getHTML();
     const errorTag = `<p style="color: red; font-weight: bold;">${errorMessage}</p><br />`;
@@ -286,7 +296,7 @@ const EditNoteScreen = () => {
             setIsUpdating(false);
             toggleAddNoteState();
           }
-        }, 300); // allow WebView to flush
+        }, 300);
       }
     });
 
@@ -294,43 +304,44 @@ const EditNoteScreen = () => {
   }, [navigation, title, editor, media, newAudio, tags, isPublished, location]);
 
   return (
-    <View style={{ flex: 1 }} testID="EditNoteScreen">
+    <View className="flex-1" testID="EditNoteScreen">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0} // ← bigger offset
-        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+        className="flex-1"
       >
         <KeyboardAwareScrollView ref={scrollViewRef} contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
-          {/* Top bar with back arrow + title input */}
-          <View style={[NotePageStyles().topContainer, { backgroundColor: theme.homeColor }]}>
-            <View style={NotePageStyles().topButtonsContainer}>
-              <TouchableOpacity style={NotePageStyles().topButtons} onPress={handleSaveNote}>
-                <Ionicons name="arrow-back-outline" size={30} color={NotePageStyles().title.color} />
+          <View className="min-h-[140px] bg-accent">
+            <View
+              className="flex-row items-center justify-between bg-primary px-[5px] text-center"
+              style={{ paddingTop: Constants.statusBarHeight, height: height * 0.15 }}
+            >
+              <TouchableOpacity className="z-[99] h-[50px] w-[50px] items-center justify-center rounded-full bg-tertiary" onPress={handleSaveNote}>
+                <Ionicons name="arrow-back-outline" size={30} color="var(--color-foreground)" />
               </TouchableOpacity>
-              <TextInput style={NotePageStyles().title} placeholder="Title Field Note" value={title} onChangeText={setTitle} />
+              <TextInput className="mr-[5%] h-[45px] w-4/5 rounded-[18px] border border-foreground px-[10px] text-center text-[20px] text-foreground" placeholder="Title Field Note" value={title} onChangeText={setTitle} />
             </View>
-            <View style={NotePageStyles().keyContainer}>
+            <View className="w-full flex-row items-center justify-between bg-primary px-10 py-[5px]">
               <TouchableOpacity onPress={() => setViewMedia(!viewMedia)}>
-                <Ionicons name="images-outline" size={30} color={NotePageStyles().saveText.color} />
+                <Ionicons name="images-outline" size={30} color="var(--color-foreground)" />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => setViewAudio(!viewAudio)}>
-                <Ionicons name="mic-outline" size={30} color={NotePageStyles().saveText.color} />
+                <Ionicons name="mic-outline" size={30} color="var(--color-foreground)" />
               </TouchableOpacity>
               <TouchableOpacity onPress={toggleLocation}>
                 <Ionicons
                   name="location-outline"
                   size={30}
-                  color={location.latitude === 0 && location.longitude === 0 ? "red" : theme.text}
+                  color={location.latitude === 0 && location.longitude === 0 ? "red" : "var(--color-foreground)"}
                 />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => setIsTagging(!isTagging)}>
-                <Ionicons name="pricetag-outline" size={30} color={NotePageStyles().saveText.color} />
+                <Ionicons name="pricetag-outline" size={30} color="var(--color-foreground)" />
               </TouchableOpacity>
             </View>
           </View>
 
-          {/* Media / Audio / Tagging panels */}
-          <View style={NotePageStyles().container}>
+          <View className="mb-1 w-full bg-tertiary">
             <PhotoScroller
               active={viewMedia}
               newMedia={media}
@@ -342,79 +353,44 @@ const EditNoteScreen = () => {
             {isTagging && <TagWindow tags={tags} setTags={setTags} />}
           </View>
 
-          {/* Rich-text editor */}
-          <View style={NotePageStyles().richTextContainer}>
+          <View className="min-h-[300px] grow pb-[120px] ios:h-full android:flex-1">
             <RichText
               editor={editor}
-              style={[
-                NotePageStyles().editor,
-                {
-                  backgroundColor: theme.primaryColor,
-                  minHeight: 200,
-                  paddingBottom: 120,
-                },
-              ]}
+              style={{
+                flex: 1,
+                width: "100%",
+                minHeight: 200,
+                paddingBottom: 120,
+                padding: 10,
+                marginBottom: 4,
+                backgroundColor: theme.primaryColor,
+              }}
             />
           </View>
 
           {Platform.OS === "ios" && (
-            <View style={styles.toolbar} testID="Toolbar">
+            <View className="absolute bottom-[27px] z-10 h-[50px] w-full justify-center px-[10px]" testID="Toolbar">
               <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
             </View>
           )}
           {keyboardVisible && (
-            <View
-              style={[
-                styles.doneButton,
-                { bottom: 7 }, // 10px of padding above the keyboard
-              ]}
-              testID="doneButton"
-            >
+            <View className="absolute right-4 z-10" style={{ bottom: 7 }} testID="doneButton">
               <TouchableOpacity onPress={handleDonePress}>
-                <Text style={styles.doneText}>Done</Text>
+                <Text className="text-right text-[14px] text-blue-500">Done</Text>
               </TouchableOpacity>
             </View>
           )}
           {Platform.OS === "android" && (
-            <View style={styles.toolbar} testID="Toolbar">
+            <View className="absolute bottom-[27px] z-10 h-[50px] w-full justify-center px-[10px]" testID="Toolbar">
               <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
             </View>
           )}
         </KeyboardAwareScrollView>
 
-        {/* Loading spinner */}
         <LoadingModal visible={isUpdating} />
       </KeyboardAvoidingView>
     </View>
   );
 };
-const styles = StyleSheet.create({
-  doneButton: {
-    position: "absolute",
-    right: 16, // fixed distance from the right edge
-    zIndex: 10,
-  },
-  doneText: {
-    color: "blue",
-    fontSize: 14,
-    textAlign: "right",
-  },
-  toolbar: {
-    position: "absolute", // Keep toolbar at the bottom of the screen
-    bottom: 27, // Align toolbar with the bottom edge
-    width: "100%", // Full-width toolbar
-    justifyContent: "center", // Center items in the toolbar
-    paddingHorizontal: 10,
-    zIndex: 10, // Ensure it stays above other elements
-    ...Platform.select({
-      android: {
-        height: 50,
-      },
-      ios: {
-        height: 50,
-      },
-    }),
-  },
-});
 
 export default EditNoteScreen;

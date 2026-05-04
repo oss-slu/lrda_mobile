@@ -1,25 +1,13 @@
-import { ActivityIndicator, View, Text, StyleSheet } from "react-native";
-import { useTheme } from "../../components/ThemeProvider";
-import { defaultTextFont } from "../../../styles/globalStyles";
+import { ActivityIndicator, View, Text } from "react-native";
 
 const ExploreLoadingScreen = () => {
-  const { theme, isDarkmode } = useTheme();
-
   return (
-    <View style={styles.centered}>
+    <View className="flex-1 justify-center items-center">
       <ActivityIndicator size="large" color="#0000ff" />
-      <View style={{ padding: 5 }}></View>
-      <Text style={{ ...defaultTextFont, color: theme.text }}>Loading your location...</Text>
+      <View className="p-[5px]" />
+      <Text className="font-inter text-foreground">Loading your location...</Text>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
 
 export default ExploreLoadingScreen;

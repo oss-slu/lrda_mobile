@@ -1,5 +1,5 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import { View, Text, TouchableOpacity, Alert, Dimensions } from "react-native";
 import {
   launchCameraAsync,
   launchImageLibraryAsync,
@@ -17,7 +17,6 @@ import DraggableFlatList from "react-native-draggable-flatlist";
 import ImageView from "react-native-image-viewing";
 import * as FileSystem from "expo-file-system/legacy";
 import * as MediaLibrary from "expo-media-library";
-import { PhotoStyles } from "../../styles/components/PhotoScrollerStyles";
 
 const PhotoScroller = forwardRef(
   (
@@ -109,7 +108,7 @@ const PhotoScroller = forwardRef(
     };
 
     const displayErrorInEditor = async (errorMessage: string) => {
-      Alert.alert("Error", errorMessage); // Alerts the error message to the user
+      Alert.alert("Error", errorMessage);
     };
 
     const handleSaveMedia = async (imageURI: string) => {
@@ -163,11 +162,11 @@ const PhotoScroller = forwardRef(
       }
       return (
         <View key={key}>
-          <TouchableOpacity style={PhotoStyles.trash} onPress={() => handleDeleteMedia(index)}>
+          <TouchableOpacity className="absolute z-[99] h-[15%] w-[15%] items-center justify-center rounded-full bg-black/75" onPress={() => handleDeleteMedia(index)}>
             <Ionicons name="close-outline" size={15} color="white" />
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.5} onLongPress={drag} delayLongPress={100} onPress={() => goBig(index)}>
-            <View style={styles.mediaItem}>
+            <View className="mr-[5px] h-[100px] w-[100px]">
               {IsImage ? (
                 <LoadingImage imageURI={ImageURI} type={ImageType} isImage={true} />
               ) : (
@@ -224,7 +223,6 @@ const PhotoScroller = forwardRef(
                 videoMaxDuration: 300,
               });
               if (!galleryResult.canceled) {
-                // Pass the selected image to handleImageSelection
                 handleImageSelection(galleryResult);
               }
             },
@@ -236,8 +234,8 @@ const PhotoScroller = forwardRef(
 
     function Footer({ imageIndex }: { imageIndex: number }) {
       return showFooter ? (
-        <View style={PhotoStyles.footerContainer}>
-          <Text style={PhotoStyles.footerText}>Media Saved to Device</Text>
+        <View className="mb-[13%] w-[80%] items-center justify-center self-center rounded-sm bg-white/80 p-[10px]">
+          <Text className="text-center font-inter text-base font-bold text-foreground">Media Saved to Device</Text>
         </View>
       ) : null;
     }
@@ -248,33 +246,41 @@ const PhotoScroller = forwardRef(
 
       return showHeader ? (
         <View>
-          <TouchableOpacity style={PhotoStyles.closeUnderlay} onPress={() => setPlaying(false)}>
-            <Ionicons
-              name="close-outline"
-              size={24}
-              // color="#dfe5e8"
-              style={PhotoStyles.icon}
-            />
+          <TouchableOpacity className="absolute right-[10px] top-[50px] z-[100] h-[50px] w-[50px] items-center justify-center rounded-full bg-black/50" onPress={() => setPlaying(false)}>
+            <Ionicons name="close-outline" size={24} className="ml-1 self-center text-[#dfe5e8]" />
           </TouchableOpacity>
-          <TouchableOpacity style={PhotoStyles.playUnderlay} onPress={() => setShowVideo(true)}>
-            <Ionicons name="play-outline" size={24} color="#dfe5e8" style={PhotoStyles.icon} />
+          <TouchableOpacity
+            className="mt-[60%] items-center justify-center rounded-full bg-black/50"
+            style={{
+              top: "50%",
+              left: "50%",
+              transform: [{ translateY: -25 }, { translateX: -25 }],
+              width: 50,
+              height: 50,
+            }}
+            onPress={() => setShowVideo(true)}
+          >
+            <Ionicons name="play-outline" size={24} color="#dfe5e8" className="ml-1 self-center text-[#dfe5e8]" />
           </TouchableOpacity>
           {showVideo && (
-            <View style={PhotoStyles.videoContainer}>
+            <View
+              className="absolute my-[50px] w-full items-center justify-center bg-primary"
+              style={{ height: Dimensions.get("screen").height - 70 }}
+            >
               <Video
                 source={{ uri: newMedia[imageIndex].getUri() }}
                 resizeMode={ResizeMode.CONTAIN}
                 shouldPlay={true}
                 useNativeControls={true}
                 isLooping={true}
-                style={PhotoStyles.video}
+                className="h-full w-full self-center justify-center"
               />
             </View>
           )}
         </View>
       ) : (
-        <TouchableOpacity style={PhotoStyles.closeUnderlay} onPress={() => setPlaying(false)}>
-          <Ionicons name="close-outline" size={24} color="#dfe5e8" style={PhotoStyles.icon} />
+        <TouchableOpacity className="absolute right-[10px] top-[50px] z-[100] h-[50px] w-[50px] items-center justify-center rounded-full bg-black/50" onPress={() => setPlaying(false)}>
+          <Ionicons name="close-outline" size={24} color="#dfe5e8" className="ml-1 self-center text-[#dfe5e8]" />
         </TouchableOpacity>
       );
     }
@@ -306,29 +312,21 @@ const PhotoScroller = forwardRef(
     if (active) {
       return (
         <View
-          style={[
-            PhotoStyles.container,
-            {
-              marginBottom: playing ? 100 : 0,
-              marginTop: playing ? 30 : 0,
-              height: playing ? "auto" : 110,
-            },
-          ]}
+          className="w-full justify-center bg-primary"
+          style={{
+            marginBottom: playing ? 100 : 0,
+            marginTop: playing ? 30 : 0,
+            height: playing ? "auto" : 110,
+          }}
         >
           {playing && renderImageView()}
-          <View style={{ flexDirection: "row" }}>
+          <View className="flex-row">
             <TouchableOpacity
               testID="photoScrollerButton"
-              style={[
-                PhotoStyles.image,
-                {
-                  backgroundColor: "rgb(240,240,240)",
-                  justifyContent: "center",
-                },
-              ]}
+              className="h-[100px] w-[100px] items-center justify-center rounded-lg bg-[rgb(240,240,240)]"
               onPress={handleNewMedia}
             >
-              <Ionicons style={{ alignSelf: "center" }} name="camera-outline" size={60} color="#111111" />
+              <Ionicons className="self-center" name="camera-outline" size={60} color="#111111" />
             </TouchableOpacity>
             <DraggableFlatList
               showsHorizontalScrollIndicator={false}
@@ -349,11 +347,3 @@ const PhotoScroller = forwardRef(
 );
 
 export default PhotoScroller;
-
-const styles = StyleSheet.create({
-  mediaItem: {
-    width: 100, // You can adjust these values
-    height: 100,
-    marginRight: 5, // Spacing between images
-  },
-});

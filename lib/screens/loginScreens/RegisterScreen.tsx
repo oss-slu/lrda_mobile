@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ImageBackground } from "react-native";
+import { Text, View, TextInput, TouchableOpacity, ImageBackground } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Snackbar } from "react-native-paper";
 import { authClient } from "../../auth/client";
 import { validateEmail, validatePassword } from "../../utils/validation";
-import { defaultTextFont } from "../../../styles/globalStyles";
 import { useRouter } from "expo-router";
 
 const RegistrationScreen: React.FC = () => {
@@ -76,31 +75,37 @@ const RegistrationScreen: React.FC = () => {
   };
 
   return (
-    <KeyboardAwareScrollView contentContainerStyle={styles.container}>
-      <ImageBackground source={require("../../../assets/splash.jpg")} style={styles.imageBackground}>
-        <Snackbar visible={snackState} onDismiss={onDismissSnackBar} duration={1500} style={styles.snackbar}>
-          <Text style={{ ...defaultTextFont, textAlign: "center" }}>{snackMessage}</Text>
+    <KeyboardAwareScrollView contentContainerStyle={{ flex: 1, justifyContent: "center" }}>
+      <ImageBackground source={require("../../../assets/splash.jpg")} className="flex-1 justify-center" resizeMode="cover">
+        <Snackbar visible={snackState} onDismiss={onDismissSnackBar} duration={1500} style={{ backgroundColor: "white", alignItems: "center" }}>
+          <Text className="font-inter text-center">{snackMessage}</Text>
         </Snackbar>
-        <View style={styles.registerBox}>
-          <Text style={styles.title}>Register</Text>
-          <View style={{ marginTop: 40 }}>
+        <View className="w-[85%] self-center rounded-[10px] bg-white/80 p-[25px]">
+          <Text className="font-inter pl-[10px] pt-[10px] text-left text-[32px] font-bold text-black">Register</Text>
+          <View className="mt-10">
             <TextInput
-              style={styles.input}
+              className="mb-10 border-b border-black pb-[7px] pl-[10px] text-[14px] text-black"
               placeholder="First Name"
               placeholderTextColor="#7D7D7D"
               value={firstName}
               onChangeText={setFirstName}
             />
             <TextInput
-              style={styles.input}
+              className="mb-10 border-b border-black pb-[7px] pl-[10px] text-[14px] text-black"
               placeholder="Last Name"
               placeholderTextColor="#7D7D7D"
               value={lastName}
               onChangeText={setLastName}
             />
-            <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#7D7D7D" value={email} onChangeText={setEmail} />
             <TextInput
-              style={styles.input}
+              className="mb-10 border-b border-black pb-[7px] pl-[10px] text-[14px] text-black"
+              placeholder="Email"
+              placeholderTextColor="#7D7D7D"
+              value={email}
+              onChangeText={setEmail}
+            />
+            <TextInput
+              className="mb-10 border-b border-black pb-[7px] pl-[10px] text-[14px] text-black"
               placeholder="Password"
               secureTextEntry
               placeholderTextColor="#7D7D7D"
@@ -108,7 +113,7 @@ const RegistrationScreen: React.FC = () => {
               onChangeText={setPassword}
             />
             <TextInput
-              style={styles.input}
+              className="mb-10 border-b border-black pb-[7px] pl-[10px] text-[14px] text-black"
               placeholder="Confirm Password"
               secureTextEntry
               placeholderTextColor="#7D7D7D"
@@ -116,12 +121,12 @@ const RegistrationScreen: React.FC = () => {
               onChangeText={setConfirmPassword}
             />
           </View>
-          <TouchableOpacity onPress={handleRegister} style={styles.button}>
-            <Text style={styles.buttonText}>Sign Up</Text>
+          <TouchableOpacity onPress={handleRegister} className="mt-5 items-center rounded-[15px] py-[10px]" style={{ backgroundColor: "rgb(17,47,187)" }}>
+            <Text className="font-inter text-[22px] font-bold text-white">Sign Up</Text>
           </TouchableOpacity>
-          <Text style={styles.loginText}>
+          <Text className="font-inter mt-5 text-center text-[14px] text-black">
             Already have an account?{" "}
-            <Text style={styles.signIn} onPress={() => router.replace("/(auth)/login")}>
+            <Text className="font-inter font-bold" style={{ color: "rgb(17,47,187)" }} onPress={() => router.replace("/(auth)/login")}>
               Sign In
             </Text>
           </Text>
@@ -130,75 +135,5 @@ const RegistrationScreen: React.FC = () => {
     </KeyboardAwareScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  imageBackground: {
-    flex: 1,
-    resizeMode: "cover",
-    justifyContent: "center",
-  },
-  registerBox: {
-    backgroundColor: "rgba(255, 255, 255, 0.80)",
-    padding: 25,
-    borderRadius: 10,
-    width: "85%",
-    minHeight: "auto",
-    alignSelf: "center",
-    elevation: 0,
-  },
-  title: {
-    ...defaultTextFont,
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#000",
-    marginBottom: 0,
-    paddingLeft: 10,
-    paddingTop: 10,
-    textAlign: "left",
-  },
-  input: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#000",
-    marginBottom: 40,
-    marginTop: 0,
-    paddingVertical: 7,
-    fontSize: 14,
-    paddingLeft: 10,
-    color: "#000",
-  },
-  button: {
-    backgroundColor: "rgb(17,47,187)",
-    borderRadius: 15,
-    paddingVertical: 10,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  buttonText: {
-    ...defaultTextFont,
-    color: "white",
-    fontSize: 22,
-    fontWeight: "bold",
-  },
-  loginText: {
-    ...defaultTextFont,
-    marginTop: 20,
-    textAlign: "center",
-    fontSize: 14,
-    color: "#000",
-  },
-  signIn: {
-    ...defaultTextFont,
-    color: "rgb(17,47,187)",
-    fontWeight: "bold",
-  },
-  snackbar: {
-    backgroundColor: "white",
-    alignItems: "center",
-  },
-});
 
 export default RegistrationScreen;

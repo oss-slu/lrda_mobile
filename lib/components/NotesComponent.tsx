@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Dimensions } from "react-native";
+import { View, Text, Dimensions } from "react-native";
 import LoadingImage from "./loadingImage";
 import * as Location from "expo-location";
 import { fetchCreatorName } from "../utils/api_calls";
-import { defaultTextFont } from "../../styles/globalStyles";
 import { Note } from "../../types";
 
 const { width, height } = Dimensions.get("window");
@@ -66,7 +65,15 @@ function NotesComponent({ IsImage, resolvedImageURI, ImageType, textLength, show
   }, [item]);
 
   return (
-    <View style={[styles.notesContainer, { backgroundColor: isDarkmode ? "#3f3f3f" : "white" }]}>
+    <View
+      className="flex-row items-center rounded-sm bg-surface"
+      style={{
+        width: width > 1000 ? "97.5%" : "95%",
+        margin: 10,
+        height: height * 0.1,
+        paddingHorizontal: height * 0.02,
+      }}
+    >
       {IsImage && resolvedImageURI ? (
         <View>
           <LoadingImage imageURI={resolvedImageURI} type={ImageType} isImage={true} height={70} width={100} />
@@ -77,13 +84,13 @@ function NotesComponent({ IsImage, resolvedImageURI, ImageType, textLength, show
         </View>
       )}
 
-      <View style={styles.notesTxtContent}>
-        <View style={styles.columnData}>
-          <Text style={[styles.noteTitle, { color: isDarkmode ? "#d9d9d9" : "black" }]}>
+      <View className="ml-5 flex-wrap">
+        <View className="h-[80%] justify-evenly">
+          <Text className="font-inter text-foreground">
             {item.title.length > textLength ? item.title.slice(0, textLength) + "..." : item.title}
           </Text>
 
-          <Text style={[styles.noteText, { color: isDarkmode ? "#d9d9d9" : "black" }]}>{showTime}</Text>
+          <Text className="font-inter text-foreground">{showTime}</Text>
         </View>
       </View>
     </View>
@@ -91,30 +98,3 @@ function NotesComponent({ IsImage, resolvedImageURI, ImageType, textLength, show
 }
 
 export default NotesComponent;
-
-const styles = StyleSheet.create({
-  notesContainer: {
-    flexDirection: "row",
-    width: width > 1000 ? "97.5%" : "95%",
-    margin: 10,
-    height: height * 0.1,
-    alignItems: "center",
-    paddingHorizontal: height * 0.02,
-    borderRadius: 10,
-  },
-  noteTitle: {
-    ...defaultTextFont,
-  },
-  noteText: {
-    ...defaultTextFont,
-  },
-
-  notesTxtContent: {
-    marginLeft: 20,
-    flexWrap: "wrap",
-  },
-  columnData: {
-    height: "80%",
-    justifyContent: "space-evenly",
-  },
-});

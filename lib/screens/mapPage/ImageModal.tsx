@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { Modal, View, ScrollView, Text, Image, ActivityIndicator, StyleSheet, TouchableOpacity, Dimensions } from "react-native";
+import { Modal, View, ScrollView, Text, Image, ActivityIndicator, TouchableOpacity, Dimensions } from "react-native";
 import { useTheme } from "../../components/ThemeProvider";
-import { defaultTextFont } from "../../../styles/globalStyles";
 
 interface ImageType {
   uri: string;
@@ -13,7 +12,7 @@ interface Props {
   images: ImageType[];
 }
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 const ImageModal: React.FC<Props> = ({ isVisible, onClose, images }) => {
   const [imageLoadedState, setImageLoadedState] = useState<{ [key: string]: boolean }>({});
@@ -26,65 +25,31 @@ const ImageModal: React.FC<Props> = ({ isVisible, onClose, images }) => {
 
   const handleImageTouchStart = () => setIsImageTouched(!isImageTouched);
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      paddingTop: 45,
-      width: "100%",
-      backgroundColor: theme.primaryColor,
-    },
-    imageContainer: {
-      alignItems: "center",
-      width: "100%",
-      backgroundColor: theme.primaryColor,
-    },
-    image: {
-      width: width,
-      height: width,
-    },
-    noImagesText: {
-      ...defaultTextFont,
-      alignSelf: "center",
-      justifyContent: "center",
-      marginTop: 200,
-      color: theme.text,
-    },
-    closeButton: {
-      height: 40,
-      width: 75,
-      alignItems: "center",
-      justifyContent: "center",
-      marginTop: 20,
-      backgroundColor: "#ddd",
-      padding: 10,
-      borderRadius: 5,
-      marginBottom: 30,
-    },
-  });
-
   return (
     <Modal animationType="slide" transparent={false} visible={isVisible} onRequestClose={onClose}>
-      <View style={styles.container}>
+      <View className="flex-1 justify-center items-center pt-[45px] w-full bg-primary">
         <ScrollView
           style={{ height: isImageTouched ? "80%" : "50%" }}
           onTouchStart={images && images.length > 2 ? handleImageTouchStart : undefined}
         >
           {images && images.length > 0 ? (
             images.map((image, index) => (
-              <View key={index} style={styles.imageContainer}>
+              <View key={index} className="items-center w-full bg-primary">
                 {!imageLoadedState[image.uri] && <ActivityIndicator size="large" color="#0000ff" />}
-                <Image source={{ uri: image.uri }} style={styles.image} onLoad={() => handleLoad(image.uri)} />
+                <Image source={{ uri: image.uri }} style={{ width, height: width }} onLoad={() => handleLoad(image.uri)} />
               </View>
             ))
           ) : (
-            <Text style={styles.noImagesText}>No images</Text>
+            <Text className="font-inter self-center justify-center mt-[200px] text-foreground">No images</Text>
           )}
         </ScrollView>
 
-        <TouchableOpacity style={styles.closeButton} onPress={onClose} testID="image-component">
-          <Text style={{ ...defaultTextFont }} testID="close-button">
+        <TouchableOpacity
+          className="h-10 w-[75px] items-center justify-center mt-5 bg-[#ddd] p-2.5 rounded-[5px] mb-[30px]"
+          onPress={onClose}
+          testID="image-component"
+        >
+          <Text className="font-inter" testID="close-button">
             Close
           </Text>
         </TouchableOpacity>

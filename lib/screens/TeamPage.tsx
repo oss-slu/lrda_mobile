@@ -1,8 +1,6 @@
 import React from "react";
-import { View, Text, StyleSheet, Image, FlatList, TouchableOpacity, Dimensions, StatusBar, ScrollView } from "react-native";
+import { View, Text, Image, FlatList, TouchableOpacity, Dimensions, StatusBar, ScrollView } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { useTheme } from "../components/ThemeProvider";
-import { defaultTextFont } from "../../styles/globalStyles";
 
 import { useRouter } from "expo-router";
 
@@ -107,42 +105,40 @@ const teamMembers = [
 
 export default function TeamPage() {
   const router = useRouter();
-  const { theme } = useTheme();
 
   const renderItem = ({ item }: { item: { id: number; name: string; role: string; image: any } }) => (
-    <View style={styles.teamMember}>
-      <Image source={item.image} style={styles.teamImage} accessible accessibilityLabel={`${item.name}, ${item.role}`} />
-      <Text style={[styles.memberName, { color: theme.text || "#ffffff" }]}>{item.name}</Text>
-      <Text style={[styles.memberRole, { color: theme.tertiaryColor || "#aaaaaa" }]}>{item.role}</Text>
+    <View className="items-center flex-1 mx-2">
+      <Image source={item.image} className="w-20 h-20 rounded-full mb-2" accessible accessibilityLabel={`${item.name}, ${item.role}`} />
+      <Text className="font-inter text-foreground text-sm font-bold text-center">{item.name}</Text>
+      <Text className="font-inter text-tertiary text-xs text-center">{item.role}</Text>
     </View>
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.primaryColor }]}>
+    <View className="flex-1 bg-primary">
       <StatusBar translucent backgroundColor="transparent" />
 
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: theme.homeColor }]}>
-        <View style={styles.headerContent}>
+      <View className="bg-accent" style={{ height: width > 500 ? height * 0.12 : height * 0.19 }}>
+        <View
+          className="flex-row justify-start items-center px-5"
+          style={{ marginTop: width > 500 ? "5%" : "20%" }}
+        >
           <TouchableOpacity onPress={() => router.back()}>
             <Feather name={"arrow-left"} size={30} />
           </TouchableOpacity>
-          <View style={styles.headerHeading}>
-            <Text style={{ ...defaultTextFont, fontSize: 17, fontWeight: "bold" }}>Team</Text>
+          <View className="ml-5">
+            <Text className="font-inter text-[17px] font-bold">Team</Text>
           </View>
         </View>
       </View>
 
-      {/* Scrollable Body */}
-      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-        {/* Title */}
-        <View style={styles.titleContainer}>
-          <Text style={[styles.title, { color: theme.text || "#ffffff" }]}>About Our Team</Text>
+      <ScrollView contentContainerStyle={{ paddingBottom: 60 }} showsVerticalScrollIndicator={false}>
+        <View className="py-5 items-center">
+          <Text className="font-inter text-foreground text-2xl font-bold text-center">About Our Team</Text>
         </View>
 
-        {/* WR Team Section */}
-        <View style={styles.sectionContainer}>
-          <Text style={[styles.subtitle, { color: theme.tertiaryColor || "#aaaaaa", marginBottom: 12 }]}>
+        <View className="px-4 mb-6">
+          <Text className="font-inter text-tertiary text-base text-center mb-3">
             The Saint Louis University Where's Religion Team
           </Text>
           <FlatList
@@ -151,101 +147,24 @@ export default function TeamPage() {
             keyExtractor={(item) => item.id.toString()}
             numColumns={2}
             scrollEnabled={false}
-            contentContainerStyle={styles.teamContainer}
-            columnWrapperStyle={styles.teamRow}
+            contentContainerStyle={{ paddingBottom: 20 }}
+            columnWrapperStyle={{ justifyContent: "space-between", marginBottom: 20 }}
           />
         </View>
 
-        {/* Development Team Section */}
-        <View style={styles.sectionContainer}>
-          <Text style={[styles.subtitle, { color: theme.tertiaryColor || "#aaaaaa", marginBottom: 12 }]}>The Development Team</Text>
+        <View className="px-4 mb-6">
+          <Text className="font-inter text-tertiary text-base text-center mb-3">The Development Team</Text>
           <FlatList
             data={teamMembers}
             renderItem={renderItem}
             keyExtractor={(item) => item.id.toString()}
             numColumns={2}
             scrollEnabled={false}
-            contentContainerStyle={[styles.teamContainer, { paddingBottom: 40 }]}
-            columnWrapperStyle={styles.teamRow}
+            contentContainerStyle={{ paddingBottom: 40 }}
+            columnWrapperStyle={{ justifyContent: "space-between", marginBottom: 20 }}
           />
         </View>
       </ScrollView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContainer: {
-    paddingBottom: 60,
-  },
-  header: {
-    height: width > 500 ? height * 0.12 : height * 0.19,
-  },
-  headerContent: {
-    marginTop: width > 500 ? "5%" : "20%",
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    paddingHorizontal: 20,
-  },
-  headerHeading: {
-    marginLeft: 20,
-  },
-  headerTitle: {
-    ...defaultTextFont,
-    fontSize: 20,
-    fontWeight: "bold",
-    marginLeft: 10,
-  },
-  titleContainer: {
-    paddingVertical: 20,
-    alignItems: "center",
-  },
-  sectionContainer: {
-    paddingHorizontal: 16,
-    marginBottom: 24,
-  },
-  title: {
-    ...defaultTextFont,
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  subtitle: {
-    ...defaultTextFont,
-    fontSize: 16,
-    textAlign: "center",
-  },
-  teamContainer: {
-    paddingBottom: 20,
-  },
-  teamRow: {
-    justifyContent: "space-between",
-    marginBottom: 20,
-  },
-  teamMember: {
-    alignItems: "center",
-    flex: 1,
-    marginHorizontal: 8,
-  },
-  teamImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginBottom: 8,
-  },
-  memberName: {
-    ...defaultTextFont,
-    fontSize: 14,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  memberRole: {
-    ...defaultTextFont,
-    fontSize: 12,
-    textAlign: "center",
-  },
-});

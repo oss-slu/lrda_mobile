@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Text, StyleSheet, View } from "react-native";
-import { defaultTextFont } from "../../styles/globalStyles";
+import { Text, View } from "react-native";
 
 const Greeting: React.FC = () => {
   const [greeting, setGreeting] = useState<string>("");
 
   useEffect(() => {
     const determineGreeting = () => {
-      const currentHour = new Date().getHours(); // Get the current hour (0-23)
+      const currentHour = new Date().getHours();
 
       if (currentHour >= 5 && currentHour < 12) {
         setGreeting("Good Morning");
@@ -20,27 +19,14 @@ const Greeting: React.FC = () => {
       }
     };
 
-    determineGreeting(); // Call the function to set the initial greeting
-  }, []); // Empty dependency array ensures it runs once when the component mounts
+    determineGreeting();
+  }, []);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.greetingText}>{greeting},</Text>
+    <View className="flex-1 justify-center items-center">
+      <Text className="font-inter text-[13px] font-semibold">{greeting},</Text>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  greetingText: {
-    ...defaultTextFont,
-    fontSize: 13,
-    fontWeight: "600",
-  },
-});
 
 export default Greeting;
