@@ -2,7 +2,7 @@ import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Animated, ImageBackground, Keyboard, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { Snackbar } from "react-native-paper";
+import Toast from "react-native-toast-message";
 import { useAuthStore } from "../../stores/authStore";
 import { useRouter } from "expo-router";
 
@@ -12,10 +12,8 @@ const LoginScreen: React.FC = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [firstClick, setFirstClick] = useState(true);
-  const [snackState, toggleSnack] = useState(false);
   const [loading, setLoading] = useState(false);
   const fadeAnim = useRef(new Animated.Value(1)).current;
-  const [snackMessage, setSnackMessage] = useState("");
 
   const fadeOut = () => {
     Animated.timing(fadeAnim, {
@@ -44,11 +42,9 @@ const LoginScreen: React.FC = () => {
     router.push("/(auth)/register");
   };
 
-  const onDismissSnackBar = () => toggleSnack(false);
-
   const handleLogin = async () => {
     if (username === "" || password === "") {
-      toggleSnack(!snackState);
+      Toast.show({ type: "error", text1: "Please enter your email and password." });
     } else {
       try {
         await login(username, password);
@@ -67,8 +63,7 @@ const LoginScreen: React.FC = () => {
         } else if (msg.includes("Invalid email or password") || msg.includes("INVALID_EMAIL_OR_PASSWORD")) {
           message = "Invalid username or password.";
         }
-        setSnackMessage(message);
-        toggleSnack(true);
+        Toast.show({ type: "error", text1: message });
       }
     }
   };
@@ -92,17 +87,6 @@ const LoginScreen: React.FC = () => {
       keyboardShouldPersistTaps="handled"
     >
       <ImageBackground source={require("../../../assets/splash.jpg")} className="flex-1 justify-center" resizeMode="cover">
-        <Snackbar
-          visible={snackState}
-          onDismiss={onDismissSnackBar}
-          style={{
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "white",
-          }}
-        >
-          <Text className="font-inter text-center">{snackMessage}</Text>
-        </Snackbar>
         {firstClick ? (
           <TouchableOpacity activeOpacity={1} className="mb-[200px] items-center justify-center self-center py-[200px]" onPress={fadeOut}>
             <Animated.Text className="font-inter text-[50px] font-bold text-[#111111] mb-[70px]" style={{ opacity: fadeAnim }}>

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Text, View, TextInput, TouchableOpacity, ImageBackground } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { Snackbar } from "react-native-paper";
+import Toast from "react-native-toast-message";
 import { authClient } from "../../auth/client";
 import { validateEmail, validatePassword } from "../../utils/validation";
 import { useRouter } from "expo-router";
@@ -14,27 +14,22 @@ const RegistrationScreen: React.FC = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
-  const [snackState, setSnackState] = useState(false);
-  const [snackMessage, setSnackMessage] = useState("");
 
   const handleRegister = async () => {
     const emailError = validateEmail(email);
     if (emailError) {
-      setSnackMessage(emailError);
-      setSnackState(true);
+      Toast.show({ type: "error", text1: emailError });
       return;
     }
 
     const passwordError = validatePassword(password);
     if (passwordError) {
-      setSnackMessage(passwordError);
-      setSnackState(true);
+      Toast.show({ type: "error", text1: passwordError });
       return;
     }
 
     if (password !== confirmPassword) {
-      setSnackMessage("Passwords do not match");
-      setSnackState(true);
+      Toast.show({ type: "error", text1: "Passwords do not match" });
       return;
     }
 
@@ -51,8 +46,11 @@ const RegistrationScreen: React.FC = () => {
       }
 
       setRegistrationSuccess(true);
-      setSnackMessage("Signup successful! Please verify your email before logging in.");
-      setSnackState(true);
+      Toast.show({
+        type: "success",
+        text1: "Signup successful! Please verify your email before logging in.",
+        onHide: () => router.replace("/(auth)/login"),
+      });
     } catch (error: any) {
       setRegistrationSuccess(false);
       let message = error?.message || "Signup failed. Please try again.";
@@ -62,24 +60,13 @@ const RegistrationScreen: React.FC = () => {
       } else if (message.includes("Password too weak")) {
         message = "Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character.";
       }
-      setSnackMessage(message);
-      setSnackState(true);
-    }
-  };
-
-  const onDismissSnackBar = () => {
-    setSnackState(false);
-    if (registrationSuccess) {
-      router.replace("/(auth)/login");
+      Toast.show({ type: "error", text1: message });
     }
   };
 
   return (
     <KeyboardAwareScrollView contentContainerStyle={{ flex: 1, justifyContent: "center" }}>
       <ImageBackground source={require("../../../assets/splash.jpg")} className="flex-1 justify-center" resizeMode="cover">
-        <Snackbar visible={snackState} onDismiss={onDismissSnackBar} duration={1500} style={{ backgroundColor: "white", alignItems: "center" }}>
-          <Text className="font-inter text-center">{snackMessage}</Text>
-        </Snackbar>
         <View className="w-[85%] self-center rounded-[10px] bg-white/80 p-[25px]">
           <Text className="font-inter pl-[10px] pt-[10px] text-left text-[32px] font-bold text-black">Register</Text>
           <View className="mt-10">

@@ -4,6 +4,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const DEFAULT_ACCENT = "#7FADE1";
 
+export const ACCENT_PALETTE = [
+  { id: 1, color: "rgb(196,115,115)" },
+  { id: 2, color: "rgb(82,214,168)" },
+  { id: 3, color: "rgb(195,142,132)" },
+  { id: 4, color: "rgb(96, 113, 209)" },
+  { id: 5, color: "rgb(127, 173, 225)" },
+  { id: 6, color: "rgb(195,142,232)" },
+];
+
 interface ThemeStore {
   accentColor: string;
   isDarkmode: boolean;

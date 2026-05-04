@@ -130,7 +130,7 @@ const AddNoteScreen: React.FC = () => {
     return unsubscribe;
   }, [navigation, editor]);
 
-  const { theme } = useTheme();
+  const { colors } = useTheme();
   const titleTextRef = useRef<TextInput>(null);
   const scrollViewRef = useRef<KeyboardAwareScrollView>(null);
 
@@ -143,12 +143,12 @@ const AddNoteScreen: React.FC = () => {
       const combinedCSS = `
         ${customImageCSS}
         body {
-          color: ${theme.text};
+          color: ${colors.foreground};
         }
       `;
       editor.injectCSS(combinedCSS);
     }
-  }, [editor, theme.text]);
+  }, [editor, colors.foreground]);
 
   const isBodyEmpty = (htmlString: string) => {
     const textOnly = htmlString.replace(/<\/?[^>]+(>|$)/g, "").trim();
@@ -432,7 +432,7 @@ const AddNoteScreen: React.FC = () => {
                   paddingBottom: 120,
                   padding: 10,
                   marginBottom: 4,
-                  backgroundColor: theme.primaryColor,
+                  backgroundColor: colors.primary,
                 }}
               />
             </View>

@@ -10,7 +10,7 @@ type Props = SvgProps & {
 };
 
 export const SvgIcon: React.FC<Props> = ({ color = "white", height = 64, width = 80, ...props }) => {
-  const { theme } = useTheme();
+  const { colors } = useTheme();
 
   const originalWidth = width > 1000 ? 150 : 75;
   const originalHeight = width > 1000 ? 120 : 60;
@@ -28,7 +28,7 @@ export const SvgIcon: React.FC<Props> = ({ color = "white", height = 64, width =
     >
       <Path
         d="M75.2 0v61H0V0c4.1 0 7.4 3.1 7.9 7.1C10 21.7 22.5 33 37.7 33c15.2 0 27.7-11.3 29.7-25.9 0.5-4 3.9-7.1 7.9-7.1h.1z"
-        fill={theme.primaryColor}
+        fill={colors.primary}
       />
     </Svg>
   );

@@ -31,7 +31,7 @@ const { width, height } = Dimensions.get("window");
 
 const Library = () => {
   const router = useRouter();
-  const { theme, isDarkmode } = useTheme();
+  const { colors, isDarkmode, accentColor } = useTheme();
   const { userInitials, userName } = useUserInfo();
 
   const [selectedNote, setSelectedNote] = useState<NoteDetailData | undefined>(undefined);
@@ -104,7 +104,7 @@ const Library = () => {
     if (isLoadingMore) {
       return (
         <View className="py-[50px] items-center mb-[100px]">
-          <ActivityIndicator size="small" color={theme.text} />
+          <ActivityIndicator size="small" color={colors.foreground} />
         </View>
       );
     }
@@ -266,7 +266,7 @@ const Library = () => {
               <TouchableOpacity key={option} onPress={() => { setSelectedSortOption(option); setIsSortOpened(false); }}>
                 <View
                   className="w-[200px] justify-center items-center p-[10px] rounded-[10px]"
-                  style={{ backgroundColor: selectedSortOption === option ? theme.homeColor : "transparent" }}
+                  style={{ backgroundColor: selectedSortOption === option ? accentColor : "transparent" }}
                 >
                   <Text className={`font-inter text-xl ${selectedSortOption === option ? "text-black" : "text-foreground"}`}>
                     {label}

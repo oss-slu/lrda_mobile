@@ -20,7 +20,7 @@ const data = [
 ];
 
 export default function MorePage() {
-  const { isDarkmode, toggleDarkmode, theme } = useTheme();
+  const { isDarkmode, toggleDarkmode, accentColor } = useTheme();
   const resetTheme = useThemeStore((state) => state.reset);
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
@@ -102,7 +102,7 @@ export default function MorePage() {
     >
       <Text className={`font-inter text-sm font-medium ${icon === "delete" ? "text-red-500" : "text-black"}`}>{optionName}</Text>
       {icon === "none" ? (
-        <View className="h-[25px] w-[25px] rounded-full border-[0.5px]" style={{ backgroundColor: theme.homeColor }} />
+        <View className="h-[25px] w-[25px] rounded-full border-[0.5px]" style={{ backgroundColor: accentColor }} />
       ) : (
         <MaterialIcons name={icon} size={25} color={icon === "delete" ? "red" : "black"} />
       )}

@@ -17,7 +17,7 @@ const { width } = Dimensions.get("window");
 const ImageModal: React.FC<Props> = ({ isVisible, onClose, images }) => {
   const [imageLoadedState, setImageLoadedState] = useState<{ [key: string]: boolean }>({});
   const [isImageTouched, setIsImageTouched] = useState(false);
-  const { theme } = useTheme();
+  const { colors } = useTheme();
 
   const handleLoad = (uri: string) => {
     setImageLoadedState((prev) => ({ ...prev, [uri]: true }));

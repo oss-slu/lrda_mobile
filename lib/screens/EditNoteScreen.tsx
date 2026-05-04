@@ -68,7 +68,7 @@ const EditNoteScreen = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [viewMedia, setViewMedia] = useState(false);
   const [viewAudio, setViewAudio] = useState(false);
-  const { theme } = useTheme();
+  const { colors } = useTheme();
   const toggleAddNoteState = useAddNoteStore((s) => s.toggleAddNoteState);
   const editor = useEditorBridge({
     initialContent: note.text || "",
@@ -108,12 +108,12 @@ const EditNoteScreen = () => {
       const combinedCSS = `
         ${customImageCSS}
         body {
-          color: ${theme.text};
+          color: ${colors.foreground};
         }
       `;
       editor.injectCSS(combinedCSS);
     }
-  }, [editor, theme.text]);
+  }, [editor, colors.foreground]);
 
   const setLocationToZero = () => {
     setLocation({ latitude: 0, longitude: 0 });
@@ -363,7 +363,7 @@ const EditNoteScreen = () => {
                 paddingBottom: 120,
                 padding: 10,
                 marginBottom: 4,
-                backgroundColor: theme.primaryColor,
+                backgroundColor: colors.primary,
               }}
             />
           </View>

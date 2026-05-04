@@ -35,7 +35,7 @@ const SPACING_FOR_CARD_INSET = width * 0.1 - 10;
 const LIMIT = 20;
 
 const ExploreScreen = () => {
-  const { theme, isDarkmode } = useTheme();
+  const { colors, isDarkmode, accentColor } = useTheme();
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedNote, setSelectedNote] = useState<NoteDetailData | undefined>(undefined);
   const [globeIcon, setGlobeIcon] = useState<"earth-outline" | "earth">("earth-outline");
@@ -321,14 +321,14 @@ const ExploreScreen = () => {
         }}
       >
         <TouchableOpacity onPress={() => setGlobeIcon((prev) => (prev === "earth-outline" ? "earth" : "earth-outline"))}>
-          <Ionicons name={globeIcon} size={25} color={globeIcon === "earth" ? "green" : theme.text} style={{ marginRight: 9 }} />
+          <Ionicons name={globeIcon} size={25} color={globeIcon === "earth" ? "green" : colors.foreground} style={{ marginRight: 9 }} />
         </TouchableOpacity>
         <TextInput
           returnKeyType="done"
           placeholder="Search here"
-          placeholderTextColor={theme.text}
+          placeholderTextColor={colors.foreground}
           autoCapitalize="none"
-          style={{ flex: 1, padding: 0, color: theme.text }}
+          style={{ flex: 1, padding: 0, color: colors.foreground }}
           onChangeText={setSearchQuery}
           onSubmitEditing={handleSearch}
         />
@@ -352,7 +352,7 @@ const ExploreScreen = () => {
           }
           placement="bottom"
         >
-          <Ionicons name="search" size={25} onPress={handleSearch} color={theme.text} />
+          <Ionicons name="search" size={25} onPress={handleSearch} color={colors.foreground} />
         </Tooltip>
       </View>
       <Tooltip
@@ -413,15 +413,15 @@ const ExploreScreen = () => {
               }}
             >
               {isLoadingMore ? (
-                <ActivityIndicator size="small" color={theme.text} />
+                <ActivityIndicator size="small" color={colors.foreground} />
               ) : (
                 <TouchableOpacity
                   testID="loadMoreTouchable"
                   onPress={handleLoadMore}
                   className="w-[70%] h-[50%] rounded-[3px] justify-center items-center"
-                  style={{ backgroundColor: theme.homeColor }}
+                  style={{ backgroundColor: accentColor }}
                 >
-                  <Text className="text-[32px]" style={{ color: theme.text }}>Load More</Text>
+                  <Text className="text-[32px]" style={{ color: colors.foreground }}>Load More</Text>
                 </TouchableOpacity>
               )}
             </View>

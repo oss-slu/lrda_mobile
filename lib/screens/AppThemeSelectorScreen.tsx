@@ -1,12 +1,11 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { useTheme } from "../components/ThemeProvider";
-import { appTheme } from "../components/colors";
-import { useThemeStore } from "../stores/themeStore";
+import { ACCENT_PALETTE, useThemeStore } from "../stores/themeStore";
 
 function AppThemeSelectorScreen() {
   const setAccentColor = useThemeStore((state) => state.setAccentColor);
-  const { theme } = useTheme();
+  const { accentColor } = useTheme();
 
   return (
     <View className="h-full bg-white px-5 py-[10px]">
@@ -15,23 +14,23 @@ function AppThemeSelectorScreen() {
       <View
         className="mx-[10px] mt-5 rounded-full border-[0.5px]"
         style={{
-          backgroundColor: theme.homeColor,
+          backgroundColor: accentColor,
           height: 40,
           width: 80,
         }}
       />
 
       <View className="mb-5 flex-row flex-wrap">
-        {appTheme.map((theme, key) => (
+        {ACCENT_PALETTE.map((item) => (
           <TouchableOpacity
-            key={key}
+            key={item.id}
             onPress={() => {
-              setAccentColor(theme.themeColor);
+              setAccentColor(item.color);
             }}
           >
             <View
               className="mx-[10px] mt-5 h-[60px] w-[60px] rounded-full border-[0.5px]"
-              style={{ backgroundColor: theme.themeColor }}
+              style={{ backgroundColor: item.color }}
             />
           </TouchableOpacity>
         ))}

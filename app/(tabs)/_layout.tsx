@@ -2,12 +2,10 @@ import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Platform } from "react-native";
 import { useTheme } from "../../lib/components/ThemeProvider";
-import { useThemeStore } from "../../lib/stores/themeStore";
 import AddNoteBtnComponent from "../../lib/components/AddNoteBtnComponent";
 
 export default function TabsLayout() {
-  const { theme, isDarkmode } = useTheme();
-  const appThemeColor = useThemeStore((state) => state.accentColor);
+  const { colors, isDarkmode, accentColor } = useTheme();
 
   return (
     <Tabs
@@ -16,7 +14,7 @@ export default function TabsLayout() {
         tabBarShowLabel: true,
         tabBarHideOnKeyboard: true,
         tabBarStyle: {
-          backgroundColor: theme.primaryColor,
+          backgroundColor: colors.primary,
           position: "absolute",
           bottom: 0,
           left: 0,
@@ -27,7 +25,7 @@ export default function TabsLayout() {
           elevation: 0,
         },
         tabBarItemStyle: {
-          backgroundColor: theme.primaryColor,
+          backgroundColor: colors.primary,
           height: "100%",
         },
       }}
@@ -37,7 +35,7 @@ export default function TabsLayout() {
         options={{
           tabBarLabel: "Home",
           tabBarIcon: ({ size, focused }) => (
-            <Ionicons name="home" size={size} color={focused ? (isDarkmode ? "white" : "black") : appThemeColor} />
+            <Ionicons name="home" size={size} color={focused ? (isDarkmode ? "white" : "black") : accentColor} />
           ),
         }}
       />
@@ -46,7 +44,7 @@ export default function TabsLayout() {
         options={{
           tabBarLabel: "Library",
           tabBarIcon: ({ size, focused }) => (
-            <Ionicons name="library" size={size} color={focused ? (isDarkmode ? "white" : "black") : appThemeColor} />
+            <Ionicons name="library" size={size} color={focused ? (isDarkmode ? "white" : "black") : accentColor} />
           ),
         }}
       />
@@ -62,7 +60,7 @@ export default function TabsLayout() {
         options={{
           tabBarLabel: "Map",
           tabBarIcon: ({ size, focused }) => (
-            <Ionicons name="map" size={size} color={focused ? (isDarkmode ? "white" : "black") : appThemeColor} />
+            <Ionicons name="map" size={size} color={focused ? (isDarkmode ? "white" : "black") : accentColor} />
           ),
         }}
       />
@@ -71,7 +69,7 @@ export default function TabsLayout() {
         options={{
           tabBarLabel: "More",
           tabBarIcon: ({ size, focused }) => (
-            <Ionicons name="menu-outline" size={size + 10} color={focused ? (isDarkmode ? "white" : "black") : appThemeColor} />
+            <Ionicons name="menu-outline" size={size + 10} color={focused ? (isDarkmode ? "white" : "black") : accentColor} />
           ),
         }}
       />
