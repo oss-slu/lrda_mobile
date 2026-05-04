@@ -134,14 +134,13 @@ export default class ApiService {
   }
 
   /**
-    * Fetches user data from Firestore first, then the API if Firestore data is not found.
+    * Fetches user data from the API.
     * @param {string} uid - The UID of the user.
     * @returns {Promise<UserData | null>} The user data.
     */
   static async fetchUserData(uid: string): Promise<UserData | null> {
     try {
       // Fetch user data from API
-      console.log("Fetching user data from API for UID:", uid);
       const url = `${API_BASE_URL}query`;
       const headers = {
         "Content-Type": "application/json",
@@ -176,7 +175,7 @@ export default class ApiService {
 
 
   /**
-   * Fetches the name of the creator by querying the API and Firestore with the given creatorId.
+   * Fetches the name of the creator by querying the API with the given creatorId.
    * @param {string} creatorId - The UID of the creator.
    * @returns {Promise<string>} The name of the creator.
    */

@@ -167,7 +167,6 @@ export class User {
       }
 
       await AsyncStorage.setItem(AUTH_TOKEN_KEY, token);
-      console.log(`[User.login] Token stored in AsyncStorage: ${token.substring(0, 20)}...`);
       this.userData = user;
       await this.persistUser(user);
       this.notifyLoginState();

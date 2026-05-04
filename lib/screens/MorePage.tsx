@@ -119,11 +119,8 @@ export default function MorePage() {
         return;
       }
 
-      // Debug: Check if token exists
       const token = await AsyncStorage.getItem("authToken");
-      console.log(`[onDeleteAccount] Token exists: ${!!token}, length: ${token?.length ?? 0}`);
       if (!token) {
-        console.warn(`[onDeleteAccount] WARNING: No authToken found in AsyncStorage!`);
         Alert.alert(
           "Authentication Error",
           "Your session has expired. Please log in again to delete your account."
@@ -145,8 +142,6 @@ export default function MorePage() {
           method: "POST",
           body: JSON.stringify(payload),
         });
-
-        console.log(`[Account Delete] Response status: ${response.status}, ok: ${response.ok}`);
 
         if (response.ok) {
           Alert.alert("Success", "Your account deletion request was received. You will be logged out.");
@@ -204,12 +199,6 @@ export default function MorePage() {
       console.log(e);
     }
   };
-
-  const handleDeleteUserAccount = () => {
-    setTimeout(() => {
-      onLogoutPress();
-    }, 3000)
-  }
 
   const handleReportClick = () => {
     const email = 'yashkamal.bhatia@slu.edu'; // The predefined email address

@@ -21,15 +21,8 @@ export async function authFetch(path: string, options: AuthFetchOptions = {}) {
         ...(headers as Record<string, string> | undefined),
     };
 
-    if (!skipAuth) {
-        if (token && token.trim().length > 0) {
-            mergedHeaders.Authorization = `Bearer ${token}`;
-            console.log(`[authFetch] ${path}: Adding Bearer token (length: ${token.length})`);
-        } else {
-            console.warn(`[authFetch] ${path}: NO TOKEN FOUND in AsyncStorage! User may not be authenticated. skipAuth=${skipAuth}`);
-        }
-    } else {
-        console.log(`[authFetch] ${path}: Skipping auth (unauthenticated endpoint)`);
+    if (!skipAuth && token && token.trim().length > 0) {
+        mergedHeaders.Authorization = `Bearer ${token}`;
     }
 
     const baseUrl = AUTH_API_URL.replace(/\/$/, "");
