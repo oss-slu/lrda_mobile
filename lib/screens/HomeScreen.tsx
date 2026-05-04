@@ -15,7 +15,8 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { User } from "../models/user_class";
+import { useAuthStore } from "../stores/authStore";
+import { getHasDoneTutorial, setTutorialDone } from "../utils/tutorial";
 import { Note } from "../../types";
 import ApiService from "../utils/api_calls";
 import DataConversion from "../utils/data_conversion";
@@ -39,11 +40,11 @@ import TooltipContent from "../onboarding/TooltipComponent";
 import { useRouter, useFocusEffect } from "expo-router";
 
 const { width, height } = Dimensions.get("window");
-const user = User.getInstance();
 const limit = 20;
 
 const HomeScreen: React.FC = () => {
   const router = useRouter();
+  const authUser = useAuthStore((s) => s.user);
   const [notes, setNotes] = useState<Note[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
   const [updateCounter, setUpdateCounter] = useState(0);
@@ -86,20 +87,17 @@ const HomeScreen: React.FC = () => {
   }, [router, notes]);
 
   useEffect(() => {
-    (async () => {
-      const name = await user.getName();
-      if (name) {
-        const firstName = name.split(" ")[0];
-        setUserName(firstName);
-
-        const initials = name
-          .split(" ")
-          .map((namePart) => namePart[0])
-          .join("");
-        setUserInitials(initials);
-      }
-    })();
-  }, []);
+    const name = authUser?.name;
+    if (name) {
+      const firstName = name.split(" ")[0];
+      setUserName(firstName);
+      const initials = name
+        .split(" ")
+        .map((namePart) => namePart[0])
+        .join("");
+      setUserInitials(initials);
+    }
+  }, [authUser]);
 
   const refreshPage = useCallback(() => {
     setPage(1);
@@ -131,7 +129,7 @@ const HomeScreen: React.FC = () => {
       }
 
       const skip = (pageNum - 1) * limit;
-      const userId = await user.getId();
+      const userId = authUser?.id ?? "";
 
       const data = await ApiService.fetchMessagesBatch(false, published, userId, limit, skip);
 
@@ -216,10 +214,9 @@ const HomeScreen: React.FC = () => {
     );
   };
 
-  const handleArchiveNote = async (note: Note | undefined, user: User) => {
+  const handleArchiveNote = async (note: Note | undefined) => {
     if (note?.id) {
       try {
-        const userId = await user.getId();
         const updatedNote = {
           ...note,
           isPublished: false,
@@ -316,7 +313,7 @@ const HomeScreen: React.FC = () => {
     const noteToDelete = notes.find((note) => note.id === id);
 
     if (noteToDelete) {
-      handleArchiveNote(noteToDelete, user); // Pass the correct arguments
+      handleArchiveNote(noteToDelete);
     }
 
     setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
@@ -548,7 +545,7 @@ const HomeScreen: React.FC = () => {
 
   // useEffect to update the userTutorial state after the async call resolves.
   useEffect(() => {
-    User.getHasDoneTutorial("HomeScreen").then((tutorialDone: boolean) => {
+    getHasDoneTutorial("HomeScreen").then((tutorialDone: boolean) => {
       setUserTutorial(tutorialDone);
       if (!tutorialDone) {
         setAccountTip(true); // Enable the account tip only if the tutorial hasn't been done
@@ -589,7 +586,7 @@ const HomeScreen: React.FC = () => {
                       setSearchTip(false);
                       setFilterToolTip(false);
                       setPubPrivTip(false);
-                      User.setUserTutorialDone("HomeScreen", true);
+                      setTutorialDone("HomeScreen", true);
                     }}
                   />
                 }
@@ -636,7 +633,7 @@ const HomeScreen: React.FC = () => {
                     message="Switch between your published and privated notes with this switch"
                     onPressOk={() => {
                       setPubPrivTip(false);
-                      User.setUserTutorialDone("HomeScreen", true);
+                      setTutorialDone("HomeScreen", true);
                     }}
                     onSkip={() => {
                       // Disable all tutorial tips when Skip is pressed
@@ -644,7 +641,7 @@ const HomeScreen: React.FC = () => {
                       setSearchTip(false);
                       setFilterToolTip(false);
                       setPubPrivTip(false);
-                      User.setUserTutorialDone("HomeScreen", true);
+                      setTutorialDone("HomeScreen", true);
                     }}
                   />
                 }
@@ -697,7 +694,7 @@ const HomeScreen: React.FC = () => {
                           setSearchTip(false);
                           setFilterToolTip(false);
                           setPubPrivTip(false);
-                          User.setUserTutorialDone("HomeScreen", true);
+                          setTutorialDone("HomeScreen", true);
                         }}
                       />
                     }
@@ -766,7 +763,7 @@ const HomeScreen: React.FC = () => {
                           setSearchTip(false);
                           setFilterToolTip(false);
                           setPubPrivTip(false);
-                          User.setUserTutorialDone("HomeScreen", true);
+                          setTutorialDone("HomeScreen", true);
                         }}
                       />
                     }

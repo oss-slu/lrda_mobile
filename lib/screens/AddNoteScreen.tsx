@@ -29,7 +29,7 @@ import { useTheme } from "../components/ThemeProvider";
 import LoadingModal from "../components/LoadingModal";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Video } from "expo-av";
-import { User } from "../models/user_class";
+import { getHasDoneTutorial, setTutorialDone } from "../utils/tutorial";
 import { AudioType, Media } from "../models/media_class";
 import ApiService from "../utils/api_calls";
 import { useAddNoteStore } from "../stores/addNoteStore";
@@ -39,8 +39,6 @@ import { Button } from "react-native-paper";
 import TooltipContent from "../onboarding/TooltipComponent";
 import Tooltip from "react-native-walkthrough-tooltip";
 import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
-
-const user = User.getInstance();
 
 const AddNoteScreen: React.FC = () => {
   const router = useRouter();
@@ -398,7 +396,7 @@ const AddNoteScreen: React.FC = () => {
   // Update the userTutorial state once the async function resolves.
   useEffect(() => {
     // For the "AddNote" tutorial
-    User.getHasDoneTutorial("AddNote").then((result: boolean) => {
+    getHasDoneTutorial("AddNote").then((result: boolean) => {
       setUserTutorial(result);
     });
   }, []);
@@ -425,12 +423,12 @@ const AddNoteScreen: React.FC = () => {
                   onPressOk={() => {
                     setMediaTip(false);
                     setUserTutorial(true);
-                    User.setUserTutorialDone("AddNote", true);
+                    setTutorialDone("AddNote", true);
                   }}
                   onSkip={() => {
                     setMediaTip(false);
                     setUserTutorial(true);
-                    User.setUserTutorialDone("AddNote", true);
+                    setTutorialDone("AddNote", true);
                   }}
                 />
               }

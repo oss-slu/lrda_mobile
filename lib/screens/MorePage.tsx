@@ -3,7 +3,8 @@ import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, Dimensions
 import { Ionicons, Feather, MaterialIcons, Entypo } from "@expo/vector-icons";
 import { useTheme } from "../components/ThemeProvider";
 import { useThemeStore } from "../stores/themeStore";
-import { User } from "../models/user_class";
+import { useAuthStore } from "../stores/authStore";
+import { getHasDoneTutorial, setTutorialDone } from "../utils/tutorial";
 import { useRouter } from "expo-router";
 import Carousel from "react-native-reanimated-carousel";
 import ThemeToggle from "../components/ThemeToggle";
@@ -22,7 +23,8 @@ const data = [
 export default function MorePage() {
   const { theme, isDarkmode, toggleDarkmode } = useTheme();
   const clearTheme = useThemeStore((state) => state.clearTheme);
-  const userObject = User.getInstance();
+  const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
   const router = useRouter();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isThemeOpen, setIsThemeOpen] = useState(false);
@@ -30,18 +32,16 @@ export default function MorePage() {
   const [userInitials, setUserInitials] = useState("N/A");
 
   useEffect(() => {
-    (async () => {
-      const name = await userObject.getName();
+    const name = user?.name;
+    if (name) {
       setUserName(name);
-      if (name) {
-        const initials = name
-          .split(" ")
-          .map((namePart) => namePart[0])
-          .join("");
-        setUserInitials(initials);
-      }
-    })();
-  }, []);
+      const initials = name
+        .split(" ")
+        .map((namePart) => namePart[0])
+        .join("");
+      setUserInitials(initials);
+    }
+  }, [user]);
 
   const handleThemeOpen = () => {
     setIsThemeOpen(!isThemeOpen);
@@ -71,7 +71,7 @@ export default function MorePage() {
 
   const onLogoutPress = async () => {
     try {
-      await User.getInstance().logout();
+      await logout();
       clearTheme();
       router.replace("/(auth)/login");
     } catch (e) {
@@ -131,7 +131,7 @@ export default function MorePage() {
   const [morePageTip, setMorePageTip] = useState<boolean>(false);
 
   useEffect(() => {
-    User.getHasDoneTutorial("MorePage").then((tutorialDone: boolean) => {
+    getHasDoneTutorial("MorePage").then((tutorialDone: boolean) => {
       setUserTutorial(tutorialDone);
       if (!tutorialDone) {
         setMorePageTip(true);
@@ -200,12 +200,12 @@ export default function MorePage() {
                   onPressOk={() => {
                     setUserTutorial(true);
                     setMorePageTip(false);
-                    User.setUserTutorialDone("MorePage", true);
+                    setTutorialDone("MorePage", true);
                   }}
                   onSkip={() => {
                     setUserTutorial(true);
                     setMorePageTip(false);
-                    User.setUserTutorialDone("MorePage", true);
+                    setTutorialDone("MorePage", true);
                   }}
                 />
               }

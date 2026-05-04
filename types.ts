@@ -1,5 +1,4 @@
 import { Media, PhotoType, VideoType, AudioType } from "./lib/models/media_class";
-import { User } from "./lib/models/user_class";
 
 export type Tag = {
   label: string;
@@ -93,10 +92,4 @@ export type AddNoteScreenProps = {
 export type ImageNote = {
   image: string;
   note: Note;
-};
-
-export type GoogleMapProps = {
-  route: any;
-  updateCounter: any;
-  user: User;
 };

@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@10play/tentap-editor": "^0.5.23",
+    "@better-auth/expo": "^1.6.9",
     "@expo/metro-runtime": "~6.1.2",
     "@gapur/react-native-accordion": "^1.0.7",
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -38,6 +39,7 @@
     "expo-location": "~19.0.8",
     "expo-media-library": "~18.2.1",
     "expo-router": "~6.0.23",
+    "expo-secure-store": "^55.0.13",
     "expo-splash-screen": "~31.0.13",
     "expo-status-bar": "~3.0.9",
     "expo-updates": "~29.0.16",

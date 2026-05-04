@@ -3,12 +3,7 @@ import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, ImageBackgr
 import { authClient, AUTH_API_URL } from "../../auth/client";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useRouter } from "expo-router";
-
-// Utility function to validate email format
-const validateEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-};
+import { validateEmail as checkEmail } from "../../utils/validation";
 
 const ForgotPassword: React.FC = () => {
   const router = useRouter();
@@ -20,7 +15,7 @@ const ForgotPassword: React.FC = () => {
       return;
     }
 
-    if (!validateEmail(email)) {
+    if (checkEmail(email)) {
       Alert.alert("Error", "Please enter a valid email address.");
       return;
     }

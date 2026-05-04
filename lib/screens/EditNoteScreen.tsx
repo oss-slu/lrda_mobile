@@ -16,7 +16,7 @@ import ToastMessage from "react-native-toast-message";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import PhotoScroller from "../components/photoScroller";
-import { User } from "../models/user_class";
+import { useAuthStore } from "../stores/authStore";
 import AudioContainer from "../components/audio";
 import { Media, AudioType } from "../models/media_class";
 import ApiService from "../utils/api_calls";
@@ -30,9 +30,9 @@ import { useAddNoteStore } from "../stores/addNoteStore";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
 
-const user = User.getInstance();
 const EditNoteScreen = () => {
   const router = useRouter();
+  const authUser = useAuthStore((s) => s.user);
   const navigation = useNavigation();
   const { noteData } = useLocalSearchParams<{ noteData: string }>();
   const note = useMemo(() => {
@@ -227,12 +227,11 @@ const EditNoteScreen = () => {
       setIsUpdating(true);
 
       try {
-        const userId = await user.getId();
         const editedNote = {
           id: note.id,
           title,
           text: latestContent,
-          creatorId: userId,
+          creatorId: authUser?.id,
           media,
           latitude: location.latitude,
           longitude: location.longitude,
@@ -267,13 +266,12 @@ const EditNoteScreen = () => {
   const handleSaveNote = async () => {
     setIsUpdating(true);
     try {
-      const userId = await user.getId();
       const textContent = await editor.getHTML();
       const editedNote = {
         id: note.id,
         title,
         text: textContent,
-        creatorId: userId,
+        creatorId: authUser?.id,
         media,
         latitude: location.latitude,
         longitude: location.longitude,

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View, SafeAreaView, Image, FlatList, TouchableOpacity } from "react-native";
-import { User } from "../models/user_class";
+import { useAuthStore } from "../stores/authStore";
 import { Note, ImageNote, ProfilePageProps } from "../../types";
 import DataConversion from "../utils/data_conversion";
 import ApiService from "../utils/api_calls";
@@ -9,10 +9,9 @@ import { Feather } from "@expo/vector-icons";
 import { defaultTextFont } from "../../styles/globalStyles";
 import { useRouter } from "expo-router";
 
-const user = User.getInstance();
-
 export default function ProfilePage() {
   const navigation = useRouter();
+  const authUser = useAuthStore((s) => s.user);
   const [allImages, setAllImages] = useState<ImageNote[]>([]);
   const [userInitials, setUserInitials] = useState("N/A");
   const [userName, setUserName] = useState("");
@@ -20,21 +19,19 @@ export default function ProfilePage() {
   const { theme } = useTheme(); // Access theme dynamically
 
   useEffect(() => {
-    (async () => {
-      const name = await user.getName();
-      setUserName(name || "");
-      if (name) {
-        const initials = name
-          .split(" ")
-          .map((namePart) => namePart[0])
-          .join("");
-        setUserInitials(initials);
-      }
-    })();
+    const name = authUser?.name;
+    if (name) {
+      setUserName(name);
+      const initials = name
+        .split(" ")
+        .map((namePart) => namePart[0])
+        .join("");
+      setUserInitials(initials);
+    }
 
     const fetchMessages = async () => {
       try {
-        const data = await ApiService.fetchMessages(false, false, (await user.getId()) || "");
+        const data = await ApiService.fetchMessages(false, false, authUser?.id || "");
         const fetchedNotes = DataConversion.convertMediaTypes(data);
         setFieldNotes(fetchedNotes.length);
 
@@ -46,7 +43,7 @@ export default function ProfilePage() {
     };
 
     fetchMessages();
-  }, []);
+  }, [authUser]);
 
   const navigateToEditNoteScreen = (note: Note) => {
     navigation.push({ pathname: "/edit-note", params: { noteData: JSON.stringify(note) } });

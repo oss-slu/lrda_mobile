@@ -15,7 +15,8 @@ import {
 } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { User } from "../models/user_class";
+import { useAuthStore } from "../stores/authStore";
+import { getHasDoneTutorial, setTutorialDone } from "../utils/tutorial";
 import { Note } from "../../types";
 import ApiService from "../utils/api_calls";
 import DataConversion from "../utils/data_conversion";
@@ -35,13 +36,13 @@ import LottieView from "lottie-react-native";
 import { defaultTextFont } from "../../styles/globalStyles";
 import Tooltip from "react-native-walkthrough-tooltip";
 import TooltipContent from "../onboarding/TooltipComponent";
-const user = User.getInstance();
 const { width, height } = Dimensions.get("window");
 
 const limit = 20;
 
 const Library = () => {
   const router = useRouter();
+  const authUser = useAuthStore((s) => s.user);
   const [notes, setNotes] = useState<Note[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
   const [updateCounter, setUpdateCounter] = useState(0);
@@ -75,18 +76,16 @@ const Library = () => {
   const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
-    (async () => {
-      const name = await user.getName();
+    const name = authUser?.name;
+    if (name) {
       setUserName(name);
-      if (name) {
-        const initials = name
-          .split(" ")
-          .map((namePart) => namePart[0])
-          .join("");
-        setUserInitials(initials);
-      }
-    })();
-  }, []);
+      const initials = name
+        .split(" ")
+        .map((namePart) => namePart[0])
+        .join("");
+      setUserInitials(initials);
+    }
+  }, [authUser]);
 
   const refreshPage = useCallback(() => {
     setPage(1);
@@ -112,8 +111,7 @@ const Library = () => {
     try {
       // Calculate skip using the current page number
       const skip = (pageNum - 1) * limit;
-      // Get userId if needed
-      const userId = await user.getId();
+      const userId = authUser?.id ?? "";
       // Use batch-fetching with skip and limit; note we use isPrivate state
       const data = await ApiService.fetchMapsMessagesBatch(isPrivate, published, isPrivate ? userId : "", limit, skip);
       // Filter out archived notes; assume notes without `isArchived` are not archived
@@ -357,7 +355,7 @@ const Library = () => {
   const [libraryTip, setLibraryTip] = useState<boolean>(false);
 
   useEffect(() => {
-    User.getHasDoneTutorial("Library").then((tutorialDone: boolean) => {
+    getHasDoneTutorial("Library").then((tutorialDone: boolean) => {
       setUserTutorial(tutorialDone);
       // If the tutorial has not been completed, enable the libraryTip.
       if (!tutorialDone) {
@@ -468,12 +466,12 @@ const Library = () => {
                 onPressOk={() => {
                   setUserTutorial(true);
                   setLibraryTip(false);
-                  User.setUserTutorialDone("Library", true);
+                  setTutorialDone("Library", true);
                 }}
                 onSkip={() => {
                   setUserTutorial(true);
                   setLibraryTip(false);
-                  User.setUserTutorialDone("Library", true);
+                  setTutorialDone("Library", true);
                 }}
               />
             }

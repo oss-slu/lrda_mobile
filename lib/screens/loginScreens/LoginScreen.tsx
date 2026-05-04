@@ -5,15 +5,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Animated, ImageBackground, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Snackbar } from "react-native-paper";
-import { User } from "../../models/user_class";
-import { removeItem } from "../../utils/async_storage";
+import { useAuthStore } from "../../stores/authStore";
 import { defaultTextFont } from "../../../styles/globalStyles";
 import { useRouter } from "expo-router";
 
-const user = User.getInstance();
-
 const LoginScreen: React.FC = () => {
   const router = useRouter();
+  const login = useAuthStore((s) => s.login);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [firstClick, setFirstClick] = useState(true);
@@ -56,44 +54,25 @@ const LoginScreen: React.FC = () => {
       toggleSnack(!snackState);
     } else {
       try {
-        const status = await user.login(username, password);
-        if (status == "success") {
-          const userId = await user.getId();
-          // console.log("in login page, Inside the is statement of success ", userId)
-          if (userId !== null) {
-            setUsername("");
-            setPassword("");
-            router.replace("/(tabs)");
-          }
-        }
+        await login(username, password);
+        setUsername("");
+        setPassword("");
+        router.replace("/(tabs)");
       } catch (error) {
-        console.log("login failed :", error);
+        console.log("login failed:", error);
         let message = "Login failed. Please try again.";
 
-        if (error.message.includes("network") || error.message.includes("Network request failed")) {
+        const msg = error.message || "";
+        if (msg.includes("network") || msg.includes("Network request failed")) {
           message = "Network error. Please check your connection.";
-        } else if (error.message.includes("EMAIL_NOT_VERIFIED") || error.message.includes("Email not verified")) {
+        } else if (msg.includes("Email not verified") || msg.includes("EMAIL_NOT_VERIFIED")) {
           message = "Please verify your email before logging in. Check your inbox and spam folder.";
-        } else if (
-          error.message.includes("auth/invalid-email") ||
-          error.message.includes("auth/invalid-credential") ||
-          error.message.includes("INVALID_EMAIL_OR_PASSWORD") ||
-          error.message.includes("Invalid email or password")
-        ) {
+        } else if (msg.includes("Invalid email or password") || msg.includes("INVALID_EMAIL_OR_PASSWORD")) {
           message = "Invalid username or password.";
         }
         setSnackMessage(message);
         toggleSnack(true);
       }
-    }
-  };
-
-  const clearOnboarding = async () => {
-    try {
-      await removeItem("onboarded");
-      console.log("Onboarding key cleared!");
-    } catch (error) {
-      console.error("Failed to clear the onboarding key.", error);
     }
   };
 

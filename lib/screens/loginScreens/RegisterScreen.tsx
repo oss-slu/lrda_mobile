@@ -2,25 +2,10 @@ import React, { useState } from "react";
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ImageBackground } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Snackbar } from "react-native-paper";
-import { signUpWithEmail } from "../../auth/client";
+import { authClient } from "../../auth/client";
 import { validateEmail, validatePassword } from "../../utils/validation";
 import { defaultTextFont } from "../../../styles/globalStyles";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-
-/**
- * Clears the navigation-related keys from AsyncStorage.
- * Keys include: "Explore", "AddNote", "MorePage", "Library", and "HomeScreen".
- */
-const clearNavigationKeys = async (): Promise<void> => {
-  try {
-    const keysToRemove = ["Explore", "AddNote", "MorePage", "Library", "HomeScreen"];
-    await AsyncStorage.multiRemove(keysToRemove);
-    console.log("Navigation keys removed successfully");
-  } catch (error) {
-    console.error("Error removing navigation keys:", error);
-  }
-};
 
 const RegistrationScreen: React.FC = () => {
   const router = useRouter();
@@ -56,7 +41,7 @@ const RegistrationScreen: React.FC = () => {
 
     try {
       const fullName = `${firstName} ${lastName}`;
-      const { error } = await signUpWithEmail({
+      const { error } = await authClient.signUp.email({
         email,
         password,
         name: fullName.trim(),
@@ -66,9 +51,6 @@ const RegistrationScreen: React.FC = () => {
         throw new Error(error.message || "Signup failed. Please try again.");
       }
 
-      await clearNavigationKeys();
-
-      // Set success message and navigate to login screen
       setRegistrationSuccess(true);
       setSnackMessage("Signup successful! Please verify your email before logging in.");
       setSnackState(true);
@@ -76,10 +58,10 @@ const RegistrationScreen: React.FC = () => {
       setRegistrationSuccess(false);
       let message = error?.message || "Signup failed. Please try again.";
       console.log(message);
-      if (message.includes("auth/email-already-in-use") || message.includes("User already exists")) {
+      if (message.includes("User already exists") || message.includes("email-already-in-use")) {
         message = "The email address is already in use by another account.";
       } else if (message.includes("Password too weak")) {
-        message = "Password must include upper/lowercase letters, a number, and a special character.";
+        message = "Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character.";
       }
       setSnackMessage(message);
       setSnackState(true);

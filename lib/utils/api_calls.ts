@@ -1,13 +1,13 @@
 import Constants from "expo-constants";
-import { User } from "../models/user_class";
+import { useAuthStore } from "../stores/authStore";
 import { Tag } from "../../types";
 
 const extra = (Constants.expoConfig?.extra ?? {}) as { apiBaseUrl?: string };
 const API_BASE_URL = extra.apiBaseUrl || "http://localhost:3002";
 
-async function getAuthHeaders(): Promise<HeadersInit> {
+function getAuthHeaders(): HeadersInit {
   const headers: HeadersInit = { "Content-Type": "application/json" };
-  const token = await User.getInstance().getToken();
+  const token = useAuthStore.getState().sessionToken;
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
@@ -24,7 +24,7 @@ export default class ApiService {
     allResults: any[] = []
   ): Promise<any[]> {
     try {
-      const headers = await getAuthHeaders();
+      const headers = getAuthHeaders();
       const params = new URLSearchParams();
       params.set("limit", limit.toString());
       params.set("offset", skip.toString());
@@ -56,7 +56,7 @@ export default class ApiService {
 
   static async fetchMessagesBatch(global: boolean, published: boolean, userId: string, limit = 20, skip = 0): Promise<any[]> {
     try {
-      const headers = await getAuthHeaders();
+      const headers = getAuthHeaders();
       const params = new URLSearchParams();
       params.set("limit", limit.toString());
       params.set("offset", skip.toString());
@@ -82,7 +82,7 @@ export default class ApiService {
 
   static async fetchMapsMessagesBatch(global: boolean, published: boolean, userId: string, limit = 20, skip = 0): Promise<any[]> {
     try {
-      const headers = await getAuthHeaders();
+      const headers = getAuthHeaders();
       const params = new URLSearchParams();
       params.set("limit", limit.toString());
       params.set("offset", skip.toString());
@@ -100,7 +100,7 @@ export default class ApiService {
 
   static async fetchUserData(userId: string): Promise<any | null> {
     try {
-      const headers = await getAuthHeaders();
+      const headers = getAuthHeaders();
       const url = `${API_BASE_URL}/api/users/${userId}`;
       const response = await fetch(url, { method: "GET", headers });
 
@@ -118,7 +118,7 @@ export default class ApiService {
 
   static async fetchCreatorName(creatorId: string): Promise<string> {
     try {
-      const headers = await getAuthHeaders();
+      const headers = getAuthHeaders();
       const url = `${API_BASE_URL}/api/users/${creatorId}`;
       const response = await fetch(url, { method: "GET", headers });
 
@@ -136,7 +136,7 @@ export default class ApiService {
 
   static async deleteNoteFromAPI(id: string): Promise<boolean> {
     try {
-      const headers = await getAuthHeaders();
+      const headers = getAuthHeaders();
       const url = `${API_BASE_URL}/api/notes/${id}`;
       const response = await fetch(url, { method: "DELETE", headers });
 
@@ -152,7 +152,7 @@ export default class ApiService {
   }
 
   static async writeNewNote(note: any): Promise<Response> {
-    const headers = await getAuthHeaders();
+    const headers = getAuthHeaders();
     const tags: Tag[] = (note.tags || []).map((t: string) => ({ label: t, origin: "user" }));
 
     const body = {
@@ -185,7 +185,7 @@ export default class ApiService {
   }
 
   static async overwriteNote(note: any): Promise<Response> {
-    const headers = await getAuthHeaders();
+    const headers = getAuthHeaders();
     const tags: Tag[] = (note.tags || []).map((t: string | Tag) =>
       typeof t === "string" ? { label: t, origin: "user" as const } : t
     );
@@ -222,7 +222,7 @@ export default class ApiService {
 
   static async searchMessages(query: string): Promise<any[]> {
     try {
-      const headers = await getAuthHeaders();
+      const headers = getAuthHeaders();
       const params = new URLSearchParams();
       params.set("search", query);
       params.set("published", "true");
