@@ -4,19 +4,13 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  SafeAreaView,
   Image,
   StyleSheet,
   Dimensions,
-  Switch,
   Platform,
   StatusBar,
   Linking,
-  Alert,
-  TextInput,
-  Modal as NativeModal,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../components/ThemeProvider";
 import { useDispatch } from "react-redux";
@@ -30,8 +24,6 @@ import ReactNativeModal from 'react-native-modal';
 import AppThemeSelectorScreen from "./AppThemeSelectorScreen";
 import Entypo from 'react-native-vector-icons/Entypo';
 import { clearThemeReducer } from "../../redux/slice/ThemeSlice";
-import { authFetch } from "../config";
-import { KeyboardAvoidingView, Keyboard, TouchableWithoutFeedback } from "react-native"; // Import necessary components
 import { defaultTextFont } from "../../styles/globalStyles";
 import Tooltip from 'react-native-walkthrough-tooltip';
 import TooltipContent from "../onboarding/TooltipComponent";
@@ -76,103 +68,9 @@ export default function MorePage() {
   const handleSettingsToggle = () => {
     setIsSettingsOpen(!isSettingsOpen);
   }
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [reasons, setReasons] = useState([]); // To track selected reasons
-  const [keyboardVisible, setKeyboardVisible] = useState(false); // Track keyboard visibility
-
-
-  const [additionalDetails, setAdditionalDetails] = useState("");
-
-  const toggleReason = (reason) => {
-    if (reasons.includes(reason)) {
-      setReasons(reasons.filter((r) => r !== reason)); // Remove if already selected
-    } else {
-      setReasons([...reasons, reason]); // Add if not already selected
-    }
-  }
-
   const handleToggleDarkMode = () => {
     if (toggleDarkmode) {
       toggleDarkmode();
-    }
-  };
-
-
-  React.useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener("keyboardDidShow", () => {
-      setKeyboardVisible(true);
-    });
-    const keyboardDidHideListener = Keyboard.addListener("keyboardDidHide", () => {
-      setKeyboardVisible(false);
-    });
-
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-    };
-  }, []);
-
-  const onDeleteAccount = async () => {
-    try {
-      if (reasons.length === 0) {
-        Alert.alert("Error", "Please select at least one reason for account deletion.");
-        return;
-      }
-
-      const token = await AsyncStorage.getItem("authToken");
-      if (!token) {
-        Alert.alert(
-          "Authentication Error",
-          "Your session has expired. Please log in again to delete your account."
-        );
-        setShowDeleteModal(false);
-        // Navigate back to login
-        router.replace('/onboarding');
-        return;
-      }
-
-      // Send deletion request to backend
-      const payload = {
-        reasons,
-        additionalDetails: additionalDetails || "",
-      };
-
-      try {
-        const response = await authFetch("/api/account/delete", {
-          method: "POST",
-          body: JSON.stringify(payload),
-        });
-
-        if (response.ok) {
-          Alert.alert("Success", "Your account deletion request was received. You will be logged out.");
-          setShowDeleteModal(false);
-          // Perform local logout and cleanup
-          await onLogoutPress();
-          return;
-        }
-
-        // Attempt to parse error body
-        let errText = "Failed to delete account.";
-        try {
-          const errBody = await response.json();
-          console.error("[Account Delete] Error response:", JSON.stringify(errBody, null, 2));
-          if (errBody && errBody.message) errText = errBody.message;
-        } catch (e) {
-          console.error("[Account Delete] Failed to parse error response:", e);
-          // ignore parse errors
-        }
-
-        Alert.alert("Error", errText);
-        setShowDeleteModal(false);
-        return;
-      } catch (networkErr) {
-        console.error("Network error deleting account:", networkErr);
-        Alert.alert("Error", "Network error while attempting to delete account. Please try again.");
-        return;
-      }
-    } catch (error) {
-      console.error("Error deleting account:", error);
-      Alert.alert("Error", "Failed to delete account. Please try again.");
     }
   };
 
@@ -379,11 +277,6 @@ export default function MorePage() {
               >
                 <SettingOptions optionName={'App Theme'} icon={'none'} />
               </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setShowDeleteModal(true)}
-              >
-                <SettingOptions optionName={'Delete My Account'} icon={'delete'} />
-              </TouchableOpacity>
               <TouchableOpacity onPress={handleReportClick}>
                 <SettingOptions optionName={'Report an Issue'} icon={'report'} />
               </TouchableOpacity>
@@ -421,77 +314,6 @@ export default function MorePage() {
               <AppThemeSelectorScreen />
             </View>
           </ReactNativeModal>
-
-          <NativeModal
-            visible={showDeleteModal}
-            transparent={true}
-            animationType="slide"
-            onRequestClose={() => setShowDeleteModal(false)}
-          >
-            <KeyboardAvoidingView
-              style={[styles.modalOverlay, { justifyContent: keyboardVisible ? "flex-end" : "center" }]}
-              behavior={Platform.OS === "ios" ? "padding" : "height"} // Adjust for iOS and Android
-              keyboardVerticalOffset={Platform.OS === "ios" ? 50 : 0} // Offset for iOS
-            >
-              <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <View style={[styles.modalContent, { backgroundColor: isDarkmode ? "#333" : "#fff" }]}>
-                  <Text style={[styles.modalTitle, { color: theme.text }]}>Why are you deleting your account?</Text>
-
-                  {/* Checkbox Options */}
-                  <View style={styles.checkboxOption}>
-                    <TouchableOpacity style={styles.checkbox} onPress={() => toggleReason("Slow Loading")}>
-                      <Text style={[styles.checkboxSymbol, { color: theme.text }]}>
-                        {reasons.includes("Slow Loading") ? "☑" : "☐"}
-                      </Text>
-                    </TouchableOpacity>
-                    <Text style={[styles.checkboxText, { color: theme.text }]}>Slow Loading</Text>
-                  </View>
-                  <View style={styles.checkboxOption}>
-                    <TouchableOpacity style={styles.checkbox} onPress={() => toggleReason("Connectivity Issues")}>
-                      <Text style={[styles.checkboxSymbol, { color: theme.text }]}>
-                        {reasons.includes("Connectivity Issues") ? "☑" : "☐"}
-                      </Text>
-                    </TouchableOpacity>
-                    <Text style={[styles.checkboxText, { color: theme.text }]}>Connectivity Issues</Text>
-                  </View>
-                  <View style={styles.checkboxOption}>
-                    <TouchableOpacity style={styles.checkbox} onPress={() => toggleReason("No Reason")}>
-                      <Text style={[styles.checkboxSymbol, { color: theme.text }]}>
-                        {reasons.includes("No Reason") ? "☑" : "☐"}
-                      </Text>
-                    </TouchableOpacity>
-                    <Text style={[styles.checkboxText, { color: theme.text }]}>No Reason</Text>
-                  </View>
-
-
-                  {/* Additional Details */}
-                  <TextInput
-                    placeholder="Additional details (optional)"
-                    placeholderTextColor={isDarkmode ? "#aaa" : "#555"}
-                    style={[styles.textInput, { borderColor: isDarkmode ? "#555" : "#ccc", color: theme.text }]}
-                    value={additionalDetails}
-                    onChangeText={setAdditionalDetails}
-                  />
-
-                  {/* Buttons */}
-                  <View style={styles.modalButtonContainer}>
-                    <TouchableOpacity style={[styles.modalButton, { backgroundColor: "red" }]} onPress={onDeleteAccount}>
-                      <Text style={styles.modalButtonText}>Confirm Delete</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[
-                        styles.modalButton,
-                        { backgroundColor: isDarkmode ? "#6c757d" : "#007bff" },
-                      ]}
-                      onPress={() => setShowDeleteModal(false)}
-                    >
-                      <Text style={styles.modalButtonText}>Cancel</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </TouchableWithoutFeedback>
-            </KeyboardAvoidingView>
-          </NativeModal>
 
         </>)
       }
@@ -626,94 +448,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
 
-  deleteAccountBulletPoints: {
-    ...defaultTextFont,
-    fontSize: 8,
-  },
-  deleteAccountActionButtons: {
-    backgroundColor: 'white',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderColor: 'balck',
-    borderWidth: 1,
-    borderRadius: 12,
-  },
   switchText: { ...defaultTextFont, fontSize: 18, fontWeight: "500" },
   logout: { flexDirection: "row", justifyContent: "center", alignItems: "center", height: 50, width: "90%", borderRadius: 15, marginTop: 10 },
   logoutText: { ...defaultTextFont, fontSize: 20, fontWeight: "600", marginRight: 10 },
 
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContent: {
-    width: "90%",
-    borderRadius: 10,
-    padding: 20,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5, // Android shadow
-  },
-  modalTitle: {
-    ...defaultTextFont,
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-  radioOption: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 5,
-  },
-  radioText: {
-    ...defaultTextFont,
-    fontSize: 18,
-    marginLeft: 10,
-  },
-  textInput: {
-    height: 40,
-    width: "100%",
-    borderWidth: 1,
-    borderRadius: 5,
-    marginVertical: 10,
-    paddingHorizontal: 10,
-  },
-  modalButtonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    width: "100%",
-    marginTop: 20,
-  },
-  modalButton: {
-    padding: 10,
-    borderRadius: 5,
-    width: "45%",
-  },
-  modalButtonText: {
-    ...defaultTextFont,
-    color: "#fff",
-    textAlign: "center",
-    fontWeight: "600",
-  },
-
-  checkboxOption: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 5,
-  },
-  checkbox: {
-    marginRight: 10,
-  },
-  checkboxSymbol: {
-    ...defaultTextFont,
-    fontSize: 20,
-  },
-  checkboxText: {
-    ...defaultTextFont,
-    fontSize: 18,
-  },
 });
