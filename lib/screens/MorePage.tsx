@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, Dimensions, Platform, StatusBar, Linking } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, Feather, MaterialIcons, Entypo } from "@expo/vector-icons";
 import { useTheme } from "../components/ThemeProvider";
 import { useDispatch } from "react-redux";
 import { User } from "../models/user_class";
 import { useRouter } from "expo-router";
 import Carousel from "react-native-reanimated-carousel";
 import ThemeToggle from "../components/ThemeToggle";
-import Feather from "react-native-vector-icons/Feather";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import ReactNativeModal from "react-native-modal";
 import AppThemeSelectorScreen from "./AppThemeSelectorScreen";
-import Entypo from "react-native-vector-icons/Entypo";
 import { clearThemeReducer } from "../../redux/slice/ThemeSlice";
 import { defaultTextFont } from "../../styles/globalStyles";
 import Tooltip from "react-native-walkthrough-tooltip";

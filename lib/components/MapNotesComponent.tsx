@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
 import { useTheme } from "./ThemeProvider";
-import FontAwesome6 from "react-native-vector-icons/FontAwesome6";
+import { FontAwesome6 } from "@expo/vector-icons";
 import { defaultTextFont } from "../../styles/globalStyles";
 
 const { width } = Dimensions.get("window");

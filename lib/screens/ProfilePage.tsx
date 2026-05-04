@@ -5,7 +5,7 @@ import { Note, ImageNote, ProfilePageProps } from "../../types";
 import DataConversion from "../utils/data_conversion";
 import ApiService from "../utils/api_calls";
 import { useTheme } from "../components/ThemeProvider";
-import Feather from "react-native-vector-icons/Feather";
+import { Feather } from "@expo/vector-icons";
 import { defaultTextFont } from "../../styles/globalStyles";
 import { useRouter } from "expo-router";
 

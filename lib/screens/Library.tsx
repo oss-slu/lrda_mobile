@@ -14,7 +14,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
 import { Note } from "../../types";
 import ApiService from "../utils/api_calls";
@@ -31,7 +31,6 @@ import ToastMessage from "react-native-toast-message";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import Greeting from "../components/Greeting";
 import NotesComponent from "../components/NotesComponent";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import LottieView from "lottie-react-native";
 import { defaultTextFont } from "../../styles/globalStyles";
 import Tooltip from "react-native-walkthrough-tooltip";

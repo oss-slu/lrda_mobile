@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity, ActivityIndicator, StatusBar } from "react-native";
 import WebView from "react-native-webview";
 import { useTheme } from "../components/ThemeProvider";
-import Feather from "react-native-vector-icons/Feather";
+import { Feather } from "@expo/vector-icons";
 import { defaultTextFont } from "../../styles/globalStyles";
 import { useRouter } from "expo-router";
 

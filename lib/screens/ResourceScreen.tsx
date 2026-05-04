@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions, FlatList, Linking, StatusBar, ScrollView } from "react-native";
 import { useTheme } from "../components/ThemeProvider";
-import Feather from "react-native-vector-icons/Feather";
+import { Feather } from "@expo/vector-icons";
 import { onlineResources, analogueResources } from "../data"; // Update path as needed
 import { defaultTextFont } from "../../styles/globalStyles";
 

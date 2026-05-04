@@ -1,8 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { SvgIcon } from "./SvgIcon";
-import IonIcons from "react-native-vector-icons/Ionicons";
-import Feather from "react-native-vector-icons/Feather";
+import { Ionicons, Feather } from "@expo/vector-icons";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import { useSelector, useDispatch } from "react-redux";
 import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
@@ -42,7 +41,7 @@ function AddNoteBtnComponent() {
         onPress={isAddButtonMode ? handleAdd : handlePublish}
       >
         {isAddButtonMode ? (
-          <IonIcons name="add" testID="add-icon" size={25} style={[styles.buttonIcon, { color: appThemeColor }]} />
+          <Ionicons name="add" testID="add-icon" size={25} style={[styles.buttonIcon, { color: appThemeColor }]} />
         ) : (
           <Feather name="upload-cloud" testID="publish-icon" size={25} style={[styles.buttonIcon, { color: appThemeColor }]} />
         )}

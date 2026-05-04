@@ -14,7 +14,7 @@ import {
   Keyboard,
   ActivityIndicator,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
 import { Note } from "../../types";
 import ApiService from "../utils/api_calls";
@@ -32,7 +32,6 @@ import NotesComponent from "../components/NotesComponent";
 import Greeting from "../components/Greeting";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import LottieView from "lottie-react-native";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
 import { useSelector, useDispatch } from "react-redux";
 import { defaultTextFont } from "../../styles/globalStyles";
