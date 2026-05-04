@@ -425,7 +425,7 @@ const loadingVideoStyles = StyleSheet.create({
   },
 });
 
-interface Note {
+export interface NoteDetailData {
   title: string;
   description: string;
   creatorId?: string;
@@ -436,7 +436,7 @@ interface Note {
 interface NoteDetailModalProps {
   isVisible: boolean;
   onClose: () => void;
-  note?: Note;
+  note?: NoteDetailData;
 }
 
 const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClose, note }) => {

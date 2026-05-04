@@ -36,7 +36,7 @@ async function parseResponse<T>(response: Response): Promise<T> {
 
 // --- Notes ---
 
-interface FetchNotesOptions {
+export interface FetchNotesOptions {
   creatorId?: string;
   published?: boolean;
   limit?: number;
