@@ -13,13 +13,13 @@ function ResourceScreen() {
   const router = useRouter();
   const { theme } = useTheme();
 
-  const renderOnlineResource = ({ item }) => (
+  const renderOnlineResource = ({ item }: { item: { title: string; url: string } }) => (
     <TouchableOpacity style={styles.resourceBox} onPress={() => Linking.openURL(item.url)}>
       <Text style={styles.resourceLink}>{item.title}</Text>
     </TouchableOpacity>
   );
 
-  const renderAnalogueResource = ({ item }) => (
+  const renderAnalogueResource = ({ item }: { item: string }) => (
     <View style={styles.resourceBox}>
       <Text style={styles.resourceText}>{item}</Text>
     </View>

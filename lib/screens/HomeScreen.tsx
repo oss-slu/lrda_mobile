@@ -283,7 +283,7 @@ const HomeScreen: React.FC = () => {
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "100%", paddingBottom: 15, paddingTop: 10 }}>
             <View style={styles.userAccountAndPageTitle}>
               <Tooltip
-                topAdjustment={Platform.OS === "android" ? -StatusBar.currentHeight : 0}
+                topAdjustment={Platform.OS === "android" ? -(StatusBar.currentHeight ?? 0) : 0}
                 showChildInTooltip={false}
                 isVisible={accountTip && !userTutorial}
                 content={
@@ -312,7 +312,7 @@ const HomeScreen: React.FC = () => {
           {!isSearchVisible && (
             <View style={homeStyles.publishedAndSortContainer}>
               <Tooltip
-                topAdjustment={Platform.OS === "android" ? -StatusBar.currentHeight : 0}
+                topAdjustment={Platform.OS === "android" ? -(StatusBar.currentHeight ?? 0) : 0}
                 showChildInTooltip={false}
                 isVisible={pubPrivTip && !userTutorial}
                 content={
@@ -336,7 +336,7 @@ const HomeScreen: React.FC = () => {
               <View>
                 {!isSortOpened ? (
                   <Tooltip
-                    topAdjustment={Platform.OS === "android" ? -StatusBar.currentHeight : 0}
+                    topAdjustment={Platform.OS === "android" ? -(StatusBar.currentHeight ?? 0) : 0}
                     isVisible={filterToolTip && !userTutorial}
                     content={
                       <TooltipContent message="Filter your notes with this!" onPressOk={() => { setFilterToolTip(false); setPubPrivTip(true); }} onSkip={skipTutorial} />
@@ -371,7 +371,7 @@ const HomeScreen: React.FC = () => {
               <View style={styles.searchIcon}>
                 <TouchableOpacity testID="searchButton" onPress={toggleSearchBar}>
                   <Tooltip
-                    topAdjustment={Platform.OS === "android" ? -StatusBar.currentHeight : 0}
+                    topAdjustment={Platform.OS === "android" ? -(StatusBar.currentHeight ?? 0) : 0}
                     isVisible={searchTip && !userTutorial}
                     content={
                       <TooltipContent message="Try out our search bar!" onPressOk={() => { setSearchTip(false); setFilterToolTip(true); }} onSkip={skipTutorial} />

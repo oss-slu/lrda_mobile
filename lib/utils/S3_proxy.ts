@@ -63,6 +63,7 @@ async function uploadMedia(uri: string, mediaType: string): Promise<string> {
     .then(async (resp) => {
       if (resp.ok) {
         const location = resp.headers.get("Location");
+        if (!location) throw new Error("Upload succeeded but no Location header returned");
         console.log("uploadMedia - Uploaded successfully, Location:", location);
         return location;
       } else {
@@ -124,17 +125,18 @@ export async function uploadAudio(uri: string): Promise<string> {
       console.log("uploadMedia - Server response status:", resp.status);
       if (resp.ok) {
         const location = resp.headers.get("Location");
+        if (!location) throw new Error("Upload succeeded but no Location header returned");
         console.log("uploadMedia - Uploaded successfully, Location:", location);
         attempts = 0;
         return location;
       } else {
-        console.log("uploadMedia - Server response body:", resp.body);
+        throw new Error(`Upload failed with status ${resp.status}`);
       }
     })
     .catch((err) => {
       if (attempts > 3) {
         console.error("uploadMedia - Error:", err);
-        return err;
+        throw err;
       }
       attempts++;
       return uploadAudio(uri);

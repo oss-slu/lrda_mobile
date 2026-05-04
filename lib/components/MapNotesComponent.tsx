@@ -3,11 +3,19 @@ import { View, Text, Image, ImageStyle, StyleSheet, Dimensions, TouchableOpacity
 import { useTheme } from "./ThemeProvider";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { defaultTextFont } from "../../styles/globalStyles";
+import { MapMarker } from "../../types";
 
 const { width } = Dimensions.get("window");
 const CARD_HEIGHT = 170;
 const CARD_WIDTH = width * 0.8;
-export const MapNotesComponent = ({ index, marker, onViewNote }) => {
+
+interface MapNotesComponentProps {
+  index: number;
+  marker: MapMarker;
+  onViewNote: (marker: MapMarker) => void;
+}
+
+export const MapNotesComponent = ({ index, marker, onViewNote }: MapNotesComponentProps) => {
   const { theme, isDarkmode } = useTheme();
   return (
     <View style={[styles.card, isDarkmode && styles.cardDark]} key={index}>

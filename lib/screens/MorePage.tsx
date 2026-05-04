@@ -91,7 +91,7 @@ export default function MorePage() {
     Linking.openURL(mailtoLink).catch((err) => console.error("Error opening email client:", err));
   };
 
-  const SettingOptions = ({ optionName, icon }) => (
+  const SettingOptions = ({ optionName, icon }: { optionName: string; icon: React.ComponentProps<typeof MaterialIcons>["name"] | "none" }) => (
     <View
       style={{
         height: 60,
@@ -117,7 +117,7 @@ export default function MorePage() {
       )}
     </View>
   );
-  const MenuItem = ({ title, iconName, onPress }) => (
+  const MenuItem = ({ title, iconName, onPress }: { title: string; iconName: React.ComponentProps<typeof Ionicons>["name"]; onPress: () => void }) => (
     <TouchableOpacity style={styles.menuButton} onPress={onPress}>
       <View style={styles.menuContent}>
         <Text style={[styles.menuText, { fontSize: 14, fontWeight: "500" }]}>{title}</Text>
@@ -193,7 +193,7 @@ export default function MorePage() {
             <Tooltip
               isVisible={morePageTip && !userTutorial}
               showChildInTooltip={false} // Changed from false to true
-              topAdjustment={Platform.OS === "android" ? -StatusBar.currentHeight : 0}
+              topAdjustment={Platform.OS === "android" ? -(StatusBar.currentHeight ?? 0) : 0}
               content={
                 <TooltipContent
                   message="Welcome to our more page! Here you can find settings, FAQ, logout, switch themes, and more!"

@@ -208,7 +208,7 @@ const AddNoteScreen: React.FC = () => {
     fetchCurrentLocation();
   }, []);
 
-  const displayErrorInEditor = async (errorMessage) => {
+  const displayErrorInEditor = async (errorMessage: string) => {
     const currentContent = await editor.getHTML();
     const errorTag = `<p style="color: red; font-weight: bold;">${errorMessage}</p><br />`;
     editor.setContent(currentContent + errorTag);
@@ -223,7 +223,7 @@ const AddNoteScreen: React.FC = () => {
       editor.focus();
     } catch (error) {
       console.error("Error inserting image:", error);
-      displayErrorInEditor(`Error inserting image: ${error.message}`);
+      displayErrorInEditor(`Error inserting image: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
@@ -235,7 +235,7 @@ const AddNoteScreen: React.FC = () => {
       editor.focus();
     } catch (error) {
       console.error("Error adding video:", error);
-      displayErrorInEditor(`Error adding video: ${error.message}`);
+      displayErrorInEditor(`Error adding video: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
@@ -248,7 +248,7 @@ const AddNoteScreen: React.FC = () => {
       editor.focus();
     } catch (error) {
       console.error("Error adding audio:", error);
-      displayErrorInEditor(`Error adding audio: ${error.message}`);
+      displayErrorInEditor(`Error adding audio: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
@@ -351,7 +351,7 @@ const AddNoteScreen: React.FC = () => {
         >
           <View style={{ flex: 1 }}>
             <Tooltip
-              topAdjustment={Platform.OS === "android" ? -StatusBar.currentHeight : 0}
+              topAdjustment={Platform.OS === "android" ? -(StatusBar.currentHeight ?? 0) : 0}
               isVisible={mediaTip === true && userTutorial === false}
               showChildInTooltip={true}
               content={

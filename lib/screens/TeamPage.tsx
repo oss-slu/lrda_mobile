@@ -109,7 +109,7 @@ export default function TeamPage() {
   const router = useRouter();
   const { theme } = useTheme();
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item }: { item: { id: number; name: string; role: string; image: any } }) => (
     <View style={styles.teamMember}>
       <Image source={item.image} style={styles.teamImage} accessible accessibilityLabel={`${item.name}, ${item.role}`} />
       <Text style={[styles.memberName, { color: theme.text || "#ffffff" }]}>{item.name}</Text>

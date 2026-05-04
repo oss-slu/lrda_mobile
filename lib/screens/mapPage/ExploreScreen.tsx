@@ -12,10 +12,11 @@ import {
   Keyboard,
   StatusBar,
   ActivityIndicator,
+  ScrollView,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
-import NoteDetailModal from "./NoteDetailModal";
+import NoteDetailModal, { NoteDetailData } from "./NoteDetailModal";
 import { formatToLocalDateString } from "../../components/time";
 import { Ionicons } from "@expo/vector-icons";
 import Tooltip from "react-native-walkthrough-tooltip";
@@ -26,6 +27,7 @@ import Constants from "expo-constants";
 import { useTheme } from "../../components/ThemeProvider";
 import { MapNotesComponent } from "../../components/MapNotesComponent";
 import { getHasDoneTutorial, setTutorialDone } from "../../utils/tutorial";
+import { Note, MapMarker } from "../../../types";
 
 const { width } = Dimensions.get("window");
 const CARD_HEIGHT = 220;
@@ -36,14 +38,17 @@ const LIMIT = 20; // Number of notes per batch
 const ExploreScreen = () => {
   const { theme, isDarkmode } = useTheme();
   const [isModalVisible, setModalVisible] = useState(false);
-  const [selectedNote, setSelectedNote] = useState(null);
+  const [selectedNote, setSelectedNote] = useState<NoteDetailData | undefined>(undefined);
   const [globeIcon, setGlobeIcon] = useState<"earth-outline" | "earth">("earth-outline");
   const [searchQuery, setSearchQuery] = useState("");
   const [mapType, setMapType] = useState<"standard" | "satellite" | "hybrid" | "terrain">("standard");
   const [showMapTypeOptions, setShowMapTypeOptions] = useState(false);
-  const [searchResults, setSearchResults] = useState(null);
-  const [userLocation, setUserLocation] = useState(null); // Store user's current location
-  const [state, setState] = useState({
+  const [searchResults, setSearchResults] = useState<Note[] | null>(null);
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [state, setState] = useState<{
+    markers: MapMarker[];
+    region: { latitude: number; longitude: number; latitudeDelta: number; longitudeDelta: number };
+  }>({
     markers: [],
     region: {
       latitude: 38.631393,
@@ -58,14 +63,14 @@ const ExploreScreen = () => {
   const [hasMore, setHasMore] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const _map = useRef(null);
-  const _scrollView = useRef(null);
+  const _map = useRef<MapView | null>(null);
+  const _scrollView = useRef<ScrollView | null>(null);
   const mapAnimation = useRef(new Animated.Value(0)).current; // Flag to control interactions between scrolling and marker pressing
   const scrollEnabled = useRef(true);
 
   const toggleMapTypeOptions = () => setShowMapTypeOptions(!showMapTypeOptions);
 
-  const onViewNote = (note) => {
+  const onViewNote = (note: MapMarker) => {
     setSelectedNote(note);
     setModalVisible(true);
   };
@@ -97,10 +102,10 @@ const ExploreScreen = () => {
     }
   }, [searchQuery, state.region]);
 
-  const mapNoteToMarker = (note) => {
-    const time = note.time ? new Date(note.time) : new Date(note.createdAt);
-    const latitude = typeof note.latitude === "number" ? note.latitude : parseFloat(note.latitude);
-    const longitude = typeof note.longitude === "number" ? note.longitude : parseFloat(note.longitude);
+  const mapNoteToMarker = (note: Note): MapMarker => {
+    const time = new Date(note.time);
+    const latitude = note.latitude ?? 0;
+    const longitude = note.longitude ?? 0;
     return {
       coordinate: {
         latitude: isNaN(latitude) ? 0 : latitude,
@@ -111,14 +116,14 @@ const ExploreScreen = () => {
       description: note.text || "No description available",
       images:
         note.media?.length > 0
-          ? note.media.map((mediaItem) => ({ uri: mediaItem.uri.toString() }))
+          ? note.media.map((mediaItem: { uri: string }) => ({ uri: mediaItem.uri.toString() }))
           : [{ uri: Image.resolveAssetSource(require("../../../assets/map_marker.png")).uri }],
       time: formatToLocalDateString(time),
       tags: note.tags || [],
     };
   };
 
-  const sortNotesByProximity = (markers) => {
+  const sortNotesByProximity = (markers: MapMarker[]): MapMarker[] => {
     if (!userLocation) return markers;
     return markers
       .map((marker) => {
@@ -133,8 +138,8 @@ const ExploreScreen = () => {
       .sort((a, b) => a.distance - b.distance);
   };
 
-  const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const toRad = (value) => (value * Math.PI) / 180;
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const toRad = (value: number) => (value * Math.PI) / 180;
     const R = 6371; // Radius of the Earth in km
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
@@ -156,7 +161,7 @@ const ExploreScreen = () => {
       const marker = state.markers[index];
       if (marker) {
         // Animate the map to the marker's region
-        _map.current.animateToRegion(
+        _map.current?.animateToRegion(
           {
             ...marker.coordinate,
             latitudeDelta: state.region.latitudeDelta,
@@ -168,7 +173,7 @@ const ExploreScreen = () => {
     });
 
     return () => {
-      mapAnimation.removeListener(listenerId); // Cleanup listener on unmount
+      mapAnimation.removeListener(listenerId);
     };
   }, [state.markers]);
 
@@ -236,7 +241,7 @@ const ExploreScreen = () => {
       if (!scrollEnabled.current) return;
       if (index < 0 || index >= state.markers.length) return;
       const { coordinate } = state.markers[index];
-      _map.current.animateToRegion(
+      _map.current?.animateToRegion(
         {
           ...coordinate,
           latitudeDelta: state.region.latitudeDelta,
@@ -248,7 +253,7 @@ const ExploreScreen = () => {
     return () => mapAnimation.removeListener(listenerId);
   }, [state.markers]);
 
-  const onMarkerPress = (markerData) => {
+  const onMarkerPress = (markerData: MapMarker) => {
     scrollEnabled.current = false;
 
     const markerIndex = state.markers.findIndex(
@@ -259,9 +264,9 @@ const ExploreScreen = () => {
     if (markerIndex !== -1) {
       // Scroll to the card corresponding to the marker
       const offset = markerIndex * (CARD_WIDTH + 20);
-      _scrollView.current.scrollTo({ x: offset, y: 0, animated: true });
+      _scrollView.current?.scrollTo({ x: offset, y: 0, animated: true });
 
-      _map.current.animateToRegion(
+      _map.current?.animateToRegion(
         {
           ...markerData.coordinate,
           latitudeDelta: state.region.latitudeDelta,
@@ -326,7 +331,7 @@ const ExploreScreen = () => {
           onSubmitEditing={handleSearch}
         />
         <Tooltip
-          topAdjustment={Platform.OS === "android" ? -StatusBar.currentHeight : 0}
+          topAdjustment={Platform.OS === "android" ? -(StatusBar.currentHeight ?? 0) : 0}
           isVisible={searchToolTip && !userTutorial}
           content={
             <TooltipContent

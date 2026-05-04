@@ -11,7 +11,7 @@ interface LoadingImageProps {
   width?: number;
 }
 
-export default function LoadingImage({ imageURI, type, isImage, height, width }: LoadingImageProps) {
+export default function LoadingImage({ imageURI, type, isImage, height = 70, width = 100 }: LoadingImageProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   if (isImage && imageURI !== "") {

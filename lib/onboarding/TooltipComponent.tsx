@@ -1,8 +1,14 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { useTheme } from "../components/ThemeProvider";
+import { useTheme, ThemeColors } from "../components/ThemeProvider";
 
-const TooltipContent = ({ message, onPressOk, onSkip }) => {
+interface TooltipContentProps {
+  message: string;
+  onPressOk: () => void;
+  onSkip: () => void;
+}
+
+const TooltipContent = ({ message, onPressOk, onSkip }: TooltipContentProps) => {
   const { theme } = useTheme();
   const styles = createStyles(theme);
 
@@ -21,7 +27,7 @@ const TooltipContent = ({ message, onPressOk, onSkip }) => {
   );
 };
 
-const createStyles = (theme) =>
+const createStyles = (theme: ThemeColors & Record<string, string>) =>
   StyleSheet.create({
     container: {
       backgroundColor: theme.tooltipBackground || "#FFF",

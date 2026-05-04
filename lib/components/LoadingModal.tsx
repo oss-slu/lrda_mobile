@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, Modal, Text, StyleSheet } from "react-native";
 import { defaultTextFont } from "../../styles/globalStyles";
 
-const LoadingModal = ({ visible }) => (
+const LoadingModal = ({ visible }: { visible: boolean }) => (
   <Modal animationType="fade" transparent={true} visible={visible}>
     <View style={styles.centeredView}>
       <View style={styles.modalView}>

@@ -62,7 +62,7 @@ const LoginScreen: React.FC = () => {
         console.log("login failed:", error);
         let message = "Login failed. Please try again.";
 
-        const msg = error.message || "";
+        const msg = error instanceof Error ? error.message : "";
         if (msg.includes("network") || msg.includes("Network request failed")) {
           message = "Network error. Please check your connection.";
         } else if (msg.includes("Email not verified") || msg.includes("EMAIL_NOT_VERIFIED")) {

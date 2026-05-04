@@ -113,7 +113,7 @@ export default function ProfilePage() {
 }
 
 // Generate styles dynamically based on theme
-const createStyles = (theme) =>
+const createStyles = (theme: Record<string, string>) =>
   StyleSheet.create({
     container: {
       flex: 1,

@@ -55,7 +55,7 @@ const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
         sound,
         isPlaying: false,
         progress: 0,
-        duration: status.isLoaded ? status.durationMillis / 1000 : 0,
+        duration: status.isLoaded ? (status.durationMillis ?? 0) / 1000 : 0,
       };
       setAudioState(newAudioState);
       return newAudioState;
@@ -74,13 +74,9 @@ const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
         setAudioState({ ...state, isPlaying: false });
         setPlayingMedia(null);
       } else {
-        if (playingMedia && playingMedia !== uri) {
-          const currentPlayingSound = audioState[playingMedia]?.sound;
-          if (currentPlayingSound) await currentPlayingSound.pauseAsync();
-          setAudioState((prev) => ({
-            ...prev,
-            [playingMedia]: { ...prev[playingMedia], isPlaying: false },
-          }));
+        if (playingMedia && playingMedia !== uri && audioState?.sound) {
+          await audioState.sound.pauseAsync();
+          setAudioState((prev) => (prev ? { ...prev, isPlaying: false } : null));
         }
 
         setPlayingMedia(uri);
@@ -98,7 +94,7 @@ const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
                     ...prev,
                     isPlaying: status.isPlaying,
                     progress: status.positionMillis / 1000,
-                    duration: status.durationMillis / 1000,
+                    duration: (status.durationMillis ?? 0) / 1000,
                   }
                 : null
             );

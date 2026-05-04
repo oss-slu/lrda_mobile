@@ -41,3 +41,14 @@ export type ImageNote = {
   image: string;
   note: Note;
 };
+
+export interface MapMarker {
+  coordinate: { latitude: number; longitude: number };
+  creatorId: string;
+  title: string;
+  description: string;
+  images: { uri: string }[];
+  time: string;
+  tags: string[];
+  distance?: number;
+}

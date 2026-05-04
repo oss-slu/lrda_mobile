@@ -4,11 +4,23 @@ import LoadingImage from "./loadingImage";
 import * as Location from "expo-location";
 import { fetchCreatorName } from "../utils/api_calls";
 import { defaultTextFont } from "../../styles/globalStyles";
+import { Note } from "../../types";
 
 const { width, height } = Dimensions.get("window");
 
-function NotesComponent({ IsImage, resolvedImageURI, ImageType, textLength, showTime, item, isPublished, isDarkmode }) {
-  const [address, setAddress] = useState(null);
+interface NotesComponentProps {
+  IsImage: boolean;
+  resolvedImageURI: string;
+  ImageType: string;
+  textLength: number;
+  showTime: string;
+  item: Note;
+  isPublished: boolean;
+  isDarkmode: boolean;
+}
+
+function NotesComponent({ IsImage, resolvedImageURI, ImageType, textLength, showTime, item, isPublished, isDarkmode }: NotesComponentProps) {
+  const [address, setAddress] = useState<string | null>(null);
   const [author, setAuthor] = useState("anonymous");
 
   const fetchUserName = async (creatorId: string) => {
@@ -20,9 +32,9 @@ function NotesComponent({ IsImage, resolvedImageURI, ImageType, textLength, show
     }
   };
 
-  const fetchAddress = async (latitude, longitude) => {
-    const lat = typeof latitude === "number" ? latitude : parseFloat(latitude);
-    const lon = typeof longitude === "number" ? longitude : parseFloat(longitude);
+  const fetchAddress = async (latitude: number | null, longitude: number | null) => {
+    const lat = typeof latitude === "number" ? latitude : NaN;
+    const lon = typeof longitude === "number" ? longitude : NaN;
 
     if (isNaN(lat) || isNaN(lon)) {
       return;

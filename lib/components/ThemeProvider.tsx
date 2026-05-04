@@ -3,7 +3,7 @@ import AsyncStorage from "../utils/async_storage";
 import { colors } from "./colors";
 import { useThemeStore } from "../stores/themeStore";
 
-type ThemeColors = (typeof colors)["lightColors"];
+export type ThemeColors = (typeof colors)["lightColors"];
 
 interface ThemeContextValue {
   isDarkmode: boolean;

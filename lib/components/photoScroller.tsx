@@ -126,7 +126,7 @@ const PhotoScroller = forwardRef(
         }, 2000);
       } catch (error) {
         console.error("Error saving media:", error);
-        displayErrorInEditor(`Error uploading media: ${error.message}`);
+        displayErrorInEditor(`Error uploading media: ${error instanceof Error ? error.message : String(error)}`);
       }
     };
 

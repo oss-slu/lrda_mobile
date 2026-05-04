@@ -12,7 +12,7 @@ jest.mock("../lib/components/ThemeProvider", () => ({
 
 jest.mock("@react-native-community/datetimepicker", () => {
   const { View } = require("react-native");
-  return (props) => <View testID={props.testID} />;
+  return (props: { testID?: string }) => <View testID={props.testID} />;
 });
 
 const FIXED_DATE = new Date("2024-01-15T12:00:00.000Z");

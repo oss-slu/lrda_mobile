@@ -1,3 +1,4 @@
+import "../global.css";
 import React, { useEffect } from "react";
 import { Stack } from "expo-router";
 import { ThemeProvider } from "../lib/components/ThemeProvider";
