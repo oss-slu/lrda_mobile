@@ -1,16 +1,5 @@
-import React, { useState, useEffect, } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  StyleSheet,
-  Dimensions,
-  Platform,
-  StatusBar,
-  Linking,
-} from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, Dimensions, Platform, StatusBar, Linking } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../components/ThemeProvider";
 import { useDispatch } from "react-redux";
@@ -18,14 +7,14 @@ import { User } from "../models/user_class";
 import { useRouter } from "expo-router";
 import Carousel from "react-native-reanimated-carousel";
 import ThemeToggle from "../components/ThemeToggle";
-import Feather from 'react-native-vector-icons/Feather';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import ReactNativeModal from 'react-native-modal';
+import Feather from "react-native-vector-icons/Feather";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import ReactNativeModal from "react-native-modal";
 import AppThemeSelectorScreen from "./AppThemeSelectorScreen";
-import Entypo from 'react-native-vector-icons/Entypo';
+import Entypo from "react-native-vector-icons/Entypo";
 import { clearThemeReducer } from "../../redux/slice/ThemeSlice";
 import { defaultTextFont } from "../../styles/globalStyles";
-import Tooltip from 'react-native-walkthrough-tooltip';
+import Tooltip from "react-native-walkthrough-tooltip";
 import TooltipContent from "../onboarding/TooltipComponent";
 const { width, height } = Dimensions.get("window");
 const data = [
@@ -34,17 +23,14 @@ const data = [
   { source: require("../../assets/Pond_049.jpg") },
 ];
 
-
-
-
 export default function MorePage() {
   const { theme, isDarkmode, toggleDarkmode } = useTheme();
   const dispatch = useDispatch();
   const userObject = User.getInstance();
   const router = useRouter();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isThemeOpen, setIsThemeOpen] = useState(false)
-  const [userName, setUserName] = useState('');
+  const [isThemeOpen, setIsThemeOpen] = useState(false);
+  const [userName, setUserName] = useState("");
   const [userInitials, setUserInitials] = useState("N/A");
 
   useEffect(() => {
@@ -63,17 +49,16 @@ export default function MorePage() {
 
   const handleThemeOpen = () => {
     setIsThemeOpen(!isThemeOpen);
-  }
+  };
 
   const handleSettingsToggle = () => {
     setIsSettingsOpen(!isSettingsOpen);
-  }
+  };
   const handleToggleDarkMode = () => {
     if (toggleDarkmode) {
       toggleDarkmode();
     }
   };
-
 
   const handleEmail = () => {
     const emailAddress = "yashkamal.bhatia@slu.edu";
@@ -99,49 +84,47 @@ export default function MorePage() {
   };
 
   const handleReportClick = () => {
-    const email = 'yashkamal.bhatia@slu.edu'; // The predefined email address
-    const subject = 'Bug Report on \'Where\'s Religion?'; // The subject of the email
-    const body = 'Please provide details of your issue you are facing here.'; // The body of the email
+    const email = "yashkamal.bhatia@slu.edu"; // The predefined email address
+    const subject = "Bug Report on 'Where's Religion?"; // The subject of the email
+    const body = "Please provide details of your issue you are facing here."; // The body of the email
 
     // Create the mailto link
     const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
     // Open the email client
-    Linking.openURL(mailtoLink)
-      .catch((err) => console.error('Error opening email client:', err));
+    Linking.openURL(mailtoLink).catch((err) => console.error("Error opening email client:", err));
   };
 
-
   const SettingOptions = ({ optionName, icon }) => (
-    <View style={{
-      height: 60,
-      width: width * 0.8,
-      backgroundColor: '#e5e8e5',
-      shadowColor: "#000", // Shadow color
-      shadowOffset: { width: 0, height: 4 }, // Shadow offset for depth
-      shadowOpacity: 0.1, // Subtle shadow opacity
-      shadowRadius: 6, // Blur for the shadow
-      marginTop: 30,
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: 20,
-      borderRadius: 10,
-
-    }}>
-      <Text style={{ ...defaultTextFont, fontSize: 14, fontWeight: '500', color: icon === 'delete' ? 'red' : 'black' }}>{optionName}</Text>
-      {
-        icon === 'none' ? (
-          <View style={{ height: 25, width: 25, backgroundColor: theme.homeColor, borderRadius: 50, borderWidth: 0.5 }}>
-          </View>) :
-          (<MaterialIcons name={icon} size={25} color={icon === 'delete' ? 'red' : 'black'} />)
-      }
+    <View
+      style={{
+        height: 60,
+        width: width * 0.8,
+        backgroundColor: "#e5e8e5",
+        shadowColor: "#000", // Shadow color
+        shadowOffset: { width: 0, height: 4 }, // Shadow offset for depth
+        shadowOpacity: 0.1, // Subtle shadow opacity
+        shadowRadius: 6, // Blur for the shadow
+        marginTop: 30,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingHorizontal: 20,
+        borderRadius: 10,
+      }}
+    >
+      <Text style={{ ...defaultTextFont, fontSize: 14, fontWeight: "500", color: icon === "delete" ? "red" : "black" }}>{optionName}</Text>
+      {icon === "none" ? (
+        <View style={{ height: 25, width: 25, backgroundColor: theme.homeColor, borderRadius: 50, borderWidth: 0.5 }}></View>
+      ) : (
+        <MaterialIcons name={icon} size={25} color={icon === "delete" ? "red" : "black"} />
+      )}
     </View>
-  )
+  );
   const MenuItem = ({ title, iconName, onPress }) => (
     <TouchableOpacity style={styles.menuButton} onPress={onPress}>
       <View style={styles.menuContent}>
-        <Text style={[styles.menuText, { fontSize: 14, fontWeight: '500' }]}>{title}</Text>
+        <Text style={[styles.menuText, { fontSize: 14, fontWeight: "500" }]}>{title}</Text>
         <Ionicons name={iconName} size={styles.menuIcon.fontSize} color={"black"} />
       </View>
     </TouchableOpacity>
@@ -160,13 +143,12 @@ export default function MorePage() {
     });
   }, []);
 
-
   return (
     <View style={{ flex: 1 }}>
       <StatusBar translucent backgroundColor="transparent" />
 
-      {
-        !isSettingsOpen ? (<>
+      {!isSettingsOpen ? (
+        <>
           {/* Header */}
           <View style={[styles.header, { backgroundColor: theme.homeColor }]}>
             <View style={styles.headerContent}>
@@ -192,25 +174,19 @@ export default function MorePage() {
             </View>
           </View>
 
-
-
           <ScrollView
-
-            contentContainerStyle={[styles.menuContainer, { paddingBottom: 200, }]}
+            contentContainerStyle={[styles.menuContainer, { paddingBottom: 200 }]}
             scrollEnabled={true}
             showsVerticalScrollIndicator={false}
           >
             {/* Carousel */}
-
 
             <View style={styles.carouselContainer}>
               <Carousel
                 width={width}
                 height={width / 2}
                 data={data}
-                renderItem={({ item }) => (
-                  <Image source={item.source} style={styles.bannerImage} />
-                )}
+                renderItem={({ item }) => <Image source={item.source} style={styles.bannerImage} />}
                 autoPlay
                 autoPlayInterval={3000}
                 scrollAnimationDuration={800}
@@ -221,7 +197,7 @@ export default function MorePage() {
             <Tooltip
               isVisible={morePageTip && !userTutorial}
               showChildInTooltip={false} // Changed from false to true
-              topAdjustment={Platform.OS === 'android' ? -StatusBar.currentHeight : 0}
+              topAdjustment={Platform.OS === "android" ? -StatusBar.currentHeight : 0}
               content={
                 <TooltipContent
                   message="Welcome to our more page! Here you can find settings, FAQ, logout, switch themes, and more!"
@@ -239,84 +215,75 @@ export default function MorePage() {
               }
               placement="top"
             >
-              <View style={{ marginTop: 40, alignItems: 'center' }}>
-
-                <MenuItem title="About" iconName="information-circle-outline" onPress={() => { router.push("/more/about") }} />
+              <View style={{ marginTop: 40, alignItems: "center" }}>
+                <MenuItem
+                  title="About"
+                  iconName="information-circle-outline"
+                  onPress={() => {
+                    router.push("/more/about");
+                  }}
+                />
                 <MenuItem title="Resource" iconName="link-outline" onPress={() => router.push("/more/resource")} />
                 <MenuItem title="Meet our team" iconName="people-outline" onPress={() => router.push("/more/team")} />
                 <MenuItem title="Settings" iconName="settings-outline" onPress={handleSettingsToggle} />
-                <MenuItem title="FAQ" iconName="help-circle-outline" onPress={() => { }} />
+                <MenuItem title="FAQ" iconName="help-circle-outline" onPress={() => {}} />
                 <MenuItem title="Logout" iconName="exit-outline" onPress={onLogoutPress} />
               </View>
             </Tooltip>
-
-
           </ScrollView>
-        </>) : (<>
+        </>
+      ) : (
+        <>
           {/** header content starts here */}
           <View style={[styles.header, { backgroundColor: theme.homeColor }]}>
             <View style={styles.settingsHeaderContent}>
               <TouchableOpacity onPress={handleSettingsToggle}>
-                <Feather name={'arrow-left'} size={30} />
+                <Feather name={"arrow-left"} size={30} />
               </TouchableOpacity>
               <View style={styles.headerHeading} testID="settings-header">
-                <Text style={{ ...defaultTextFont, fontSize: 17, fontWeight: 'bold' }}>Settings</Text>
+                <Text style={{ ...defaultTextFont, fontSize: 17, fontWeight: "bold" }}>Settings</Text>
               </View>
             </View>
           </View>
           {/** header content ends here */}
           <ScrollView>
-
-
-            <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 60 }}>
-
-
-
-              <TouchableOpacity
-                onPress={handleThemeOpen}
-              >
-                <SettingOptions optionName={'App Theme'} icon={'none'} />
+            <View style={{ justifyContent: "center", alignItems: "center", marginTop: 60 }}>
+              <TouchableOpacity onPress={handleThemeOpen}>
+                <SettingOptions optionName={"App Theme"} icon={"none"} />
               </TouchableOpacity>
               <TouchableOpacity onPress={handleReportClick}>
-                <SettingOptions optionName={'Report an Issue'} icon={'report'} />
+                <SettingOptions optionName={"Report an Issue"} icon={"report"} />
               </TouchableOpacity>
-
-
             </View>
-
           </ScrollView>
 
           <ReactNativeModal
             isVisible={isThemeOpen}
             backdropColor="#00aa00"
             backdropOpacity={0}
-            style={{ margin: 0, justifyContent: 'center', alignItems: 'center', top: "20%" }} // Center the modal
+            style={{ margin: 0, justifyContent: "center", alignItems: "center", top: "20%" }} // Center the modal
           >
             <View
               style={{
-                backgroundColor: 'white',
+                backgroundColor: "white",
                 padding: 20,
                 borderRadius: 10,
                 height: height * 0.7, // Restrict modal height to 70% of the screen
-                width: '90%', // Set the width to 90% of the screen
+                width: "90%", // Set the width to 90% of the screen
               }}
             >
               <View style={styles.headingAndAction}>
-
                 <Text style={styles.heading}>Customize your app</Text>
 
-                <TouchableOpacity
-                  onPress={handleThemeOpen} testID="close-app-theme-modal"
-                >
-                  <Entypo name={'cross'} size={30} />
+                <TouchableOpacity onPress={handleThemeOpen} testID="close-app-theme-modal">
+                  <Entypo name={"cross"} size={30} />
                 </TouchableOpacity>
               </View>
               <AppThemeSelectorScreen />
             </View>
           </ReactNativeModal>
-
-        </>)
-      }
+        </>
+      )}
     </View>
   );
 }
@@ -325,18 +292,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: Platform.OS === "android" ? 25 : 0,
-
   },
   header: {
     height: width > 500 ? height * 0.12 : height * 0.19,
   },
   profile: { flexDirection: "row", alignItems: "center" },
   userAccountAndPageTitle: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: width > 500 ? '13%' : '27%',
-
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: width > 500 ? "13%" : "27%",
   },
   userPhoto: {
     height: width * 0.095,
@@ -344,7 +309,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     alignContent: "center",
     justifyContent: "center",
-    backgroundColor: 'black',
+    backgroundColor: "black",
     marginLeft: 8,
   },
   pfpText: {
@@ -352,13 +317,12 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontSize: 14,
     alignSelf: "center",
-    color: 'white',
+    color: "white",
   },
   pageTitle: {
     ...defaultTextFont,
     fontSize: 18,
-    fontWeight: '500'
-
+    fontWeight: "500",
   },
   bannerImage: {
     width: "95%",
@@ -371,11 +335,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     height: width / 2,
     marginTop: 20,
-
   },
   menuContainer: {
     alignItems: "center",
-
   },
   menuButton: {
     flexDirection: "row",
@@ -416,13 +378,13 @@ const styles = StyleSheet.create({
   },
   headerContent: {
     marginLeft: 0,
-    marginTop: width > 500 ? '5%' : "15%",
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    marginTop: width > 500 ? "5%" : "15%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 10,
     width: width,
-    height: '50%'
+    height: "50%",
   },
   headerHeading: {
     marginLeft: 20,
@@ -430,26 +392,33 @@ const styles = StyleSheet.create({
 
   settingsHeaderContent: {
     marginLeft: 0,
-    marginTop: width > 500 ? '4%' : "15%",
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
+    marginTop: width > 500 ? "4%" : "15%",
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    alignItems: "center",
     paddingHorizontal: 10,
     width: width,
-    height: '50%'
+    height: "50%",
   },
   heading: {
     ...defaultTextFont,
     fontSize: 18,
-    fontWeight: '600'
+    fontWeight: "600",
   },
   headingAndAction: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
 
   switchText: { ...defaultTextFont, fontSize: 18, fontWeight: "500" },
-  logout: { flexDirection: "row", justifyContent: "center", alignItems: "center", height: 50, width: "90%", borderRadius: 15, marginTop: 10 },
+  logout: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    height: 50,
+    width: "90%",
+    borderRadius: 15,
+    marginTop: 10,
+  },
   logoutText: { ...defaultTextFont, fontSize: 20, fontWeight: "600", marginRight: 10 },
-
 });

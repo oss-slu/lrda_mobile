@@ -41,7 +41,9 @@ const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60).toString().padStart(2, "0");
+    const secs = Math.floor(seconds % 60)
+      .toString()
+      .padStart(2, "0");
     return `${mins}:${secs}`;
   };
 
@@ -103,9 +105,7 @@ const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
             );
             if (status.didJustFinish) {
               state.sound.stopAsync();
-              setAudioState((prev) =>
-                prev ? { ...prev, isPlaying: false, progress: 0 } : null
-              );
+              setAudioState((prev) => (prev ? { ...prev, isPlaying: false, progress: 0 } : null));
               setPlayingMedia(null);
             }
           }
@@ -162,18 +162,9 @@ const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
   }
   // Normal case
   return (
-    <View
-      style={[
-        styles.audioContainer,
-        { marginVertical: 10, alignItems: "center", width: width - 40 },
-      ]}
-    >
+    <View style={[styles.audioContainer, { marginVertical: 10, alignItems: "center", width: width - 40 }]}>
       <TouchableOpacity onPress={() => playPauseAudio(uri)} testID="audioButton">
-        <Ionicons
-          name={audioState.isPlaying ? "pause-circle-outline" : "play-circle-outline"}
-          size={30}
-          color={theme.text}
-        />
+        <Ionicons name={audioState.isPlaying ? "pause-circle-outline" : "play-circle-outline"} size={30} color={theme.text} />
       </TouchableOpacity>
       <Slider
         style={styles.audioSlider}
@@ -206,7 +197,7 @@ const LoadingImage: React.FC<LoadingImageProps> = ({ uri, alt, onPress }) => {
 
   if (error) {
     return (
-      <View testID= "no-image"  style={loadingImageStyles.container}>
+      <View testID="no-image" style={loadingImageStyles.container}>
         <View style={loadingImageStyles.errorContainer}>
           <Ionicons name="alert-circle-outline" size={50} color="red" />
           <Text style={loadingImageStyles.errorText}>Couldn't load image</Text>
@@ -228,16 +219,12 @@ const LoadingImage: React.FC<LoadingImageProps> = ({ uri, alt, onPress }) => {
           setError(true);
         }}
       />
-        {loading && (
+      {loading && (
         <View style={loadingImageStyles.loadingOverlay}>
           <ActivityIndicator testID="loadingIndicator" size="large" color={theme.homeColor} />
         </View>
       )}
-      <TouchableOpacity
-        testID="imageButton"
-        style={StyleSheet.absoluteFill}
-        onPress={() => onPress(uri)}
-      />
+      <TouchableOpacity testID="imageButton" style={StyleSheet.absoluteFill} onPress={() => onPress(uri)} />
     </View>
   );
 };
@@ -286,7 +273,11 @@ const LoadingDots: React.FC = () => {
 
   // Skip animation if in Jest environment
   if (!!process.env.JEST_WORKER_ID) {
-    return <Text style={{...defaultTextFont}} testID="loadingDotsStatic">...</Text>;
+    return (
+      <Text style={{ ...defaultTextFont }} testID="loadingDotsStatic">
+        ...
+      </Text>
+    );
   }
 
   useEffect(() => {
@@ -332,15 +323,9 @@ const LoadingDots: React.FC = () => {
 
   return (
     <View style={loadingDotsStyles.container}>
-      <Animated.Text style={[loadingDotsStyles.dot, { opacity: dot1Opacity }]}>
-        .
-      </Animated.Text>
-      <Animated.Text style={[loadingDotsStyles.dot, { opacity: dot2Opacity }]}>
-        .
-      </Animated.Text>
-      <Animated.Text style={[loadingDotsStyles.dot, { opacity: dot3Opacity }]}>
-        .
-      </Animated.Text>
+      <Animated.Text style={[loadingDotsStyles.dot, { opacity: dot1Opacity }]}>.</Animated.Text>
+      <Animated.Text style={[loadingDotsStyles.dot, { opacity: dot2Opacity }]}>.</Animated.Text>
+      <Animated.Text style={[loadingDotsStyles.dot, { opacity: dot3Opacity }]}>.</Animated.Text>
     </View>
   );
 };
@@ -369,11 +354,11 @@ const LoadingVideo: React.FC<LoadingVideoProps> = ({ uri, onPress, width }) => {
   const [error, setError] = useState(false);
   const containerWidth = width - 40;
   const containerHeight = containerWidth / 1.77;
-  const {theme} = useTheme();
+  const { theme } = useTheme();
 
   if (error) {
     return (
-      <View testID= "no-video" style={[loadingVideoStyles.container, { width: containerWidth, height: containerHeight }]}>
+      <View testID="no-video" style={[loadingVideoStyles.container, { width: containerWidth, height: containerHeight }]}>
         <View style={loadingVideoStyles.errorContainer}>
           <Ionicons name="alert-circle-outline" size={50} color="red" />
           <Text style={loadingVideoStyles.errorText}>Couldn't load video</Text>
@@ -399,17 +384,8 @@ const LoadingVideo: React.FC<LoadingVideoProps> = ({ uri, onPress, width }) => {
           <ActivityIndicator testID="videoLoadingIndicator" size="large" color={theme.homeColor} />
         </View>
       )}
-      <TouchableOpacity
-        testID="videoButton"
-        style={StyleSheet.absoluteFill}
-        onPress={() => onPress(uri)}
-      >
-        <Ionicons
-          name="play-circle-outline"
-          size={50}
-          color="white"
-          style={{ alignSelf: "center", marginTop: 70 }}
-        />
+      <TouchableOpacity testID="videoButton" style={StyleSheet.absoluteFill} onPress={() => onPress(uri)}>
+        <Ionicons name="play-circle-outline" size={50} color="white" style={{ alignSelf: "center", marginTop: 70 }} />
       </TouchableOpacity>
     </View>
   );
@@ -559,11 +535,7 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
           {/* Creator Name */}
           <View style={styles.creatorContainer}>
             <Ionicons name="person-circle-outline" size={18} color={theme.text} />
-            {creatorName ? (
-              <Text style={styles.creatorText}>{creatorName}</Text>
-            ) : (
-              <LoadingDots />
-            )}
+            {creatorName ? <Text style={styles.creatorText}>{creatorName}</Text> : <LoadingDots />}
           </View>
 
           {/* Date */}
@@ -595,17 +567,12 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
       />
 
       {/* Video Modal */}
-      <VideoModal
-        isVisible={isVideoVisible}
-        onClose={() => setIsVideoVisible(false)}
-        videos={selectedVideo ? [selectedVideo] : []}
-      />
+      <VideoModal isVisible={isVideoVisible} onClose={() => setIsVideoVisible(false)} videos={selectedVideo ? [selectedVideo] : []} />
     </Modal>
   );
 });
 
 export default NoteDetailModal;
-
 
 const styles = StyleSheet.create({
   closeButton: {

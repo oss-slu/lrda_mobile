@@ -1,6 +1,6 @@
-import React from 'react';
-import Svg, { SvgProps, Path } from 'react-native-svg';
-import { useTheme } from './ThemeProvider';
+import React from "react";
+import Svg, { SvgProps, Path } from "react-native-svg";
+import { useTheme } from "./ThemeProvider";
 
 type Props = SvgProps & {
   color?: string;
@@ -8,7 +8,7 @@ type Props = SvgProps & {
   width?: number;
 };
 
-export const SvgIcon: React.FC<Props> = ({ color = 'white', height = 64, width = 80, ...props }) => {
+export const SvgIcon: React.FC<Props> = ({ color = "white", height = 64, width = 80, ...props }) => {
   const { theme } = useTheme();
 
   // Define the original aspect ratio

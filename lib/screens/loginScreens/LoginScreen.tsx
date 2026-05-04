@@ -2,17 +2,7 @@
 
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  Animated,
-  ImageBackground,
-  Keyboard,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, Animated, ImageBackground, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Snackbar } from "react-native-paper";
 import { User } from "../../models/user_class";
@@ -62,33 +52,27 @@ const LoginScreen: React.FC = () => {
   const onDismissSnackBar = () => toggleSnack(false);
 
   const handleLogin = async () => {
-
     if (username === "" || password === "") {
       toggleSnack(!snackState);
     } else {
-
       try {
-        const status = await user.login(username, password)
+        const status = await user.login(username, password);
         if (status == "success") {
           const userId = await user.getId();
           // console.log("in login page, Inside the is statement of success ", userId)
           if (userId !== null) {
-            setUsername("")
-            setPassword("")
-            router.replace('/(tabs)');
+            setUsername("");
+            setPassword("");
+            router.replace("/(tabs)");
           }
         }
-      }
-      catch (error) {
+      } catch (error) {
         console.log("login failed :", error);
         let message = "Login failed. Please try again.";
 
         if (error.message.includes("network") || error.message.includes("Network request failed")) {
           message = "Network error. Please check your connection.";
-        } else if (
-          error.message.includes("EMAIL_NOT_VERIFIED") ||
-          error.message.includes("Email not verified")
-        ) {
+        } else if (error.message.includes("EMAIL_NOT_VERIFIED") || error.message.includes("Email not verified")) {
           message = "Please verify your email before logging in. Check your inbox and spam folder.";
         } else if (
           error.message.includes("auth/invalid-email") ||
@@ -97,12 +81,10 @@ const LoginScreen: React.FC = () => {
           error.message.includes("Invalid email or password")
         ) {
           message = "Invalid username or password.";
-
         }
         setSnackMessage(message);
-        toggleSnack(true)
+        toggleSnack(true);
       }
-
     }
   };
 
@@ -121,7 +103,6 @@ const LoginScreen: React.FC = () => {
       setLoading(true);
       await handleLogin();
       setLoading(false);
-
     } catch (e) {
       console.log(e);
       setLoading(false);
@@ -134,10 +115,7 @@ const LoginScreen: React.FC = () => {
       style={{ backgroundColor: "#F4DFCD" }}
       keyboardShouldPersistTaps="handled"
     >
-      <ImageBackground
-        source={require("../../../assets/splash.jpg")}
-        style={styles.imageBackground}
-      >
+      <ImageBackground source={require("../../../assets/splash.jpg")} style={styles.imageBackground}>
         <Snackbar
           visible={snackState}
           onDismiss={onDismissSnackBar}
@@ -150,14 +128,8 @@ const LoginScreen: React.FC = () => {
           <Text style={{ ...defaultTextFont, textAlign: "center" }}>{snackMessage}</Text>
         </Snackbar>
         {firstClick ? (
-          <TouchableOpacity
-            activeOpacity={1}
-            style={styles.title}
-            onPress={fadeOut}
-          >
-            <Animated.Text style={[styles.logo, { opacity: fadeAnim }]}>
-              Where's {"\n"} Religion?
-            </Animated.Text>
+          <TouchableOpacity activeOpacity={1} style={styles.title} onPress={fadeOut}>
+            <Animated.Text style={[styles.logo, { opacity: fadeAnim }]}>Where's {"\n"} Religion?</Animated.Text>
           </TouchableOpacity>
         ) : (
           <View style={styles.loginBox}>
@@ -188,24 +160,21 @@ const LoginScreen: React.FC = () => {
               />
             </View>
             <TouchableOpacity onPress={() => router.push("/(auth)/forgot-password")}>
-              <View style={styles.forgotPasswordContainer}><Text style={styles.forgotText}>Forgot Password?</Text></View>
+              <View style={styles.forgotPasswordContainer}>
+                <Text style={styles.forgotText}>Forgot Password?</Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity onPress={onLoginPress} style={styles.buttons} testID="login-button">
-              {!loading && <Text style={{ ...defaultTextFont, color: "white", fontWeight: "600", fontSize: 15 }}>
-                Login
-              </Text>}
+              {!loading && <Text style={{ ...defaultTextFont, color: "white", fontWeight: "600", fontSize: 15 }}>Login</Text>}
               {loading && <ActivityIndicator size="small" color="white" />}
             </TouchableOpacity>
             <TouchableOpacity onPress={handleGoRegister} style={styles.buttons} testID="register-button">
-              <Text style={{ ...defaultTextFont, color: "white", fontWeight: "600", fontSize: 15 }}>
-                Register
-              </Text>
+              <Text style={{ ...defaultTextFont, color: "white", fontWeight: "600", fontSize: 15 }}>Register</Text>
             </TouchableOpacity>
           </View>
         )}
       </ImageBackground>
     </KeyboardAwareScrollView>
-
   );
 };
 
@@ -293,25 +262,23 @@ const styles = StyleSheet.create({
 
   forgotPasswordContainer: {
     width: 300,
-    justifyContent: 'center',
+    justifyContent: "center",
     alignItems: "flex-end",
-
   },
   forgotText: {
     color: "#111111",
     fontSize: 12,
     fontWeight: "400",
     marginBottom: 20,
-    marginRight: 40
+    marginRight: 40,
   },
   signUpStatement: {
     position: "absolute",
     top: 450,
     display: "flex",
     flexDirection: "row",
-    justifyContent: 'center',
-    alignItems: 'center'
-
+    justifyContent: "center",
+    alignItems: "center",
   },
   signUpQuery: {
     color: "black",
@@ -321,8 +288,7 @@ const styles = StyleSheet.create({
     color: "blue",
     fontWeight: "500",
     marginTop: 0,
-
-  }
+  },
 });
 
 export default LoginScreen;

@@ -25,7 +25,7 @@ function RootLayoutInner() {
     const checkState = async () => {
       const onboarded = await getItem("onboarded");
       const isValid = await user.initializeUser();
-      setIsOnboarded(onboarded === '1');
+      setIsOnboarded(onboarded === "1");
       setIsAuthenticated(isValid);
       setIsReady(true);
       await SplashScreen.hideAsync();

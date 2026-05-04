@@ -11,13 +11,7 @@ interface LoadingImageProps {
   width?: number;
 }
 
-export default function LoadingImage({
-  imageURI,
-  type,
-  isImage,
-  height,
-  width,
-}: LoadingImageProps) {
+export default function LoadingImage({ imageURI, type, isImage, height, width }: LoadingImageProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   if (isImage && imageURI !== "") {
@@ -34,9 +28,7 @@ export default function LoadingImage({
           <Placeholder
             style={{ top: width / 2 }}
             Animation={Progressive}
-            Left={() => (
-              <PlaceholderMedia size={width} style={{ borderRadius: 10 }} />
-            )}
+            Left={() => <PlaceholderMedia size={width} style={{ borderRadius: 10 }} />}
           />
         )}
         {type === "video" ? (
@@ -54,12 +46,7 @@ export default function LoadingImage({
               onLoadEnd={() => setIsLoading(false)}
             />
             <View style={styles.playUnderlay}>
-              <Ionicons
-                name="play-outline"
-                size={24}
-                color="#dfe5e8"
-                style={styles.icon}
-              />
+              <Ionicons name="play-outline" size={24} color="#dfe5e8" style={styles.icon} />
             </View>
           </View>
         ) : (
@@ -87,9 +74,7 @@ export default function LoadingImage({
           <Placeholder
             style={{ top: width / 2 }}
             Animation={Progressive}
-            Left={() => (
-              <PlaceholderMedia size={width} style={{ borderRadius: 10 }} />
-            )}
+            Left={() => <PlaceholderMedia size={width} style={{ borderRadius: 10 }} />}
           />
         )}
         <Image

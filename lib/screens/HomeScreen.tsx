@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import {
   Platform,
   View,
@@ -12,9 +12,8 @@ import {
   Animated,
   StatusBar,
   Keyboard,
-  ActivityIndicator
+  ActivityIndicator,
 } from "react-native";
-import { useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
 import { Note } from "../../types";
@@ -32,12 +31,12 @@ import ToastMessage from "react-native-toast-message";
 import NotesComponent from "../components/NotesComponent";
 import Greeting from "../components/Greeting";
 import { useAddNoteContext } from "../context/AddNoteContext";
-import LottieView from 'lottie-react-native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import LottieView from "lottie-react-native";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector, useDispatch } from "react-redux";
 import { defaultTextFont } from "../../styles/globalStyles";
-import Tooltip from 'react-native-walkthrough-tooltip';
+import Tooltip from "react-native-walkthrough-tooltip";
 import TooltipContent from "../onboarding/TooltipComponent";
 import { useRouter, useFocusEffect } from "expo-router";
 
@@ -55,7 +54,7 @@ const HomeScreen: React.FC = () => {
   const [reversed, setReversed] = useState(false);
   const [rendering, setRendering] = useState(true);
   const [userInitials, setUserInitials] = useState("N/A");
-  const [userName, setUserName] = useState('');
+  const [userName, setUserName] = useState("");
   const [initialItems, setInitialItems] = useState([
     { label: "My Entries", value: "my_entries" },
     { label: "Published Entries", value: "published_entries" },
@@ -64,9 +63,7 @@ const HomeScreen: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(initialItems[0].value);
   const [items, setItems] = useState(initialItems);
-  const [selectedNote, setSelectedNote] = useState<Note | undefined>(
-    undefined
-  );
+  const [selectedNote, setSelectedNote] = useState<Note | undefined>(undefined);
   const [isModalVisible, setModalVisible] = useState(false);
   const { setNavigateToAddNote } = useAddNoteContext();
   const { theme, isDarkmode } = useTheme();
@@ -75,7 +72,7 @@ const HomeScreen: React.FC = () => {
   const [selectedSortOption, setSelectedSortOption] = useState(1);
   let textLength = 18;
   const dispatch = useDispatch();
-  
+
   // Pagination states
   const [page, setPage] = useState(1);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -86,11 +83,9 @@ const HomeScreen: React.FC = () => {
       const untitledNumber = findNextUntitledNumber(notes);
       console.log("in homescreen untitled numbe ", untitledNumber);
       router.push({ pathname: "/add-note", params: { untitledNumber: String(untitledNumber) } });
-  
-    }
-    setNavigateToAddNote(() => navigateToAddNote)
-  }, [router, notes])
-
+    };
+    setNavigateToAddNote(() => navigateToAddNote);
+  }, [router, notes]);
 
   useEffect(() => {
     (async () => {
@@ -98,7 +93,7 @@ const HomeScreen: React.FC = () => {
       if (name) {
         const firstName = name.split(" ")[0];
         setUserName(firstName);
-  
+
         const initials = name
           .split(" ")
           .map((namePart) => namePart[0])
@@ -107,8 +102,8 @@ const HomeScreen: React.FC = () => {
       }
     })();
   }, []);
-  
-const refreshPage = useCallback(() => {
+
+  const refreshPage = useCallback(() => {
     setPage(1);
     setHasMore(true);
     setUpdateCounter((prev) => prev + 1);
@@ -121,7 +116,6 @@ const refreshPage = useCallback(() => {
     }, [refreshPage])
   );
 
-
   // Fetch notes, either all published or user-specific based on filter
   useEffect(() => {
     setRendering(true);
@@ -130,60 +124,49 @@ const refreshPage = useCallback(() => {
     fetchMessages(1);
   }, [updateCounter, published]);
 
-
   const fetchMessages = async (pageNum: number) => {
     try {
-        if (pageNum === 1) {
-            setRendering(true); 
-        } else {
-            setIsLoadingMore(true); 
-        }
+      if (pageNum === 1) {
+        setRendering(true);
+      } else {
+        setIsLoadingMore(true);
+      }
 
-        const skip = (pageNum - 1) * limit;
-        const userId = await user.getId();
+      const skip = (pageNum - 1) * limit;
+      const userId = await user.getId();
 
-        const data = await ApiService.fetchMessagesBatch(
-            false,
-            published,
-            userId,
-            limit,
-            skip
-        );
+      const data = await ApiService.fetchMessagesBatch(false, published, userId, limit, skip);
 
-        const filteredNotes = data.filter((note: Note) => !note.isArchived);
+      const filteredNotes = data.filter((note: Note) => !note.isArchived);
 
-        const convertedNotes = DataConversion.convertMediaTypes(filteredNotes)
-            .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+      const convertedNotes = DataConversion.convertMediaTypes(filteredNotes).sort(
+        (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
+      );
 
-        const finalNotes = reversed ? convertedNotes.reverse() : convertedNotes;
+      const finalNotes = reversed ? convertedNotes.reverse() : convertedNotes;
 
-        if (pageNum === 1) {
-            setNotes(finalNotes);
-        } else {
-            setNotes(prev => [...prev, ...finalNotes]);
-        }
+      if (pageNum === 1) {
+        setNotes(finalNotes);
+      } else {
+        setNotes((prev) => [...prev, ...finalNotes]);
+      }
 
-        setHasMore(finalNotes.length === limit);
-
+      setHasMore(finalNotes.length === limit);
     } catch (error) {
-        console.error("Error fetching notes:", error);
-        ToastMessage.show({
-            type: "error",
-            text1: "Error fetching notes",
-            text2: error.message,
-        });
+      console.error("Error fetching notes:", error);
+      ToastMessage.show({
+        type: "error",
+        text1: "Error fetching notes",
+        text2: error.message,
+      });
     } finally {
-        setRendering(false);      
-        setIsLoadingMore(false);  
+      setRendering(false);
+      setIsLoadingMore(false);
     }
-};
-
-  
+  };
 
   const updateNote = (note: Note) => {
-    setNotes((prevNotes) =>
-      prevNotes?.map((prevNote) => (prevNote.id === note.id ? note : prevNote))
-    );
+    setNotes((prevNotes) => prevNotes?.map((prevNote) => (prevNote.id === note.id ? note : prevNote)));
     refreshPage();
   };
 
@@ -200,7 +183,7 @@ const refreshPage = useCallback(() => {
   const renderFooter = () => {
     if (isLoadingMore) {
       return (
-        <View  style={{ paddingVertical: 50, alignItems: "center", marginBottom: 100 }}>
+        <View style={{ paddingVertical: 50, alignItems: "center", marginBottom: 100 }}>
           <ActivityIndicator size="small" color={theme.text} />
         </View>
       );
@@ -208,28 +191,28 @@ const refreshPage = useCallback(() => {
     if (hasMore) {
       return (
         <TouchableOpacity
-        testID="load-more"
-        onPress={handleLoadMore}
-        style={{
-          paddingVertical: 20,
-          width: "65%",
-          alignItems: "center",
-          alignSelf: "center",
-          borderRadius: 20,
-          marginVertical: 4, // reduced from 8
-          backgroundColor: theme.homeColor,
-        }}
-      >
-        <Text testID="load-more-button" style={{ ...defaultTextFont ,color: theme.text, fontSize: 16, fontWeight: "400" }}>
-          Load More
-        </Text>
-      </TouchableOpacity>
+          testID="load-more"
+          onPress={handleLoadMore}
+          style={{
+            paddingVertical: 20,
+            width: "65%",
+            alignItems: "center",
+            alignSelf: "center",
+            borderRadius: 20,
+            marginVertical: 4, // reduced from 8
+            backgroundColor: theme.homeColor,
+          }}
+        >
+          <Text testID="load-more-button" style={{ ...defaultTextFont, color: theme.text, fontSize: 16, fontWeight: "400" }}>
+            Load More
+          </Text>
+        </TouchableOpacity>
       );
     }
     return (
       <View style={{ padding: 20, alignItems: "center" }}>
         <Text testID="empty-state-text" style={{ ...defaultTextFont, color: "gray", fontSize: 14 }}>
-          End of the Page 
+          End of the Page
         </Text>
       </View>
     );
@@ -278,16 +261,17 @@ const refreshPage = useCallback(() => {
   };
 
   const findNextUntitledNumber = (notes: Note[]): number => {
-    return notes.reduce((maxNumber, note) => {
+    return (
+      notes.reduce((maxNumber, note) => {
         const match = note.title.match(/^Untitled (\d+)$/);
         if (match) {
-            const number = parseInt(match[1], 10);
-            return Math.max(maxNumber, number);
+          const number = parseInt(match[1], 10);
+          return Math.max(maxNumber, number);
         }
         return maxNumber;
-    }, 0) + 1;
-};
-
+      }, 0) + 1
+    );
+  };
 
   const sideMenu = (data: any, rowMap: any) => {
     const note = data.item;
@@ -297,19 +281,10 @@ const refreshPage = useCallback(() => {
       <View style={styles(theme, width).rowBack} key={data.index}>
         <TouchableOpacity>
           <TouchableOpacity onPress={() => publishNote(data.item.id, rowMap)}>
-          <Ionicons
-          name={isNotePublished ? "arrow-undo" : "share"}
-          size={30}
-          color={"green"}
-        />
+            <Ionicons name={isNotePublished ? "arrow-undo" : "share"} size={30} color={"green"} />
           </TouchableOpacity>
         </TouchableOpacity>
-        <View
-          style={[
-            styles(theme, width).backRightBtn,
-            styles(theme, width).backRightBtnRight,
-          ]}
-        >
+        <View style={[styles(theme, width).backRightBtn, styles(theme, width).backRightBtnRight]}>
           {isPrivate ? (
             <TouchableOpacity
               style={{
@@ -320,26 +295,22 @@ const refreshPage = useCallback(() => {
               }}
               onPress={() => deleteNote(data.item.id, rowMap)}
             >
-              <Ionicons
-                name="trash-outline"
-                size={24}
-                color={styles(theme, width).backColor.color}
-              />
+              <Ionicons name="trash-outline" size={24} color={styles(theme, width).backColor.color} />
             </TouchableOpacity>
           ) : null}
         </View>
       </View>
     );
   };
- //handle sort
- const handleSort = () => {
-  setIsSortOpened(!isSortOpened);
-}
+  //handle sort
+  const handleSort = () => {
+    setIsSortOpened(!isSortOpened);
+  };
 
-const handleSortOption = ({ option }) => {
-  setSelectedSortOption(option);
-  setIsSortOpened(false);
-}
+  const handleSortOption = ({ option }) => {
+    setSelectedSortOption(option);
+    setIsSortOpened(false);
+  };
 
   const deleteNote = (id: string, rowMap: any) => {
     if (rowMap[id]) {
@@ -355,11 +326,9 @@ const handleSortOption = ({ option }) => {
     setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
   };
 
-
   async function publishNote(data: any, rowMap: any) {
     if (rowMap[data]) {
       rowMap[data].closeRow();
-
     }
     const foundNote = notes.find((note) => note.id === data);
     const editedNote: Note = {
@@ -382,17 +351,14 @@ const handleSortOption = ({ option }) => {
   const renderList = (notes: Note[]) => {
     const filteredNotes = searchQuery
       ? notes.filter((note) => {
-        const lowerCaseQuery = searchQuery.toLowerCase();
-        const noteTime = new Date(note.time);
-        const formattedTime = formatToLocalDateString(noteTime);
-        return (
-          note.title.toLowerCase().includes(lowerCaseQuery) ||
-          formattedTime.includes(lowerCaseQuery)
-        );
-      })
+          const lowerCaseQuery = searchQuery.toLowerCase();
+          const noteTime = new Date(note.time);
+          const formattedTime = formatToLocalDateString(noteTime);
+          return note.title.toLowerCase().includes(lowerCaseQuery) || formattedTime.includes(lowerCaseQuery);
+        })
       : notes;
 
-      // Apply sorting based on selectedSortOption
+    // Apply sorting based on selectedSortOption
     filteredNotes.sort((a, b) => {
       if (selectedSortOption === 1) {
         // Sort by date and time (latest first)
@@ -409,66 +375,63 @@ const handleSortOption = ({ option }) => {
     const privateData = filteredNotes.filter((eachNotes) => eachNotes.published === false);
     const publicData = filteredNotes.filter((eachNotes) => eachNotes.published != false);
     return isPrivate ? (
-      privateData.length > 0 ? (<SwipeListView
-        data={privateData}
-        renderItem={renderItem}
-        renderHiddenItem={sideMenu}
-        leftActivationValue={160}
-        rightActivationValue={-160}
-        leftOpenValue={75}
-        rightOpenValue={-75}
-        stopLeftSwipe={175}
-        stopRightSwipe={-175}
-        keyExtractor={(item) => item.id}
-        onRightAction={(data, rowMap) => deleteNote(data, rowMap)}
-        onLeftAction={(data, rowMap) => publishNote(data, rowMap)}
-        contentContainerStyle={{paddingBottom: 150}}
-        ListFooterComponent={renderFooter}
-      />)
-        : (<View style={styles(theme, width).resultNotFound}>
-
-          <LottieView
-            testID="no-results-animation"
-            source={require('../../assets/animations/noResultFound.json')}
-            autoPlay
-            loop
-            style={styles(theme, width).lottie}
-          />
-          <Text style={styles(theme, width).resultNotFoundTxt}>No Results Found</Text>
-        </View>
-        )
-
-    ) : (
-      publicData.length > 0 ? (
+      privateData.length > 0 ? (
         <SwipeListView
-          data={publicData}
+          data={privateData}
           renderItem={renderItem}
           renderHiddenItem={sideMenu}
           leftActivationValue={160}
+          rightActivationValue={-160}
           leftOpenValue={75}
+          rightOpenValue={-75}
           stopLeftSwipe={175}
+          stopRightSwipe={-175}
           keyExtractor={(item) => item.id}
+          onRightAction={(data, rowMap) => deleteNote(data, rowMap)}
           onLeftAction={(data, rowMap) => publishNote(data, rowMap)}
           contentContainerStyle={{ paddingBottom: 150 }}
           ListFooterComponent={renderFooter}
-      />) :
-        (<View style={styles(theme, width).resultNotFound}>
-
+        />
+      ) : (
+        <View style={styles(theme, width).resultNotFound}>
           <LottieView
             testID="no-results-animation"
-            source={require('../../assets/animations/noResultFound.json')}
+            source={require("../../assets/animations/noResultFound.json")}
             autoPlay
             loop
             style={styles(theme, width).lottie}
           />
           <Text style={styles(theme, width).resultNotFoundTxt}>No Results Found</Text>
         </View>
-        )
+      )
+    ) : publicData.length > 0 ? (
+      <SwipeListView
+        data={publicData}
+        renderItem={renderItem}
+        renderHiddenItem={sideMenu}
+        leftActivationValue={160}
+        leftOpenValue={75}
+        stopLeftSwipe={175}
+        keyExtractor={(item) => item.id}
+        onLeftAction={(data, rowMap) => publishNote(data, rowMap)}
+        contentContainerStyle={{ paddingBottom: 150 }}
+        ListFooterComponent={renderFooter}
+      />
+    ) : (
+      <View style={styles(theme, width).resultNotFound}>
+        <LottieView
+          testID="no-results-animation"
+          source={require("../../assets/animations/noResultFound.json")}
+          autoPlay
+          loop
+          style={styles(theme, width).lottie}
+        />
+        <Text style={styles(theme, width).resultNotFoundTxt}>No Results Found</Text>
+      </View>
     );
   };
 
   const renderItem = (data: any) => {
-   
     const item = data.item;
     const tempTime = new Date(item.time);
     const showTime = formatToLocalDateString(tempTime);
@@ -494,7 +457,7 @@ const handleSortOption = ({ option }) => {
         key={item.id}
         activeOpacity={1}
         style={{
-          backgroundColor: isDarkmode? 'black' : '#e6e6e6',
+          backgroundColor: isDarkmode ? "black" : "#e6e6e6",
           width: "100%",
         }}
         onPress={() => {
@@ -508,7 +471,7 @@ const handleSortOption = ({ option }) => {
                   time: item.time.toISOString(),
                 }),
               },
-            });            
+            });
           } else {
             const formattedNote = {
               ...item,
@@ -523,11 +486,18 @@ const handleSortOption = ({ option }) => {
           }
         }}
       >
-        <NotesComponent IsImage={IsImage} resolvedImageURI={resolvedImageURI} ImageType={ImageType} textLength={textLength} showTime={showTime} item={item} isDarkmode={isDarkmode}/>
+        <NotesComponent
+          IsImage={IsImage}
+          resolvedImageURI={resolvedImageURI}
+          ImageType={ImageType}
+          textLength={textLength}
+          showTime={showTime}
+          item={item}
+          isDarkmode={isDarkmode}
+        />
       </TouchableOpacity>
     );
   };
-
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -538,7 +508,7 @@ const handleSortOption = ({ option }) => {
   const toggleSearchBar = () => {
     if (isSearchVisible) {
       // Hide the search container
-      setSearchQuery('');
+      setSearchQuery("");
       Animated.timing(animation, {
         toValue: 0,
         duration: 300,
@@ -560,8 +530,6 @@ const handleSortOption = ({ option }) => {
     outputRange: [0, width],
   });
 
-
-
   const formatDate = (date: Date) => {
     const day = date.getDate().toString();
     const month = (date.getMonth() + 1).toString();
@@ -572,10 +540,7 @@ const handleSortOption = ({ option }) => {
   const filteredNotes = useMemo(() => {
     return notes.filter((note) => {
       const noteTime = formatToLocalDateString(new Date(note.time));
-      return (
-        note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        noteTime.includes(searchQuery)
-      );
+      return note.title.toLowerCase().includes(searchQuery.toLowerCase()) || noteTime.includes(searchQuery);
     });
   }, [notes, searchQuery]);
 
@@ -596,7 +561,7 @@ const handleSortOption = ({ option }) => {
   }, []);
 
   return (
-    <View style={{ flex: 1, backgroundColor : isDarkmode? 'black' : '#e4e4e4'}}>
+    <View style={{ flex: 1, backgroundColor: isDarkmode ? "black" : "#e4e4e4" }}>
       <StatusBar translucent backgroundColor="transparent" />
       <View testID="HomeScreen" style={styles(theme, width).container}>
         <View style={styles(theme, width).topView}>
@@ -611,17 +576,16 @@ const handleSortOption = ({ option }) => {
             }}
           >
             <View style={styles(theme, width).userAccountAndPageTitle}>
-
               <Tooltip
-                topAdjustment={Platform.OS === 'android' ? -StatusBar.currentHeight : 0}
-                showChildInTooltip = {false}
+                topAdjustment={Platform.OS === "android" ? -StatusBar.currentHeight : 0}
+                showChildInTooltip={false}
                 isVisible={accountTip && !userTutorial}
                 content={
-                <TooltipContent
-                      message="See account information here."
-                      onPressOk={() => {
-                        setAccountTip(false);
-                        setSearchTip(true);
+                  <TooltipContent
+                    message="See account information here."
+                    onPressOk={() => {
+                      setAccountTip(false);
+                      setSearchTip(true);
                     }}
                     onSkip={() => {
                       // Disable all tutorial tips when Skip is pressed
@@ -629,131 +593,133 @@ const handleSortOption = ({ option }) => {
                       setSearchTip(false);
                       setFilterToolTip(false);
                       setPubPrivTip(false);
-                      User.setUserTutorialDone("HomeScreen", true)
+                      User.setUserTutorialDone("HomeScreen", true);
                     }}
                   />
-              }
-              placement="bottom"
-      >
-              <TouchableOpacity testID="user-account"
-                style={[
-                  styles(theme, width).userPhoto,
-                  { 
-                    backgroundColor: theme.black, 
-                    width: width > 1000 ? 50 : 30,
-                    height: width > 1000 ? 50 : 30,
-                  },
-                ]}
-                onPress={() => {
-                  router.push("/account");
-                }}
+                }
+                placement="bottom"
               >
-                <Text style={styles(theme, width).pfpText}>{userInitials}</Text>
-              </TouchableOpacity>
-            </Tooltip>
+                <TouchableOpacity
+                  testID="user-account"
+                  style={[
+                    styles(theme, width).userPhoto,
+                    {
+                      backgroundColor: theme.black,
+                      width: width > 1000 ? 50 : 30,
+                      height: width > 1000 ? 50 : 30,
+                    },
+                  ]}
+                  onPress={() => {
+                    router.push("/account");
+                  }}
+                >
+                  <Text style={styles(theme, width).pfpText}>{userInitials}</Text>
+                </TouchableOpacity>
+              </Tooltip>
               <Text style={styles(theme, width).pageTitle}>Notes</Text>
             </View>
 
             <View testID="greeting-component" style={styles(theme, width).userWishContainer}>
               <Greeting />
-              <Text testID="user-name" style={styles(theme, width).userName}>{userName}</Text>
+              <Text testID="user-name" style={styles(theme, width).userName}>
+                {userName}
+              </Text>
             </View>
           </View>
-
-
         </View>
 
-        <View style={[styles(theme, width).toolContainer, { marginHorizontal: 20, }]}>
-          {
-            !isSearchVisible && (
+        <View style={[styles(theme, width).toolContainer, { marginHorizontal: 20 }]}>
+          {!isSearchVisible && (
             <View style={styles(theme, width).publishedAndSortContainer}>
-                     <Tooltip
-              topAdjustment={Platform.OS === 'android' ? -StatusBar.currentHeight : 0}
-              showChildInTooltip = {false}
-              isVisible={pubPrivTip && !userTutorial}
-              content={
-              <TooltipContent
-                message="Switch between your published and privated notes with this switch"
-                  onPressOk={() => {
-                    setPubPrivTip(false);
-                    User.setUserTutorialDone("HomeScreen", true)
-                }}
-                onSkip={() => {
-                  // Disable all tutorial tips when Skip is pressed
-                  setAccountTip(false);
-                  setSearchTip(false);
-                  setFilterToolTip(false);
-                  setPubPrivTip(false);
-                  User.setUserTutorialDone("HomeScreen", true)
-                }}
-            />
-          }
-          placement="bottom"
-          >
-              <View style={styles(theme, width).publishedOrPrivateContainer}>
-                <Pressable onPress={() => {
-                  setIsPrivate(false);
-                  setPublished(true);
-                }}>
-                  <View testID="public-btn" style={[styles(theme, width).publishedTxtContainer, { backgroundColor: isPrivate ? 'transparent' : 'black' },]}>
-                    <Text style={[styles(theme, width).publishedTxt, { color: isPrivate ? 'black' : 'white' }]}> Published</Text>
-                  </View>
-                </Pressable>
-                <Pressable onPress={() => {
-                  setIsPrivate(true);
-                  setPublished(false);
-                }}>
-                  <View testID="private-btn" style={[styles(theme, width).publishedTxtContainer, { backgroundColor: isPrivate ? 'black' : 'transparent' }]}>
-                    <Text style={[styles(theme, width).publishedTxt, { color: isPrivate ? 'white' : 'black' }]}>Private</Text>
-                  </View>
-                </Pressable>
-              </View>
-              </Tooltip>
-              <View>
-                {
-                  !isSortOpened ? (            
-                  <Tooltip
-                    topAdjustment={Platform.OS === 'android' ? -StatusBar.currentHeight : 0}
-                    isVisible={filterToolTip && !userTutorial}
-                    content={
-                    <TooltipContent
-                      message="Filter your notes with this!"
-                        onPressOk={() => {
-                          setFilterToolTip(false);
-                          setPubPrivTip(true);
-                      }}
-                      onSkip={() => {
-                        // Disable all tutorial tips when Skip is pressed
-                        setAccountTip(false);
-                        setSearchTip(false);
-                        setFilterToolTip(false);
-                        setPubPrivTip(false);
-                        User.setUserTutorialDone("HomeScreen", true)
-                      }}
+              <Tooltip
+                topAdjustment={Platform.OS === "android" ? -StatusBar.currentHeight : 0}
+                showChildInTooltip={false}
+                isVisible={pubPrivTip && !userTutorial}
+                content={
+                  <TooltipContent
+                    message="Switch between your published and privated notes with this switch"
+                    onPressOk={() => {
+                      setPubPrivTip(false);
+                      User.setUserTutorialDone("HomeScreen", true);
+                    }}
+                    onSkip={() => {
+                      // Disable all tutorial tips when Skip is pressed
+                      setAccountTip(false);
+                      setSearchTip(false);
+                      setFilterToolTip(false);
+                      setPubPrivTip(false);
+                      User.setUserTutorialDone("HomeScreen", true);
+                    }}
                   />
                 }
                 placement="bottom"
-                >
-                <TouchableOpacity testID="sort-button"
-                    onPress={handleSort}
+              >
+                <View style={styles(theme, width).publishedOrPrivateContainer}>
+                  <Pressable
+                    onPress={() => {
+                      setIsPrivate(false);
+                      setPublished(true);
+                    }}
                   >
-      
-                    <MaterialIcons name='sort' size={30} />
+                    <View
+                      testID="public-btn"
+                      style={[styles(theme, width).publishedTxtContainer, { backgroundColor: isPrivate ? "transparent" : "black" }]}
+                    >
+                      <Text style={[styles(theme, width).publishedTxt, { color: isPrivate ? "black" : "white" }]}> Published</Text>
+                    </View>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => {
+                      setIsPrivate(true);
+                      setPublished(false);
+                    }}
+                  >
+                    <View
+                      testID="private-btn"
+                      style={[styles(theme, width).publishedTxtContainer, { backgroundColor: isPrivate ? "black" : "transparent" }]}
+                    >
+                      <Text style={[styles(theme, width).publishedTxt, { color: isPrivate ? "white" : "black" }]}>Private</Text>
+                    </View>
+                  </Pressable>
+                </View>
+              </Tooltip>
+              <View>
+                {!isSortOpened ? (
+                  <Tooltip
+                    topAdjustment={Platform.OS === "android" ? -StatusBar.currentHeight : 0}
+                    isVisible={filterToolTip && !userTutorial}
+                    content={
+                      <TooltipContent
+                        message="Filter your notes with this!"
+                        onPressOk={() => {
+                          setFilterToolTip(false);
+                          setPubPrivTip(true);
+                        }}
+                        onSkip={() => {
+                          // Disable all tutorial tips when Skip is pressed
+                          setAccountTip(false);
+                          setSearchTip(false);
+                          setFilterToolTip(false);
+                          setPubPrivTip(false);
+                          User.setUserTutorialDone("HomeScreen", true);
+                        }}
+                      />
+                    }
+                    placement="bottom"
+                  >
+                    <TouchableOpacity testID="sort-button" onPress={handleSort}>
+                      <MaterialIcons name="sort" size={30} />
+                    </TouchableOpacity>
+                  </Tooltip>
+                ) : (
+                  <TouchableOpacity onPress={handleSort}>
+                    <MaterialIcons name="close" size={30} />
                   </TouchableOpacity>
-                  </Tooltip>)
-                    : (
-                      <TouchableOpacity
-                        onPress={handleSort}
-                      >
-                        <MaterialIcons name='close' size={30} />
-                      </TouchableOpacity>)
-                }
+                )}
               </View>
             </View>
-            )
-          }
-          <View style={[styles(theme, width).searchParentContainer, { width: isSearchVisible ? '95%' : 40 }]}>
-
+          )}
+          <View style={[styles(theme, width).searchParentContainer, { width: isSearchVisible ? "95%" : 40 }]}>
             {/* Search Container */}
             {isSearchVisible && (
               <Animated.View
@@ -764,7 +730,7 @@ const handleSortOption = ({ option }) => {
                   },
                   {
                     marginBottom: 23,
-                  }
+                  },
                 ]}
               >
                 <TextInput
@@ -774,30 +740,29 @@ const handleSortOption = ({ option }) => {
                   placeholderTextColor="#999"
                   onChangeText={(e) => setSearchQuery(e)}
                   style={[styles(theme, width).searchInput]}
-                  cursorColor='black'
+                  cursorColor="black"
                   autoFocus={true}
                 />
               </Animated.View>
             )}
-            {
-              isSearchVisible ? (
-                <View style={[styles(theme, width).searchIcon, {marginTop: -25}]}>
-                  <TouchableOpacity testID="searchButton" onPress={toggleSearchBar}>
-                    <Ionicons name='close' size={25} />
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <View style={styles(theme, width).searchIcon}>
-                  <TouchableOpacity testID="searchButton" onPress={toggleSearchBar}>
+            {isSearchVisible ? (
+              <View style={[styles(theme, width).searchIcon, { marginTop: -25 }]}>
+                <TouchableOpacity testID="searchButton" onPress={toggleSearchBar}>
+                  <Ionicons name="close" size={25} />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={styles(theme, width).searchIcon}>
+                <TouchableOpacity testID="searchButton" onPress={toggleSearchBar}>
                   <Tooltip
-                      topAdjustment={Platform.OS === 'android' ? -StatusBar.currentHeight : 0}
-                      isVisible={searchTip && !userTutorial}
-                      content={
+                    topAdjustment={Platform.OS === "android" ? -StatusBar.currentHeight : 0}
+                    isVisible={searchTip && !userTutorial}
+                    content={
                       <TooltipContent
                         message="Try out our search bar!"
-                          onPressOk={() => {
-                            setSearchTip(false);
-                            setFilterToolTip(true);
+                        onPressOk={() => {
+                          setSearchTip(false);
+                          setFilterToolTip(true);
                         }}
                         onSkip={() => {
                           // Disable all tutorial tips when Skip is pressed
@@ -805,20 +770,18 @@ const handleSortOption = ({ option }) => {
                           setSearchTip(false);
                           setFilterToolTip(false);
                           setPubPrivTip(false);
-                          User.setUserTutorialDone("HomeScreen", true)
+                          User.setUserTutorialDone("HomeScreen", true);
                         }}
-                    />
-                  }
-                  placement="bottom"
+                      />
+                    }
+                    placement="bottom"
                   >
-                    <Ionicons name='search' size={25} />
+                    <Ionicons name="search" size={25} />
                   </Tooltip>
-                  </TouchableOpacity>
-                </View>
-              )
-            }
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
-
         </View>
       </View>
 
@@ -826,53 +789,85 @@ const handleSortOption = ({ option }) => {
         {rendering ? <NoteSkeleton /> : renderList(notes)}
       </View>
 
+      <NoteDetailModal isVisible={isModalVisible} onClose={() => setModalVisible(false)} note={selectedNote} />
 
-      <NoteDetailModal
-        isVisible={isModalVisible}
-        onClose={() => setModalVisible(false)}
-        note={selectedNote}
-      />
-
-{isSortOpened && isSearchVisible== false && <View testID="sort-options" style={{
-         position: 'absolute',
-         top: 120, // adjust based on your layout
-         right: 20,
-         width: 200,
-         backgroundColor: isDarkmode ? '#525252' : 'white',
-         borderRadius: 12,
-         padding: 10,
-         zIndex: 10,
-         elevation: 10,
-         shadowColor: '#000',
-         shadowOffset: { width: 0, height: 2 },
-         shadowOpacity: 0.2,
-         shadowRadius: 4,
-      }}>
-        <Text style={{  ...defaultTextFont, fontSize: 16, fontWeight: '600', marginBottom: 10, color: isDarkmode ? '#c7c7c7' : 'black',}}>Sort by</Text>
-        <View style={{ height: '50%', justifyContent: 'space-evenly', alignItems: 'center'}}>
-          <TouchableOpacity
-            onPress={() => handleSortOption({ option: 1 })}
-          >
-            <View style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 1 ? theme.homeColor : 'none', width: 200 }]}>
-              <Text style={{ ...defaultTextFont, fontSize: 14, paddingVertical: 6, color: selectedSortOption === 1 ? theme.primary : (isDarkmode ? '#ccc' : '#000'), }}>Date & Time(latest)</Text>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => handleSortOption({ option: 2 })}
-          >
-            <View style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 2 ? theme.homeColor : 'none' }]}>
-              <Text style={{ ...defaultTextFont, fontSize: 14, paddingVertical: 6, color: selectedSortOption === 2 ? theme.primary : (isDarkmode ? '#ccc' : '#000'),}}>A-Z</Text>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => handleSortOption({ option: 3 })}
-          >
-            <View style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 3 ? theme.homeColor : 'none' }]}>
-              <Text style={{ ...defaultTextFont, fontSize: 14, paddingVertical: 6, color: selectedSortOption === 2 ? theme.primary : (isDarkmode ? '#ccc' : '#000'),}}>Z-A</Text>
-            </View>
-          </TouchableOpacity>
+      {isSortOpened && isSearchVisible == false && (
+        <View
+          testID="sort-options"
+          style={{
+            position: "absolute",
+            top: 120, // adjust based on your layout
+            right: 20,
+            width: 200,
+            backgroundColor: isDarkmode ? "#525252" : "white",
+            borderRadius: 12,
+            padding: 10,
+            zIndex: 10,
+            elevation: 10,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.2,
+            shadowRadius: 4,
+          }}
+        >
+          <Text style={{ ...defaultTextFont, fontSize: 16, fontWeight: "600", marginBottom: 10, color: isDarkmode ? "#c7c7c7" : "black" }}>
+            Sort by
+          </Text>
+          <View style={{ height: "50%", justifyContent: "space-evenly", alignItems: "center" }}>
+            <TouchableOpacity onPress={() => handleSortOption({ option: 1 })}>
+              <View
+                style={[
+                  styles(theme, width).selectedSortOption,
+                  { backgroundColor: selectedSortOption === 1 ? theme.homeColor : "none", width: 200 },
+                ]}
+              >
+                <Text
+                  style={{
+                    ...defaultTextFont,
+                    fontSize: 14,
+                    paddingVertical: 6,
+                    color: selectedSortOption === 1 ? theme.primary : isDarkmode ? "#ccc" : "#000",
+                  }}
+                >
+                  Date & Time(latest)
+                </Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleSortOption({ option: 2 })}>
+              <View
+                style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 2 ? theme.homeColor : "none" }]}
+              >
+                <Text
+                  style={{
+                    ...defaultTextFont,
+                    fontSize: 14,
+                    paddingVertical: 6,
+                    color: selectedSortOption === 2 ? theme.primary : isDarkmode ? "#ccc" : "#000",
+                  }}
+                >
+                  A-Z
+                </Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleSortOption({ option: 3 })}>
+              <View
+                style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 3 ? theme.homeColor : "none" }]}
+              >
+                <Text
+                  style={{
+                    ...defaultTextFont,
+                    fontSize: 14,
+                    paddingVertical: 6,
+                    color: selectedSortOption === 2 ? theme.primary : isDarkmode ? "#ccc" : "#000",
+                  }}
+                >
+                  Z-A
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>}
+      )}
     </View>
   );
 };
@@ -925,7 +920,7 @@ const styles = (theme, width, color, isDarkmode) =>
     },
     scrollerBackgroundColor: {
       flex: 1,
-      width: '100%',
+      width: "100%",
     },
     addButton: {
       position: "absolute",
@@ -959,7 +954,6 @@ const styles = (theme, width, color, isDarkmode) =>
       marginTop: 1,
       padding: 10,
       alignSelf: "center",
-
     },
     backRightBtn: {
       alignItems: "flex-end",
@@ -969,45 +963,45 @@ const styles = (theme, width, color, isDarkmode) =>
       top: 0,
       width: 75,
       paddingRight: 17,
-      color: theme.text
+      color: theme.text,
     },
     backRightBtnRight: {
       backgroundColor: theme.homeGray,
       width: "50%",
       right: 0,
-      color: theme.text
+      color: theme.text,
     },
     userWishContainer: {
-      marginRight: 10, 
+      marginRight: 10,
     },
     userName: {
       ...defaultTextFont,
-      fontWeight: '500',
+      fontWeight: "500",
       height: "50%",
-      textAlign: 'center',       
-      alignSelf: 'center',       
+      textAlign: "center",
+      alignSelf: "center",
     },
-    
+
     toolContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
       marginTop: 10,
     },
     publishedOrPrivateContainer: {
-      backgroundColor: '#e7e7e7',
+      backgroundColor: "#e7e7e7",
       height: 30,
       width: 120,
       borderRadius: 20,
       marginBottom: 10,
-      flexDirection: 'row',
-      justifyContent: 'space-evenly',
-      alignItems: 'center',
+      flexDirection: "row",
+      justifyContent: "space-evenly",
+      alignItems: "center",
     },
-    publishedAndSortContainer:{
-      flexDirection: 'row', 
-      width: width > 500? "20%" : "45%",
-      justifyContent: 'space-between', 
+    publishedAndSortContainer: {
+      flexDirection: "row",
+      width: width > 500 ? "20%" : "45%",
+      justifyContent: "space-between",
     },
     publishedTxtContainer: {
       paddingHorizontal: 5,
@@ -1016,9 +1010,9 @@ const styles = (theme, width, color, isDarkmode) =>
     },
     publishedTxt: {
       ...defaultTextFont,
-      color: 'white',
+      color: "white",
       fontSize: 10,
-      fontWeight: '600',
+      fontWeight: "600",
     },
     searchContainer: {
       right: 0,
@@ -1035,58 +1029,49 @@ const styles = (theme, width, color, isDarkmode) =>
       fontSize: 16,
       color: "black",
       paddingHorizontal: 10,
-      paddingVertical: 0, 
+      paddingVertical: 0,
       width: "100%",
     },
     searchIcon: {
       marginBottom: 10,
     },
     searchParentContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
     },
     userAccountAndPageTitle: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      width: width> 500? '13%' : "27%",
-
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      width: width > 500 ? "13%" : "27%",
     },
     pageTitle: {
       ...defaultTextFont,
       fontSize: 18,
-      fontWeight: '500'
-
+      fontWeight: "500",
     },
     lottie: {
       width: 100,
       height: 200,
     },
     resultNotFound: {
-      justifyContent: 'center',
-      alignItems: 'center'
+      justifyContent: "center",
+      alignItems: "center",
     },
     resultNotFoundTxt: {
       ...defaultTextFont,
       fontSize: 15,
-      fontWeight: '400',
+      fontWeight: "400",
     },
     selectedSortOption: {
       // backgroundColor: theme.homeColor,
       width: width * 0.4,
-      justifyContent: 'center',
-      alignItems: 'center',
+      justifyContent: "center",
+      alignItems: "center",
       padding: 10,
       borderRadius: 10,
-    }
-
+    },
   });
 
 export default HomeScreen;
-
-
-
-
-
-

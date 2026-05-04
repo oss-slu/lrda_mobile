@@ -1,33 +1,20 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Dimensions,
-  FlatList,
-  Linking,
-  StatusBar,
-  ScrollView,
-} from 'react-native';
-import { useTheme } from '../components/ThemeProvider';
-import Feather from 'react-native-vector-icons/Feather';
-import { onlineResources, analogueResources } from '../data'; // Update path as needed
-import { defaultTextFont } from '../../styles/globalStyles';
-
-const { width, height } = Dimensions.get('window');
+import React from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, FlatList, Linking, StatusBar, ScrollView } from "react-native";
+import { useTheme } from "../components/ThemeProvider";
+import Feather from "react-native-vector-icons/Feather";
+import { onlineResources, analogueResources } from "../data"; // Update path as needed
+import { defaultTextFont } from "../../styles/globalStyles";
 
 import { useRouter } from "expo-router";
+
+const { width, height } = Dimensions.get("window");
 
 function ResourceScreen() {
   const router = useRouter();
   const { theme } = useTheme();
 
   const renderOnlineResource = ({ item }) => (
-    <TouchableOpacity
-      style={styles.resourceBox}
-      onPress={() => Linking.openURL(item.url)}
-    >
+    <TouchableOpacity style={styles.resourceBox} onPress={() => Linking.openURL(item.url)}>
       <Text style={styles.resourceLink}>{item.title}</Text>
     </TouchableOpacity>
   );
@@ -48,7 +35,7 @@ function ResourceScreen() {
             <Feather name="arrow-left" size={30} />
           </TouchableOpacity>
           <View style={styles.headerHeading}>
-            <Text style={{ fontSize: 17, fontWeight: 'bold' }}>Resources</Text>
+            <Text style={{ fontSize: 17, fontWeight: "bold" }}>Resources</Text>
           </View>
         </View>
       </View>
@@ -56,12 +43,7 @@ function ResourceScreen() {
       {/* Main content */}
       <ScrollView contentContainerStyle={styles.mainContent}>
         <Text style={styles.sectionTitle}>Online Resources</Text>
-        <FlatList
-          data={onlineResources}
-          renderItem={renderOnlineResource}
-          keyExtractor={(item) => item.url}
-          scrollEnabled={false}
-        />
+        <FlatList data={onlineResources} renderItem={renderOnlineResource} keyExtractor={(item) => item.url} scrollEnabled={false} />
 
         <Text style={styles.sectionTitle}>Analogue Resources</Text>
         <FlatList
@@ -85,9 +67,9 @@ const styles = StyleSheet.create({
     height: width > 500 ? height * 0.12 : height * 0.19,
   },
   headerContent: {
-    marginTop: width > 500 ? '5%' : '20%',
-    flexDirection: 'row',
-    alignItems: 'center',
+    marginTop: width > 500 ? "5%" : "20%",
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 20,
   },
   headerHeading: {
@@ -99,26 +81,26 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginVertical: 16,
   },
   resourceBox: {
     marginBottom: 12,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 8,
     padding: 12,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   resourceLink: {
-    color: '#1a73e8',
+    color: "#1a73e8",
     fontSize: 14,
   },
   resourceText: {
     fontSize: 14,
-    color: '#000',
+    color: "#000",
   },
 });

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import {
   Platform,
   View,
@@ -11,9 +11,8 @@ import {
   Pressable,
   Animated,
   StatusBar,
-  ActivityIndicator
+  ActivityIndicator,
 } from "react-native";
-import { useCallback } from "react";
 import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { User } from "../models/user_class";
@@ -32,10 +31,10 @@ import ToastMessage from "react-native-toast-message";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import Greeting from "../components/Greeting";
 import NotesComponent from "../components/NotesComponent";
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import LottieView from 'lottie-react-native';
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import LottieView from "lottie-react-native";
 import { defaultTextFont } from "../../styles/globalStyles";
-import Tooltip from 'react-native-walkthrough-tooltip';
+import Tooltip from "react-native-walkthrough-tooltip";
 import TooltipContent from "../onboarding/TooltipComponent";
 const user = User.getInstance();
 const { width, height } = Dimensions.get("window");
@@ -61,7 +60,7 @@ const Library = () => {
   const [items, setItems] = useState(initialItems);
   const [selectedNote, setSelectedNote] = useState<Note | undefined>(undefined);
   const [isModalVisible, setModalVisible] = useState(false);
-  const [userName, setUserName] = useState('');
+  const [userName, setUserName] = useState("");
   const { theme, isDarkmode } = useTheme();
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [isSortOpened, setIsSortOpened] = useState(false);
@@ -81,7 +80,10 @@ const Library = () => {
       const name = await user.getName();
       setUserName(name);
       if (name) {
-        const initials = name.split(" ").map((namePart) => namePart[0]).join("");
+        const initials = name
+          .split(" ")
+          .map((namePart) => namePart[0])
+          .join("");
         setUserInitials(initials);
       }
     })();
@@ -114,26 +116,21 @@ const Library = () => {
       // Get userId if needed
       const userId = await user.getId();
       // Use batch-fetching with skip and limit; note we use isPrivate state
-      const data = await ApiService.fetchMapsMessagesBatch(
-          isPrivate,
-          published,
-          isPrivate ? userId : "",
-          limit,
-          skip
-      );
+      const data = await ApiService.fetchMapsMessagesBatch(isPrivate, published, isPrivate ? userId : "", limit, skip);
       // Filter out archived notes; assume notes without `isArchived` are not archived
       const publicNotes = data.filter((note: Note) => !note.isArchived && note.published);
       // Convert data and sort notes by date (latest first)
-      const fetchedNotes = DataConversion.convertMediaTypes(publicNotes)
-        .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+      const fetchedNotes = DataConversion.convertMediaTypes(publicNotes).sort(
+        (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
+      );
       const finalNotes = reversed ? fetchedNotes.reverse() : fetchedNotes;
-  
+
       if (pageNum === 1) {
         setNotes(finalNotes);
       } else {
         setNotes((prev) => [...prev, ...finalNotes]);
       }
-  
+
       setHasMore(finalNotes.length === limit);
       setRendering(false);
     } catch (error) {
@@ -160,7 +157,7 @@ const Library = () => {
   const renderFooter = () => {
     if (isLoadingMore) {
       return (
-        <View  style={{ paddingVertical: 50, alignItems: "center", marginBottom: 100 }}>
+        <View style={{ paddingVertical: 50, alignItems: "center", marginBottom: 100 }}>
           <ActivityIndicator size="small" color={theme.text} />
         </View>
       );
@@ -168,22 +165,22 @@ const Library = () => {
     if (hasMore) {
       return (
         <TouchableOpacity
-        testID="load-more"
-        onPress={handleLoadMore}
-        style={{
-          paddingVertical: 20,
-          width: "65%",
-          alignItems: "center",
-          alignSelf: "center",
-          borderRadius: 20,
-          marginVertical: 4, // reduced from 8
-          backgroundColor: theme.homeColor,
-        }}
-      >
-        <Text testID="load-more-button" style={{ ...defaultTextFont ,color: theme.text, fontSize: 16, fontWeight: "400" }}>
-          Load More
-        </Text>
-      </TouchableOpacity>
+          testID="load-more"
+          onPress={handleLoadMore}
+          style={{
+            paddingVertical: 20,
+            width: "65%",
+            alignItems: "center",
+            alignSelf: "center",
+            borderRadius: 20,
+            marginVertical: 4, // reduced from 8
+            backgroundColor: theme.homeColor,
+          }}
+        >
+          <Text testID="load-more-button" style={{ ...defaultTextFont, color: theme.text, fontSize: 16, fontWeight: "400" }}>
+            Load More
+          </Text>
+        </TouchableOpacity>
       );
     }
     return (
@@ -197,7 +194,7 @@ const Library = () => {
 
   const toggleSearchBar = () => {
     if (isSearchVisible) {
-      setSearchQuery('');
+      setSearchQuery("");
       Animated.timing(animation, {
         toValue: 0,
         duration: 300,
@@ -231,13 +228,10 @@ const Library = () => {
           const lowerCaseQuery = searchQuery.toLowerCase();
           const noteTime = new Date(note.time);
           const formattedTime = formatToLocalDateString(noteTime);
-          return (
-            note.title.toLowerCase().includes(lowerCaseQuery) ||
-            formattedTime.includes(lowerCaseQuery)
-          );
+          return note.title.toLowerCase().includes(lowerCaseQuery) || formattedTime.includes(lowerCaseQuery);
         })
       : notes;
-    
+
     // Only apply sort if there's an active search query.
     // Otherwise, display the notes in the natural order they are stored.
     const displayNotes = searchQuery
@@ -253,9 +247,10 @@ const Library = () => {
           return 0;
         })
       : filteredNotes;
-    
-    return published && (
-      displayNotes.length > 0 ? (
+
+    return (
+      published &&
+      (displayNotes.length > 0 ? (
         <SwipeListView
           data={displayNotes}
           renderItem={renderItem}
@@ -265,18 +260,12 @@ const Library = () => {
         />
       ) : (
         <View style={styles(theme, width).resultNotFound}>
-          <LottieView
-            source={require('../../assets/animations/noResultFound.json')}
-            autoPlay
-            loop
-            style={styles(theme, width).lottie}
-          />
+          <LottieView source={require("../../assets/animations/noResultFound.json")} autoPlay loop style={styles(theme, width).lottie} />
           <Text style={styles(theme, width).resultNotFoundTxt}>No Results Found</Text>
         </View>
-      )
+      ))
     );
   };
-  
 
   const renderItem = (data: any) => {
     const item = data.item;
@@ -302,7 +291,7 @@ const Library = () => {
       <TouchableOpacity
         key={item.id}
         activeOpacity={1}
-        style={{ backgroundColor: isDarkmode ? 'black' : '#e6e6e6' }}
+        style={{ backgroundColor: isDarkmode ? "black" : "#e6e6e6" }}
         onPress={() => {
           if (!item.published) {
             router.push({
@@ -328,14 +317,14 @@ const Library = () => {
           }
         }}
       >
-        <NotesComponent 
-          IsImage={IsImage} 
-          resolvedImageURI={resolvedImageURI} 
-          ImageType={ImageType} 
-          textLength={textLength} 
-          showTime={showTime} 
-          item={item} 
-          isDarkmode={isDarkmode} 
+        <NotesComponent
+          IsImage={IsImage}
+          resolvedImageURI={resolvedImageURI}
+          ImageType={ImageType}
+          textLength={textLength}
+          showTime={showTime}
+          item={item}
+          isDarkmode={isDarkmode}
         />
       </TouchableOpacity>
     );
@@ -379,7 +368,7 @@ const Library = () => {
   }, []);
 
   return (
-    <View testID="Library" style={{ flex: 1, backgroundColor: isDarkmode ? 'black' : '#e4e4e4' }}>
+    <View testID="Library" style={{ flex: 1, backgroundColor: isDarkmode ? "black" : "#e4e4e4" }}>
       <StatusBar translucent backgroundColor="transparent" />
       <View style={styles(theme, width).container}>
         <View style={styles(theme, width).topView}>
@@ -394,11 +383,11 @@ const Library = () => {
             }}
           >
             <View style={styles(theme, width).userAccountAndPageTitle}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 testID="account-page"
                 style={[
                   styles(theme, width).userPhoto,
-                  { 
+                  {
                     backgroundColor: theme.black,
                     width: width > 1000 ? 50 : 30,
                     height: width > 1000 ? 50 : 30,
@@ -412,135 +401,130 @@ const Library = () => {
               </TouchableOpacity>
               <Text style={styles(theme, width).pageTitle}>Library</Text>
             </View>
-  
+
             <View testID="greeting-component" style={styles(theme, width).userWishContainer}>
               <Greeting />
               <Text style={styles(theme, width).userName}>{userName}</Text>
             </View>
           </View>
         </View>
-  
+
         <View testID="Filter" style={[styles(theme, width).toolContainer, { marginHorizontal: 20 }]}>
-          {
-            !isSearchVisible && (
-              <View>
-                {
-                  !isSortOpened ? (
-                    <TouchableOpacity onPress={handleSort}>
-                      <MaterialIcons name='sort' size={30} />
-                    </TouchableOpacity>
-                  ) : (
-                    <TouchableOpacity onPress={handleSort}>
-                      <MaterialIcons name='close' size={30} />
-                    </TouchableOpacity>
-                  )
-                }
-              </View>
-            )
-          }
-          <View testID="SearchBar" style={[styles(theme, width).searchParentContainer, { width: isSearchVisible ? '95%' : 40 }]}>
+          {!isSearchVisible && (
+            <View>
+              {!isSortOpened ? (
+                <TouchableOpacity onPress={handleSort}>
+                  <MaterialIcons name="sort" size={30} />
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity onPress={handleSort}>
+                  <MaterialIcons name="close" size={30} />
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
+          <View testID="SearchBar" style={[styles(theme, width).searchParentContainer, { width: isSearchVisible ? "95%" : 40 }]}>
             {isSearchVisible && (
-              <Animated.View
-                style={[
-                  styles(theme, width).searchContainer,
-                  { width: searchBarWidth, marginBottom: 23 },
-                ]}
-              >
+              <Animated.View style={[styles(theme, width).searchContainer, { width: searchBarWidth, marginBottom: 23 }]}>
                 <TextInput
                   placeholder="Search..."
                   value={searchQuery}
                   placeholderTextColor="#999"
                   onChangeText={(e) => setSearchQuery(e)}
                   style={[styles(theme, width).searchInput]}
-                  cursorColor={'black'}
+                  cursorColor={"black"}
                   autoFocus={true}
                 />
               </Animated.View>
             )}
-            {
-              isSearchVisible ? (
-                <View style={[styles(theme, width).seachIcon, { marginTop: -25 }]}>
-                  <TouchableOpacity onPress={toggleSearchBar} testID="close-button">
-                    <Ionicons name="close" size={25} />
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <View style={styles(theme, width).seachIcon}>
-                  <TouchableOpacity onPress={toggleSearchBar} testID="search-button">
-                    <Ionicons name="search" size={25} />
-                  </TouchableOpacity>
-                </View>
-              )
-            }
+            {isSearchVisible ? (
+              <View style={[styles(theme, width).seachIcon, { marginTop: -25 }]}>
+                <TouchableOpacity onPress={toggleSearchBar} testID="close-button">
+                  <Ionicons name="close" size={25} />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={styles(theme, width).seachIcon}>
+                <TouchableOpacity onPress={toggleSearchBar} testID="search-button">
+                  <Ionicons name="search" size={25} />
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         </View>
       </View>
-  
+
       <View testID="notes-list" style={styles(theme, width).scrollerBackgroundColor}>
-  {rendering ? (
-    <NoteSkeleton />
-  ) : (
-    <Tooltip 
-      isVisible={libraryTip && !userTutorial}
-      showChildInTooltip={false}
-      topAdjustment={Platform.OS === 'android' ? -400 : -400}
-      displayInsets={{ top: 20, bottom: 20, left: 10, right: 10 }}
-      content={
-        <TooltipContent
-          message="Welcome to library! Scroll to view all published notes from other creators."
-          onPressOk={() => {
-            setUserTutorial(true);
-            setLibraryTip(false);
-            User.setUserTutorialDone("Library", true);
-          }
+        {rendering ? (
+          <NoteSkeleton />
+        ) : (
+          <Tooltip
+            isVisible={libraryTip && !userTutorial}
+            showChildInTooltip={false}
+            topAdjustment={Platform.OS === "android" ? -400 : -400}
+            displayInsets={{ top: 20, bottom: 20, left: 10, right: 10 }}
+            content={
+              <TooltipContent
+                message="Welcome to library! Scroll to view all published notes from other creators."
+                onPressOk={() => {
+                  setUserTutorial(true);
+                  setLibraryTip(false);
+                  User.setUserTutorialDone("Library", true);
+                }}
+                onSkip={() => {
+                  setUserTutorial(true);
+                  setLibraryTip(false);
+                  User.setUserTutorialDone("Library", true);
+                }}
+              />
+            }
+            placement="bottom"
+          >
+            {renderList(notes)}
+          </Tooltip>
+        )}
+      </View>
 
-          }
-          onSkip={() => {
-            setUserTutorial(true);
-            setLibraryTip(false);
-            User.setUserTutorialDone("Library", true);
-          }}
-        />
-      }
-      placement="bottom"
-    >
-      {renderList(notes)}
-    </Tooltip>
-
-       )}
-</View>
-  
       {isSortOpened && isSearchVisible == false && (
-        <View style={{
-          height: "100%",
-          width: '100%',
-          backgroundColor: isDarkmode ? '#525252' : 'white',
-          position: 'absolute',
-          top: '19%',
-          borderRadius: 20,
-          padding: 20,
-        }}>
-          <Text style={{ ...defaultTextFont ,fontSize: 20, color: isDarkmode ? '#c7c7c7' : 'black', fontWeight: 600 }}>
-            Sort by
-          </Text>
-          <View style={{ height: '50%', justifyContent: 'space-evenly', alignItems: 'center' }}>
+        <View
+          style={{
+            height: "100%",
+            width: "100%",
+            backgroundColor: isDarkmode ? "#525252" : "white",
+            position: "absolute",
+            top: "19%",
+            borderRadius: 20,
+            padding: 20,
+          }}
+        >
+          <Text style={{ ...defaultTextFont, fontSize: 20, color: isDarkmode ? "#c7c7c7" : "black", fontWeight: 600 }}>Sort by</Text>
+          <View style={{ height: "50%", justifyContent: "space-evenly", alignItems: "center" }}>
             <TouchableOpacity onPress={() => handleSortOption({ option: 1 })}>
-              <View style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 1 ? theme.homeColor : 'none', width: 200 }]}>
-                <Text style={{ ...defaultTextFont, fontSize: 20, color: isDarkmode && selectedSortOption != 1 ? '#c7c7c7' : 'black' }}>
+              <View
+                style={[
+                  styles(theme, width).selectedSortOption,
+                  { backgroundColor: selectedSortOption === 1 ? theme.homeColor : "none", width: 200 },
+                ]}
+              >
+                <Text style={{ ...defaultTextFont, fontSize: 20, color: isDarkmode && selectedSortOption != 1 ? "#c7c7c7" : "black" }}>
                   Date & Time(latest)
                 </Text>
               </View>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => handleSortOption({ option: 2 })}>
-              <View style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 2 ? theme.homeColor : 'none' }]}>
-                <Text style={{ ...defaultTextFont,fontSize: 20, color: isDarkmode && selectedSortOption != 2 ? '#c7c7c7' : 'black' }}>
+              <View
+                style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 2 ? theme.homeColor : "none" }]}
+              >
+                <Text style={{ ...defaultTextFont, fontSize: 20, color: isDarkmode && selectedSortOption != 2 ? "#c7c7c7" : "black" }}>
                   A-Z
                 </Text>
               </View>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => handleSortOption({ option: 3 })}>
-              <View style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 3 ? theme.homeColor : 'none' }]}>
-                <Text style={{ ...defaultTextFont, fontSize: 20, color: isDarkmode && selectedSortOption != 3 ? '#c7c7c7' : 'black' }}>
+              <View
+                style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 3 ? theme.homeColor : "none" }]}
+              >
+                <Text style={{ ...defaultTextFont, fontSize: 20, color: isDarkmode && selectedSortOption != 3 ? "#c7c7c7" : "black" }}>
                   Z-A
                 </Text>
               </View>
@@ -548,16 +532,12 @@ const Library = () => {
           </View>
         </View>
       )}
-  
-      <NoteDetailModal
-        isVisible={isModalVisible}
-        onClose={() => setModalVisible(false)}
-        note={selectedNote}
-      />
+
+      <NoteDetailModal isVisible={isModalVisible} onClose={() => setModalVisible(false)} note={selectedNote} />
     </View>
   );
 };
-  
+
 const styles = (theme, width, color, isDarkmode) =>
   StyleSheet.create({
     container: {

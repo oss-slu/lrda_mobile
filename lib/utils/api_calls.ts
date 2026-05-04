@@ -7,15 +7,15 @@ const API_BASE_URL = process.env.API_BASE_URL || "https://lived-religion-dev.rer
 
 export default class ApiService {
   /**
- * Fetches messages from the API, with optional pagination.
- * @param {boolean} global - Indicates whether to fetch global messages or user-specific messages.
- * @param {boolean} published - Indicates whether to fetch only published messages.
- * @param {string} userId - The ID of the user for user-specific messages.
- * @param {number} [limit=150] - The limit of messages per page. Defaults to 150.
- * @param {number} [skip=0] - The iterator to skip messages for pagination.
- * @param {Array} [allResults=[]] - The accumulated results for pagination.
- * @returns {Promise<any[]>} The array of messages fetched from the API.
- */
+   * Fetches messages from the API, with optional pagination.
+   * @param {boolean} global - Indicates whether to fetch global messages or user-specific messages.
+   * @param {boolean} published - Indicates whether to fetch only published messages.
+   * @param {string} userId - The ID of the user for user-specific messages.
+   * @param {number} [limit=150] - The limit of messages per page. Defaults to 150.
+   * @param {number} [skip=0] - The iterator to skip messages for pagination.
+   * @param {Array} [allResults=[]] - The accumulated results for pagination.
+   * @returns {Promise<any[]>} The array of messages fetched from the API.
+   */
   static async fetchMessages(
     global: boolean,
     published: boolean,
@@ -62,13 +62,7 @@ export default class ApiService {
     }
   }
 
-  static async fetchMessagesBatch(
-    global: boolean,
-    published: boolean,
-    userId: string,
-    limit = 20,
-    skip = 0
-  ): Promise<any[]> {
+  static async fetchMessagesBatch(global: boolean, published: boolean, userId: string, limit = 20, skip = 0): Promise<any[]> {
     try {
       const url = `${API_BASE_URL}query?limit=${limit}&skip=${skip}`;
       const headers = {
@@ -98,13 +92,7 @@ export default class ApiService {
     }
   }
 
-  static async fetchMapsMessagesBatch(
-    global: boolean,
-    published: boolean,
-    userId: string,
-    limit = 20,
-    skip = 0
-  ): Promise<any[]> {
+  static async fetchMapsMessagesBatch(global: boolean, published: boolean, userId: string, limit = 20, skip = 0): Promise<any[]> {
     try {
       const url = `${API_BASE_URL}query?limit=${limit}&skip=${skip}`;
       const headers = {
@@ -134,10 +122,10 @@ export default class ApiService {
   }
 
   /**
-    * Fetches user data from the API.
-    * @param {string} uid - The UID of the user.
-    * @returns {Promise<UserData | null>} The user data.
-    */
+   * Fetches user data from the API.
+   * @param {string} uid - The UID of the user.
+   * @returns {Promise<UserData | null>} The user data.
+   */
   static async fetchUserData(uid: string): Promise<UserData | null> {
     try {
       // Fetch user data from API
@@ -146,9 +134,9 @@ export default class ApiService {
         "Content-Type": "application/json",
       };
       const body = JSON.stringify({
-        "$or": [
-          { "@type": "Agent", "uid": uid },
-          { "@type": "foaf:Agent", "uid": uid },
+        $or: [
+          { "@type": "Agent", uid: uid },
+          { "@type": "foaf:Agent", uid: uid },
         ],
       });
 
@@ -170,10 +158,6 @@ export default class ApiService {
     }
   }
 
-
-
-
-
   /**
    * Fetches the name of the creator by querying the API with the given creatorId.
    * @param {string} creatorId - The UID of the creator.
@@ -185,10 +169,10 @@ export default class ApiService {
       const apiUrl = `${API_BASE_URL}query`;
       const headers = { "Content-Type": "application/json" };
       const body = {
-        "$or": [
-          { "@type": "Agent", "uid": creatorId },
-          { "@type": "foaf:Agent", "uid": creatorId }
-        ]
+        $or: [
+          { "@type": "Agent", uid: creatorId },
+          { "@type": "foaf:Agent", uid: creatorId },
+        ],
       };
 
       console.log(`Querying API with UID: ${creatorId}`);
@@ -214,8 +198,6 @@ export default class ApiService {
       return "Error retrieving creator";
     }
   }
-
-
 
   /**
    * Creates user data in the API.
@@ -365,10 +347,7 @@ export default class ApiService {
         // Check if tags contain the query string
         if (
           Array.isArray(message.tags) &&
-          message.tags.some(
-            (tag: any) =>
-              typeof tag === "string" && tag.toLowerCase().includes(lowerCaseQuery)
-          )
+          message.tags.some((tag: any) => typeof tag === "string" && tag.toLowerCase().includes(lowerCaseQuery))
         ) {
           return true;
         }
@@ -382,7 +361,4 @@ export default class ApiService {
       throw error;
     }
   }
-
-
-
 }

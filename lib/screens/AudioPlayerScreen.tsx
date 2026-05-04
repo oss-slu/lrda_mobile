@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, Button } from 'react-native';
-import { Audio } from 'expo-av';
-import { defaultTextFont } from '../../styles/globalStyles';
+import React from "react";
+import { View, Text, Button } from "react-native";
+import { Audio } from "expo-av";
+import { defaultTextFont } from "../../styles/globalStyles";
 import { useRouter, useLocalSearchParams } from "expo-router";
 
 const AudioPlayerScreen: React.FC = () => {
@@ -24,8 +24,8 @@ const AudioPlayerScreen: React.FC = () => {
   }, [audioUri]);
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text style={{ ...defaultTextFont  }}>Audio Playback</Text>
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <Text style={{ ...defaultTextFont }}>Audio Playback</Text>
       <Button title="Go Back" onPress={() => router.back()} />
     </View>
   );

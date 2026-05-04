@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  TouchableOpacity,
-  ImageBackground,
-} from "react-native";
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ImageBackground } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Snackbar } from "react-native-paper";
 import { signUpWithEmail } from "../../auth/client";
@@ -21,13 +14,7 @@ import { useRouter } from "expo-router";
  */
 const clearNavigationKeys = async (): Promise<void> => {
   try {
-    const keysToRemove = [
-      "Explore",
-      "AddNote",
-      "MorePage",
-      "Library",
-      "HomeScreen",
-    ];
+    const keysToRemove = ["Explore", "AddNote", "MorePage", "Library", "HomeScreen"];
     await AsyncStorage.multiRemove(keysToRemove);
     console.log("Navigation keys removed successfully");
   } catch (error) {
@@ -81,7 +68,6 @@ const RegistrationScreen: React.FC = () => {
 
       await clearNavigationKeys();
 
-
       // Set success message and navigate to login screen
       setRegistrationSuccess(true);
       setSnackMessage("Signup successful! Please verify your email before logging in.");
@@ -115,18 +101,47 @@ const RegistrationScreen: React.FC = () => {
         </Snackbar>
         <View style={styles.registerBox}>
           <Text style={styles.title}>Register</Text>
-          <View style={{ marginTop: 40 }} >
-            <TextInput style={styles.input} placeholder="First Name" placeholderTextColor="#7D7D7D" value={firstName} onChangeText={setFirstName} />
-            <TextInput style={styles.input} placeholder="Last Name" placeholderTextColor="#7D7D7D" value={lastName} onChangeText={setLastName} />
+          <View style={{ marginTop: 40 }}>
+            <TextInput
+              style={styles.input}
+              placeholder="First Name"
+              placeholderTextColor="#7D7D7D"
+              value={firstName}
+              onChangeText={setFirstName}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Last Name"
+              placeholderTextColor="#7D7D7D"
+              value={lastName}
+              onChangeText={setLastName}
+            />
             <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#7D7D7D" value={email} onChangeText={setEmail} />
-            <TextInput style={styles.input} placeholder="Password" secureTextEntry placeholderTextColor="#7D7D7D" value={password} onChangeText={setPassword} />
-            <TextInput style={styles.input} placeholder="Confirm Password" secureTextEntry placeholderTextColor="#7D7D7D" value={confirmPassword} onChangeText={setConfirmPassword} />
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              secureTextEntry
+              placeholderTextColor="#7D7D7D"
+              value={password}
+              onChangeText={setPassword}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Confirm Password"
+              secureTextEntry
+              placeholderTextColor="#7D7D7D"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+            />
           </View>
           <TouchableOpacity onPress={handleRegister} style={styles.button}>
             <Text style={styles.buttonText}>Sign Up</Text>
           </TouchableOpacity>
           <Text style={styles.loginText}>
-            Already have an account? <Text style={styles.signIn} onPress={() => router.replace("/(auth)/login")}>Sign In</Text>
+            Already have an account?{" "}
+            <Text style={styles.signIn} onPress={() => router.replace("/(auth)/login")}>
+              Sign In
+            </Text>
           </Text>
         </View>
       </ImageBackground>

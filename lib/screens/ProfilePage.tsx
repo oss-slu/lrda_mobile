@@ -1,19 +1,11 @@
 import React, { useState, useEffect } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  SafeAreaView,
-  Image,
-  FlatList,
-  TouchableOpacity,
-} from "react-native";
+import { StyleSheet, Text, View, SafeAreaView, Image, FlatList, TouchableOpacity } from "react-native";
 import { User } from "../models/user_class";
 import { Note, ImageNote, ProfilePageProps } from "../../types";
 import DataConversion from "../utils/data_conversion";
 import ApiService from "../utils/api_calls";
 import { useTheme } from "../components/ThemeProvider";
-import Feather from 'react-native-vector-icons/Feather';
+import Feather from "react-native-vector-icons/Feather";
 import { defaultTextFont } from "../../styles/globalStyles";
 import { useRouter } from "expo-router";
 
@@ -42,11 +34,7 @@ export default function ProfilePage() {
 
     const fetchMessages = async () => {
       try {
-        const data = await ApiService.fetchMessages(
-          false,
-          false,
-          (await user.getId()) || ""
-        );
+        const data = await ApiService.fetchMessages(false, false, (await user.getId()) || "");
         const fetchedNotes = DataConversion.convertMediaTypes(data);
         setFieldNotes(fetchedNotes.length);
 
@@ -76,7 +64,7 @@ export default function ProfilePage() {
         ListHeaderComponent={() => (
           <View>
             <TouchableOpacity onPress={() => navigation.back()}>
-              <Feather name={'arrow-left'} size={30} style={{marginLeft: 20}}/>
+              <Feather name={"arrow-left"} size={30} style={{ marginLeft: 20 }} />
             </TouchableOpacity>
             <View style={{ alignSelf: "center" }}>
               <View style={styles.userPhoto}>
@@ -93,18 +81,12 @@ export default function ProfilePage() {
               </View>
             </View>
             <View style={styles.infoContainer}>
-              <Text style={[styles.text, { fontWeight: "200", fontSize: 36 }]}>
-                {userName}
-              </Text>
-              <Text style={[styles.text, { color: "#AEB5BC", fontSize: 14 }]}>
-                Administrator
-              </Text>
+              <Text style={[styles.text, { fontWeight: "200", fontSize: 36 }]}>{userName}</Text>
+              <Text style={[styles.text, { color: "#AEB5BC", fontSize: 14 }]}>Administrator</Text>
             </View>
             <View style={styles.statsContainer}>
               <View style={styles.statsBox}>
-                <Text style={[styles.text, { fontSize: 24 }]}>
-                  {fieldNotes}
-                </Text>
+                <Text style={[styles.text, { fontSize: 24 }]}>{fieldNotes}</Text>
                 <Text style={[styles.text, styles.subText]}>Posts</Text>
               </View>
               <View
@@ -117,23 +99,15 @@ export default function ProfilePage() {
                   },
                 ]}
               >
-                <Text style={[styles.text, { fontSize: 24 }]}>
-                  {allImages.length}
-                </Text>
+                <Text style={[styles.text, { fontSize: 24 }]}>{allImages.length}</Text>
                 <Text style={[styles.text, styles.subText]}>Images</Text>
               </View>
             </View>
           </View>
         )}
         renderItem={({ item }) => (
-          <TouchableOpacity
-            style={{ flex: 1, aspectRatio: 1 }}
-            onPress={() => navigateToEditNoteScreen(item.note)}
-          >
-            <Image
-              source={{ uri: item.image }}
-              style={{ flex: 1, aspectRatio: 1 }}
-            />
+          <TouchableOpacity style={{ flex: 1, aspectRatio: 1 }} onPress={() => navigateToEditNoteScreen(item.note)}>
+            <Image source={{ uri: item.image }} style={{ flex: 1, aspectRatio: 1 }} />
           </TouchableOpacity>
         )}
       />

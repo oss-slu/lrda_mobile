@@ -11,8 +11,8 @@ export const Audio = {
 
 export const Video = jest.fn(() => null);
 export const ResizeMode = {
-  CONTAIN: 'contain',
-  COVER: 'cover',
-  STRETCH: 'stretch',
-  CENTER: 'center',
+  CONTAIN: "contain",
+  COVER: "cover",
+  STRETCH: "stretch",
+  CENTER: "center",
 };

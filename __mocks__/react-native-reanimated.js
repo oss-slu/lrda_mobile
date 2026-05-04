@@ -1,5 +1,5 @@
 // __mocks__/react-native-reanimated.js
-import { Animated } from 'react-native';
+import { Animated } from "react-native";
 
 export default {
   ...Animated,

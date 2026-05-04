@@ -73,13 +73,7 @@ export class AudioType extends Media {
    * Creates a new AudioType instance.
    * @param {MediaData & { duration: string; name: string }} data - The data object containing the UUID, type, URI, duration, and name of the audio.
    */
-  constructor({
-    uuid,
-    uri,
-    duration,
-    name,
-    isPlaying,
-  }: MediaData & { duration: string; name: string; isPlaying: boolean }) {
+  constructor({ uuid, uri, duration, name, isPlaying }: MediaData & { duration: string; name: string; isPlaying: boolean }) {
     super({ uuid, type: "audio", uri });
     this.duration = duration;
     this.name = name;
@@ -120,12 +114,7 @@ export class VideoType extends Media {
    * Creates a new VideoType instance.
    * @param {MediaData & { thumbnail: string; duration: string }} data - The data object containing the UUID, type, URI, thumbnail, and duration of the video.
    */
-  constructor({
-    uuid,
-    uri,
-    thumbnail,
-    duration,
-  }: MediaData & { thumbnail: string; duration: string }) {
+  constructor({ uuid, uri, thumbnail, duration }: MediaData & { thumbnail: string; duration: string }) {
     super({ uuid, type: "video", uri });
     this.thumbnail = thumbnail;
     this.duration = duration;

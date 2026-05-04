@@ -16,11 +16,7 @@ export async function signInWithEmail(email: string, password: string) {
   return authClient.signIn.email({ email, password });
 }
 
-export async function signUpWithEmail(data: {
-  email: string;
-  password: string;
-  name: string;
-}) {
+export async function signUpWithEmail(data: { email: string; password: string; name: string }) {
   return authClient.signUp.email(data);
 }
 

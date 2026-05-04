@@ -1,19 +1,8 @@
-import React, { useRef, useState } from 'react';
-import {
-  Modal,
-  View,
-  ScrollView,
-  Text,
-  Image,
-  ActivityIndicator,
-  StyleSheet,
-  TouchableOpacity,
-  Dimensions,
-  Button,
-} from 'react-native';
-import { Video, ResizeMode, Audio } from 'expo-av';
+import React, { useRef, useState } from "react";
+import { Modal, View, ScrollView, Text, Image, ActivityIndicator, StyleSheet, TouchableOpacity, Dimensions, Button } from "react-native";
+import { Video, ResizeMode, Audio } from "expo-av";
 import { useTheme } from "../../components/ThemeProvider";
-import { defaultTextFont } from '../../../styles/globalStyles';
+import { defaultTextFont } from "../../../styles/globalStyles";
 
 interface VideoType {
   uri: string;
@@ -47,9 +36,9 @@ const VideoModal: React.FC<Props> = ({ isVisible, onClose, videos }) => {
         shouldDuckAndroid: true,
         playThroughEarpieceAndroid: false,
       });
-      console.log('Audio playback configured to play in silent mode.');
+      console.log("Audio playback configured to play in silent mode.");
     } catch (error) {
-      console.error('Failed to configure audio mode:', error);
+      console.error("Failed to configure audio mode:", error);
     }
   }
   configureAudioPlayback();
@@ -74,7 +63,8 @@ const VideoModal: React.FC<Props> = ({ isVisible, onClose, videos }) => {
                   useNativeControls
                   resizeMode={ResizeMode.CONTAIN}
                   isLooping
-                  onPlaybackStatusUpdate={status => setStatus(() => status)} />
+                  onPlaybackStatusUpdate={(status) => setStatus(() => status)}
+                />
               </View>
             ))
           ) : (
@@ -93,14 +83,14 @@ const VideoModal: React.FC<Props> = ({ isVisible, onClose, videos }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingTop: 45,
-    width: '100%',
+    width: "100%",
   },
   videoContainer: {
-    alignItems: 'center',
-    width: '100%',
+    alignItems: "center",
+    width: "100%",
     paddingBottom: 1.25,
   },
   video: {
@@ -109,17 +99,17 @@ const styles = StyleSheet.create({
   },
   noVideosText: {
     ...defaultTextFont,
-    alignSelf: 'center',
-    justifyContent: 'center',
+    alignSelf: "center",
+    justifyContent: "center",
     marginTop: 200,
   },
   closeButton: {
     height: 40,
     width: 75,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginTop: 20,
-    backgroundColor: '#ddd',
+    backgroundColor: "#ddd",
     padding: 10,
     borderRadius: 5,
     marginBottom: 30,

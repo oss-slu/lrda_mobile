@@ -1,20 +1,12 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  FlatList,
-  Alert,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Audio } from "expo-av";
 import uuid from "react-native-uuid";
 
-import { uploadAudio } from "../utils/S3_proxy";  // Assuming you have a function to upload the audio
-import { AudioType } from "../models/media_class";  // Assuming AudioType is correctly defined
+import { uploadAudio } from "../utils/S3_proxy"; // Assuming you have a function to upload the audio
+import { AudioType } from "../models/media_class"; // Assuming AudioType is correctly defined
 import { defaultTextFont } from "../../styles/globalStyles";
-
 
 type AudioContainerProps = {
   newAudio: AudioType[];
@@ -22,11 +14,7 @@ type AudioContainerProps = {
   insertAudioToEditor: (audioUri: string) => void;
 };
 
-const AudioContainer = ({
-  newAudio,
-  setNewAudio,
-  insertAudioToEditor,
-}: AudioContainerProps) => {
+const AudioContainer = ({ newAudio, setNewAudio, insertAudioToEditor }: AudioContainerProps) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recording, setRecording] = useState<null | Audio.Recording>(null);
   const [currentSound, setCurrentSound] = useState<Audio.Sound | null>(null);
@@ -55,9 +43,7 @@ const AudioContainer = ({
         playsInSilentModeIOS: true,
       });
 
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
+      const { recording } = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
 
       setRecording(recording);
     } catch (error) {
@@ -128,11 +114,7 @@ const AudioContainer = ({
   return (
     <View style={styles.container} testID="audio-container">
       <View style={styles.header}>
-        {isRecording ? (
-          <Ionicons name="mic-outline" size={60} color="red" />
-        ) : (
-          <Ionicons name="mic-outline" size={60} color="#111111" />
-        )}
+        {isRecording ? <Ionicons name="mic-outline" size={60} color="red" /> : <Ionicons name="mic-outline" size={60} color="#111111" />}
 
         <Text style={{ ...defaultTextFont, fontSize: 24, fontWeight: "600" }}>Recordings</Text>
 
@@ -147,7 +129,6 @@ const AudioContainer = ({
         )}
       </View>
 
-
       <FlatList
         data={newAudio}
         keyExtractor={(item) => item.uuid}
@@ -155,27 +136,16 @@ const AudioContainer = ({
         renderItem={({ item }) => (
           <View style={styles.audioItem}>
             <Text style={styles.audioText}>{item.name}</Text>
-            <TouchableOpacity
-              onPress={() =>
-                playingAudio === item.uri ? stopAudio() : playAudio(item.uri)
-              }
-            >
+            <TouchableOpacity onPress={() => (playingAudio === item.uri ? stopAudio() : playAudio(item.uri))}>
               <Ionicons
-                name={
-                  playingAudio === item.uri
-                    ? "pause-circle-outline"
-                    : "play-circle-outline"
-                }
+                name={playingAudio === item.uri ? "pause-circle-outline" : "play-circle-outline"}
                 size={30}
                 color={playingAudio === item.uri ? "red" : "#111111"}
               />
-
             </TouchableOpacity>
           </View>
         )}
-        ListEmptyComponent={
-          <Text style={styles.emptyListText}>No recordings available</Text>
-        }
+        ListEmptyComponent={<Text style={styles.emptyListText}>No recordings available</Text>}
       />
     </View>
   );

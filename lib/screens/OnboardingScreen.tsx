@@ -1,18 +1,18 @@
-import React from 'react';
-import { StyleSheet, Dimensions, TouchableOpacity, Text } from 'react-native';
-import Onboarding from 'react-native-onboarding-swiper';
-import { Video } from 'expo-av';
-import { setItem } from '../utils/async_storage';
-import { defaultTextFont } from '../../styles/globalStyles';
+import React from "react";
+import { StyleSheet, Dimensions, TouchableOpacity, Text } from "react-native";
+import Onboarding from "react-native-onboarding-swiper";
+import { Video } from "expo-av";
+import { setItem } from "../utils/async_storage";
+import { defaultTextFont } from "../../styles/globalStyles";
 import { useRouter } from "expo-router";
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = Dimensions.get("window");
 
 const OnboardingScreen = () => {
   const router = useRouter();
   const handleDone = () => {
-    setItem('onboarded', '1');
-    router.replace('/(auth)/login');
+    setItem("onboarded", "1");
+    router.replace("/(auth)/login");
   };
 
   const doneButton = ({ ...props }) => (
@@ -42,10 +42,10 @@ const OnboardingScreen = () => {
       NextButtonComponent={nextButton}
       pages={[
         {
-          backgroundColor: '#87ceeb',
+          backgroundColor: "#87ceeb",
           image: (
             <Video
-              source={require('../../assets/videos/v3_1.mp4')}
+              source={require("../../assets/videos/v3_1.mp4")}
               style={{ width, height }}
               resizeMode="cover"
               shouldPlay
@@ -53,14 +53,14 @@ const OnboardingScreen = () => {
               isMuted={true}
             />
           ),
-          title: 'Welcome to Our App!',
-          subtitle: 'Learn more about our features in this onboarding experience.',
+          title: "Welcome to Our App!",
+          subtitle: "Learn more about our features in this onboarding experience.",
         },
         {
-          backgroundColor: '#ff7f50',
+          backgroundColor: "#ff7f50",
           image: (
             <Video
-              source={require('../../assets/videos/v1.mp4')}
+              source={require("../../assets/videos/v1.mp4")}
               style={{ width, height }}
               resizeMode="cover"
               shouldPlay
@@ -68,14 +68,14 @@ const OnboardingScreen = () => {
               isMuted={true}
             />
           ),
-          title: 'Stay Connected',
-          subtitle: 'Interact and stay connected with our community.',
+          title: "Stay Connected",
+          subtitle: "Interact and stay connected with our community.",
         },
         {
-          backgroundColor: '#ffe135',
+          backgroundColor: "#ffe135",
           image: (
             <Video
-              source={require('../../assets/videos/v4_1.mp4')}
+              source={require("../../assets/videos/v4_1.mp4")}
               style={{ width, height }}
               resizeMode="cover"
               shouldPlay
@@ -83,14 +83,14 @@ const OnboardingScreen = () => {
               isMuted={true}
             />
           ),
-          title: 'Get Notified',
-          subtitle: 'Receive instant notifications and stay updated.',
+          title: "Get Notified",
+          subtitle: "Receive instant notifications and stay updated.",
         },
         {
-          backgroundColor: '#ffa280',
+          backgroundColor: "#ffa280",
           image: (
             <Video
-              source={require('../../assets/videos/v2.mp4')}
+              source={require("../../assets/videos/v2.mp4")}
               style={{ width, height }}
               resizeMode="cover"
               shouldPlay
@@ -98,22 +98,22 @@ const OnboardingScreen = () => {
               isMuted={true}
             />
           ),
-          title: 'Explore Features',
-          subtitle: 'Discover new functionalities tailored just for you.',
+          title: "Explore Features",
+          subtitle: "Discover new functionalities tailored just for you.",
         },
         {
-          backgroundColor: '#90ee90',
+          backgroundColor: "#90ee90",
           image: (
             <Video
-              source={require('../../assets/videos/v5_2.mp4')}
-              style={{ width, height}}
+              source={require("../../assets/videos/v5_2.mp4")}
+              style={{ width, height }}
               resizeMode="cover"
               shouldPlay
               isLooping
               isMuted={true}
             />
           ),
-          title: 'Get Started!',
+          title: "Get Started!",
           subtitle: 'Tap "Done" to start using the app.',
         },
       ]}
@@ -126,51 +126,51 @@ const styles = StyleSheet.create({
   title: {
     ...defaultTextFont,
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    textAlign: 'center',
+    fontWeight: "bold",
+    color: "#333",
+    textAlign: "center",
   },
   subtitle: {
     ...defaultTextFont,
     fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
+    color: "#666",
+    textAlign: "center",
     paddingHorizontal: 10,
   },
   skipButton: {
     paddingVertical: 10,
     paddingHorizontal: 20,
-    backgroundColor: '#ccc',
+    backgroundColor: "#ccc",
     borderRadius: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   nextButton: {
     paddingVertical: 10,
     paddingHorizontal: 20,
-    backgroundColor: '#4A90E2',
+    backgroundColor: "#4A90E2",
     borderRadius: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   doneButton: {
     paddingVertical: 10,
     paddingHorizontal: 20,
-    backgroundColor: '#4A90E2',
+    backgroundColor: "#4A90E2",
     borderRadius: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   doneButtonText: {
     ...defaultTextFont,
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
     fontSize: 16,
   },
   buttonText: {
     ...defaultTextFont,
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
     fontSize: 16,
   },
 });

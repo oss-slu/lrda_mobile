@@ -27,9 +27,7 @@ async function uploadMedia(uri: string, mediaType: string): Promise<string> {
   console.log("uploadMedia - Input URI:", uri);
 
   let data = new FormData();
-  const uniqueName = `media-${Date.now()}.${
-    mediaType === "image" ? "jpg" : "mp4"
-  }`;
+  const uniqueName = `media-${Date.now()}.${mediaType === "image" ? "jpg" : "mp4"}`;
 
   if (Platform.OS === "web") {
     const response = await fetch(uri);
@@ -42,9 +40,7 @@ async function uploadMedia(uri: string, mediaType: string): Promise<string> {
     let base64 = await FileSystem.readAsStringAsync(uri, {
       encoding: FileSystem.EncodingType.Base64,
     });
-    base64 = `data:${
-      mediaType === "image" ? "image/jpeg" : "video/mp4"
-    };base64,${base64}`;
+    base64 = `data:${mediaType === "image" ? "image/jpeg" : "video/mp4"};base64,${base64}`;
     data.append("file", {
       type: mediaType === "image" ? "image/jpeg" : "video/mp4",
       uri: base64,
@@ -82,7 +78,6 @@ async function uploadMedia(uri: string, mediaType: string): Promise<string> {
     });
 }
 
-
 export { getThumbnail, convertHeicToJpg, uploadMedia };
 
 export async function uploadAudio(uri: string): Promise<string> {
@@ -118,7 +113,7 @@ export async function uploadAudio(uri: string): Promise<string> {
       uri: base64,
       name: uniqueName,
     });
-    console.log("base64===",base64)
+    console.log("base64===", base64);
   }
 
   return fetch(S3_PROXY_PREFIX + "uploadFile", {

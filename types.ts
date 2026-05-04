@@ -1,9 +1,4 @@
-import {
-  Media,
-  PhotoType,
-  VideoType,
-  AudioType,
-} from "./lib/models/media_class";
+import { Media, PhotoType, VideoType, AudioType } from "./lib/models/media_class";
 import { User } from "./lib/models/user_class";
 
 export type MediaData = {

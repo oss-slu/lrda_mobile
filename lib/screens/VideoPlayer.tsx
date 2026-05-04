@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Video } from 'expo-av';
+import React from "react";
+import { View, StyleSheet } from "react-native";
+import { Video } from "expo-av";
 
 interface VideoPlayerProps {
   videoUri: string;
@@ -27,16 +27,15 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUri }) => {
 export default VideoPlayer;
 
 const styles = StyleSheet.create({
-    videoContainer: {
-      width: '90%',
-      height: '50%',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    videoPlayer: {
-      width: '100%',
-      height: '100%',
-      resizeMode: 'contain', // Ensures the video scales to fit within container
-    },
-  });
-  
+  videoContainer: {
+    width: "90%",
+    height: "50%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  videoPlayer: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "contain", // Ensures the video scales to fit within container
+  },
+});

@@ -10,7 +10,7 @@ import {
   StyleSheet,
   Keyboard,
   Alert,
-  Text
+  Text,
 } from "react-native";
 import ToastMessage from "react-native-toast-message";
 import { Ionicons } from "@expo/vector-icons";
@@ -37,12 +37,14 @@ const EditNoteScreen = () => {
   const navigation = useNavigation();
   const { noteData } = useLocalSearchParams<{ noteData: string }>();
   const note = useMemo(() => {
-    try { return JSON.parse(noteData || "{}"); }
-    catch { return {}; }
+    try {
+      return JSON.parse(noteData || "{}");
+    } catch {
+      return {};
+    }
   }, [noteData]);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
-
 
   const [title, setTitle] = useState(note.title || "Untitled");
   const [time, setTime] = useState(new Date(note.time));
@@ -69,7 +71,6 @@ const EditNoteScreen = () => {
   const { setPublishNote } = useAddNoteContext();
   const hasFocusedRef = useRef(false);
 
-
   useEffect(() => {
     // ─── LISTEN on all platforms for show / hide ───
     const showSub = Keyboard.addListener("keyboardDidShow", () => {
@@ -86,25 +87,25 @@ const EditNoteScreen = () => {
       hideSub.remove();
     };
   }, []);
-//find the keyboards height
-useEffect(() => {
-  const showSub = Keyboard.addListener("keyboardDidShow", ({ endCoordinates }) => {
-    setKeyboardVisible(true);
-    setKeyboardHeight(endCoordinates.height);
-  });
-  const hideSub = Keyboard.addListener("keyboardDidHide", () => {
-    setKeyboardVisible(false);
-    setKeyboardHeight(0);
-  });
-  return () => {
-    showSub.remove();
-    hideSub.remove();
-  };
-}, []);
+  //find the keyboards height
+  useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardDidShow", ({ endCoordinates }) => {
+      setKeyboardVisible(true);
+      setKeyboardHeight(endCoordinates.height);
+    });
+    const hideSub = Keyboard.addListener("keyboardDidHide", () => {
+      setKeyboardVisible(false);
+      setKeyboardHeight(0);
+    });
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   const handleDonePress = () => {
-    if (editor?.blur) editor.blur();   // blur the rich-text editor
-    Keyboard.dismiss();                // dismiss the native keyboard
+    if (editor?.blur) editor.blur(); // blur the rich-text editor
+    Keyboard.dismiss(); // dismiss the native keyboard
   };
 
   const initialTitle = useRef(note.title || "");
@@ -329,36 +330,21 @@ useEffect(() => {
     return unsubscribe;
   }, [navigation, title, editor, media, newAudio, tags, isPublished, location]);
 
-
   return (
     <View style={{ flex: 1 }} testID="EditNoteScreen">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS==='ios' ? 0 : 0}   // ← bigger offset
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0} // ← bigger offset
         style={{ flex: 1 }}
       >
-            
-        <KeyboardAwareScrollView
-          ref={scrollViewRef}
-          contentContainerStyle={{ flexGrow: 1 }}
-          keyboardShouldPersistTaps="handled"
-        >
+        <KeyboardAwareScrollView ref={scrollViewRef} contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
           {/* Top bar with back arrow + title input */}
           <View style={[NotePageStyles().topContainer, { backgroundColor: theme.homeColor }]}>
             <View style={NotePageStyles().topButtonsContainer}>
               <TouchableOpacity style={NotePageStyles().topButtons} onPress={handleSaveNote}>
-                <Ionicons
-                  name="arrow-back-outline"
-                  size={30}
-                  color={NotePageStyles().title.color}
-                />
+                <Ionicons name="arrow-back-outline" size={30} color={NotePageStyles().title.color} />
               </TouchableOpacity>
-              <TextInput
-                style={NotePageStyles().title}
-                placeholder="Title Field Note"
-                value={title}
-                onChangeText={setTitle}
-              />
+              <TextInput style={NotePageStyles().title} placeholder="Title Field Note" value={title} onChangeText={setTitle} />
             </View>
             <View style={NotePageStyles().keyContainer}>
               <TouchableOpacity onPress={() => setViewMedia(!viewMedia)}>
@@ -389,13 +375,7 @@ useEffect(() => {
               insertImageToEditor={insertImageToEditor}
               addVideoToEditor={addVideoToEditor}
             />
-            {viewAudio && (
-              <AudioContainer
-                newAudio={newAudio}
-                setNewAudio={setNewAudio}
-                insertAudioToEditor={insertAudioToEditor}
-              />
-            )}
+            {viewAudio && <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} insertAudioToEditor={insertAudioToEditor} />}
             {isTagging && <TagWindow tags={tags} setTags={setTags} />}
           </View>
 
@@ -416,45 +396,40 @@ useEffect(() => {
           </View>
 
           {Platform.OS === "ios" && (
-          <View style={styles.toolbar} testID="Toolbar">
-            <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
-          </View>
-        )}
+            <View style={styles.toolbar} testID="Toolbar">
+              <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
+            </View>
+          )}
           {keyboardVisible && (
-  <View
-    style={[
-      styles.doneButton,
-      { bottom: 7 }  // 10px of padding above the keyboard
-    ]}
-    testID="doneButton"
-  >
-    <TouchableOpacity onPress={handleDonePress}>
-      <Text style={styles.doneText}>Done</Text>
-    </TouchableOpacity>
-  </View>
-)}
-           {Platform.OS === "android" && (
-          <View style={styles.toolbar} testID="Toolbar">
-            <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
-          </View>
-        )}
+            <View
+              style={[
+                styles.doneButton,
+                { bottom: 7 }, // 10px of padding above the keyboard
+              ]}
+              testID="doneButton"
+            >
+              <TouchableOpacity onPress={handleDonePress}>
+                <Text style={styles.doneText}>Done</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          {Platform.OS === "android" && (
+            <View style={styles.toolbar} testID="Toolbar">
+              <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
+            </View>
+          )}
         </KeyboardAwareScrollView>
-
-
 
         {/* Loading spinner */}
         <LoadingModal visible={isUpdating} />
       </KeyboardAvoidingView>
-
-
     </View>
-    
   );
 };
 const styles = StyleSheet.create({
   doneButton: {
     position: "absolute",
-    right: 16,       // fixed distance from the right edge
+    right: 16, // fixed distance from the right edge
     zIndex: 10,
   },
   doneText: {
@@ -463,10 +438,10 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
   toolbar: {
-    position: 'absolute', // Keep toolbar at the bottom of the screen
+    position: "absolute", // Keep toolbar at the bottom of the screen
     bottom: 27, // Align toolbar with the bottom edge
-    width: '100%', // Full-width toolbar
-    justifyContent: 'center', // Center items in the toolbar
+    width: "100%", // Full-width toolbar
+    justifyContent: "center", // Center items in the toolbar
     paddingHorizontal: 10,
     zIndex: 10, // Ensure it stays above other elements
     ...Platform.select({

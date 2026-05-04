@@ -38,11 +38,7 @@ export default function TabsLayout() {
         options={{
           tabBarLabel: "Home",
           tabBarIcon: ({ size, focused }) => (
-            <Ionicons
-              name="home"
-              size={size}
-              color={focused ? (isDarkmode ? "white" : "black") : appThemeColor}
-            />
+            <Ionicons name="home" size={size} color={focused ? (isDarkmode ? "white" : "black") : appThemeColor} />
           ),
         }}
       />
@@ -51,11 +47,7 @@ export default function TabsLayout() {
         options={{
           tabBarLabel: "Library",
           tabBarIcon: ({ size, focused }) => (
-            <Ionicons
-              name="library"
-              size={size}
-              color={focused ? (isDarkmode ? "white" : "black") : appThemeColor}
-            />
+            <Ionicons name="library" size={size} color={focused ? (isDarkmode ? "white" : "black") : appThemeColor} />
           ),
         }}
       />
@@ -71,11 +63,7 @@ export default function TabsLayout() {
         options={{
           tabBarLabel: "Map",
           tabBarIcon: ({ size, focused }) => (
-            <Ionicons
-              name="map"
-              size={size}
-              color={focused ? (isDarkmode ? "white" : "black") : appThemeColor}
-            />
+            <Ionicons name="map" size={size} color={focused ? (isDarkmode ? "white" : "black") : appThemeColor} />
           ),
         }}
       />
@@ -84,11 +72,7 @@ export default function TabsLayout() {
         options={{
           tabBarLabel: "More",
           tabBarIcon: ({ size, focused }) => (
-            <Ionicons
-              name="menu-outline"
-              size={size + 10}
-              color={focused ? (isDarkmode ? "white" : "black") : appThemeColor}
-            />
+            <Ionicons name="menu-outline" size={size + 10} color={focused ? (isDarkmode ? "white" : "black") : appThemeColor} />
           ),
         }}
       />

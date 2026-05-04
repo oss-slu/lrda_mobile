@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  TextInput,
-  Button,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, TextInput, Button } from "react-native";
 import * as Location from "expo-location";
 import { defaultTextFont } from "../../styles/globalStyles";
 
@@ -37,21 +30,12 @@ async function getLocation() {
   }
 }
 
-function getDistanceFrom(
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number
-) {
+function getDistanceFrom(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371;
   const dLat = deg2rad(lat2 - lat1);
   const dLon = deg2rad(lon2 - lon1);
   const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(deg2rad(lat1)) *
-      Math.cos(deg2rad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const distance = R * c;
   const distanceInMiles = distance * 0.621371;
@@ -63,16 +47,9 @@ function deg2rad(deg: number) {
   return deg * (Math.PI / 180);
 }
 
-export default function LocationWindow({
-  location,
-  setLocation,
-}: LocationProps) {
-  const [latitude, setLatitude] = useState(
-    location?.latitude?.toString() || ""
-  );
-  const [longitude, setLongitude] = useState(
-    location?.longitude?.toString() || ""
-  );
+export default function LocationWindow({ location, setLocation }: LocationProps) {
+  const [latitude, setLatitude] = useState(location?.latitude?.toString() || "");
+  const [longitude, setLongitude] = useState(location?.longitude?.toString() || "");
   const [distanceFromEvent, setDistanceFromEvent] = useState<string>("");
   const [isLocationShown, setIsLocationShown] = useState(true);
 
@@ -118,13 +95,13 @@ export default function LocationWindow({
       // Show Location
       try {
         let userLocation = await getLocation();
-    
+
         if (userLocation?.coords?.latitude !== undefined && userLocation?.coords?.longitude !== undefined) {
           setLocation({
             latitude: userLocation.coords.latitude,
             longitude: userLocation.coords.longitude,
           });
-    
+
           setLatitude(userLocation.coords.latitude.toString());
           setLongitude(userLocation.coords.longitude.toString());
         } else {
@@ -140,28 +117,13 @@ export default function LocationWindow({
   return (
     <View style={styles.container}>
       <View style={styles.distanceContainer}>
-        <Text style={styles.distanceText}>
-          {(distanceFromEvent && location) && distanceFromEvent.toString()}
-        </Text>
+        <Text style={styles.distanceText}>{distanceFromEvent && location && distanceFromEvent.toString()}</Text>
       </View>
       <Text style={styles.label}>Longitude</Text>
-      <TextInput
-        style={styles.input}
-        value={longitude}
-        onChangeText={handleLongitudeChange}
-        editable={false}
-      />
+      <TextInput style={styles.input} value={longitude} onChangeText={handleLongitudeChange} editable={false} />
       <Text style={styles.label}>Latitude</Text>
-      <TextInput
-        style={styles.input}
-        value={latitude}
-        onChangeText={handleLatitudeChange}
-        editable={false}
-      />
-      <Button
-        title={isLocationShown ? "Hide Location" : "Show Location"}
-        onPress={toggleLocationVisibility}
-      />
+      <TextInput style={styles.input} value={latitude} onChangeText={handleLatitudeChange} editable={false} />
+      <Button title={isLocationShown ? "Hide Location" : "Show Location"} onPress={toggleLocationVisibility} />
     </View>
   );
 }

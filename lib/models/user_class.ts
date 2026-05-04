@@ -1,11 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { UserData } from "../../types";
 import { getItem } from "../utils/async_storage";
-import {
-  signInWithEmail,
-  signOut as authSignOut,
-  getCurrentSession,
-} from "../auth/client";
+import { signInWithEmail, signOut as authSignOut, getCurrentSession } from "../auth/client";
 
 const USER_DATA_KEY = "userData";
 
@@ -14,7 +10,7 @@ export class User {
   private userData: UserData | null = null;
   private callback: ((isLoggedIn: boolean) => void) | null = null;
 
-  private constructor() { }
+  private constructor() {}
 
   public static getInstance(): User {
     if (!User.instance) {
@@ -130,9 +126,7 @@ export class User {
     if (!this.userData) {
       this.userData = await this.loadUser();
     }
-    return this.userData
-      ? (this.userData["uid"] ?? this.userData["@id"] ?? this.userData["id"])
-      : null;
+    return this.userData ? (this.userData["uid"] ?? this.userData["@id"] ?? this.userData["id"]) : null;
   }
 
   public async getName(): Promise<string | null> {
@@ -162,8 +156,8 @@ export class User {
   }
 
   public async hasOnboarded(): Promise<boolean> {
-    const onboarded = await getItem('onboarded');
-    return onboarded === '1';
+    const onboarded = await getItem("onboarded");
+    return onboarded === "1";
   }
 
   public async getRoles(): Promise<{
@@ -181,8 +175,7 @@ export class User {
       const value = await AsyncStorage.getItem(page_tutorial);
       if (value !== null) {
         return JSON.parse(value);
-      }
-      else {
+      } else {
         return false;
       }
     } catch (error) {

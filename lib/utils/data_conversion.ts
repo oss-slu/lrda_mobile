@@ -15,11 +15,11 @@ export default class DataConversion {
       let time = new Date(message.__rerum.createdAt);
       if (message.time === undefined) {
         time = new Date(message.__rerum.createdAt);
-        var date = new Date();
-        var offsetInHours = date.getTimezoneOffset() / 60;
+        let date = new Date();
+        let offsetInHours = date.getTimezoneOffset() / 60;
         time.setHours(time.getHours() - offsetInHours);
       } else {
-        time = new Date (message.time);
+        time = new Date(message.time);
       }
 
       const mediaItems = message.media.map((item: any) => {
@@ -75,9 +75,7 @@ export default class DataConversion {
       };
     });
 
-    fetchedNotes.sort(
-      (b, a) => new Date(b.time).getTime() - new Date(a.time).getTime()
-    );
+    fetchedNotes.sort((b, a) => new Date(b.time).getTime() - new Date(a.time).getTime());
 
     return fetchedNotes;
   }

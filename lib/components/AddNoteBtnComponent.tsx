@@ -19,8 +19,7 @@ function AddNoteBtnComponent() {
   const pathname = usePathname();
 
   // if the current screen is add-note or edit-note, we show the publish button
-  const isAddButtonMode =
-    !pathname.includes("/add-note") && !pathname.includes("/edit-note");
+  const isAddButtonMode = !pathname.includes("/add-note") && !pathname.includes("/edit-note");
 
   const handleAdd = () => {
     dispatch(toogleAddNoteState());
@@ -43,24 +42,12 @@ function AddNoteBtnComponent() {
         onPress={isAddButtonMode ? handleAdd : handlePublish}
       >
         {isAddButtonMode ? (
-          <IonIcons
-            name="add"
-            testID="add-icon"
-            size={25}
-            style={[styles.buttonIcon, { color: appThemeColor }]}
-          />
+          <IonIcons name="add" testID="add-icon" size={25} style={[styles.buttonIcon, { color: appThemeColor }]} />
         ) : (
-          <Feather
-            name="upload-cloud"
-            testID="publish-icon"
-            size={25}
-            style={[styles.buttonIcon, { color: appThemeColor }]}
-          />
+          <Feather name="upload-cloud" testID="publish-icon" size={25} style={[styles.buttonIcon, { color: appThemeColor }]} />
         )}
       </TouchableOpacity>
-      <Text style={[styles.label, { color: appThemeColor || "gray" }]}>
-        {isAddButtonMode ? "Add" : "Publish"}
-      </Text>
+      <Text style={[styles.label, { color: appThemeColor || "gray" }]}>{isAddButtonMode ? "Add" : "Publish"}</Text>
     </View>
   );
 }

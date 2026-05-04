@@ -1,5 +1,5 @@
-import React, { useState, useEffect} from "react";
-import { View, Text, StyleSheet ,Button, Platform} from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, Button, Platform } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { defaultTextFont } from "../../styles/globalStyles";
 
@@ -28,13 +28,7 @@ export function formatToLocalDateString(date: Date): string {
   return `${formattedDate}\n${formattedTime}`;
 }
 
-export default function LocationWindow({
-  time,
-  setTime,
-}: {
-  time: Date;
-  setTime: React.Dispatch<React.SetStateAction<Date>>;
-}) {
+export default function LocationWindow({ time, setTime }: { time: Date; setTime: React.Dispatch<React.SetStateAction<Date>> }) {
   const [date, setDate] = useState(new Date());
   const [chosenDate, setChosenDate] = useState(new Date());
   const [chosenTime, setChosenTime] = useState(new Date());
@@ -50,13 +44,13 @@ export default function LocationWindow({
 
   const onChangeDate = (event: any, selectedDate: any) => {
     const currentDate = selectedDate || date;
-    if (Platform.OS === 'android') {
-      if (event.type === 'dismissed') {
-        setShowDatePicker(false); 
+    if (Platform.OS === "android") {
+      if (event.type === "dismissed") {
+        setShowDatePicker(false);
       } else {
         setChosenDate(currentDate);
         setShowDatePicker(false);
-        setIsDateTimeSelected(true); 
+        setIsDateTimeSelected(true);
       }
     } else {
       setChosenDate(currentDate);
@@ -65,20 +59,19 @@ export default function LocationWindow({
 
   const onChangeTime = (event: any, selectedTime: any) => {
     const currentTime = selectedTime || time;
-  
-    if (Platform.OS === 'android') {
-      if (event.type === 'dismissed') {
+
+    if (Platform.OS === "android") {
+      if (event.type === "dismissed") {
         setShowTimePicker(false);
       } else {
         setChosenTime(currentTime);
-        setShowTimePicker(false); 
+        setShowTimePicker(false);
         setShowDatePicker(true);
       }
     } else {
       setChosenTime(currentTime);
     }
   };
-  
 
   const saveDateTime = () => {
     const combinedDate = new Date(
@@ -89,59 +82,57 @@ export default function LocationWindow({
       chosenTime.getMinutes()
     );
     setTime(combinedDate);
-    setSavedDateTime(combinedDate); 
+    setSavedDateTime(combinedDate);
     setShowPicker(false);
-    setShowDatePicker(false); 
+    setShowDatePicker(false);
     setShowTimePicker(false);
-    setIsDateTimeSelected(false); 
-
+    setIsDateTimeSelected(false);
   };
 
   return (
-    
     <View style={styles.container}>
       <Text style={styles.label}>Date & Time</Text>
       {showPicker ? (
-        <View style={Platform.OS === 'ios' ? styles.IOSdateTimePickerContainer : styles.dateTimePickerContainer}>
-    {showDatePicker && (
-            <DateTimePicker
-              testID="datePicker"
-              value={chosenDate}
-              mode="date"
-              is24Hour={true}
-              display="default"
-              onChange={onChangeDate}
-            />
+        <View style={Platform.OS === "ios" ? styles.IOSdateTimePickerContainer : styles.dateTimePickerContainer}>
+          {showDatePicker && (
+            <DateTimePicker testID="datePicker" value={chosenDate} mode="date" is24Hour={true} display="default" onChange={onChangeDate} />
           )}
-    {showTimePicker && (
-            <DateTimePicker
-              testID="timePicker"
-              value={chosenTime}
-              mode="time"
-              is24Hour={true}
-              display="default"
-              onChange={onChangeTime}
-            />
+          {showTimePicker && (
+            <DateTimePicker testID="timePicker" value={chosenTime} mode="time" is24Hour={true} display="default" onChange={onChangeTime} />
           )}
-        {isDateTimeSelected && Platform.OS === 'android' && (
-        <Text style={styles.selectedDateTimeLabel}>
-         Selected: {formatToLocalDateString(new Date(chosenDate.getFullYear(), chosenDate.getMonth(), chosenDate.getDate(), chosenTime.getHours(), chosenTime.getMinutes()))}
-        </Text>
+          {isDateTimeSelected && Platform.OS === "android" && (
+            <Text style={styles.selectedDateTimeLabel}>
+              Selected:{" "}
+              {formatToLocalDateString(
+                new Date(
+                  chosenDate.getFullYear(),
+                  chosenDate.getMonth(),
+                  chosenDate.getDate(),
+                  chosenTime.getHours(),
+                  chosenTime.getMinutes()
+                )
+              )}
+            </Text>
+          )}
+          <View style={styles.button}>
+            <Button title="Save" onPress={saveDateTime} testID="Save" />
+          </View>
+        </View>
+      ) : (
+        <View>
+          <View style={styles.savedTimeContainer}>
+            <Text style={styles.savedTime}>{formatToLocalDateString(savedDateTime || time)}</Text>
+          </View>
+          <Button
+            title="Select Date & Time"
+            onPress={() => {
+              setShowPicker(true);
+              setShowDatePicker(Platform.OS === "ios");
+              setShowTimePicker(true);
+            }}
+          />
+        </View>
       )}
-      <View style={styles.button}>
-       <Button title="Save" onPress={saveDateTime}testID="Save"/>
-      </View>
-    </View>
-) : (
-  <View>
-    <View style={styles.savedTimeContainer}>
-      <Text style={styles.savedTime}>
-        {formatToLocalDateString(savedDateTime || time)}
-      </Text>
-    </View>
-    <Button title="Select Date & Time" onPress={() => { setShowPicker(true); setShowDatePicker(Platform.OS === 'ios'); setShowTimePicker(true); }} />
-  </View>
-)}
     </View>
   );
 }
@@ -161,7 +152,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     marginTop: 10,
-    width: "100%", 
+    width: "100%",
   },
   input: {
     width: "100%",
@@ -172,10 +163,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   IOSdateTimePickerContainer: {
-    flexDirection: "row", 
+    flexDirection: "row",
   },
   dateTimePickerContainer: {
-    flexDirection: "column", 
+    flexDirection: "column",
   },
   savedTimeContainer: {
     alignItems: "center",
@@ -187,12 +178,12 @@ const styles = StyleSheet.create({
   },
   selectedDateTimeLabel: {
     ...defaultTextFont,
-    marginBottom: 10, 
+    marginBottom: 10,
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
   button: {
-    flexDirection: "column", 
+    flexDirection: "column",
     alignItems: "center",
   },
 });

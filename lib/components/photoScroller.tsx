@@ -1,16 +1,11 @@
-import React, {
-  useState,
-  useEffect,
-  forwardRef,
-  useImperativeHandle,
-} from "react";
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import {
   launchCameraAsync,
   launchImageLibraryAsync,
   MediaTypeOptions,
   requestCameraPermissionsAsync,
-  requestMediaLibraryPermissionsAsync
+  requestMediaLibraryPermissionsAsync,
 } from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { ResizeMode, Video } from "expo-av";
@@ -22,7 +17,7 @@ import DraggableFlatList from "react-native-draggable-flatlist";
 import ImageView from "react-native-image-viewing";
 import * as FileSystem from "expo-file-system/legacy";
 import * as MediaLibrary from "expo-media-library";
-import { PhotoStyles } from "../../styles/components/PhotoScrollerStyles"
+import { PhotoStyles } from "../../styles/components/PhotoScrollerStyles";
 
 const PhotoScroller = forwardRef(
   (
@@ -35,7 +30,7 @@ const PhotoScroller = forwardRef(
     }: {
       newMedia: Media[];
       setNewMedia: React.Dispatch<React.SetStateAction<Media[]>>;
-      active: Boolean;
+      active: boolean;
       insertImageToEditor: Function;
       addVideoToEditor: Function;
     },
@@ -69,12 +64,8 @@ const PhotoScroller = forwardRef(
         console.log("PhotoScroller unmounted");
       };
     }, []);
-    
 
-    const handleImageSelection = async (result: {
-      canceled?: false;
-      assets: any;
-    }) => {
+    const handleImageSelection = async (result: { canceled?: false; assets: any }) => {
       const { uri } = result.assets[0];
       console.log("Selected image URI: ", uri);
 
@@ -89,11 +80,7 @@ const PhotoScroller = forwardRef(
         });
         setNewMedia([...newMedia, newMediaItem]);
         insertImageToEditor(uploadedUrl);
-      } else if (
-        uri.endsWith(".jpg") ||
-        uri.endsWith("png") ||
-        uri.endsWith(".jpeg")
-      ) {
+      } else if (uri.endsWith(".jpg") || uri.endsWith("png") || uri.endsWith(".jpeg")) {
         const uploadedUrl = await uploadMedia(uri, "image");
         console.log("After URL is retrieved from upload Media ", uploadedUrl);
         const newMediaItem = new PhotoType({
@@ -103,13 +90,9 @@ const PhotoScroller = forwardRef(
         });
         setNewMedia([...newMedia, newMediaItem]);
         if (insertImageToEditor) {
-          insertImageToEditor(uploadedUrl, 'Captured Image');
+          insertImageToEditor(uploadedUrl, "Captured Image");
         }
-      } else if (
-        uri.endsWith(".MOV") ||
-        uri.endsWith(".mov") ||
-        uri.endsWith(".mp4")
-      ) {
+      } else if (uri.endsWith(".MOV") || uri.endsWith(".mov") || uri.endsWith(".mp4")) {
         const uploadedUrl = await uploadMedia(uri, "video");
         const thumbnail = await getThumbnail(uri);
         console.log("After URL is retrieved from upload Media ", uploadedUrl);
@@ -129,18 +112,14 @@ const PhotoScroller = forwardRef(
       Alert.alert("Error", errorMessage); // Alerts the error message to the user
     };
 
-
     const handleSaveMedia = async (imageURI: string) => {
       try {
         const fileName = imageURI.replace(/^.*[\\\/]/, "");
-        const imageFullPathInLocalStorage =
-          FileSystem.documentDirectory + fileName;
+        const imageFullPathInLocalStorage = FileSystem.documentDirectory + fileName;
 
-        FileSystem.downloadAsync(imageURI, imageFullPathInLocalStorage).then(
-          async ({ uri }) => {
-            await MediaLibrary.saveToLibraryAsync(imageFullPathInLocalStorage);
-          }
-        );
+        FileSystem.downloadAsync(imageURI, imageFullPathInLocalStorage).then(async ({ uri }) => {
+          await MediaLibrary.saveToLibraryAsync(imageFullPathInLocalStorage);
+        });
         setShowFooter(true);
         setTimeout(() => {
           setShowFooter(false);
@@ -168,15 +147,7 @@ const PhotoScroller = forwardRef(
       setPlaying(true);
     };
 
-    const renderItem = ({
-      item: media,
-      getIndex,
-      drag,
-    }: {
-      item: Media;
-      getIndex: Function;
-      drag: () => void;
-    }) => {
+    const renderItem = ({ item: media, getIndex, drag }: { item: Media; getIndex: Function; drag: () => void }) => {
       const index = getIndex();
       const key = `media-${index}`;
       const mediaItem = media;
@@ -192,29 +163,13 @@ const PhotoScroller = forwardRef(
       }
       return (
         <View key={key}>
-          <TouchableOpacity
-            style={PhotoStyles.trash}
-            onPress={() => handleDeleteMedia(index)}
-          >
-            <Ionicons
-              name="close-outline"
-              size={15}
-              color="white"
-            />
+          <TouchableOpacity style={PhotoStyles.trash} onPress={() => handleDeleteMedia(index)}>
+            <Ionicons name="close-outline" size={15} color="white" />
           </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.5}
-            onLongPress={drag}
-            delayLongPress={100}
-            onPress={() => goBig(index)}
-          >
+          <TouchableOpacity activeOpacity={0.5} onLongPress={drag} delayLongPress={100} onPress={() => goBig(index)}>
             <View style={styles.mediaItem}>
               {IsImage ? (
-                <LoadingImage
-                  imageURI={ImageURI}
-                  type={ImageType}
-                  isImage={true}
-                />
+                <LoadingImage imageURI={ImageURI} type={ImageType} isImage={true} />
               ) : (
                 <LoadingImage imageURI={""} type={ImageType} isImage={false} />
               )}
@@ -226,19 +181,19 @@ const PhotoScroller = forwardRef(
 
     const handleNewMedia = async () => {
       Alert.alert(
-        'Select Media',
-        'Choose the source for your media:',
+        "Select Media",
+        "Choose the source for your media:",
         [
           {
-            text: 'Cancel',
-            style: 'cancel',
+            text: "Cancel",
+            style: "cancel",
           },
           {
-            text: 'Take Photo',
+            text: "Take Photo",
             onPress: async () => {
               const { status } = await requestCameraPermissionsAsync();
-              if (status !== 'granted') {
-                alert('Sorry, we need camera permissions to make this work!');
+              if (status !== "granted") {
+                alert("Sorry, we need camera permissions to make this work!");
                 return;
               }
               const cameraResult = await launchCameraAsync({
@@ -254,11 +209,11 @@ const PhotoScroller = forwardRef(
             },
           },
           {
-            text: 'Choose from Camera Roll',
+            text: "Choose from Camera Roll",
             onPress: async () => {
               const { status } = await requestMediaLibraryPermissionsAsync();
-              if (status !== 'granted') {
-                alert('Sorry, we need camera roll permissions to make this work!');
+              if (status !== "granted") {
+                alert("Sorry, we need camera roll permissions to make this work!");
                 return;
               }
               const galleryResult = await launchImageLibraryAsync({
@@ -293,10 +248,7 @@ const PhotoScroller = forwardRef(
 
       return showHeader ? (
         <View>
-          <TouchableOpacity
-            style={PhotoStyles.closeUnderlay}
-            onPress={() => setPlaying(false)}
-          >
+          <TouchableOpacity style={PhotoStyles.closeUnderlay} onPress={() => setPlaying(false)}>
             <Ionicons
               name="close-outline"
               size={24}
@@ -304,16 +256,8 @@ const PhotoScroller = forwardRef(
               style={PhotoStyles.icon}
             />
           </TouchableOpacity>
-          <TouchableOpacity
-            style={PhotoStyles.playUnderlay}
-            onPress={() => setShowVideo(true)}
-          >
-            <Ionicons
-              name="play-outline"
-              size={24}
-              color="#dfe5e8"
-              style={PhotoStyles.icon}
-            />
+          <TouchableOpacity style={PhotoStyles.playUnderlay} onPress={() => setShowVideo(true)}>
+            <Ionicons name="play-outline" size={24} color="#dfe5e8" style={PhotoStyles.icon} />
           </TouchableOpacity>
           {showVideo && (
             <View style={PhotoStyles.videoContainer}>
@@ -329,16 +273,8 @@ const PhotoScroller = forwardRef(
           )}
         </View>
       ) : (
-        <TouchableOpacity
-          style={PhotoStyles.closeUnderlay}
-          onPress={() => setPlaying(false)}
-        >
-          <Ionicons
-            name="close-outline"
-            size={24}
-            color="#dfe5e8"
-            style={PhotoStyles.icon}
-          />
+        <TouchableOpacity style={PhotoStyles.closeUnderlay} onPress={() => setPlaying(false)}>
+          <Ionicons name="close-outline" size={24} color="#dfe5e8" style={PhotoStyles.icon} />
         </TouchableOpacity>
       );
     }
@@ -358,9 +294,7 @@ const PhotoScroller = forwardRef(
           }))}
           imageIndex={imageToShow}
           onImageIndexChange={(index) => setCurrentImageIndex(index)}
-          onLongPress={() =>
-            handleSaveMedia(newMedia[currentImageIndex].getUri())
-          }
+          onLongPress={() => handleSaveMedia(newMedia[currentImageIndex].getUri())}
           visible={playing}
           onRequestClose={() => setPlaying(false)}
           FooterComponent={(imageIndex) => Footer(imageIndex)}
@@ -394,12 +328,7 @@ const PhotoScroller = forwardRef(
               ]}
               onPress={handleNewMedia}
             >
-              <Ionicons
-                style={{ alignSelf: "center" }}
-                name="camera-outline"
-                size={60}
-                color="#111111"
-              />
+              <Ionicons style={{ alignSelf: "center" }} name="camera-outline" size={60} color="#111111" />
             </TouchableOpacity>
             <DraggableFlatList
               showsHorizontalScrollIndicator={false}

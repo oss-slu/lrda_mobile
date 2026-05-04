@@ -1,17 +1,7 @@
-import React, { useState } from 'react';
-import {
-  Modal,
-  View,
-  ScrollView,
-  Text,
-  Image,
-  ActivityIndicator,
-  StyleSheet,
-  TouchableOpacity,
-  Dimensions,
-} from 'react-native';
+import React, { useState } from "react";
+import { Modal, View, ScrollView, Text, Image, ActivityIndicator, StyleSheet, TouchableOpacity, Dimensions } from "react-native";
 import { useTheme } from "../../components/ThemeProvider";
-import { defaultTextFont } from '../../../styles/globalStyles';
+import { defaultTextFont } from "../../../styles/globalStyles";
 
 interface ImageType {
   uri: string;
@@ -39,15 +29,15 @@ const ImageModal: React.FC<Props> = ({ isVisible, onClose, images }) => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
+      justifyContent: "center",
+      alignItems: "center",
       paddingTop: 45,
-      width: '100%',
+      width: "100%",
       backgroundColor: theme.primaryColor,
     },
     imageContainer: {
-      alignItems: 'center',
-      width: '100%',
+      alignItems: "center",
+      width: "100%",
       backgroundColor: theme.primaryColor,
     },
     image: {
@@ -56,18 +46,18 @@ const ImageModal: React.FC<Props> = ({ isVisible, onClose, images }) => {
     },
     noImagesText: {
       ...defaultTextFont,
-      alignSelf: 'center',
-      justifyContent: 'center',
+      alignSelf: "center",
+      justifyContent: "center",
       marginTop: 200,
       color: theme.text,
     },
     closeButton: {
       height: 40,
       width: 75,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       marginTop: 20,
-      backgroundColor: '#ddd',
+      backgroundColor: "#ddd",
       padding: 10,
       borderRadius: 5,
       marginBottom: 30,
@@ -84,14 +74,8 @@ const ImageModal: React.FC<Props> = ({ isVisible, onClose, images }) => {
           {images && images.length > 0 ? (
             images.map((image, index) => (
               <View key={index} style={styles.imageContainer}>
-                {!imageLoadedState[image.uri] && (
-                  <ActivityIndicator size="large" color="#0000ff" />
-                )}
-                <Image
-                  source={{ uri: image.uri }}
-                  style={styles.image}
-                  onLoad={() => handleLoad(image.uri)}
-                />
+                {!imageLoadedState[image.uri] && <ActivityIndicator size="large" color="#0000ff" />}
+                <Image source={{ uri: image.uri }} style={styles.image} onLoad={() => handleLoad(image.uri)} />
               </View>
             ))
           ) : (
@@ -99,8 +83,10 @@ const ImageModal: React.FC<Props> = ({ isVisible, onClose, images }) => {
           )}
         </ScrollView>
 
-        <TouchableOpacity style={styles.closeButton} onPress={onClose} testID='image-component' >
-          <Text style={{...defaultTextFont}} testID='close-button'>Close</Text>
+        <TouchableOpacity style={styles.closeButton} onPress={onClose} testID="image-component">
+          <Text style={{ ...defaultTextFont }} testID="close-button">
+            Close
+          </Text>
         </TouchableOpacity>
       </View>
     </Modal>

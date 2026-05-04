@@ -1,22 +1,10 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  TextInput,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, TextInput } from "react-native";
 import { SwipeListView } from "react-native-swipe-list-view";
 import { Ionicons } from "@expo/vector-icons";
 import { defaultTextFont } from "../../styles/globalStyles";
 
-function TagWindow({
-  tags,
-  setTags,
-}: {
-  tags: string[];
-  setTags: React.Dispatch<React.SetStateAction<string[]>>;
-}) {
+function TagWindow({ tags, setTags }: { tags: string[]; setTags: React.Dispatch<React.SetStateAction<string[]>> }) {
   const [inputText, setInputText] = useState("");
 
   let data =
@@ -35,16 +23,8 @@ function TagWindow({
   const renderHiddenItem = (data: any, rowMap: any) => {
     return (
       <View style={styles.rowBack}>
-        <TouchableOpacity
-          onPress={() => handleDeleteTag(data.item.key)}
-          testID={`delete-action-${data.item.key}`}
-        >
-          <Ionicons
-            name="trash-outline"
-            size={24}
-            color="#111111"
-            style={{ alignSelf: "center" }}
-          />
+        <TouchableOpacity onPress={() => handleDeleteTag(data.item.key)} testID={`delete-action-${data.item.key}`}>
+          <Ionicons name="trash-outline" size={24} color="#111111" style={{ alignSelf: "center" }} />
         </TouchableOpacity>
       </View>
     );
@@ -65,7 +45,7 @@ function TagWindow({
         onChangeText={setInputText}
         placeholder="Your Tag Here"
         onSubmitEditing={() => {
-          if (inputText !== '') {
+          if (inputText !== "") {
             setTags([...tags, inputText]);
             setInputText("");
           }

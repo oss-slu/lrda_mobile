@@ -15,11 +15,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUri }) => {
 
   useEffect(() => {
     const loadSound = async () => {
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: audioUri },
-        { shouldPlay: false },
-        onPlaybackStatusUpdate
-      );
+      const { sound } = await Audio.Sound.createAsync({ uri: audioUri }, { shouldPlay: false }, onPlaybackStatusUpdate);
       setSound(sound);
 
       const status = await sound.getStatusAsync();
@@ -68,7 +64,9 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUri }) => {
 
   const formatTime = (millis: number) => {
     const minutes = Math.floor(millis / 60000);
-    const seconds = Math.floor((millis % 60000) / 1000).toString().padStart(2, "0");
+    const seconds = Math.floor((millis % 60000) / 1000)
+      .toString()
+      .padStart(2, "0");
     return `${minutes}:${seconds}`;
   };
 

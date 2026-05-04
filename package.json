@@ -8,7 +8,9 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "test": "jest -u"
+    "test": "jest -u",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@10play/tentap-editor": "^0.5.23",
@@ -87,9 +89,14 @@
     "@types/react-native-onboarding-swiper": "^1.1.9",
     "babel-jest": "^30.0.0",
     "babel-preset-expo": "~54.0.10",
+    "eslint": "^9.39.4",
+    "eslint-config-expo": "^55.0.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
     "jest": "^29.7.0",
     "jest-expo": "~54.0.17",
     "moxios": "^0.4.0",
+    "prettier": "^3.8.3",
     "react-test-renderer": "19.1.0",
     "redux-mock-store": "^1.5.4",
     "ts-jest": "^29.2.5",

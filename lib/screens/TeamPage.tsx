@@ -1,20 +1,12 @@
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  FlatList,
-  TouchableOpacity,
-  Dimensions,
-  StatusBar,
-  ScrollView,
-} from "react-native";
-import Feather from 'react-native-vector-icons/Feather';
+import { View, Text, StyleSheet, Image, FlatList, TouchableOpacity, Dimensions, StatusBar, ScrollView } from "react-native";
+import Feather from "react-native-vector-icons/Feather";
 import { useTheme } from "../components/ThemeProvider";
 import { defaultTextFont } from "../../styles/globalStyles";
 
-const { width, height } = Dimensions.get('window');
+import { useRouter } from "expo-router";
+
+const { width, height } = Dimensions.get("window");
 
 const WR_team = [
   {
@@ -50,7 +42,7 @@ const teamMembers = [
     role: "Software Developer (COLR)",
     image: require("../../assets/Yash.jpg"),
   },
-    {
+  {
     id: 4,
     name: "Stuart Ray",
     role: "Developer",
@@ -106,14 +98,12 @@ const teamMembers = [
     image: require("../../assets/Sam.jpg"),
   },
   {
-    id:13, 
+    id: 13,
     name: "Josh Hogan",
     role: "Developer",
-    image: require("../../assets/F-22.jpg")
-  }
+    image: require("../../assets/F-22.jpg"),
+  },
 ];
-
-import { useRouter } from "expo-router";
 
 export default function TeamPage() {
   const router = useRouter();
@@ -121,12 +111,7 @@ export default function TeamPage() {
 
   const renderItem = ({ item }) => (
     <View style={styles.teamMember}>
-      <Image
-        source={item.image}
-        style={styles.teamImage}
-        accessible
-        accessibilityLabel={`${item.name}, ${item.role}`}
-      />
+      <Image source={item.image} style={styles.teamImage} accessible accessibilityLabel={`${item.name}, ${item.role}`} />
       <Text style={[styles.memberName, { color: theme.text || "#ffffff" }]}>{item.name}</Text>
       <Text style={[styles.memberRole, { color: theme.secondaryText || "#aaaaaa" }]}>{item.role}</Text>
     </View>
@@ -140,10 +125,10 @@ export default function TeamPage() {
       <View style={[styles.header, { backgroundColor: theme.homeColor }]}>
         <View style={styles.headerContent}>
           <TouchableOpacity onPress={() => router.back()}>
-            <Feather name={'arrow-left'} size={30} />
+            <Feather name={"arrow-left"} size={30} />
           </TouchableOpacity>
           <View style={styles.headerHeading}>
-            <Text style={{ ...defaultTextFont, fontSize: 17, fontWeight: 'bold' }}>Team</Text>
+            <Text style={{ ...defaultTextFont, fontSize: 17, fontWeight: "bold" }}>Team</Text>
           </View>
         </View>
       </View>
@@ -173,9 +158,7 @@ export default function TeamPage() {
 
         {/* Development Team Section */}
         <View style={styles.sectionContainer}>
-          <Text style={[styles.subtitle, { color: theme.secondaryText || "#aaaaaa", marginBottom: 12 }]}>
-            The Development Team
-          </Text>
+          <Text style={[styles.subtitle, { color: theme.secondaryText || "#aaaaaa", marginBottom: 12 }]}>The Development Team</Text>
           <FlatList
             data={teamMembers}
             renderItem={renderItem}
@@ -202,10 +185,10 @@ const styles = StyleSheet.create({
     height: width > 500 ? height * 0.12 : height * 0.19,
   },
   headerContent: {
-    marginTop: width > 500 ? '5%' : '20%',
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
+    marginTop: width > 500 ? "5%" : "20%",
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    alignItems: "center",
     paddingHorizontal: 20,
   },
   headerHeading: {

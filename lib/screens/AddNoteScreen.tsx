@@ -23,12 +23,7 @@ import PhotoScroller from "../components/photoScroller";
 import TagWindow from "../components/tagging";
 import LocationWindow from "../components/location";
 import TimeWindow from "../components/time";
-import {
-  DEFAULT_TOOLBAR_ITEMS,
-  RichText,
-  Toolbar,
-  useEditorBridge,
-} from "@10play/tentap-editor";
+import { DEFAULT_TOOLBAR_ITEMS, RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
 import NotePageStyles, { customImageCSS } from "../../styles/pages/NoteStyles";
 import { useTheme } from "../components/ThemeProvider";
 import LoadingModal from "../components/LoadingModal";
@@ -40,10 +35,10 @@ import ApiService from "../utils/api_calls";
 import { useDispatch, useSelector } from "react-redux";
 import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
 import { useAddNoteContext } from "../context/AddNoteContext";
-import {defaultTextFont} from "../../styles/globalStyles";
+import { defaultTextFont } from "../../styles/globalStyles";
 import { Button } from "react-native-paper";
 import TooltipContent from "../onboarding/TooltipComponent";
-import Tooltip from 'react-native-walkthrough-tooltip';
+import Tooltip from "react-native-walkthrough-tooltip";
 import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
 
 const user = User.getInstance();
@@ -69,11 +64,9 @@ const AddNoteScreen: React.FC = () => {
     latitude: number;
     longitude: number;
   } | null>(null);
-  const [locationButtonColor, setLocationButtonColor] =
-    useState<string>("#000"); // Default color
+  const [locationButtonColor, setLocationButtonColor] = useState<string>("#000"); // Default color
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
-  const [isVideoModalVisible, setIsVideoModalVisible] =
-    useState<boolean>(false);
+  const [isVideoModalVisible, setIsVideoModalVisible] = useState<boolean>(false);
   const [videoUri, setVideoUri] = useState<string | null>(null);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const { setPublishNote } = useAddNoteContext();
@@ -83,9 +76,7 @@ const AddNoteScreen: React.FC = () => {
   const audioRef = useRef(newAudio);
   const titleTxtRef = useRef(titleText);
 
-  const addNoteState = useSelector(
-    (state) => state?.addNoteState?.isAddNoteOpned
-  );
+  const addNoteState = useSelector((state) => state?.addNoteState?.isAddNoteOpned);
   useEffect(() => {
     console.log("Updated isAddNoteOpened state:", addNoteState);
   }, [addNoteState]);
@@ -104,57 +95,55 @@ const AddNoteScreen: React.FC = () => {
   useEffect(() => {
     titleTxtRef.current = titleText;
   }, [titleText]);
-  
+
   useEffect(() => {
     bodyTextRef.current = bodyText;
   }, [bodyText]);
-  
+
   useEffect(() => {
     tagsRef.current = tags;
   }, [tags]);
-  
+
   useEffect(() => {
     mediaRef.current = newMedia;
   }, [newMedia]);
-  
+
   useEffect(() => {
     audioRef.current = newAudio;
   }, [newAudio]);
 
-  
   useEffect(() => {
-    const unsubscribe = navigation.addListener('blur', () => {
+    const unsubscribe = navigation.addListener("blur", () => {
       console.log("Blur listener triggered...");
-  
-      setTimeout(async () => {
 
-        console.log("===========================\n is published\n",isPublished)
-         if(!isPublished){
-         const latestContent = await editor.getHTML();
-        bodyTextRef.current = latestContent;
-        console.log("Delayed content fetch:", latestContent);
-  
-        const bodyIsEmpty = isBodyEmpty(latestContent);
-        console.log("Is body empty?", bodyIsEmpty);
-  
-        if (
-          titleTxtRef.current.length !== 0 ||
-          !bodyIsEmpty ||
-          tagsRef.current.length !== 0 ||
-          mediaRef.current.length !== 0 ||
-          audioRef.current.length !== 0
-        ) {
-          console.log("Saving note...");
-          await saveNote();
-        } else {
-          console.log("Nothing to save, toggling state.");
-          dispatch(toogleAddNoteState());
-          router.back();
-        }
+      setTimeout(async () => {
+        console.log("===========================\n is published\n", isPublished);
+        if (!isPublished) {
+          const latestContent = await editor.getHTML();
+          bodyTextRef.current = latestContent;
+          console.log("Delayed content fetch:", latestContent);
+
+          const bodyIsEmpty = isBodyEmpty(latestContent);
+          console.log("Is body empty?", bodyIsEmpty);
+
+          if (
+            titleTxtRef.current.length !== 0 ||
+            !bodyIsEmpty ||
+            tagsRef.current.length !== 0 ||
+            mediaRef.current.length !== 0 ||
+            audioRef.current.length !== 0
+          ) {
+            console.log("Saving note...");
+            await saveNote();
+          } else {
+            console.log("Nothing to save, toggling state.");
+            dispatch(toogleAddNoteState());
+            router.back();
+          }
         }
       }, 300); // <-- 300ms delay gives WebView enough time
     });
-  
+
     return unsubscribe;
   }, [navigation, editor]);
 
@@ -162,12 +151,11 @@ const AddNoteScreen: React.FC = () => {
   const titleTextRef = useRef<TextInput>(null);
   const scrollViewRef = useRef<KeyboardAwareScrollView>(null);
 
-   useEffect(() => {
+  useEffect(() => {
     // Save the correct reference to handleShareButtonPress
     console.log("useeffect called when to hit save button");
     setPublishNote(() => handleShareButtonPress);
   }, [titleText]);
-
 
   useEffect(() => {
     if (editor) {
@@ -181,15 +169,12 @@ const AddNoteScreen: React.FC = () => {
       editor.injectCSS(combinedCSS); // Inject both styles at once
     }
   }, [editor, theme.text]);
-  
+
   const isBodyEmpty = (htmlString: string) => {
     // Remove all tags and whitespace
     const textOnly = htmlString.replace(/<\/?[^>]+(>|$)/g, "").trim();
     return textOnly.length === 0;
   };
-
-  
-
 
   useEffect(() => {
     // Listen for keyboard events to show/hide toolbar
@@ -233,9 +218,7 @@ const AddNoteScreen: React.FC = () => {
   const setLocationToZero = () => {
     setLocation({ latitude: 0, longitude: 0 });
     setLocationButtonColor("red");
-    console.log(
-      "Location set to (0, 0) due to permission denial or manual setting."
-    );
+    console.log("Location set to (0, 0) due to permission denial or manual setting.");
   };
 
   const fetchCurrentLocation = async () => {
@@ -331,49 +314,41 @@ const AddNoteScreen: React.FC = () => {
   };
 
   const handleShareButtonPress = async () => {
-    console.log("Publish Pressed ......")
+    console.log("Publish Pressed ......");
     await syncEditorContent();
 
     const bodyIsEmpty = isBodyEmpty(bodyTextRef.current);
 
-    if(
-      titleTextRef.current?.length !==0||
-      !bodyIsEmpty|| 
+    if (
+      titleTextRef.current?.length !== 0 ||
+      !bodyIsEmpty ||
       tagsRef.current.length! == 0 ||
       mediaRef.current.length! == 0 ||
       audioRef.current.length! == 0
-    )
-    {
-      console.log("inside if Published Pressed ...")
-    setIsPublished(!isPublished);
-    ToastMessage.show({
-      type: "success",
-      text1: isPublished ? "Note Unpublished" : "Note Published",
-      visibilityTime: 3000,
-    });
-    await saveNote(true);
-  }
-  else{
-    console.log("Empty Note. Nothing to Save/Publish")
-  }
+    ) {
+      console.log("inside if Published Pressed ...");
+      setIsPublished(!isPublished);
+      ToastMessage.show({
+        type: "success",
+        text1: isPublished ? "Note Unpublished" : "Note Published",
+        visibilityTime: 3000,
+      });
+      await saveNote(true);
+    } else {
+      console.log("Empty Note. Nothing to Save/Publish");
+    }
   };
 
   const getTitle = () => {
     console.log(titleText);
-    const title = titleText.trim()
-      ? titleText.trim()
-      : params.untitledNumber
-      ? `Untitled ${params.untitledNumber}`
-      : "Untitled";
+    const title = titleText.trim() ? titleText.trim() : params.untitledNumber ? `Untitled ${params.untitledNumber}` : "Untitled";
     console.log(title);
 
     return title;
   };
-  const prepareNoteData = async (published:boolean) => {
+  const prepareNoteData = async (published: boolean) => {
     const userLocation = await Location.getCurrentPositionAsync({});
-    const finalLocation = userLocation
-      ? userLocation.coords
-      : { latitude: 0, longitude: 0 };
+    const finalLocation = userLocation ? userLocation.coords : { latitude: 0, longitude: 0 };
     const textContent = await editor.getHTML();
     const sanitizedContent = textContent.replace(/<\/?p>/g, ""); // Remove <p> tags
     const uid = await user.getId();
@@ -386,7 +361,7 @@ const AddNoteScreen: React.FC = () => {
       tags: tags || [],
       latitude: finalLocation.latitude.toString(),
       longitude: finalLocation.longitude.toString(),
-      published:published,
+      published: published,
       time: new Date().toISOString(),
       creator: uid,
     };
@@ -428,124 +403,85 @@ const AddNoteScreen: React.FC = () => {
     console.log("Synced editor content:", latestContent);
   };
 
-      /* CHECKING IF USER HAS DONE TUTORIAL */ 
-      const [userTutorial, setUserTutorial] = useState<boolean>(false);
-      const [mediaTip, setMediaTip] = useState<boolean>(true); // This is the first tip.
-      
-      // Update the userTutorial state once the async function resolves.
-      useEffect(() => {
-        // For the "AddNote" tutorial
-        User.getHasDoneTutorial("AddNote").then((result: boolean) => {
-          setUserTutorial(result);
-        });
-      }, []);
+  /* CHECKING IF USER HAS DONE TUTORIAL */
+  const [userTutorial, setUserTutorial] = useState<boolean>(false);
+  const [mediaTip, setMediaTip] = useState<boolean>(true); // This is the first tip.
 
+  // Update the userTutorial state once the async function resolves.
+  useEffect(() => {
+    // For the "AddNote" tutorial
+    User.getHasDoneTutorial("AddNote").then((result: boolean) => {
+      setUserTutorial(result);
+    });
+  }, []);
 
   return (
     <View style={{ flex: 1 }}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
-      >
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
         <KeyboardAwareScrollView
-  ref={scrollViewRef}
-  contentContainerStyle={{ flexGrow: 1 }}
-  enableOnAndroid
-  extraScrollHeight={Platform.OS === 'ios' ? 80 : 100}
-  keyboardOpeningTime={0}
-  keyboardShouldPersistTaps="handled"
->
-
+          ref={scrollViewRef}
+          contentContainerStyle={{ flexGrow: 1 }}
+          enableOnAndroid
+          extraScrollHeight={Platform.OS === "ios" ? 80 : 100}
+          keyboardOpeningTime={0}
+          keyboardShouldPersistTaps="handled"
+        >
           <View style={{ flex: 1 }}>
-          <Tooltip
-              topAdjustment={Platform.OS === 'android' ? -StatusBar.currentHeight : 0}
-                isVisible={mediaTip === true &&  userTutorial === false  }
-                showChildInTooltip = {true }
-        content={
-          <TooltipContent
-            message="Upload media to your notes! Hit publish once you are ready."
-            onPressOk={() => {
-              setMediaTip(false);
-              setUserTutorial(true)
-              User.setUserTutorialDone("AddNote", true)
-            }}
-            onSkip={() => {
-              setMediaTip(false);
-              setUserTutorial(true)
-              User.setUserTutorialDone("AddNote", true)
-            }}
-          />
-        }
-        placement="bottom"
-      >
-            <View style={[NotePageStyles().topContainer]}>
-              <View
-                style={[
-                  NotePageStyles().topButtonsContainer,
-                  { backgroundColor: theme.homeColor },
-                ]}
-              >
-                <TouchableOpacity
-                  style={NotePageStyles().topButtons}
-                  onPress={()=> saveNote(false)}
-                >
-                  <Ionicons
-                    name="arrow-back-outline"
-                    size={30}
-                    color={NotePageStyles().saveText.color}
-                  />
-                </TouchableOpacity>
-                <TextInput
-                  style={NotePageStyles().title}
-                  placeholder="Title Field Note"
-                  placeholderTextColor={NotePageStyles().title.color}
-                  onChangeText={setTitleText}
-                  value={titleText}
-                  onFocus={() => {
-                    // Remove focus from the editor when the title is being edited
-                    if (editor?.blur) {
-                      editor.blur();
-                    }
+            <Tooltip
+              topAdjustment={Platform.OS === "android" ? -StatusBar.currentHeight : 0}
+              isVisible={mediaTip === true && userTutorial === false}
+              showChildInTooltip={true}
+              content={
+                <TooltipContent
+                  message="Upload media to your notes! Hit publish once you are ready."
+                  onPressOk={() => {
+                    setMediaTip(false);
+                    setUserTutorial(true);
+                    User.setUserTutorialDone("AddNote", true);
+                  }}
+                  onSkip={() => {
+                    setMediaTip(false);
+                    setUserTutorial(true);
+                    User.setUserTutorialDone("AddNote", true);
                   }}
                 />
+              }
+              placement="bottom"
+            >
+              <View style={[NotePageStyles().topContainer]}>
+                <View style={[NotePageStyles().topButtonsContainer, { backgroundColor: theme.homeColor }]}>
+                  <TouchableOpacity style={NotePageStyles().topButtons} onPress={() => saveNote(false)}>
+                    <Ionicons name="arrow-back-outline" size={30} color={NotePageStyles().saveText.color} />
+                  </TouchableOpacity>
+                  <TextInput
+                    style={NotePageStyles().title}
+                    placeholder="Title Field Note"
+                    placeholderTextColor={NotePageStyles().title.color}
+                    onChangeText={setTitleText}
+                    value={titleText}
+                    onFocus={() => {
+                      // Remove focus from the editor when the title is being edited
+                      if (editor?.blur) {
+                        editor.blur();
+                      }
+                    }}
+                  />
+                </View>
+                <View style={NotePageStyles().keyContainer}>
+                  <TouchableOpacity onPress={() => setViewMedia(!viewMedia)} testID="imageButton">
+                    <Ionicons name="images-outline" size={30} color={NotePageStyles().saveText.color} />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => setViewAudio(!viewAudio)}>
+                    <Ionicons name="mic-outline" size={30} color={NotePageStyles().saveText.color} />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={toggleLocation} testID="checklocationpermission">
+                    <Ionicons name="location-outline" size={30} color={locationButtonColor} />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => setIsTagging(!isTagging)}>
+                    <Ionicons name="pricetag-outline" size={30} color={NotePageStyles().saveText.color} />
+                  </TouchableOpacity>
+                </View>
               </View>
-              <View style={NotePageStyles().keyContainer}>
-                <TouchableOpacity
-                  onPress={() => setViewMedia(!viewMedia)}
-                  testID="imageButton"
-                >
-                  <Ionicons
-                    name="images-outline"
-                    size={30}
-                    color={NotePageStyles().saveText.color}
-                  />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => setViewAudio(!viewAudio)}>
-                  <Ionicons
-                    name="mic-outline"
-                    size={30}
-                    color={NotePageStyles().saveText.color}
-                  />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={toggleLocation}
-                  testID="checklocationpermission"
-                >
-                  <Ionicons
-                    name="location-outline"
-                    size={30}
-                    color={locationButtonColor}
-                  />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => setIsTagging(!isTagging)}>
-                  <Ionicons
-                    name="pricetag-outline"
-                    size={30}
-                    color={NotePageStyles().saveText.color}
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
             </Tooltip>
 
             <View style={NotePageStyles().container}>
@@ -556,71 +492,44 @@ const AddNoteScreen: React.FC = () => {
                 insertImageToEditor={insertImageToEditor}
                 addVideoToEditor={addVideoToEditor}
               />
-              {viewAudio && (
-                <AudioContainer
-                  newAudio={newAudio}
-                  setNewAudio={setNewAudio}
-                  insertAudioToEditor={insertAudioToEditor}
-                />
-              )}
+              {viewAudio && <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} insertAudioToEditor={insertAudioToEditor} />}
               {isTagging && <TagWindow tags={tags} setTags={setTags} />}
-              {isLocation && (
-                <LocationWindow location={location} setLocation={setLocation} />
-              )}
+              {isLocation && <LocationWindow location={location} setLocation={setLocation} />}
               {isTime && <TimeWindow time={time} setTime={setTime} />}
             </View>
-            <View
-  style={[NotePageStyles().richTextContainer]}
-  testID="TenTapEditor"
->
-  <RichText
-    editor={editor}
-    placeholder="Write Content Here..."
-    style={[
-      NotePageStyles().editor,
-      {
-        backgroundColor: theme.backgroundColor,
-        minHeight: 200, // gives initial space to type
-        paddingBottom: 120, // prevents content from being hidden behind keyboard/toolbar
-      },
-    ]}
-  />
-</View>
-
-
+            <View style={[NotePageStyles().richTextContainer]} testID="TenTapEditor">
+              <RichText
+                editor={editor}
+                placeholder="Write Content Here..."
+                style={[
+                  NotePageStyles().editor,
+                  {
+                    backgroundColor: theme.backgroundColor,
+                    minHeight: 200, // gives initial space to type
+                    paddingBottom: 120, // prevents content from being hidden behind keyboard/toolbar
+                  },
+                ]}
+              />
+            </View>
 
             <View style={styles.toolbar} testID="RichEditor">
               <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
             </View>
-            {Platform.OS === "ios" && (
-              <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
-            )}
+            {Platform.OS === "ios" && <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />}
           </View>
-          {keyboardVisible &&(
-          <View style={styles.doneButton} testID="doneButton">
-            <TouchableOpacity onPress={handleDonePress}>
-              <Text style={styles.doneText}>Done</Text>
-            </TouchableOpacity>
-          </View>
+          {keyboardVisible && (
+            <View style={styles.doneButton} testID="doneButton">
+              <TouchableOpacity onPress={handleDonePress}>
+                <Text style={styles.doneText}>Done</Text>
+              </TouchableOpacity>
+            </View>
           )}
         </KeyboardAwareScrollView>
         {/* Video Player Modal */}
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={isVideoModalVisible}
-          onRequestClose={() => setIsVideoModalVisible(false)}
-        >
+        <Modal animationType="slide" transparent={true} visible={isVideoModalVisible} onRequestClose={() => setIsVideoModalVisible(false)}>
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-              {videoUri && (
-                <Video
-                  source={{ uri: videoUri }}
-                  useNativeControls
-                  resizeMode="contain"
-                  style={styles.videoPlayer}
-                />
-              )}
+              {videoUri && <Video source={{ uri: videoUri }} useNativeControls resizeMode="contain" style={styles.videoPlayer} />}
               <TouchableOpacity onPress={() => setIsVideoModalVisible(false)}>
                 <Text style={styles.closeButton}>Close</Text>
               </TouchableOpacity>
@@ -677,10 +586,10 @@ const styles = StyleSheet.create({
     marginRight: 25,
   },
   toolbar: {
-    position: 'absolute', // Keep toolbar at the bottom of the screen
+    position: "absolute", // Keep toolbar at the bottom of the screen
     bottom: 27, // Align toolbar with the bottom edge
-    width: '100%', // Full-width toolbar
-    justifyContent: 'center', // Center items in the toolbar
+    width: "100%", // Full-width toolbar
+    justifyContent: "center", // Center items in the toolbar
     paddingHorizontal: 10,
     zIndex: 10, // Ensure it stays above other elements
     ...Platform.select({

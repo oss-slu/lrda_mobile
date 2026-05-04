@@ -6,8 +6,7 @@ import { useTheme } from "../../lib/components/ThemeProvider";
 // Define custom CSS as a separate string
 // In NotePageStyles.ts
 
-
-const {height} = Dimensions.get('window');
+const { height } = Dimensions.get("window");
 
 export const customImageCSS = `
   .ProseMirror img {
@@ -19,15 +18,12 @@ export const customImageCSS = `
      true; // Ensure valid JavaScript return value
 `;
 
-
-
 const NotePageStyles = () => {
   const { theme } = useTheme();
 
   return StyleSheet.create({
     topContainer: {
       minHeight: 140,
-    
     },
     topButtonsContainer: {
       justifyContent: "space-between",
@@ -71,7 +67,7 @@ const NotePageStyles = () => {
       textAlign: "right",
       marginRight: 25,
     },
-    
+
     container: {
       backgroundColor: theme.tertiaryColor,
       marginBottom: 4,
@@ -98,7 +94,8 @@ const NotePageStyles = () => {
       minHeight: 200, // Adjust for better visibility
       color: theme.text,
       padding: 10,
-      ...Platform.select({  // Adjust for better visibility
+      ...Platform.select({
+        // Adjust for better visibility
         android: {
           backgroundColor: theme.primaryColor,
           color: theme.text,
@@ -110,12 +107,12 @@ const NotePageStyles = () => {
       }),
     },
 
-   // Define this image style
-   editorImage: {
-    width: 50,
-    height: 50,
-    resizeMode: 'cover', // Ensures the image keeps its aspect ratio
-  },
+    // Define this image style
+    editorImage: {
+      width: 50,
+      height: 50,
+      resizeMode: "cover", // Ensures the image keeps its aspect ratio
+    },
 
     textEditorContainer: {
       minHeight: 300, // Set a minimum height for the editor
@@ -131,15 +128,13 @@ const NotePageStyles = () => {
       textAlign: "center",
       fontSize: 20, // Slightly smaller than 30 for better mobile readability
       color: theme.text,
-      marginRight: '5%',
-
-      
+      marginRight: "5%",
     },
     input: {
-      backgroundColor: 'white',
+      backgroundColor: "white",
       fontSize: 22,
       color: theme.text,
-      height: 900, 
+      height: 900,
     },
     addButton: {
       position: "absolute",
@@ -181,18 +176,18 @@ const NotePageStyles = () => {
           flex: 1, // ensures scroll fills screen but still scrollable
         },
         ios: {
-          height: '100%',
-        }
+          height: "100%",
+        },
       }),
     },
-    
+
     toolbar: {
-      position: 'absolute', // Keep toolbar at the bottom of the screen
+      position: "absolute", // Keep toolbar at the bottom of the screen
       bottom: 0, // Align toolbar with the bottom edge
-      width: '100%', // Full-width toolbar
+      width: "100%", // Full-width toolbar
       height: 50, // Adjusted height for better usability
       backgroundColor: theme.primaryColor, // Ensure it matches the theme
-      justifyContent: 'center', // Center items in the toolbar
+      justifyContent: "center", // Center items in the toolbar
       paddingHorizontal: 10,
       zIndex: 10, // Ensure it stays above other elements
 
@@ -209,8 +204,8 @@ const NotePageStyles = () => {
     },
     closeKeyboardButton: {
       padding: 10,
-      justifyContent: 'center',
-      alignItems: 'center',
+      justifyContent: "center",
+      alignItems: "center",
     },
   });
 };

@@ -1,13 +1,5 @@
 import React, { useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  ImageBackground,
-} from "react-native";
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, ImageBackground } from "react-native";
 import { authClient, AUTH_API_URL } from "../../auth/client";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useRouter } from "expo-router";
@@ -44,10 +36,7 @@ const ForgotPassword: React.FC = () => {
         throw new Error(error.message || "Failed to send reset email.");
       }
 
-      Alert.alert(
-        "Success",
-        `If an account exists for ${email.trim()}, a password reset link has been sent.`
-      );
+      Alert.alert("Success", `If an account exists for ${email.trim()}, a password reset link has been sent.`);
       router.back();
     } catch (error: any) {
       let message = error?.message || "Failed to send reset email.";
@@ -66,15 +55,10 @@ const ForgotPassword: React.FC = () => {
       style={{ backgroundColor: "#F4DFCD" }}
       keyboardShouldPersistTaps="handled"
     >
-      <ImageBackground
-        source={require("../../../assets/splash.jpg")}
-        style={styles.imageBackground}
-      >
+      <ImageBackground source={require("../../../assets/splash.jpg")} style={styles.imageBackground}>
         <View style={styles.resetBox}>
           <Text style={styles.logo}>Forgot Password</Text>
-          <Text style={styles.instructions}>
-            Enter your email to receive a password reset link.
-          </Text>
+          <Text style={styles.instructions}>Enter your email to receive a password reset link.</Text>
           <View style={styles.inputView}>
             <TextInput
               style={styles.inputText}
@@ -87,14 +71,9 @@ const ForgotPassword: React.FC = () => {
             />
           </View>
           <TouchableOpacity onPress={handlePasswordReset} style={styles.buttons}>
-            <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
-              Send Reset Link
-            </Text>
+            <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>Send Reset Link</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={{ marginTop: 20 }}
-            onPress={() => router.back()}
-          >
+          <TouchableOpacity style={{ marginTop: 20 }} onPress={() => router.back()}>
             <Text style={styles.backToLoginText}>Back to Login</Text>
           </TouchableOpacity>
         </View>
