@@ -32,8 +32,7 @@ import { Video } from "expo-av";
 import { User } from "../models/user_class";
 import { AudioType, Media } from "../models/media_class";
 import ApiService from "../utils/api_calls";
-import { useDispatch, useSelector } from "react-redux";
-import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
+import { useAddNoteStore } from "../stores/addNoteStore";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import { defaultTextFont } from "../../styles/globalStyles";
 import { Button } from "react-native-paper";
@@ -76,21 +75,12 @@ const AddNoteScreen: React.FC = () => {
   const audioRef = useRef(newAudio);
   const titleTxtRef = useRef(titleText);
 
-  const addNoteState = useSelector((state) => state?.addNoteState?.isAddNoteOpned);
-  useEffect(() => {
-    console.log("Updated isAddNoteOpened state:", addNoteState);
-  }, [addNoteState]);
-
-  const dispatch = useDispatch();
+  const { isAddNoteOpen, toggleAddNoteState } = useAddNoteStore();
 
   const editor = useEditorBridge({
     initialContent: bodyText || "",
     avoidIosKeyboard: true,
   });
-
-  useEffect(() => {
-    console.log("Updated isAddNoteOpened state:", addNoteState);
-  }, [addNoteState]);
 
   useEffect(() => {
     titleTxtRef.current = titleText;
@@ -137,7 +127,7 @@ const AddNoteScreen: React.FC = () => {
             await saveNote();
           } else {
             console.log("Nothing to save, toggling state.");
-            dispatch(toogleAddNoteState());
+            toggleAddNoteState();
             router.back();
           }
         }
@@ -387,7 +377,7 @@ const AddNoteScreen: React.FC = () => {
       console.error("Error saving the note:", error);
     } finally {
       setIsUpdating(false);
-      dispatch(toogleAddNoteState());
+      toggleAddNoteState();
     }
   };
 

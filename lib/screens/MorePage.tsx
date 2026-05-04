@@ -2,14 +2,13 @@ import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, Dimensions, Platform, StatusBar, Linking } from "react-native";
 import { Ionicons, Feather, MaterialIcons, Entypo } from "@expo/vector-icons";
 import { useTheme } from "../components/ThemeProvider";
-import { useDispatch } from "react-redux";
+import { useThemeStore } from "../stores/themeStore";
 import { User } from "../models/user_class";
 import { useRouter } from "expo-router";
 import Carousel from "react-native-reanimated-carousel";
 import ThemeToggle from "../components/ThemeToggle";
 import ReactNativeModal from "react-native-modal";
 import AppThemeSelectorScreen from "./AppThemeSelectorScreen";
-import { clearThemeReducer } from "../../redux/slice/ThemeSlice";
 import { defaultTextFont } from "../../styles/globalStyles";
 import Tooltip from "react-native-walkthrough-tooltip";
 import TooltipContent from "../onboarding/TooltipComponent";
@@ -22,7 +21,7 @@ const data = [
 
 export default function MorePage() {
   const { theme, isDarkmode, toggleDarkmode } = useTheme();
-  const dispatch = useDispatch();
+  const clearTheme = useThemeStore((state) => state.clearTheme);
   const userObject = User.getInstance();
   const router = useRouter();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -73,7 +72,7 @@ export default function MorePage() {
   const onLogoutPress = async () => {
     try {
       await User.getInstance().logout();
-      dispatch(clearThemeReducer());
+      clearTheme();
       router.replace("/(auth)/login");
     } catch (e) {
       console.log(e);

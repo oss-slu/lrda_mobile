@@ -3,13 +3,7 @@ import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import { Platform } from "react-native";
 import AddNoteScreen from "../lib/screens/AddNoteScreen";
 import LocationWindow from "../lib/components/time";
-import { Provider } from "react-redux";
-import configureStore from "redux-mock-store";
 import moxios from "moxios";
-
-// Mock Redux store
-const mockStore = configureStore([]);
-const store = mockStore({});
 
 // Mock external dependencies
 jest.mock("../lib/components/ThemeProvider", () => ({

@@ -26,8 +26,7 @@ import NotePageStyles, { customImageCSS } from "../../styles/pages/NoteStyles";
 import { useTheme } from "../components/ThemeProvider";
 import LoadingModal from "../components/LoadingModal";
 import { useAddNoteContext } from "../context/AddNoteContext";
-import { useDispatch } from "react-redux";
-import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
+import { useAddNoteStore } from "../stores/addNoteStore";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
 
@@ -63,7 +62,7 @@ const EditNoteScreen = () => {
   const [viewMedia, setViewMedia] = useState(false);
   const [viewAudio, setViewAudio] = useState(false);
   const { theme } = useTheme();
-  const dispatch = useDispatch();
+  const toggleAddNoteState = useAddNoteStore((s) => s.toggleAddNoteState);
   const editor = useEditorBridge({
     initialContent: note.text || "",
     avoidIosKeyboard: true,
@@ -258,7 +257,7 @@ const EditNoteScreen = () => {
         console.error("❌ Error publishing note:", error);
       } finally {
         setIsUpdating(false);
-        dispatch(toogleAddNoteState());
+        toggleAddNoteState();
       }
     } else {
       console.log("⚠️ Empty note — publish skipped.");
@@ -288,7 +287,7 @@ const EditNoteScreen = () => {
       console.error("Error updating the note:", error);
     } finally {
       setIsUpdating(false);
-      dispatch(toogleAddNoteState());
+      toggleAddNoteState();
       setIsPublishBtnClicked(true);
       router.back();
     }
@@ -321,7 +320,7 @@ const EditNoteScreen = () => {
             console.warn("Auto-save failed:", e);
           } finally {
             setIsUpdating(false);
-            dispatch(toogleAddNoteState());
+            toggleAddNoteState();
           }
         }, 300); // allow WebView to flush
       }

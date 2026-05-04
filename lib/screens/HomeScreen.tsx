@@ -32,8 +32,7 @@ import NotesComponent from "../components/NotesComponent";
 import Greeting from "../components/Greeting";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import LottieView from "lottie-react-native";
-import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
-import { useSelector, useDispatch } from "react-redux";
+import { useAddNoteStore } from "../stores/addNoteStore";
 import { defaultTextFont } from "../../styles/globalStyles";
 import Tooltip from "react-native-walkthrough-tooltip";
 import TooltipContent from "../onboarding/TooltipComponent";
@@ -70,7 +69,7 @@ const HomeScreen: React.FC = () => {
   const [isSortOpened, setIsSortOpened] = useState(false);
   const [selectedSortOption, setSelectedSortOption] = useState(1);
   let textLength = 18;
-  const dispatch = useDispatch();
+  const toggleAddNoteState = useAddNoteStore((s) => s.toggleAddNoteState);
 
   // Pagination states
   const [page, setPage] = useState(1);
@@ -461,7 +460,7 @@ const HomeScreen: React.FC = () => {
         }}
         onPress={() => {
           if (!item.published) {
-            dispatch(toogleAddNoteState());
+            toggleAddNoteState();
             router.push({
               pathname: "/edit-note",
               params: {

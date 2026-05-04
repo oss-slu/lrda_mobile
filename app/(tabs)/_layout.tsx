@@ -2,13 +2,12 @@ import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Platform } from "react-native";
 import { useTheme } from "../../lib/components/ThemeProvider";
-import { useSelector } from "react-redux";
-import { RootState } from "../../redux/store/store";
+import { useThemeStore } from "../../lib/stores/themeStore";
 import AddNoteBtnComponent from "../../lib/components/AddNoteBtnComponent";
 
 export default function TabsLayout() {
   const { theme, isDarkmode } = useTheme();
-  const appThemeColor = useSelector((state: RootState) => state.themeSlice.theme);
+  const appThemeColor = useThemeStore((state) => state.theme);
 
   return (
     <Tabs

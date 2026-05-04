@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Stack } from "expo-router";
-import { Provider } from "react-redux";
-import { store, persistor } from "../redux/store/store";
-import { PersistGate } from "redux-persist/lib/integration/react";
 import { ThemeProvider } from "../lib/components/ThemeProvider";
 import { AddNoteProvider } from "../lib/context/AddNoteContext";
 import { useFonts } from "expo-font";
@@ -73,14 +70,10 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <ThemeProvider>
-          <AddNoteProvider>
-            <RootLayoutInner />
-          </AddNoteProvider>
-        </ThemeProvider>
-      </PersistGate>
-    </Provider>
+    <ThemeProvider>
+      <AddNoteProvider>
+        <RootLayoutInner />
+      </AddNoteProvider>
+    </ThemeProvider>
   );
 }

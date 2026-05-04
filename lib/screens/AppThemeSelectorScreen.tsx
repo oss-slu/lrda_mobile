@@ -3,12 +3,11 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../components/ThemeProvider";
 import { appTheme } from "../components/colors";
-import { useDispatch, UseDispatch } from "react-redux";
-import { themeReducer } from "../../redux/slice/ThemeSlice";
+import { useThemeStore } from "../stores/themeStore";
 import { defaultTextFont } from "../../styles/globalStyles";
 
 function AppThemeSelectorScreen() {
-  const dispatch = useDispatch();
+  const setTheme = useThemeStore((state) => state.setTheme);
   const { theme, isDarkmode } = useTheme();
   // const [selectedColor, setSelectedColor] = useState('#ff0000'); // Default color
   // const [sliderValue, setSliderValue] = useState(0.5); // Slider value state
@@ -40,7 +39,7 @@ function AppThemeSelectorScreen() {
           <TouchableOpacity
             key={key}
             onPress={() => {
-              dispatch(themeReducer(theme.themeColor));
+              setTheme(theme.themeColor);
             }}
           >
             <View style={[styles.themeContainer, { backgroundColor: theme.themeColor }]}></View>

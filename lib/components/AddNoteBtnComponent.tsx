@@ -3,25 +3,23 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { SvgIcon } from "./SvgIcon";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import { useAddNoteContext } from "../context/AddNoteContext";
-import { useSelector, useDispatch } from "react-redux";
-import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
+import { useThemeStore } from "../stores/themeStore";
+import { useAddNoteStore } from "../stores/addNoteStore";
 import { useTheme } from "./ThemeProvider";
 import { usePathname } from "expo-router";
 
 function AddNoteBtnComponent() {
-  const dispatch = useDispatch();
   const { navigateToAddNote, publishNote } = useAddNoteContext();
   const { theme, isDarkmode } = useTheme();
-  const appThemeColor = useSelector((s) => s.themeSlice.theme);
-  const addNoteState = useSelector((s) => s.addNoteState.isAddNoteOpned);
+  const appThemeColor = useThemeStore((s) => s.theme);
+  const toggleAddNoteState = useAddNoteStore((s) => s.toggleAddNoteState);
 
   const pathname = usePathname();
 
-  // if the current screen is add-note or edit-note, we show the publish button
   const isAddButtonMode = !pathname.includes("/add-note") && !pathname.includes("/edit-note");
 
   const handleAdd = () => {
-    dispatch(toogleAddNoteState());
+    toggleAddNoteState();
     navigateToAddNote();
   };
   const handlePublish = () => publishNote();
