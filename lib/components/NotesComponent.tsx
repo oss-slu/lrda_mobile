@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Image, StyleSheet, Alert, Dimensions } from "react-native";
+import { View, Text, StyleSheet, Dimensions } from "react-native";
 import LoadingImage from "./loadingImage";
 import * as Location from "expo-location";
-import axios from "axios";
+import ApiService from "../utils/api_calls";
 import { defaultTextFont } from "../../styles/globalStyles";
 
 const { width, height } = Dimensions.get("window");
@@ -11,36 +11,26 @@ function NotesComponent({ IsImage, resolvedImageURI, ImageType, textLength, show
   const [address, setAddress] = useState(null);
   const [author, setAuthor] = useState("anonymous");
 
-  const fetchUserName = async (url) => {
+  const fetchUserName = async (creatorId: string) => {
     try {
-      // Perform the GET request
-      const response = await axios.get(url);
-      const data = response.data;
-
-      // Fetch the author
-      const author = data.name;
-
-      setAuthor(author);
+      const name = await ApiService.fetchCreatorName(creatorId);
+      setAuthor(name);
     } catch (error) {
-      throw new Error("Failed to fetch data.");
+      console.error("Failed to fetch creator name:", error);
     }
   };
 
   const fetchAddress = async (latitude, longitude) => {
-    // Convert latitude and longitude to numbers
-    const lat = parseFloat(latitude);
-    const lon = parseFloat(longitude);
+    const lat = typeof latitude === "number" ? latitude : parseFloat(latitude);
+    const lon = typeof longitude === "number" ? longitude : parseFloat(longitude);
 
     if (isNaN(lat) || isNaN(lon)) {
-      // console.error("Invalid latitude or longitude values:", latitude, longitude);
-      // Alert.alert("Error", "Invalid latitude or longitude values.");
       return;
     }
 
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        // Alert.alert("Permission Denied", "Permission to access location was denied.");
         return;
       }
 
@@ -50,20 +40,17 @@ function NotesComponent({ IsImage, resolvedImageURI, ImageType, textLength, show
         const location = result[0];
         const formattedAddress = `${location.name || ""}, ${location.street || ""}, ${location.city || ""}, ${location.region || ""}, ${location.country || ""}`;
         setAddress(formattedAddress.trim());
-      } else {
-        // Alert.alert("Error", "No address found for the given coordinates.");
       }
     } catch (error) {
-      // console.error("Error fetching address:", error);
-      // Alert.alert("Error", "Unable to fetch address.");
+      // silently fail
     }
   };
 
   useEffect(() => {
-    // console.log("lat and long, ", item.latitude, item.longitude)
     fetchAddress(item.latitude, item.longitude);
-    // console.log("inside the useEffect ", item.creator)
-    fetchUserName(item.creator);
+    if (item.creatorId) {
+      fetchUserName(item.creatorId);
+    }
   }, [item]);
 
   return (
@@ -86,10 +73,6 @@ function NotesComponent({ IsImage, resolvedImageURI, ImageType, textLength, show
 
           <Text style={[styles.noteText, { color: isDarkmode ? "#d9d9d9" : "black" }]}>{showTime}</Text>
         </View>
-        {/* <View style={styles.columnData}>
-                        <Text>{address?.slice(0, 20)}...</Text>
-                        <Text>{author}</Text>
-                    </View> */}
       </View>
     </View>
   );

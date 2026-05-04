@@ -135,7 +135,7 @@ const HomeScreen: React.FC = () => {
 
       const data = await ApiService.fetchMessagesBatch(false, published, userId, limit, skip);
 
-      const filteredNotes = data.filter((note: Note) => !note.isArchived);
+      const filteredNotes = data;
 
       const convertedNotes = DataConversion.convertMediaTypes(filteredNotes).sort(
         (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
@@ -222,9 +222,7 @@ const HomeScreen: React.FC = () => {
         const userId = await user.getId();
         const updatedNote = {
           ...note,
-          isArchived: true,
-          published: false,
-          archivedAt: new Date().toISOString(),
+          isPublished: false,
         };
 
         const response = await ApiService.overwriteNote(updatedNote);
@@ -273,7 +271,7 @@ const HomeScreen: React.FC = () => {
 
   const sideMenu = (data: any, rowMap: any) => {
     const note = data.item;
-    const isNotePublished = note.published;
+    const isNotePublished = note.isPublished;
 
     return (
       <View style={styles(theme, width).rowBack} key={data.index}>
@@ -333,12 +331,12 @@ const HomeScreen: React.FC = () => {
       id: foundNote?.id || "",
       title: foundNote?.title || "",
       text: foundNote?.text || "",
-      creator: foundNote?.creator || "",
+      creatorId: foundNote?.creatorId || "",
       media: foundNote?.media || [],
-      latitude: foundNote?.latitude || "",
-      longitude: foundNote?.longitude || "",
+      latitude: foundNote?.latitude ?? null,
+      longitude: foundNote?.longitude ?? null,
       audio: foundNote?.audio || [],
-      published: !foundNote?.published || false,
+      isPublished: !foundNote?.isPublished || false,
       time: foundNote?.time || new Date(),
       tags: foundNote?.tags || [],
     };
@@ -370,8 +368,8 @@ const HomeScreen: React.FC = () => {
       }
       return 0;
     });
-    const privateData = filteredNotes.filter((eachNotes) => eachNotes.published === false);
-    const publicData = filteredNotes.filter((eachNotes) => eachNotes.published != false);
+    const privateData = filteredNotes.filter((eachNotes) => eachNotes.isPublished === false);
+    const publicData = filteredNotes.filter((eachNotes) => eachNotes.isPublished != false);
     return isPrivate ? (
       privateData.length > 0 ? (
         <SwipeListView
@@ -459,7 +457,7 @@ const HomeScreen: React.FC = () => {
           width: "100%",
         }}
         onPress={() => {
-          if (!item.published) {
+          if (!item.isPublished) {
             toggleAddNoteState();
             router.push({
               pathname: "/edit-note",

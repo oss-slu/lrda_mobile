@@ -50,11 +50,11 @@ const EditNoteScreen = () => {
   const [tags, setTags] = useState(note.tags || []);
   const [media, setMedia] = useState<Media[]>(note.media || []);
   const [newAudio, setNewAudio] = useState<AudioType[]>(note.audio || []);
-  const [isPublished, setIsPublished] = useState(note.published || false);
+  const [isPublished, setIsPublished] = useState(note.isPublished || false);
   const [ispublishBtnClicked, setIsPublishBtnClicked] = useState(false);
   const [location, setLocation] = useState({
-    latitude: parseFloat(note.latitude) || 0,
-    longitude: parseFloat(note.longitude) || 0,
+    latitude: note.latitude || 0,
+    longitude: note.longitude || 0,
   });
   const [locationButtonColor, setLocationButtonColor] = useState<string>("#000");
   const [isTagging, setIsTagging] = useState(false);
@@ -232,12 +232,12 @@ const EditNoteScreen = () => {
           id: note.id,
           title,
           text: latestContent,
-          creator: userId,
+          creatorId: userId,
           media,
-          latitude: location.latitude.toString(),
-          longitude: location.longitude.toString(),
+          latitude: location.latitude,
+          longitude: location.longitude,
           audio: newAudio,
-          published: true,
+          isPublished: true,
           time,
           tags,
         };
@@ -273,12 +273,12 @@ const EditNoteScreen = () => {
         id: note.id,
         title,
         text: textContent,
-        creator: userId,
+        creatorId: userId,
         media,
-        latitude: location.latitude.toString(),
-        longitude: location.longitude.toString(),
+        latitude: location.latitude,
+        longitude: location.longitude,
         audio: newAudio,
-        published: isPublished,
+        isPublished,
         time,
         tags,
       };
@@ -307,9 +307,9 @@ const EditNoteScreen = () => {
               media,
               audio: newAudio,
               tags,
-              published: isPublished,
-              latitude: location.latitude.toString(),
-              longitude: location.longitude.toString(),
+              isPublished,
+              latitude: location.latitude,
+              longitude: location.longitude,
               time: new Date(),
             };
 

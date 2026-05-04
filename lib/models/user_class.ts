@@ -4,10 +4,12 @@ import { getItem } from "../utils/async_storage";
 import { signInWithEmail, signOut as authSignOut, getCurrentSession } from "../auth/client";
 
 const USER_DATA_KEY = "userData";
+const SESSION_TOKEN_KEY = "sessionToken";
 
 export class User {
   private static instance: User;
   private userData: UserData | null = null;
+  private sessionToken: string | null = null;
   private callback: ((isLoggedIn: boolean) => void) | null = null;
 
   private constructor() {}
@@ -22,6 +24,15 @@ export class User {
   private async persistUser(userData: UserData) {
     try {
       await AsyncStorage.setItem(USER_DATA_KEY, JSON.stringify(userData));
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  private async persistToken(token: string) {
+    try {
+      this.sessionToken = token;
+      await AsyncStorage.setItem(SESSION_TOKEN_KEY, token);
     } catch (error) {
       console.log(error);
     }
@@ -56,6 +67,8 @@ export class User {
   private async clearUser() {
     try {
       await AsyncStorage.removeItem(USER_DATA_KEY);
+      await AsyncStorage.removeItem(SESSION_TOKEN_KEY);
+      this.sessionToken = null;
     } catch (error) {
       console.log(error);
     }
@@ -64,6 +77,16 @@ export class User {
   private async clearSession() {
     this.userData = null;
     await this.clearUser();
+  }
+
+  public async getToken(): Promise<string | null> {
+    if (this.sessionToken) return this.sessionToken;
+    try {
+      this.sessionToken = await AsyncStorage.getItem(SESSION_TOKEN_KEY);
+    } catch (error) {
+      console.log(error);
+    }
+    return this.sessionToken;
   }
 
   public async initializeUser(): Promise<boolean> {
@@ -76,8 +99,11 @@ export class User {
         return false;
       }
 
-      this.userData = session.user as UserData;
+      this.userData = session.user as unknown as UserData;
       await this.persistUser(this.userData);
+      if ((session.session as any)?.token) {
+        await this.persistToken((session.session as any).token);
+      }
       this.notifyLoginState();
       return true;
     } catch (error) {
@@ -100,8 +126,13 @@ export class User {
         throw new Error("Missing user in sign-in response");
       }
 
-      this.userData = data.user as UserData;
+      this.userData = data.user as unknown as UserData;
       await this.persistUser(this.userData);
+      if ((data as any).token) {
+        await this.persistToken((data as any).token);
+      } else if ((data as any).session?.token) {
+        await this.persistToken((data as any).session.token);
+      }
       this.notifyLoginState();
 
       return "success";
@@ -126,7 +157,7 @@ export class User {
     if (!this.userData) {
       this.userData = await this.loadUser();
     }
-    return this.userData ? (this.userData["uid"] ?? this.userData["@id"] ?? this.userData["id"]) : null;
+    return this.userData?.id ?? null;
   }
 
   public async getName(): Promise<string | null> {
@@ -138,21 +169,7 @@ export class User {
       return null;
     }
 
-    const profile = this.userData as UserData & {
-      firstName?: string;
-      lastName?: string;
-      name?: string;
-    };
-
-    if (typeof profile.name === "string" && profile.name.trim().length > 0) {
-      return profile.name;
-    }
-
-    const first = typeof profile.firstName === "string" ? profile.firstName : "";
-    const last = typeof profile.lastName === "string" ? profile.lastName : "";
-    const fullName = `${first} ${last}`.trim();
-
-    return fullName.length > 0 ? fullName : null;
+    return this.userData.name || null;
   }
 
   public async hasOnboarded(): Promise<boolean> {
@@ -160,14 +177,18 @@ export class User {
     return onboarded === "1";
   }
 
-  public async getRoles(): Promise<{
-    administrator: boolean;
-    contributor: boolean;
-  } | null> {
+  public async getRole(): Promise<string | null> {
     if (!this.userData) {
       this.userData = await this.loadUser();
     }
-    return this.userData?.roles ?? null;
+    return this.userData?.role ?? null;
+  }
+
+  public async isInstructor(): Promise<boolean> {
+    if (!this.userData) {
+      this.userData = await this.loadUser();
+    }
+    return this.userData?.isInstructor ?? false;
   }
 
   public static async getHasDoneTutorial(page_tutorial): Promise<boolean> {

@@ -117,7 +117,7 @@ const Library = () => {
       // Use batch-fetching with skip and limit; note we use isPrivate state
       const data = await ApiService.fetchMapsMessagesBatch(isPrivate, published, isPrivate ? userId : "", limit, skip);
       // Filter out archived notes; assume notes without `isArchived` are not archived
-      const publicNotes = data.filter((note: Note) => !note.isArchived && note.published);
+      const publicNotes = data.filter((note: Note) => note.isPublished);
       // Convert data and sort notes by date (latest first)
       const fetchedNotes = DataConversion.convertMediaTypes(publicNotes).sort(
         (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
@@ -292,7 +292,7 @@ const Library = () => {
         activeOpacity={1}
         style={{ backgroundColor: isDarkmode ? "black" : "#e6e6e6" }}
         onPress={() => {
-          if (!item.published) {
+          if (!item.isPublished) {
             router.push({
               pathname: "/edit-note",
               params: {

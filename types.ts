@@ -1,6 +1,11 @@
 import { Media, PhotoType, VideoType, AudioType } from "./lib/models/media_class";
 import { User } from "./lib/models/user_class";
 
+export type Tag = {
+  label: string;
+  origin: "user" | "ai";
+};
+
 export type MediaData = {
   uuid: string;
   type: string;
@@ -8,12 +13,15 @@ export type MediaData = {
 };
 
 export type UserData = {
-  "@id": string;
+  id: string;
   name: string;
-  roles: {
-    administrator: boolean;
-    contributor: boolean;
-  };
+  email: string;
+  image?: string | null;
+  role: string;
+  isInstructor: boolean;
+  instructorId?: string | null;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type Note = {
@@ -23,12 +31,11 @@ export type Note = {
   time: Date;
   media: (VideoType | PhotoType)[];
   audio: AudioType[];
-  creator: string;
-  latitude: string;
-  longitude: string;
-  published: boolean | undefined;
+  creatorId: string;
+  latitude: number | null;
+  longitude: number | null;
+  isPublished: boolean;
   tags: string[];
-  isArchived?: boolean; // Optional flag to indicate if the note is archived
 };
 
 export type RootStackParamList = {
@@ -89,7 +96,7 @@ export type ImageNote = {
 };
 
 export type GoogleMapProps = {
-  route: any; // substitute any with the actual type if you know it
-  updateCounter: any; // substitute any with the actual type if you know it
+  route: any;
+  updateCounter: any;
   user: User;
 };

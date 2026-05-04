@@ -36,14 +36,7 @@ export default {
       buildNumber: "1",
       infoPlist: {
         NSAppTransportSecurity: {
-          NSAllowsArbitraryLoads: false,
-          NSExceptionDomains: {
-            "s3-proxy.rerum.io": {
-              NSTemporaryExceptionAllowsInsecureHTTPLoads: true,
-              NSTemporaryExceptionMinimumTLSVersion: "TLSv1.2",
-              NSIncludesSubdomains: true,
-            },
-          },
+          NSAllowsArbitraryLoads: true,
         },
         NSLocationWhenInUseUsageDescription:
           "Allowing location services enables you to see nearby notes and/or share the location of your notes with other app users.",
@@ -82,7 +75,7 @@ export default {
       url: "https://u.expo.dev/801029ef-db83-4668-a97a-5adcc4c333e2",
     },
     extra: {
-      apiBaseUrl: process.env.API_BASE_URL,
+      apiBaseUrl: process.env.API_BASE_URL?.replace("localhost", getLocalIP()),
       authApiUrl: AUTH_API_URL,
       s3ProxyPrefix: process.env.S3_PROXY_PREFIX,
       eas: {

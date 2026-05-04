@@ -3,12 +3,13 @@
   "version": "1.0.8",
   "main": "expo-router/entry",
   "scripts": {
-    "build:android": "NODE_ENV=production eas build -p android",
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web",
-    "test": "jest -u",
+    "build:android": "eas build -p android",
+    "build:ios": "eas build -p ios",
+    "test": "jest",
+    "test:update": "jest -u",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },

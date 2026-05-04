@@ -336,12 +336,11 @@ const AddNoteScreen: React.FC = () => {
 
     return title;
   };
-  const prepareNoteData = async (published: boolean) => {
+  const prepareNoteData = async (publish: boolean) => {
     const userLocation = await Location.getCurrentPositionAsync({});
     const finalLocation = userLocation ? userLocation.coords : { latitude: 0, longitude: 0 };
     const textContent = await editor.getHTML();
-    const sanitizedContent = textContent.replace(/<\/?p>/g, ""); // Remove <p> tags
-    const uid = await user.getId();
+    const sanitizedContent = textContent.replace(/<\/?p>/g, "");
     const title = getTitle();
     return {
       title,
@@ -349,11 +348,10 @@ const AddNoteScreen: React.FC = () => {
       media: newMedia || [],
       audio: newAudio || [],
       tags: tags || [],
-      latitude: finalLocation.latitude.toString(),
-      longitude: finalLocation.longitude.toString(),
-      published: published,
+      latitude: finalLocation.latitude,
+      longitude: finalLocation.longitude,
+      isPublished: publish,
       time: new Date().toISOString(),
-      creator: uid,
     };
   };
 

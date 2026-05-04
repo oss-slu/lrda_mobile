@@ -457,8 +457,8 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
     setIsModalVisible(false);
     setIsVideoVisible(false);
 
-    if (note?.creator) {
-      ApiService.fetchCreatorName(note.creator)
+    if (note?.creatorId) {
+      ApiService.fetchCreatorName(note.creatorId)
         .then((name) => setCreatorName(name))
         .catch(() => setCreatorName("Unknown Creator"));
     } else {

@@ -1,21 +1,20 @@
-import { UserData } from "../../types";
+import Constants from "expo-constants";
+import { User } from "../models/user_class";
+import { Tag } from "../../types";
 
-/**
- * Provides methods for interacting with the API to fetch, create, update, and delete notes.
- */
-const API_BASE_URL = process.env.API_BASE_URL || "https://lived-religion-dev.rerum.io/deer-lr/";
+const extra = (Constants.expoConfig?.extra ?? {}) as { apiBaseUrl?: string };
+const API_BASE_URL = extra.apiBaseUrl || "http://localhost:3002";
+
+async function getAuthHeaders(): Promise<HeadersInit> {
+  const headers: HeadersInit = { "Content-Type": "application/json" };
+  const token = await User.getInstance().getToken();
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  return headers;
+}
 
 export default class ApiService {
-  /**
-   * Fetches messages from the API, with optional pagination.
-   * @param {boolean} global - Indicates whether to fetch global messages or user-specific messages.
-   * @param {boolean} published - Indicates whether to fetch only published messages.
-   * @param {string} userId - The ID of the user for user-specific messages.
-   * @param {number} [limit=150] - The limit of messages per page. Defaults to 150.
-   * @param {number} [skip=0] - The iterator to skip messages for pagination.
-   * @param {Array} [allResults=[]] - The accumulated results for pagination.
-   * @returns {Promise<any[]>} The array of messages fetched from the API.
-   */
   static async fetchMessages(
     global: boolean,
     published: boolean,
@@ -25,34 +24,27 @@ export default class ApiService {
     allResults: any[] = []
   ): Promise<any[]> {
     try {
-      const url = `${API_BASE_URL}query?limit=${limit}&skip=${skip}`;
-      const headers = {
-        "Content-Type": "application/json",
-      };
+      const headers = await getAuthHeaders();
+      const params = new URLSearchParams();
+      params.set("limit", limit.toString());
+      params.set("offset", skip.toString());
 
-      let body: { type: string; published?: boolean; creator?: string } = {
-        type: "message",
-      };
-
-      if (global) {
-        body = { type: "message" };
-      } else if (published) {
-        body = { type: "message", published: true }; // For published messages, no specific creator
-      } else {
-        body = { type: "message", creator: userId };
+      if (!global && userId) {
+        params.set("creatorId", userId);
+      }
+      if (global || published) {
+        params.set("published", "true");
       }
 
-      const response = await fetch(url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(body),
-      });
-
+      const url = `${API_BASE_URL}/api/notes?${params.toString()}`;
+      const response = await fetch(url, { method: "GET", headers });
       const data = await response.json();
 
       if (data.length > 0) {
         allResults = allResults.concat(data);
-        return this.fetchMessages(global, published, userId, limit, skip + data.length, allResults);
+        if (data.length === limit) {
+          return this.fetchMessages(global, published, userId, limit, skip + data.length, allResults);
+        }
       }
 
       return allResults;
@@ -64,26 +56,22 @@ export default class ApiService {
 
   static async fetchMessagesBatch(global: boolean, published: boolean, userId: string, limit = 20, skip = 0): Promise<any[]> {
     try {
-      const url = `${API_BASE_URL}query?limit=${limit}&skip=${skip}`;
-      const headers = {
-        "Content-Type": "application/json",
-      };
+      const headers = await getAuthHeaders();
+      const params = new URLSearchParams();
+      params.set("limit", limit.toString());
+      params.set("offset", skip.toString());
 
-      let body: { type: string; published?: boolean; creator?: string } = {
-        type: "message",
-      };
+      if (!global && userId) {
+        params.set("creatorId", userId);
+      }
+      if (published) {
+        params.set("published", "true");
+      } else if (!global && userId) {
+        params.set("published", "false");
+      }
 
-      body = {
-        type: "message",
-        creator: userId,
-        published,
-      };
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(body),
-      });
+      const url = `${API_BASE_URL}/api/notes?${params.toString()}`;
+      const response = await fetch(url, { method: "GET", headers });
       const data = await response.json();
       return data;
     } catch (error) {
@@ -94,25 +82,14 @@ export default class ApiService {
 
   static async fetchMapsMessagesBatch(global: boolean, published: boolean, userId: string, limit = 20, skip = 0): Promise<any[]> {
     try {
-      const url = `${API_BASE_URL}query?limit=${limit}&skip=${skip}`;
-      const headers = {
-        "Content-Type": "application/json",
-      };
+      const headers = await getAuthHeaders();
+      const params = new URLSearchParams();
+      params.set("limit", limit.toString());
+      params.set("offset", skip.toString());
+      params.set("published", "true");
 
-      let body: { type: string; published?: boolean; creator?: string } = {
-        type: "message",
-      };
-
-      body = {
-        type: "message",
-        published,
-      };
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(body),
-      });
+      const url = `${API_BASE_URL}/api/notes?${params.toString()}`;
+      const response = await fetch(url, { method: "GET", headers });
       const data = await response.json();
       return data;
     } catch (error) {
@@ -121,136 +98,52 @@ export default class ApiService {
     }
   }
 
-  /**
-   * Fetches user data from the API.
-   * @param {string} uid - The UID of the user.
-   * @returns {Promise<UserData | null>} The user data.
-   */
-  static async fetchUserData(uid: string): Promise<UserData | null> {
+  static async fetchUserData(userId: string): Promise<any | null> {
     try {
-      // Fetch user data from API
-      const url = `${API_BASE_URL}query`;
-      const headers = {
-        "Content-Type": "application/json",
-      };
-      const body = JSON.stringify({
-        $or: [
-          { "@type": "Agent", uid: uid },
-          { "@type": "foaf:Agent", uid: uid },
-        ],
-      });
+      const headers = await getAuthHeaders();
+      const url = `${API_BASE_URL}/api/users/${userId}`;
+      const response = await fetch(url, { method: "GET", headers });
 
-      console.log("API Request Body:", body);
-
-      const response = await fetch(url, { method: "POST", headers, body });
-      console.log(`API Response Status (${url}):`, response.status);
-
-      // Ensure the response is not empty
-      const data = await response.json();
-      if (Array.isArray(data) && data.length > 0) {
-        return data[0] as UserData;
+      if (!response.ok) {
+        console.log("User not found for ID:", userId);
+        return null;
       }
-      console.log("No valid user data found in API response for UID:", uid);
-      return null;
+
+      return await response.json();
     } catch (error) {
       console.error("Error fetching user data:", error);
       return null;
     }
   }
 
-  /**
-   * Fetches the name of the creator by querying the API with the given creatorId.
-   * @param {string} creatorId - The UID of the creator.
-   * @returns {Promise<string>} The name of the creator.
-   */
   static async fetchCreatorName(creatorId: string): Promise<string> {
     try {
-      // Step 1: Query the API with creatorId
-      const apiUrl = `${API_BASE_URL}query`;
-      const headers = { "Content-Type": "application/json" };
-      const body = {
-        $or: [
-          { "@type": "Agent", uid: creatorId },
-          { "@type": "foaf:Agent", uid: creatorId },
-        ],
-      };
+      const headers = await getAuthHeaders();
+      const url = `${API_BASE_URL}/api/users/${creatorId}`;
+      const response = await fetch(url, { method: "GET", headers });
 
-      console.log(`Querying API with UID: ${creatorId}`);
-
-      const apiResponse = await fetch(apiUrl, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(body),
-      });
-
-      const apiData = await apiResponse.json();
-      if (Array.isArray(apiData) && apiData.length > 0) {
-        const name = apiData[0].name;
-        if (name) return name;
-        console.warn(`Creator found in API but 'name' attribute is missing for UID: ${creatorId}`);
-        return "Unknown Creator";
+      if (!response.ok) {
+        return "Creator not available";
       }
 
-      console.warn(`Creator not found in API for UID: ${creatorId}`);
-      return "Creator not available";
+      const data = await response.json();
+      return data.name || "Unknown Creator";
     } catch (error) {
-      console.error(`Error fetching creator name:`, error, creatorId);
+      console.error("Error fetching creator name:", error);
       return "Error retrieving creator";
     }
   }
 
-  /**
-   * Creates user data in the API.
-   * @param {UserData} userData - The user data to be created.
-   * @returns {Promise<Response>} The response from the API.
-   */
-  static async createUserData(userData: UserData) {
+  static async deleteNoteFromAPI(id: string): Promise<boolean> {
     try {
-      const response = await fetch(`${API_BASE_URL}create`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          "@type": "Agent",
-          ...userData,
-        }),
-      });
-      return response;
-    } catch (error) {
-      console.error("Error creating user data:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * Deletes a note from the API.
-   * @param {string} id - The ID of the note to delete.
-   * @param {string} userId - The ID of the user who owns the note.
-   * @returns {Promise<boolean>} A boolean indicating whether the deletion was successful.
-   */
-  static async deleteNoteFromAPI(id: string, userId: string): Promise<boolean> {
-    try {
-      const url = `${API_BASE_URL}delete`;
-      const headers = {
-        "Content-Type": "text/plain; charset=utf-8",
-      };
-      const body = {
-        type: "message",
-        creator: userId,
-        "@id": id,
-      };
-
-      const response = await fetch(url, {
-        method: "DELETE",
-        headers,
-        body: JSON.stringify(body),
-      });
+      const headers = await getAuthHeaders();
+      const url = `${API_BASE_URL}/api/notes/${id}`;
+      const response = await fetch(url, { method: "DELETE", headers });
 
       if (response.status === 204) {
         return true;
       } else {
-        throw response;
+        throw new Error(`Delete failed with status ${response.status}`);
       }
     } catch (error) {
       console.error("Error deleting note:", error);
@@ -258,104 +151,86 @@ export default class ApiService {
     }
   }
 
-  /**
-   * Writes a new note to the API.
-   * @param {any} note - The note object to be created.
-   * @returns {Promise<Response>} The response from the API.
-   */
-  static async writeNewNote(note: any) {
-    return fetch(`${API_BASE_URL}/create`, {
+  static async writeNewNote(note: any): Promise<Response> {
+    const headers = await getAuthHeaders();
+    const tags: Tag[] = (note.tags || []).map((t: string) => ({ label: t, origin: "user" }));
+
+    const body = {
+      title: note.title,
+      text: note.text,
+      latitude: note.latitude != null ? Number(note.latitude) || null : null,
+      longitude: note.longitude != null ? Number(note.longitude) || null : null,
+      isPublished: note.isPublished ?? note.published ?? false,
+      tags,
+      time: note.time ? new Date(note.time).toISOString() : new Date().toISOString(),
+      media: (note.media || []).map((m: any) => ({
+        type: m.type,
+        uri: m.uri,
+        thumbnailUri: m.thumbnail || undefined,
+        uuid: m.uuid || undefined,
+      })),
+      audio: (note.audio || []).map((a: any) => ({
+        uri: a.uri,
+        name: a.name || undefined,
+        duration: a.duration || undefined,
+        uuid: a.uuid || undefined,
+      })),
+    };
+
+    return fetch(`${API_BASE_URL}/api/notes`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        type: "message",
-        title: note.title,
-        media: note.media,
-        BodyText: note.text,
-        creator: note.creator,
-        latitude: note.latitude || "",
-        longitude: note.longitude || "",
-        audio: note.audio,
-        published: note.published,
-        tags: note.tags,
-        time: note.time || new Date(),
-      }),
+      headers,
+      body: JSON.stringify(body),
     });
   }
 
-  /**
-   * Overwrites an existing note in the API.
-   * @param {any} note - The note object to be updated.
-   * @returns {Promise<Response>} The response from the API.
-   */
-  static async overwriteNote(note: any) {
-    return await fetch(`${API_BASE_URL}overwrite`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        "@id": note.id,
-        title: note.title,
-        BodyText: note.text,
-        type: "message",
-        creator: note.creator,
-        media: note.media,
-        latitude: note.latitude,
-        longitude: note.longitude,
-        audio: note.audio,
-        published: note.published,
-        tags: note.tags,
-        time: note.time,
-        isArchived: note.isArchived,
-      }),
+  static async overwriteNote(note: any): Promise<Response> {
+    const headers = await getAuthHeaders();
+    const tags: Tag[] = (note.tags || []).map((t: string | Tag) =>
+      typeof t === "string" ? { label: t, origin: "user" as const } : t
+    );
+
+    const body: Record<string, any> = {
+      title: note.title,
+      text: note.text,
+      isPublished: note.isPublished ?? note.published ?? false,
+      tags,
+      time: note.time ? new Date(note.time).toISOString() : undefined,
+      media: (note.media || []).map((m: any) => ({
+        type: m.type,
+        uri: m.uri,
+        thumbnailUri: m.thumbnail || m.thumbnailUri || undefined,
+        uuid: m.uuid || undefined,
+      })),
+      audio: (note.audio || []).map((a: any) => ({
+        uri: a.uri,
+        name: a.name || undefined,
+        duration: a.duration || undefined,
+        uuid: a.uuid || undefined,
+      })),
+    };
+
+    if (note.latitude != null) body.latitude = Number(note.latitude) || null;
+    if (note.longitude != null) body.longitude = Number(note.longitude) || null;
+
+    return fetch(`${API_BASE_URL}/api/notes/${note.id}`, {
+      method: "PATCH",
+      headers,
+      body: JSON.stringify(body),
     });
   }
 
   static async searchMessages(query: string): Promise<any[]> {
     try {
-      const url = `${API_BASE_URL}query`;
-      const headers = {
-        "Content-Type": "application/json",
-      };
+      const headers = await getAuthHeaders();
+      const params = new URLSearchParams();
+      params.set("search", query);
+      params.set("published", "true");
+      params.set("limit", "50");
 
-      // Request body for retrieving messages of type "message"
-      const body = {
-        type: "message",
-      };
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(body),
-      });
-
-      let data = await response.json();
-
-      // Convert the query to lowercase for case-insensitive matching
-      const lowerCaseQuery = query.toLowerCase();
-
-      // Filter the messages by title or tags containing the query string
-      data = data.filter((message: any) => {
-        // Check if title contains the query string
-        if (message.title && typeof message.title === "string" && message.title.toLowerCase().includes(lowerCaseQuery)) {
-          return true;
-        }
-
-        // Check if tags contain the query string
-        if (
-          Array.isArray(message.tags) &&
-          message.tags.some((tag: any) => typeof tag === "string" && tag.toLowerCase().includes(lowerCaseQuery))
-        ) {
-          return true;
-        }
-
-        return false;
-      });
-
-      return data;
+      const url = `${API_BASE_URL}/api/notes?${params.toString()}`;
+      const response = await fetch(url, { method: "GET", headers });
+      return await response.json();
     } catch (error) {
       console.error("Error searching messages:", error);
       throw error;
