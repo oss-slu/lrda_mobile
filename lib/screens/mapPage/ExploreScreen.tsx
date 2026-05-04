@@ -148,33 +148,6 @@ const ExploreScreen = () => {
     return R * c;
   };
   useEffect(() => {
-    const listenerId = mapAnimation.addListener(({ value }) => {
-      if (!scrollEnabled.current) return;
-
-      const index = Math.floor(value / (CARD_WIDTH + 20));
-      if (index >= state.markers.length || index < 0) {
-        return;
-      }
-
-      const marker = state.markers[index];
-      if (marker) {
-        _map.current?.animateToRegion(
-          {
-            ...marker.coordinate,
-            latitudeDelta: state.region.latitudeDelta,
-            longitudeDelta: state.region.longitudeDelta,
-          },
-          350
-        );
-      }
-    });
-
-    return () => {
-      mapAnimation.removeListener(listenerId);
-    };
-  }, [state.markers]);
-
-  useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status === "granted") {

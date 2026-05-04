@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, View, ScrollView, Text, TouchableOpacity, Dimensions } from "react-native";
 import { Video, ResizeMode, Audio } from "expo-av";
 
@@ -24,23 +24,17 @@ const VideoModal: React.FC<Props> = ({ isVisible, onClose, videos }) => {
     setImageLoadedState((prev) => ({ ...prev, [uri]: true }));
   };
 
-  async function configureAudioPlayback() {
-    try {
-      await Audio.setAudioModeAsync({
-        playsInSilentModeIOS: true,
-        allowsRecordingIOS: false,
-        staysActiveInBackground: false,
-        shouldDuckAndroid: true,
-        playThroughEarpieceAndroid: false,
-      });
-      console.log("Audio playback configured to play in silent mode.");
-    } catch (error) {
+  useEffect(() => {
+    Audio.setAudioModeAsync({
+      playsInSilentModeIOS: true,
+      allowsRecordingIOS: false,
+      staysActiveInBackground: false,
+      shouldDuckAndroid: true,
+      playThroughEarpieceAndroid: false,
+    }).catch((error) => {
       console.error("Failed to configure audio mode:", error);
-    }
-  }
-  configureAudioPlayback();
-
-  console.log(videos);
+    });
+  }, []);
 
   const handleImageTouchStart = () => setIsImageTouched(!isImageTouched);
 

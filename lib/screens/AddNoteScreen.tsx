@@ -74,6 +74,7 @@ const AddNoteScreen: React.FC = () => {
   const mediaRef = useRef(newMedia);
   const audioRef = useRef(newAudio);
   const titleTxtRef = useRef(titleText);
+  const isPublishedRef = useRef(isPublished);
 
   const { isAddNoteOpen, toggleAddNoteState } = useAddNoteStore();
 
@@ -103,9 +104,13 @@ const AddNoteScreen: React.FC = () => {
   }, [newAudio]);
 
   useEffect(() => {
+    isPublishedRef.current = isPublished;
+  }, [isPublished]);
+
+  useEffect(() => {
     const unsubscribe = navigation.addListener("blur", () => {
       setTimeout(async () => {
-        if (!isPublished) {
+        if (!isPublishedRef.current) {
           const latestContent = await editor.getHTML();
           bodyTextRef.current = latestContent;
 
@@ -162,8 +167,6 @@ const AddNoteScreen: React.FC = () => {
     const hideKeyboardListener = Keyboard.addListener("keyboardDidHide", () => {
       setKeyboardVisible(false);
     });
-
-    setPublishNote(() => handleShareButtonPress);
 
     return () => {
       showKeyboardListener.remove();
@@ -284,8 +287,7 @@ const AddNoteScreen: React.FC = () => {
     return title;
   };
   const prepareNoteData = async (publish: boolean) => {
-    const userLocation = await Location.getCurrentPositionAsync({});
-    const finalLocation = userLocation ? userLocation.coords : { latitude: 0, longitude: 0 };
+    const finalLocation = location ?? { latitude: 0, longitude: 0 };
     const textContent = await editor.getHTML();
     const sanitizedContent = textContent.replace(/<\/?p>/g, "");
     const title = getTitle();

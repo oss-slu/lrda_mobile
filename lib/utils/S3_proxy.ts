@@ -5,7 +5,6 @@ import * as FileSystem from "expo-file-system/legacy";
 
 const S3_PROXY_PREFIX = process.env.S3_PROXY_PREFIX || "http://s3-proxy.rerum.io/S3/";
 
-
 async function getThumbnail(uri: string): Promise<string> {
   const { uri: thumbnailUri } = await getThumbnailAsync(uri);
   const address = await uploadMedia(thumbnailUri, "image");
@@ -13,17 +12,13 @@ async function getThumbnail(uri: string): Promise<string> {
 }
 
 async function convertHeicToJpg(uri: string): Promise<string> {
-  console.log("Converting HEIC to JPG...");
   const convertedImage = await manipulateAsync(uri, [], {
     format: SaveFormat.JPEG,
   });
-  console.log("Converted image URI: ", convertedImage.uri);
   return convertedImage.uri;
 }
 
 async function uploadMedia(uri: string, mediaType: string): Promise<string> {
-  console.log("uploadMedia - Input URI:", uri);
-
   let data = new FormData();
   const uniqueName = `media-${Date.now()}.${mediaType === "image" ? "jpg" : "mp4"}`;
 
@@ -52,8 +47,6 @@ async function uploadMedia(uri: string, mediaType: string): Promise<string> {
     } as any);
   }
 
-  console.log("uploadMedia - Starting fetch with S3_PROXY_PREFIX:", S3_PROXY_PREFIX);
-
   return fetch(S3_PROXY_PREFIX + "uploadFile", {
     method: "POST",
     mode: "cors",
@@ -63,17 +56,15 @@ async function uploadMedia(uri: string, mediaType: string): Promise<string> {
       if (resp.ok) {
         const location = resp.headers.get("Location");
         if (!location) throw new Error("Upload succeeded but no Location header returned");
-        console.log("uploadMedia - Uploaded successfully, Location:", location);
         return location;
       } else {
-        const errorText = await resp.text(); // Retrieve response text for errors
-        console.log("uploadMedia - Failed response:", errorText);
+        const errorText = await resp.text();
         throw new Error(`Failed to upload. Status: ${resp.status}, Error: ${errorText}`);
       }
     })
     .catch((err) => {
       console.error("uploadMedia - Network request failed:", err.message);
-      throw err; // Re-throw error to be caught in the AddNoteScreen
+      throw err;
     });
 }
 

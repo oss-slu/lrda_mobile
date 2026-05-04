@@ -99,16 +99,15 @@ const PhotoScroller = forwardRef(
         const fileName = imageURI.replace(/^.*[\\\/]/, "");
         const imageFullPathInLocalStorage = FileSystem.documentDirectory + fileName;
 
-        FileSystem.downloadAsync(imageURI, imageFullPathInLocalStorage).then(async ({ uri }) => {
-          await MediaLibrary.saveToLibraryAsync(imageFullPathInLocalStorage);
-        });
+        await FileSystem.downloadAsync(imageURI, imageFullPathInLocalStorage);
+        await MediaLibrary.saveToLibraryAsync(imageFullPathInLocalStorage);
         setShowFooter(true);
         setTimeout(() => {
           setShowFooter(false);
         }, 2000);
       } catch (error) {
         console.error("Error saving media:", error);
-        displayErrorInEditor(`Error uploading media: ${error instanceof Error ? error.message : String(error)}`);
+        displayErrorInEditor(`Error saving media: ${error instanceof Error ? error.message : String(error)}`);
       }
     };
 

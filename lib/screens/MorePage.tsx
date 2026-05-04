@@ -49,20 +49,6 @@ export default function MorePage() {
   const handleSettingsToggle = () => {
     setIsSettingsOpen(!isSettingsOpen);
   };
-  const handleToggleDarkMode = () => {
-    if (toggleDarkmode) {
-      toggleDarkmode();
-    }
-  };
-
-  const handleEmail = () => {
-    const emailAddress = "yashkamal.bhatia@slu.edu";
-    const subject = "Bug Report on 'Where's Religion?'";
-    const body = "Please provide details of your issue you are facing here.";
-    const emailUrl = `mailto:${emailAddress}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    Linking.openURL(emailUrl);
-  };
-
   const handleVisitWebsite = () => {
     const websiteUrl = "https://www.wheresreligion.org";
     Linking.openURL(websiteUrl);

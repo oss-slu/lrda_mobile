@@ -100,11 +100,15 @@ const HomeScreen: React.FC = () => {
     );
   };
 
-  const deleteNote = (id: string, rowMap: any) => {
+  const deleteNote = async (id: string, rowMap: any) => {
     if (rowMap[id]) rowMap[id].closeRow();
     const noteToDelete = notes.find((note) => note.id === id);
-    if (noteToDelete) handleArchiveNote(noteToDelete);
-    setNotes((prev) => prev.filter((note) => note.id !== id));
+    if (noteToDelete) {
+      const success = await handleArchiveNote(noteToDelete);
+      if (success) {
+        setNotes((prev) => prev.filter((note) => note.id !== id));
+      }
+    }
   };
 
   const publishNote = async (id: string, rowMap: any) => {
@@ -112,8 +116,13 @@ const HomeScreen: React.FC = () => {
     const found = notes.find((note) => note.id === id);
     if (!found) return;
     const editedNote: Note = { ...found, isPublished: !found.isPublished };
-    await apiUpdateNote(editedNote);
-    refreshPage();
+    try {
+      await apiUpdateNote(editedNote);
+      refreshPage();
+    } catch (error) {
+      console.error("Error publishing note:", error);
+      ToastMessage.show({ type: "error", text1: "Error", text2: "Failed to update note. Try again later." });
+    }
   };
 
   const displayNotes = sortNotes(filterNotes(notes, searchQuery), selectedSortOption);

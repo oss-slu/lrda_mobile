@@ -24,33 +24,3 @@ export const removeItem = async (key: string): Promise<void> => {
     console.log("Error deleting value: ", error);
   }
 };
-
-export const saveString = async (key: string, value: string): Promise<boolean> => {
-  try {
-    await AsyncStorage.setItem(key, value);
-    return true;
-  } catch {
-    return false;
-  }
-};
-
-export const save = async (key: string, value: unknown): Promise<boolean> => saveString(key, JSON.stringify(value));
-
-export const get = async <T = unknown>(key: string): Promise<T | null> => {
-  try {
-    const itemString = await AsyncStorage.getItem(key);
-    if (itemString) {
-      return JSON.parse(itemString) as T;
-    } else {
-      return null;
-    }
-  } catch {
-    return null;
-  }
-};
-
-export default {
-  saveString,
-  save,
-  get,
-};
