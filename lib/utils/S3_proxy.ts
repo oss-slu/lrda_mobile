@@ -5,7 +5,6 @@ import * as FileSystem from "expo-file-system/legacy";
 
 const S3_PROXY_PREFIX = process.env.S3_PROXY_PREFIX || "http://s3-proxy.rerum.io/S3/";
 
-let attempts = 0;
 
 async function getThumbnail(uri: string): Promise<string> {
   const { uri: thumbnailUri } = await getThumbnailAsync(uri);
@@ -48,7 +47,7 @@ async function uploadMedia(uri: string, mediaType: string): Promise<string> {
   } else if (Platform.OS == "android") {
     data.append("file", {
       uri: uri,
-      type: "video/mp4",
+      type: mediaType === "image" ? "image/jpeg" : "video/mp4",
       name: uniqueName,
     } as any);
   }
@@ -80,7 +79,7 @@ async function uploadMedia(uri: string, mediaType: string): Promise<string> {
 
 export { getThumbnail, convertHeicToJpg, uploadMedia };
 
-export async function uploadAudio(uri: string): Promise<string> {
+export async function uploadAudio(uri: string, maxRetries = 4): Promise<string> {
   let type = "video/3gp.";
   let data = new FormData();
   const uniqueName = `media-${Date.now()}.3gp`;
@@ -94,7 +93,6 @@ export async function uploadAudio(uri: string): Promise<string> {
 
     data.append("file", file);
   } else if (Platform.OS === "android") {
-    // Handle Android upload differently
     const fileInfo = await FileSystem.getInfoAsync(uri);
     const fileUri = fileInfo.uri;
 
@@ -115,30 +113,28 @@ export async function uploadAudio(uri: string): Promise<string> {
     } as any);
   }
 
-  return fetch(S3_PROXY_PREFIX + "uploadFile", {
-    method: "POST",
-    mode: "cors",
-    body: data,
-  })
-    .then((resp) => {
-      console.log("Got the response from the upload file servlet");
-      console.log("uploadMedia - Server response status:", resp.status);
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const resp = await fetch(S3_PROXY_PREFIX + "uploadFile", {
+        method: "POST",
+        mode: "cors",
+        body: data,
+      });
+
       if (resp.ok) {
         const location = resp.headers.get("Location");
         if (!location) throw new Error("Upload succeeded but no Location header returned");
-        console.log("uploadMedia - Uploaded successfully, Location:", location);
-        attempts = 0;
         return location;
       } else {
         throw new Error(`Upload failed with status ${resp.status}`);
       }
-    })
-    .catch((err) => {
-      if (attempts > 3) {
-        console.error("uploadMedia - Error:", err);
+    } catch (err) {
+      if (attempt >= maxRetries) {
+        console.error("uploadAudio - Error after retries:", err);
         throw err;
       }
-      attempts++;
-      return uploadAudio(uri);
-    });
+    }
+  }
+
+  throw new Error("uploadAudio failed unexpectedly");
 }

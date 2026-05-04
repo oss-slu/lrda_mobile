@@ -5,7 +5,7 @@ import { Audio } from "expo-av";
 import uuid from "react-native-uuid";
 
 import { uploadAudio } from "../utils/S3_proxy";
-import { AudioType } from "../models/media_class";
+import type { AudioType } from "../models/media_class";
 
 type AudioContainerProps = {
   newAudio: AudioType[];
@@ -60,14 +60,14 @@ const AudioContainer = ({ newAudio, setNewAudio, insertAudioToEditor }: AudioCon
 
         if (uri) {
           const uploadedUri = await uploadAudio(uri);
-          const newRecording = new AudioType({
+          const newRecording: AudioType = {
             uuid: uuid.v4().toString(),
             type: "audio",
             uri: uploadedUri,
             duration: "00:30",
             name: `Recording ${newAudio.length + 1}`,
             isPlaying: false,
-          });
+          };
 
           setNewAudio((prevAudio) => [...prevAudio, newRecording]);
           insertAudioToEditor(uploadedUri);

@@ -31,6 +31,7 @@ const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const soundRef = useRef<Audio.Sound | null>(null);
 
   const [playingMedia, setPlayingMedia] = useState<string | null>(null);
 
@@ -47,6 +48,7 @@ const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
     try {
       const { sound } = await Audio.Sound.createAsync({ uri });
       const status = await sound.getStatusAsync();
+      soundRef.current = sound;
       const newAudioState = {
         sound,
         isPlaying: false,
@@ -126,8 +128,8 @@ const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
 
     return () => {
       isMounted = false;
-      if (audioState?.sound) {
-        audioState.sound.unloadAsync();
+      if (soundRef.current) {
+        soundRef.current.unloadAsync();
       }
     };
   }, [uri]);
@@ -221,16 +223,11 @@ const LoadingDots: React.FC = () => {
   const dot1Opacity = useRef(new Animated.Value(0)).current;
   const dot2Opacity = useRef(new Animated.Value(0)).current;
   const dot3Opacity = useRef(new Animated.Value(0)).current;
-
-  if (!!process.env.JEST_WORKER_ID) {
-    return (
-      <Text className="font-inter" testID="loadingDotsStatic">
-        ...
-      </Text>
-    );
-  }
+  const isTest = !!process.env.JEST_WORKER_ID;
 
   useEffect(() => {
+    if (isTest) return;
+
     const animateDots = () => {
       Animated.sequence([
         Animated.timing(dot1Opacity, {
@@ -269,7 +266,15 @@ const LoadingDots: React.FC = () => {
     };
 
     animateDots();
-  }, [dot1Opacity, dot2Opacity, dot3Opacity]);
+  }, [isTest, dot1Opacity, dot2Opacity, dot3Opacity]);
+
+  if (isTest) {
+    return (
+      <Text className="font-inter" testID="loadingDotsStatic">
+        ...
+      </Text>
+    );
+  }
 
   return (
     <View className="flex-row items-center">

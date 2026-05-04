@@ -27,7 +27,7 @@ import LoadingModal from "../components/LoadingModal";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Video, ResizeMode } from "expo-av";
 import { getHasDoneTutorial, setTutorialDone } from "../utils/tutorial";
-import { AudioType, Media } from "../models/media_class";
+import type { AudioType, Media } from "../models/media_class";
 import { createNote } from "../utils/api_calls";
 import { useAddNoteStore } from "../stores/addNoteStore";
 import { useAddNoteContext } from "../context/AddNoteContext";

@@ -2,16 +2,14 @@ import React from "react";
 import { Dimensions, TouchableOpacity, Text } from "react-native";
 import Onboarding from "react-native-onboarding-swiper";
 import { Video, ResizeMode } from "expo-av";
-import { setItem } from "../utils/async_storage";
-import { useRouter } from "expo-router";
+import { useOnboardingStore } from "../stores/onboardingStore";
 
 const { width, height } = Dimensions.get("window");
 
 const OnboardingScreen = () => {
-  const router = useRouter();
+  const completeOnboarding = useOnboardingStore((s) => s.completeOnboarding);
   const handleDone = () => {
-    setItem("onboarded", "1");
-    router.replace("/(auth)/login");
+    completeOnboarding();
   };
 
   const doneButton = ({ ...props }: any) => (

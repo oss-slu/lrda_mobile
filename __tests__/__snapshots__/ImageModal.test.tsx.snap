@@ -8,16 +8,7 @@ exports[`ImageModal renders without crashing 1`] = `
   visible={true}
 >
   <View
-    style={
-      {
-        "alignItems": "center",
-        "backgroundColor": undefined,
-        "flex": 1,
-        "justifyContent": "center",
-        "paddingTop": 45,
-        "width": "100%",
-      }
-    }
+    className="flex-1 justify-center items-center pt-[45px] w-full bg-primary"
   >
     <RCTScrollView
       style={
@@ -28,13 +19,7 @@ exports[`ImageModal renders without crashing 1`] = `
     >
       <View>
         <View
-          style={
-            {
-              "alignItems": "center",
-              "backgroundColor": undefined,
-              "width": "100%",
-            }
-          }
+          className="items-center w-full bg-primary"
         >
           <ActivityIndicator
             color="#0000ff"
@@ -56,13 +41,7 @@ exports[`ImageModal renders without crashing 1`] = `
           />
         </View>
         <View
-          style={
-            {
-              "alignItems": "center",
-              "backgroundColor": undefined,
-              "width": "100%",
-            }
-          }
+          className="items-center w-full bg-primary"
         >
           <ActivityIndicator
             color="#0000ff"
@@ -115,26 +94,13 @@ exports[`ImageModal renders without crashing 1`] = `
       onStartShouldSetResponder={[Function]}
       style={
         {
-          "alignItems": "center",
-          "backgroundColor": "#ddd",
-          "borderRadius": 5,
-          "height": 40,
-          "justifyContent": "center",
-          "marginBottom": 30,
-          "marginTop": 20,
           "opacity": 1,
-          "padding": 10,
-          "width": 75,
         }
       }
       testID="image-component"
     >
       <Text
-        style={
-          {
-            "fontFamily": "Inter",
-          }
-        }
+        className="font-inter"
         testID="close-button"
       >
         Close

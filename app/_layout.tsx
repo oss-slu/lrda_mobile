@@ -6,30 +6,30 @@ import { AddNoteProvider } from "../lib/context/AddNoteContext";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { useAuthStore } from "../lib/stores/authStore";
-import { getItem } from "../lib/utils/async_storage";
+import { useOnboardingStore } from "../lib/stores/onboardingStore";
 import Toast from "react-native-toast-message";
 import "react-native-gesture-handler";
-import { useState } from "react";
 
 SplashScreen.preventAutoHideAsync();
 
 function RootLayoutInner() {
-  const [isOnboarded, setIsOnboarded] = useState(false);
+  const isOnboarded = useOnboardingStore((s) => s.isOnboarded);
+  const onboardingReady = useOnboardingStore((s) => s.isReady);
+  const initOnboarding = useOnboardingStore((s) => s.initialize);
   const isReady = useAuthStore((s) => s.isReady);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const initialize = useAuthStore((s) => s.initialize);
 
   useEffect(() => {
     const checkState = async () => {
-      const onboarded = await getItem("onboarded");
-      setIsOnboarded(onboarded === "1");
+      await initOnboarding();
       await initialize();
       await SplashScreen.hideAsync();
     };
     checkState();
   }, []);
 
-  if (!isReady) return null;
+  if (!isReady || !onboardingReady) return null;
 
   return (
     <>

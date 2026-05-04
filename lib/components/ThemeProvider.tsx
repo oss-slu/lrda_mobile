@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { View } from "react-native";
-import { vars, useColorScheme } from "nativewind";
+import { vars } from "nativewind";
 import { useThemeStore } from "../stores/themeStore";
 
 const COLORS = {
@@ -19,11 +19,6 @@ export function useTheme() {
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const isDarkmode = useThemeStore((s) => s.isDarkmode);
   const accentColor = useThemeStore((s) => s.accentColor);
-  const { setColorScheme } = useColorScheme();
-
-  useEffect(() => {
-    setColorScheme(isDarkmode ? "dark" : "light");
-  }, [isDarkmode]);
 
   return (
     <View style={[{ flex: 1 }, vars({ "--color-accent": accentColor })]} className={isDarkmode ? "dark" : ""}>

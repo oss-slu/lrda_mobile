@@ -52,14 +52,14 @@ const Library = () => {
     const item = data.item;
     const showTime = formatToLocalDateString(new Date(item.time));
     const mediaItem = item.media[0];
-    const ImageType = mediaItem?.getType();
+    const ImageType = mediaItem?.type;
     let ImageURI = "";
     let IsImage = false;
     if (ImageType === "image") {
-      ImageURI = mediaItem.getUri();
+      ImageURI = mediaItem.uri;
       IsImage = true;
     } else if (ImageType === "video") {
-      ImageURI = mediaItem.getThumbnail();
+      ImageURI = mediaItem.thumbnail;
       IsImage = true;
     }
     const resolvedImageURI = Platform.OS === "android" ? String(ImageURI || "") : ImageURI;

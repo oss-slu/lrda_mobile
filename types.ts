@@ -1,14 +1,8 @@
-import { Media, PhotoType, VideoType, AudioType } from "./lib/models/media_class";
+import type { PhotoType, VideoType, AudioType } from "./lib/models/media_class";
 
 export type Tag = {
   label: string;
   origin: "user" | "ai";
-};
-
-export type MediaData = {
-  uuid: string;
-  type: string;
-  uri: string;
 };
 
 export type UserData = {

@@ -2,30 +2,13 @@
 
 exports[`TagWindowTest1 renders without crashing 1`] = `
 <View
-  style={
-    {
-      "marginBottom": 10,
-      "minHeight": 100,
-    }
-  }
+  className="mb-2.5 min-h-[100px]"
 >
   <TextInput
+    className="rounded-[30px] h-10 w-full border-b-2 bg-white justify-center text-center text-lg font-medium"
     onChangeText={[Function]}
     onSubmitEditing={[Function]}
     placeholder="Your Tag Here"
-    style={
-      {
-        "backgroundColor": "white",
-        "borderBottomWidth": 2,
-        "borderRadius": 30,
-        "fontSize": 18,
-        "fontWeight": "500",
-        "height": 40,
-        "justifyContent": "center",
-        "textAlign": "center",
-        "width": "100%",
-      }
-    }
     testID="tag-input"
     value=""
   />
@@ -118,21 +101,11 @@ exports[`TagWindowTest1 renders without crashing 1`] = `
             }
           >
             <View
+              className="items-center bg-red-500 flex-1 flex-row justify-between px-4 py-[1px]"
               leftActionActivated={false}
               leftActionState={false}
               rightActionActivated={false}
               rightActionState={false}
-              style={
-                {
-                  "alignItems": "center",
-                  "backgroundColor": "red",
-                  "flex": 1,
-                  "flexDirection": "row",
-                  "justifyContent": "space-between",
-                  "paddingHorizontal": 15,
-                  "paddingVertical": 1,
-                }
-              }
               swipeAnimatedValue={0}
             >
               <View
@@ -291,24 +264,12 @@ exports[`TagWindowTest1 renders without crashing 1`] = `
                 onStartShouldSetResponder={[Function]}
                 style={
                   {
-                    "alignItems": "center",
-                    "backgroundColor": "white",
-                    "flex": 1,
-                    "flexDirection": "row",
-                    "justifyContent": "center",
                     "opacity": 1,
-                    "paddingVertical": 1,
                   }
                 }
               >
                 <Text
-                  style={
-                    {
-                      "fontFamily": "Inter",
-                      "fontSize": 18,
-                      "fontWeight": "500",
-                    }
-                  }
+                  className="font-inter text-lg font-medium"
                 >
                   Tag1
                 </Text>
@@ -345,21 +306,11 @@ exports[`TagWindowTest1 renders without crashing 1`] = `
             }
           >
             <View
+              className="items-center bg-red-500 flex-1 flex-row justify-between px-4 py-[1px]"
               leftActionActivated={false}
               leftActionState={false}
               rightActionActivated={false}
               rightActionState={false}
-              style={
-                {
-                  "alignItems": "center",
-                  "backgroundColor": "red",
-                  "flex": 1,
-                  "flexDirection": "row",
-                  "justifyContent": "space-between",
-                  "paddingHorizontal": 15,
-                  "paddingVertical": 1,
-                }
-              }
               swipeAnimatedValue={0}
             >
               <View
@@ -518,24 +469,12 @@ exports[`TagWindowTest1 renders without crashing 1`] = `
                 onStartShouldSetResponder={[Function]}
                 style={
                   {
-                    "alignItems": "center",
-                    "backgroundColor": "white",
-                    "flex": 1,
-                    "flexDirection": "row",
-                    "justifyContent": "center",
                     "opacity": 1,
-                    "paddingVertical": 1,
                   }
                 }
               >
                 <Text
-                  style={
-                    {
-                      "fontFamily": "Inter",
-                      "fontSize": 18,
-                      "fontWeight": "500",
-                    }
-                  }
+                  className="font-inter text-lg font-medium"
                 >
                   Tag2
                 </Text>
@@ -572,21 +511,11 @@ exports[`TagWindowTest1 renders without crashing 1`] = `
             }
           >
             <View
+              className="items-center bg-red-500 flex-1 flex-row justify-between px-4 py-[1px]"
               leftActionActivated={false}
               leftActionState={false}
               rightActionActivated={false}
               rightActionState={false}
-              style={
-                {
-                  "alignItems": "center",
-                  "backgroundColor": "red",
-                  "flex": 1,
-                  "flexDirection": "row",
-                  "justifyContent": "space-between",
-                  "paddingHorizontal": 15,
-                  "paddingVertical": 1,
-                }
-              }
               swipeAnimatedValue={0}
             >
               <View
@@ -745,24 +674,12 @@ exports[`TagWindowTest1 renders without crashing 1`] = `
                 onStartShouldSetResponder={[Function]}
                 style={
                   {
-                    "alignItems": "center",
-                    "backgroundColor": "white",
-                    "flex": 1,
-                    "flexDirection": "row",
-                    "justifyContent": "center",
                     "opacity": 1,
-                    "paddingVertical": 1,
                   }
                 }
               >
                 <Text
-                  style={
-                    {
-                      "fontFamily": "Inter",
-                      "fontSize": 18,
-                      "fontWeight": "500",
-                    }
-                  }
+                  className="font-inter text-lg font-medium"
                 >
                   Tag3
                 </Text>

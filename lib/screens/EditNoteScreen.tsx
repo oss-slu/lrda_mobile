@@ -17,7 +17,7 @@ import Constants from "expo-constants";
 import PhotoScroller from "../components/photoScroller";
 import { useAuthStore } from "../stores/authStore";
 import AudioContainer from "../components/audio";
-import { Media, AudioType } from "../models/media_class";
+import type { Media, AudioType } from "../models/media_class";
 import { updateNote as apiUpdateNote } from "../utils/api_calls";
 import TagWindow from "../components/tagging";
 import { DEFAULT_TOOLBAR_ITEMS, RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";

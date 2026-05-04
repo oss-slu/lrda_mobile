@@ -9,7 +9,7 @@ import {
 } from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { ResizeMode, Video } from "expo-av";
-import { Media, VideoType, PhotoType } from "../models/media_class";
+import type { Media, VideoType, PhotoType } from "../models/media_class";
 import uuid from "react-native-uuid";
 import { getThumbnail, convertHeicToJpg, uploadMedia } from "../utils/S3_proxy";
 import LoadingImage from "./loadingImage";
@@ -71,22 +71,12 @@ const PhotoScroller = forwardRef(
       if (uri.endsWith(".heic") || uri.endsWith(".HEIC")) {
         const jpgUri = await convertHeicToJpg(uri);
         const uploadedUrl = await uploadMedia(jpgUri, "image");
-        console.log("After URL is retrieved from upload Media ", uploadedUrl);
-        const newMediaItem = new PhotoType({
-          uuid: uuid.v4().toString(),
-          type: "image",
-          uri: uploadedUrl,
-        });
+        const newMediaItem: PhotoType = { uuid: uuid.v4().toString(), type: "image", uri: uploadedUrl };
         setNewMedia([...newMedia, newMediaItem]);
         insertImageToEditor(uploadedUrl);
       } else if (uri.endsWith(".jpg") || uri.endsWith("png") || uri.endsWith(".jpeg")) {
         const uploadedUrl = await uploadMedia(uri, "image");
-        console.log("After URL is retrieved from upload Media ", uploadedUrl);
-        const newMediaItem = new PhotoType({
-          uuid: uuid.v4().toString(),
-          type: "image",
-          uri: uploadedUrl,
-        });
+        const newMediaItem: PhotoType = { uuid: uuid.v4().toString(), type: "image", uri: uploadedUrl };
         setNewMedia([...newMedia, newMediaItem]);
         if (insertImageToEditor) {
           insertImageToEditor(uploadedUrl, "Captured Image");
@@ -94,14 +84,7 @@ const PhotoScroller = forwardRef(
       } else if (uri.endsWith(".MOV") || uri.endsWith(".mov") || uri.endsWith(".mp4")) {
         const uploadedUrl = await uploadMedia(uri, "video");
         const thumbnail = await getThumbnail(uri);
-        console.log("After URL is retrieved from upload Media ", uploadedUrl);
-        const newMediaItem = new VideoType({
-          uuid: uuid.v4().toString(),
-          type: "video",
-          uri: uploadedUrl,
-          thumbnail: thumbnail,
-          duration: "0:00",
-        });
+        const newMediaItem: VideoType = { uuid: uuid.v4().toString(), type: "video", uri: uploadedUrl, thumbnail, duration: "0:00" };
         setNewMedia([...newMedia, newMediaItem]);
         addVideoToEditor(uploadedUrl);
       }
@@ -135,10 +118,10 @@ const PhotoScroller = forwardRef(
       let curImages: string[] = [];
 
       for (let x = 0; x < newMedia.length; x++) {
-        if (newMedia[x].getType() === "image") {
-          curImages.push(newMedia[x].getUri());
-        } else if (newMedia[x].getType() === "video") {
-          curImages.push((newMedia[x] as VideoType).getThumbnail());
+        if (newMedia[x].type === "image") {
+          curImages.push(newMedia[x].uri);
+        } else if (newMedia[x].type === "video") {
+          curImages.push((newMedia[x] as VideoType).thumbnail);
         }
       }
 
@@ -150,14 +133,14 @@ const PhotoScroller = forwardRef(
       const index = getIndex();
       const key = `media-${index}`;
       const mediaItem = media;
-      const ImageType = mediaItem?.getType();
+      const ImageType = mediaItem?.type;
       let ImageURI = "";
       let IsImage = false;
       if (ImageType === "image") {
-        ImageURI = mediaItem.getUri();
+        ImageURI = mediaItem.uri;
         IsImage = true;
       } else if (ImageType === "video") {
-        ImageURI = (mediaItem as VideoType).getThumbnail();
+        ImageURI = (mediaItem as VideoType).thumbnail;
         IsImage = true;
       }
       return (
@@ -242,7 +225,7 @@ const PhotoScroller = forwardRef(
 
     function Header({ imageIndex }: { imageIndex: number }) {
       const [showVideo, setShowVideo] = useState(false);
-      const showHeader = newMedia[imageIndex].getType() === "video";
+      const showHeader = newMedia[imageIndex].type === "video";
 
       return showHeader ? (
         <View>
@@ -268,7 +251,7 @@ const PhotoScroller = forwardRef(
               style={{ height: Dimensions.get("screen").height - 70 }}
             >
               <Video
-                source={{ uri: newMedia[imageIndex].getUri() }}
+                source={{ uri: newMedia[imageIndex].uri }}
                 resizeMode={ResizeMode.CONTAIN}
                 shouldPlay={true}
                 useNativeControls={true}
@@ -300,7 +283,7 @@ const PhotoScroller = forwardRef(
           }))}
           imageIndex={imageToShow}
           onImageIndexChange={(index) => setCurrentImageIndex(index)}
-          onLongPress={() => handleSaveMedia(newMedia[currentImageIndex].getUri())}
+          onLongPress={() => handleSaveMedia(newMedia[currentImageIndex].uri)}
           visible={playing}
           onRequestClose={() => setPlaying(false)}
           FooterComponent={(imageIndex) => Footer(imageIndex)}
