@@ -17,7 +17,7 @@ import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import NoteDetailModal from "./NoteDetailModal";
 import { formatToLocalDateString } from "../../components/time";
-import Ionicons from "react-native-vector-icons/Ionicons";
+import { Ionicons } from "@expo/vector-icons";
 import Tooltip from "react-native-walkthrough-tooltip";
 import TooltipContent from "../../onboarding/TooltipComponent";
 import { mapDarkStyle, mapStandardStyle } from "./mapData";
@@ -98,20 +98,17 @@ const ExploreScreen = () => {
   }, [searchQuery, state.region]);
 
   const mapNoteToMarker = (note) => {
-    const time = note.time ? new Date(note.time) : new Date(note.__rerum.createdAt);
-    const offsetInHours = new Date().getTimezoneOffset() / 60;
-    time.setHours(time.getHours() - offsetInHours);
-    const latitude = parseFloat(note.latitude);
-    const longitude = parseFloat(note.longitude);
+    const time = note.time ? new Date(note.time) : new Date(note.createdAt);
+    const latitude = typeof note.latitude === "number" ? note.latitude : parseFloat(note.latitude);
+    const longitude = typeof note.longitude === "number" ? note.longitude : parseFloat(note.longitude);
     return {
       coordinate: {
         latitude: isNaN(latitude) ? 0 : latitude,
         longitude: isNaN(longitude) ? 0 : longitude,
       },
-      creator: note.creator || "",
-      createdAt: note.__rerum.createdAt || "",
+      creatorId: note.creatorId || "",
       title: note.title || "Untitled",
-      description: note.BodyText || "No description available",
+      description: note.text || "No description available",
       images:
         note.media?.length > 0
           ? note.media.map((mediaItem) => ({ uri: mediaItem.uri.toString() }))

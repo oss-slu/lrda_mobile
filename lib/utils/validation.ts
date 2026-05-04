@@ -1,4 +1,4 @@
-export const validateEmail = (email) => {
+export const validateEmail = (email: string): string | null => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     return "Invalid email address";
@@ -8,7 +8,7 @@ export const validateEmail = (email) => {
 
 const PASSWORD_REGEX = /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}/;
 
-export const validatePassword = (password) => {
+export const validatePassword = (password: string): string | null => {
   if (!PASSWORD_REGEX.test(password)) {
     return "Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character.";
   }

@@ -3,33 +3,40 @@ import AsyncStorage from "../utils/async_storage";
 import { colors } from "./colors";
 import { useThemeStore } from "../stores/themeStore";
 
-const ThemeContext = createContext();
+type ThemeColors = (typeof colors)["lightColors"];
 
-export function useTheme() {
-  return useContext(ThemeContext);
+interface ThemeContextValue {
+  isDarkmode: boolean;
+  toggleDarkmode: () => void;
+  theme: ThemeColors;
 }
 
-export function ThemeProvider({ children }) {
+const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
+
+export function useTheme(): ThemeContextValue {
+  const ctx = useContext(ThemeContext);
+  if (!ctx) throw new Error("useTheme must be used within a ThemeProvider");
+  return ctx;
+}
+
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const appThemeColor = useThemeStore((state) => state.theme);
 
   const [isDarkmode, setIsDarkmode] = useState(false);
   colors.darkColors.homeColor = appThemeColor;
   colors.lightColors.homeColor = appThemeColor;
-  console.log(colors.darkColors.homeColor, appThemeColor);
+
   const toggleDarkmode = () => {
     setIsDarkmode((prevMode) => !prevMode);
-
-    // Save the theme preference in AsyncStorage
     AsyncStorage.save("themePreference", !isDarkmode ? "dark" : "light");
   };
 
   useEffect(() => {
-    // Load the user's theme preference from AsyncStorage on app start
-    AsyncStorage.get("themePreference")
+    AsyncStorage.get<string>("themePreference")
       .then((theme) => {
         setIsDarkmode(theme === "dark");
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         console.error("Error loading theme preference:", error);
       });
   }, []);
