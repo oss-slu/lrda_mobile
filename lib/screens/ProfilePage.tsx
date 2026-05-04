@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View, SafeAreaView, Image, FlatList, TouchableOpacity } from "react-native";
 import { useAuthStore } from "../stores/authStore";
-import { Note, ImageNote, ProfilePageProps } from "../../types";
+import { Note, ImageNote } from "../../types";
 import DataConversion from "../utils/data_conversion";
-import ApiService from "../utils/api_calls";
+import { fetchAllNotes } from "../utils/api_calls";
 import { useTheme } from "../components/ThemeProvider";
 import { Feather } from "@expo/vector-icons";
 import { defaultTextFont } from "../../styles/globalStyles";
@@ -31,7 +31,7 @@ export default function ProfilePage() {
 
     const fetchMessages = async () => {
       try {
-        const data = await ApiService.fetchMessages(false, false, authUser?.id || "");
+        const data = await fetchAllNotes({ creatorId: authUser?.id || "" });
         const fetchedNotes = DataConversion.convertMediaTypes(data);
         setFieldNotes(fetchedNotes.length);
 

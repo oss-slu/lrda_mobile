@@ -1,6 +1,7 @@
 import Constants from "expo-constants";
 import { useAuthStore } from "../stores/authStore";
-import { Tag } from "../../types";
+import type { Note, Tag, UserData } from "../../types";
+import type { AudioType, Media } from "../models/media_class";
 
 const extra = (Constants.expoConfig?.extra ?? {}) as { apiBaseUrl?: string };
 const API_BASE_URL = extra.apiBaseUrl || "http://localhost:3002";
@@ -14,226 +15,180 @@ function getAuthHeaders(): HeadersInit {
   return headers;
 }
 
-export default class ApiService {
-  static async fetchMessages(
-    global: boolean,
-    published: boolean,
-    userId: string,
-    limit = 150,
-    skip = 0,
-    allResults: any[] = []
-  ): Promise<any[]> {
-    try {
-      const headers = getAuthHeaders();
-      const params = new URLSearchParams();
-      params.set("limit", limit.toString());
-      params.set("offset", skip.toString());
-
-      if (!global && userId) {
-        params.set("creatorId", userId);
-      }
-      if (global || published) {
-        params.set("published", "true");
-      }
-
-      const url = `${API_BASE_URL}/api/notes?${params.toString()}`;
-      const response = await fetch(url, { method: "GET", headers });
-      const data = await response.json();
-
-      if (data.length > 0) {
-        allResults = allResults.concat(data);
-        if (data.length === limit) {
-          return this.fetchMessages(global, published, userId, limit, skip + data.length, allResults);
-        }
-      }
-
-      return allResults;
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-      throw error;
-    }
-  }
-
-  static async fetchMessagesBatch(global: boolean, published: boolean, userId: string, limit = 20, skip = 0): Promise<any[]> {
-    try {
-      const headers = getAuthHeaders();
-      const params = new URLSearchParams();
-      params.set("limit", limit.toString());
-      params.set("offset", skip.toString());
-
-      if (!global && userId) {
-        params.set("creatorId", userId);
-      }
-      if (published) {
-        params.set("published", "true");
-      } else if (!global && userId) {
-        params.set("published", "false");
-      }
-
-      const url = `${API_BASE_URL}/api/notes?${params.toString()}`;
-      const response = await fetch(url, { method: "GET", headers });
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-      throw error;
-    }
-  }
-
-  static async fetchMapsMessagesBatch(global: boolean, published: boolean, userId: string, limit = 20, skip = 0): Promise<any[]> {
-    try {
-      const headers = getAuthHeaders();
-      const params = new URLSearchParams();
-      params.set("limit", limit.toString());
-      params.set("offset", skip.toString());
-      params.set("published", "true");
-
-      const url = `${API_BASE_URL}/api/notes?${params.toString()}`;
-      const response = await fetch(url, { method: "GET", headers });
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-      throw error;
-    }
-  }
-
-  static async fetchUserData(userId: string): Promise<any | null> {
-    try {
-      const headers = getAuthHeaders();
-      const url = `${API_BASE_URL}/api/users/${userId}`;
-      const response = await fetch(url, { method: "GET", headers });
-
-      if (!response.ok) {
-        console.log("User not found for ID:", userId);
-        return null;
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      return null;
-    }
-  }
-
-  static async fetchCreatorName(creatorId: string): Promise<string> {
-    try {
-      const headers = getAuthHeaders();
-      const url = `${API_BASE_URL}/api/users/${creatorId}`;
-      const response = await fetch(url, { method: "GET", headers });
-
-      if (!response.ok) {
-        return "Creator not available";
-      }
-
-      const data = await response.json();
-      return data.name || "Unknown Creator";
-    } catch (error) {
-      console.error("Error fetching creator name:", error);
-      return "Error retrieving creator";
-    }
-  }
-
-  static async deleteNoteFromAPI(id: string): Promise<boolean> {
-    try {
-      const headers = getAuthHeaders();
-      const url = `${API_BASE_URL}/api/notes/${id}`;
-      const response = await fetch(url, { method: "DELETE", headers });
-
-      if (response.status === 204) {
-        return true;
-      } else {
-        throw new Error(`Delete failed with status ${response.status}`);
-      }
-    } catch (error) {
-      console.error("Error deleting note:", error);
-      return false;
-    }
-  }
-
-  static async writeNewNote(note: any): Promise<Response> {
-    const headers = getAuthHeaders();
-    const tags: Tag[] = (note.tags || []).map((t: string) => ({ label: t, origin: "user" }));
-
-    const body = {
-      title: note.title,
-      text: note.text,
-      latitude: note.latitude != null ? Number(note.latitude) || null : null,
-      longitude: note.longitude != null ? Number(note.longitude) || null : null,
-      isPublished: note.isPublished ?? note.published ?? false,
-      tags,
-      time: note.time ? new Date(note.time).toISOString() : new Date().toISOString(),
-      media: (note.media || []).map((m: any) => ({
-        type: m.type,
-        uri: m.uri,
-        thumbnailUri: m.thumbnail || undefined,
-        uuid: m.uuid || undefined,
-      })),
-      audio: (note.audio || []).map((a: any) => ({
-        uri: a.uri,
-        name: a.name || undefined,
-        duration: a.duration || undefined,
-        uuid: a.uuid || undefined,
-      })),
-    };
-
-    return fetch(`${API_BASE_URL}/api/notes`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(body),
-    });
-  }
-
-  static async overwriteNote(note: any): Promise<Response> {
-    const headers = getAuthHeaders();
-    const tags: Tag[] = (note.tags || []).map((t: string | Tag) =>
-      typeof t === "string" ? { label: t, origin: "user" as const } : t
-    );
-
-    const body: Record<string, any> = {
-      title: note.title,
-      text: note.text,
-      isPublished: note.isPublished ?? note.published ?? false,
-      tags,
-      time: note.time ? new Date(note.time).toISOString() : undefined,
-      media: (note.media || []).map((m: any) => ({
-        type: m.type,
-        uri: m.uri,
-        thumbnailUri: m.thumbnail || m.thumbnailUri || undefined,
-        uuid: m.uuid || undefined,
-      })),
-      audio: (note.audio || []).map((a: any) => ({
-        uri: a.uri,
-        name: a.name || undefined,
-        duration: a.duration || undefined,
-        uuid: a.uuid || undefined,
-      })),
-    };
-
-    if (note.latitude != null) body.latitude = Number(note.latitude) || null;
-    if (note.longitude != null) body.longitude = Number(note.longitude) || null;
-
-    return fetch(`${API_BASE_URL}/api/notes/${note.id}`, {
-      method: "PATCH",
-      headers,
-      body: JSON.stringify(body),
-    });
-  }
-
-  static async searchMessages(query: string): Promise<any[]> {
-    try {
-      const headers = getAuthHeaders();
-      const params = new URLSearchParams();
-      params.set("search", query);
-      params.set("published", "true");
-      params.set("limit", "50");
-
-      const url = `${API_BASE_URL}/api/notes?${params.toString()}`;
-      const response = await fetch(url, { method: "GET", headers });
-      return await response.json();
-    } catch (error) {
-      console.error("Error searching messages:", error);
-      throw error;
-    }
+class ApiError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+  ) {
+    super(message);
+    this.name = "ApiError";
   }
 }
+
+async function parseResponse<T>(response: Response): Promise<T> {
+  if (!response.ok) {
+    const text = await response.text().catch(() => "");
+    throw new ApiError(text || `Request failed with status ${response.status}`, response.status);
+  }
+  if (response.status === 204) return undefined as T;
+  return response.json();
+}
+
+// --- Notes ---
+
+interface FetchNotesOptions {
+  creatorId?: string;
+  published?: boolean;
+  limit?: number;
+  offset?: number;
+  search?: string;
+}
+
+export async function fetchNotes(options: FetchNotesOptions = {}): Promise<Note[]> {
+  const headers = getAuthHeaders();
+  const params = new URLSearchParams();
+
+  if (options.limit != null) params.set("limit", options.limit.toString());
+  if (options.offset != null) params.set("offset", options.offset.toString());
+  if (options.creatorId) params.set("creatorId", options.creatorId);
+  if (options.published != null) params.set("published", options.published.toString());
+  if (options.search) params.set("search", options.search);
+
+  const url = `${API_BASE_URL}/api/notes?${params.toString()}`;
+  const response = await fetch(url, { method: "GET", headers });
+  return parseResponse<Note[]>(response);
+}
+
+export async function fetchAllNotes(options: Omit<FetchNotesOptions, "limit" | "offset"> = {}): Promise<Note[]> {
+  const limit = 150;
+  const allResults: Note[] = [];
+  let offset = 0;
+
+  while (true) {
+    const batch = await fetchNotes({ ...options, limit, offset });
+    allResults.push(...batch);
+    if (batch.length < limit) break;
+    offset += batch.length;
+  }
+
+  return allResults;
+}
+
+interface CreateNoteInput {
+  title: string;
+  text: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  isPublished: boolean;
+  tags: string[];
+  time?: string | Date;
+  media?: Media[];
+  audio?: AudioType[];
+}
+
+function formatTags(tags: (string | Tag)[]): Tag[] {
+  return tags.map((t) => (typeof t === "string" ? { label: t, origin: "user" as const } : t));
+}
+
+function formatMedia(media: Media[]) {
+  return media.map((m) => ({
+    type: m.type,
+    uri: m.uri,
+    thumbnailUri: (m as any).thumbnail || (m as any).thumbnailUri || undefined,
+    uuid: m.uuid || undefined,
+  }));
+}
+
+function formatAudio(audio: AudioType[]) {
+  return audio.map((a) => ({
+    uri: a.uri,
+    name: a.name || undefined,
+    duration: a.duration || undefined,
+    uuid: a.uuid || undefined,
+  }));
+}
+
+export async function createNote(input: CreateNoteInput): Promise<Note> {
+  const headers = getAuthHeaders();
+  const body = {
+    title: input.title,
+    text: input.text,
+    latitude: input.latitude != null ? Number(input.latitude) || null : null,
+    longitude: input.longitude != null ? Number(input.longitude) || null : null,
+    isPublished: input.isPublished,
+    tags: formatTags(input.tags),
+    time: input.time ? new Date(input.time).toISOString() : new Date().toISOString(),
+    media: formatMedia(input.media || []),
+    audio: formatAudio(input.audio || []),
+  };
+
+  const response = await fetch(`${API_BASE_URL}/api/notes`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+  });
+  return parseResponse<Note>(response);
+}
+
+interface UpdateNoteInput {
+  id: string;
+  title?: string;
+  text?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  isPublished?: boolean;
+  tags?: (string | Tag)[];
+  time?: string | Date;
+  media?: Media[];
+  audio?: AudioType[];
+}
+
+export async function updateNote(input: UpdateNoteInput): Promise<Note> {
+  const headers = getAuthHeaders();
+  const body: Record<string, unknown> = {};
+
+  if (input.title !== undefined) body.title = input.title;
+  if (input.text !== undefined) body.text = input.text;
+  if (input.isPublished !== undefined) body.isPublished = input.isPublished;
+  if (input.tags !== undefined) body.tags = formatTags(input.tags);
+  if (input.time !== undefined) body.time = new Date(input.time).toISOString();
+  if (input.media !== undefined) body.media = formatMedia(input.media);
+  if (input.audio !== undefined) body.audio = formatAudio(input.audio);
+  if (input.latitude != null) body.latitude = Number(input.latitude) || null;
+  if (input.longitude != null) body.longitude = Number(input.longitude) || null;
+
+  const response = await fetch(`${API_BASE_URL}/api/notes/${input.id}`, {
+    method: "PATCH",
+    headers,
+    body: JSON.stringify(body),
+  });
+  return parseResponse<Note>(response);
+}
+
+export async function deleteNote(id: string): Promise<void> {
+  const headers = getAuthHeaders();
+  const response = await fetch(`${API_BASE_URL}/api/notes/${id}`, {
+    method: "DELETE",
+    headers,
+  });
+  await parseResponse<void>(response);
+}
+
+// --- Users ---
+
+export async function fetchUser(userId: string): Promise<UserData | null> {
+  const headers = getAuthHeaders();
+  const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
+    method: "GET",
+    headers,
+  });
+
+  if (response.status === 404) return null;
+  return parseResponse<UserData>(response);
+}
+
+export async function fetchCreatorName(creatorId: string): Promise<string> {
+  const user = await fetchUser(creatorId);
+  return user?.name || "Unknown Creator";
+}
+

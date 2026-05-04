@@ -1,5 +1,4 @@
 import { Platform, StyleSheet, Dimensions } from "react-native";
-import { lightTheme, darkTheme } from "../colors";
 import Constants from "expo-constants";
 import { useTheme } from "../../lib/components/ThemeProvider";
 
@@ -13,9 +12,8 @@ export const customImageCSS = `
     max-width: 200px !important;
     max-height: 200px !important;
     object-fit: cover !important;
-    display: inline-block; /* Ensure images don't expand to fit container width */
+    display: inline-block;
   }
-     true; // Ensure valid JavaScript return value
 `;
 
 const NotePageStyles = () => {

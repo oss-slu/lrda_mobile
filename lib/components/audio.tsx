@@ -167,10 +167,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     width: "100%",
   },
-  headerText: {
-    fontSize: 24,
-    fontWeight: "600",
-  },
   audioList: {
     width: "100%",
     alignItems: "center",

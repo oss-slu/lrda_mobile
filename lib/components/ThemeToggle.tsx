@@ -47,19 +47,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 4,
   },
-  toggleButton: {
-    flex: 1,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  toggleText: {
-    ...defaultTextFont,
-    fontSize: 14,
-    fontWeight: "bold",
-  },
 });
 
 export default ThemeToggle;

@@ -1,11 +1,9 @@
 import { StyleSheet, Dimensions } from "react-native";
-import { lightTheme, darkTheme } from "../colors";
+import { lightTheme } from "../colors";
 import Constants from "expo-constants";
 import { defaultTextFont } from "../globalStyles";
 
-// build out settings for dark/light mode configuration
 const globalStyle = lightTheme;
-// const globalStyle = darkTheme;
 
 export const PhotoStyles = StyleSheet.create({
   container: {

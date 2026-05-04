@@ -21,7 +21,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Tooltip from "react-native-walkthrough-tooltip";
 import TooltipContent from "../../onboarding/TooltipComponent";
 import { mapDarkStyle, mapStandardStyle } from "./mapData";
-import ApiService from "../../utils/api_calls";
+import { fetchNotes } from "../../utils/api_calls";
 import Constants from "expo-constants";
 import { useTheme } from "../../components/ThemeProvider";
 import { MapNotesComponent } from "../../components/MapNotesComponent";
@@ -77,7 +77,7 @@ const ExploreScreen = () => {
 
   const searchForMessages = useCallback(async () => {
     try {
-      const results = await ApiService.searchMessages(searchQuery);
+      const results = await fetchNotes({ search: searchQuery, published: true, limit: 50 });
       if (results && results.length > 0) {
         const firstResult = results[0];
         const newRegion = {
@@ -191,13 +191,7 @@ const ExploreScreen = () => {
           setState((prevState) => ({ ...prevState, markers: sortedMarkers }));
         } else {
           const skip = (pageNum - 1) * LIMIT;
-          const fetchedNotes = await ApiService.fetchMapsMessagesBatch(
-            globeIcon === "earth",
-            globeIcon !== "earth",
-            "someUserId",
-            LIMIT,
-            skip
-          );
+          const fetchedNotes = await fetchNotes({ published: true, limit: LIMIT, offset: skip });
           const fetchedMarkers = fetchedNotes.map(mapNoteToMarker);
           const sortedMarkers = sortNotesByProximity(fetchedMarkers);
           if (pageNum === 1) {

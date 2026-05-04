@@ -6,7 +6,6 @@ import {
   View,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
   Keyboard,
   Platform,
   KeyboardAvoidingView,
@@ -21,8 +20,6 @@ import AudioContainer from "../components/audio";
 
 import PhotoScroller from "../components/photoScroller";
 import TagWindow from "../components/tagging";
-import LocationWindow from "../components/location";
-import TimeWindow from "../components/time";
 import { DEFAULT_TOOLBAR_ITEMS, RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
 import NotePageStyles, { customImageCSS } from "../../styles/pages/NoteStyles";
 import { useTheme } from "../components/ThemeProvider";
@@ -31,11 +28,10 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { Video } from "expo-av";
 import { getHasDoneTutorial, setTutorialDone } from "../utils/tutorial";
 import { AudioType, Media } from "../models/media_class";
-import ApiService from "../utils/api_calls";
+import { createNote } from "../utils/api_calls";
 import { useAddNoteStore } from "../stores/addNoteStore";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import { defaultTextFont } from "../../styles/globalStyles";
-import { Button } from "react-native-paper";
 import TooltipContent from "../onboarding/TooltipComponent";
 import Tooltip from "react-native-walkthrough-tooltip";
 import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
@@ -45,17 +41,13 @@ const AddNoteScreen: React.FC = () => {
   const navigation = useNavigation();
   const params = useLocalSearchParams<{ untitledNumber?: string }>();
   const [titleText, setTitleText] = useState<string>("");
-  const [isSaveButtonEnabled, setIsSaveButtonEnabled] = useState<boolean>(true);
   const [bodyText, setBodyText] = useState<string>("<p></p>");
   const [newMedia, setNewMedia] = useState<Media[]>([]);
   const [newAudio, setNewAudio] = useState<AudioType[]>([]);
   const [tags, setTags] = useState<string[]>([]);
-  const [time, setTime] = useState<Date>(new Date());
   const [viewMedia, setViewMedia] = useState<boolean>(false);
   const [viewAudio, setViewAudio] = useState<boolean>(false);
   const [isTagging, setIsTagging] = useState<boolean>(false);
-  const [isLocation, setIsLocation] = useState<boolean>(false);
-  const [isTime, setIsTime] = useState<boolean>(false);
   const [isPublished, setIsPublished] = useState<boolean>(false);
   const [location, setLocation] = useState<{
     latitude: number;
@@ -102,17 +94,12 @@ const AddNoteScreen: React.FC = () => {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("blur", () => {
-      console.log("Blur listener triggered...");
-
       setTimeout(async () => {
-        console.log("===========================\n is published\n", isPublished);
         if (!isPublished) {
           const latestContent = await editor.getHTML();
           bodyTextRef.current = latestContent;
-          console.log("Delayed content fetch:", latestContent);
 
           const bodyIsEmpty = isBodyEmpty(latestContent);
-          console.log("Is body empty?", bodyIsEmpty);
 
           if (
             titleTxtRef.current.length !== 0 ||
@@ -121,15 +108,13 @@ const AddNoteScreen: React.FC = () => {
             mediaRef.current.length !== 0 ||
             audioRef.current.length !== 0
           ) {
-            console.log("Saving note...");
-            await saveNote();
+            await saveNote(false);
           } else {
-            console.log("Nothing to save, toggling state.");
             toggleAddNoteState();
             router.back();
           }
         }
-      }, 300); // <-- 300ms delay gives WebView enough time
+      }, 300);
     });
 
     return unsubscribe;
@@ -140,8 +125,6 @@ const AddNoteScreen: React.FC = () => {
   const scrollViewRef = useRef<KeyboardAwareScrollView>(null);
 
   useEffect(() => {
-    // Save the correct reference to handleShareButtonPress
-    console.log("useeffect called when to hit save button");
     setPublishNote(() => handleShareButtonPress);
   }, [titleText]);
 
@@ -183,21 +166,6 @@ const AddNoteScreen: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // Save the correct reference to handleShareButtonPress
-    console.log("useeffect called when to hit save button");
-    setPublishNote(() => handleShareButtonPress);
-  }, [titleText]);
-
-  const customToolbarItems = [
-    ...DEFAULT_TOOLBAR_ITEMS,
-    {
-      icon: () => <Ionicons name="close" size={24} color={theme.text} />, // Close keyboard icon
-      onPress: () => Keyboard.dismiss(), // Dismiss the keyboard when tapped
-      id: "closeKeyboard", // Unique ID for this toolbar item
-    },
-  ];
-
-  useEffect(() => {
     if (editor) {
       editor.injectCSS(customImageCSS);
     }
@@ -206,57 +174,40 @@ const AddNoteScreen: React.FC = () => {
   const setLocationToZero = () => {
     setLocation({ latitude: 0, longitude: 0 });
     setLocationButtonColor("red");
-    console.log("Location set to (0, 0) due to permission denial or manual setting.");
   };
 
   const fetchCurrentLocation = async () => {
-    console.log("Requesting location permission...");
     const { status } = await Location.requestForegroundPermissionsAsync();
 
     if (status === "granted") {
-      console.log("Location permission granted. Fetching current location...");
       try {
         const userLocation = await Location.getCurrentPositionAsync({});
-        console.log("User location fetched:", userLocation.coords);
         setLocation({
           latitude: userLocation.coords.latitude,
           longitude: userLocation.coords.longitude,
         });
-        setLocationButtonColor("#000"); // Reset icon color to default
+        setLocationButtonColor("#000");
       } catch (error) {
         console.error("Error fetching location:", error);
         Alert.alert("Error", "Failed to retrieve location.");
       }
     } else {
-      console.log("Location permission denied. Setting location to (0, 0).");
       setLocationToZero();
     }
   };
 
   const toggleLocation = () => {
     if (location && location.latitude === 0 && location.longitude === 0) {
-      console.log("Re-fetching current location...");
       fetchCurrentLocation();
     } else {
       setLocationToZero();
     }
   };
 
-  const getIconStyle = (isDarkMode: boolean, isError: boolean) => {
-    if (isError) return "red";
-    return isDarkMode ? "white" : "black";
-  };
-
-  // Automatically check location on component mount
   useEffect(() => {
     fetchCurrentLocation();
   }, []);
-  // Toggle location to (0, 0) when the location button is pressed
-  const toggleLocationToZero = () => {
-    setLocationToZero();
-  };
 
-  // Function to display an error message inside the editor
   const displayErrorInEditor = async (errorMessage) => {
     const currentContent = await editor.getHTML();
     const errorTag = `<p style="color: red; font-weight: bold;">${errorMessage}</p><br />`;
@@ -302,19 +253,17 @@ const AddNoteScreen: React.FC = () => {
   };
 
   const handleShareButtonPress = async () => {
-    console.log("Publish Pressed ......");
     await syncEditorContent();
 
     const bodyIsEmpty = isBodyEmpty(bodyTextRef.current);
 
     if (
-      titleTextRef.current?.length !== 0 ||
+      titleTxtRef.current.length !== 0 ||
       !bodyIsEmpty ||
-      tagsRef.current.length! == 0 ||
-      mediaRef.current.length! == 0 ||
-      audioRef.current.length! == 0
+      tagsRef.current.length !== 0 ||
+      mediaRef.current.length !== 0 ||
+      audioRef.current.length !== 0
     ) {
-      console.log("inside if Published Pressed ...");
       setIsPublished(!isPublished);
       ToastMessage.show({
         type: "success",
@@ -322,16 +271,11 @@ const AddNoteScreen: React.FC = () => {
         visibilityTime: 3000,
       });
       await saveNote(true);
-    } else {
-      console.log("Empty Note. Nothing to Save/Publish");
     }
   };
 
   const getTitle = () => {
-    console.log(titleText);
     const title = titleText.trim() ? titleText.trim() : params.untitledNumber ? `Untitled ${params.untitledNumber}` : "Untitled";
-    console.log(title);
-
     return title;
   };
   const prepareNoteData = async (publish: boolean) => {
@@ -354,18 +298,12 @@ const AddNoteScreen: React.FC = () => {
   };
 
   const saveNote = async (published: boolean) => {
-    console.log("Saving note...");
-    console.log("Title Text:", titleText.length); // Log the title to ensure it's what you expect
     const noteData = await prepareNoteData(published);
-    console.log("Note Data Prepared:", noteData); // Check if title is being passed correctly
 
-    // Proceed with saving the note
     setIsUpdating(true);
-    setIsSaveButtonEnabled(true);
 
     try {
-      const response = await ApiService.writeNewNote(noteData);
-      const responseJson = await response.json();
+      await createNote(noteData);
       if (router.canGoBack()) {
         router.back();
       }
@@ -386,7 +324,6 @@ const AddNoteScreen: React.FC = () => {
     const latestContent = await editor.getHTML();
     setBodyText(latestContent);
     bodyTextRef.current = latestContent;
-    console.log("Synced editor content:", latestContent);
   };
 
   /* CHECKING IF USER HAS DONE TUTORIAL */
@@ -480,8 +417,6 @@ const AddNoteScreen: React.FC = () => {
               />
               {viewAudio && <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} insertAudioToEditor={insertAudioToEditor} />}
               {isTagging && <TagWindow tags={tags} setTags={setTags} />}
-              {isLocation && <LocationWindow location={location} setLocation={setLocation} />}
-              {isTime && <TimeWindow time={time} setTime={setTime} />}
             </View>
             <View style={[NotePageStyles().richTextContainer]} testID="TenTapEditor">
               <RichText

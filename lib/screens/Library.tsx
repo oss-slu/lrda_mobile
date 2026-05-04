@@ -1,14 +1,12 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Platform,
   View,
   Text,
   TouchableOpacity,
   Dimensions,
-  Image,
   TextInput,
   StyleSheet,
-  Pressable,
   Animated,
   StatusBar,
   ActivityIndicator,
@@ -18,18 +16,15 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useAuthStore } from "../stores/authStore";
 import { getHasDoneTutorial, setTutorialDone } from "../utils/tutorial";
 import { Note } from "../../types";
-import ApiService from "../utils/api_calls";
+import { fetchNotes } from "../utils/api_calls";
 import DataConversion from "../utils/data_conversion";
 import { SwipeListView } from "react-native-swipe-list-view";
 import NoteSkeleton from "../components/noteSkeleton";
-import LoadingImage from "../components/loadingImage";
 import { formatToLocalDateString } from "../components/time";
 import { useTheme } from "../components/ThemeProvider";
 import Constants from "expo-constants";
-import DropDownPicker from "react-native-dropdown-picker";
 import NoteDetailModal from "./mapPage/NoteDetailModal";
 import ToastMessage from "react-native-toast-message";
-import { useAddNoteContext } from "../context/AddNoteContext";
 import Greeting from "../components/Greeting";
 import NotesComponent from "../components/NotesComponent";
 import LottieView from "lottie-react-native";
@@ -44,20 +39,11 @@ const Library = () => {
   const router = useRouter();
   const authUser = useAuthStore((s) => s.user);
   const [notes, setNotes] = useState<Note[]>([]);
-  const [messages, setMessages] = useState<any[]>([]);
   const [updateCounter, setUpdateCounter] = useState(0);
-  const [isFilterOpned, setIsFilterOpned] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
   const [published, setPublished] = useState(true);
-  const [reversed, setReversed] = useState(false);
   const [rendering, setRendering] = useState(true);
   const [userInitials, setUserInitials] = useState("N/A");
-  const [initialItems, setInitialItems] = useState([
-    { label: "My Entries", value: "my_entries" },
-    { label: "Published Entries", value: "published_entries" },
-  ]);
-  const [open, setOpen] = useState(false);
-  const [items, setItems] = useState(initialItems);
   const [selectedNote, setSelectedNote] = useState<Note | undefined>(undefined);
   const [isModalVisible, setModalVisible] = useState(false);
   const [userName, setUserName] = useState("");
@@ -113,14 +99,13 @@ const Library = () => {
       const skip = (pageNum - 1) * limit;
       const userId = authUser?.id ?? "";
       // Use batch-fetching with skip and limit; note we use isPrivate state
-      const data = await ApiService.fetchMapsMessagesBatch(isPrivate, published, isPrivate ? userId : "", limit, skip);
+      const data = await fetchNotes({ published: true, limit, offset: skip });
       // Filter out archived notes; assume notes without `isArchived` are not archived
       const publicNotes = data.filter((note: Note) => note.isPublished);
       // Convert data and sort notes by date (latest first)
-      const fetchedNotes = DataConversion.convertMediaTypes(publicNotes).sort(
+      const finalNotes = DataConversion.convertMediaTypes(publicNotes).sort(
         (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
       );
-      const finalNotes = reversed ? fetchedNotes.reverse() : fetchedNotes;
 
       if (pageNum === 1) {
         setNotes(finalNotes);
@@ -211,12 +196,6 @@ const Library = () => {
     inputRange: [0, screenWidth],
     outputRange: [0, screenWidth],
   });
-
-  const handleReverseOrder = () => {
-    setNotes(notes.reverse());
-    setReversed(!reversed);
-    setUpdateCounter(updateCounter + 1);
-  };
 
   const renderList = (notes: Note[]) => {
     // Filter notes if there's a search query.
@@ -329,17 +308,6 @@ const Library = () => {
 
   const [searchQuery, setSearchQuery] = useState("");
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-  };
-
-  const formatDate = (date: Date) => {
-    const day = date.getDate().toString();
-    const month = (date.getMonth() + 1).toString();
-    const year = date.getFullYear();
-    return `${month}/${day}/${year}`;
-  };
-
   //handle sort
   const handleSort = () => {
     setIsSortOpened(!isSortOpened);
@@ -435,13 +403,13 @@ const Library = () => {
               </Animated.View>
             )}
             {isSearchVisible ? (
-              <View style={[styles(theme, width).seachIcon, { marginTop: -25 }]}>
+              <View style={[styles(theme, width).searchIcon, { marginTop: -25 }]}>
                 <TouchableOpacity onPress={toggleSearchBar} testID="close-button">
                   <Ionicons name="close" size={25} />
                 </TouchableOpacity>
               </View>
             ) : (
-              <View style={styles(theme, width).seachIcon}>
+              <View style={styles(theme, width).searchIcon}>
                 <TouchableOpacity onPress={toggleSearchBar} testID="search-button">
                   <Ionicons name="search" size={25} />
                 </TouchableOpacity>
@@ -549,15 +517,6 @@ const styles = (theme, width, color, isDarkmode) =>
       alignSelf: "center",
       color: theme.white,
     },
-    shareColor: {
-      color: "green",
-    },
-    highlightColor: {
-      color: theme.text,
-    },
-    backColor: {
-      color: "red",
-    },
     userPhoto: {
       height: width * 0.095,
       width: width * 0.095,
@@ -567,34 +526,8 @@ const styles = (theme, width, color, isDarkmode) =>
       backgroundColor: theme.black,
       marginLeft: 8,
     },
-    noteTitle: {
-      ...defaultTextFont,
-      fontSize: 22,
-      fontWeight: "700",
-      maxWidth: "100%",
-      flexShrink: 1,
-      color: theme.text,
-    },
-    noteText: {
-      ...defaultTextFont,
-      marginTop: 10,
-      fontSize: 18,
-      color: theme.text,
-    },
     scrollerBackgroundColor: {
       flex: 1,
-    },
-    addButton: {
-      position: "absolute",
-      bottom: 20,
-      right: 20,
-      backgroundColor: theme.text,
-      borderRadius: 50,
-      width: 50,
-      height: 50,
-      alignItems: "center",
-      justifyContent: "center",
-      color: theme.text,
     },
     topView: {
       flexDirection: "row",
@@ -604,53 +537,6 @@ const styles = (theme, width, color, isDarkmode) =>
       marginBottom: 0,
       marginTop: 10,
       backgroundColor: theme.homeColor,
-    },
-    dropdown: {
-      width: "100%",
-      alignItems: "center",
-      zIndex: 1000,
-      marginTop: -13,
-    },
-    noteContainer: {
-      justifyContent: "space-between",
-      alignItems: "center",
-      alignSelf: "center",
-      backgroundColor: theme.primaryColor,
-      marginTop: 1,
-      width: "100%",
-      flexDirection: "row",
-      height: 185,
-      paddingLeft: width * 0.03,
-      paddingRight: width * 0.03,
-      color: theme.text,
-    },
-    rowBack: {
-      width: "100%",
-      height: 140,
-      alignItems: "center",
-      backgroundColor: theme.homeGray,
-      flex: 1,
-      flexDirection: "row",
-      justifyContent: "space-between",
-      marginTop: 1,
-      padding: 10,
-      alignSelf: "center",
-    },
-    backRightBtn: {
-      alignItems: "flex-end",
-      bottom: 0,
-      justifyContent: "center",
-      position: "absolute",
-      top: 0,
-      width: 75,
-      paddingRight: 17,
-      color: theme.text,
-    },
-    backRightBtnRight: {
-      backgroundColor: theme.homeGray,
-      width: "50%",
-      right: 0,
-      color: theme.text,
     },
     userWishContainer: {
       marginRight: 10,
@@ -684,6 +570,9 @@ const styles = (theme, width, color, isDarkmode) =>
       paddingHorizontal: 10,
       paddingVertical: 0,
       width: "100%",
+    },
+    searchIcon: {
+      marginBottom: 10,
     },
     searchParentContainer: {
       flexDirection: "row",

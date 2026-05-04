@@ -3,7 +3,6 @@ import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import { Platform } from "react-native";
 import AddNoteScreen from "../lib/screens/AddNoteScreen";
 import LocationWindow from "../lib/components/time";
-import moxios from "moxios";
 
 // Mock external dependencies
 jest.mock("../lib/components/ThemeProvider", () => ({
@@ -32,13 +31,11 @@ const mockPlatformOS = (OS: string) => {
 beforeAll(() => {
   jest.spyOn(console, "log").mockImplementation(() => {});
   jest.spyOn(console, "error").mockImplementation(() => {});
-  moxios.install();
 });
 
 afterAll(() => {
   (console.log as jest.Mock).mockRestore();
   (console.error as jest.Mock).mockRestore();
-  moxios.uninstall();
 });
 
 describe("AddNoteScreen", () => {

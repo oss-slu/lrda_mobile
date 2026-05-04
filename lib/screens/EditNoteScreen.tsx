@@ -1,12 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   View,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
   StyleSheet,
   Keyboard,
   Alert,
@@ -19,7 +17,7 @@ import PhotoScroller from "../components/photoScroller";
 import { useAuthStore } from "../stores/authStore";
 import AudioContainer from "../components/audio";
 import { Media, AudioType } from "../models/media_class";
-import ApiService from "../utils/api_calls";
+import { updateNote as apiUpdateNote } from "../utils/api_calls";
 import TagWindow from "../components/tagging";
 import { DEFAULT_TOOLBAR_ITEMS, RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
 import NotePageStyles, { customImageCSS } from "../../styles/pages/NoteStyles";
@@ -43,7 +41,6 @@ const EditNoteScreen = () => {
     }
   }, [noteData]);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   const [title, setTitle] = useState(note.title || "Untitled");
   const [time, setTime] = useState(new Date(note.time));
@@ -56,7 +53,6 @@ const EditNoteScreen = () => {
     latitude: note.latitude || 0,
     longitude: note.longitude || 0,
   });
-  const [locationButtonColor, setLocationButtonColor] = useState<string>("#000");
   const [isTagging, setIsTagging] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [viewMedia, setViewMedia] = useState(false);
@@ -68,33 +64,13 @@ const EditNoteScreen = () => {
     avoidIosKeyboard: true,
   });
   const { setPublishNote } = useAddNoteContext();
-  const hasFocusedRef = useRef(false);
 
   useEffect(() => {
-    // ─── LISTEN on all platforms for show / hide ───
     const showSub = Keyboard.addListener("keyboardDidShow", () => {
-      console.log(" Keyboard shown");
       setKeyboardVisible(true);
     });
     const hideSub = Keyboard.addListener("keyboardDidHide", () => {
-      console.log("Keyboard hidden");
       setKeyboardVisible(false);
-    });
-    console.log("KEYBOARD VIS:", keyboardVisible);
-    return () => {
-      showSub.remove();
-      hideSub.remove();
-    };
-  }, []);
-  //find the keyboards height
-  useEffect(() => {
-    const showSub = Keyboard.addListener("keyboardDidShow", ({ endCoordinates }) => {
-      setKeyboardVisible(true);
-      setKeyboardHeight(endCoordinates.height);
-    });
-    const hideSub = Keyboard.addListener("keyboardDidHide", () => {
-      setKeyboardVisible(false);
-      setKeyboardHeight(0);
     });
     return () => {
       showSub.remove();
@@ -130,7 +106,6 @@ const EditNoteScreen = () => {
 
   const setLocationToZero = () => {
     setLocation({ latitude: 0, longitude: 0 });
-    setLocationButtonColor("red");
   };
 
   const syncEditorContent = async () => {
@@ -147,7 +122,6 @@ const EditNoteScreen = () => {
           latitude: userLocation.coords.latitude,
           longitude: userLocation.coords.longitude,
         });
-        setLocationButtonColor(theme.text);
       } catch (error) {
         Alert.alert("Error", "Failed to retrieve location.");
       }
@@ -212,8 +186,6 @@ const EditNoteScreen = () => {
   };
 
   const handlePublishPress = async () => {
-    console.log("📤 Publish button pressed in EditNoteScreen");
-
     const latestContent = await editor.getHTML();
     initialText.current = latestContent;
 
@@ -221,9 +193,7 @@ const EditNoteScreen = () => {
     const bodyIsEmpty = latestContent.replace(/<\/?[^>]+(>|$)/g, "").trim().length === 0;
 
     if (!titleIsEmpty || !bodyIsEmpty || tags.length !== 0 || media.length !== 0 || newAudio.length !== 0) {
-      console.log("✅ Valid content found. Proceeding to publish...");
-
-      setIsPublished(true); // Only publish if explicitly pressed
+      setIsPublished(true);
       setIsUpdating(true);
 
       try {
@@ -241,7 +211,7 @@ const EditNoteScreen = () => {
           tags,
         };
 
-        await ApiService.overwriteNote(editedNote);
+        await apiUpdateNote(editedNote);
         setIsPublishBtnClicked(true);
 
         ToastMessage.show({
@@ -250,16 +220,13 @@ const EditNoteScreen = () => {
           visibilityTime: 3000,
         });
 
-        console.log("🧭 Navigating back after publish");
         router.back();
       } catch (error) {
-        console.error("❌ Error publishing note:", error);
+        console.error("Error publishing note:", error);
       } finally {
         setIsUpdating(false);
         toggleAddNoteState();
       }
-    } else {
-      console.log("⚠️ Empty note — publish skipped.");
     }
   };
 
@@ -280,7 +247,7 @@ const EditNoteScreen = () => {
         time,
         tags,
       };
-      await ApiService.overwriteNote(editedNote);
+      await apiUpdateNote(editedNote);
     } catch (error) {
       console.error("Error updating the note:", error);
     } finally {
@@ -311,9 +278,8 @@ const EditNoteScreen = () => {
               time: new Date(),
             };
 
-            console.log("Auto-saving EditNote on exit...");
             setIsUpdating(true);
-            await ApiService.overwriteNote(updatedNote);
+            await apiUpdateNote(updatedNote);
           } catch (e) {
             console.warn("Auto-save failed:", e);
           } finally {

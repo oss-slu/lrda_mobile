@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Dimensions } from "react-native";
 import LoadingImage from "./loadingImage";
 import * as Location from "expo-location";
-import ApiService from "../utils/api_calls";
+import { fetchCreatorName } from "../utils/api_calls";
 import { defaultTextFont } from "../../styles/globalStyles";
 
 const { width, height } = Dimensions.get("window");
@@ -13,7 +13,7 @@ function NotesComponent({ IsImage, resolvedImageURI, ImageType, textLength, show
 
   const fetchUserName = async (creatorId: string) => {
     try {
-      const name = await ApiService.fetchCreatorName(creatorId);
+      const name = await fetchCreatorName(creatorId);
       setAuthor(name);
     } catch (error) {
       console.error("Failed to fetch creator name:", error);

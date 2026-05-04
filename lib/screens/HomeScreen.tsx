@@ -1,32 +1,28 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Platform,
   View,
   Text,
   TouchableOpacity,
   Dimensions,
-  Image,
   TextInput,
   StyleSheet,
   Pressable,
   Animated,
   StatusBar,
-  Keyboard,
   ActivityIndicator,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useAuthStore } from "../stores/authStore";
 import { getHasDoneTutorial, setTutorialDone } from "../utils/tutorial";
 import { Note } from "../../types";
-import ApiService from "../utils/api_calls";
+import { fetchNotes, updateNote as apiUpdateNote } from "../utils/api_calls";
 import DataConversion from "../utils/data_conversion";
 import { SwipeListView } from "react-native-swipe-list-view";
 import NoteSkeleton from "../components/noteSkeleton";
-import LoadingImage from "../components/loadingImage";
 import { formatToLocalDateString } from "../components/time";
 import { useTheme } from "../components/ThemeProvider";
 import Constants from "expo-constants";
-import DropDownPicker from "react-native-dropdown-picker";
 import NoteDetailModal from "./mapPage/NoteDetailModal";
 import ToastMessage from "react-native-toast-message";
 import NotesComponent from "../components/NotesComponent";
@@ -46,22 +42,13 @@ const HomeScreen: React.FC = () => {
   const router = useRouter();
   const authUser = useAuthStore((s) => s.user);
   const [notes, setNotes] = useState<Note[]>([]);
-  const [messages, setMessages] = useState<any[]>([]);
   const [updateCounter, setUpdateCounter] = useState(0);
   const [isPrivate, setIsPrivate] = useState(true);
   const [published, setPublished] = useState(false);
-  const [reversed, setReversed] = useState(false);
   const [rendering, setRendering] = useState(true);
   const [userInitials, setUserInitials] = useState("N/A");
   const [userName, setUserName] = useState("");
-  const [initialItems, setInitialItems] = useState([
-    { label: "My Entries", value: "my_entries" },
-    { label: "Published Entries", value: "published_entries" },
-  ]);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(initialItems[0].value);
-  const [items, setItems] = useState(initialItems);
   const [selectedNote, setSelectedNote] = useState<Note | undefined>(undefined);
   const [isModalVisible, setModalVisible] = useState(false);
   const { setNavigateToAddNote } = useAddNoteContext();
@@ -80,7 +67,6 @@ const HomeScreen: React.FC = () => {
   useEffect(() => {
     const navigateToAddNote = () => {
       const untitledNumber = findNextUntitledNumber(notes);
-      console.log("in homescreen untitled numbe ", untitledNumber);
       router.push({ pathname: "/add-note", params: { untitledNumber: String(untitledNumber) } });
     };
     setNavigateToAddNote(() => navigateToAddNote);
@@ -131,23 +117,24 @@ const HomeScreen: React.FC = () => {
       const skip = (pageNum - 1) * limit;
       const userId = authUser?.id ?? "";
 
-      const data = await ApiService.fetchMessagesBatch(false, published, userId, limit, skip);
+      const data = await fetchNotes({
+        creatorId: userId || undefined,
+        published: published ? true : userId ? false : undefined,
+        limit,
+        offset: skip,
+      });
 
-      const filteredNotes = data;
-
-      const convertedNotes = DataConversion.convertMediaTypes(filteredNotes).sort(
+      const convertedNotes = DataConversion.convertMediaTypes(data).sort(
         (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
       );
 
-      const finalNotes = reversed ? convertedNotes.reverse() : convertedNotes;
-
       if (pageNum === 1) {
-        setNotes(finalNotes);
+        setNotes(convertedNotes);
       } else {
-        setNotes((prev) => [...prev, ...finalNotes]);
+        setNotes((prev) => [...prev, ...convertedNotes]);
       }
 
-      setHasMore(finalNotes.length === limit);
+      setHasMore(convertedNotes.length === limit);
     } catch (error) {
       console.error("Error fetching notes:", error);
       ToastMessage.show({
@@ -222,18 +209,14 @@ const HomeScreen: React.FC = () => {
           isPublished: false,
         };
 
-        const response = await ApiService.overwriteNote(updatedNote);
-        if (response.ok) {
-          ToastMessage.show({
-            type: "success",
-            text1: "Success",
-            text2: "Note successfully archived.",
-          });
-          updateNote(updatedNote); // Update the note in local state
-          return true;
-        } else {
-          throw new Error("Archiving failed");
-        }
+        await apiUpdateNote(updatedNote);
+        ToastMessage.show({
+          type: "success",
+          text1: "Success",
+          text2: "Note successfully archived.",
+        });
+        updateNote(updatedNote);
+        return true;
       } catch (error) {
         ToastMessage.show({
           type: "error",
@@ -337,7 +320,7 @@ const HomeScreen: React.FC = () => {
       time: foundNote?.time || new Date(),
       tags: foundNote?.tags || [],
     };
-    await ApiService.overwriteNote(editedNote);
+    await apiUpdateNote(editedNote);
     refreshPage();
   }
 
@@ -494,10 +477,6 @@ const HomeScreen: React.FC = () => {
 
   const [searchQuery, setSearchQuery] = useState("");
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-  };
-
   const toggleSearchBar = () => {
     if (isSearchVisible) {
       // Hide the search container
@@ -522,20 +501,6 @@ const HomeScreen: React.FC = () => {
     inputRange: [0, width],
     outputRange: [0, width],
   });
-
-  const formatDate = (date: Date) => {
-    const day = date.getDate().toString();
-    const month = (date.getMonth() + 1).toString();
-    const year = date.getFullYear();
-    return `${month}/${day}/${year}`;
-  };
-
-  const filteredNotes = useMemo(() => {
-    return notes.filter((note) => {
-      const noteTime = formatToLocalDateString(new Date(note.time));
-      return note.title.toLowerCase().includes(searchQuery.toLowerCase()) || noteTime.includes(searchQuery);
-    });
-  }, [notes, searchQuery]);
 
   const [userTutorial, setUserTutorial] = useState<boolean | null>(null);
   const [accountTip, setAccountTip] = useState<boolean>(false); // Start false, renamed from setAccontTip
@@ -879,12 +844,6 @@ const styles = (theme, width, color, isDarkmode) =>
       alignSelf: "center",
       color: theme.white,
     },
-    shareColor: {
-      color: "green",
-    },
-    highlightColor: {
-      color: theme.text,
-    },
     backColor: {
       color: "red",
     },
@@ -897,35 +856,9 @@ const styles = (theme, width, color, isDarkmode) =>
       backgroundColor: theme.black,
       marginLeft: 8,
     },
-    noteTitle: {
-      ...defaultTextFont,
-      fontSize: 22,
-      fontWeight: "700",
-      maxWidth: "100%",
-      flexShrink: 1,
-      color: theme.text,
-    },
-    noteText: {
-      ...defaultTextFont,
-      marginTop: 10,
-      fontSize: 18,
-      color: theme.text,
-    },
     scrollerBackgroundColor: {
       flex: 1,
       width: "100%",
-    },
-    addButton: {
-      position: "absolute",
-      bottom: 20,
-      right: 20,
-      backgroundColor: theme.text,
-      borderRadius: 50,
-      width: 50,
-      height: 50,
-      alignItems: "center",
-      justifyContent: "center",
-      color: theme.text,
     },
     topView: {
       flexDirection: "row",

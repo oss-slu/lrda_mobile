@@ -15,7 +15,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import RenderHTML, { TNodeRendererProps } from "react-native-render-html";
-import ApiService from "../../utils/api_calls";
+import { fetchCreatorName } from "../../utils/api_calls";
 import { useTheme } from "../../components/ThemeProvider";
 import ImageModal from "./ImageModal";
 import VideoModal from "./VideoModal";
@@ -425,11 +425,10 @@ const loadingVideoStyles = StyleSheet.create({
   },
 });
 
-// NoteDetailModal
 interface Note {
   title: string;
   description: string;
-  creator?: string;
+  creatorId?: string;
   time?: string;
   images?: { uri: string }[];
 }
@@ -458,7 +457,7 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
     setIsVideoVisible(false);
 
     if (note?.creatorId) {
-      ApiService.fetchCreatorName(note.creatorId)
+      fetchCreatorName(note.creatorId)
         .then((name) => setCreatorName(name))
         .catch(() => setCreatorName("Unknown Creator"));
     } else {
