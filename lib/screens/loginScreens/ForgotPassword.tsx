@@ -8,7 +8,7 @@ import {
   Alert,
   ImageBackground,
 } from "react-native";
-import { authFetch, AUTH_API_URL } from "../../config/auth";
+import { authClient, AUTH_API_URL } from "../../auth/client";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useRouter } from "expo-router";
 
@@ -35,33 +35,13 @@ const ForgotPassword: React.FC = () => {
 
     try {
       const base = AUTH_API_URL ? AUTH_API_URL.replace(/\/$/, "") : "";
-      const response = await authFetch("/api/auth/request-password-reset", {
-        method: "POST",
-        skipAuth: true,
-        body: JSON.stringify({
-          email: email.trim(),
-          redirectTo: `${base}/reset-password`,
-        }),
+      const { error } = await authClient.requestPasswordReset({
+        email: email.trim(),
+        redirectTo: `${base}/reset-password`,
       });
 
-      if (!response.ok) {
-        let errorMessage = "Failed to send reset email.";
-
-        const errorText = await response.text();
-        if (errorText) {
-          try {
-            const errorPayload = JSON.parse(errorText);
-            errorMessage =
-              errorPayload?.message ||
-              errorPayload?.error?.message ||
-              errorPayload?.error ||
-              errorText;
-          } catch {
-            errorMessage = errorText;
-          }
-        }
-
-        throw new Error(errorMessage);
+      if (error) {
+        throw new Error(error.message || "Failed to send reset email.");
       }
 
       Alert.alert(

@@ -29,6 +29,7 @@
     "@types/react-native-onboarding-swiper": "^1.1.9",
     "axios": "^1.7.9",
     "babel-plugin-transform-inline-environment-variables": "^0.4.4",
+    "better-auth": "^1.6.9",
     "camelize": "^1.0.1",
     "cheerio": "0.22.0",
     "dotenv": "^16.5.0",

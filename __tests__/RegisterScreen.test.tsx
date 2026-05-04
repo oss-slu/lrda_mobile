@@ -3,15 +3,15 @@ import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import RegistrationScreen from '../lib/screens/loginScreens/RegisterScreen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-jest.mock('../lib/config/auth', () => ({
+jest.mock('../lib/auth/client', () => ({
   AUTH_API_URL: 'https://example.com',
-  authFetch: jest.fn(() =>
-    Promise.resolve({
-      ok: true,
-      text: async () => '',
-      json: async () => ({}),
-    })
+  authClient: {},
+  signUpWithEmail: jest.fn(() =>
+    Promise.resolve({ data: {}, error: null })
   ),
+  signInWithEmail: jest.fn(() => Promise.resolve({ data: null, error: null })),
+  getCurrentSession: jest.fn(() => Promise.resolve({ data: null, error: null })),
+  signOut: jest.fn(() => Promise.resolve({ data: null, error: null })),
 }));
 
 //mock react-native-safe-area-context

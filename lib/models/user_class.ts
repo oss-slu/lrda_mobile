@@ -1,21 +1,13 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { UserData } from "../../types";
 import { getItem } from "../utils/async_storage";
-import { authFetch } from "../config";
+import {
+  signInWithEmail,
+  signOut as authSignOut,
+  getCurrentSession,
+} from "../auth/client";
 
 const USER_DATA_KEY = "userData";
-const AUTH_TOKEN_KEY = "authToken";
-
-type AuthResponse = {
-  token?: string;
-  accessToken?: string;
-  user?: UserData;
-  data?: {
-    token?: string;
-    accessToken?: string;
-    user?: UserData;
-  };
-};
 
 export class User {
   private static instance: User;
@@ -52,30 +44,16 @@ export class User {
   private async loadUser(): Promise<UserData | null> {
     try {
       const value = await AsyncStorage.getItem(USER_DATA_KEY);
-
-      // Log raw data retrieved from AsyncStorage
-      console.log("Loaded raw user data from AsyncStorage:", value);
-
-      // Check if data exists and is non-empty
       if (value && value.trim() !== "") {
         try {
-          const parsedData = JSON.parse(value);
-          console.log("Parsed user data:", parsedData);
-          return parsedData;
+          return JSON.parse(value);
         } catch (parseError) {
-          // Log detailed error if JSON parsing fails
           console.error("JSON parse error. Invalid data format:", value, parseError);
         }
-      } else {
-        // Log explicitly when the value is null or empty
-        console.log("No valid data in AsyncStorage or data is empty.");
       }
     } catch (error) {
-      // Log errors related to AsyncStorage operations
       console.error("Error retrieving or parsing user data from AsyncStorage:", error);
     }
-
-    // Return null if data is invalid or parsing fails
     return null;
   }
 
@@ -87,55 +65,23 @@ export class User {
     }
   }
 
-  private extractAuthPayload(payload: AuthResponse) {
-    const token =
-      payload?.token ??
-      payload?.accessToken ??
-      payload?.data?.token ??
-      payload?.data?.accessToken;
-    const user = payload?.user ?? payload?.data?.user ?? null;
-    return { token, user };
-  }
-
   private async clearSession() {
     this.userData = null;
-    await Promise.all([
-      this.clearUser(),
-      AsyncStorage.removeItem(AUTH_TOKEN_KEY),
-    ]);
+    await this.clearUser();
   }
 
   public async initializeUser(): Promise<boolean> {
     try {
-      const token = await AsyncStorage.getItem(AUTH_TOKEN_KEY);
+      const { data: session, error } = await getCurrentSession();
 
-      if (!token) {
+      if (error || !session?.user) {
         await this.clearSession();
         this.notifyLoginState();
         return false;
       }
 
-      const response = await authFetch("/api/auth/get-session", {
-        method: "GET",
-      });
-
-      if (!response.ok) {
-        await this.clearSession();
-        this.notifyLoginState();
-        return false;
-      }
-
-      const sessionPayload = await response.json();
-      const userFromSession = (sessionPayload?.user ?? sessionPayload?.data?.user) as UserData | null;
-
-      if (!userFromSession) {
-        await this.clearSession();
-        this.notifyLoginState();
-        return false;
-      }
-
-      this.userData = userFromSession;
-      await this.persistUser(userFromSession);
+      this.userData = session.user as UserData;
+      await this.persistUser(this.userData);
       this.notifyLoginState();
       return true;
     } catch (error) {
@@ -148,27 +94,18 @@ export class User {
 
   public async login(email: string, password: string): Promise<string> {
     try {
-      const response = await authFetch("/api/auth/sign-in/email", {
-        method: "POST",
-        body: JSON.stringify({ email, password }),
-        skipAuth: true,
-      });
+      const { data, error } = await signInWithEmail(email, password);
 
-      if (!response.ok) {
-        const message = await response.text();
-        throw new Error(message || "Failed to sign in");
+      if (error) {
+        throw new Error(error.message || "Failed to sign in");
       }
 
-      const payload = (await response.json()) as AuthResponse;
-      const { token, user } = this.extractAuthPayload(payload);
-
-      if (!token || !user) {
-        throw new Error("Missing token or user in sign-in response");
+      if (!data?.user) {
+        throw new Error("Missing user in sign-in response");
       }
 
-      await AsyncStorage.setItem(AUTH_TOKEN_KEY, token);
-      this.userData = user;
-      await this.persistUser(user);
+      this.userData = data.user as UserData;
+      await this.persistUser(this.userData);
       this.notifyLoginState();
 
       return "success";
@@ -180,17 +117,12 @@ export class User {
 
   public async logout(dispatch?: any) {
     try {
-      await authFetch("/api/auth/sign-out", {
-        method: "POST",
-      });
+      await authSignOut();
     } catch (error) {
       console.error("Error during API sign out", error);
     } finally {
       await this.clearSession();
       this.notifyLoginState();
-      if (dispatch) {
-        console.log("logout dispatch received, but navigation state is now router-managed");
-      }
     }
   }
 
@@ -203,10 +135,8 @@ export class User {
       : null;
   }
 
-
   public async getName(): Promise<string | null> {
     if (!this.userData) {
-      // Load user data from AsyncStorage if not already loaded
       this.userData = await this.loadUser();
     }
 
@@ -231,7 +161,6 @@ export class User {
     return fullName.length > 0 ? fullName : null;
   }
 
-
   public async hasOnboarded(): Promise<boolean> {
     const onboarded = await getItem('onboarded');
     return onboarded === '1';
@@ -246,6 +175,7 @@ export class User {
     }
     return this.userData?.roles ?? null;
   }
+
   public static async getHasDoneTutorial(page_tutorial): Promise<boolean> {
     try {
       const value = await AsyncStorage.getItem(page_tutorial);

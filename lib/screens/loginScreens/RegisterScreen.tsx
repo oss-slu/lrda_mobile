@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Snackbar } from "react-native-paper";
-import { authFetch } from "../../config/auth";
+import { signUpWithEmail } from "../../auth/client";
 import { validateEmail, validatePassword } from "../../utils/validation";
 import { defaultTextFont } from "../../../styles/globalStyles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -69,19 +69,14 @@ const RegistrationScreen: React.FC = () => {
 
     try {
       const fullName = `${firstName} ${lastName}`;
-      const response = await authFetch("/api/auth/sign-up/email", {
-        method: "POST",
-        skipAuth: true,
-        body: JSON.stringify({
-          email,
-          password,
-          name: fullName.trim(),
-        }),
+      const { error } = await signUpWithEmail({
+        email,
+        password,
+        name: fullName.trim(),
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || "Signup failed. Please try again.");
+      if (error) {
+        throw new Error(error.message || "Signup failed. Please try again.");
       }
 
       await clearNavigationKeys();

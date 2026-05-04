@@ -6,21 +6,24 @@ import configureStore from 'redux-mock-store';
 import LoginScreen from '../lib/screens/loginScreens/LoginScreen';
 import moxios from 'moxios';
 
-jest.mock('../lib/config', () => ({
+jest.mock('../lib/auth/client', () => ({
   AUTH_API_URL: 'https://example.com',
-  authFetch: jest.fn(() =>
+  authClient: {},
+  signInWithEmail: jest.fn(() =>
     Promise.resolve({
-      ok: true,
-      json: async () => ({
-        token: 'mock-token',
+      data: {
         user: {
           '@id': '12345',
           name: 'Test User',
           roles: { administrator: false, contributor: true },
         },
-      }),
+      },
+      error: null,
     })
   ),
+  signUpWithEmail: jest.fn(() => Promise.resolve({ data: {}, error: null })),
+  getCurrentSession: jest.fn(() => Promise.resolve({ data: null, error: null })),
+  signOut: jest.fn(() => Promise.resolve({ data: null, error: null })),
 }));
 
 // Create a mock store

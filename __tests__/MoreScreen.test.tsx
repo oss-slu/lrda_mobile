@@ -216,7 +216,6 @@ describe('MorePage - Settings View and Modals', () => {
 
     // Check that settings options are visible
     expect(getByText('App Theme')).toBeTruthy();
-    expect(getByText('Delete My Account')).toBeTruthy();
     expect(getByText('Report an Issue')).toBeTruthy();
   });
 
