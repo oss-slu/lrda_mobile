@@ -1,10 +1,27 @@
 import React from 'react';
 import { fireEvent, render, waitFor, act } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
-import { SafeAreaProvider } from 'react-native-safe-area-context'; 
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import configureStore from 'redux-mock-store';
 import LoginScreen from '../lib/screens/loginScreens/LoginScreen';
 import moxios from 'moxios';
+
+jest.mock('../lib/config', () => ({
+  AUTH_API_URL: 'https://example.com',
+  authFetch: jest.fn(() =>
+    Promise.resolve({
+      ok: true,
+      json: async () => ({
+        token: 'mock-token',
+        user: {
+          '@id': '12345',
+          name: 'Test User',
+          roles: { administrator: false, contributor: true },
+        },
+      }),
+    })
+  ),
+}));
 
 // Create a mock store
 const mockStore = configureStore([]);
@@ -14,20 +31,6 @@ const store = mockStore({
   },
 });
 
-jest.mock("firebase/database", () => ({
-  getDatabase: jest.fn(),
-}));
-
-jest.mock("firebase/auth", () => ({
-  getAuth: jest.fn(),
-  initializeAuth: jest.fn(),
-  getReactNativePersistence: jest.fn(),
-  onAuthStateChanged: jest.fn(),
-  signInWithEmailAndPassword: jest.fn(() =>
-    Promise.resolve({ user: { uid: '12345' } })
-  ),
-}));
-
 jest.mock("react-native-safe-area-context", () => {
   const { View } = require("react-native");
   return {
@@ -36,18 +39,6 @@ jest.mock("react-native-safe-area-context", () => {
     useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
   };
 });
-
-
-
-jest.mock("firebase/storage", () => ({
-  getStorage: jest.fn(),
-}));
-
-jest.mock('firebase/firestore', () => ({
-  getFirestore: jest.fn(() => ({})), 
-  doc: jest.fn(() => ({})), 
-  getDoc: jest.fn(() => Promise.resolve({ exists: () => false })),
-}));
 
 // Stub SplashScreen to bypass it entirely
 jest.mock("expo-splash-screen", () => ({
@@ -59,9 +50,9 @@ jest.mock("expo-splash-screen", () => ({
 beforeEach(() => {
   jest.clearAllMocks();
   jest.useFakeTimers();
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
+  jest.spyOn(console, 'log').mockImplementation(() => { });
+  jest.spyOn(console, 'error').mockImplementation(() => { });
+  jest.spyOn(console, 'warn').mockImplementation(() => { });
   moxios.install();
 });
 
@@ -109,8 +100,8 @@ describe('LoginScreen', () => {
     // 2️⃣ Simulate user tap on splash screen
     fireEvent.press(getByText("Where's \n Religion?"));
 
-   // Fast-forward the animation to skip waiting for 6 seconds
-  jest.advanceTimersByTime(6000); // Move time forward by 6000ms
+    // Fast-forward the animation to skip waiting for 6 seconds
+    jest.advanceTimersByTime(6000); // Move time forward by 6000ms
 
 
     // 4️⃣ Wait for the login form to be present

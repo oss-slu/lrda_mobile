@@ -8,8 +8,7 @@ import {
   Alert,
   ImageBackground,
 } from "react-native";
-import { sendPasswordResetEmail } from "firebase/auth";
-import { auth } from "../../config"; // Firebase auth instance
+import { authFetch, AUTH_API_URL } from "../../config/auth";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useRouter } from "expo-router";
 
@@ -35,14 +34,49 @@ const ForgotPassword: React.FC = () => {
     }
 
     try {
-      await sendPasswordResetEmail(auth, email);
+      const base = AUTH_API_URL ? AUTH_API_URL.replace(/\/$/, "") : "";
+      const response = await authFetch("/api/auth/request-password-reset", {
+        method: "POST",
+        skipAuth: true,
+        body: JSON.stringify({
+          email: email.trim(),
+          redirectTo: `${base}/reset-password`,
+        }),
+      });
+
+      if (!response.ok) {
+        let errorMessage = "Failed to send reset email.";
+
+        const errorText = await response.text();
+        if (errorText) {
+          try {
+            const errorPayload = JSON.parse(errorText);
+            errorMessage =
+              errorPayload?.message ||
+              errorPayload?.error?.message ||
+              errorPayload?.error ||
+              errorText;
+          } catch {
+            errorMessage = errorText;
+          }
+        }
+
+        throw new Error(errorMessage);
+      }
+
       Alert.alert(
         "Success",
-        `A password reset link has been sent to ${email}.`
+        `If an account exists for ${email.trim()}, a password reset link has been sent.`
       );
       router.back();
     } catch (error: any) {
-      Alert.alert("Error", error.message || "Failed to send reset email.");
+      let message = error?.message || "Failed to send reset email.";
+
+      if (message.includes("too many requests") || message.includes("429")) {
+        message = "Too many reset attempts. Please wait a moment and try again.";
+      }
+
+      Alert.alert("Error", message);
     }
   };
 

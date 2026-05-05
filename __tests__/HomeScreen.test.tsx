@@ -4,7 +4,6 @@ import { Provider } from 'react-redux';
 import configureStore from 'redux-mock-store'; // Import for creating a mock store
 import HomeScreen from '../lib/screens/HomeScreen';
 import { AddNoteProvider } from '../lib/context/AddNoteContext';
-import { onAuthStateChanged } from 'firebase/auth';
 import ApiService from '../lib/utils/api_calls';
 
 // Mock external dependencies
@@ -14,29 +13,13 @@ jest.mock('../lib/components/ThemeProvider', () => ({
   }),
 }));
 
-// Mock Firebase services (unchanged)
-jest.mock("firebase/app", () => ({
-  initializeApp: jest.fn(),
-  getApps: jest.fn(() => []),
-}));
-
-jest.mock("firebase/auth", () => ({
-  getAuth: jest.fn(),
-  initializeAuth: jest.fn(),
-  getReactNativePersistence: jest.fn(),
-  onAuthStateChanged: jest.fn(),
-}));
-
-jest.mock("firebase/firestore", () => ({
-  getFirestore: jest.fn(),
-}));
-
-jest.mock("firebase/database", () => ({
-  getDatabase: jest.fn(),
-}));
-
-jest.mock("firebase/storage", () => ({
-  getStorage: jest.fn(),
+jest.mock('../lib/models/user_class', () => ({
+  User: {
+    getInstance: jest.fn(() => ({
+      getName: jest.fn(() => Promise.resolve('Test User')),
+      getId: jest.fn(() => Promise.resolve('12345')),
+    })),
+  },
 }));
 
 jest.mock('expo-font', () => ({
@@ -56,11 +39,6 @@ jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
     settings: {},
   })),
 }));
-
-onAuthStateChanged.mockImplementation((auth, callback) => {
-  const mockUser = { uid: "12345", email: "test@example.com" };
-  callback(mockUser);
-});
 
 // Mock expo-location module
 jest.mock('expo-location', () => ({
@@ -82,8 +60,8 @@ const store = mockStore({}); // You can pass an initial state here if needed
 
 beforeEach(() => {
   jest.clearAllMocks();
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  jest.spyOn(console, 'log').mockImplementation(() => { });
+  jest.spyOn(console, 'error').mockImplementation(() => { });
 });
 
 afterEach(() => {
@@ -131,7 +109,7 @@ describe('HomeScreen', () => {
 
   it("applies correct styles to the user name text", async () => {
     const routeMock = { params: { untitledNumber: 1 } };
-  
+
     const { getByTestId } = render(
       <Provider store={store}>
         <AddNoteProvider>
@@ -139,10 +117,10 @@ describe('HomeScreen', () => {
         </AddNoteProvider>
       </Provider>
     );
-  
+
     const userNameText = await waitFor(() => getByTestId("user-name"));
     const styles = userNameText.props.style;
-  
+
     expect(styles).toEqual(
       expect.objectContaining({
         textAlign: 'center',
@@ -150,7 +128,7 @@ describe('HomeScreen', () => {
       })
     );
   });
-  
+
 
   it('renders sort button', async () => {
 
@@ -169,7 +147,7 @@ describe('HomeScreen', () => {
 
   it('shows sort options', async () => {
     const routeMock = { params: { untitledNumber: 1 } };
-  
+
     const { getByTestId } = render(
       <Provider store={store}> {/* Wrap with Provider */}
         <AddNoteProvider>
@@ -177,13 +155,13 @@ describe('HomeScreen', () => {
         </AddNoteProvider>
       </Provider>
     );
-  
+
     // Wait for the sort button to be rendered
     const sortButton = await waitFor(() => getByTestId('sort-button'));
-    
+
     // Simulate pressing the sort button
     fireEvent.press(sortButton);
-  
+
     // Check if the sort options are rendered
     const sortOptions = await waitFor(() => getByTestId('sort-options'));
     expect(sortOptions).toBeTruthy();
@@ -258,7 +236,7 @@ describe('HomeScreen', () => {
   it("renders the account component and navigates to AccountPage when clicked", async () => {
     const mockNavigate = jest.fn();  // Mock navigation function
     const routeMock = { params: { untitledNumber: 1 } };
-  
+
     const { getByTestId } = render(
       <Provider store={store}> {/* Wrap with Provider */}
         <AddNoteProvider>
@@ -266,14 +244,14 @@ describe('HomeScreen', () => {
         </AddNoteProvider>
       </Provider>
     );
-  
+
     // Find the account button
     const accountComponent = await waitFor(() => getByTestId("user-account"));
     expect(accountComponent).toBeTruthy();
-  
+
     // Simulate pressing the button
     fireEvent.press(accountComponent);
-  
+
     // Check if navigation was triggered
     // Navigation now uses expo-router's router.push("/account")
     const { useRouter } = require('expo-router');
@@ -282,7 +260,7 @@ describe('HomeScreen', () => {
 
   it("handles and renders the 'Notes' title next to the account component", async () => {
     const routeMock = { params: { untitledNumber: 1 } };
-  
+
     const { getByText } = render(
       <Provider store={store}> {/* Wrap with Provider */}
         <AddNoteProvider>
@@ -290,7 +268,7 @@ describe('HomeScreen', () => {
         </AddNoteProvider>
       </Provider>
     );
-  
+
     // Wait for "Notes" title to appear
     await waitFor(() => {
       expect(getByText("Notes")).toBeTruthy();
@@ -301,7 +279,7 @@ describe('HomeScreen', () => {
 
     // Mock the API call to return an empty array (No notes found)
     jest.spyOn(ApiService, "fetchMessagesBatch").mockResolvedValueOnce([]);
-  
+
     const { getByTestId } = render(
       <Provider store={store}> {/* Wrap with Provider */}
         <AddNoteProvider>
@@ -309,13 +287,13 @@ describe('HomeScreen', () => {
         </AddNoteProvider>
       </Provider>
     );
-  
+
     // Ensure the API call was triggered
     await waitFor(() => {
       expect(ApiService.fetchMessagesBatch).toHaveBeenCalled();
-   });
-   
-  
+    });
+
+
     // Ensure the Lottie animation appears
     await waitFor(() => {
       expect(getByTestId("no-results-animation")).toBeTruthy();
@@ -324,7 +302,7 @@ describe('HomeScreen', () => {
 
   it("applies the default font style to the 'Notes' title", async () => {
     const routeMock = { params: { untitledNumber: 1 } };
-  
+
     const { getByText } = render(
       <Provider store={store}>
         <AddNoteProvider>
@@ -332,15 +310,15 @@ describe('HomeScreen', () => {
         </AddNoteProvider>
       </Provider>
     );
-  
+
     const notesText = await waitFor(() => getByText("Notes"));
-  
+
     // Safely flatten the style
     const flattenedStyle = Array.isArray(notesText.props.style)
       ? Object.assign({}, ...notesText.props.style)
       : notesText.props.style;
-  
+
     expect(flattenedStyle.fontFamily).toBe("Inter"); // Update this as needed based on your globalStyles file
   });
-  
+
 });

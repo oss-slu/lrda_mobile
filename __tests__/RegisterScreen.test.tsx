@@ -1,50 +1,59 @@
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import RegistrationScreen from '../lib/screens/loginScreens/RegisterScreen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+type Insets = { top: number; bottom: number; left: number; right: number };
+type SafeAreaConsumerProps = {
+  children: (insets: Insets) => React.ReactNode;
+};
+type ProviderProps = {
+  children?: React.ReactNode;
+};
+type ScrollViewProps = {
+  children?: React.ReactNode;
+};
+type SnackbarProps = {
+  children?: React.ReactNode;
+  visible?: boolean;
+  onDismiss?: () => void;
+  duration?: number;
+};
+
+const mockReplace = jest.fn();
+
+jest.mock('expo-router', () => ({
+  useRouter: () => ({
+    replace: mockReplace,
+  }),
+}));
+
+jest.mock('../lib/config/auth', () => ({
+  AUTH_API_URL: 'https://example.com',
+  authFetch: jest.fn(() =>
+    Promise.resolve({
+      ok: true,
+      text: async () => '',
+      json: async () => ({}),
+    })
+  ),
+}));
 
 //mock react-native-safe-area-context
 jest.mock('react-native-safe-area-context', () => {
   return {
-    SafeAreaProvider: ({ children }) => children,
-    SafeAreaConsumer: ({ children }) => children({ top: 0, bottom: 0, left: 0, right: 0 }),
+    SafeAreaProvider: ({ children }: ProviderProps) => children,
+    SafeAreaConsumer: ({ children }: SafeAreaConsumerProps) => children({ top: 0, bottom: 0, left: 0, right: 0 }),
     useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
   };
 });
-
-// Mock Firebase authentication & Firestore
-jest.mock('firebase/auth', () => ({
-  getAuth: jest.fn(),
-  initializeAuth: jest.fn(() => ({
-    currentUser: null,
-  })),
-  getReactNativePersistence: jest.fn(),
-  createUserWithEmailAndPassword: jest.fn(() =>
-    Promise.resolve({ user: { uid: '12345' } })
-  ),
-  onAuthStateChanged: jest.fn(),
-}));
-
-jest.mock('../lib/config/firebase', () => ({
-  auth: {
-    currentUser: null,
-  },
-  db: {}, // Mock Firestore
-  realtimeDb: {}, // Mock Realtime Database
-}));
-
-jest.mock('firebase/firestore', () => ({
-  getFirestore: jest.fn(),
-  doc: jest.fn(),
-  setDoc: jest.fn(() => Promise.resolve()),
-  Timestamp: { now: jest.fn(() => 'mockTimestamp') },
-}));
 
 jest.mock('react-native-keyboard-aware-scroll-view', () => {
   const React = require('react');
   const { View } = require('react-native');
   return {
-    KeyboardAwareScrollView: ({ children }) => <View>{children}</View>,
+    KeyboardAwareScrollView: ({ children }: ScrollViewProps) => <View>{children}</View>,
   };
 });
 
@@ -52,7 +61,7 @@ jest.mock('react-native-paper', () => {
   const React = require('react');
   const { View } = require('react-native');
   return {
-    Snackbar: ({ children, visible, onDismiss, duration = 1500 }) => {
+    Snackbar: ({ children, visible, onDismiss, duration = 1500 }: SnackbarProps) => {
       React.useEffect(() => {
         if (visible && onDismiss && duration) {
           const timer = setTimeout(() => {
@@ -66,10 +75,11 @@ jest.mock('react-native-paper', () => {
   };
 });
 
-describe('RegisterScreen', () => {
-  const navigationMock = { navigate: jest.fn() };
-  const routeMock = { params: {} };
+beforeEach(() => {
+  mockReplace.mockClear();
+});
 
+describe('RegisterScreen', () => {
   it('renders correctly', () => {
     const { toJSON } = render(
       <SafeAreaProvider>
@@ -102,7 +112,6 @@ describe('RegisterScreen', () => {
     );
 
     fireEvent.press(getByText('Sign In'));
-    const { useRouter } = require('expo-router');
-    expect(useRouter().replace).toHaveBeenCalledWith("/(auth)/login");
+    expect(mockReplace).toHaveBeenCalledWith("/(auth)/login");
   });
 });

@@ -10,7 +10,7 @@ import { store } from '../redux/store/store';
 // Mock react-native-reanimated
 jest.mock('react-native-reanimated', () => {
   const Reanimated = require('react-native-reanimated/mock');
-  Reanimated.default.call = () => {};
+  Reanimated.default.call = () => { };
   return Reanimated;
 });
 
@@ -78,13 +78,6 @@ jest.mock('../lib/components/ThemeProvider', () => ({
   }),
 }));
 
-// Firebase and Expo mocks
-jest.mock('firebase/auth', () => ({ getAuth: jest.fn(), initializeAuth: jest.fn(), getReactNativePersistence: jest.fn(), onAuthStateChanged: jest.fn() }));
-jest.mock('firebase/database', () => ({ getDatabase: jest.fn() }));
-jest.mock('firebase/firestore', () => ({
-  getFirestore: jest.fn(),
-  doc: jest.fn(() => ({ get: jest.fn(() => Promise.resolve({ exists: false })) })),
-}));
 jest.mock('expo-location', () => ({
   getForegroundPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted' })),
   requestForegroundPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted' })),
@@ -115,9 +108,9 @@ const renderWithProviders = (component: React.ReactElement) => {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
+  jest.spyOn(console, 'log').mockImplementation(() => { });
+  jest.spyOn(console, 'error').mockImplementation(() => { });
+  jest.spyOn(console, 'warn').mockImplementation(() => { });
   moxios.install();
 });
 

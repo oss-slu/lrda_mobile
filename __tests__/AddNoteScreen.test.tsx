@@ -31,8 +31,8 @@ jest.mock('../lib/models/user_class', () => {
         getId: jest.fn(() => Promise.resolve("mock-user-id")),
         setUserTutorialDone: jest.fn(),
       }),
-      getHasDoneTutorial: jest.fn(() => Promise.resolve(true)), 
-      setUserTutorialDone: jest.fn(() => Promise.resolve()),    
+      getHasDoneTutorial: jest.fn(() => Promise.resolve(true)),
+      setUserTutorialDone: jest.fn(() => Promise.resolve()),
     },
   };
 });
@@ -62,36 +62,8 @@ jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
   })),
 }));
 
-// Mock Firebase services
-jest.mock("firebase/app", () => ({
-  initializeApp: jest.fn(),
-  getApps: jest.fn(() => []),
-}));
-
 jest.mock('react-native-keyboard-aware-scroll-view', () => ({
   KeyboardAwareScrollView: jest.fn(({ children }) => children),
-}));
-
-jest.mock("firebase/auth", () => ({
-  getAuth: jest.fn(),
-  initializeAuth: jest.fn(),
-  getReactNativePersistence: jest.fn(),
-  onAuthStateChanged: jest.fn(), // Mock onAuthStateChanged
-}));
-
-jest.mock("firebase/storage", () => ({
-  getStorage: jest.fn(),
-}));
-
-jest.mock('firebase/firestore', () => ({
-  getFirestore: jest.fn(),
-  doc: jest.fn(() => ({
-    get: jest.fn(() => Promise.resolve({ exists: false })),
-  })),
-}));
-
-jest.mock("firebase/database", () => ({
-  getDatabase: jest.fn(), // Mock getDatabase to prevent the error
 }));
 
 jest.mock('@10play/tentap-editor', () => ({
@@ -133,8 +105,8 @@ jest.mock('../lib/utils/api_calls', () => ({
 // Mock console methods to avoid unnecessary log outputs in tests
 beforeEach(() => {
   jest.clearAllMocks();
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  jest.spyOn(console, 'log').mockImplementation(() => { });
+  jest.spyOn(console, 'error').mockImplementation(() => { });
 });
 
 afterEach(() => {
@@ -217,29 +189,29 @@ describe('AddNoteScreen', () => {
   });
 
   it('renders the "Done" button when the keyboard is open', async () => {
-  
+
     // Mock `Keyboard.addListener` to simulate keyboard opening
     const mockKeyboardListener = jest.spyOn(Keyboard, 'addListener').mockImplementation((event, callback) => {
       if (event === 'keyboardDidShow') {
-        setTimeout(callback, 0); 
+        setTimeout(callback, 0);
       }
       return {
         remove: jest.fn(),
       } as unknown as EmitterSubscription;
     });
-  
+
     const { findByTestId } = renderWithProviders(
       <AddNoteScreen />
     );
-  
+
     // Expect the "Done" button to appear when keyboard opens
     const doneButton = await findByTestId("doneButton");
     expect(doneButton).toBeTruthy();
-  
+
     // Cleanup mock
     mockKeyboardListener.mockRestore();
   });
-  
+
 });
 
 describe("AddNoteScreen's checkLocationPermission method", () => {

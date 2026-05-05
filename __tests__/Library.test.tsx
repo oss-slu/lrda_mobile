@@ -5,26 +5,10 @@ import HomeScreen from '../lib/screens/HomeScreen';
 import { useTheme } from '../lib/components/ThemeProvider';
 import ApiService from '../lib/utils/api_calls';
 import ToastMessage from 'react-native-toast-message';
-import { onAuthStateChanged } from 'firebase/auth';
 import configureStore from 'redux-mock-store';
 import { AddNoteProvider } from '../lib/context/AddNoteContext';
 import moxios from 'moxios';
 import { User } from '../lib/models/user_class';
-
-jest.mock('firebase/database', () => ({
-    getDatabase: jest.fn(),
-}));
-
-jest.mock('firebase/firestore', () => ({
-  getFirestore: jest.fn(() => ({})), 
-  doc: jest.fn(() => ({})), 
-  getDoc: jest.fn(() => Promise.resolve({ exists: () => false })),
-}));
-
-
-jest.mock("firebase/storage", () => ({
-  getStorage: jest.fn(),
-}));
 
 jest.mock('../lib/utils/data_conversion', () => {
   return {
@@ -57,35 +41,29 @@ jest.mock('../lib/components/NotesComponent', () => {
     // Use @id if available, otherwise fall back to item.id
     const noteId = item["@id"] || item.id;
     return (
-        <Text testID={`note-${noteId}`}>
-          {item.title}
-        </Text>
+      <Text testID={`note-${noteId}`}>
+        {item.title}
+      </Text>
     );
   };
 });
-jest.mock('firebase/auth', () => ({
-    getAuth: jest.fn(),
-    initializeAuth: jest.fn(),
-    getReactNativePersistence: jest.fn(),
-    onAuthStateChanged: jest.fn(),
-}));
 
 jest.mock('expo-font', () => ({
-    loadAsync: jest.fn(() => Promise.resolve()),
-    isLoaded: jest.fn(() => true),
+  loadAsync: jest.fn(() => Promise.resolve()),
+  isLoaded: jest.fn(() => true),
 }));
 
 jest.mock('react-native/Libraries/Image/Image', () => ({
-    ...jest.requireActual('react-native/Libraries/Image/Image'),
-    resolveAssetSource: jest.fn(() => ({ uri: 'mocked-asset-uri' })),
+  ...jest.requireActual('react-native/Libraries/Image/Image'),
+  resolveAssetSource: jest.fn(() => ({ uri: 'mocked-asset-uri' })),
 }));
 
 jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
+  settings: {},
+  setValues: jest.fn(),
+  getConstants: jest.fn(() => ({
     settings: {},
-    setValues: jest.fn(),
-    getConstants: jest.fn(() => ({
-      settings: {},
-    })),
+  })),
 }));
 
 //mock carousel
@@ -132,9 +110,9 @@ jest.mock('expo-location', () => ({
 beforeEach(() => {
   jest.clearAllMocks();
   jest.useFakeTimers();
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
+  jest.spyOn(console, 'log').mockImplementation(() => { });
+  jest.spyOn(console, 'error').mockImplementation(() => { });
+  jest.spyOn(console, 'warn').mockImplementation(() => { });
   moxios.install();
 });
 
@@ -329,7 +307,7 @@ describe('Library Component', () => {
     });
   });
 
-  
+
   it("Renders no results found when there are no more notes.", async () => {
 
     const navigationMock = {
@@ -358,7 +336,7 @@ describe('Library Component', () => {
       push: jest.fn(),
     };
     const routeMock = { params: {} };
-  
+
     const dummyNotes = Array.from({ length: 20 }, (_, i) => ({
       id: `${i}`,
       time: new Date().toISOString(),
@@ -374,13 +352,13 @@ describe('Library Component', () => {
         },
       ],
     }));
-  
+
     jest.spyOn(ApiService, 'fetchMapsMessagesBatch').mockResolvedValue(dummyNotes);
-  
+
     const { getByText } = render(
       <Library />
     );
-  
+
     await waitFor(() => {
       expect(getByText("Load More")).toBeTruthy();
     });

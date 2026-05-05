@@ -7,17 +7,6 @@ import { Linking, TouchableOpacity } from 'react-native';
 import HomeScreen from '../lib/screens/HomeScreen';
 import { waitFor } from '@testing-library/react-native';
 
-jest.mock('firebase/database', () => ({
-  getDatabase: jest.fn(),
-}));
-
-jest.mock('firebase/auth', () => ({
-  getAuth: jest.fn(),
-  initializeAuth: jest.fn(),
-  getReactNativePersistence: jest.fn(),
-  onAuthStateChanged: jest.fn(),
-}));
-
 jest.mock('expo-font', () => ({
   loadAsync: jest.fn(() => Promise.resolve()),
   isLoaded: jest.fn(() => true),
@@ -34,19 +23,6 @@ jest.mock('react-native/Libraries/Settings/NativeSettingsManager', () => ({
   getConstants: jest.fn(() => ({
     settings: {},
   })),
-}));
-
-jest.mock('firebase/firestore', () => ({
-  getFirestore: jest.fn(),
-  doc: jest.fn(() => ({
-    id: 'mocked-doc-id',
-  })),
-  getDoc: jest.fn(() =>
-    Promise.resolve({
-      exists: () => true,
-      data: () => ({ name: 'Mocked User' }),
-    })
-  ),
 }));
 
 //mock carousel
@@ -116,15 +92,15 @@ beforeEach(() => {
 });
 
 beforeAll(() => {
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  jest.spyOn(console, 'log').mockImplementation(() => { });
+  jest.spyOn(console, 'error').mockImplementation(() => { });
 });
 
 describe('MorePage - Main View', () => {
   it('should render the carousel', async () => {
     const { getByTestId } = render(
       <Provider store={store}>
-          <MorePage />
+        <MorePage />
       </Provider>
     );
     await waitFor(() => {
@@ -135,7 +111,7 @@ describe('MorePage - Main View', () => {
   it('should toggle dark mode when theme switch is pressed', async () => {
     const { getByTestId } = render(
       <Provider store={store}>
-          <MorePage />
+        <MorePage />
       </Provider>
     );
     const toggleSwitch = getByTestId('dark-mode-toggle');
@@ -146,7 +122,7 @@ describe('MorePage - Main View', () => {
   it('should display user and navigate to AccountPage when avatar is pressed', async () => {
     const { getByText } = render(
       <Provider store={store}>
-          <MorePage />
+        <MorePage />
       </Provider>
     );
 
@@ -162,7 +138,7 @@ describe('MorePage - Main View', () => {
   it('should call logout when the Logout menu item is pressed', async () => {
     const { getByText } = render(
       <Provider store={store}>
-          <MorePage />
+        <MorePage />
       </Provider>
     );
 
@@ -183,7 +159,7 @@ describe('MorePage - Main View', () => {
   it('should navigate to Resource page when Resource menu item is pressed', async () => {
     const { getByText } = render(
       <Provider store={store}>
-          <MorePage />
+        <MorePage />
       </Provider>
     );
 
@@ -199,7 +175,7 @@ describe('MorePage - Main View', () => {
   it('should navigate to TeamPage when "Meet our team" menu item is pressed', async () => {
     const { getByText } = render(
       <Provider store={store}>
-          <MorePage />
+        <MorePage />
       </Provider>
     );
 
@@ -218,7 +194,7 @@ describe('MorePage - Settings View and Modals', () => {
   const renderAndOpenSettings = async () => {
     const utils = render(
       <Provider store={store}>
-          <MorePage />
+        <MorePage />
       </Provider>
     );
     // Wait for the main view to load

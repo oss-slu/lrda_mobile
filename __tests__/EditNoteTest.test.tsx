@@ -44,14 +44,6 @@ jest.mock('expo-location', () => ({
   requestForegroundPermissionsAsync: jest.fn().mockResolvedValue({ status: 'granted' }),
   getCurrentPositionAsync: jest.fn().mockResolvedValue({ coords: { latitude: 0, longitude: 0 } }),
 }));
-
-jest.mock('firebase/auth', () => ({
-  getAuth: jest.fn(),
-  initializeAuth: jest.fn(),
-  getReactNativePersistence: jest.fn(),
-  onAuthStateChanged: jest.fn(),
-}));
-jest.mock('firebase/database', () => ({ getDatabase: jest.fn() }));
 jest.mock('react-native/Libraries/Image/Image', () => ({
   ...jest.requireActual('react-native/Libraries/Image/Image'),
   resolveAssetSource: jest.fn(),
@@ -157,5 +149,5 @@ describe('EditNoteScreen', () => {
 
     expect(screen.getByTestId('doneButton')).toBeTruthy();
   });
-  
+
 });
