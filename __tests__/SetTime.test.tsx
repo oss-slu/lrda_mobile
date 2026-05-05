@@ -1,7 +1,6 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import LocationWindow from "../lib/components/time";
-import { Button } from "react-native";
 
 // Mock ThemeProvider
 jest.mock("../lib/components/ThemeProvider", () => ({
@@ -11,8 +10,11 @@ jest.mock("../lib/components/ThemeProvider", () => ({
 }));
 
 jest.mock("@react-native-community/datetimepicker", () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { View } = require("react-native");
-  return (props: { testID?: string }) => <View testID={props.testID} />;
+  return function MockDateTimePicker(props: { testID?: string }) {
+    return <View testID={props.testID} />;
+  };
 });
 
 const FIXED_DATE = new Date("2024-01-15T12:00:00.000Z");

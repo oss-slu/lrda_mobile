@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { View, Button, Text } from "react-native";
 import Slider from "@react-native-community/slider";
 import { Audio, AVPlaybackStatus } from "expo-av";
@@ -12,13 +12,15 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUri }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState<number | null>(null);
   const [position, setPosition] = useState<number>(0);
+  const soundRef = useRef<Audio.Sound | null>(null);
 
   useEffect(() => {
     const loadSound = async () => {
-      const { sound } = await Audio.Sound.createAsync({ uri: audioUri }, { shouldPlay: false }, onPlaybackStatusUpdate);
-      setSound(sound);
+      const { sound: newSound } = await Audio.Sound.createAsync({ uri: audioUri }, { shouldPlay: false }, onPlaybackStatusUpdate);
+      soundRef.current = newSound;
+      setSound(newSound);
 
-      const status = await sound.getStatusAsync();
+      const status = await newSound.getStatusAsync();
       if (status.isLoaded) {
         setDuration(status.durationMillis || 0);
       }
@@ -27,9 +29,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUri }) => {
     loadSound();
 
     return () => {
-      if (sound) {
-        sound.unloadAsync();
-      }
+      soundRef.current?.unloadAsync();
     };
   }, [audioUri]);
 

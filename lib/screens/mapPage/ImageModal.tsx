@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Modal, View, ScrollView, Text, Image, ActivityIndicator, TouchableOpacity, Dimensions } from "react-native";
-import { useTheme } from "../../components/ThemeProvider";
 
 interface ImageType {
   uri: string;
@@ -17,7 +16,6 @@ const { width } = Dimensions.get("window");
 const ImageModal: React.FC<Props> = ({ isVisible, onClose, images }) => {
   const [imageLoadedState, setImageLoadedState] = useState<{ [key: string]: boolean }>({});
   const [isImageTouched, setIsImageTouched] = useState(false);
-  const { colors } = useTheme();
 
   const handleLoad = (uri: string) => {
     setImageLoadedState((prev) => ({ ...prev, [uri]: true }));

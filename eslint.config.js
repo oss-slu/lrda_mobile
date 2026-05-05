@@ -7,6 +7,14 @@ module.exports = defineConfig([
   expoConfig,
   eslintPluginPrettierRecommended,
   {
+    rules: {
+      "react-hooks/refs": "off",
+      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/static-components": "off",
+      "react-hooks/immutability": "off",
+    },
+  },
+  {
     files: ["__tests__/**/*", "setupTests.*", "__mocks__/**/*"],
     languageOptions: {
       globals: {

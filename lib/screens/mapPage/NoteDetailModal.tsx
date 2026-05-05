@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo, useMemo, useRef } from "react";
+import React, { useState, useEffect, useCallback, memo, useMemo, useRef } from "react";
 import { Modal, TouchableOpacity, Image, View, Text, ScrollView, useWindowDimensions, ActivityIndicator, Animated } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
@@ -35,25 +35,28 @@ const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
     return `${mins}:${secs}`;
   };
 
-  const initializeAudio = async (uri: string) => {
-    if (audioState?.sound) return audioState;
-    try {
-      const { sound } = await Audio.Sound.createAsync({ uri });
-      const status = await sound.getStatusAsync();
-      soundRef.current = sound;
-      const newAudioState = {
-        sound,
-        isPlaying: false,
-        progress: 0,
-        duration: status.isLoaded ? (status.durationMillis ?? 0) / 1000 : 0,
-      };
-      setAudioState(newAudioState);
-      return newAudioState;
-    } catch (err) {
-      setError(true);
-      throw err;
-    }
-  };
+  const initializeAudio = useCallback(
+    async (uri: string) => {
+      if (audioState?.sound) return audioState;
+      try {
+        const { sound } = await Audio.Sound.createAsync({ uri });
+        const status = await sound.getStatusAsync();
+        soundRef.current = sound;
+        const newAudioState = {
+          sound,
+          isPlaying: false,
+          progress: 0,
+          duration: status.isLoaded ? (status.durationMillis ?? 0) / 1000 : 0,
+        };
+        setAudioState(newAudioState);
+        return newAudioState;
+      } catch (err) {
+        setError(true);
+        throw err;
+      }
+    },
+    [audioState]
+  );
 
   const playPauseAudio = async (uri: string) => {
     const state = await initializeAudio(uri);
@@ -124,13 +127,13 @@ const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
         soundRef.current.unloadAsync();
       }
     };
-  }, [uri]);
+  }, [uri, initializeAudio]);
 
   if (error) {
     return (
       <View className="flex-row items-center self-center rounded-[10px] bg-[#f0f0f0] p-2.5">
         <Ionicons name="alert-circle-outline" size={30} color={accentColor} />
-        <Text className="ml-2.5 font-inter text-base text-[#333]">Couldn't load audio</Text>
+        <Text className="ml-2.5 font-inter text-base text-[#333]">Couldn&apos;t load audio</Text>
       </View>
     );
   }
@@ -174,14 +177,14 @@ interface LoadingImageProps {
 const LoadingImage: React.FC<LoadingImageProps> = ({ uri, alt, onPress }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const { colors, accentColor } = useTheme();
+  const { accentColor } = useTheme();
 
   if (error) {
     return (
       <View testID="no-image" className="relative h-[400px] w-[400px] items-center justify-center">
         <View className="flex-1 items-center justify-center p-2.5">
           <Ionicons name="alert-circle-outline" size={50} color="red" />
-          <Text className="mt-2.5 font-inter text-base text-black">Couldn't load image</Text>
+          <Text className="mt-2.5 font-inter text-base text-black">Couldn&apos;t load image</Text>
         </View>
       </View>
     );
@@ -294,7 +297,7 @@ const LoadingVideo: React.FC<LoadingVideoProps> = ({ uri, onPress, width }) => {
   const [error, setError] = useState(false);
   const containerWidth = width - 40;
   const containerHeight = containerWidth / 1.77;
-  const { colors, accentColor } = useTheme();
+  const { accentColor } = useTheme();
 
   if (error) {
     return (
@@ -305,7 +308,7 @@ const LoadingVideo: React.FC<LoadingVideoProps> = ({ uri, onPress, width }) => {
       >
         <View className="flex-1 items-center justify-center p-2.5">
           <Ionicons name="alert-circle-outline" size={50} color="red" />
-          <Text className="mt-2.5 font-inter text-base text-red-500">Couldn't load video</Text>
+          <Text className="mt-2.5 font-inter text-base text-red-500">Couldn&apos;t load video</Text>
         </View>
       </View>
     );
@@ -348,13 +351,13 @@ interface NoteDetailModalProps {
   note?: NoteDetailData;
 }
 
-const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClose, note }) => {
+const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(function NoteDetailModal({ isVisible, onClose, note }) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedVideo, setSelectedVideo] = useState<{ uri: string } | null>(null);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [isVideoVisible, setIsVideoVisible] = useState<boolean>(false);
   const { width } = useWindowDimensions();
-  const { colors, accentColor } = useTheme();
+  const { colors } = useTheme();
 
   const { data: creatorName = "" } = useQuery({
     queryKey: queryKeys.users.name(note?.creatorId ?? ""),

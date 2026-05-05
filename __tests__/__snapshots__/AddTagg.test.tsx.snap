@@ -5,7 +5,7 @@ exports[`TagWindowTest1 renders without crashing 1`] = `
   className="mb-2.5 min-h-[100px]"
 >
   <TextInput
-    className="rounded-[30px] h-10 w-full border-b-2 bg-white justify-center text-center text-lg font-medium"
+    className="h-10 w-full justify-center rounded-[30px] border-b-2 bg-white text-center text-lg font-medium"
     onChangeText={[Function]}
     onSubmitEditing={[Function]}
     placeholder="Your Tag Here"
@@ -101,7 +101,7 @@ exports[`TagWindowTest1 renders without crashing 1`] = `
             }
           >
             <View
-              className="items-center bg-red-500 flex-1 flex-row justify-between px-4 py-[1px]"
+              className="flex-1 flex-row items-center justify-between bg-red-500 px-4 py-[1px]"
               leftActionActivated={false}
               leftActionState={false}
               rightActionActivated={false}
@@ -306,7 +306,7 @@ exports[`TagWindowTest1 renders without crashing 1`] = `
             }
           >
             <View
-              className="items-center bg-red-500 flex-1 flex-row justify-between px-4 py-[1px]"
+              className="flex-1 flex-row items-center justify-between bg-red-500 px-4 py-[1px]"
               leftActionActivated={false}
               leftActionState={false}
               rightActionActivated={false}
@@ -511,7 +511,7 @@ exports[`TagWindowTest1 renders without crashing 1`] = `
             }
           >
             <View
-              className="items-center bg-red-500 flex-1 flex-row justify-between px-4 py-[1px]"
+              className="flex-1 flex-row items-center justify-between bg-red-500 px-4 py-[1px]"
               leftActionActivated={false}
               leftActionState={false}
               rightActionActivated={false}

@@ -1,10 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { View, Text, Dimensions } from "react-native";
 import LoadingImage from "./loadingImage";
-import * as Location from "expo-location";
-import { useQuery } from "@tanstack/react-query";
-import { fetchCreatorName } from "../utils/api_calls";
-import { queryKeys } from "../query/queryKeys";
 import { Note } from "../../types";
 
 const { width, height } = Dimensions.get("window");
@@ -30,45 +26,6 @@ function NotesComponent({
   isPublished,
   isDarkmode,
 }: NotesComponentProps) {
-  const [address, setAddress] = useState<string | null>(null);
-
-  const { data: author = "anonymous" } = useQuery({
-    queryKey: queryKeys.users.name(item.creatorId),
-    queryFn: () => fetchCreatorName(item.creatorId),
-    enabled: !!item.creatorId,
-    staleTime: Infinity,
-  });
-
-  const fetchAddress = async (latitude: number | null, longitude: number | null) => {
-    const lat = typeof latitude === "number" ? latitude : NaN;
-    const lon = typeof longitude === "number" ? longitude : NaN;
-
-    if (isNaN(lat) || isNaN(lon)) {
-      return;
-    }
-
-    try {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        return;
-      }
-
-      const result = await Location.reverseGeocodeAsync({ latitude: lat, longitude: lon });
-
-      if (result.length > 0) {
-        const location = result[0];
-        const formattedAddress = `${location.name || ""}, ${location.street || ""}, ${location.city || ""}, ${location.region || ""}, ${location.country || ""}`;
-        setAddress(formattedAddress.trim());
-      }
-    } catch (error) {
-      // silently fail
-    }
-  };
-
-  useEffect(() => {
-    fetchAddress(item.latitude, item.longitude);
-  }, [item]);
-
   return (
     <View
       className="flex-row items-center rounded-sm bg-surface"

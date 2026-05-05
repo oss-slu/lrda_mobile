@@ -135,7 +135,7 @@ export default function TeamPage() {
         </View>
 
         <View className="mb-6 px-4">
-          <Text className="mb-3 text-center font-inter text-base text-tertiary">The Saint Louis University Where's Religion Team</Text>
+          <Text className="mb-3 text-center font-inter text-base text-tertiary">The Saint Louis University Where&apos;s Religion Team</Text>
           <FlatList
             data={WR_team}
             renderItem={renderItem}

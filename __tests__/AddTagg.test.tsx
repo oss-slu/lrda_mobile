@@ -61,10 +61,8 @@ describe("TagWindowTest1", () => {
   it("displays input field and tags list", () => {
     const { getByTestId, getAllByText } = render(<TagWindow tags={mockTags} setTags={mockSetTags} />);
 
-    // Check if the input field exists
     expect(getByTestId("tag-input")).toBeTruthy();
 
-    // Check if tags are displayed
     mockTags.forEach((tag) => {
       expect(getAllByText(tag).length).toBeGreaterThan(0);
     });
@@ -76,9 +74,8 @@ describe("TagWindowTest2", () => {
   const mockSetTags = jest.fn();
 
   it("handles tag deletion when swiping", async () => {
-    const { getByTestId, getAllByText } = render(<TagWindow tags={mockTags} setTags={mockSetTags} />);
+    const { getByTestId } = render(<TagWindow tags={mockTags} setTags={mockSetTags} />);
 
-    // Simulate a swipe to delete the first tag
     const swipeListView = getByTestId("swipe-list");
 
     // Trigger row open, simulating a swipe to delete the first tag (Tag1)

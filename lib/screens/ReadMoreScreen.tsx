@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, Text, Dimensions, TouchableOpacity, ActivityIndicator, StatusBar } from "react-native";
 import WebView from "react-native-webview";
 import { Feather } from "@expo/vector-icons";
@@ -9,11 +9,6 @@ const { height } = Dimensions.get("window");
 function ReadMoreScreen() {
   const router = useRouter();
 
-  const [isContentLoading, setIsContentLoading] = useState(true);
-
-  const handleContentLoading = () => {
-    setIsContentLoading(false);
-  };
   return (
     <View className="flex-1">
       <StatusBar translucent backgroundColor="transparent" />

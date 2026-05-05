@@ -13,7 +13,7 @@ const RegistrationScreen: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [, setRegistrationSuccess] = useState(false);
 
   const handleRegister = async () => {
     const emailError = validateEmail(email);

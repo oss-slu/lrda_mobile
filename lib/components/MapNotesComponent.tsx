@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Image, ImageStyle, Dimensions, TouchableOpacity } from "react-native";
+import { View, Text, Image, Dimensions, TouchableOpacity } from "react-native";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { MapMarker } from "../../types";
 

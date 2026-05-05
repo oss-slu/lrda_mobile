@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useCallback, useEffect, useEffectEvent, useRef, useMemo } from "react";
 import { View, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Keyboard, Alert, Text, Dimensions } from "react-native";
 import ToastMessage from "react-native-toast-message";
 import { Ionicons } from "@expo/vector-icons";
@@ -44,7 +44,7 @@ const EditNoteScreen = () => {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   const [title, setTitle] = useState(note.title || "Untitled");
-  const [time, setTime] = useState(new Date(note.time));
+  const [time] = useState(new Date(note.time));
   const [tags, setTags] = useState(note.tags || []);
   const [media, setMedia] = useState<Media[]>(note.media || []);
   const [newAudio, setNewAudio] = useState<AudioType[]>(note.audio || []);
@@ -84,12 +84,13 @@ const EditNoteScreen = () => {
     Keyboard.dismiss();
   };
 
-  const initialTitle = useRef(note.title || "");
   const initialText = useRef(note.text || "");
 
+  const onPublish = useEffectEvent(() => handlePublishPress());
+
   useEffect(() => {
-    setPublishNote(() => handlePublishPress);
-  }, []);
+    setPublishNote(() => onPublish);
+  }, [setPublishNote]);
 
   const scrollViewRef = useRef(null);
 
@@ -109,12 +110,7 @@ const EditNoteScreen = () => {
     setLocation({ latitude: 0, longitude: 0 });
   };
 
-  const syncEditorContent = async () => {
-    const latestContent = await editor.getHTML();
-    initialText.current = latestContent;
-  };
-
-  const fetchCurrentLocation = async () => {
+  const fetchCurrentLocation = useCallback(async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status === "granted") {
       try {
@@ -123,13 +119,13 @@ const EditNoteScreen = () => {
           latitude: userLocation.coords.latitude,
           longitude: userLocation.coords.longitude,
         });
-      } catch (error) {
+      } catch {
         Alert.alert("Error", "Failed to retrieve location.");
       }
     } else {
       setLocationToZero();
     }
-  };
+  }, []);
 
   const toggleLocation = () => {
     if (location.latitude === 0 && location.longitude === 0) {
@@ -141,7 +137,7 @@ const EditNoteScreen = () => {
 
   useEffect(() => {
     fetchCurrentLocation();
-  }, []);
+  }, [fetchCurrentLocation]);
 
   const insertImageToEditor = async (imageUri: string) => {
     try {
@@ -254,38 +250,40 @@ const EditNoteScreen = () => {
     }
   };
 
+  const onBlur = useEffectEvent(async () => {
+    if (!ispublishBtnClicked) {
+      try {
+        const textContent = await editor.getHTML();
+
+        const updatedNote = {
+          ...note,
+          title,
+          text: textContent,
+          media,
+          audio: newAudio,
+          tags,
+          isPublished,
+          latitude: location.latitude,
+          longitude: location.longitude,
+          time: new Date(),
+        };
+
+        await updateNoteMutation.mutateAsync(updatedNote);
+      } catch (e) {
+        console.warn("Auto-save failed:", e);
+      } finally {
+        toggleAddNoteState();
+      }
+    }
+  });
+
   useEffect(() => {
     const unsubscribe = navigation.addListener("blur", () => {
-      if (!ispublishBtnClicked) {
-        setTimeout(async () => {
-          try {
-            const textContent = await editor.getHTML();
-
-            const updatedNote = {
-              ...note,
-              title,
-              text: textContent,
-              media,
-              audio: newAudio,
-              tags,
-              isPublished,
-              latitude: location.latitude,
-              longitude: location.longitude,
-              time: new Date(),
-            };
-
-            await updateNoteMutation.mutateAsync(updatedNote);
-          } catch (e) {
-            console.warn("Auto-save failed:", e);
-          } finally {
-            toggleAddNoteState();
-          }
-        }, 300);
-      }
+      setTimeout(onBlur, 300);
     });
 
     return unsubscribe;
-  }, [navigation, title, editor, media, newAudio, tags, isPublished, location]);
+  }, [navigation]);
 
   return (
     <View className="flex-1" testID="EditNoteScreen">

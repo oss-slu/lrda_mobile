@@ -8,7 +8,7 @@ exports[`ImageModal renders without crashing 1`] = `
   visible={true}
 >
   <View
-    className="flex-1 justify-center items-center pt-[45px] w-full bg-primary"
+    className="w-full flex-1 items-center justify-center bg-primary pt-[45px]"
   >
     <RCTScrollView
       style={
@@ -19,7 +19,7 @@ exports[`ImageModal renders without crashing 1`] = `
     >
       <View>
         <View
-          className="items-center w-full bg-primary"
+          className="w-full items-center bg-primary"
         >
           <ActivityIndicator
             color="#0000ff"
@@ -41,7 +41,7 @@ exports[`ImageModal renders without crashing 1`] = `
           />
         </View>
         <View
-          className="items-center w-full bg-primary"
+          className="w-full items-center bg-primary"
         >
           <ActivityIndicator
             color="#0000ff"

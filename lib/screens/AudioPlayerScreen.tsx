@@ -6,19 +6,19 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 const AudioPlayerScreen: React.FC = () => {
   const router = useRouter();
   const { audioUri } = useLocalSearchParams<{ audioUri: string }>();
-  const [sound, setSound] = React.useState<Audio.Sound | null>(null);
+  const soundRef = React.useRef<Audio.Sound | null>(null);
 
   React.useEffect(() => {
     async function loadAudio() {
       const { sound } = await Audio.Sound.createAsync({ uri: audioUri });
-      setSound(sound);
+      soundRef.current = sound;
       await sound.playAsync();
     }
 
     loadAudio();
 
     return () => {
-      if (sound) sound.unloadAsync();
+      soundRef.current?.unloadAsync();
     };
   }, [audioUri]);
 

@@ -64,7 +64,7 @@ const HomeScreen: React.FC = () => {
       router.push({ pathname: "/add-note", params: { untitledNumber: String(untitledNumber) } });
     };
     setNavigateToAddNote(() => navigateToAddNote);
-  }, [router, notes]);
+  }, [router, notes, setNavigateToAddNote]);
 
   const handleArchiveNote = async (note: Note | undefined) => {
     if (note?.id) {

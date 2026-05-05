@@ -29,7 +29,7 @@ async function uploadMedia(uri: string, mediaType: string): Promise<string> {
       type: mediaType === "image" ? "image/jpeg" : "video/mp4",
     });
     data.append("file", file);
-  } else if (Platform.OS == "ios") {
+  } else if (Platform.OS === "ios") {
     let base64 = await FileSystem.readAsStringAsync(uri, {
       encoding: FileSystem.EncodingType.Base64,
     });
@@ -39,7 +39,7 @@ async function uploadMedia(uri: string, mediaType: string): Promise<string> {
       uri: base64,
       name: uniqueName,
     } as any);
-  } else if (Platform.OS == "android") {
+  } else if (Platform.OS === "android") {
     data.append("file", {
       uri: uri,
       type: mediaType === "image" ? "image/jpeg" : "video/mp4",

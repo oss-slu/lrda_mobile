@@ -2,16 +2,16 @@
 
 exports[`LocationWindow renders without crashing 1`] = `
 <View
-  className="h-[110px] justify-center items-center p-5"
+  className="h-[110px] items-center justify-center p-5"
 >
   <Text
-    className="font-inter text-lg font-bold mb-[1px]"
+    className="mb-[1px] font-inter text-lg font-bold"
   >
     Date & Time
   </Text>
   <View>
     <View
-      className="items-center mt-2.5"
+      className="mt-2.5 items-center"
     >
       <Text
         className="font-inter text-base"

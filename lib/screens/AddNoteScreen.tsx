@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useEffectEvent, useRef, useState } from "react";
 import {
   Alert,
   View,
@@ -65,7 +65,7 @@ const AddNoteScreen: React.FC = () => {
   } | null>(null);
   const [locationButtonColor, setLocationButtonColor] = useState<string>("#000");
   const [isVideoModalVisible, setIsVideoModalVisible] = useState<boolean>(false);
-  const [videoUri, setVideoUri] = useState<string | null>(null);
+  const [videoUri] = useState<string | null>(null);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const { setPublishNote } = useAddNoteContext();
   const bodyTextRef = useRef(bodyText);
@@ -76,7 +76,7 @@ const AddNoteScreen: React.FC = () => {
   const isPublishedRef = useRef(isPublished);
 
   const createNoteMutation = useCreateNote();
-  const { isAddNoteOpen, toggleAddNoteState } = useAddNoteStore();
+  const { toggleAddNoteState } = useAddNoteStore();
 
   const editor = useEditorBridge({
     initialContent: bodyText || "",
@@ -107,41 +107,44 @@ const AddNoteScreen: React.FC = () => {
     isPublishedRef.current = isPublished;
   }, [isPublished]);
 
+  const onBlur = useEffectEvent(async () => {
+    if (!isPublishedRef.current) {
+      const latestContent = await editor.getHTML();
+      bodyTextRef.current = latestContent;
+
+      const bodyIsEmpty = isBodyEmpty(latestContent);
+
+      if (
+        titleTxtRef.current.length !== 0 ||
+        !bodyIsEmpty ||
+        tagsRef.current.length !== 0 ||
+        mediaRef.current.length !== 0 ||
+        audioRef.current.length !== 0
+      ) {
+        await saveNote(false);
+      } else {
+        toggleAddNoteState();
+        router.back();
+      }
+    }
+  });
+
   useEffect(() => {
     const unsubscribe = navigation.addListener("blur", () => {
-      setTimeout(async () => {
-        if (!isPublishedRef.current) {
-          const latestContent = await editor.getHTML();
-          bodyTextRef.current = latestContent;
-
-          const bodyIsEmpty = isBodyEmpty(latestContent);
-
-          if (
-            titleTxtRef.current.length !== 0 ||
-            !bodyIsEmpty ||
-            tagsRef.current.length !== 0 ||
-            mediaRef.current.length !== 0 ||
-            audioRef.current.length !== 0
-          ) {
-            await saveNote(false);
-          } else {
-            toggleAddNoteState();
-            router.back();
-          }
-        }
-      }, 300);
+      setTimeout(onBlur, 300);
     });
 
     return unsubscribe;
-  }, [navigation, editor]);
+  }, [navigation]);
 
   const { colors } = useTheme();
-  const titleTextRef = useRef<TextInput>(null);
   const scrollViewRef = useRef<KeyboardAwareScrollView>(null);
 
+  const onPublish = useEffectEvent(() => handleShareButtonPress());
+
   useEffect(() => {
-    setPublishNote(() => handleShareButtonPress);
-  }, [titleText]);
+    setPublishNote(() => onPublish);
+  }, [setPublishNote]);
 
   useEffect(() => {
     if (editor) {
@@ -185,7 +188,7 @@ const AddNoteScreen: React.FC = () => {
     setLocationButtonColor("red");
   };
 
-  const fetchCurrentLocation = async () => {
+  const fetchCurrentLocation = useCallback(async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
 
     if (status === "granted") {
@@ -203,7 +206,7 @@ const AddNoteScreen: React.FC = () => {
     } else {
       setLocationToZero();
     }
-  };
+  }, []);
 
   const toggleLocation = () => {
     if (location && location.latitude === 0 && location.longitude === 0) {
@@ -215,7 +218,7 @@ const AddNoteScreen: React.FC = () => {
 
   useEffect(() => {
     fetchCurrentLocation();
-  }, []);
+  }, [fetchCurrentLocation]);
 
   const displayErrorInEditor = async (errorMessage: string) => {
     const currentContent = await editor.getHTML();

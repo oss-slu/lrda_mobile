@@ -15,14 +15,7 @@ interface Props {
 const { width } = Dimensions.get("window");
 
 const VideoModal: React.FC<Props> = ({ isVisible, onClose, videos }) => {
-  const [imageLoadedState, setImageLoadedState] = useState<{ [key: string]: boolean }>({});
   const [isImageTouched, setIsImageTouched] = useState(false);
-  const [status, setStatus] = React.useState({});
-  const video = React.useRef(null);
-
-  const handleLoad = (uri: string) => {
-    setImageLoadedState((prev) => ({ ...prev, [uri]: true }));
-  };
 
   useEffect(() => {
     Audio.setAudioModeAsync({
@@ -54,7 +47,6 @@ const VideoModal: React.FC<Props> = ({ isVisible, onClose, videos }) => {
                   useNativeControls
                   resizeMode={ResizeMode.CONTAIN}
                   isLooping
-                  onPlaybackStatusUpdate={(status) => setStatus(() => status)}
                 />
               </View>
             ))

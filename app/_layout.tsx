@@ -29,7 +29,7 @@ function RootLayoutInner() {
       await SplashScreen.hideAsync();
     };
     checkState();
-  }, []);
+  }, [initOnboarding, initialize]);
 
   if (!isReady || !onboardingReady) return null;
 

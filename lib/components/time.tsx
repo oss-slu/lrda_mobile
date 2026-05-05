@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { View, Text, Button, Platform } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
@@ -28,7 +28,7 @@ export function formatToLocalDateString(date: Date): string {
 }
 
 export default function LocationWindow({ time, setTime }: { time: Date; setTime: React.Dispatch<React.SetStateAction<Date>> }) {
-  const [date, setDate] = useState(new Date());
+  const [date] = useState(time);
   const [chosenDate, setChosenDate] = useState(new Date());
   const [chosenTime, setChosenTime] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
@@ -36,10 +36,6 @@ export default function LocationWindow({ time, setTime }: { time: Date; setTime:
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [savedDateTime, setSavedDateTime] = useState<null | Date>(null);
   const [isDateTimeSelected, setIsDateTimeSelected] = useState(false);
-
-  useEffect(() => {
-    setDate(time);
-  }, []);
 
   const onChangeDate = (event: any, selectedDate: any) => {
     const currentDate = selectedDate || date;

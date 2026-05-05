@@ -15,10 +15,6 @@ export const SvgIcon: React.FC<Props> = ({ color = "white", height = 64, width =
   const originalWidth = width > 1000 ? 150 : 75;
   const originalHeight = width > 1000 ? 120 : 60;
 
-  const aspectRatio = originalWidth / originalHeight;
-
-  const adjustedHeight = width / aspectRatio;
-
   return (
     <Svg height={height * 1.5} width={width * 1.2} viewBox={`0 0 ${originalWidth} ${originalHeight}`} {...props}>
       <Path

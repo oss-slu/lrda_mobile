@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
+import React, { useEffect, useEffectEvent, useState, useRef, useCallback, useMemo } from "react";
 import {
   Text,
   TextInput,
@@ -42,8 +42,8 @@ const ExploreScreen = () => {
   const [globeIcon, setGlobeIcon] = useState<"earth-outline" | "earth">("earth-outline");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSearch, setActiveSearch] = useState<string | null>(null);
-  const [mapType, setMapType] = useState<"standard" | "satellite" | "hybrid" | "terrain">("standard");
-  const [showMapTypeOptions, setShowMapTypeOptions] = useState(false);
+  const [mapType] = useState<"standard" | "satellite" | "hybrid" | "terrain">("standard");
+
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [region, setRegion] = useState({
     latitude: 38.631393,
@@ -58,8 +58,6 @@ const ExploreScreen = () => {
   const _scrollView = useRef<ScrollView | null>(null);
   const mapAnimation = useRef(new Animated.Value(0)).current;
   const scrollEnabled = useRef(true);
-
-  const toggleMapTypeOptions = () => setShowMapTypeOptions(!showMapTypeOptions);
 
   const mapNoteToMarker = useCallback((note: Note): MapMarker => {
     const time = new Date(note.time);
@@ -177,25 +175,27 @@ const ExploreScreen = () => {
     setModalVisible(true);
   };
 
+  const onMapScroll = useEffectEvent(({ value }: { value: number }) => {
+    const calculatedIndex = Math.floor(value / (CARD_WIDTH + 20) + 0.3);
+    const index = calculatedIndex >= markers.length ? markers.length - 1 : calculatedIndex;
+    setCurrentIndex(index);
+    if (!scrollEnabled.current) return;
+    if (index < 0 || index >= markers.length) return;
+    const { coordinate } = markers[index];
+    _map.current?.animateToRegion(
+      {
+        ...coordinate,
+        latitudeDelta: region.latitudeDelta,
+        longitudeDelta: region.longitudeDelta,
+      },
+      350
+    );
+  });
+
   useEffect(() => {
-    const listenerId = mapAnimation.addListener(({ value }) => {
-      const calculatedIndex = Math.floor(value / (CARD_WIDTH + 20) + 0.3);
-      const index = calculatedIndex >= markers.length ? markers.length - 1 : calculatedIndex;
-      setCurrentIndex(index);
-      if (!scrollEnabled.current) return;
-      if (index < 0 || index >= markers.length) return;
-      const { coordinate } = markers[index];
-      _map.current?.animateToRegion(
-        {
-          ...coordinate,
-          latitudeDelta: region.latitudeDelta,
-          longitudeDelta: region.longitudeDelta,
-        },
-        350
-      );
-    });
+    const listenerId = mapAnimation.addListener(onMapScroll);
     return () => mapAnimation.removeListener(listenerId);
-  }, [markers]);
+  }, [mapAnimation]);
 
   const onMarkerPress = (markerData: MapMarker) => {
     scrollEnabled.current = false;

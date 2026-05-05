@@ -1,5 +1,5 @@
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Animated, ImageBackground, Keyboard, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Toast from "react-native-toast-message";
@@ -15,21 +15,18 @@ const LoginScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
-  const fadeOut = () => {
+  const fadeOut = useCallback(() => {
     Animated.timing(fadeAnim, {
       toValue: 0,
       duration: 1000,
       useNativeDriver: true,
     }).start(() => setFirstClick(false));
-  };
+  }, [fadeAnim]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      fadeOut();
-    }, 2000);
-
+    const timer = setTimeout(fadeOut, 2000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [fadeOut]);
 
   useEffect(() => {
     (async () => {
@@ -90,7 +87,7 @@ const LoginScreen: React.FC = () => {
         {firstClick ? (
           <TouchableOpacity activeOpacity={1} className="mb-[200px] items-center justify-center self-center py-[200px]" onPress={fadeOut}>
             <Animated.Text className="mb-[70px] font-inter text-[50px] font-bold text-[#111111]" style={{ opacity: fadeAnim }}>
-              Where's {"\n"} Religion?
+              Where&apos;s {"\n"} Religion?
             </Animated.Text>
           </TouchableOpacity>
         ) : (

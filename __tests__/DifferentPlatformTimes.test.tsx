@@ -1,7 +1,6 @@
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import { Platform } from "react-native";
-import AddNoteScreen from "../lib/screens/AddNoteScreen";
 import LocationWindow from "../lib/components/time";
 
 // Mock external dependencies
@@ -16,8 +15,11 @@ jest.mock("../lib/utils/api_calls", () => ({
 }));
 
 jest.mock("@react-native-community/datetimepicker", () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { View } = require("react-native");
-  return (props: any) => <View testID={props.testID} />;
+  return function MockDateTimePicker(props: any) {
+    return <View testID={props.testID} />;
+  };
 });
 
 // Alternative approach using jest.spyOn
@@ -40,20 +42,7 @@ afterAll(() => {
 
 describe("AddNoteScreen", () => {
   it("renders without crashing", () => {
-    const routeMock = {
-      params: {
-        untitledNumber: 1,
-        refreshPage: jest.fn(),
-      },
-    };
-
-    // Add the actual render test here
-    // const { getByTestId } = render(
-    //   <Provider store={store}>
-    //     <AddNoteScreen route={routeMock} />
-    //   </Provider>
-    // );
-    // expect(getByTestId('add-note-screen')).toBeTruthy();
+    // Placeholder - actual render test requires Provider/store setup
   });
 });
 

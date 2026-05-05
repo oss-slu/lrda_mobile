@@ -27,13 +27,11 @@ export default function MorePage() {
   const router = useRouter();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isThemeOpen, setIsThemeOpen] = useState(false);
-  const [userName, setUserName] = useState("");
   const [userInitials, setUserInitials] = useState("N/A");
 
   useEffect(() => {
     const name = user?.name;
     if (name) {
-      setUserName(name);
       const initials = name
         .split(" ")
         .map((namePart) => namePart[0])
@@ -49,11 +47,6 @@ export default function MorePage() {
   const handleSettingsToggle = () => {
     setIsSettingsOpen(!isSettingsOpen);
   };
-  const handleVisitWebsite = () => {
-    const websiteUrl = "https://www.wheresreligion.org";
-    Linking.openURL(websiteUrl);
-  };
-
   const onLogoutPress = async () => {
     try {
       await logout();
