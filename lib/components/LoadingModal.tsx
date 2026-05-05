@@ -1,43 +1,23 @@
-import React, { useState } from 'react';
-import { View, Modal, Text, StyleSheet } from 'react-native';
-import { defaultTextFont } from '../../styles/globalStyles';
+import React from "react";
+import { View, Modal, Text } from "react-native";
 
-const LoadingModal = ({ visible }) => (
-  <Modal
-    animationType="fade"
-    transparent={true}
-    visible={visible}
-  >
-    <View style={styles.centeredView}>
-      <View style={styles.modalView}>
-        <Text style={{...defaultTextFont}}>Please wait, saving changes to the note</Text>
+const LoadingModal = ({ visible }: { visible: boolean }) => (
+  <Modal animationType="fade" transparent={true} visible={visible}>
+    <View className="flex-1 items-center justify-center bg-black/50">
+      <View
+        className="m-5 items-center rounded-lg bg-white p-[35px]"
+        style={{
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.25,
+          shadowRadius: 4,
+          elevation: 5,
+        }}
+      >
+        <Text className="font-inter">Please wait, saving changes to the note</Text>
       </View>
     </View>
   </Modal>
 );
-
-const styles = StyleSheet.create({
-    centeredView: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    },
-    modalView: {
-      margin: 20,
-      backgroundColor: "white",
-      borderRadius: 20,
-      padding: 35,
-      alignItems: "center",
-      shadowColor: "#000",
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-      shadowOpacity: 0.25,
-      shadowRadius: 4,
-      elevation: 5,
-    },
-  });
 
 export default LoadingModal;

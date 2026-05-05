@@ -1,20 +1,11 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  FlatList,
-  Alert,
-} from "react-native";
+import { View, Text, TouchableOpacity, FlatList, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Audio } from "expo-av";
 import uuid from "react-native-uuid";
 
-import { uploadAudio } from "../utils/S3_proxy";  // Assuming you have a function to upload the audio
-import { AudioType } from "../models/media_class";  // Assuming AudioType is correctly defined
-import { defaultTextFont } from "../../styles/globalStyles";
-
+import { uploadAudio } from "../utils/S3_proxy";
+import type { AudioType } from "../models/media_class";
 
 type AudioContainerProps = {
   newAudio: AudioType[];
@@ -22,11 +13,7 @@ type AudioContainerProps = {
   insertAudioToEditor: (audioUri: string) => void;
 };
 
-const AudioContainer = ({
-  newAudio,
-  setNewAudio,
-  insertAudioToEditor,
-}: AudioContainerProps) => {
+const AudioContainer = ({ newAudio, setNewAudio, insertAudioToEditor }: AudioContainerProps) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recording, setRecording] = useState<null | Audio.Recording>(null);
   const [currentSound, setCurrentSound] = useState<Audio.Sound | null>(null);
@@ -34,7 +21,6 @@ const AudioContainer = ({
 
   useEffect(() => {
     return () => {
-      // Clean up any active audio players when component unmounts
       if (currentSound) {
         currentSound.unloadAsync();
       }
@@ -55,9 +41,7 @@ const AudioContainer = ({
         playsInSilentModeIOS: true,
       });
 
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
+      const { recording } = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
 
       setRecording(recording);
     } catch (error) {
@@ -75,14 +59,15 @@ const AudioContainer = ({
         setRecording(null);
 
         if (uri) {
-          const uploadedUri = await uploadAudio(uri); // Upload the recording
-          const newRecording = new AudioType({
+          const uploadedUri = await uploadAudio(uri);
+          const newRecording: AudioType = {
             uuid: uuid.v4().toString(),
             type: "audio",
             uri: uploadedUri,
-            duration: "00:30", // Example duration, replace with real duration if available
+            duration: "00:30",
             name: `Recording ${newAudio.length + 1}`,
-          });
+            isPlaying: false,
+          };
 
           setNewAudio((prevAudio) => [...prevAudio, newRecording]);
           insertAudioToEditor(uploadedUri);
@@ -106,7 +91,7 @@ const AudioContainer = ({
       setPlayingAudio(uri);
       await sound.playAsync();
       sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.didJustFinish) {
+        if (status.isLoaded && status.didJustFinish) {
           setPlayingAudio(null);
           sound.unloadAsync();
         }
@@ -126,15 +111,11 @@ const AudioContainer = ({
   };
 
   return (
-    <View style={styles.container} testID="audio-container">
-      <View style={styles.header}>
-        {isRecording ? (
-          <Ionicons name="mic-outline" size={60} color="red" />
-        ) : (
-          <Ionicons name="mic-outline" size={60} color="#111111" />
-        )}
+    <View className="mb-2.5 w-full items-center bg-white p-2.5" testID="audio-container">
+      <View className="w-full flex-row items-center justify-between">
+        {isRecording ? <Ionicons name="mic-outline" size={60} color="red" /> : <Ionicons name="mic-outline" size={60} color="#111111" />}
 
-        <Text style={{ ...defaultTextFont, fontSize: 24, fontWeight: "600" }}>Recordings</Text>
+        <Text className="font-inter text-2xl font-semibold">Recordings</Text>
 
         {isRecording ? (
           <TouchableOpacity onPress={stopRecording}>
@@ -147,82 +128,26 @@ const AudioContainer = ({
         )}
       </View>
 
-
       <FlatList
         data={newAudio}
         keyExtractor={(item) => item.uuid}
-        contentContainerStyle={styles.audioList}
+        contentContainerStyle={{ width: "100%", alignItems: "center" }}
         renderItem={({ item }) => (
-          <View style={styles.audioItem}>
-            <Text style={styles.audioText}>{item.name}</Text>
-            <TouchableOpacity
-              onPress={() =>
-                playingAudio === item.uri ? stopAudio() : playAudio(item.uri)
-              }
-            >
+          <View className="mb-2.5 w-[90%] flex-row items-center justify-between rounded-[5px] bg-[#f0f2f3] p-2.5">
+            <Text className="text-base font-medium text-[#333]">{item.name}</Text>
+            <TouchableOpacity onPress={() => (playingAudio === item.uri ? stopAudio() : playAudio(item.uri))}>
               <Ionicons
-                name={
-                  playingAudio === item.uri
-                    ? "pause-circle-outline"
-                    : "play-circle-outline"
-                }
+                name={playingAudio === item.uri ? "pause-circle-outline" : "play-circle-outline"}
                 size={30}
                 color={playingAudio === item.uri ? "red" : "#111111"}
               />
-
             </TouchableOpacity>
           </View>
         )}
-        ListEmptyComponent={
-          <Text style={styles.emptyListText}>No recordings available</Text>
-        }
+        ListEmptyComponent={<Text className="mt-5 text-base text-[#888]">No recordings available</Text>}
       />
     </View>
   );
 };
 
 export default AudioContainer;
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#fff",
-    marginBottom: 10,
-    width: "100%",
-    alignItems: "center",
-    padding: 10,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    width: "100%",
-  },
-  headerText: {
-    fontSize: 24,
-    fontWeight: "600",
-  },
-  audioList: {
-    width: "100%",
-    alignItems: "center",
-  },
-  audioItem: {
-    backgroundColor: "#f0f2f3",
-    marginBottom: 10,
-    padding: 10,
-    borderRadius: 5,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    width: "90%",
-  },
-  audioText: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#333",
-  },
-  emptyListText: {
-    color: "#888",
-    fontSize: 16,
-    marginTop: 20,
-  },
-});

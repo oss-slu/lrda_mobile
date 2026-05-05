@@ -1,184 +1,92 @@
-import React, { useState, useEffect } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  SafeAreaView,
-  Image,
-  FlatList,
-  TouchableOpacity,
-} from "react-native";
-import { User } from "../models/user_class";
-import { Note, ImageNote, ProfilePageProps } from "../../types";
+import React, { useMemo } from "react";
+import { Text, View, SafeAreaView, Image, FlatList, TouchableOpacity, ActivityIndicator } from "react-native";
+import { useQuery } from "@tanstack/react-query";
+import { useAuthStore } from "../stores/authStore";
+import { Note } from "../../types";
 import DataConversion from "../utils/data_conversion";
-import ApiService from "../utils/api_calls";
-import { useTheme } from "../components/ThemeProvider";
-import Feather from 'react-native-vector-icons/Feather';
-import { defaultTextFont } from "../../styles/globalStyles";
+import { fetchAllNotes } from "../utils/api_calls";
+import { queryKeys } from "../query/queryKeys";
+import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-
-const user = User.getInstance();
 
 export default function ProfilePage() {
   const navigation = useRouter();
-  const [allImages, setAllImages] = useState<ImageNote[]>([]);
-  const [userInitials, setUserInitials] = useState("N/A");
-  const [userName, setUserName] = useState("");
-  const [fieldNotes, setFieldNotes] = useState(0);
-  const { theme } = useTheme(); // Access theme dynamically
+  const authUser = useAuthStore((s) => s.user);
 
-  useEffect(() => {
-    (async () => {
-      const name = await user.getName();
-      setUserName(name || "");
-      if (name) {
-        const initials = name
-          .split(" ")
-          .map((namePart) => namePart[0])
-          .join("");
-        setUserInitials(initials);
-      }
-    })();
+  const userName = authUser?.name ?? "";
+  const userInitials = useMemo(() => {
+    if (!userName) return "N/A";
+    return userName
+      .split(" ")
+      .map((part) => part[0])
+      .join("");
+  }, [userName]);
 
-    const fetchMessages = async () => {
-      try {
-        const data = await ApiService.fetchMessages(
-          false,
-          false,
-          (await user.getId()) || ""
-        );
-        const fetchedNotes = DataConversion.convertMediaTypes(data);
-        setFieldNotes(fetchedNotes.length);
+  const { data, isLoading } = useQuery({
+    queryKey: queryKeys.profile.notes(authUser?.id ?? ""),
+    queryFn: () => fetchAllNotes({ creatorId: authUser?.id ?? "" }),
+    enabled: !!authUser?.id,
+    select: (notes) => {
+      const converted = DataConversion.convertMediaTypes(notes);
+      return {
+        fieldNotes: converted.length,
+        images: DataConversion.extractImages(converted).reverse(),
+      };
+    },
+  });
 
-        const extractedImages = DataConversion.extractImages(fetchedNotes);
-        setAllImages(extractedImages.reverse());
-      } catch (error) {
-        console.error("Error fetching messages:", error);
-      }
-    };
-
-    fetchMessages();
-  }, []);
+  const fieldNotes = data?.fieldNotes ?? 0;
+  const allImages = data?.images ?? [];
 
   const navigateToEditNoteScreen = (note: Note) => {
     navigation.push({ pathname: "/edit-note", params: { noteData: JSON.stringify(note) } });
   };
 
-  const styles = createStyles(theme); // Pass theme to the style generator
-
   return (
-    <SafeAreaView style={styles.container}>
-      <FlatList
-        data={allImages}
-        numColumns={3}
-        keyExtractor={(item, index) => index.toString()}
-        contentContainerStyle={{ paddingBottom: 200 }}
-        ListHeaderComponent={() => (
-          <View>
-            <TouchableOpacity onPress={() => navigation.back()}>
-              <Feather name={'arrow-left'} size={30} style={{marginLeft: 20}}/>
+    <SafeAreaView className="flex-1 bg-primary">
+      {isLoading ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" />
+        </View>
+      ) : (
+        <FlatList
+          data={allImages}
+          numColumns={3}
+          keyExtractor={(item, index) => index.toString()}
+          contentContainerStyle={{ paddingBottom: 200 }}
+          ListHeaderComponent={() => (
+            <View>
+              <TouchableOpacity onPress={() => navigation.back()}>
+                <Feather name={"arrow-left"} size={30} style={{ marginLeft: 20 }} />
+              </TouchableOpacity>
+              <View className="self-center">
+                <View className="h-[190px] w-[190px] content-center justify-center rounded-full bg-foreground">
+                  <Text className="self-center text-[60px] font-medium text-primary">{userInitials}</Text>
+                </View>
+              </View>
+              <View className="mt-4 items-center self-center">
+                <Text className="font-inter text-4xl font-extralight text-foreground">{userName}</Text>
+                <Text className="font-inter text-sm text-[#AEB5BC]">Administrator</Text>
+              </View>
+              <View className="mt-8 flex-row self-center">
+                <View className="flex-1 items-center">
+                  <Text className="font-inter text-2xl text-foreground">{fieldNotes}</Text>
+                  <Text className="font-inter text-xs font-medium uppercase text-foreground">Posts</Text>
+                </View>
+                <View className="flex-1 items-center border-l border-r border-[#DFD8C8]">
+                  <Text className="font-inter text-2xl text-foreground">{allImages.length}</Text>
+                  <Text className="font-inter text-xs font-medium uppercase text-foreground">Images</Text>
+                </View>
+              </View>
+            </View>
+          )}
+          renderItem={({ item }) => (
+            <TouchableOpacity style={{ flex: 1, aspectRatio: 1 }} onPress={() => navigateToEditNoteScreen(item.note)}>
+              <Image source={{ uri: item.image }} style={{ flex: 1, aspectRatio: 1 }} />
             </TouchableOpacity>
-            <View style={{ alignSelf: "center" }}>
-              <View style={styles.userPhoto}>
-                <Text
-                  style={{
-                    fontWeight: "500",
-                    fontSize: 60,
-                    alignSelf: "center",
-                    color: theme.primaryColor,
-                  }}
-                >
-                  {userInitials}
-                </Text>
-              </View>
-            </View>
-            <View style={styles.infoContainer}>
-              <Text style={[styles.text, { fontWeight: "200", fontSize: 36 }]}>
-                {userName}
-              </Text>
-              <Text style={[styles.text, { color: "#AEB5BC", fontSize: 14 }]}>
-                Administrator
-              </Text>
-            </View>
-            <View style={styles.statsContainer}>
-              <View style={styles.statsBox}>
-                <Text style={[styles.text, { fontSize: 24 }]}>
-                  {fieldNotes}
-                </Text>
-                <Text style={[styles.text, styles.subText]}>Posts</Text>
-              </View>
-              <View
-                style={[
-                  styles.statsBox,
-                  {
-                    borderColor: "#DFD8C8",
-                    borderLeftWidth: 1,
-                    borderRightWidth: 1,
-                  },
-                ]}
-              >
-                <Text style={[styles.text, { fontSize: 24 }]}>
-                  {allImages.length}
-                </Text>
-                <Text style={[styles.text, styles.subText]}>Images</Text>
-              </View>
-            </View>
-          </View>
-        )}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={{ flex: 1, aspectRatio: 1 }}
-            onPress={() => navigateToEditNoteScreen(item.note)}
-          >
-            <Image
-              source={{ uri: item.image }}
-              style={{ flex: 1, aspectRatio: 1 }}
-            />
-          </TouchableOpacity>
-        )}
-      />
+          )}
+        />
+      )}
     </SafeAreaView>
   );
 }
-
-// Generate styles dynamically based on theme
-const createStyles = (theme) =>
-  StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.primaryColor,
-    },
-    text: {
-      ...defaultTextFont,
-      color: theme.text,
-    },
-    userPhoto: {
-      backgroundColor: theme.text,
-      height: 190,
-      width: 190,
-      borderRadius: 200,
-      alignContent: "center",
-      justifyContent: "center",
-    },
-    infoContainer: {
-      alignSelf: "center",
-      alignItems: "center",
-      marginTop: 16,
-    },
-    statsContainer: {
-      flexDirection: "row",
-      alignSelf: "center",
-      marginTop: 32,
-    },
-    statsBox: {
-      alignItems: "center",
-      flex: 1,
-    },
-    subText: {
-      ...defaultTextFont,
-      fontSize: 12,
-      color: theme.text,
-      textTransform: "uppercase",
-      fontWeight: "500",
-    },
-  });

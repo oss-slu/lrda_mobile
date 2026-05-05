@@ -1,0 +1,12 @@
+appId: register.edu.slu.cs.oss.lrda
+---
+# Skip the onboarding carousel (only appears on first launch).
+# The onboarding "Skip" button completes onboarding and navigates to login.
+# We wait briefly for the app to settle, then tap Skip if visible.
+- runFlow:
+    when:
+      visible: "Skip"
+    commands:
+      - waitForAnimationToEnd
+      - tapOn: "Skip"
+      - waitForAnimationToEnd

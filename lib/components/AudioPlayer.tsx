@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { View, Button, StyleSheet, Text } from "react-native";
-import Slider from "@react-native-community/slider"; // Corrected import
-import { Audio } from "expo-av";
+import React, { useEffect, useRef, useState } from "react";
+import { View, Button, Text } from "react-native";
+import Slider from "@react-native-community/slider";
+import { Audio, AVPlaybackStatus } from "expo-av";
 
 interface AudioPlayerProps {
   audioUri: string;
@@ -12,17 +12,15 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUri }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState<number | null>(null);
   const [position, setPosition] = useState<number>(0);
+  const soundRef = useRef<Audio.Sound | null>(null);
 
   useEffect(() => {
     const loadSound = async () => {
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: audioUri },
-        { shouldPlay: false },
-        onPlaybackStatusUpdate
-      );
-      setSound(sound);
+      const { sound: newSound } = await Audio.Sound.createAsync({ uri: audioUri }, { shouldPlay: false }, onPlaybackStatusUpdate);
+      soundRef.current = newSound;
+      setSound(newSound);
 
-      const status = await sound.getStatusAsync();
+      const status = await newSound.getStatusAsync();
       if (status.isLoaded) {
         setDuration(status.durationMillis || 0);
       }
@@ -31,13 +29,11 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUri }) => {
     loadSound();
 
     return () => {
-      if (sound) {
-        sound.unloadAsync();
-      }
+      soundRef.current?.unloadAsync();
     };
   }, [audioUri]);
 
-  const onPlaybackStatusUpdate = (status: Audio.AVPlaybackStatus) => {
+  const onPlaybackStatusUpdate = (status: AVPlaybackStatus) => {
     if (status.isLoaded) {
       setPosition(status.positionMillis || 0);
       if (status.didJustFinish) {
@@ -68,15 +64,17 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUri }) => {
 
   const formatTime = (millis: number) => {
     const minutes = Math.floor(millis / 60000);
-    const seconds = Math.floor((millis % 60000) / 1000).toString().padStart(2, "0");
+    const seconds = Math.floor((millis % 60000) / 1000)
+      .toString()
+      .padStart(2, "0");
     return `${minutes}:${seconds}`;
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.sliderWrapper}>
+    <View className="my-5 items-center">
+      <View className="w-[90%] items-center">
         <Slider
-          style={styles.slider}
+          style={{ width: "100%" }}
           minimumValue={0}
           maximumValue={duration || 1}
           value={position}
@@ -85,38 +83,14 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUri }) => {
           maximumTrackTintColor="#D3D3D3"
           thumbTintColor="#1DB954"
         />
-        <View style={styles.timeWrapper}>
-          <Text style={styles.time}>{formatTime(position)}</Text>
-          <Text style={styles.time}>{formatTime(duration || 0)}</Text>
+        <View className="mt-[5px] w-full flex-row justify-between">
+          <Text className="text-xs text-[#555]">{formatTime(position)}</Text>
+          <Text className="text-xs text-[#555]">{formatTime(duration || 0)}</Text>
         </View>
       </View>
       <Button title={isPlaying ? "Pause" : "Play"} onPress={handlePlayPause} />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: "center",
-    marginVertical: 20,
-  },
-  sliderWrapper: {
-    width: "90%",
-    alignItems: "center",
-  },
-  slider: {
-    width: "100%",
-  },
-  timeWrapper: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    marginTop: 5,
-  },
-  time: {
-    fontSize: 12,
-    color: "#555",
-  },
-});
 
 export default AudioPlayer;

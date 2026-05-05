@@ -1,52 +1,32 @@
-// LoginScreen.tsx
-
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  Animated,
-  ImageBackground,
-  Keyboard,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Animated, ImageBackground, Keyboard, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { Snackbar } from "react-native-paper";
-import { User } from "../../models/user_class";
-import { removeItem } from "../../utils/async_storage";
-import { defaultTextFont } from "../../../styles/globalStyles";
+import Toast from "react-native-toast-message";
+import { useAuthStore } from "../../stores/authStore";
 import { useRouter } from "expo-router";
-
-const user = User.getInstance();
 
 const LoginScreen: React.FC = () => {
   const router = useRouter();
+  const login = useAuthStore((s) => s.login);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [firstClick, setFirstClick] = useState(true);
-  const [snackState, toggleSnack] = useState(false);
   const [loading, setLoading] = useState(false);
   const fadeAnim = useRef(new Animated.Value(1)).current;
-  const [snackMessage, setSnackMessage] = useState("");
 
-  const fadeOut = () => {
+  const fadeOut = useCallback(() => {
     Animated.timing(fadeAnim, {
       toValue: 0,
       duration: 1000,
       useNativeDriver: true,
     }).start(() => setFirstClick(false));
-  };
+  }, [fadeAnim]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      fadeOut();
-    }, 2000);
-
+    const timer = setTimeout(fadeOut, 2000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [fadeOut]);
 
   useEffect(() => {
     (async () => {
@@ -59,59 +39,29 @@ const LoginScreen: React.FC = () => {
     router.push("/(auth)/register");
   };
 
-  const onDismissSnackBar = () => toggleSnack(false);
-
   const handleLogin = async () => {
-
     if (username === "" || password === "") {
-      toggleSnack(!snackState);
+      Toast.show({ type: "error", text1: "Please enter your email and password." });
     } else {
-
       try {
-        const status = await user.login(username, password)
-        if (status == "success") {
-          const userId = await user.getId();
-          // console.log("in login page, Inside the is statement of success ", userId)
-          if (userId !== null) {
-            setUsername("")
-            setPassword("")
-            router.replace('/(tabs)');
-          }
-        }
-      }
-      catch (error) {
-        console.log("login failed :", error);
+        await login(username, password);
+        setUsername("");
+        setPassword("");
+        router.replace("/(tabs)");
+      } catch (error) {
+        console.log("login failed:", error);
         let message = "Login failed. Please try again.";
 
-        if (error.message.includes("network") || error.message.includes("Network request failed")) {
+        const msg = error instanceof Error ? error.message : "";
+        if (msg.includes("network") || msg.includes("Network request failed")) {
           message = "Network error. Please check your connection.";
-        } else if (
-          error.message.includes("EMAIL_NOT_VERIFIED") ||
-          error.message.includes("Email not verified")
-        ) {
+        } else if (msg.includes("Email not verified") || msg.includes("EMAIL_NOT_VERIFIED")) {
           message = "Please verify your email before logging in. Check your inbox and spam folder.";
-        } else if (
-          error.message.includes("auth/invalid-email") ||
-          error.message.includes("auth/invalid-credential") ||
-          error.message.includes("INVALID_EMAIL_OR_PASSWORD") ||
-          error.message.includes("Invalid email or password")
-        ) {
+        } else if (msg.includes("Invalid email or password") || msg.includes("INVALID_EMAIL_OR_PASSWORD")) {
           message = "Invalid username or password.";
-
         }
-        setSnackMessage(message);
-        toggleSnack(true)
+        Toast.show({ type: "error", text1: message });
       }
-
-    }
-  };
-
-  const clearOnboarding = async () => {
-    try {
-      await removeItem("onboarded");
-      console.log("Onboarding key cleared!");
-    } catch (error) {
-      console.error("Failed to clear the onboarding key.", error);
     }
   };
 
@@ -121,7 +71,6 @@ const LoginScreen: React.FC = () => {
       setLoading(true);
       await handleLogin();
       setLoading(false);
-
     } catch (e) {
       console.log(e);
       setLoading(false);
@@ -130,41 +79,26 @@ const LoginScreen: React.FC = () => {
 
   return (
     <KeyboardAwareScrollView
-      contentContainerStyle={styles.container}
+      contentContainerStyle={{ flex: 1, justifyContent: "center", alignItems: "stretch" }}
       style={{ backgroundColor: "#F4DFCD" }}
       keyboardShouldPersistTaps="handled"
     >
-      <ImageBackground
-        source={require("../../../assets/splash.jpg")}
-        style={styles.imageBackground}
-      >
-        <Snackbar
-          visible={snackState}
-          onDismiss={onDismissSnackBar}
-          style={{
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "white",
-          }}
-        >
-          <Text style={{ ...defaultTextFont, textAlign: "center" }}>{snackMessage}</Text>
-        </Snackbar>
+      <ImageBackground source={require("../../../assets/splash.jpg")} className="flex-1 justify-center" resizeMode="cover">
         {firstClick ? (
-          <TouchableOpacity
-            activeOpacity={1}
-            style={styles.title}
-            onPress={fadeOut}
-          >
-            <Animated.Text style={[styles.logo, { opacity: fadeAnim }]}>
-              Where's {"\n"} Religion?
+          <TouchableOpacity activeOpacity={1} className="mb-[200px] items-center justify-center self-center py-[200px]" onPress={fadeOut}>
+            <Animated.Text className="mb-[70px] font-inter text-[50px] font-bold text-[#111111]" style={{ opacity: fadeAnim }}>
+              Where&apos;s {"\n"} Religion?
             </Animated.Text>
           </TouchableOpacity>
         ) : (
-          <View style={styles.loginBox}>
-            <Text style={[styles.logo, { marginBottom: 50 }]}>Login</Text>
-            <View style={styles.inputView}>
+          <View
+            className="h-[500px] w-[300px] items-center justify-center self-center rounded-[10px] bg-white/60 shadow-md"
+            style={{ elevation: 10, shadowColor: "#000", shadowOpacity: 0.4, shadowRadius: 10 }}
+          >
+            <Text className="mb-[50px] font-inter text-[50px] font-bold text-[#111111]">Login</Text>
+            <View className="mb-5 h-[50px] w-4/5 items-start justify-center rounded-full border-2 border-gray-500 bg-white p-5">
               <TextInput
-                style={styles.inputText}
+                className="h-[50px] w-full rounded-full font-inter text-[16px] text-[#111111]"
                 placeholder="Email..."
                 placeholderTextColor="#003f5c"
                 value={username}
@@ -175,10 +109,10 @@ const LoginScreen: React.FC = () => {
               />
             </View>
 
-            <View style={styles.inputView}>
+            <View className="mb-5 h-[50px] w-4/5 items-start justify-center rounded-full border-2 border-gray-500 bg-white p-5">
               <TextInput
                 secureTextEntry
-                style={styles.inputText}
+                className="h-[50px] w-full rounded-full font-inter text-[16px] text-[#111111]"
                 placeholder="Password..."
                 placeholderTextColor="#003f5c"
                 value={password}
@@ -188,141 +122,32 @@ const LoginScreen: React.FC = () => {
               />
             </View>
             <TouchableOpacity onPress={() => router.push("/(auth)/forgot-password")}>
-              <View style={styles.forgotPasswordContainer}><Text style={styles.forgotText}>Forgot Password?</Text></View>
+              <View className="w-[300px] items-end justify-center">
+                <Text className="mb-5 mr-10 text-[12px] font-normal text-[#111111]">Forgot Password?</Text>
+              </View>
             </TouchableOpacity>
-            <TouchableOpacity onPress={onLoginPress} style={styles.buttons} testID="login-button">
-              {!loading && <Text style={{ ...defaultTextFont, color: "white", fontWeight: "600", fontSize: 15 }}>
-                Login
-              </Text>}
+            <TouchableOpacity
+              onPress={onLoginPress}
+              className="mb-[10px] h-[50px] w-[200px] items-center justify-center rounded-[30px] shadow-sm"
+              style={{ backgroundColor: "rgb(17,47,187)", elevation: 10, shadowColor: "#000", shadowOpacity: 0.2, shadowRadius: 3 }}
+              testID="login-button"
+            >
+              {!loading && <Text className="font-inter text-[15px] font-semibold text-white">Login</Text>}
               {loading && <ActivityIndicator size="small" color="white" />}
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleGoRegister} style={styles.buttons} testID="register-button">
-              <Text style={{ ...defaultTextFont, color: "white", fontWeight: "600", fontSize: 15 }}>
-                Register
-              </Text>
+            <TouchableOpacity
+              onPress={handleGoRegister}
+              className="mb-[10px] h-[50px] w-[200px] items-center justify-center rounded-[30px] shadow-sm"
+              style={{ backgroundColor: "rgb(17,47,187)", elevation: 10, shadowColor: "#000", shadowOpacity: 0.2, shadowRadius: 3 }}
+              testID="register-button"
+            >
+              <Text className="font-inter text-[15px] font-semibold text-white">Register</Text>
             </TouchableOpacity>
           </View>
         )}
       </ImageBackground>
     </KeyboardAwareScrollView>
-
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "stretch",
-  },
-  logo: {
-    ...defaultTextFont,
-    fontWeight: "bold",
-    fontSize: 50,
-    color: "#111111",
-    marginBottom: 70,
-  },
-  inputView: {
-    width: "80%",
-    backgroundColor: "#fff",
-    borderRadius: 25,
-    height: 50,
-    marginBottom: 20,
-    padding: 20,
-    justifyContent: "center",
-    alignItems: "flex-start",
-    borderColor: "gray",
-    borderWidth: 2,
-  },
-  inputText: {
-    ...defaultTextFont,
-    height: 50,
-    color: "#111111",
-    fontSize: 16,
-    width: "100%",
-    borderRadius: 25,
-  },
-
-  forgot: {
-    ...defaultTextFont,
-    color: "#111111",
-    fontSize: 12,
-    fontWeight: "400",
-    marginBottom: 20,
-  },
-
-  imageBackground: {
-    flex: 1,
-    resizeMode: "cover",
-    justifyContent: "center",
-  },
-  title: {
-    justifyContent: "center",
-    alignContent: "center",
-    alignSelf: "center",
-    marginBottom: 200,
-    paddingVertical: 200,
-  },
-  buttons: {
-    backgroundColor: "rgb(17,47,187)",
-    width: 200,
-    height: 50,
-    borderRadius: 30,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 10,
-    elevation: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-  },
-  loginBox: {
-    alignSelf: "center",
-    alignContent: "center",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.6)", // Transparent white background
-    height: 500,
-    width: 300,
-    borderRadius: 10,
-    elevation: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-  },
-
-  forgotPasswordContainer: {
-    width: 300,
-    justifyContent: 'center',
-    alignItems: "flex-end",
-
-  },
-  forgotText: {
-    color: "#111111",
-    fontSize: 12,
-    fontWeight: "400",
-    marginBottom: 20,
-    marginRight: 40
-  },
-  signUpStatement: {
-    position: "absolute",
-    top: 450,
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: 'center',
-    alignItems: 'center'
-
-  },
-  signUpQuery: {
-    color: "black",
-    fontWeight: "600",
-  },
-  signUp: {
-    color: "blue",
-    fontWeight: "500",
-    marginTop: 0,
-
-  }
-});
 
 export default LoginScreen;

@@ -1,24 +1,20 @@
-import {
-  Media,
-  PhotoType,
-  VideoType,
-  AudioType,
-} from "./lib/models/media_class";
-import { User } from "./lib/models/user_class";
+import type { PhotoType, VideoType, AudioType } from "./lib/models/media_class";
 
-export type MediaData = {
-  uuid: string;
-  type: string;
-  uri: string;
+export type Tag = {
+  label: string;
+  origin: "user" | "ai";
 };
 
 export type UserData = {
-  "@id": string;
+  id: string;
   name: string;
-  roles: {
-    administrator: boolean;
-    contributor: boolean;
-  };
+  email: string;
+  image?: string | null;
+  role: string;
+  isInstructor: boolean;
+  instructorId?: string | null;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type Note = {
@@ -28,64 +24,11 @@ export type Note = {
   time: Date;
   media: (VideoType | PhotoType)[];
   audio: AudioType[];
-  creator: string;
-  latitude: string;
-  longitude: string;
-  published: boolean | undefined;
+  creatorId: string;
+  latitude: number | null;
+  longitude: number | null;
+  isPublished: boolean;
   tags: string[];
-  isArchived?: boolean; // Optional flag to indicate if the note is archived
-};
-
-export type RootStackParamList = {
-  Home: undefined;
-  Login: undefined;
-  Onboarding: undefined;
-  Register: undefined;
-  AccountPage: undefined;
-  AddNote: { onSave: (note: Note) => void };
-  EditNote: { note: Note; onSave: (note: Note) => void };
-};
-
-export type EditNoteScreenProps = {
-  route: {
-    params: {
-      note: Note;
-      onSave: (note: Note) => void;
-    };
-  };
-  navigation: {
-    goBack: () => void;
-  };
-  insertImageToEditor: (capturedImage: string) => void;
-};
-
-export type RootTabParamList = {
-  HomeTab: undefined;
-  Tab1: undefined;
-  Tab2: undefined;
-};
-
-export type HomeScreenProps = {
-  navigation: any;
-  route: { params?: { note: Note; onSave: (note: Note) => void } };
-  showTooltip: boolean;
-};
-
-export type ProfilePageProps = {
-  navigation: any;
-};
-
-export type EditNoteProps = {
-  route: { params: { note: Note; onSave: (note: Note) => void } };
-  navigation: {
-    setOptions: (options: { headerTitle: string }) => void;
-    goBack: () => void;
-  };
-};
-
-export type AddNoteScreenProps = {
-  navigation: any;
-  route: any;
 };
 
 export type ImageNote = {
@@ -93,8 +36,13 @@ export type ImageNote = {
   note: Note;
 };
 
-export type GoogleMapProps = {
-  route: any; // substitute any with the actual type if you know it
-  updateCounter: any; // substitute any with the actual type if you know it
-  user: User;
-};
+export interface MapMarker {
+  coordinate: { latitude: number; longitude: number };
+  creatorId: string;
+  title: string;
+  description: string;
+  images: { uri: string }[];
+  time: string;
+  tags: string[];
+  distance?: number;
+}

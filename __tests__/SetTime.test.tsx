@@ -1,24 +1,26 @@
-import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
-import LocationWindow from '../lib/components/time';
-import { Button } from 'react-native';
+import React from "react";
+import { render, fireEvent } from "@testing-library/react-native";
+import LocationWindow from "../lib/components/time";
 
 // Mock ThemeProvider
-jest.mock('../lib/components/ThemeProvider', () => ({
+jest.mock("../lib/components/ThemeProvider", () => ({
   useTheme: () => ({
-    theme: 'mockedTheme',
+    theme: "mockedTheme",
   }),
 }));
 
-jest.mock('@react-native-community/datetimepicker', () => {
-  const { View } = require('react-native');
-  return (props) => <View testID={props.testID} />;
+jest.mock("@react-native-community/datetimepicker", () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { View } = require("react-native");
+  return function MockDateTimePicker(props: { testID?: string }) {
+    return <View testID={props.testID} />;
+  };
 });
 
-const FIXED_DATE = new Date('2024-01-15T12:00:00.000Z');
+const FIXED_DATE = new Date("2024-01-15T12:00:00.000Z");
 
-describe('LocationWindow', () => {
-  it('renders without crashing', () => {
+describe("LocationWindow", () => {
+  it("renders without crashing", () => {
     const { toJSON } = render(<LocationWindow time={FIXED_DATE} setTime={() => {}} />);
     expect(toJSON()).toMatchSnapshot();
   });
@@ -27,21 +29,19 @@ describe('LocationWindow', () => {
     const { getByText } = render(<LocationWindow time={FIXED_DATE} setTime={() => {}} />);
 
     // Verify that the "Select Date & Time" button is displayed
-    const selectButton = getByText('Select Date & Time');
+    const selectButton = getByText("Select Date & Time");
     expect(selectButton).toBeTruthy();
   });
 
   it('shows the "Save" button when date & time picker is active', () => {
-    const { getByText, getByTestId } = render(
-      <LocationWindow time={FIXED_DATE} setTime={() => {}} />
-    );
+    const { getByText, getByTestId } = render(<LocationWindow time={FIXED_DATE} setTime={() => {}} />);
 
     // Trigger the display of date & time pickers
-    const selectButton = getByText('Select Date & Time');
+    const selectButton = getByText("Select Date & Time");
     fireEvent.press(selectButton); // This should display the pickers
 
     // Now the "Save" button should be visible
-    const saveButton = getByTestId('Save');
+    const saveButton = getByTestId("Save");
     expect(saveButton).toBeTruthy();
 
     // Simulate the button press

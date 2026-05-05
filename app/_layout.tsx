@@ -1,45 +1,37 @@
-import React, { useEffect, useState } from "react";
+import "../global.css";
+import React, { useEffect } from "react";
 import { Stack } from "expo-router";
-import { Provider } from "react-redux";
-import { store, persistor } from "../redux/store/store";
-import { PersistGate } from "redux-persist/lib/integration/react";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "../lib/query/queryClient";
 import { ThemeProvider } from "../lib/components/ThemeProvider";
 import { AddNoteProvider } from "../lib/context/AddNoteContext";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-import { User } from "../lib/models/user_class";
-import { getItem } from "../lib/utils/async_storage";
+import { useAuthStore } from "../lib/stores/authStore";
+import { useOnboardingStore } from "../lib/stores/onboardingStore";
 import Toast from "react-native-toast-message";
 import "react-native-gesture-handler";
 
 SplashScreen.preventAutoHideAsync();
 
-const user = User.getInstance();
-
 function RootLayoutInner() {
-  const [isReady, setIsReady] = useState(false);
-  const [isOnboarded, setIsOnboarded] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const isOnboarded = useOnboardingStore((s) => s.isOnboarded);
+  const onboardingReady = useOnboardingStore((s) => s.isReady);
+  const initOnboarding = useOnboardingStore((s) => s.initialize);
+  const isReady = useAuthStore((s) => s.isReady);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const initialize = useAuthStore((s) => s.initialize);
 
   useEffect(() => {
     const checkState = async () => {
-      const onboarded = await getItem("onboarded");
-      const isValid = await user.initializeUser();
-      setIsOnboarded(onboarded === '1');
-      setIsAuthenticated(isValid);
-      setIsReady(true);
+      await initOnboarding();
+      await initialize();
       await SplashScreen.hideAsync();
     };
     checkState();
-  }, []);
+  }, [initOnboarding, initialize]);
 
-  useEffect(() => {
-    user.setLoginCallback((isLoggedIn: boolean) => {
-      setIsAuthenticated(isLoggedIn);
-    });
-  }, []);
-
-  if (!isReady) return null;
+  if (!isReady || !onboardingReady) return null;
 
   return (
     <>
@@ -73,14 +65,12 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <ThemeProvider>
-          <AddNoteProvider>
-            <RootLayoutInner />
-          </AddNoteProvider>
-        </ThemeProvider>
-      </PersistGate>
-    </Provider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <AddNoteProvider>
+          <RootLayoutInner />
+        </AddNoteProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }

@@ -1,20 +1,10 @@
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  FlatList,
-  TouchableOpacity,
-  Dimensions,
-  StatusBar,
-  ScrollView,
-} from "react-native";
-import Feather from 'react-native-vector-icons/Feather';
-import { useTheme } from "../components/ThemeProvider";
-import { defaultTextFont } from "../../styles/globalStyles";
+import { View, Text, Image, FlatList, TouchableOpacity, Dimensions, StatusBar, ScrollView } from "react-native";
+import { Feather } from "@expo/vector-icons";
 
-const { width, height } = Dimensions.get('window');
+import { useRouter } from "expo-router";
+
+const { width, height } = Dimensions.get("window");
 
 const WR_team = [
   {
@@ -50,7 +40,7 @@ const teamMembers = [
     role: "Software Developer (COLR)",
     image: require("../../assets/Yash.jpg"),
   },
-    {
+  {
     id: 4,
     name: "Stuart Ray",
     role: "Developer",
@@ -106,163 +96,70 @@ const teamMembers = [
     image: require("../../assets/Sam.jpg"),
   },
   {
-    id:13, 
+    id: 13,
     name: "Josh Hogan",
     role: "Developer",
-    image: require("../../assets/F-22.jpg")
-  }
+    image: require("../../assets/F-22.jpg"),
+  },
 ];
-
-import { useRouter } from "expo-router";
 
 export default function TeamPage() {
   const router = useRouter();
-  const { theme } = useTheme();
 
-  const renderItem = ({ item }) => (
-    <View style={styles.teamMember}>
-      <Image
-        source={item.image}
-        style={styles.teamImage}
-        accessible
-        accessibilityLabel={`${item.name}, ${item.role}`}
-      />
-      <Text style={[styles.memberName, { color: theme.text || "#ffffff" }]}>{item.name}</Text>
-      <Text style={[styles.memberRole, { color: theme.secondaryText || "#aaaaaa" }]}>{item.role}</Text>
+  const renderItem = ({ item }: { item: { id: number; name: string; role: string; image: any } }) => (
+    <View className="mx-2 flex-1 items-center">
+      <Image source={item.image} className="mb-2 h-20 w-20 rounded-full" accessible accessibilityLabel={`${item.name}, ${item.role}`} />
+      <Text className="text-center font-inter text-sm font-bold text-foreground">{item.name}</Text>
+      <Text className="text-center font-inter text-xs text-tertiary">{item.role}</Text>
     </View>
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View className="flex-1 bg-primary">
       <StatusBar translucent backgroundColor="transparent" />
 
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: theme.homeColor }]}>
-        <View style={styles.headerContent}>
+      <View className="bg-accent" style={{ height: width > 500 ? height * 0.12 : height * 0.19 }}>
+        <View className="flex-row items-center justify-start px-5" style={{ marginTop: width > 500 ? "5%" : "20%" }}>
           <TouchableOpacity onPress={() => router.back()}>
-            <Feather name={'arrow-left'} size={30} />
+            <Feather name={"arrow-left"} size={30} />
           </TouchableOpacity>
-          <View style={styles.headerHeading}>
-            <Text style={{ ...defaultTextFont, fontSize: 17, fontWeight: 'bold' }}>Team</Text>
+          <View className="ml-5">
+            <Text className="font-inter text-[17px] font-bold">Team</Text>
           </View>
         </View>
       </View>
 
-      {/* Scrollable Body */}
-      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-        {/* Title */}
-        <View style={styles.titleContainer}>
-          <Text style={[styles.title, { color: theme.text || "#ffffff" }]}>About Our Team</Text>
+      <ScrollView contentContainerStyle={{ paddingBottom: 60 }} showsVerticalScrollIndicator={false}>
+        <View className="items-center py-5">
+          <Text className="text-center font-inter text-2xl font-bold text-foreground">About Our Team</Text>
         </View>
 
-        {/* WR Team Section */}
-        <View style={styles.sectionContainer}>
-          <Text style={[styles.subtitle, { color: theme.secondaryText || "#aaaaaa", marginBottom: 12 }]}>
-            The Saint Louis University Where's Religion Team
-          </Text>
+        <View className="mb-6 px-4">
+          <Text className="mb-3 text-center font-inter text-base text-tertiary">The Saint Louis University Where&apos;s Religion Team</Text>
           <FlatList
             data={WR_team}
             renderItem={renderItem}
             keyExtractor={(item) => item.id.toString()}
             numColumns={2}
             scrollEnabled={false}
-            contentContainerStyle={styles.teamContainer}
-            columnWrapperStyle={styles.teamRow}
+            contentContainerStyle={{ paddingBottom: 20 }}
+            columnWrapperStyle={{ justifyContent: "space-between", marginBottom: 20 }}
           />
         </View>
 
-        {/* Development Team Section */}
-        <View style={styles.sectionContainer}>
-          <Text style={[styles.subtitle, { color: theme.secondaryText || "#aaaaaa", marginBottom: 12 }]}>
-            The Development Team
-          </Text>
+        <View className="mb-6 px-4">
+          <Text className="mb-3 text-center font-inter text-base text-tertiary">The Development Team</Text>
           <FlatList
             data={teamMembers}
             renderItem={renderItem}
             keyExtractor={(item) => item.id.toString()}
             numColumns={2}
             scrollEnabled={false}
-            contentContainerStyle={[styles.teamContainer, { paddingBottom: 40 }]}
-            columnWrapperStyle={styles.teamRow}
+            contentContainerStyle={{ paddingBottom: 40 }}
+            columnWrapperStyle={{ justifyContent: "space-between", marginBottom: 20 }}
           />
         </View>
       </ScrollView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContainer: {
-    paddingBottom: 60,
-  },
-  header: {
-    height: width > 500 ? height * 0.12 : height * 0.19,
-  },
-  headerContent: {
-    marginTop: width > 500 ? '5%' : '20%',
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  headerHeading: {
-    marginLeft: 20,
-  },
-  headerTitle: {
-    ...defaultTextFont,
-    fontSize: 20,
-    fontWeight: "bold",
-    marginLeft: 10,
-  },
-  titleContainer: {
-    paddingVertical: 20,
-    alignItems: "center",
-  },
-  sectionContainer: {
-    paddingHorizontal: 16,
-    marginBottom: 24,
-  },
-  title: {
-    ...defaultTextFont,
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  subtitle: {
-    ...defaultTextFont,
-    fontSize: 16,
-    textAlign: "center",
-  },
-  teamContainer: {
-    paddingBottom: 20,
-  },
-  teamRow: {
-    justifyContent: "space-between",
-    marginBottom: 20,
-  },
-  teamMember: {
-    alignItems: "center",
-    flex: 1,
-    marginHorizontal: 8,
-  },
-  teamImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginBottom: 8,
-  },
-  memberName: {
-    ...defaultTextFont,
-    fontSize: 14,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  memberRole: {
-    ...defaultTextFont,
-    fontSize: 12,
-    textAlign: "center",
-  },
-});

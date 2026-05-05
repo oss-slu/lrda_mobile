@@ -1,22 +1,9 @@
 import React, { useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  ImageBackground,
-} from "react-native";
-import { authFetch, AUTH_API_URL } from "../../config/auth";
+import { Text, View, TextInput, TouchableOpacity, Alert, ImageBackground } from "react-native";
+import { authClient, AUTH_API_URL } from "../../auth/client";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useRouter } from "expo-router";
-
-// Utility function to validate email format
-const validateEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-};
+import { validateEmail as checkEmail } from "../../utils/validation";
 
 const ForgotPassword: React.FC = () => {
   const router = useRouter();
@@ -28,46 +15,23 @@ const ForgotPassword: React.FC = () => {
       return;
     }
 
-    if (!validateEmail(email)) {
+    if (checkEmail(email)) {
       Alert.alert("Error", "Please enter a valid email address.");
       return;
     }
 
     try {
       const base = AUTH_API_URL ? AUTH_API_URL.replace(/\/$/, "") : "";
-      const response = await authFetch("/api/auth/request-password-reset", {
-        method: "POST",
-        skipAuth: true,
-        body: JSON.stringify({
-          email: email.trim(),
-          redirectTo: `${base}/reset-password`,
-        }),
+      const { error } = await authClient.requestPasswordReset({
+        email: email.trim(),
+        redirectTo: `${base}/reset-password`,
       });
 
-      if (!response.ok) {
-        let errorMessage = "Failed to send reset email.";
-
-        const errorText = await response.text();
-        if (errorText) {
-          try {
-            const errorPayload = JSON.parse(errorText);
-            errorMessage =
-              errorPayload?.message ||
-              errorPayload?.error?.message ||
-              errorPayload?.error ||
-              errorText;
-          } catch {
-            errorMessage = errorText;
-          }
-        }
-
-        throw new Error(errorMessage);
+      if (error) {
+        throw new Error(error.message || "Failed to send reset email.");
       }
 
-      Alert.alert(
-        "Success",
-        `If an account exists for ${email.trim()}, a password reset link has been sent.`
-      );
+      Alert.alert("Success", `If an account exists for ${email.trim()}, a password reset link has been sent.`);
       router.back();
     } catch (error: any) {
       let message = error?.message || "Failed to send reset email.";
@@ -82,22 +46,20 @@ const ForgotPassword: React.FC = () => {
 
   return (
     <KeyboardAwareScrollView
-      contentContainerStyle={styles.container}
+      contentContainerStyle={{ flex: 1, justifyContent: "center", alignItems: "stretch" }}
       style={{ backgroundColor: "#F4DFCD" }}
       keyboardShouldPersistTaps="handled"
     >
-      <ImageBackground
-        source={require("../../../assets/splash.jpg")}
-        style={styles.imageBackground}
-      >
-        <View style={styles.resetBox}>
-          <Text style={styles.logo}>Forgot Password</Text>
-          <Text style={styles.instructions}>
-            Enter your email to receive a password reset link.
-          </Text>
-          <View style={styles.inputView}>
+      <ImageBackground source={require("../../../assets/splash.jpg")} className="flex-1 justify-center" resizeMode="cover">
+        <View
+          className="h-[400px] w-[300px] items-center self-center rounded-[10px] bg-white/85 p-5"
+          style={{ elevation: 10, shadowColor: "#000", shadowOpacity: 0.4, shadowRadius: 10 }}
+        >
+          <Text className="mb-5 text-[28px] font-bold text-[#111111]">Forgot Password</Text>
+          <Text className="mb-5 text-center text-[16px] text-[#555555]">Enter your email to receive a password reset link.</Text>
+          <View className="mb-5 h-[50px] w-full justify-center rounded-full border border-gray-500 bg-white px-5">
             <TextInput
-              style={styles.inputText}
+              className="h-[50px] w-full rounded-full text-[16px] text-[#111111]"
               placeholder="Email..."
               placeholderTextColor="#003f5c"
               value={email}
@@ -106,95 +68,22 @@ const ForgotPassword: React.FC = () => {
               autoCapitalize="none"
             />
           </View>
-          <TouchableOpacity onPress={handlePasswordReset} style={styles.buttons}>
-            <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
-              Send Reset Link
-            </Text>
-          </TouchableOpacity>
           <TouchableOpacity
-            style={{ marginTop: 20 }}
-            onPress={() => router.back()}
+            onPress={handlePasswordReset}
+            className="mb-[10px] h-[50px] w-[200px] items-center justify-center rounded-[30px] shadow-sm"
+            style={{ backgroundColor: "rgb(17,47,187)", elevation: 10, shadowColor: "#000", shadowOpacity: 0.2, shadowRadius: 3 }}
           >
-            <Text style={styles.backToLoginText}>Back to Login</Text>
+            <Text className="text-[15px] font-semibold text-white">Send Reset Link</Text>
+          </TouchableOpacity>
+          <TouchableOpacity className="mt-5" onPress={() => router.back()}>
+            <Text className="text-[16px] font-bold" style={{ color: "rgb(17,47,187)" }}>
+              Back to Login
+            </Text>
           </TouchableOpacity>
         </View>
       </ImageBackground>
     </KeyboardAwareScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "stretch",
-  },
-  imageBackground: {
-    flex: 1,
-    resizeMode: "cover",
-    justifyContent: "center",
-  },
-  resetBox: {
-    alignSelf: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.85)",
-    height: 400,
-    width: 300,
-    borderRadius: 10,
-    elevation: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    padding: 20,
-  },
-  logo: {
-    fontWeight: "bold",
-    fontSize: 28,
-    color: "#111111",
-    marginBottom: 20,
-  },
-  instructions: {
-    fontSize: 16,
-    color: "#555555",
-    textAlign: "center",
-    marginBottom: 20,
-  },
-  inputView: {
-    width: "100%",
-    backgroundColor: "#fff",
-    borderRadius: 25,
-    height: 50,
-    marginBottom: 20,
-    paddingHorizontal: 20,
-    justifyContent: "center",
-    borderColor: "gray",
-    borderWidth: 1,
-  },
-  inputText: {
-    height: 50,
-    color: "#111111",
-    fontSize: 16,
-    width: "100%",
-    borderRadius: 25,
-  },
-  buttons: {
-    backgroundColor: "rgb(17,47,187)",
-    width: 200,
-    height: 50,
-    borderRadius: 30,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 10,
-    elevation: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-  },
-  backToLoginText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "rgb(17,47,187)",
-  },
-});
 
 export default ForgotPassword;

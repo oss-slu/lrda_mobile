@@ -2,43 +2,19 @@
 
 exports[`LocationWindow renders without crashing 1`] = `
 <View
-  style={
-    {
-      "alignItems": "center",
-      "height": 110,
-      "justifyContent": "center",
-      "padding": 20,
-    }
-  }
+  className="h-[110px] items-center justify-center p-5"
 >
   <Text
-    style={
-      {
-        "fontFamily": "Inter",
-        "fontSize": 18,
-        "fontWeight": "bold",
-        "marginBottom": 1,
-      }
-    }
+    className="mb-[1px] font-inter text-lg font-bold"
   >
     Date & Time
   </Text>
   <View>
     <View
-      style={
-        {
-          "alignItems": "center",
-          "marginTop": 10,
-        }
-      }
+      className="mt-2.5 items-center"
     >
       <Text
-        style={
-          {
-            "fontFamily": "Inter",
-            "fontSize": 16,
-          }
-        }
+        className="font-inter text-base"
       >
         1/15/2024
 01:00 AM

@@ -1,0 +1,47 @@
+appId: register.edu.slu.cs.oss.lrda
+env:
+  TEST_EMAIL: ""
+  TEST_PASSWORD: ""
+---
+# Full auth E2E: login -> verify home -> logout -> verify back at login.
+#
+# Usage:
+#   maestro test .maestro/auth_full_flow.yaml \
+#     -e TEST_EMAIL=you@example.com \
+#     -e TEST_PASSWORD=yourpassword
+
+- launchApp
+
+# Handle first-run onboarding if present
+- runFlow: skip_onboarding.yaml
+
+# Dismiss the login splash animation
+- runFlow: skip_login_splash.yaml
+
+# Login
+- tapOn: "Email..."
+- inputText: ${TEST_EMAIL}
+
+- tapOn: "Password..."
+- inputText: ${TEST_PASSWORD}
+
+- tapOn: "Login"
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible: "Home"
+    timeout: 15000
+
+# Logout
+- runFlow: auth_logout.yaml
+
+# Verify we are back at login
+- runFlow: skip_login_splash.yaml
+
+# Navigate to forgot password and back
+- runFlow:
+    file: auth_forgot_password.yaml
+    env:
+      TEST_EMAIL: ${TEST_EMAIL}

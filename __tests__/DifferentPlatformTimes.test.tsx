@@ -1,78 +1,58 @@
-import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import { Platform } from 'react-native';
-import AddNoteScreen from '../lib/screens/AddNoteScreen';
+import React from "react";
+import { render, fireEvent, waitFor } from "@testing-library/react-native";
+import { Platform } from "react-native";
 import LocationWindow from "../lib/components/time";
-import { Provider } from 'react-redux';
-import configureStore from 'redux-mock-store';
-import moxios from 'moxios';
-
-// Mock Redux store
-const mockStore = configureStore([]);
-const store = mockStore({});
 
 // Mock external dependencies
-jest.mock('../lib/components/ThemeProvider', () => ({
+jest.mock("../lib/components/ThemeProvider", () => ({
   useTheme: () => ({
-    theme: 'mockedTheme',
+    theme: "mockedTheme",
   }),
 }));
 
-jest.mock('../lib/utils/api_calls', () => ({
+jest.mock("../lib/utils/api_calls", () => ({
   fetchCreatorName: jest.fn(() => Promise.resolve([])),
 }));
 
-jest.mock('@react-native-community/datetimepicker', () => {
+jest.mock("@react-native-community/datetimepicker", () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { View } = require("react-native");
-  return (props: any) => <View testID={props.testID} />;
+  return function MockDateTimePicker(props: any) {
+    return <View testID={props.testID} />;
+  };
 });
 
 // Alternative approach using jest.spyOn
 const mockPlatformOS = (OS: string) => {
-  Object.defineProperty(Platform, 'OS', {
+  Object.defineProperty(Platform, "OS", {
     get: jest.fn(() => OS),
     configurable: true,
   });
 };
 
 beforeAll(() => {
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
-  moxios.install();
+  jest.spyOn(console, "log").mockImplementation(() => {});
+  jest.spyOn(console, "error").mockImplementation(() => {});
 });
 
 afterAll(() => {
   (console.log as jest.Mock).mockRestore();
   (console.error as jest.Mock).mockRestore();
-  moxios.uninstall();
 });
 
 describe("AddNoteScreen", () => {
   it("renders without crashing", () => {
-    const routeMock = {
-      params: {
-        untitledNumber: 1,
-        refreshPage: jest.fn(),
-      }
-    };
-    
-    // Add the actual render test here
-    // const { getByTestId } = render(
-    //   <Provider store={store}>
-    //     <AddNoteScreen route={routeMock} />
-    //   </Provider>
-    // );
-    // expect(getByTestId('add-note-screen')).toBeTruthy();
+    // Placeholder - actual render test requires Provider/store setup
   });
 });
 
-describe('LocationWindow (iOS)', () => {
+describe("LocationWindow (iOS)", () => {
   const mockSetTime = jest.fn();
   const mockTime = new Date(2020, 5, 15);
 
   beforeEach(() => {
     // Mock Platform for iOS
-    mockPlatformOS('ios');
+    mockPlatformOS("ios");
   });
 
   afterEach(() => {
@@ -80,33 +60,29 @@ describe('LocationWindow (iOS)', () => {
   });
 
   it('displays the "Select Date & Time" button on iOS', () => {
-    const { getByText } = render(
-      <LocationWindow time={mockTime} setTime={mockSetTime} />
-    );
-    const selectButton = getByText('Select Date & Time');
+    const { getByText } = render(<LocationWindow time={mockTime} setTime={mockSetTime} />);
+    const selectButton = getByText("Select Date & Time");
     expect(selectButton).toBeTruthy();
   });
 
-  it('shows time picker when the button is clicked on iOS', async () => {
-    const { getByText, queryByTestId } = render(
-      <LocationWindow time={mockTime} setTime={mockSetTime} />
-    );
-    const selectButton = getByText('Select Date & Time');
+  it("shows time picker when the button is clicked on iOS", async () => {
+    const { getByText, queryByTestId } = render(<LocationWindow time={mockTime} setTime={mockSetTime} />);
+    const selectButton = getByText("Select Date & Time");
     fireEvent.press(selectButton);
-    
+
     await waitFor(() => {
-      expect(queryByTestId('timePicker')).toBeTruthy(); // Assuming the picker has testID 'timePicker'
+      expect(queryByTestId("timePicker")).toBeTruthy(); // Assuming the picker has testID 'timePicker'
     });
   });
 });
 
-describe('LocationWindow (Android)', () => {
+describe("LocationWindow (Android)", () => {
   const mockSetTime = jest.fn();
   const mockTime = new Date(2020, 5, 15);
 
   beforeEach(() => {
     // Mock Platform for Android
-    mockPlatformOS('android');
+    mockPlatformOS("android");
   });
 
   afterEach(() => {
@@ -114,22 +90,18 @@ describe('LocationWindow (Android)', () => {
   });
 
   it('displays the "Select Date & Time" button on Android', () => {
-    const { getByText } = render(
-      <LocationWindow time={mockTime} setTime={mockSetTime} />
-    );
+    const { getByText } = render(<LocationWindow time={mockTime} setTime={mockSetTime} />);
     const selectButton = getByText(/Select Date & Time/i);
     expect(selectButton).toBeTruthy();
   });
 
-  it('shows time picker when the button is clicked on Android', async () => {
-    const { getByText, queryByTestId } = render(
-      <LocationWindow time={mockTime} setTime={mockSetTime} />
-    );
-    const selectButton = getByText('SELECT DATE & TIME');
+  it("shows time picker when the button is clicked on Android", async () => {
+    const { getByText, queryByTestId } = render(<LocationWindow time={mockTime} setTime={mockSetTime} />);
+    const selectButton = getByText("SELECT DATE & TIME");
     fireEvent.press(selectButton);
-    
+
     await waitFor(() => {
-      expect(queryByTestId('timePicker')).toBeTruthy(); // Assuming the picker has testID 'timePicker'
+      expect(queryByTestId("timePicker")).toBeTruthy(); // Assuming the picker has testID 'timePicker'
     });
   });
 });

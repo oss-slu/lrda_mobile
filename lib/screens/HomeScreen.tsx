@@ -1,1092 +1,507 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Platform,
   View,
   Text,
   TouchableOpacity,
   Dimensions,
-  Image,
   TextInput,
-  StyleSheet,
   Pressable,
   Animated,
   StatusBar,
-  Keyboard,
-  ActivityIndicator
+  ActivityIndicator,
 } from "react-native";
-import { useCallback } from "react";
-import { Ionicons } from "@expo/vector-icons";
-import { User } from "../models/user_class";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { Note } from "../../types";
-import ApiService from "../utils/api_calls";
-import DataConversion from "../utils/data_conversion";
 import { SwipeListView } from "react-native-swipe-list-view";
 import NoteSkeleton from "../components/noteSkeleton";
-import LoadingImage from "../components/loadingImage";
 import { formatToLocalDateString } from "../components/time";
 import { useTheme } from "../components/ThemeProvider";
-import Constants from "expo-constants";
-import DropDownPicker from "react-native-dropdown-picker";
-import NoteDetailModal from "./mapPage/NoteDetailModal";
+import NoteDetailModal, { NoteDetailData } from "./mapPage/NoteDetailModal";
 import ToastMessage from "react-native-toast-message";
 import NotesComponent from "../components/NotesComponent";
 import Greeting from "../components/Greeting";
 import { useAddNoteContext } from "../context/AddNoteContext";
-import LottieView from 'lottie-react-native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { toogleAddNoteState } from "../../redux/slice/AddNoteStateSlice";
-import { useSelector, useDispatch } from 'react-redux'
-import { defaultTextFont } from "../../styles/globalStyles";
-import Tooltip from 'react-native-walkthrough-tooltip';
+import LottieView from "lottie-react-native";
+import { useAddNoteStore } from "../stores/addNoteStore";
+import Tooltip from "react-native-walkthrough-tooltip";
 import TooltipContent from "../onboarding/TooltipComponent";
-import { useRouter, useFocusEffect } from "expo-router";
+import { useRouter } from "expo-router";
+import { getHasDoneTutorial, setTutorialDone } from "../utils/tutorial";
+import { useUserInfo, useNotesList, useAnimatedSearch, sortNotes, filterNotes } from "../hooks/useNotesList";
+import { useUpdateNote } from "../hooks/mutations/useUpdateNote";
+import Constants from "expo-constants";
 
-const { width, height } = Dimensions.get("window");
-const user = User.getInstance();
-const limit = 20;
+const { width } = Dimensions.get("window");
+const TEXT_LENGTH = 18;
 
 const HomeScreen: React.FC = () => {
   const router = useRouter();
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [messages, setMessages] = useState<any[]>([]);
-  const [updateCounter, setUpdateCounter] = useState(0);
+  const { isDarkmode } = useTheme();
+  const { authUser, userInitials, userName } = useUserInfo();
+  const { setNavigateToAddNote } = useAddNoteContext();
+  const toggleAddNoteState = useAddNoteStore((s) => s.toggleAddNoteState);
+
   const [isPrivate, setIsPrivate] = useState(true);
   const [published, setPublished] = useState(false);
-  const [reversed, setReversed] = useState(false);
-  const [rendering, setRendering] = useState(true);
-  const [userInitials, setUserInitials] = useState("N/A");
-  const [userName, setUserName] = useState('');
-  const [initialItems, setInitialItems] = useState([
-    { label: "My Entries", value: "my_entries" },
-    { label: "Published Entries", value: "published_entries" },
-  ]);
-  const [isSearchVisible, setIsSearchVisible] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(initialItems[0].value);
-  const [items, setItems] = useState(initialItems);
-  const [selectedNote, setSelectedNote] = useState<Note | undefined>(
-    undefined
-  );
+  const [selectedNote, setSelectedNote] = useState<NoteDetailData | undefined>(undefined);
   const [isModalVisible, setModalVisible] = useState(false);
-  const { setNavigateToAddNote } = useAddNoteContext();
-  const { theme, isDarkmode } = useTheme();
-  const animation = useRef(new Animated.Value(0)).current; // Animation value
   const [isSortOpened, setIsSortOpened] = useState(false);
   const [selectedSortOption, setSelectedSortOption] = useState(1);
-  let textLength = 18;
-  const dispatch = useDispatch();
-  
-  // Pagination states
-  const [page, setPage] = useState(1);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+
+  const updateNoteMutation = useUpdateNote();
+
+  const { notes, rendering, hasMore, isLoadingMore, handleLoadMore } = useNotesList({
+    creatorId: authUser?.id || undefined,
+    published: published ? true : authUser?.id ? false : undefined,
+  });
+
+  const { isSearchVisible, searchQuery, setSearchQuery, toggleSearchBar, searchBarWidth } = useAnimatedSearch();
 
   useEffect(() => {
     const navigateToAddNote = () => {
       const untitledNumber = findNextUntitledNumber(notes);
-      console.log("in homescreen untitled numbe ", untitledNumber);
       router.push({ pathname: "/add-note", params: { untitledNumber: String(untitledNumber) } });
-  
-    }
-    setNavigateToAddNote(() => navigateToAddNote)
-  }, [router, notes])
+    };
+    setNavigateToAddNote(() => navigateToAddNote);
+  }, [router, notes, setNavigateToAddNote]);
 
-
-  useEffect(() => {
-    (async () => {
-      const name = await user.getName();
-      if (name) {
-        const firstName = name.split(" ")[0];
-        setUserName(firstName);
-  
-        const initials = name
-          .split(" ")
-          .map((namePart) => namePart[0])
-          .join("");
-        setUserInitials(initials);
-      }
-    })();
-  }, []);
-  
-const refreshPage = useCallback(() => {
-    setPage(1);
-    setHasMore(true);
-    setUpdateCounter((prev) => prev + 1);
-  }, []);
-
-  // Refresh notes when screen regains focus (e.g. returning from AddNote/EditNote)
-  useFocusEffect(
-    useCallback(() => {
-      refreshPage();
-    }, [refreshPage])
-  );
-
-
-  // Fetch notes, either all published or user-specific based on filter
-  useEffect(() => {
-    setRendering(true);
-    setPage(1);
-    setHasMore(true);
-    fetchMessages(1);
-  }, [updateCounter, published]);
-
-
-  const fetchMessages = async (pageNum: number) => {
-    try {
-        if (pageNum === 1) {
-            setRendering(true); 
-        } else {
-            setIsLoadingMore(true); 
-        }
-
-        const skip = (pageNum - 1) * limit;
-        const userId = await user.getId();
-
-        const data = await ApiService.fetchMessagesBatch(
-            false,
-            published,
-            userId,
-            limit,
-            skip
-        );
-
-        const filteredNotes = data.filter((note: Note) => !note.isArchived);
-
-        const convertedNotes = DataConversion.convertMediaTypes(filteredNotes)
-            .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-
-        const finalNotes = reversed ? convertedNotes.reverse() : convertedNotes;
-
-        if (pageNum === 1) {
-            setNotes(finalNotes);
-        } else {
-            setNotes(prev => [...prev, ...finalNotes]);
-        }
-
-        setHasMore(finalNotes.length === limit);
-
-    } catch (error) {
-        console.error("Error fetching notes:", error);
-        ToastMessage.show({
-            type: "error",
-            text1: "Error fetching notes",
-            text2: error.message,
-        });
-    } finally {
-        setRendering(false);      
-        setIsLoadingMore(false);  
-    }
-};
-
-  
-
-  const updateNote = (note: Note) => {
-    setNotes((prevNotes) =>
-      prevNotes?.map((prevNote) => (prevNote.id === note.id ? note : prevNote))
-    );
-    refreshPage();
-  };
-
-  const handleLoadMore = async () => {
-    if (hasMore && !isLoadingMore) {
-      setIsLoadingMore(true);
-      const nextPage = page + 1;
-      await fetchMessages(nextPage);
-      setPage(nextPage);
-      setIsLoadingMore(false);
-    }
-  };
-
-  const renderFooter = () => {
-    if (isLoadingMore) {
-      return (
-        <View  style={{ paddingVertical: 50, alignItems: "center", marginBottom: 100 }}>
-          <ActivityIndicator size="small" color={theme.text} />
-        </View>
-      );
-    }
-    if (hasMore) {
-      return (
-        <TouchableOpacity
-        testID="load-more"
-        onPress={handleLoadMore}
-        style={{
-          paddingVertical: 20,
-          width: "65%",
-          alignItems: "center",
-          alignSelf: "center",
-          borderRadius: 20,
-          marginVertical: 4, // reduced from 8
-          backgroundColor: theme.homeColor,
-        }}
-      >
-        <Text testID="load-more-button" style={{ ...defaultTextFont ,color: theme.text, fontSize: 16, fontWeight: "400" }}>
-          Load More
-        </Text>
-      </TouchableOpacity>
-      );
-    }
-    return (
-      <View style={{ padding: 20, alignItems: "center" }}>
-        <Text testID="empty-state-text" style={{ ...defaultTextFont, color: "gray", fontSize: 14 }}>
-          End of the Page 
-        </Text>
-      </View>
-    );
-  };
-
-  const handleArchiveNote = async (note: Note | undefined, user: User) => {
+  const handleArchiveNote = async (note: Note | undefined) => {
     if (note?.id) {
       try {
-        const userId = await user.getId();
-        const updatedNote = {
-          ...note,
-          isArchived: true,
-          published: false,
-          archivedAt: new Date().toISOString(),
-        };
-
-        const response = await ApiService.overwriteNote(updatedNote);
-        if (response.ok) {
-          ToastMessage.show({
-            type: "success",
-            text1: "Success",
-            text2: "Note successfully archived.",
-          });
-          updateNote(updatedNote); // Update the note in local state
-          return true;
-        } else {
-          throw new Error("Archiving failed");
-        }
+        await updateNoteMutation.mutateAsync({ ...note, isPublished: false });
+        ToastMessage.show({ type: "success", text1: "Success", text2: "Note successfully archived." });
+        return true;
       } catch (error) {
-        ToastMessage.show({
-          type: "error",
-          text1: "Error",
-          text2: "Failed to archive note. System failure. Try again later.",
-        });
+        ToastMessage.show({ type: "error", text1: "Error", text2: "Failed to archive note. System failure. Try again later." });
         console.error("Error archiving note:", error);
         return false;
       }
     } else {
-      ToastMessage.show({
-        type: "error",
-        text1: "Error",
-        text2: "You must first save your note before archiving it.",
-      });
+      ToastMessage.show({ type: "error", text1: "Error", text2: "You must first save your note before archiving it." });
       return false;
     }
   };
 
   const findNextUntitledNumber = (notes: Note[]): number => {
-    return notes.reduce((maxNumber, note) => {
-        const match = note.title.match(/^Untitled (\d+)$/);
-        if (match) {
-            const number = parseInt(match[1], 10);
-            return Math.max(maxNumber, number);
-        }
-        return maxNumber;
-    }, 0) + 1;
-};
-
-
-  const sideMenu = (data: any, rowMap: any) => {
-    const note = data.item;
-    const isNotePublished = note.published;
-
     return (
-      <View style={styles(theme, width).rowBack} key={data.index}>
-        <TouchableOpacity>
-          <TouchableOpacity onPress={() => publishNote(data.item.id, rowMap)}>
-          <Ionicons
-          name={isNotePublished ? "arrow-undo" : "share"}
-          size={30}
-          color={"green"}
-        />
-          </TouchableOpacity>
-        </TouchableOpacity>
-        <View
-          style={[
-            styles(theme, width).backRightBtn,
-            styles(theme, width).backRightBtnRight,
-          ]}
-        >
-          {isPrivate ? (
-            <TouchableOpacity
-              style={{
-                justifyContent: "center",
-                alignItems: "center",
-                position: "absolute",
-                right: 20,
-              }}
-              onPress={() => deleteNote(data.item.id, rowMap)}
-            >
-              <Ionicons
-                name="trash-outline"
-                size={24}
-                color={styles(theme, width).backColor.color}
-              />
-            </TouchableOpacity>
-          ) : null}
-        </View>
-      </View>
+      notes.reduce((max, note) => {
+        const match = note.title.match(/^Untitled (\d+)$/);
+        return match ? Math.max(max, parseInt(match[1], 10)) : max;
+      }, 0) + 1
     );
   };
- //handle sort
- const handleSort = () => {
-  setIsSortOpened(!isSortOpened);
-}
 
-const handleSortOption = ({ option }) => {
-  setSelectedSortOption(option);
-  setIsSortOpened(false);
-}
-
-  const deleteNote = (id: string, rowMap: any) => {
-    if (rowMap[id]) {
-      rowMap[id].closeRow();
-    }
-
+  const deleteNote = async (id: string, rowMap: any) => {
+    if (rowMap[id]) rowMap[id].closeRow();
     const noteToDelete = notes.find((note) => note.id === id);
-
     if (noteToDelete) {
-      handleArchiveNote(noteToDelete, user); // Pass the correct arguments
+      await handleArchiveNote(noteToDelete);
     }
-
-    setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
   };
 
-
-  async function publishNote(data: any, rowMap: any) {
-    if (rowMap[data]) {
-      rowMap[data].closeRow();
-
+  const publishNote = async (id: string, rowMap: any) => {
+    if (rowMap[id]) rowMap[id].closeRow();
+    const found = notes.find((note) => note.id === id);
+    if (!found) return;
+    try {
+      await updateNoteMutation.mutateAsync({ ...found, isPublished: !found.isPublished });
+    } catch (error) {
+      console.error("Error publishing note:", error);
+      ToastMessage.show({ type: "error", text1: "Error", text2: "Failed to update note. Try again later." });
     }
-    const foundNote = notes.find((note) => note.id === data);
-    const editedNote: Note = {
-      id: foundNote?.id || "",
-      title: foundNote?.title || "",
-      text: foundNote?.text || "",
-      creator: foundNote?.creator || "",
-      media: foundNote?.media || [],
-      latitude: foundNote?.latitude || "",
-      longitude: foundNote?.longitude || "",
-      audio: foundNote?.audio || [],
-      published: !foundNote?.published || false,
-      time: foundNote?.time || new Date(),
-      tags: foundNote?.tags || [],
-    };
-    await ApiService.overwriteNote(editedNote);
-    refreshPage();
-  }
-
-  const renderList = (notes: Note[]) => {
-    const filteredNotes = searchQuery
-      ? notes.filter((note) => {
-        const lowerCaseQuery = searchQuery.toLowerCase();
-        const noteTime = new Date(note.time);
-        const formattedTime = formatToLocalDateString(noteTime);
-        return (
-          note.title.toLowerCase().includes(lowerCaseQuery) ||
-          formattedTime.includes(lowerCaseQuery)
-        );
-      })
-      : notes;
-
-      // Apply sorting based on selectedSortOption
-    filteredNotes.sort((a, b) => {
-      if (selectedSortOption === 1) {
-        // Sort by date and time (latest first)
-        return new Date(b.time).getTime() - new Date(a.time).getTime();
-      } else if (selectedSortOption === 2) {
-        // Sort A-Z by title
-        return a.title.toLowerCase().localeCompare(b.title.toLowerCase());
-      } else if (selectedSortOption === 3) {
-        // Sort Z-A by title
-        return b.title.toLowerCase().localeCompare(a.title.toLowerCase());
-      }
-      return 0;
-    });
-    const privateData = filteredNotes.filter((eachNotes) => eachNotes.published === false);
-    const publicData = filteredNotes.filter((eachNotes) => eachNotes.published != false);
-    return isPrivate ? (
-      privateData.length > 0 ? (<SwipeListView
-        data={privateData}
-        renderItem={renderItem}
-        renderHiddenItem={sideMenu}
-        leftActivationValue={160}
-        rightActivationValue={-160}
-        leftOpenValue={75}
-        rightOpenValue={-75}
-        stopLeftSwipe={175}
-        stopRightSwipe={-175}
-        keyExtractor={(item) => item.id}
-        onRightAction={(data, rowMap) => deleteNote(data, rowMap)}
-        onLeftAction={(data, rowMap) => publishNote(data, rowMap)}
-        contentContainerStyle={{paddingBottom: 150}}
-        ListFooterComponent={renderFooter}
-      />)
-        : (<View style={styles(theme, width).resultNotFound}>
-
-          <LottieView
-            testID="no-results-animation"
-            source={require('../../assets/animations/noResultFound.json')}
-            autoPlay
-            loop
-            style={styles(theme, width).lottie}
-          />
-          <Text style={styles(theme, width).resultNotFoundTxt}>No Results Found</Text>
-        </View>
-        )
-
-    ) : (
-      publicData.length > 0 ? (
-        <SwipeListView
-          data={publicData}
-          renderItem={renderItem}
-          renderHiddenItem={sideMenu}
-          leftActivationValue={160}
-          leftOpenValue={75}
-          stopLeftSwipe={175}
-          keyExtractor={(item) => item.id}
-          onLeftAction={(data, rowMap) => publishNote(data, rowMap)}
-          contentContainerStyle={{ paddingBottom: 150 }}
-          ListFooterComponent={renderFooter}
-      />) :
-        (<View style={styles(theme, width).resultNotFound}>
-
-          <LottieView
-            testID="no-results-animation"
-            source={require('../../assets/animations/noResultFound.json')}
-            autoPlay
-            loop
-            style={styles(theme, width).lottie}
-          />
-          <Text style={styles(theme, width).resultNotFoundTxt}>No Results Found</Text>
-        </View>
-        )
-    );
   };
+
+  const displayNotes = sortNotes(filterNotes(notes, searchQuery), selectedSortOption);
+  const privateData = displayNotes.filter((n) => !n.isPublished);
+  const publicData = displayNotes.filter((n) => n.isPublished);
+  const listData = isPrivate ? privateData : publicData;
 
   const renderItem = (data: any) => {
-   
     const item = data.item;
-    const tempTime = new Date(item.time);
-    const showTime = formatToLocalDateString(tempTime);
+    const showTime = formatToLocalDateString(new Date(item.time));
     const mediaItem = item.media[0];
-    const ImageType = mediaItem?.getType();
-    // Ensure ImageURI is a valid string
+    const ImageType = mediaItem?.type;
     let ImageURI = "";
     let IsImage = false;
-
     if (ImageType === "image") {
-      ImageURI = mediaItem.getUri();
+      ImageURI = mediaItem.uri;
       IsImage = true;
     } else if (ImageType === "video") {
-      ImageURI = mediaItem.getThumbnail();
+      ImageURI = mediaItem.thumbnail;
       IsImage = true;
     }
-
-    // Enforce `uri` as a string, especially for Android
     const resolvedImageURI = Platform.OS === "android" ? String(ImageURI || "") : ImageURI;
 
     return (
       <TouchableOpacity
         key={item.id}
         activeOpacity={1}
-        style={{
-          backgroundColor: isDarkmode? 'black' : '#e6e6e6',
-          width: "100%",
-        }}
+        className="w-full bg-[#e6e6e6] dark:bg-black"
         onPress={() => {
-          if (!item.published) {
-            dispatch(toogleAddNoteState());
+          if (!item.isPublished) {
+            toggleAddNoteState();
             router.push({
               pathname: "/edit-note",
-              params: {
-                noteData: JSON.stringify({
-                  ...item,
-                  time: item.time.toISOString(),
-                }),
-              },
-            });            
+              params: { noteData: JSON.stringify({ ...item, time: item.time.toISOString() }) },
+            });
           } else {
-            const formattedNote = {
+            setSelectedNote({
               ...item,
               time: formatToLocalDateString(new Date(item.time)),
               description: item.text,
-              images: item.media.map((mediaItem: { uri: any }) => ({
-                uri: mediaItem.uri,
-              })),
-            };
-            setSelectedNote(formattedNote);
+              images: item.media.map((m: { uri: string }) => ({ uri: m.uri })),
+            });
             setModalVisible(true);
           }
         }}
       >
-        <NotesComponent IsImage={IsImage} resolvedImageURI={resolvedImageURI} ImageType={ImageType} textLength={textLength} showTime={showTime} item={item} isDarkmode={isDarkmode}/>
+        <NotesComponent
+          IsImage={IsImage}
+          resolvedImageURI={resolvedImageURI}
+          ImageType={ImageType}
+          textLength={TEXT_LENGTH}
+          showTime={showTime}
+          item={item}
+          isPublished={item.isPublished}
+          isDarkmode={isDarkmode}
+        />
       </TouchableOpacity>
     );
   };
 
-
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
+  const sideMenu = (data: any, rowMap: any) => {
+    const isNotePublished = data.item.isPublished;
+    return (
+      <View className="mt-px h-[140px] w-full flex-1 flex-row items-center justify-between self-center p-2.5" key={data.index}>
+        <TouchableOpacity onPress={() => publishNote(data.item.id, rowMap)}>
+          <Ionicons name={isNotePublished ? "arrow-undo" : "share"} size={30} color="green" />
+        </TouchableOpacity>
+        <View className="absolute bottom-0 right-0 top-0 w-1/2 items-end justify-center bg-brand-gray pr-[17px]">
+          {isPrivate && (
+            <TouchableOpacity className="absolute right-5 items-center justify-center" onPress={() => deleteNote(data.item.id, rowMap)}>
+              <Ionicons name="trash-outline" size={24} color="red" />
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+    );
   };
 
-  const toggleSearchBar = () => {
-    if (isSearchVisible) {
-      // Hide the search container
-      setSearchQuery('');
-      Animated.timing(animation, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: false,
-      }).start(() => setIsSearchVisible(false));
-    } else {
-      // Show the search container
-      setIsSearchVisible(true);
-      Animated.timing(animation, {
-        toValue: width - 100,
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
-    }
-  };
-
-  const searchBarWidth = animation.interpolate({
-    inputRange: [0, width],
-    outputRange: [0, width],
-  });
-
-
-
-  const formatDate = (date: Date) => {
-    const day = date.getDate().toString();
-    const month = (date.getMonth() + 1).toString();
-    const year = date.getFullYear();
-    return `${month}/${day}/${year}`;
-  };
-
-  const filteredNotes = useMemo(() => {
-    return notes.filter((note) => {
-      const noteTime = formatToLocalDateString(new Date(note.time));
+  const renderFooter = () => {
+    if (isLoadingMore) {
       return (
-        note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        noteTime.includes(searchQuery)
+        <View className="mb-[100px] items-center py-[50px]">
+          <ActivityIndicator size="small" className="text-foreground" />
+        </View>
       );
-    });
-  }, [notes, searchQuery]);
+    }
+    if (hasMore) {
+      return (
+        <TouchableOpacity
+          testID="load-more"
+          onPress={handleLoadMore}
+          className="my-1 w-[65%] items-center self-center rounded-lg bg-accent py-5"
+        >
+          <Text testID="load-more-button" className="font-inter text-base font-normal text-foreground">
+            Load More
+          </Text>
+        </TouchableOpacity>
+      );
+    }
+    return (
+      <View className="items-center p-5">
+        <Text testID="empty-state-text" className="font-inter text-sm text-gray-500">
+          End of the Page
+        </Text>
+      </View>
+    );
+  };
+
+  const renderList = () => {
+    if (listData.length === 0) {
+      return (
+        <View className="items-center justify-center">
+          <LottieView
+            testID="no-results-animation"
+            source={require("../../assets/animations/noResultFound.json")}
+            autoPlay
+            loop
+            style={{ width: 100, height: 200 }}
+          />
+          <Text className="font-inter text-[15px] font-normal">No Results Found</Text>
+        </View>
+      );
+    }
+    return (
+      <SwipeListView
+        data={listData}
+        renderItem={renderItem}
+        renderHiddenItem={sideMenu}
+        leftActivationValue={160}
+        rightActivationValue={isPrivate ? -160 : undefined}
+        leftOpenValue={75}
+        rightOpenValue={isPrivate ? -75 : undefined}
+        stopLeftSwipe={175}
+        stopRightSwipe={isPrivate ? -175 : undefined}
+        keyExtractor={(item) => item.id}
+        onRightAction={isPrivate ? (data, rowMap) => deleteNote(data, rowMap) : undefined}
+        onLeftAction={(data, rowMap) => publishNote(data, rowMap)}
+        contentContainerStyle={{ paddingBottom: 150 }}
+        ListFooterComponent={renderFooter}
+      />
+    );
+  };
 
   const [userTutorial, setUserTutorial] = useState<boolean | null>(null);
-  const [accountTip, setAccountTip] = useState<boolean>(false); // Start false, renamed from setAccontTip
-  const [filterToolTip, setFilterToolTip] = useState<boolean>(false);
-  const [searchTip, setSearchTip] = useState<boolean>(false);
-  const [pubPrivTip, setPubPrivTip] = useState<boolean>(false);
+  const [accountTip, setAccountTip] = useState(false);
+  const [filterToolTip, setFilterToolTip] = useState(false);
+  const [searchTip, setSearchTip] = useState(false);
+  const [pubPrivTip, setPubPrivTip] = useState(false);
 
-  // useEffect to update the userTutorial state after the async call resolves.
   useEffect(() => {
-    User.getHasDoneTutorial("HomeScreen").then((tutorialDone: boolean) => {
-      setUserTutorial(tutorialDone);
-      if (!tutorialDone) {
-        setAccountTip(true); // Enable the account tip only if the tutorial hasn't been done
-      }
+    getHasDoneTutorial("HomeScreen").then((done) => {
+      setUserTutorial(done);
+      if (!done) setAccountTip(true);
     });
   }, []);
 
-  return (
-    <View style={{ flex: 1, backgroundColor : isDarkmode? 'black' : '#e4e4e4'}}>
-      <StatusBar translucent backgroundColor="transparent" />
-      <View testID="HomeScreen" style={styles(theme, width).container}>
-        <View style={styles(theme, width).topView}>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              width: "100%",
-              paddingBottom: 15,
-              paddingTop: 10,
-            }}
-          >
-            <View style={styles(theme, width).userAccountAndPageTitle}>
+  const skipTutorial = () => {
+    setAccountTip(false);
+    setSearchTip(false);
+    setFilterToolTip(false);
+    setPubPrivTip(false);
+    setTutorialDone("HomeScreen", true);
+  };
 
+  return (
+    <View className="flex-1 bg-[#e4e4e4] dark:bg-black">
+      <StatusBar translucent backgroundColor="transparent" />
+      <View
+        testID="HomeScreen"
+        className="bg-accent"
+        style={{
+          paddingTop: Constants.statusBarHeight - 20,
+          height: width > 500 ? Dimensions.get("window").height * 0.12 : Dimensions.get("window").height * 0.19,
+        }}
+      >
+        <View className="mb-0 mt-2.5 flex-row items-center justify-between bg-accent px-[5px]">
+          <View className="w-full flex-row items-center justify-between pb-[15px] pt-2.5">
+            <View className="flex-row items-center gap-2">
               <Tooltip
-                topAdjustment={Platform.OS === 'android' ? -StatusBar.currentHeight : 0}
-                showChildInTooltip = {false}
+                topAdjustment={Platform.OS === "android" ? -(StatusBar.currentHeight ?? 0) : 0}
+                showChildInTooltip={false}
                 isVisible={accountTip && !userTutorial}
                 content={
-                <TooltipContent
-                      message="See account information here."
-                      onPressOk={() => {
-                        setAccountTip(false);
-                        setSearchTip(true);
-                    }}
-                    onSkip={() => {
-                      // Disable all tutorial tips when Skip is pressed
+                  <TooltipContent
+                    message="See account information here."
+                    onPressOk={() => {
                       setAccountTip(false);
-                      setSearchTip(false);
-                      setFilterToolTip(false);
-                      setPubPrivTip(false);
-                      User.setUserTutorialDone("HomeScreen", true)
+                      setSearchTip(true);
                     }}
-                  />
-              }
-              placement="bottom"
-      >
-              <TouchableOpacity testID="user-account"
-                style={[
-                  styles(theme, width).userPhoto,
-                  { 
-                    backgroundColor: theme.black, 
-                    width: width > 1000 ? 50 : 30,
-                    height: width > 1000 ? 50 : 30,
-                  },
-                ]}
-                onPress={() => {
-                  router.push("/account");
-                }}
-              >
-                <Text style={styles(theme, width).pfpText}>{userInitials}</Text>
-              </TouchableOpacity>
-            </Tooltip>
-              <Text style={styles(theme, width).pageTitle}>Notes</Text>
-            </View>
-
-            <View testID="greeting-component" style={styles(theme, width).userWishContainer}>
-              <Greeting />
-              <Text testID="user-name" style={styles(theme, width).userName}>{userName}</Text>
-            </View>
-          </View>
-
-
-        </View>
-
-        <View style={[styles(theme, width).toolContainer, { marginHorizontal: 20, }]}>
-          {
-            !isSearchVisible && (
-            <View style={styles(theme, width).publishedAndSortContainer}>
-                     <Tooltip
-              topAdjustment={Platform.OS === 'android' ? -StatusBar.currentHeight : 0}
-              showChildInTooltip = {false}
-              isVisible={pubPrivTip && !userTutorial}
-              content={
-              <TooltipContent
-                message="Switch between your published and privated notes with this switch"
-                  onPressOk={() => {
-                    setPubPrivTip(false);
-                    User.setUserTutorialDone("HomeScreen", true)
-                }}
-                onSkip={() => {
-                  // Disable all tutorial tips when Skip is pressed
-                  setAccountTip(false);
-                  setSearchTip(false);
-                  setFilterToolTip(false);
-                  setPubPrivTip(false);
-                  User.setUserTutorialDone("HomeScreen", true)
-                }}
-            />
-          }
-          placement="bottom"
-          >
-              <View style={styles(theme, width).publishedOrPrivateContainer}>
-                <Pressable onPress={() => {
-                  setIsPrivate(false);
-                  setPublished(true);
-                }}>
-                  <View testID="public-btn" style={[styles(theme, width).publishedTxtContainer, { backgroundColor: isPrivate ? 'transparent' : 'black' },]}>
-                    <Text style={[styles(theme, width).publishedTxt, { color: isPrivate ? 'black' : 'white' }]}> Published</Text>
-                  </View>
-                </Pressable>
-                <Pressable onPress={() => {
-                  setIsPrivate(true);
-                  setPublished(false);
-                }}>
-                  <View testID="private-btn" style={[styles(theme, width).publishedTxtContainer, { backgroundColor: isPrivate ? 'black' : 'transparent' }]}>
-                    <Text style={[styles(theme, width).publishedTxt, { color: isPrivate ? 'white' : 'black' }]}>Private</Text>
-                  </View>
-                </Pressable>
-              </View>
-              </Tooltip>
-              <View>
-                {
-                  !isSortOpened ? (            
-                  <Tooltip
-                    topAdjustment={Platform.OS === 'android' ? -StatusBar.currentHeight : 0}
-                    isVisible={filterToolTip && !userTutorial}
-                    content={
-                    <TooltipContent
-                      message="Filter your notes with this!"
-                        onPressOk={() => {
-                          setFilterToolTip(false);
-                          setPubPrivTip(true);
-                      }}
-                      onSkip={() => {
-                        // Disable all tutorial tips when Skip is pressed
-                        setAccountTip(false);
-                        setSearchTip(false);
-                        setFilterToolTip(false);
-                        setPubPrivTip(false);
-                        User.setUserTutorialDone("HomeScreen", true)
-                      }}
+                    onSkip={skipTutorial}
                   />
                 }
                 placement="bottom"
+              >
+                <TouchableOpacity
+                  testID="user-account"
+                  className="ml-2 items-center justify-center rounded-full bg-[#161A1D]"
+                  style={{ width: width > 1000 ? 50 : 30, height: width > 1000 ? 50 : 30 }}
+                  onPress={() => router.push("/account")}
                 >
-                <TouchableOpacity testID="sort-button"
-                    onPress={handleSort}
-                  >
-      
-                    <MaterialIcons name='sort' size={30} />
-                  </TouchableOpacity>
-                  </Tooltip>)
-                    : (
-                      <TouchableOpacity
-                        onPress={handleSort}
-                      >
-                        <MaterialIcons name='close' size={30} />
-                      </TouchableOpacity>)
+                  <Text className="self-center font-inter text-sm font-semibold text-[#F7F8F9]">{userInitials}</Text>
+                </TouchableOpacity>
+              </Tooltip>
+              <Text className="font-inter text-lg font-medium">Notes</Text>
+            </View>
+            <View testID="greeting-component" className="mr-2.5">
+              <Greeting />
+              <Text testID="user-name" className="h-1/2 self-center text-center font-inter font-medium">
+                {userName}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <View className="mx-5 mt-2.5 flex-row items-center justify-between">
+          {!isSearchVisible && (
+            <View className="flex-row justify-between" style={{ width: width > 500 ? "20%" : "45%" }}>
+              <Tooltip
+                topAdjustment={Platform.OS === "android" ? -(StatusBar.currentHeight ?? 0) : 0}
+                showChildInTooltip={false}
+                isVisible={pubPrivTip && !userTutorial}
+                content={
+                  <TooltipContent
+                    message="Switch between your published and privated notes with this switch"
+                    onPressOk={() => {
+                      setPubPrivTip(false);
+                      setTutorialDone("HomeScreen", true);
+                    }}
+                    onSkip={skipTutorial}
+                  />
                 }
+                placement="bottom"
+              >
+                <View className="mb-2.5 h-[30px] w-[120px] flex-row items-center justify-evenly rounded-lg bg-[#e7e7e7]">
+                  <Pressable
+                    onPress={() => {
+                      setIsPrivate(false);
+                      setPublished(true);
+                    }}
+                  >
+                    <View
+                      testID="public-btn"
+                      className="rounded-lg px-[5px] py-[3px]"
+                      style={{ backgroundColor: isPrivate ? "transparent" : "black" }}
+                    >
+                      <Text className="font-inter text-[10px] font-semibold" style={{ color: isPrivate ? "black" : "white" }}>
+                        {" "}
+                        Published
+                      </Text>
+                    </View>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => {
+                      setIsPrivate(true);
+                      setPublished(false);
+                    }}
+                  >
+                    <View
+                      testID="private-btn"
+                      className="rounded-lg px-[5px] py-[3px]"
+                      style={{ backgroundColor: isPrivate ? "black" : "transparent" }}
+                    >
+                      <Text className="font-inter text-[10px] font-semibold" style={{ color: isPrivate ? "white" : "black" }}>
+                        Private
+                      </Text>
+                    </View>
+                  </Pressable>
+                </View>
+              </Tooltip>
+              <View>
+                {!isSortOpened ? (
+                  <Tooltip
+                    topAdjustment={Platform.OS === "android" ? -(StatusBar.currentHeight ?? 0) : 0}
+                    isVisible={filterToolTip && !userTutorial}
+                    content={
+                      <TooltipContent
+                        message="Filter your notes with this!"
+                        onPressOk={() => {
+                          setFilterToolTip(false);
+                          setPubPrivTip(true);
+                        }}
+                        onSkip={skipTutorial}
+                      />
+                    }
+                    placement="bottom"
+                  >
+                    <TouchableOpacity testID="sort-button" onPress={() => setIsSortOpened(true)}>
+                      <MaterialIcons name="sort" size={30} />
+                    </TouchableOpacity>
+                  </Tooltip>
+                ) : (
+                  <TouchableOpacity onPress={() => setIsSortOpened(false)}>
+                    <MaterialIcons name="close" size={30} />
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
-            )
-          }
-          <View style={[styles(theme, width).searchParentContainer, { width: isSearchVisible ? '95%' : 40 }]}>
-
-            {/* Search Container */}
+          )}
+          <View className="flex-row items-center justify-between" style={{ width: isSearchVisible ? "95%" : 40 }}>
             {isSearchVisible && (
               <Animated.View
-                style={[
-                  styles(theme, width).searchContainer,
-                  {
-                    width: searchBarWidth,
-                  },
-                  {
-                    marginBottom: 23,
-                  }
-                ]}
+                className="bottom-0 right-0 mb-[23px] h-9 items-center justify-center overflow-hidden rounded-xl bg-[#f0f0f0]"
+                style={{ width: searchBarWidth }}
               >
                 <TextInput
                   testID="search-input"
                   placeholder="Search..."
                   value={searchQuery}
                   placeholderTextColor="#999"
-                  onChangeText={(e) => setSearchQuery(e)}
-                  style={[styles(theme, width).searchInput]}
-                  cursorColor='black'
-                  autoFocus={true}
+                  onChangeText={setSearchQuery}
+                  className="w-full flex-1 px-2.5 py-0 font-inter text-base text-black"
+                  cursorColor="black"
+                  autoFocus
                 />
               </Animated.View>
             )}
-            {
-              isSearchVisible ? (
-                <View style={[styles(theme, width).searchIcon, {marginTop: -25}]}>
-                  <TouchableOpacity testID="searchButton" onPress={toggleSearchBar}>
-                    <Ionicons name='close' size={25} />
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <View style={styles(theme, width).searchIcon}>
-                  <TouchableOpacity testID="searchButton" onPress={toggleSearchBar}>
+            {isSearchVisible ? (
+              <View className="-mt-[25px] mb-2.5">
+                <TouchableOpacity testID="searchButton" onPress={toggleSearchBar}>
+                  <Ionicons name="close" size={25} />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View className="mb-2.5">
+                <TouchableOpacity testID="searchButton" onPress={toggleSearchBar}>
                   <Tooltip
-                      topAdjustment={Platform.OS === 'android' ? -StatusBar.currentHeight : 0}
-                      isVisible={searchTip && !userTutorial}
-                      content={
+                    topAdjustment={Platform.OS === "android" ? -(StatusBar.currentHeight ?? 0) : 0}
+                    isVisible={searchTip && !userTutorial}
+                    content={
                       <TooltipContent
                         message="Try out our search bar!"
-                          onPressOk={() => {
-                            setSearchTip(false);
-                            setFilterToolTip(true);
-                        }}
-                        onSkip={() => {
-                          // Disable all tutorial tips when Skip is pressed
-                          setAccountTip(false);
+                        onPressOk={() => {
                           setSearchTip(false);
-                          setFilterToolTip(false);
-                          setPubPrivTip(false);
-                          User.setUserTutorialDone("HomeScreen", true)
+                          setFilterToolTip(true);
                         }}
-                    />
-                  }
-                  placement="bottom"
+                        onSkip={skipTutorial}
+                      />
+                    }
+                    placement="bottom"
                   >
-                    <Ionicons name='search' size={25} />
+                    <Ionicons name="search" size={25} />
                   </Tooltip>
-                  </TouchableOpacity>
-                </View>
-              )
-            }
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
-
         </View>
       </View>
 
-      <View testID="notes-list" style={styles(theme, width).scrollerBackgroundColor}>
-        {rendering ? <NoteSkeleton /> : renderList(notes)}
+      <View testID="notes-list" className="w-full flex-1">
+        {rendering ? <NoteSkeleton /> : renderList()}
       </View>
 
+      <NoteDetailModal isVisible={isModalVisible} onClose={() => setModalVisible(false)} note={selectedNote} />
 
-      <NoteDetailModal
-        isVisible={isModalVisible}
-        onClose={() => setModalVisible(false)}
-        note={selectedNote}
-      />
-
-{isSortOpened && isSearchVisible== false && <View testID="sort-options" style={{
-         position: 'absolute',
-         top: 120, // adjust based on your layout
-         right: 20,
-         width: 200,
-         backgroundColor: isDarkmode ? '#525252' : 'white',
-         borderRadius: 12,
-         padding: 10,
-         zIndex: 10,
-         elevation: 10,
-         shadowColor: '#000',
-         shadowOffset: { width: 0, height: 2 },
-         shadowOpacity: 0.2,
-         shadowRadius: 4,
-      }}>
-        <Text style={{  ...defaultTextFont, fontSize: 16, fontWeight: '600', marginBottom: 10, color: isDarkmode ? '#c7c7c7' : 'black',}}>Sort by</Text>
-        <View style={{ height: '50%', justifyContent: 'space-evenly', alignItems: 'center'}}>
-          <TouchableOpacity
-            onPress={() => handleSortOption({ option: 1 })}
-          >
-            <View style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 1 ? theme.homeColor : 'none', width: 200 }]}>
-              <Text style={{ ...defaultTextFont, fontSize: 14, paddingVertical: 6, color: selectedSortOption === 1 ? theme.primary : (isDarkmode ? '#ccc' : '#000'), }}>Date & Time(latest)</Text>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => handleSortOption({ option: 2 })}
-          >
-            <View style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 2 ? theme.homeColor : 'none' }]}>
-              <Text style={{ ...defaultTextFont, fontSize: 14, paddingVertical: 6, color: selectedSortOption === 2 ? theme.primary : (isDarkmode ? '#ccc' : '#000'),}}>A-Z</Text>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => handleSortOption({ option: 3 })}
-          >
-            <View style={[styles(theme, width).selectedSortOption, { backgroundColor: selectedSortOption === 3 ? theme.homeColor : 'none' }]}>
-              <Text style={{ ...defaultTextFont, fontSize: 14, paddingVertical: 6, color: selectedSortOption === 2 ? theme.primary : (isDarkmode ? '#ccc' : '#000'),}}>Z-A</Text>
-            </View>
-          </TouchableOpacity>
+      {isSortOpened && !isSearchVisible && (
+        <View
+          testID="sort-options"
+          className="absolute right-5 top-[120px] z-10 w-[200px] rounded-md bg-white p-2.5 shadow-md dark:bg-[#525252]"
+          style={{ elevation: 10 }}
+        >
+          <Text className="mb-2.5 font-inter text-base font-semibold text-black dark:text-[#c7c7c7]">Sort by</Text>
+          <View className="h-1/2 items-center justify-evenly">
+            {[
+              { option: 1, label: "Date & Time(latest)" },
+              { option: 2, label: "A-Z" },
+              { option: 3, label: "Z-A" },
+            ].map(({ option, label }) => (
+              <TouchableOpacity
+                key={option}
+                onPress={() => {
+                  setSelectedSortOption(option);
+                  setIsSortOpened(false);
+                }}
+              >
+                <View
+                  className={`w-[200px] items-center justify-center rounded-[10px] p-2.5 ${selectedSortOption === option ? "bg-accent" : "bg-transparent"}`}
+                >
+                  <Text
+                    className="py-1.5 font-inter text-sm"
+                    style={{ color: isDarkmode && selectedSortOption !== option ? "#ccc" : "#000" }}
+                  >
+                    {label}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
-      </View>}
+      )}
     </View>
   );
 };
 
-const styles = (theme, width, color, isDarkmode) =>
-  StyleSheet.create({
-    container: {
-      paddingTop: Constants.statusBarHeight - 20,
-      backgroundColor: theme.homeColor,
-      height: width > 500 ? height * 0.12 : height * 0.19,
-    },
-    pfpText: {
-      ...defaultTextFont,
-      fontWeight: "600",
-      fontSize: 14,
-      alignSelf: "center",
-      color: theme.white,
-    },
-    shareColor: {
-      color: "green",
-    },
-    highlightColor: {
-      color: theme.text,
-    },
-    backColor: {
-      color: "red",
-    },
-    userPhoto: {
-      height: width * 0.095,
-      width: width * 0.095,
-      borderRadius: 50,
-      alignContent: "center",
-      justifyContent: "center",
-      backgroundColor: theme.black,
-      marginLeft: 8,
-    },
-    noteTitle: {
-      ...defaultTextFont,
-      fontSize: 22,
-      fontWeight: "700",
-      maxWidth: "100%",
-      flexShrink: 1,
-      color: theme.text,
-    },
-    noteText: {
-      ...defaultTextFont,
-      marginTop: 10,
-      fontSize: 18,
-      color: theme.text,
-    },
-    scrollerBackgroundColor: {
-      flex: 1,
-      width: '100%',
-    },
-    addButton: {
-      position: "absolute",
-      bottom: 20,
-      right: 20,
-      backgroundColor: theme.text,
-      borderRadius: 50,
-      width: 50,
-      height: 50,
-      alignItems: "center",
-      justifyContent: "center",
-      color: theme.text,
-    },
-    topView: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      paddingHorizontal: 5,
-      marginBottom: 0,
-      marginTop: 10,
-      backgroundColor: theme.homeColor,
-    },
-    rowBack: {
-      width: "100%",
-      height: 140,
-      alignItems: "center",
-      backgroundColor: theme.homeColor,
-      flex: 1,
-      flexDirection: "row",
-      justifyContent: "space-between",
-      marginTop: 1,
-      padding: 10,
-      alignSelf: "center",
-
-    },
-    backRightBtn: {
-      alignItems: "flex-end",
-      bottom: 0,
-      justifyContent: "center",
-      position: "absolute",
-      top: 0,
-      width: 75,
-      paddingRight: 17,
-      color: theme.text
-    },
-    backRightBtnRight: {
-      backgroundColor: theme.homeGray,
-      width: "50%",
-      right: 0,
-      color: theme.text
-    },
-    userWishContainer: {
-      marginRight: 10, 
-    },
-    userName: {
-      ...defaultTextFont,
-      fontWeight: '500',
-      height: "50%",
-      textAlign: 'center',       
-      alignSelf: 'center',       
-    },
-    
-    toolContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginTop: 10,
-    },
-    publishedOrPrivateContainer: {
-      backgroundColor: '#e7e7e7',
-      height: 30,
-      width: 120,
-      borderRadius: 20,
-      marginBottom: 10,
-      flexDirection: 'row',
-      justifyContent: 'space-evenly',
-      alignItems: 'center',
-    },
-    publishedAndSortContainer:{
-      flexDirection: 'row', 
-      width: width > 500? "20%" : "45%",
-      justifyContent: 'space-between', 
-    },
-    publishedTxtContainer: {
-      paddingHorizontal: 5,
-      paddingVertical: 3,
-      borderRadius: 20,
-    },
-    publishedTxt: {
-      ...defaultTextFont,
-      color: 'white',
-      fontSize: 10,
-      fontWeight: '600',
-    },
-    searchContainer: {
-      right: 0,
-      bottom: 0,
-      backgroundColor: "#f0f0f0",
-      justifyContent: "center",
-      alignItems: "center",
-      height: 36,
-      borderRadius: 25,
-      overflow: "hidden", // Ensures the reveal is smooth
-    },
-    searchInput: {
-      flex: 1,
-      fontSize: 16,
-      color: "black",
-      paddingHorizontal: 10,
-      paddingVertical: 0, 
-      width: "100%",
-    },
-    searchIcon: {
-      marginBottom: 10,
-    },
-    searchParentContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    },
-    userAccountAndPageTitle: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      width: width> 500? '13%' : "27%",
-
-    },
-    pageTitle: {
-      ...defaultTextFont,
-      fontSize: 18,
-      fontWeight: '500'
-
-    },
-    lottie: {
-      width: 100,
-      height: 200,
-    },
-    resultNotFound: {
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    resultNotFoundTxt: {
-      ...defaultTextFont,
-      fontSize: 15,
-      fontWeight: '400',
-    },
-    selectedSortOption: {
-      // backgroundColor: theme.homeColor,
-      width: width * 0.4,
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 10,
-      borderRadius: 10,
-    }
-
-  });
-
 export default HomeScreen;
-
-
-
-
-
-
