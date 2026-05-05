@@ -53,11 +53,13 @@ export function useNotesList(
     }, [refreshPage]),
   );
 
+  const hasLoadedOnce = useRef(false);
+
   const doFetch = useCallback(async (pageNum: number) => {
     try {
-      if (pageNum === 1) {
+      if (pageNum === 1 && !hasLoadedOnce.current) {
         setRendering(true);
-      } else {
+      } else if (pageNum > 1) {
         setIsLoadingMore(true);
       }
 
@@ -85,11 +87,11 @@ export function useNotesList(
     } finally {
       setRendering(false);
       setIsLoadingMore(false);
+      hasLoadedOnce.current = true;
     }
   }, []);
 
   useEffect(() => {
-    setRendering(true);
     setPage(1);
     setHasMore(true);
     doFetch(1);
