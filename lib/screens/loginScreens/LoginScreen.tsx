@@ -89,16 +89,19 @@ const LoginScreen: React.FC = () => {
       <ImageBackground source={require("../../../assets/splash.jpg")} className="flex-1 justify-center" resizeMode="cover">
         {firstClick ? (
           <TouchableOpacity activeOpacity={1} className="mb-[200px] items-center justify-center self-center py-[200px]" onPress={fadeOut}>
-            <Animated.Text className="font-inter text-[50px] font-bold text-[#111111] mb-[70px]" style={{ opacity: fadeAnim }}>
+            <Animated.Text className="mb-[70px] font-inter text-[50px] font-bold text-[#111111]" style={{ opacity: fadeAnim }}>
               Where's {"\n"} Religion?
             </Animated.Text>
           </TouchableOpacity>
         ) : (
-          <View className="h-[500px] w-[300px] items-center justify-center self-center rounded-[10px] bg-white/60 shadow-md" style={{ elevation: 10, shadowColor: "#000", shadowOpacity: 0.4, shadowRadius: 10 }}>
-            <Text className="font-inter mb-[50px] text-[50px] font-bold text-[#111111]">Login</Text>
+          <View
+            className="h-[500px] w-[300px] items-center justify-center self-center rounded-[10px] bg-white/60 shadow-md"
+            style={{ elevation: 10, shadowColor: "#000", shadowOpacity: 0.4, shadowRadius: 10 }}
+          >
+            <Text className="mb-[50px] font-inter text-[50px] font-bold text-[#111111]">Login</Text>
             <View className="mb-5 h-[50px] w-4/5 items-start justify-center rounded-full border-2 border-gray-500 bg-white p-5">
               <TextInput
-                className="font-inter h-[50px] w-full rounded-full text-[16px] text-[#111111]"
+                className="h-[50px] w-full rounded-full font-inter text-[16px] text-[#111111]"
                 placeholder="Email..."
                 placeholderTextColor="#003f5c"
                 value={username}
@@ -112,7 +115,7 @@ const LoginScreen: React.FC = () => {
             <View className="mb-5 h-[50px] w-4/5 items-start justify-center rounded-full border-2 border-gray-500 bg-white p-5">
               <TextInput
                 secureTextEntry
-                className="font-inter h-[50px] w-full rounded-full text-[16px] text-[#111111]"
+                className="h-[50px] w-full rounded-full font-inter text-[16px] text-[#111111]"
                 placeholder="Password..."
                 placeholderTextColor="#003f5c"
                 value={password}
@@ -126,11 +129,21 @@ const LoginScreen: React.FC = () => {
                 <Text className="mb-5 mr-10 text-[12px] font-normal text-[#111111]">Forgot Password?</Text>
               </View>
             </TouchableOpacity>
-            <TouchableOpacity onPress={onLoginPress} className="mb-[10px] h-[50px] w-[200px] items-center justify-center rounded-[30px] shadow-sm" style={{ backgroundColor: "rgb(17,47,187)", elevation: 10, shadowColor: "#000", shadowOpacity: 0.2, shadowRadius: 3 }} testID="login-button">
+            <TouchableOpacity
+              onPress={onLoginPress}
+              className="mb-[10px] h-[50px] w-[200px] items-center justify-center rounded-[30px] shadow-sm"
+              style={{ backgroundColor: "rgb(17,47,187)", elevation: 10, shadowColor: "#000", shadowOpacity: 0.2, shadowRadius: 3 }}
+              testID="login-button"
+            >
               {!loading && <Text className="font-inter text-[15px] font-semibold text-white">Login</Text>}
               {loading && <ActivityIndicator size="small" color="white" />}
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleGoRegister} className="mb-[10px] h-[50px] w-[200px] items-center justify-center rounded-[30px] shadow-sm" style={{ backgroundColor: "rgb(17,47,187)", elevation: 10, shadowColor: "#000", shadowOpacity: 0.2, shadowRadius: 3 }} testID="register-button">
+            <TouchableOpacity
+              onPress={handleGoRegister}
+              className="mb-[10px] h-[50px] w-[200px] items-center justify-center rounded-[30px] shadow-sm"
+              style={{ backgroundColor: "rgb(17,47,187)", elevation: 10, shadowColor: "#000", shadowOpacity: 0.2, shadowRadius: 3 }}
+              testID="register-button"
+            >
               <Text className="font-inter text-[15px] font-semibold text-white">Register</Text>
             </TouchableOpacity>
           </View>

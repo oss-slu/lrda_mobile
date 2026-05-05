@@ -32,9 +32,7 @@ export default class DataConversion {
         isPlaying: false,
       }));
 
-      const tags: string[] = (message.tags || []).map((t: string | Tag) =>
-        typeof t === "string" ? t : t.label
-      );
+      const tags: string[] = (message.tags || []).map((t: string | Tag) => (typeof t === "string" ? t : t.label));
 
       return {
         id: message.id,

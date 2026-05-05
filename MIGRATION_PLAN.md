@@ -52,6 +52,7 @@ This is the core of the migration. Replace all Firebase auth calls with REST cal
 ### Changes
 
 #### Remove imports
+
 ```
 - signInWithEmailAndPassword, onAuthStateChanged, signOut, getAuth from "firebase/auth"
 - doc, getDoc from "firebase/firestore"
@@ -59,23 +60,27 @@ This is the core of the migration. Replace all Firebase auth calls with REST cal
 ```
 
 #### Add imports
+
 ```
 + authFetch, AUTH_API_URL from "../config/auth"
 + AsyncStorage (already imported)
 ```
 
 #### `login(email, password)` method
+
 - **Before:** `signInWithEmailAndPassword(auth, email, password)` → `user.getIdToken()`
 - **After:** `POST /api/auth/sign-in/email` with `{ email, password }` → extract token from response → store in AsyncStorage under `authToken`
 - Fetch user data from the session response (better-auth returns user object with sign-in)
 - Remove the Firestore fallback (`getDoc(doc(db, "users", user.uid))`)
 
 #### `logout(dispatch)` method
+
 - **Before:** `signOut(auth)`
 - **After:** `POST /api/auth/sign-out` using `authFetch`
 - Keep: clearing AsyncStorage (`userData`, `authToken`), dispatching Redux state, notifying login state
 
 #### `initializeUser()` method
+
 - **Before:** `onAuthStateChanged(auth, callback)` — Firebase's realtime auth listener
 - **After:** Check session validity on startup:
   1. Read `authToken` from AsyncStorage
@@ -85,12 +90,15 @@ This is the core of the migration. Replace all Firebase auth calls with REST cal
 - This runs once on construction, not as a listener. Optionally also run on app foreground (`AppState` listener)
 
 #### `getId()` method
+
 - No changes needed — it reads from `this.userData` / AsyncStorage. Just ensure the user object from better-auth has an `id` field (map it to `uid` if needed, or update references)
 
 #### `getName()` method
+
 - better-auth stores `name` as a single field — simplify by removing the `firstName`/`lastName` Firestore fallback
 
 #### `getRoles()` method
+
 - better-auth uses a `role` field (string: "admin" | "user") via the admin plugin, not `{ administrator, contributor }` booleans
 - Either: map better-auth's role to the existing shape, or update all consumers of `getRoles()` to use the new format
 
@@ -103,6 +111,7 @@ This is the core of the migration. Replace all Firebase auth calls with REST cal
 Minimal changes — the screen already calls `user.login(username, password)` and checks the return value. The login logic is encapsulated in the User singleton.
 
 ### Changes
+
 - Update error message matching: replace `auth/invalid-email` and `auth/invalid-credential` with whatever error format better-auth returns (likely HTTP status codes like 401, or error body messages like `"INVALID_CREDENTIALS"`)
 - Everything else stays the same
 
@@ -115,6 +124,7 @@ Minimal changes — the screen already calls `user.login(username, password)` an
 ### Changes
 
 #### Remove imports
+
 ```
 - createUserWithEmailAndPassword from "firebase/auth"
 - doc, setDoc, Timestamp from "firebase/firestore"
@@ -122,6 +132,7 @@ Minimal changes — the screen already calls `user.login(username, password)` an
 ```
 
 #### Rewrite `handleRegister()`
+
 - **Before:** `createUserWithEmailAndPassword(auth, email, password)` → `setDoc` to Firestore
 - **After:** `POST /api/auth/sign-up/email` with `{ email, password, name: fullName }` — better-auth handles user record creation in PostgreSQL
 - Update error handling: replace `auth/email-already-in-use` with better-auth's error format
@@ -138,12 +149,14 @@ Minimal changes — the screen already calls `user.login(username, password)` an
 ### Changes
 
 #### Remove imports
+
 ```
 - sendPasswordResetEmail from "firebase/auth"
 - auth from "../../config"
 ```
 
 #### Rewrite `handlePasswordReset()`
+
 - **Before:** `sendPasswordResetEmail(auth, email)`
 - **After:** `POST /api/auth/forget-password` with `{ email }` — better-auth sends the reset email via Resend (already configured in the website API)
 - Update error handling to match better-auth response format
@@ -159,6 +172,7 @@ This is the most involved screen change due to account deletion logic.
 ### Changes
 
 #### Remove imports
+
 ```
 - deleteUser, reauthenticateWithCredential, EmailAuthProvider from "firebase/auth"
 - ref, remove from "firebase/database"
@@ -169,6 +183,7 @@ This is the most involved screen change due to account deletion logic.
 ```
 
 #### Rewrite `onDeleteAccount()`
+
 - **Before:** Saves deletion review to Firestore → deletes Firestore user doc → calls `deleteUser(currentUser)` → handles reauthentication
 - **After:**
   1. Call a new API endpoint (e.g., `POST /api/account/delete` or use better-auth's admin plugin `removeUser`) with bearer token
@@ -177,6 +192,7 @@ This is the most involved screen change due to account deletion logic.
   4. No reauthentication needed — the bearer token proves the session is valid. If the token is expired, redirect to login
 
 #### Decision needed
+
 - Where do account deletion reviews go? Options:
   - A new API endpoint on the website backend that stores them in PostgreSQL
   - Keep a minimal Firestore write (not recommended — defeats the purpose of migrating away)
@@ -190,10 +206,12 @@ This is the most involved screen change due to account deletion logic.
 ### Changes
 
 #### `checkOnboarding` useEffect (line 128-143)
+
 - `user.getId()` — no change needed, it reads from AsyncStorage
 - The rewritten `initializeUser()` in Step 2 handles session validation on startup
 
 #### Login callback useEffect (line 145-149)
+
 - Keep as-is — the callback mechanism doesn't depend on Firebase
 - Note: `setLoginCallback` still works the same way, just triggered by session check instead of `onAuthStateChanged`
 
@@ -206,16 +224,19 @@ This is the most involved screen change due to account deletion logic.
 ### Changes
 
 #### `fetchUserData(uid)`
+
 - **Before:** Queries Firestore first, then falls back to RERUM API
 - **After:** Fetch from the website API using bearer token (e.g., `GET /api/auth/get-session` already returns user data, or add a `GET /api/users/:id` endpoint)
 - Remove all Firestore imports and calls
 
 #### `fetchCreatorName(creatorId)`
+
 - **Before:** Queries RERUM API, then falls back to Firestore
 - **After:** Query the website API for user data by ID, or keep the RERUM API query and drop the Firestore fallback
 - Remove Firestore imports
 
 #### Add bearer token to RERUM API calls (optional)
+
 - If/when the RERUM API starts requiring auth, use `authFetch` for all calls
 - For now, the RERUM API doesn't use auth headers, so this is future work
 
@@ -277,21 +298,21 @@ Recommended implementation sequence:
 
 ## Files Changed Summary
 
-| File | Action | Effort |
-|------|--------|--------|
-| `lib/config/auth.ts` | **Create** | Low |
-| `lib/config/firebase.js` | Modify → eventually delete | Low |
-| `lib/config/index.js` | Update exports | Low |
-| `lib/models/user_class.ts` | **Rewrite auth methods** | Medium |
-| `lib/screens/loginScreens/LoginScreen.tsx` | Update error handling | Low |
-| `lib/screens/loginScreens/RegisterScreen.tsx` | Rewrite registration | Low-Medium |
-| `lib/screens/loginScreens/ForgotPassword.tsx` | Swap one function call | Low |
-| `lib/screens/MorePage.tsx` | Rewrite account deletion | Medium |
-| `lib/utils/api_calls.ts` | Remove Firestore, use API | Medium |
-| `lib/navigation/AppNavigator.tsx` | Minimal tweaks | Low |
-| `app.config.js` | Add auth API URL | Low |
-| `setupTests.js` | Update mocks | Low |
-| `__tests__/*.test.tsx` | Update mocks/assertions | Low |
+| File                                          | Action                     | Effort     |
+| --------------------------------------------- | -------------------------- | ---------- |
+| `lib/config/auth.ts`                          | **Create**                 | Low        |
+| `lib/config/firebase.js`                      | Modify → eventually delete | Low        |
+| `lib/config/index.js`                         | Update exports             | Low        |
+| `lib/models/user_class.ts`                    | **Rewrite auth methods**   | Medium     |
+| `lib/screens/loginScreens/LoginScreen.tsx`    | Update error handling      | Low        |
+| `lib/screens/loginScreens/RegisterScreen.tsx` | Rewrite registration       | Low-Medium |
+| `lib/screens/loginScreens/ForgotPassword.tsx` | Swap one function call     | Low        |
+| `lib/screens/MorePage.tsx`                    | Rewrite account deletion   | Medium     |
+| `lib/utils/api_calls.ts`                      | Remove Firestore, use API  | Medium     |
+| `lib/navigation/AppNavigator.tsx`             | Minimal tweaks             | Low        |
+| `app.config.js`                               | Add auth API URL           | Low        |
+| `setupTests.js`                               | Update mocks               | Low        |
+| `__tests__/*.test.tsx`                        | Update mocks/assertions    | Low        |
 
 ---
 
@@ -309,6 +330,7 @@ pnpm api:db:seed        # seed test users into the database
 ```
 
 **Key dev server details:**
+
 - API runs on `http://localhost:3002`
 - PostgreSQL runs in Docker on port `5433` (user: `lrda`, password: `lrda_dev`, db: `lrda_api`)
 - Auth endpoints at `http://localhost:3002/api/auth/*`
@@ -319,11 +341,11 @@ pnpm api:db:seed        # seed test users into the database
 
 The mobile app can't always reach `localhost:3002` — it depends on the platform:
 
-| Platform | URL to use | Notes |
-|----------|-----------|-------|
-| iOS Simulator | `http://localhost:3002` | Works out of the box |
-| Android Emulator | `http://10.0.2.2:3002` | Android's alias for host machine |
-| Physical device | `http://<your-lan-ip>:3002` | Both devices must be on the same WiFi network |
+| Platform         | URL to use                  | Notes                                         |
+| ---------------- | --------------------------- | --------------------------------------------- |
+| iOS Simulator    | `http://localhost:3002`     | Works out of the box                          |
+| Android Emulator | `http://10.0.2.2:3002`      | Android's alias for host machine              |
+| Physical device  | `http://<your-lan-ip>:3002` | Both devices must be on the same WiFi network |
 
 Set `authApiUrl` in the Expo config accordingly per environment.
 
@@ -343,6 +365,7 @@ pnpm api:db:studio      # Opens Drizzle Studio at http://localhost:5555
 ```
 
 Verify that:
+
 - New users appear in the `user` table after registration
 - Sessions appear in the `session` table after login
 - Sessions are removed after logout
@@ -370,14 +393,14 @@ Password reset and email verification emails are **logged to the API server cons
 
 For one developer:
 
-| Phase | Time |
-|-------|------|
-| Resolve open decisions + backend prep (missing endpoints) | 1-2 days |
-| Steps 1-5 (auth client, User class, auth screens) | 2-3 days |
-| Steps 6-8 (MorePage, AppNavigator, api_calls) | 1-2 days |
-| Steps 9-11 (config, cleanup, tests) | 1 day |
-| QA / edge cases / both platforms | 2-3 days |
-| **Total** | **~1.5-2 weeks** |
+| Phase                                                     | Time             |
+| --------------------------------------------------------- | ---------------- |
+| Resolve open decisions + backend prep (missing endpoints) | 1-2 days         |
+| Steps 1-5 (auth client, User class, auth screens)         | 2-3 days         |
+| Steps 6-8 (MorePage, AppNavigator, api_calls)             | 1-2 days         |
+| Steps 9-11 (config, cleanup, tests)                       | 1 day            |
+| QA / edge cases / both platforms                          | 2-3 days         |
+| **Total**                                                 | **~1.5-2 weeks** |
 
 Budget 2 sprints if pairing with other sprint work.
 

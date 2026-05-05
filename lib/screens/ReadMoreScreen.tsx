@@ -19,7 +19,7 @@ function ReadMoreScreen() {
       <StatusBar translucent backgroundColor="transparent" />
 
       <View className="bg-accent" style={{ height: height * 0.15 }}>
-        <View className="flex-row justify-start items-center px-5" style={{ marginTop: "20%" }}>
+        <View className="flex-row items-center justify-start px-5" style={{ marginTop: "20%" }}>
           <TouchableOpacity onPress={() => router.back()}>
             <Feather name={"arrow-left"} size={30} />
           </TouchableOpacity>
@@ -38,7 +38,7 @@ function ReadMoreScreen() {
         domStorageEnabled={true}
         startInLoadingState={true}
         renderLoading={() => (
-          <View className="flex-1 justify-center items-center">
+          <View className="flex-1 items-center justify-center">
             <ActivityIndicator size="large" color="#000000" />
           </View>
         )}

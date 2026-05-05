@@ -1,12 +1,13 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Animated, Dimensions } from "react-native";
 import { useFocusEffect } from "expo-router";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useAuthStore } from "../stores/authStore";
 import { fetchNotes, type FetchNotesOptions } from "../utils/api_calls";
 import DataConversion from "../utils/data_conversion";
 import { Note } from "../../types";
 import { formatToLocalDateString } from "../components/time";
-import ToastMessage from "react-native-toast-message";
+import { queryKeys } from "../query/queryKeys";
 
 const PAGE_SIZE = 20;
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -20,92 +21,54 @@ export function useUserInfo() {
     const name = authUser?.name;
     if (name) {
       setUserName(name.split(" ")[0]);
-      setUserInitials(name.split(" ").map((part) => part[0]).join(""));
+      setUserInitials(
+        name
+          .split(" ")
+          .map((part) => part[0])
+          .join("")
+      );
     }
   }, [authUser]);
 
   return { authUser, userInitials, userName };
 }
 
-export function useNotesList(
-  getFetchOptions: () => Omit<FetchNotesOptions, "limit" | "offset">,
-  deps: unknown[] = [],
-) {
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [rendering, setRendering] = useState(true);
-  const [page, setPage] = useState(1);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const [updateCounter, setUpdateCounter] = useState(0);
-
-  const getFetchOptionsRef = useRef(getFetchOptions);
-  getFetchOptionsRef.current = getFetchOptions;
-
-  const refreshPage = useCallback(() => {
-    setPage(1);
-    setHasMore(true);
-    setUpdateCounter((prev) => prev + 1);
-  }, []);
+export function useNotesList(options: Omit<FetchNotesOptions, "limit" | "offset">) {
+  const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage, refetch } = useInfiniteQuery({
+    queryKey: queryKeys.notes.list(options),
+    queryFn: async ({ pageParam = 0 }) => {
+      const raw = await fetchNotes({ ...options, limit: PAGE_SIZE, offset: pageParam });
+      return DataConversion.convertMediaTypes(raw).sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      if (lastPage.length < PAGE_SIZE) return undefined;
+      return allPages.reduce((total, page) => total + page.length, 0);
+    },
+  });
 
   useFocusEffect(
     useCallback(() => {
-      refreshPage();
-    }, [refreshPage]),
+      refetch();
+    }, [refetch])
   );
 
-  const hasLoadedOnce = useRef(false);
+  const notes = useMemo(() => data?.pages.flat() ?? [], [data]);
 
-  const doFetch = useCallback(async (pageNum: number) => {
-    try {
-      if (pageNum === 1 && !hasLoadedOnce.current) {
-        setRendering(true);
-      } else if (pageNum > 1) {
-        setIsLoadingMore(true);
-      }
-
-      const offset = (pageNum - 1) * PAGE_SIZE;
-      const baseOptions = getFetchOptionsRef.current();
-      const data = await fetchNotes({ ...baseOptions, limit: PAGE_SIZE, offset });
-      const converted = DataConversion.convertMediaTypes(data).sort(
-        (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime(),
-      );
-
-      if (pageNum === 1) {
-        setNotes(converted);
-      } else {
-        setNotes((prev) => [...prev, ...converted]);
-      }
-
-      setHasMore(converted.length === PAGE_SIZE);
-    } catch (error) {
-      console.error("Error fetching notes:", error);
-      ToastMessage.show({
-        type: "error",
-        text1: "Error fetching notes",
-        text2: (error as Error).message,
-      });
-    } finally {
-      setRendering(false);
-      setIsLoadingMore(false);
-      hasLoadedOnce.current = true;
+  const handleLoadMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
     }
-  }, []);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  useEffect(() => {
-    setPage(1);
-    setHasMore(true);
-    doFetch(1);
-  }, [updateCounter, doFetch, ...deps]);
-
-  const handleLoadMore = useCallback(async () => {
-    if (hasMore && !isLoadingMore) {
-      const nextPage = page + 1;
-      await doFetch(nextPage);
-      setPage(nextPage);
-    }
-  }, [hasMore, isLoadingMore, page, doFetch]);
-
-  return { notes, setNotes, rendering, hasMore, isLoadingMore, handleLoadMore, refreshPage };
+  return {
+    notes,
+    rendering: isLoading,
+    hasMore: !!hasNextPage,
+    isLoadingMore: isFetchingNextPage,
+    handleLoadMore,
+    refreshPage: refetch,
+  };
 }
 
 export function useAnimatedSearch() {
@@ -116,9 +79,7 @@ export function useAnimatedSearch() {
   const toggleSearchBar = useCallback(() => {
     if (isSearchVisible) {
       setSearchQuery("");
-      Animated.timing(animation, { toValue: 0, duration: 300, useNativeDriver: false }).start(() =>
-        setIsSearchVisible(false),
-      );
+      Animated.timing(animation, { toValue: 0, duration: 300, useNativeDriver: false }).start(() => setIsSearchVisible(false));
     } else {
       setIsSearchVisible(true);
       Animated.timing(animation, {

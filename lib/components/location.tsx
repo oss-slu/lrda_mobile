@@ -91,14 +91,24 @@ export default function LocationWindow({ location, setLocation }: LocationProps)
   };
 
   return (
-    <View className="h-[210px] justify-center items-center p-5">
-      <View className="absolute top-2.5 right-2.5 bg-white/50 p-[5px] rounded-[5px]">
-        <Text className="font-inter text-black text-sm font-bold">{distanceFromEvent && location && distanceFromEvent.toString()}</Text>
+    <View className="h-[210px] items-center justify-center p-5">
+      <View className="absolute right-2.5 top-2.5 rounded-[5px] bg-white/50 p-[5px]">
+        <Text className="font-inter text-sm font-bold text-black">{distanceFromEvent && location && distanceFromEvent.toString()}</Text>
       </View>
-      <Text className="font-inter text-lg font-bold mb-[5px]">Longitude</Text>
-      <TextInput className="w-full h-10 border border-[#ccc] rounded-[5px] px-2.5" value={longitude} onChangeText={handleLongitudeChange} editable={false} />
-      <Text className="font-inter text-lg font-bold mb-[5px]">Latitude</Text>
-      <TextInput className="w-full h-10 border border-[#ccc] rounded-[5px] px-2.5" value={latitude} onChangeText={handleLatitudeChange} editable={false} />
+      <Text className="mb-[5px] font-inter text-lg font-bold">Longitude</Text>
+      <TextInput
+        className="h-10 w-full rounded-[5px] border border-[#ccc] px-2.5"
+        value={longitude}
+        onChangeText={handleLongitudeChange}
+        editable={false}
+      />
+      <Text className="mb-[5px] font-inter text-lg font-bold">Latitude</Text>
+      <TextInput
+        className="h-10 w-full rounded-[5px] border border-[#ccc] px-2.5"
+        value={latitude}
+        onChangeText={handleLatitudeChange}
+        editable={false}
+      />
       <Button title={isLocationShown ? "Hide Location" : "Show Location"} onPress={toggleLocationVisibility} />
     </View>
   );

@@ -1,19 +1,11 @@
 import React, { useState, useEffect, memo, useMemo, useRef } from "react";
-import {
-  Modal,
-  TouchableOpacity,
-  Image,
-  View,
-  Text,
-  ScrollView,
-  useWindowDimensions,
-  ActivityIndicator,
-  Animated,
-} from "react-native";
+import { Modal, TouchableOpacity, Image, View, Text, ScrollView, useWindowDimensions, ActivityIndicator, Animated } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import RenderHTML, { TNodeRendererProps } from "react-native-render-html";
+import { useQuery } from "@tanstack/react-query";
 import { fetchCreatorName } from "../../utils/api_calls";
+import { queryKeys } from "../../query/queryKeys";
 import { useTheme } from "../../components/ThemeProvider";
 import ImageModal from "./ImageModal";
 import VideoModal from "./VideoModal";
@@ -136,23 +128,23 @@ const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
 
   if (error) {
     return (
-      <View className="flex-row items-center bg-[#f0f0f0] p-2.5 rounded-[10px] self-center">
+      <View className="flex-row items-center self-center rounded-[10px] bg-[#f0f0f0] p-2.5">
         <Ionicons name="alert-circle-outline" size={30} color={accentColor} />
-        <Text className="font-inter ml-2.5 text-[#333] text-base">Couldn't load audio</Text>
+        <Text className="ml-2.5 font-inter text-base text-[#333]">Couldn't load audio</Text>
       </View>
     );
   }
 
   if (loading || !audioState) {
     return (
-      <View className="flex-row items-center bg-[#f0f0f0] p-2.5 rounded-[10px] self-center">
+      <View className="flex-row items-center self-center rounded-[10px] bg-[#f0f0f0] p-2.5">
         <ActivityIndicator testID="audioLoadingIndicator" size="large" color={accentColor} />
       </View>
     );
   }
 
   return (
-    <View className="flex-row items-center bg-[#f0f0f0] p-2.5 rounded-[10px] self-center my-2.5" style={{ width: width - 40 }}>
+    <View className="my-2.5 flex-row items-center self-center rounded-[10px] bg-[#f0f0f0] p-2.5" style={{ width: width - 40 }}>
       <TouchableOpacity onPress={() => playPauseAudio(uri)} testID="audioButton">
         <Ionicons name={audioState.isPlaying ? "pause-circle-outline" : "play-circle-outline"} size={30} color={colors.foreground} />
       </TouchableOpacity>
@@ -166,7 +158,7 @@ const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
         thumbTintColor={colors.primary}
         onSlidingComplete={handleSlidingComplete}
       />
-      <Text className="font-inter text-[#333] text-right w-[60px]">
+      <Text className="w-[60px] text-right font-inter text-[#333]">
         {formatTime(audioState.progress)} / {formatTime(audioState.duration)}
       </Text>
     </View>
@@ -186,21 +178,21 @@ const LoadingImage: React.FC<LoadingImageProps> = ({ uri, alt, onPress }) => {
 
   if (error) {
     return (
-      <View testID="no-image" className="w-[400px] h-[400px] relative justify-center items-center">
-        <View className="flex-1 justify-center items-center p-2.5">
+      <View testID="no-image" className="relative h-[400px] w-[400px] items-center justify-center">
+        <View className="flex-1 items-center justify-center p-2.5">
           <Ionicons name="alert-circle-outline" size={50} color="red" />
-          <Text className="font-inter mt-2.5 text-black text-base">Couldn't load image</Text>
+          <Text className="mt-2.5 font-inter text-base text-black">Couldn't load image</Text>
         </View>
       </View>
     );
   }
 
   return (
-    <View className="w-[400px] h-[400px] relative justify-center items-center">
+    <View className="relative h-[400px] w-[400px] items-center justify-center">
       <Image
         testID="bufferingImage"
         source={{ uri }}
-        className="w-full h-full"
+        className="h-full w-full"
         style={{ resizeMode: "contain", opacity: loading ? 0 : 1 }}
         accessibilityLabel={alt}
         onLoadEnd={() => setLoading(false)}
@@ -210,11 +202,11 @@ const LoadingImage: React.FC<LoadingImageProps> = ({ uri, alt, onPress }) => {
         }}
       />
       {loading && (
-        <View className="absolute top-0 left-0 right-0 bottom-0 justify-center items-center bg-white/70">
+        <View className="absolute bottom-0 left-0 right-0 top-0 items-center justify-center bg-white/70">
           <ActivityIndicator testID="loadingIndicator" size="large" color={accentColor} />
         </View>
       )}
-      <TouchableOpacity testID="imageButton" className="absolute top-0 left-0 right-0 bottom-0" onPress={() => onPress(uri)} />
+      <TouchableOpacity testID="imageButton" className="absolute bottom-0 left-0 right-0 top-0" onPress={() => onPress(uri)} />
     </View>
   );
 };
@@ -278,9 +270,15 @@ const LoadingDots: React.FC = () => {
 
   return (
     <View className="flex-row items-center">
-      <Animated.Text style={{ fontFamily: "Inter", fontSize: 18, color: "#333", marginHorizontal: 2, opacity: dot1Opacity }}>.</Animated.Text>
-      <Animated.Text style={{ fontFamily: "Inter", fontSize: 18, color: "#333", marginHorizontal: 2, opacity: dot2Opacity }}>.</Animated.Text>
-      <Animated.Text style={{ fontFamily: "Inter", fontSize: 18, color: "#333", marginHorizontal: 2, opacity: dot3Opacity }}>.</Animated.Text>
+      <Animated.Text style={{ fontFamily: "Inter", fontSize: 18, color: "#333", marginHorizontal: 2, opacity: dot1Opacity }}>
+        .
+      </Animated.Text>
+      <Animated.Text style={{ fontFamily: "Inter", fontSize: 18, color: "#333", marginHorizontal: 2, opacity: dot2Opacity }}>
+        .
+      </Animated.Text>
+      <Animated.Text style={{ fontFamily: "Inter", fontSize: 18, color: "#333", marginHorizontal: 2, opacity: dot3Opacity }}>
+        .
+      </Animated.Text>
     </View>
   );
 };
@@ -300,20 +298,24 @@ const LoadingVideo: React.FC<LoadingVideoProps> = ({ uri, onPress, width }) => {
 
   if (error) {
     return (
-      <View testID="no-video" className="relative justify-center items-center bg-black" style={{ width: containerWidth, height: containerHeight }}>
-        <View className="flex-1 justify-center items-center p-2.5">
+      <View
+        testID="no-video"
+        className="relative items-center justify-center bg-black"
+        style={{ width: containerWidth, height: containerHeight }}
+      >
+        <View className="flex-1 items-center justify-center p-2.5">
           <Ionicons name="alert-circle-outline" size={50} color="red" />
-          <Text className="font-inter mt-2.5 text-red-500 text-base">Couldn't load video</Text>
+          <Text className="mt-2.5 font-inter text-base text-red-500">Couldn't load video</Text>
         </View>
       </View>
     );
   }
 
   return (
-    <View className="relative justify-center items-center bg-black" style={{ width: containerWidth, height: containerHeight }}>
+    <View className="relative items-center justify-center bg-black" style={{ width: containerWidth, height: containerHeight }}>
       <Video
         source={{ uri }}
-        className="w-full h-full"
+        className="h-full w-full"
         resizeMode={ResizeMode.CONTAIN}
         shouldPlay={false}
         isLooping={false}
@@ -321,11 +323,11 @@ const LoadingVideo: React.FC<LoadingVideoProps> = ({ uri, onPress, width }) => {
         onError={() => setError(true)}
       />
       {loading && (
-        <View className="absolute top-0 left-0 right-0 bottom-0 justify-center items-center">
+        <View className="absolute bottom-0 left-0 right-0 top-0 items-center justify-center">
           <ActivityIndicator testID="videoLoadingIndicator" size="large" color={accentColor} />
         </View>
       )}
-      <TouchableOpacity testID="videoButton" className="absolute top-0 left-0 right-0 bottom-0" onPress={() => onPress(uri)}>
+      <TouchableOpacity testID="videoButton" className="absolute bottom-0 left-0 right-0 top-0" onPress={() => onPress(uri)}>
         <Ionicons name="play-circle-outline" size={50} color="white" style={{ alignSelf: "center", marginTop: 70 }} />
       </TouchableOpacity>
     </View>
@@ -351,24 +353,21 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
   const [selectedVideo, setSelectedVideo] = useState<{ uri: string } | null>(null);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [isVideoVisible, setIsVideoVisible] = useState<boolean>(false);
-  const [creatorName, setCreatorName] = useState<string>("");
   const { width } = useWindowDimensions();
   const { colors, accentColor } = useTheme();
 
+  const { data: creatorName = "" } = useQuery({
+    queryKey: queryKeys.users.name(note?.creatorId ?? ""),
+    queryFn: () => fetchCreatorName(note!.creatorId!),
+    enabled: !!note?.creatorId,
+    staleTime: Infinity,
+  });
+
   useEffect(() => {
-    setCreatorName("");
     setSelectedImage(null);
     setSelectedVideo(null);
     setIsModalVisible(false);
     setIsVideoVisible(false);
-
-    if (note?.creatorId) {
-      fetchCreatorName(note.creatorId)
-        .then((name) => setCreatorName(name))
-        .catch(() => setCreatorName("Unknown Creator"));
-    } else {
-      setCreatorName("Creator not available");
-    }
   }, [note]);
 
   const onPicturePress = (src: string) => {
@@ -420,28 +419,31 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = memo(({ isVisible, onClo
 
   return (
     <Modal animationType="slide" transparent={false} visible={isVisible}>
-      <TouchableOpacity onPress={onClose} className="absolute top-[50px] left-5 z-10 items-center justify-center bg-[#ccc] rounded-xl p-[5px]">
-        <View className="w-10 h-10 rounded-lg bg-[#ccc] items-center justify-center">
+      <TouchableOpacity
+        onPress={onClose}
+        className="absolute left-5 top-[50px] z-10 items-center justify-center rounded-xl bg-[#ccc] p-[5px]"
+      >
+        <View className="h-10 w-10 items-center justify-center rounded-lg bg-[#ccc]">
           <Ionicons name="close" size={30} color={colors.foreground} />
         </View>
       </TouchableOpacity>
 
-      <View className="p-2.5 bg-[#f5f5f5] border-t-2 border-t-[#ddd] flex-1 pt-[100px] h-full">
-        <Text className="font-inter text-[22px] font-bold text-[#333] text-center mb-[5px]">{note?.title}</Text>
+      <View className="h-full flex-1 border-t-2 border-t-[#ddd] bg-[#f5f5f5] p-2.5 pt-[100px]">
+        <Text className="mb-[5px] text-center font-inter text-[22px] font-bold text-[#333]">{note?.title}</Text>
 
         <View className="flex-row items-center justify-between px-[15px] py-2.5">
-          <View className="flex-row items-center flex-1">
+          <View className="flex-1 flex-row items-center">
             <Ionicons name="person-circle-outline" size={18} color={colors.foreground} />
-            {creatorName ? <Text className="font-inter text-base text-[#333] ml-[5px]">{creatorName}</Text> : <LoadingDots />}
+            {creatorName ? <Text className="ml-[5px] font-inter text-base text-[#333]">{creatorName}</Text> : <LoadingDots />}
           </View>
 
-          <View className="flex-row items-center justify-end flex-1">
+          <View className="flex-1 flex-row items-center justify-end">
             <Ionicons name="calendar-outline" size={18} color={colors.foreground} />
-            <Text className="font-inter text-base text-[#333] ml-[5px]">{note?.time || "Date not available"}</Text>
+            <Text className="ml-[5px] font-inter text-base text-[#333]">{note?.time || "Date not available"}</Text>
           </View>
         </View>
 
-        <View className="h-[2px] bg-[#ddd] my-2.5 w-full self-center" />
+        <View className="my-2.5 h-[2px] w-full self-center bg-[#ddd]" />
 
         <ScrollView>
           <RenderHTML

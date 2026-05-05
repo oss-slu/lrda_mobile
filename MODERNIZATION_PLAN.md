@@ -16,9 +16,15 @@ Redux is overkill here — 3 tiny slices, no async thunks, no complex middleware
 
 ```typescript
 {
-  navigation: { navState: 'loading' | 'onboarding' | 'login' | 'home' }
-  themeSlice: { theme: string }             // hex color, default '#7FADE1'
-  addNoteState: { isAddNoteOpned: boolean }  // typo in original
+  navigation: {
+    navState: "loading" | "onboarding" | "login" | "home";
+  }
+  themeSlice: {
+    theme: string;
+  } // hex color, default '#7FADE1'
+  addNoteState: {
+    isAddNoteOpned: boolean;
+  } // typo in original
 }
 ```
 
@@ -31,11 +37,11 @@ Two stores (theme + UI state). Navigation state moves to the auth hook (see item
 export const useThemeStore = create(
   persist(
     (set) => ({
-      themeColor: '#7FADE1',
+      themeColor: "#7FADE1",
       setThemeColor: (color: string) => set({ themeColor: color }),
-      clearTheme: () => set({ themeColor: '#7FADE1' }),
+      clearTheme: () => set({ themeColor: "#7FADE1" }),
     }),
-    { name: 'theme-storage', storage: createJSONStorage(() => AsyncStorage) }
+    { name: "theme-storage", storage: createJSONStorage(() => AsyncStorage) }
   )
 );
 
@@ -48,18 +54,18 @@ export const useUIStore = create((set) => ({
 
 ### Files to Update (9 consumers)
 
-| File | Redux Usage | Zustand Change |
-|------|------------|----------------|
-| `App.tsx` | `<Provider>`, `<PersistGate>` | Remove both wrappers entirely |
-| `AppNavigator.tsx` | Reads `navState`, `theme`; dispatches `setNavState` | Use `useAuthStore` for nav, `useThemeStore` for theme |
-| `HomeScreen.tsx` | Reads/dispatches `addNoteState` | `useUIStore()` |
-| `LoginScreen.tsx` | Reads `navState`; dispatches `setNavState` | `useAuthStore()` |
-| `AddNoteScreen.tsx` | Reads `addNoteState` | `useUIStore()` |
-| `EditNoteScreen.tsx` | Imports dispatch (barely used) | `useUIStore()` |
-| `MorePage.tsx` | Dispatches `clearThemeReducer` | `useThemeStore().clearTheme()` |
-| `AppThemeSelectorScreen.tsx` | Dispatches `themeReducer` | `useThemeStore().setThemeColor()` |
-| `AddNoteBtnComponent.tsx` | Reads `theme`, `addNoteState` | `useThemeStore()`, `useUIStore()` |
-| `ThemeProvider.js` | Reads `theme` | `useThemeStore()` |
+| File                         | Redux Usage                                         | Zustand Change                                        |
+| ---------------------------- | --------------------------------------------------- | ----------------------------------------------------- |
+| `App.tsx`                    | `<Provider>`, `<PersistGate>`                       | Remove both wrappers entirely                         |
+| `AppNavigator.tsx`           | Reads `navState`, `theme`; dispatches `setNavState` | Use `useAuthStore` for nav, `useThemeStore` for theme |
+| `HomeScreen.tsx`             | Reads/dispatches `addNoteState`                     | `useUIStore()`                                        |
+| `LoginScreen.tsx`            | Reads `navState`; dispatches `setNavState`          | `useAuthStore()`                                      |
+| `AddNoteScreen.tsx`          | Reads `addNoteState`                                | `useUIStore()`                                        |
+| `EditNoteScreen.tsx`         | Imports dispatch (barely used)                      | `useUIStore()`                                        |
+| `MorePage.tsx`               | Dispatches `clearThemeReducer`                      | `useThemeStore().clearTheme()`                        |
+| `AppThemeSelectorScreen.tsx` | Dispatches `themeReducer`                           | `useThemeStore().setThemeColor()`                     |
+| `AddNoteBtnComponent.tsx`    | Reads `theme`, `addNoteState`                       | `useThemeStore()`, `useUIStore()`                     |
+| `ThemeProvider.js`           | Reads `theme`                                       | `useThemeStore()`                                     |
 
 ### Cleanup
 
@@ -78,13 +84,13 @@ The app currently manages loading states, pagination, caching, and error handlin
 
 ### What Moves to TanStack Query
 
-| Current Pattern | TanStack Query Replacement |
-|----------------|---------------------------|
-| `fetchMessagesBatch()` + manual `useState` for notes, loading, hasMore | `useInfiniteQuery` with `getNextPageParam` |
-| `fetchMapsMessagesBatch()` + manual state in ExploreScreen | `useQuery` (or `useInfiniteQuery` with bounding box params) |
-| `searchMessages()` + manual state | `useQuery` with debounced search key |
-| `fetchCreatorName()` called per-note | `useQuery` with caching — same creator only fetched once |
-| Manual `try/catch` + `console.error` in every screen | `onError` callbacks, `error` state from query |
+| Current Pattern                                                        | TanStack Query Replacement                                  |
+| ---------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `fetchMessagesBatch()` + manual `useState` for notes, loading, hasMore | `useInfiniteQuery` with `getNextPageParam`                  |
+| `fetchMapsMessagesBatch()` + manual state in ExploreScreen             | `useQuery` (or `useInfiniteQuery` with bounding box params) |
+| `searchMessages()` + manual state                                      | `useQuery` with debounced search key                        |
+| `fetchCreatorName()` called per-note                                   | `useQuery` with caching — same creator only fetched once    |
+| Manual `try/catch` + `console.error` in every screen                   | `onError` callbacks, `error` state from query               |
 
 ### Example: HomeScreen Notes
 
@@ -131,13 +137,13 @@ export default function App() {
 
 ### Screens to Update
 
-| Screen | Current Data Fetching | TanStack Query Hook |
-|--------|----------------------|---------------------|
-| `HomeScreen.tsx` | `fetchMessagesBatch` + manual pagination | `useInfiniteQuery` |
-| `Library.tsx` | `fetchMapsMessagesBatch` + manual pagination | `useInfiniteQuery` |
-| `ExploreScreen.js` | `fetchMapsMessagesBatch` + all-at-once load | `useQuery` (with bbox params) |
-| `ProfilePage.tsx` | `fetchUserData` | `useQuery` |
-| `NoteDetailModal.tsx` | `fetchCreatorName` | `useQuery` (cached per creator) |
+| Screen                | Current Data Fetching                        | TanStack Query Hook             |
+| --------------------- | -------------------------------------------- | ------------------------------- |
+| `HomeScreen.tsx`      | `fetchMessagesBatch` + manual pagination     | `useInfiniteQuery`              |
+| `Library.tsx`         | `fetchMapsMessagesBatch` + manual pagination | `useInfiniteQuery`              |
+| `ExploreScreen.js`    | `fetchMapsMessagesBatch` + all-at-once load  | `useQuery` (with bbox params)   |
+| `ProfilePage.tsx`     | `fetchUserData`                              | `useQuery`                      |
+| `NoteDetailModal.tsx` | `fetchCreatorName`                           | `useQuery` (cached per creator) |
 
 ### Mutation Hooks
 
@@ -146,7 +152,7 @@ Note create/update/delete become mutations with automatic cache invalidation:
 ```typescript
 const createNote = useMutation({
   mutationFn: ApiService.writeNewNote,
-  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notes'] }),
+  onSuccess: () => queryClient.invalidateQueries({ queryKey: ["notes"] }),
 });
 ```
 
@@ -157,6 +163,7 @@ const createNote = useMutation({
 ### Why
 
 The `User` singleton is the biggest anti-pattern in the codebase:
+
 - Not reactive to React renders
 - Mixes auth, persistence, and callback concerns
 - Untestable (shared instance across tests)
@@ -173,13 +180,13 @@ export const useAuthStore = create(
     (set) => ({
       user: null as UserData | null,
       token: null as string | null,
-      navState: 'loading' as 'loading' | 'onboarding' | 'login' | 'home',
+      navState: "loading" as "loading" | "onboarding" | "login" | "home",
       setUser: (user: UserData | null) => set({ user }),
       setToken: (token: string | null) => set({ token }),
       setNavState: (navState: string) => set({ navState }),
-      clearAuth: () => set({ user: null, token: null, navState: 'login' }),
+      clearAuth: () => set({ user: null, token: null, navState: "login" }),
     }),
-    { name: 'auth-storage', storage: createJSONStorage(() => AsyncStorage) }
+    { name: "auth-storage", storage: createJSONStorage(() => AsyncStorage) }
   )
 );
 ```
@@ -232,15 +239,15 @@ This also absorbs `navigationSlice` — one less Redux slice, now zero.
 
 ### Files That Will Need `any` Fixes (~25 instances)
 
-| File | `any` Count | Typical Fix |
-|------|------------|-------------|
-| `data_conversion.ts` | 6 | Type the RERUM/API response shape |
-| `HomeScreen.tsx` | 5 | Type `renderItem` callback params |
-| `api_calls.ts` | 4 | Type API response bodies |
-| `ForgotPassword.tsx` | 2 | Type error catches as `unknown` |
-| `Library.tsx` | 2 | Type list item params |
-| `time.tsx` | 2 | Type component props |
-| Others | 4 | Misc |
+| File                 | `any` Count | Typical Fix                       |
+| -------------------- | ----------- | --------------------------------- |
+| `data_conversion.ts` | 6           | Type the RERUM/API response shape |
+| `HomeScreen.tsx`     | 5           | Type `renderItem` callback params |
+| `api_calls.ts`       | 4           | Type API response bodies          |
+| `ForgotPassword.tsx` | 2           | Type error catches as `unknown`   |
+| `Library.tsx`        | 2           | Type list item params             |
+| `time.tsx`           | 2           | Type component props              |
+| Others               | 4           | Misc                              |
 
 ### Also
 
@@ -337,7 +344,7 @@ appId: com.wheresreligion.app
 # e2e/create-note.yaml
 appId: com.wheresreligion.app
 ---
-- runFlow: login.yaml          # reusable login flow
+- runFlow: login.yaml # reusable login flow
 - tapOn: "Add Note"
 - tapOn: "Title"
 - inputText: "Field Note from E2E"
@@ -346,14 +353,14 @@ appId: com.wheresreligion.app
 
 #### Recommended E2E Test Suite
 
-| Flow | What It Validates |
-|------|-------------------|
-| `login.yaml` | Email/password login → home screen |
-| `register.yaml` | Registration → redirect to login |
-| `create-note.yaml` | Create note with title and text |
-| `edit-note.yaml` | Edit existing note, verify changes persist |
-| `publish-note.yaml` | Publish a note, verify it appears in Library |
-| `logout.yaml` | Logout → redirect to login screen |
+| Flow                   | What It Validates                            |
+| ---------------------- | -------------------------------------------- |
+| `login.yaml`           | Email/password login → home screen           |
+| `register.yaml`        | Registration → redirect to login             |
+| `create-note.yaml`     | Create note with title and text              |
+| `edit-note.yaml`       | Edit existing note, verify changes persist   |
+| `publish-note.yaml`    | Publish a note, verify it appears in Library |
+| `logout.yaml`          | Logout → redirect to login screen            |
 | `forgot-password.yaml` | Password reset flow triggers success message |
 
 Maestro tests can run in [EAS Workflows](https://docs.expo.dev/eas/workflows/examples/e2e-tests/) for CI, or locally during development with `maestro test`.
@@ -364,9 +371,10 @@ Maestro tests can run in [EAS Workflows](https://docs.expo.dev/eas/workflows/exa
 
 ### Why
 
-The current `AppNavigator.tsx` is 285 lines of imperative navigation configuration — stack navigators nested inside tab navigators, conditional rendering based on Redux state, manual screen registration. Expo Router replaces all of this with file-based routing where the directory structure *is* the navigation.
+The current `AppNavigator.tsx` is 285 lines of imperative navigation configuration — stack navigators nested inside tab navigators, conditional rendering based on Redux state, manual screen registration. Expo Router replaces all of this with file-based routing where the directory structure _is_ the navigation.
 
 Benefits:
+
 - Navigation structure is self-documenting from the file tree
 - Automatic deep linking and URL handling
 - Typed routes generated from the file system
@@ -455,7 +463,7 @@ Minimal — mainly navigation calls:
 navigation.navigate("EditNote", { note, onSave });
 
 // After
-router.push({ pathname: '/edit-note/[id]', params: { id: note.id } });
+router.push({ pathname: "/edit-note/[id]", params: { id: note.id } });
 ```
 
 ```typescript
@@ -481,13 +489,13 @@ SDK 54 (September 2025) brings meaningful build and runtime improvements.
 
 ### Key Improvements
 
-| Feature | Impact |
-|---------|--------|
-| **Precompiled XCFrameworks** | iOS clean builds drop from ~120s to ~10s |
-| **Edge-to-edge enabled by default** | Android apps render behind system bars — screens may need safe area adjustments |
-| **`expo-file-system/next` stable** | Modern object-oriented file API for future media handling |
-| **Last SDK where New Architecture is optional** | After SDK 54, New Architecture is mandatory (you're already on it) |
-| **React Native 0.81** | Up from 0.79 (SDK 53) |
+| Feature                                         | Impact                                                                          |
+| ----------------------------------------------- | ------------------------------------------------------------------------------- |
+| **Precompiled XCFrameworks**                    | iOS clean builds drop from ~120s to ~10s                                        |
+| **Edge-to-edge enabled by default**             | Android apps render behind system bars — screens may need safe area adjustments |
+| **`expo-file-system/next` stable**              | Modern object-oriented file API for future media handling                       |
+| **Last SDK where New Architecture is optional** | After SDK 54, New Architecture is mandatory (you're already on it)              |
+| **React Native 0.81**                           | Up from 0.79 (SDK 53)                                                           |
 
 ### Migration Steps
 
@@ -504,6 +512,7 @@ Then fix any breaking changes — the main one is edge-to-edge:
 With edge-to-edge enabled by default, your screens render behind the status bar and navigation bar. Screens that currently use hardcoded `marginTop` or `paddingTop` for the status bar (e.g., `MorePage.tsx` line 509: `paddingTop: Platform.OS === "android" ? 25 : 0`) will need to use `SafeAreaView` or `useSafeAreaInsets()` instead.
 
 Files likely needing safe area fixes:
+
 - `MorePage.tsx` — hardcoded Android padding
 - `HomeScreen.tsx` — header area
 - Any screen with custom headers that offset for the status bar
@@ -527,6 +536,7 @@ Experimental in late 2025 — compiles JavaScript to native code at build time i
 ### Mapping Alternatives
 
 If `react-native-maps` becomes a persistent blocker with the New Architecture, alternatives to evaluate:
+
 - `maplibre-react-native` — open-source, good Fabric support
 - `@rnmapbox/maps` — Mapbox-powered, actively maintained for New Architecture
 
@@ -552,17 +562,17 @@ Note: Items 8 and 9 (Expo Router + SDK 54) could be done together since the SDK 
 
 ## Estimated Timeline
 
-| Item | Time |
-|------|------|
-| 1. Redux → Zustand | 1-2 days |
-| 2. Add TanStack Query | 2-3 days |
-| 3. User singleton → useAuth hook | 1-2 days (likely done during auth migration) |
-| 4. TypeScript strict mode | 1 day |
-| 5. Remove dead deps | 15 minutes |
-| 6. Standardize styling | 1-2 days |
-| 7. Migrate unit tests + add Maestro E2E | 2-3 days |
-| 8. Migrate to Expo Router | 2-3 days |
-| 9. Upgrade to Expo SDK 54 | 1-2 days |
-| **Total** | **~12-19 days** |
+| Item                                    | Time                                         |
+| --------------------------------------- | -------------------------------------------- |
+| 1. Redux → Zustand                      | 1-2 days                                     |
+| 2. Add TanStack Query                   | 2-3 days                                     |
+| 3. User singleton → useAuth hook        | 1-2 days (likely done during auth migration) |
+| 4. TypeScript strict mode               | 1 day                                        |
+| 5. Remove dead deps                     | 15 minutes                                   |
+| 6. Standardize styling                  | 1-2 days                                     |
+| 7. Migrate unit tests + add Maestro E2E | 2-3 days                                     |
+| 8. Migrate to Expo Router               | 2-3 days                                     |
+| 9. Upgrade to Expo SDK 54               | 1-2 days                                     |
+| **Total**                               | **~12-19 days**                              |
 
 Most of this can be parallelized across contributors if needed.

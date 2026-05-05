@@ -27,25 +27,25 @@ const ImageModal: React.FC<Props> = ({ isVisible, onClose, images }) => {
 
   return (
     <Modal animationType="slide" transparent={false} visible={isVisible} onRequestClose={onClose}>
-      <View className="flex-1 justify-center items-center pt-[45px] w-full bg-primary">
+      <View className="w-full flex-1 items-center justify-center bg-primary pt-[45px]">
         <ScrollView
           style={{ height: isImageTouched ? "80%" : "50%" }}
           onTouchStart={images && images.length > 2 ? handleImageTouchStart : undefined}
         >
           {images && images.length > 0 ? (
             images.map((image, index) => (
-              <View key={index} className="items-center w-full bg-primary">
+              <View key={index} className="w-full items-center bg-primary">
                 {!imageLoadedState[image.uri] && <ActivityIndicator size="large" color="#0000ff" />}
                 <Image source={{ uri: image.uri }} style={{ width, height: width }} onLoad={() => handleLoad(image.uri)} />
               </View>
             ))
           ) : (
-            <Text className="font-inter self-center justify-center mt-[200px] text-foreground">No images</Text>
+            <Text className="mt-[200px] justify-center self-center font-inter text-foreground">No images</Text>
           )}
         </ScrollView>
 
         <TouchableOpacity
-          className="h-10 w-[75px] items-center justify-center mt-5 bg-[#ddd] p-2.5 rounded-[5px] mb-[30px]"
+          className="mb-[30px] mt-5 h-10 w-[75px] items-center justify-center rounded-[5px] bg-[#ddd] p-2.5"
           onPress={onClose}
           testID="image-component"
         >

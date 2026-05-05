@@ -22,24 +22,29 @@ pnpm build:android    # Production Android build via EAS
 ## Architecture
 
 ### State Management
+
 - **Redux Toolkit** with slices: `themeSlice`, `addNoteStateSlice`
 - **Redux Persist** with AsyncStorage for offline persistence
 - **AddNoteContext** - React Context for note publishing coordination
 - **Zustand** - `addNoteStore` for note creation state
 
 ### Navigation Structure (Expo Router)
+
 File-based routing via `app/` directory:
+
 1. `onboarding` - First-time user flow
 2. `(auth)/` - Authentication screens (login, register, forgot password)
 3. `(tabs)/` - Main app with bottom tabs: Home, Library, Add Note, Map, More
 4. Modal screens: add-note, edit-note, account, video-player
 
 ### Key Singletons and Classes
+
 - **User class** (`lib/models/user_class.ts`) - Auth singleton with Better Auth session/token management
 - **Media hierarchy** (`lib/models/media_class.ts`) - Photo, Video, Audio classes extending base Media
 - **ApiService** (`lib/utils/api_calls.ts`) - Static class for all Hono API interactions
 
 ### Backend Integration
+
 - **Hono REST API** - Configured via `API_BASE_URL` env var, authenticated via Bearer tokens
   - `GET/POST/PATCH/DELETE /api/notes` - Note CRUD
   - `GET /api/users/:id` - User profiles
@@ -47,11 +52,13 @@ File-based routing via `app/` directory:
 - **S3 Proxy** - `http://s3-proxy.rerum.io/S3/` for media uploads (to be migrated)
 
 ### Data Model
+
 - **Note**: `id`, `title`, `text`, `creatorId`, `latitude` (number), `longitude` (number), `isPublished`, `tags` (string[]), `time`, `media[]`, `audio[]`
 - **UserData**: `id`, `name`, `email`, `role`, `isInstructor`
 - Tags are stored as `{label, origin}` objects in the API but handled as `string[]` internally in the mobile app (converted at the API boundary)
 
 ### Directory Layout
+
 ```
 app/                   # Expo Router routes (file-based routing)
 lib/
@@ -75,6 +82,7 @@ redux/
 Tests are in `__tests__/` using Jest with jest-expo preset and React Testing Library.
 
 Run a single test file:
+
 ```bash
 pnpm test __tests__/HomeScreen.test.tsx
 ```

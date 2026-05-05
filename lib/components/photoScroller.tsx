@@ -144,7 +144,10 @@ const PhotoScroller = forwardRef(
       }
       return (
         <View key={key}>
-          <TouchableOpacity className="absolute z-[99] h-[15%] w-[15%] items-center justify-center rounded-full bg-black/75" onPress={() => handleDeleteMedia(index)}>
+          <TouchableOpacity
+            className="absolute z-[99] h-[15%] w-[15%] items-center justify-center rounded-full bg-black/75"
+            onPress={() => handleDeleteMedia(index)}
+          >
             <Ionicons name="close-outline" size={15} color="white" />
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.5} onLongPress={drag} delayLongPress={100} onPress={() => goBig(index)}>
@@ -228,7 +231,10 @@ const PhotoScroller = forwardRef(
 
       return showHeader ? (
         <View>
-          <TouchableOpacity className="absolute right-[10px] top-[50px] z-[100] h-[50px] w-[50px] items-center justify-center rounded-full bg-black/50" onPress={() => setPlaying(false)}>
+          <TouchableOpacity
+            className="absolute right-[10px] top-[50px] z-[100] h-[50px] w-[50px] items-center justify-center rounded-full bg-black/50"
+            onPress={() => setPlaying(false)}
+          >
             <Ionicons name="close-outline" size={24} className="ml-1 self-center text-[#dfe5e8]" />
           </TouchableOpacity>
           <TouchableOpacity
@@ -255,13 +261,16 @@ const PhotoScroller = forwardRef(
                 shouldPlay={true}
                 useNativeControls={true}
                 isLooping={true}
-                className="h-full w-full self-center justify-center"
+                className="h-full w-full justify-center self-center"
               />
             </View>
           )}
         </View>
       ) : (
-        <TouchableOpacity className="absolute right-[10px] top-[50px] z-[100] h-[50px] w-[50px] items-center justify-center rounded-full bg-black/50" onPress={() => setPlaying(false)}>
+        <TouchableOpacity
+          className="absolute right-[10px] top-[50px] z-[100] h-[50px] w-[50px] items-center justify-center rounded-full bg-black/50"
+          onPress={() => setPlaying(false)}
+        >
           <Ionicons name="close-outline" size={24} color="#dfe5e8" className="ml-1 self-center text-[#dfe5e8]" />
         </TouchableOpacity>
       );

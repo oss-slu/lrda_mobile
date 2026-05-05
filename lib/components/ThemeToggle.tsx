@@ -9,9 +9,9 @@ interface ThemeToggleProps {
 
 const ThemeToggle: React.FC<ThemeToggleProps> = ({ isDarkmode, toggleDarkmode, testID }) => {
   return (
-    <View className="flex-row items-center bg-[#e0e0e0] rounded-lg p-1">
+    <View className="flex-row items-center rounded-lg bg-[#e0e0e0] p-1">
       <TouchableOpacity
-        className="py-2 px-5 rounded-lg"
+        className="rounded-lg px-5 py-2"
         style={{ backgroundColor: isDarkmode ? "transparent" : "#000" }}
         onPress={toggleDarkmode}
         testID={testID}
@@ -21,7 +21,7 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({ isDarkmode, toggleDarkmode, t
         </Text>
       </TouchableOpacity>
       <TouchableOpacity
-        className="py-2 px-5 rounded-lg"
+        className="rounded-lg px-5 py-2"
         style={{ backgroundColor: isDarkmode ? "#000" : "transparent" }}
         onPress={toggleDarkmode}
         testID={"${testID}-dark"}

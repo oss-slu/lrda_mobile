@@ -71,7 +71,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUri }) => {
   };
 
   return (
-    <View className="items-center my-5">
+    <View className="my-5 items-center">
       <View className="w-[90%] items-center">
         <Slider
           style={{ width: "100%" }}
@@ -83,7 +83,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUri }) => {
           maximumTrackTintColor="#D3D3D3"
           thumbTintColor="#1DB954"
         />
-        <View className="flex-row justify-between w-full mt-[5px]">
+        <View className="mt-[5px] w-full flex-row justify-between">
           <Text className="text-xs text-[#555]">{formatTime(position)}</Text>
           <Text className="text-xs text-[#555]">{formatTime(duration || 0)}</Text>
         </View>

@@ -16,7 +16,7 @@ export default function LoadingImage({ imageURI, type, isImage, height = 70, wid
 
   if (isImage && imageURI !== "") {
     return (
-      <View style={{ width, height }} className="justify-center items-center">
+      <View style={{ width, height }} className="items-center justify-center">
         {isLoading && (
           <Placeholder
             style={{ top: width / 2 }}
@@ -25,21 +25,21 @@ export default function LoadingImage({ imageURI, type, isImage, height = 70, wid
           />
         )}
         {type === "video" ? (
-          <View style={{ width, height }} className="justify-center items-center">
+          <View style={{ width, height }} className="items-center justify-center">
             <Image
-              className="rounded-[10px] content-center self-center"
+              className="content-center self-center rounded-[10px]"
               style={{ width, height }}
               source={{ uri: imageURI }}
               onLoadEnd={() => setIsLoading(false)}
             />
-            <View className="w-[30px] h-[30px] rounded-[30px] bg-black/50 absolute self-center">
-              <Ionicons name="play-outline" size={24} color="#dfe5e8" className="absolute self-center ml-2.5 mt-[2px]" />
+            <View className="absolute h-[30px] w-[30px] self-center rounded-[30px] bg-black/50">
+              <Ionicons name="play-outline" size={24} color="#dfe5e8" className="absolute ml-2.5 mt-[2px] self-center" />
             </View>
           </View>
         ) : (
           <View>
             <Image
-              className="rounded-[10px] content-center self-center"
+              className="content-center self-center rounded-[10px]"
               style={{ width, height }}
               source={{ uri: imageURI }}
               onLoadEnd={() => setIsLoading(false)}
@@ -50,7 +50,7 @@ export default function LoadingImage({ imageURI, type, isImage, height = 70, wid
     );
   } else {
     return (
-      <View style={{ width, height }} className="justify-center items-center">
+      <View style={{ width, height }} className="items-center justify-center">
         {isLoading && (
           <Placeholder
             style={{ top: width / 2 }}
@@ -59,7 +59,7 @@ export default function LoadingImage({ imageURI, type, isImage, height = 70, wid
           />
         )}
         <Image
-          className="rounded-[10px] content-center self-center"
+          className="content-center self-center rounded-[10px]"
           style={{ width, height }}
           source={require("./public/noPreview.png")}
           onLoadEnd={() => setIsLoading(false)}

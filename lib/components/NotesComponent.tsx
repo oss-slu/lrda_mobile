@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import { View, Text, Dimensions } from "react-native";
 import LoadingImage from "./loadingImage";
 import * as Location from "expo-location";
+import { useQuery } from "@tanstack/react-query";
 import { fetchCreatorName } from "../utils/api_calls";
+import { queryKeys } from "../query/queryKeys";
 import { Note } from "../../types";
 
 const { width, height } = Dimensions.get("window");
@@ -18,18 +20,24 @@ interface NotesComponentProps {
   isDarkmode: boolean;
 }
 
-function NotesComponent({ IsImage, resolvedImageURI, ImageType, textLength, showTime, item, isPublished, isDarkmode }: NotesComponentProps) {
+function NotesComponent({
+  IsImage,
+  resolvedImageURI,
+  ImageType,
+  textLength,
+  showTime,
+  item,
+  isPublished,
+  isDarkmode,
+}: NotesComponentProps) {
   const [address, setAddress] = useState<string | null>(null);
-  const [author, setAuthor] = useState("anonymous");
 
-  const fetchUserName = async (creatorId: string) => {
-    try {
-      const name = await fetchCreatorName(creatorId);
-      setAuthor(name);
-    } catch (error) {
-      console.error("Failed to fetch creator name:", error);
-    }
-  };
+  const { data: author = "anonymous" } = useQuery({
+    queryKey: queryKeys.users.name(item.creatorId),
+    queryFn: () => fetchCreatorName(item.creatorId),
+    enabled: !!item.creatorId,
+    staleTime: Infinity,
+  });
 
   const fetchAddress = async (latitude: number | null, longitude: number | null) => {
     const lat = typeof latitude === "number" ? latitude : NaN;
@@ -59,9 +67,6 @@ function NotesComponent({ IsImage, resolvedImageURI, ImageType, textLength, show
 
   useEffect(() => {
     fetchAddress(item.latitude, item.longitude);
-    if (item.creatorId) {
-      fetchUserName(item.creatorId);
-    }
   }, [item]);
 
   return (

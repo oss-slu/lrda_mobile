@@ -1,46 +1,42 @@
-import React, { useState, useEffect } from "react";
-import { Text, View, SafeAreaView, Image, FlatList, TouchableOpacity } from "react-native";
+import React, { useMemo } from "react";
+import { Text, View, SafeAreaView, Image, FlatList, TouchableOpacity, ActivityIndicator } from "react-native";
+import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "../stores/authStore";
-import { Note, ImageNote } from "../../types";
+import { Note } from "../../types";
 import DataConversion from "../utils/data_conversion";
 import { fetchAllNotes } from "../utils/api_calls";
+import { queryKeys } from "../query/queryKeys";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
 export default function ProfilePage() {
   const navigation = useRouter();
   const authUser = useAuthStore((s) => s.user);
-  const [allImages, setAllImages] = useState<ImageNote[]>([]);
-  const [userInitials, setUserInitials] = useState("N/A");
-  const [userName, setUserName] = useState("");
-  const [fieldNotes, setFieldNotes] = useState(0);
 
-  useEffect(() => {
-    const name = authUser?.name;
-    if (name) {
-      setUserName(name);
-      const initials = name
-        .split(" ")
-        .map((namePart) => namePart[0])
-        .join("");
-      setUserInitials(initials);
-    }
+  const userName = authUser?.name ?? "";
+  const userInitials = useMemo(() => {
+    if (!userName) return "N/A";
+    return userName
+      .split(" ")
+      .map((part) => part[0])
+      .join("");
+  }, [userName]);
 
-    const fetchMessages = async () => {
-      try {
-        const data = await fetchAllNotes({ creatorId: authUser?.id || "" });
-        const fetchedNotes = DataConversion.convertMediaTypes(data);
-        setFieldNotes(fetchedNotes.length);
+  const { data, isLoading } = useQuery({
+    queryKey: queryKeys.profile.notes(authUser?.id ?? ""),
+    queryFn: () => fetchAllNotes({ creatorId: authUser?.id ?? "" }),
+    enabled: !!authUser?.id,
+    select: (notes) => {
+      const converted = DataConversion.convertMediaTypes(notes);
+      return {
+        fieldNotes: converted.length,
+        images: DataConversion.extractImages(converted).reverse(),
+      };
+    },
+  });
 
-        const extractedImages = DataConversion.extractImages(fetchedNotes);
-        setAllImages(extractedImages.reverse());
-      } catch (error) {
-        console.error("Error fetching messages:", error);
-      }
-    };
-
-    fetchMessages();
-  }, [authUser]);
+  const fieldNotes = data?.fieldNotes ?? 0;
+  const allImages = data?.images ?? [];
 
   const navigateToEditNoteScreen = (note: Note) => {
     navigation.push({ pathname: "/edit-note", params: { noteData: JSON.stringify(note) } });
@@ -48,47 +44,49 @@ export default function ProfilePage() {
 
   return (
     <SafeAreaView className="flex-1 bg-primary">
-      <FlatList
-        data={allImages}
-        numColumns={3}
-        keyExtractor={(item, index) => index.toString()}
-        contentContainerStyle={{ paddingBottom: 200 }}
-        ListHeaderComponent={() => (
-          <View>
-            <TouchableOpacity onPress={() => navigation.back()}>
-              <Feather name={"arrow-left"} size={30} style={{ marginLeft: 20 }} />
+      {isLoading ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" />
+        </View>
+      ) : (
+        <FlatList
+          data={allImages}
+          numColumns={3}
+          keyExtractor={(item, index) => index.toString()}
+          contentContainerStyle={{ paddingBottom: 200 }}
+          ListHeaderComponent={() => (
+            <View>
+              <TouchableOpacity onPress={() => navigation.back()}>
+                <Feather name={"arrow-left"} size={30} style={{ marginLeft: 20 }} />
+              </TouchableOpacity>
+              <View className="self-center">
+                <View className="h-[190px] w-[190px] content-center justify-center rounded-full bg-foreground">
+                  <Text className="self-center text-[60px] font-medium text-primary">{userInitials}</Text>
+                </View>
+              </View>
+              <View className="mt-4 items-center self-center">
+                <Text className="font-inter text-4xl font-extralight text-foreground">{userName}</Text>
+                <Text className="font-inter text-sm text-[#AEB5BC]">Administrator</Text>
+              </View>
+              <View className="mt-8 flex-row self-center">
+                <View className="flex-1 items-center">
+                  <Text className="font-inter text-2xl text-foreground">{fieldNotes}</Text>
+                  <Text className="font-inter text-xs font-medium uppercase text-foreground">Posts</Text>
+                </View>
+                <View className="flex-1 items-center border-l border-r border-[#DFD8C8]">
+                  <Text className="font-inter text-2xl text-foreground">{allImages.length}</Text>
+                  <Text className="font-inter text-xs font-medium uppercase text-foreground">Images</Text>
+                </View>
+              </View>
+            </View>
+          )}
+          renderItem={({ item }) => (
+            <TouchableOpacity style={{ flex: 1, aspectRatio: 1 }} onPress={() => navigateToEditNoteScreen(item.note)}>
+              <Image source={{ uri: item.image }} style={{ flex: 1, aspectRatio: 1 }} />
             </TouchableOpacity>
-            <View className="self-center">
-              <View className="bg-foreground h-[190px] w-[190px] rounded-full content-center justify-center">
-                <Text className="font-medium text-[60px] self-center text-primary">
-                  {userInitials}
-                </Text>
-              </View>
-            </View>
-            <View className="self-center items-center mt-4">
-              <Text className="font-inter text-foreground font-extralight text-4xl">{userName}</Text>
-              <Text className="font-inter text-[#AEB5BC] text-sm">Administrator</Text>
-            </View>
-            <View className="flex-row self-center mt-8">
-              <View className="items-center flex-1">
-                <Text className="font-inter text-foreground text-2xl">{fieldNotes}</Text>
-                <Text className="font-inter text-foreground text-xs uppercase font-medium">Posts</Text>
-              </View>
-              <View
-                className="items-center flex-1 border-[#DFD8C8] border-l border-r"
-              >
-                <Text className="font-inter text-foreground text-2xl">{allImages.length}</Text>
-                <Text className="font-inter text-foreground text-xs uppercase font-medium">Images</Text>
-              </View>
-            </View>
-          </View>
-        )}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={{ flex: 1, aspectRatio: 1 }} onPress={() => navigateToEditNoteScreen(item.note)}>
-            <Image source={{ uri: item.image }} style={{ flex: 1, aspectRatio: 1 }} />
-          </TouchableOpacity>
-        )}
-      />
+          )}
+        />
+      )}
     </SafeAreaView>
   );
 }

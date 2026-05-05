@@ -30,6 +30,7 @@ pnpm add @tanstack/react-query
 ### Create QueryClient (`lib/query/queryClient.ts`)
 
 Configure a `QueryClient` with:
+
 - `staleTime: 30_000` (30s before background refetch)
 - `gcTime: 5 * 60 * 1000` (5 min garbage collection)
 - `retry: 2` on queries, `retry: 0` on mutations
@@ -41,8 +42,7 @@ Configure a `QueryClient` with:
 export const queryKeys = {
   notes: {
     all: ["notes"] as const,
-    list: (opts: { creatorId?: string; published?: boolean }) =>
-      ["notes", opts] as const,
+    list: (opts: { creatorId?: string; published?: boolean }) => ["notes", opts] as const,
     detail: (id: string) => ["notes", id] as const,
   },
   users: {
@@ -71,6 +71,7 @@ Replace all useEffect-based data fetching with useQuery/useInfiniteQuery.
 state + `useFocusEffect` + manual `doFetch`.
 
 **New:** `useInfiniteQuery` with:
+
 - `getNextPageParam` returning the next offset
 - `select` to flatten pages + run `DataConversion.convertMediaTypes`
 - A `useFocusEffect` that calls `refetch()` (simpler than the current approach)
@@ -114,8 +115,7 @@ Replace the `useEffect` calling `fetchAllNotes` with:
 const { data: images, isLoading } = useQuery({
   queryKey: queryKeys.profile.notes(authUser?.id ?? ""),
   queryFn: () => fetchAllNotes({ creatorId: authUser?.id }),
-  select: (notes) =>
-    DataConversion.extractImages(DataConversion.convertMediaTypes(notes)),
+  select: (notes) => DataConversion.extractImages(DataConversion.convertMediaTypes(notes)),
   enabled: !!authUser?.id,
 });
 ```
@@ -191,20 +191,20 @@ Create `lib/hooks/mutations/` with shared mutation hooks.
 
 ## Phase 5: Cleanup -- What to Remove
 
-| Remove | Replaced by |
-|---|---|
-| `updateCounter` state in `useNotesList` | `queryClient.invalidateQueries` |
-| `hasLoadedOnce` ref in `useNotesList` | `isLoading` vs `isFetching` distinction |
-| `rendering` state in `useNotesList` | `isLoading` (first load) vs `isFetching` (background) |
-| `page`, `isLoadingMore`, `hasMore` in `useNotesList` | Built into `useInfiniteQuery` |
-| `setNotes` exposure from `useNotesList` | `queryClient.setQueryData` in mutations |
-| `refreshPage()` function | `refetch()` from query or `invalidateQueries` from mutations |
-| `useFocusEffect` counter pattern in `useNotesList` | Simpler `useFocusEffect(() => refetch())` |
-| All pagination state in `ExploreScreen` | `useInfiniteQuery` |
-| `useEffect` for `fetchCreatorName` in `NotesComponent` | `useQuery` with shared cache |
-| `useEffect` for `fetchCreatorName` in `NoteDetailModal` | `useQuery` with shared cache |
-| `isUpdating` state in `AddNoteScreen` / `EditNoteScreen` | `mutation.isPending` |
-| Direct `apiUpdateNote` calls in `HomeScreen` | `useUpdateNote` mutation hook |
+| Remove                                                   | Replaced by                                                  |
+| -------------------------------------------------------- | ------------------------------------------------------------ |
+| `updateCounter` state in `useNotesList`                  | `queryClient.invalidateQueries`                              |
+| `hasLoadedOnce` ref in `useNotesList`                    | `isLoading` vs `isFetching` distinction                      |
+| `rendering` state in `useNotesList`                      | `isLoading` (first load) vs `isFetching` (background)        |
+| `page`, `isLoadingMore`, `hasMore` in `useNotesList`     | Built into `useInfiniteQuery`                                |
+| `setNotes` exposure from `useNotesList`                  | `queryClient.setQueryData` in mutations                      |
+| `refreshPage()` function                                 | `refetch()` from query or `invalidateQueries` from mutations |
+| `useFocusEffect` counter pattern in `useNotesList`       | Simpler `useFocusEffect(() => refetch())`                    |
+| All pagination state in `ExploreScreen`                  | `useInfiniteQuery`                                           |
+| `useEffect` for `fetchCreatorName` in `NotesComponent`   | `useQuery` with shared cache                                 |
+| `useEffect` for `fetchCreatorName` in `NoteDetailModal`  | `useQuery` with shared cache                                 |
+| `isUpdating` state in `AddNoteScreen` / `EditNoteScreen` | `mutation.isPending`                                         |
+| Direct `apiUpdateNote` calls in `HomeScreen`             | `useUpdateNote` mutation hook                                |
 
 ---
 
@@ -243,26 +243,26 @@ incrementally per screen. Pair with error boundaries for a complete declarative 
 
 ## Files Changed Summary
 
-| File | Change type |
-|---|---|
-| `package.json` | Add `@tanstack/react-query` |
-| `app/_layout.tsx` | Add `QueryClientProvider` wrapper |
-| `lib/query/queryClient.ts` | **New** -- QueryClient config |
-| `lib/query/queryKeys.ts` | **New** -- centralized key factory |
-| `lib/hooks/useNotesList.ts` | Rewrite to `useInfiniteQuery` |
-| `lib/hooks/mutations/useCreateNote.ts` | **New** -- create note mutation |
-| `lib/hooks/mutations/useUpdateNote.ts` | **New** -- update note mutation |
-| `lib/hooks/mutations/useDeleteNote.ts` | **New** -- delete note mutation |
-| `lib/hooks/mutations/useUploadMedia.ts` | **New** -- media upload mutation |
-| `lib/hooks/mutations/useUploadAudio.ts` | **New** -- audio upload mutation |
-| `lib/screens/HomeScreen.tsx` | Use mutation hooks, remove `setNotes` |
-| `lib/screens/EditNoteScreen.tsx` | Use mutation hooks, remove `isUpdating` |
-| `lib/screens/AddNoteScreen.tsx` | Use mutation hooks, remove `isUpdating` |
-| `lib/screens/Library.tsx` | Consume new `useNotesList` shape |
-| `lib/screens/mapPage/ExploreScreen.tsx` | Rewrite to `useInfiniteQuery` |
-| `lib/screens/ProfilePage.tsx` | Replace `useEffect` with `useQuery` |
-| `lib/screens/mapPage/NoteDetailModal.tsx` | Replace `useEffect` with `useQuery` |
-| `lib/components/NotesComponent.tsx` | Replace `useEffect` with `useQuery` |
-| `lib/components/audio.tsx` | Wrap upload in `useUploadAudio` |
-| `lib/components/photoScroller.tsx` | Wrap upload in `useUploadMedia` |
-| `lib/utils/api_calls.ts` | **No changes** |
+| File                                      | Change type                             |
+| ----------------------------------------- | --------------------------------------- |
+| `package.json`                            | Add `@tanstack/react-query`             |
+| `app/_layout.tsx`                         | Add `QueryClientProvider` wrapper       |
+| `lib/query/queryClient.ts`                | **New** -- QueryClient config           |
+| `lib/query/queryKeys.ts`                  | **New** -- centralized key factory      |
+| `lib/hooks/useNotesList.ts`               | Rewrite to `useInfiniteQuery`           |
+| `lib/hooks/mutations/useCreateNote.ts`    | **New** -- create note mutation         |
+| `lib/hooks/mutations/useUpdateNote.ts`    | **New** -- update note mutation         |
+| `lib/hooks/mutations/useDeleteNote.ts`    | **New** -- delete note mutation         |
+| `lib/hooks/mutations/useUploadMedia.ts`   | **New** -- media upload mutation        |
+| `lib/hooks/mutations/useUploadAudio.ts`   | **New** -- audio upload mutation        |
+| `lib/screens/HomeScreen.tsx`              | Use mutation hooks, remove `setNotes`   |
+| `lib/screens/EditNoteScreen.tsx`          | Use mutation hooks, remove `isUpdating` |
+| `lib/screens/AddNoteScreen.tsx`           | Use mutation hooks, remove `isUpdating` |
+| `lib/screens/Library.tsx`                 | Consume new `useNotesList` shape        |
+| `lib/screens/mapPage/ExploreScreen.tsx`   | Rewrite to `useInfiniteQuery`           |
+| `lib/screens/ProfilePage.tsx`             | Replace `useEffect` with `useQuery`     |
+| `lib/screens/mapPage/NoteDetailModal.tsx` | Replace `useEffect` with `useQuery`     |
+| `lib/components/NotesComponent.tsx`       | Replace `useEffect` with `useQuery`     |
+| `lib/components/audio.tsx`                | Wrap upload in `useUploadAudio`         |
+| `lib/components/photoScroller.tsx`        | Wrap upload in `useUploadMedia`         |
+| `lib/utils/api_calls.ts`                  | **No changes**                          |

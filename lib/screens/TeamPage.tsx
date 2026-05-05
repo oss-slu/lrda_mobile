@@ -107,10 +107,10 @@ export default function TeamPage() {
   const router = useRouter();
 
   const renderItem = ({ item }: { item: { id: number; name: string; role: string; image: any } }) => (
-    <View className="items-center flex-1 mx-2">
-      <Image source={item.image} className="w-20 h-20 rounded-full mb-2" accessible accessibilityLabel={`${item.name}, ${item.role}`} />
-      <Text className="font-inter text-foreground text-sm font-bold text-center">{item.name}</Text>
-      <Text className="font-inter text-tertiary text-xs text-center">{item.role}</Text>
+    <View className="mx-2 flex-1 items-center">
+      <Image source={item.image} className="mb-2 h-20 w-20 rounded-full" accessible accessibilityLabel={`${item.name}, ${item.role}`} />
+      <Text className="text-center font-inter text-sm font-bold text-foreground">{item.name}</Text>
+      <Text className="text-center font-inter text-xs text-tertiary">{item.role}</Text>
     </View>
   );
 
@@ -119,10 +119,7 @@ export default function TeamPage() {
       <StatusBar translucent backgroundColor="transparent" />
 
       <View className="bg-accent" style={{ height: width > 500 ? height * 0.12 : height * 0.19 }}>
-        <View
-          className="flex-row justify-start items-center px-5"
-          style={{ marginTop: width > 500 ? "5%" : "20%" }}
-        >
+        <View className="flex-row items-center justify-start px-5" style={{ marginTop: width > 500 ? "5%" : "20%" }}>
           <TouchableOpacity onPress={() => router.back()}>
             <Feather name={"arrow-left"} size={30} />
           </TouchableOpacity>
@@ -133,14 +130,12 @@ export default function TeamPage() {
       </View>
 
       <ScrollView contentContainerStyle={{ paddingBottom: 60 }} showsVerticalScrollIndicator={false}>
-        <View className="py-5 items-center">
-          <Text className="font-inter text-foreground text-2xl font-bold text-center">About Our Team</Text>
+        <View className="items-center py-5">
+          <Text className="text-center font-inter text-2xl font-bold text-foreground">About Our Team</Text>
         </View>
 
-        <View className="px-4 mb-6">
-          <Text className="font-inter text-tertiary text-base text-center mb-3">
-            The Saint Louis University Where's Religion Team
-          </Text>
+        <View className="mb-6 px-4">
+          <Text className="mb-3 text-center font-inter text-base text-tertiary">The Saint Louis University Where's Religion Team</Text>
           <FlatList
             data={WR_team}
             renderItem={renderItem}
@@ -152,8 +147,8 @@ export default function TeamPage() {
           />
         </View>
 
-        <View className="px-4 mb-6">
-          <Text className="font-inter text-tertiary text-base text-center mb-3">The Development Team</Text>
+        <View className="mb-6 px-4">
+          <Text className="mb-3 text-center font-inter text-base text-tertiary">The Development Team</Text>
           <FlatList
             data={teamMembers}
             renderItem={renderItem}

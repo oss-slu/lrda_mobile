@@ -74,9 +74,15 @@ export default function MorePage() {
     Linking.openURL(mailtoLink).catch((err) => console.error("Error opening email client:", err));
   };
 
-  const SettingOptions = ({ optionName, icon }: { optionName: string; icon: React.ComponentProps<typeof MaterialIcons>["name"] | "none" }) => (
+  const SettingOptions = ({
+    optionName,
+    icon,
+  }: {
+    optionName: string;
+    icon: React.ComponentProps<typeof MaterialIcons>["name"] | "none";
+  }) => (
     <View
-      className="h-[60px] flex-row justify-between items-center px-5 rounded-[10px] mt-[30px]"
+      className="mt-[30px] h-[60px] flex-row items-center justify-between rounded-[10px] px-5"
       style={{
         width: width * 0.8,
         backgroundColor: "#e5e8e5",
@@ -94,9 +100,17 @@ export default function MorePage() {
       )}
     </View>
   );
-  const MenuItem = ({ title, iconName, onPress }: { title: string; iconName: React.ComponentProps<typeof Ionicons>["name"]; onPress: () => void }) => (
+  const MenuItem = ({
+    title,
+    iconName,
+    onPress,
+  }: {
+    title: string;
+    iconName: React.ComponentProps<typeof Ionicons>["name"];
+    onPress: () => void;
+  }) => (
     <TouchableOpacity
-      className="flex-row items-center justify-between bg-white py-[18px] px-[30px] mb-3 rounded-[16px] w-[90%]"
+      className="mb-3 w-[90%] flex-row items-center justify-between rounded-[16px] bg-white px-[30px] py-[18px]"
       style={{
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 4 },
@@ -106,8 +120,8 @@ export default function MorePage() {
       }}
       onPress={onPress}
     >
-      <View className="flex-row items-center justify-between w-[90%]">
-        <Text className="font-inter text-sm font-medium text-black ml-[30px]">{title}</Text>
+      <View className="w-[90%] flex-row items-center justify-between">
+        <Text className="ml-[30px] font-inter text-sm font-medium text-black">{title}</Text>
         <Ionicons name={iconName} size={28} color={"black"} />
       </View>
     </TouchableOpacity>
@@ -133,12 +147,12 @@ export default function MorePage() {
         <>
           <View className="bg-accent" style={{ height: width > 500 ? height * 0.12 : height * 0.19 }}>
             <View
-              className="flex-row justify-between items-center px-[10px] h-[50%]"
+              className="h-[50%] flex-row items-center justify-between px-[10px]"
               style={{ marginTop: width > 500 ? "5%" : "15%", width }}
             >
-              <View className="flex-row justify-between items-center" style={{ width: width > 500 ? "13%" : "27%" }}>
+              <View className="flex-row items-center justify-between" style={{ width: width > 500 ? "13%" : "27%" }}>
                 <TouchableOpacity
-                  className="rounded-full items-center justify-center bg-foreground ml-2"
+                  className="ml-2 items-center justify-center rounded-full bg-foreground"
                   style={{
                     width: width > 1000 ? 50 : 30,
                     height: width > 1000 ? 50 : 30,
@@ -147,7 +161,7 @@ export default function MorePage() {
                     router.push("/account");
                   }}
                 >
-                  <Text className="font-inter font-semibold text-sm text-white self-center">{userInitials}</Text>
+                  <Text className="self-center font-inter text-sm font-semibold text-white">{userInitials}</Text>
                 </TouchableOpacity>
                 <Text className="font-inter text-lg font-medium">More</Text>
               </View>
@@ -160,13 +174,13 @@ export default function MorePage() {
             scrollEnabled={true}
             showsVerticalScrollIndicator={false}
           >
-            <View className="items-center mt-5" style={{ height: width / 2 }}>
+            <View className="mt-5 items-center" style={{ height: width / 2 }}>
               <Carousel
                 width={width}
                 height={width / 2}
                 data={data}
                 renderItem={({ item }) => (
-                  <Image source={item.source} className="w-[95%] h-full self-center rounded-[10px]" resizeMode="cover" />
+                  <Image source={item.source} className="h-full w-[95%] self-center rounded-[10px]" resizeMode="cover" />
                 )}
                 autoPlay
                 autoPlayInterval={3000}
@@ -216,7 +230,7 @@ export default function MorePage() {
         <>
           <View className="bg-accent" style={{ height: width > 500 ? height * 0.12 : height * 0.19 }}>
             <View
-              className="flex-row justify-start items-center px-[10px] h-[50%]"
+              className="h-[50%] flex-row items-center justify-start px-[10px]"
               style={{ marginTop: width > 500 ? "4%" : "15%", width }}
             >
               <TouchableOpacity onPress={handleSettingsToggle}>
@@ -228,7 +242,7 @@ export default function MorePage() {
             </View>
           </View>
           <ScrollView>
-            <View className="justify-center items-center mt-[60px]">
+            <View className="mt-[60px] items-center justify-center">
               <TouchableOpacity onPress={handleThemeOpen}>
                 <SettingOptions optionName={"App Theme"} icon={"none"} />
               </TouchableOpacity>
@@ -244,10 +258,7 @@ export default function MorePage() {
             backdropOpacity={0}
             style={{ margin: 0, justifyContent: "center", alignItems: "center", top: "20%" }}
           >
-            <View
-              className="bg-white p-5 rounded-[10px] w-[90%]"
-              style={{ height: height * 0.7 }}
-            >
+            <View className="w-[90%] rounded-[10px] bg-white p-5" style={{ height: height * 0.7 }}>
               <View className="flex-row justify-between">
                 <Text className="font-inter text-lg font-semibold">Customize your app</Text>
 

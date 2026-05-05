@@ -28,7 +28,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { Video, ResizeMode } from "expo-av";
 import { getHasDoneTutorial, setTutorialDone } from "../utils/tutorial";
 import type { AudioType, Media } from "../models/media_class";
-import { createNote } from "../utils/api_calls";
+import { useCreateNote } from "../hooks/mutations/useCreateNote";
 import { useAddNoteStore } from "../stores/addNoteStore";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import TooltipContent from "../onboarding/TooltipComponent";
@@ -64,7 +64,6 @@ const AddNoteScreen: React.FC = () => {
     longitude: number;
   } | null>(null);
   const [locationButtonColor, setLocationButtonColor] = useState<string>("#000");
-  const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [isVideoModalVisible, setIsVideoModalVisible] = useState<boolean>(false);
   const [videoUri, setVideoUri] = useState<string | null>(null);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
@@ -76,6 +75,7 @@ const AddNoteScreen: React.FC = () => {
   const titleTxtRef = useRef(titleText);
   const isPublishedRef = useRef(isPublished);
 
+  const createNoteMutation = useCreateNote();
   const { isAddNoteOpen, toggleAddNoteState } = useAddNoteStore();
 
   const editor = useEditorBridge({
@@ -307,17 +307,14 @@ const AddNoteScreen: React.FC = () => {
   const saveNote = async (published: boolean) => {
     const noteData = await prepareNoteData(published);
 
-    setIsUpdating(true);
-
     try {
-      await createNote(noteData);
+      await createNoteMutation.mutateAsync(noteData);
       if (router.canGoBack()) {
         router.back();
       }
     } catch (error) {
       console.error("Error saving the note:", error);
     } finally {
-      setIsUpdating(false);
       toggleAddNoteState();
     }
   };
@@ -380,7 +377,10 @@ const AddNoteScreen: React.FC = () => {
                   className="flex-row items-center justify-between bg-accent px-[5px] text-center"
                   style={{ paddingTop: Constants.statusBarHeight, height: height * 0.15 }}
                 >
-                  <TouchableOpacity className="z-[99] h-[50px] w-[50px] items-center justify-center rounded-full bg-tertiary" onPress={() => saveNote(false)}>
+                  <TouchableOpacity
+                    className="z-[99] h-[50px] w-[50px] items-center justify-center rounded-full bg-tertiary"
+                    onPress={() => saveNote(false)}
+                  >
                     <Ionicons name="arrow-back-outline" size={30} color="var(--color-foreground)" />
                   </TouchableOpacity>
                   <TextInput
@@ -424,7 +424,7 @@ const AddNoteScreen: React.FC = () => {
               {viewAudio && <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} insertAudioToEditor={insertAudioToEditor} />}
               {isTagging && <TagWindow tags={tags} setTags={setTags} />}
             </View>
-            <View className="min-h-[300px] grow pb-[120px] ios:h-full android:flex-1" testID="TenTapEditor">
+            <View className="ios:h-full android:flex-1 min-h-[300px] grow pb-[120px]" testID="TenTapEditor">
               <RichText
                 editor={editor}
                 style={{
@@ -439,15 +439,15 @@ const AddNoteScreen: React.FC = () => {
               />
             </View>
 
-            <View className="absolute bottom-[27px] z-10 w-full justify-center px-[10px] ios:h-[50px] android:h-[70px]" testID="RichEditor">
+            <View className="ios:h-[50px] android:h-[70px] absolute bottom-[27px] z-10 w-full justify-center px-[10px]" testID="RichEditor">
               <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
             </View>
             {Platform.OS === "ios" && <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />}
           </View>
           {keyboardVisible && (
-            <View className="absolute bottom-0 w-full border-[#ddd] bg-white py-[5px] z-10" testID="doneButton">
+            <View className="absolute bottom-0 z-10 w-full border-[#ddd] bg-white py-[5px]" testID="doneButton">
               <TouchableOpacity onPress={handleDonePress}>
-                <Text className="font-inter mr-[25px] p-0 text-right text-[14px] text-blue-500">Done</Text>
+                <Text className="mr-[25px] p-0 text-right font-inter text-[14px] text-blue-500">Done</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -455,15 +455,22 @@ const AddNoteScreen: React.FC = () => {
         <Modal animationType="slide" transparent={true} visible={isVideoModalVisible} onRequestClose={() => setIsVideoModalVisible(false)}>
           <View className="flex-1 items-center justify-center bg-black/50">
             <View className="w-[90%] items-center rounded-[10px] bg-white p-5">
-              {videoUri && <Video source={{ uri: videoUri }} useNativeControls resizeMode={ResizeMode.CONTAIN} style={{ width: "100%", height: 200 }} />}
+              {videoUri && (
+                <Video
+                  source={{ uri: videoUri }}
+                  useNativeControls
+                  resizeMode={ResizeMode.CONTAIN}
+                  style={{ width: "100%", height: 200 }}
+                />
+              )}
               <TouchableOpacity onPress={() => setIsVideoModalVisible(false)}>
-                <Text className="font-inter mt-5 text-blue-500">Close</Text>
+                <Text className="mt-5 font-inter text-blue-500">Close</Text>
               </TouchableOpacity>
             </View>
           </View>
         </Modal>
 
-        <LoadingModal visible={isUpdating} />
+        <LoadingModal visible={createNoteMutation.isPending} />
       </KeyboardAvoidingView>
     </View>
   );

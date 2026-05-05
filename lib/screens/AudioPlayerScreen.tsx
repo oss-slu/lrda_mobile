@@ -23,7 +23,7 @@ const AudioPlayerScreen: React.FC = () => {
   }, [audioUri]);
 
   return (
-    <View className="flex-1 justify-center items-center">
+    <View className="flex-1 items-center justify-center">
       <Text className="font-inter">Audio Playback</Text>
       <Button title="Go Back" onPress={() => router.back()} />
     </View>

@@ -21,7 +21,7 @@ function TagWindow({ tags, setTags }: { tags: string[]; setTags: React.Dispatch<
 
   const renderHiddenItem = (data: any, rowMap: any) => {
     return (
-      <View className="items-center bg-red-500 flex-1 flex-row justify-between px-4 py-[1px]">
+      <View className="flex-1 flex-row items-center justify-between bg-red-500 px-4 py-[1px]">
         <TouchableOpacity onPress={() => handleDeleteTag(data.item.key)} testID={`delete-action-${data.item.key}`}>
           <Ionicons name="trash-outline" size={24} color="#111111" style={{ alignSelf: "center" }} />
         </TouchableOpacity>
@@ -30,7 +30,7 @@ function TagWindow({ tags, setTags }: { tags: string[]; setTags: React.Dispatch<
   };
 
   const renderItem = ({ item }: { item: { key: string; tag: string } }) => (
-    <TouchableOpacity activeOpacity={1} className="items-center bg-white flex-1 flex-row justify-center py-[1px]">
+    <TouchableOpacity activeOpacity={1} className="flex-1 flex-row items-center justify-center bg-white py-[1px]">
       <Text className="font-inter text-lg font-medium">{item.tag}</Text>
     </TouchableOpacity>
   );
@@ -39,7 +39,7 @@ function TagWindow({ tags, setTags }: { tags: string[]; setTags: React.Dispatch<
     <View className="mb-2.5 min-h-[100px]">
       <TextInput
         testID="tag-input"
-        className="rounded-[30px] h-10 w-full border-b-2 bg-white justify-center text-center text-lg font-medium"
+        className="h-10 w-full justify-center rounded-[30px] border-b-2 bg-white text-center text-lg font-medium"
         value={inputText}
         onChangeText={setInputText}
         placeholder="Your Tag Here"

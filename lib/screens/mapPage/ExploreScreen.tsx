@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import {
   Text,
   TextInput,
@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import NoteDetailModal, { NoteDetailData } from "./NoteDetailModal";
 import { formatToLocalDateString } from "../../components/time";
 import { Ionicons } from "@expo/vector-icons";
@@ -40,26 +41,17 @@ const ExploreScreen = () => {
   const [selectedNote, setSelectedNote] = useState<NoteDetailData | undefined>(undefined);
   const [globeIcon, setGlobeIcon] = useState<"earth-outline" | "earth">("earth-outline");
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeSearch, setActiveSearch] = useState<string | null>(null);
   const [mapType, setMapType] = useState<"standard" | "satellite" | "hybrid" | "terrain">("standard");
   const [showMapTypeOptions, setShowMapTypeOptions] = useState(false);
-  const [searchResults, setSearchResults] = useState<Note[] | null>(null);
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [state, setState] = useState<{
-    markers: MapMarker[];
-    region: { latitude: number; longitude: number; latitudeDelta: number; longitudeDelta: number };
-  }>({
-    markers: [],
-    region: {
-      latitude: 38.631393,
-      longitude: -90.192226,
-      latitudeDelta: 0.04864195044303443,
-      longitudeDelta: 0.040142817690068,
-    },
+  const [region, setRegion] = useState({
+    latitude: 38.631393,
+    longitude: -90.192226,
+    latitudeDelta: 0.04864195044303443,
+    longitudeDelta: 0.040142817690068,
   });
 
-  const [page, setPage] = useState(1);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const _map = useRef<MapView | null>(null);
@@ -69,39 +61,7 @@ const ExploreScreen = () => {
 
   const toggleMapTypeOptions = () => setShowMapTypeOptions(!showMapTypeOptions);
 
-  const onViewNote = (note: MapMarker) => {
-    setSelectedNote(note);
-    setModalVisible(true);
-  };
-
-  const handleSearch = () => {
-    Keyboard.dismiss();
-    searchForMessages();
-  };
-
-  const searchForMessages = useCallback(async () => {
-    try {
-      const results = await fetchNotes({ search: searchQuery, published: true, limit: 50 });
-      if (results && results.length > 0) {
-        const firstResult = results[0];
-        const newRegion = {
-          ...state.region,
-          latitude: Number(firstResult.latitude) || 0,
-          longitude: Number(firstResult.longitude) || 0,
-        };
-        setState((prevState) => ({ ...prevState, region: newRegion }));
-        const sanitizedResults = results.map((result) => ({
-          ...result,
-          tags: (result.tags || []).map((tag) => (typeof tag === "string" ? tag.toLowerCase() : "")),
-        }));
-        setSearchResults(sanitizedResults);
-      }
-    } catch (error) {
-      console.error("Error searching messages:", error);
-    }
-  }, [searchQuery, state.region]);
-
-  const mapNoteToMarker = (note: Note): MapMarker => {
+  const mapNoteToMarker = useCallback((note: Note): MapMarker => {
     const time = new Date(note.time);
     const latitude = note.latitude ?? 0;
     const longitude = note.longitude ?? 0;
@@ -120,22 +80,25 @@ const ExploreScreen = () => {
       time: formatToLocalDateString(time),
       tags: note.tags || [],
     };
-  };
+  }, []);
 
-  const sortNotesByProximity = (markers: MapMarker[]): MapMarker[] => {
-    if (!userLocation) return markers;
-    return markers
-      .map((marker) => {
-        const distance = calculateDistance(
-          userLocation.latitude,
-          userLocation.longitude,
-          marker.coordinate.latitude,
-          marker.coordinate.longitude
-        );
-        return { ...marker, distance };
-      })
-      .sort((a, b) => a.distance - b.distance);
-  };
+  const sortNotesByProximity = useCallback(
+    (markers: MapMarker[]): MapMarker[] => {
+      if (!userLocation) return markers;
+      return markers
+        .map((marker) => {
+          const distance = calculateDistance(
+            userLocation.latitude,
+            userLocation.longitude,
+            marker.coordinate.latitude,
+            marker.coordinate.longitude
+          );
+          return { ...marker, distance };
+        })
+        .sort((a, b) => a.distance - b.distance);
+    },
+    [userLocation]
+  );
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     const toRad = (value: number) => (value * Math.PI) / 180;
@@ -147,6 +110,7 @@ const ExploreScreen = () => {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   };
+
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -157,75 +121,86 @@ const ExploreScreen = () => {
     })();
   }, []);
 
-  const fetchMessages = useCallback(
-    async (pageNum = 1) => {
-      try {
-        if (searchResults) {
-          const fetchedMarkers = searchResults.map(mapNoteToMarker);
-          const sortedMarkers = sortNotesByProximity(fetchedMarkers);
-          setState((prevState) => ({ ...prevState, markers: sortedMarkers }));
-        } else {
-          const skip = (pageNum - 1) * LIMIT;
-          const fetchedNotes = await fetchNotes({ published: true, limit: LIMIT, offset: skip });
-          const fetchedMarkers = fetchedNotes.map(mapNoteToMarker);
-          const sortedMarkers = sortNotesByProximity(fetchedMarkers);
-          if (pageNum === 1) {
-            setState((prevState) => ({ ...prevState, markers: sortedMarkers }));
-          } else {
-            setState((prevState) => ({
-              ...prevState,
-              markers: [...prevState.markers, ...sortedMarkers],
-            }));
-          }
-          setHasMore(fetchedNotes.length === LIMIT);
-        }
-      } catch (error) {
-        console.error("Error fetching messages:", error);
-      }
+  const {
+    data: paginatedData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["explore", "notes"],
+    queryFn: async ({ pageParam = 0 }) => {
+      return fetchNotes({ published: true, limit: LIMIT, offset: pageParam });
     },
-    [globeIcon, searchResults, userLocation]
-  );
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      if (lastPage.length < LIMIT) return undefined;
+      return allPages.reduce((total, page) => total + page.length, 0);
+    },
+  });
+
+  const { data: searchData } = useQuery({
+    queryKey: ["explore", "search", activeSearch],
+    queryFn: () => fetchNotes({ search: activeSearch!, published: true, limit: 50 }),
+    enabled: !!activeSearch,
+  });
 
   useEffect(() => {
-    setPage(1);
-    setHasMore(true);
-    fetchMessages(1);
-  }, [userLocation, globeIcon, searchResults]);
-
-  const handleLoadMore = async () => {
-    if (hasMore && !isLoadingMore) {
-      setIsLoadingMore(true);
-      const nextPage = page + 1;
-      await fetchMessages(nextPage);
-      setPage(nextPage);
-      setIsLoadingMore(false);
+    if (searchData && searchData.length > 0) {
+      const firstResult = searchData[0];
+      setRegion((prev) => ({
+        ...prev,
+        latitude: Number(firstResult.latitude) || 0,
+        longitude: Number(firstResult.longitude) || 0,
+      }));
     }
+  }, [searchData]);
+
+  const markers = useMemo(() => {
+    const notes = activeSearch && searchData ? searchData : (paginatedData?.pages.flat() ?? []);
+    const mapped = notes.map(mapNoteToMarker);
+    return sortNotesByProximity(mapped);
+  }, [activeSearch, searchData, paginatedData, mapNoteToMarker, sortNotesByProximity]);
+
+  const handleSearch = () => {
+    Keyboard.dismiss();
+    setActiveSearch(searchQuery || null);
+  };
+
+  const handleLoadMore = () => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  };
+
+  const onViewNote = (note: MapMarker) => {
+    setSelectedNote(note);
+    setModalVisible(true);
   };
 
   useEffect(() => {
     const listenerId = mapAnimation.addListener(({ value }) => {
       const calculatedIndex = Math.floor(value / (CARD_WIDTH + 20) + 0.3);
-      const index = calculatedIndex >= state.markers.length ? state.markers.length - 1 : calculatedIndex;
+      const index = calculatedIndex >= markers.length ? markers.length - 1 : calculatedIndex;
       setCurrentIndex(index);
       if (!scrollEnabled.current) return;
-      if (index < 0 || index >= state.markers.length) return;
-      const { coordinate } = state.markers[index];
+      if (index < 0 || index >= markers.length) return;
+      const { coordinate } = markers[index];
       _map.current?.animateToRegion(
         {
           ...coordinate,
-          latitudeDelta: state.region.latitudeDelta,
-          longitudeDelta: state.region.longitudeDelta,
+          latitudeDelta: region.latitudeDelta,
+          longitudeDelta: region.longitudeDelta,
         },
         350
       );
     });
     return () => mapAnimation.removeListener(listenerId);
-  }, [state.markers]);
+  }, [markers]);
 
   const onMarkerPress = (markerData: MapMarker) => {
     scrollEnabled.current = false;
 
-    const markerIndex = state.markers.findIndex(
+    const markerIndex = markers.findIndex(
       (marker) =>
         marker.coordinate.latitude === markerData.coordinate.latitude && marker.coordinate.longitude === markerData.coordinate.longitude
     );
@@ -237,8 +212,8 @@ const ExploreScreen = () => {
       _map.current?.animateToRegion(
         {
           ...markerData.coordinate,
-          latitudeDelta: state.region.latitudeDelta,
-          longitudeDelta: state.region.longitudeDelta,
+          latitudeDelta: region.latitudeDelta,
+          longitudeDelta: region.longitudeDelta,
         },
         350
       );
@@ -249,7 +224,8 @@ const ExploreScreen = () => {
     }
   };
 
-  const shouldShowLoadMore = !searchResults && hasMore && currentIndex >= page * LIMIT - 1;
+  const totalFetched = paginatedData?.pages.flat().length ?? 0;
+  const shouldShowLoadMore = !activeSearch && !!hasNextPage && currentIndex >= totalFetched - 1;
 
   const [userTutorial, setUserTutorial] = useState(false);
 
@@ -268,12 +244,12 @@ const ExploreScreen = () => {
       <StatusBar translucent backgroundColor="transparent" />
       <MapView
         ref={_map}
-        initialRegion={state.region}
+        initialRegion={region}
         className="flex-1"
         customMapStyle={isDarkmode ? mapDarkStyle : mapStandardStyle}
         mapType={mapType}
       >
-        {state.markers.map((marker, index) => (
+        {markers.map((marker, index) => (
           <Marker key={index} coordinate={marker.coordinate} onPress={() => onMarkerPress(marker)}>
             <Animated.View style={{ alignItems: "center", justifyContent: "center", width: 50, height: 50 }}>
               <Animated.Image source={require("../../../assets/marker.png")} style={{ width: 30, height: 30 }} resizeMode="cover" />
@@ -283,7 +259,7 @@ const ExploreScreen = () => {
       </MapView>
 
       <View
-        className="absolute flex-row w-[90%] self-center rounded-[5px] p-2.5 shadow-md elevation-[10]"
+        className="elevation-[10] absolute w-[90%] flex-row self-center rounded-[5px] p-2.5 shadow-md"
         style={{
           marginTop: Constants.statusBarHeight,
           backgroundColor: isDarkmode ? "#333" : "#fff",
@@ -364,14 +340,14 @@ const ExploreScreen = () => {
             useNativeDriver: true,
           })}
         >
-          {state.markers.map((marker, index) => (
+          {markers.map((marker, index) => (
             <MapNotesComponent key={index} index={index} marker={marker} onViewNote={onViewNote} />
           ))}
 
           {shouldShowLoadMore && (
             <View
               testID="loadMoreButton"
-              className="justify-center items-center"
+              className="items-center justify-center"
               style={{
                 width: CARD_WIDTH,
                 height: CARD_HEIGHT - 55,
@@ -385,16 +361,18 @@ const ExploreScreen = () => {
                 elevation: 0,
               }}
             >
-              {isLoadingMore ? (
+              {isFetchingNextPage ? (
                 <ActivityIndicator size="small" color={colors.foreground} />
               ) : (
                 <TouchableOpacity
                   testID="loadMoreTouchable"
                   onPress={handleLoadMore}
-                  className="w-[70%] h-[50%] rounded-[3px] justify-center items-center"
+                  className="h-[50%] w-[70%] items-center justify-center rounded-[3px]"
                   style={{ backgroundColor: accentColor }}
                 >
-                  <Text className="text-[32px]" style={{ color: colors.foreground }}>Load More</Text>
+                  <Text className="text-[32px]" style={{ color: colors.foreground }}>
+                    Load More
+                  </Text>
                 </TouchableOpacity>
               )}
             </View>

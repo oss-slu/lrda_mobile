@@ -17,7 +17,7 @@ const StarRating: React.FC<StarRatingProps> = ({ ratings, reviews }) => {
   return (
     <View className="flex-row items-center">
       {stars}
-      <Text className="text-xs ml-[5px] text-[#444]">({reviews})</Text>
+      <Text className="ml-[5px] text-xs text-[#444]">({reviews})</Text>
     </View>
   );
 };

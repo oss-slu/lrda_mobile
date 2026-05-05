@@ -28,10 +28,7 @@ function AppThemeSelectorScreen() {
               setAccentColor(item.color);
             }}
           >
-            <View
-              className="mx-[10px] mt-5 h-[60px] w-[60px] rounded-full border-[0.5px]"
-              style={{ backgroundColor: item.color }}
-            />
+            <View className="mx-[10px] mt-5 h-[60px] w-[60px] rounded-full border-[0.5px]" style={{ backgroundColor: item.color }} />
           </TouchableOpacity>
         ))}
       </View>

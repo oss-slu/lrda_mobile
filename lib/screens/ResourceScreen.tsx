@@ -11,13 +11,15 @@ function ResourceScreen() {
   const router = useRouter();
 
   const renderOnlineResource = ({ item }: { item: { title: string; url: string } }) => (
-    <TouchableOpacity className="mb-3 bg-white rounded-sm p-3 shadow-sm">
-      <Text className="text-[#1a73e8] text-sm" onPress={() => Linking.openURL(item.url)}>{item.title}</Text>
+    <TouchableOpacity className="mb-3 rounded-sm bg-white p-3 shadow-sm">
+      <Text className="text-sm text-[#1a73e8]" onPress={() => Linking.openURL(item.url)}>
+        {item.title}
+      </Text>
     </TouchableOpacity>
   );
 
   const renderAnalogueResource = ({ item }: { item: string }) => (
-    <View className="mb-3 bg-white rounded-sm p-3 shadow-sm">
+    <View className="mb-3 rounded-sm bg-white p-3 shadow-sm">
       <Text className="text-sm text-black">{item}</Text>
     </View>
   );
@@ -27,10 +29,7 @@ function ResourceScreen() {
       <StatusBar translucent backgroundColor="transparent" />
 
       <View className="bg-accent" style={{ height: width > 500 ? height * 0.12 : height * 0.19 }}>
-        <View
-          className="flex-row items-center px-5"
-          style={{ marginTop: width > 500 ? "5%" : "20%" }}
-        >
+        <View className="flex-row items-center px-5" style={{ marginTop: width > 500 ? "5%" : "20%" }}>
           <TouchableOpacity onPress={() => router.back()}>
             <Feather name="arrow-left" size={30} />
           </TouchableOpacity>
@@ -41,10 +40,10 @@ function ResourceScreen() {
       </View>
 
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 200 }}>
-        <Text className="text-lg font-bold my-4">Online Resources</Text>
+        <Text className="my-4 text-lg font-bold">Online Resources</Text>
         <FlatList data={onlineResources} renderItem={renderOnlineResource} keyExtractor={(item) => item.url} scrollEnabled={false} />
 
-        <Text className="text-lg font-bold my-4">Analogue Resources</Text>
+        <Text className="my-4 text-lg font-bold">Analogue Resources</Text>
         <FlatList
           data={analogueResources}
           renderItem={renderAnalogueResource}

@@ -68,7 +68,7 @@ const RegistrationScreen: React.FC = () => {
     <KeyboardAwareScrollView contentContainerStyle={{ flex: 1, justifyContent: "center" }}>
       <ImageBackground source={require("../../../assets/splash.jpg")} className="flex-1 justify-center" resizeMode="cover">
         <View className="w-[85%] self-center rounded-[10px] bg-white/80 p-[25px]">
-          <Text className="font-inter pl-[10px] pt-[10px] text-left text-[32px] font-bold text-black">Register</Text>
+          <Text className="pl-[10px] pt-[10px] text-left font-inter text-[32px] font-bold text-black">Register</Text>
           <View className="mt-10">
             <TextInput
               className="mb-10 border-b border-black pb-[7px] pl-[10px] text-[14px] text-black"
@@ -108,10 +108,14 @@ const RegistrationScreen: React.FC = () => {
               onChangeText={setConfirmPassword}
             />
           </View>
-          <TouchableOpacity onPress={handleRegister} className="mt-5 items-center rounded-[15px] py-[10px]" style={{ backgroundColor: "rgb(17,47,187)" }}>
+          <TouchableOpacity
+            onPress={handleRegister}
+            className="mt-5 items-center rounded-[15px] py-[10px]"
+            style={{ backgroundColor: "rgb(17,47,187)" }}
+          >
             <Text className="font-inter text-[22px] font-bold text-white">Sign Up</Text>
           </TouchableOpacity>
-          <Text className="font-inter mt-5 text-center text-[14px] text-black">
+          <Text className="mt-5 text-center font-inter text-[14px] text-black">
             Already have an account?{" "}
             <Text className="font-inter font-bold" style={{ color: "rgb(17,47,187)" }} onPress={() => router.replace("/(auth)/login")}>
               Sign In

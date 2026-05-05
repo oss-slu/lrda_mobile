@@ -1,6 +1,8 @@
 import "../global.css";
 import React, { useEffect } from "react";
 import { Stack } from "expo-router";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "../lib/query/queryClient";
 import { ThemeProvider } from "../lib/components/ThemeProvider";
 import { AddNoteProvider } from "../lib/context/AddNoteContext";
 import { useFonts } from "expo-font";
@@ -63,10 +65,12 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <ThemeProvider>
-      <AddNoteProvider>
-        <RootLayoutInner />
-      </AddNoteProvider>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <AddNoteProvider>
+          <RootLayoutInner />
+        </AddNoteProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }

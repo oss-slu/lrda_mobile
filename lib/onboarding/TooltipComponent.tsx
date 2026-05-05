@@ -9,15 +9,15 @@ interface TooltipContentProps {
 
 const TooltipContent = ({ message, onPressOk, onSkip }: TooltipContentProps) => {
   return (
-    <View className="bg-surface min-w-[200px] items-center">
-      <TouchableOpacity className="absolute top-[5px] right-2" onPress={onSkip}>
-        <Text className="text-accent font-bold text-[13px]">Skip Tutorial</Text>
+    <View className="min-w-[200px] items-center bg-surface">
+      <TouchableOpacity className="absolute right-2 top-[5px]" onPress={onSkip}>
+        <Text className="text-[13px] font-bold text-accent">Skip Tutorial</Text>
       </TouchableOpacity>
 
-      <Text className="text-base font-semibold mt-10 mb-[30px] text-center text-foreground">{message}</Text>
+      <Text className="mb-[30px] mt-10 text-center text-base font-semibold text-foreground">{message}</Text>
 
-      <TouchableOpacity className="mt-2.5 bg-accent py-1.5 px-3 rounded-md" onPress={onPressOk}>
-        <Text className="text-white text-base font-semibold">Okay</Text>
+      <TouchableOpacity className="mt-2.5 rounded-md bg-accent px-3 py-1.5" onPress={onPressOk}>
+        <Text className="text-base font-semibold text-white">Okay</Text>
       </TouchableOpacity>
     </View>
   );

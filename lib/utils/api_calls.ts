@@ -18,7 +18,7 @@ function getAuthHeaders(): HeadersInit {
 class ApiError extends Error {
   constructor(
     message: string,
-    public status: number,
+    public status: number
   ) {
     super(message);
     this.name = "ApiError";
@@ -74,7 +74,7 @@ export async function fetchAllNotes(options: Omit<FetchNotesOptions, "limit" | "
   return allResults;
 }
 
-interface CreateNoteInput {
+export interface CreateNoteInput {
   title: string;
   text: string;
   latitude?: number | null;
@@ -130,7 +130,7 @@ export async function createNote(input: CreateNoteInput): Promise<Note> {
   return parseResponse<Note>(response);
 }
 
-interface UpdateNoteInput {
+export interface UpdateNoteInput {
   id: string;
   title?: string;
   text?: string;
@@ -191,4 +191,3 @@ export async function fetchCreatorName(creatorId: string): Promise<string> {
   const user = await fetchUser(creatorId);
   return user?.name || "Unknown Creator";
 }
-

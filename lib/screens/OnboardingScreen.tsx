@@ -13,20 +13,20 @@ const OnboardingScreen = () => {
   };
 
   const doneButton = ({ ...props }: any) => (
-    <TouchableOpacity className="py-2.5 px-5 bg-[#4A90E2] rounded-[30px] items-center justify-center" {...props}>
-      <Text className="font-inter text-white font-bold text-base">Done</Text>
+    <TouchableOpacity className="items-center justify-center rounded-[30px] bg-[#4A90E2] px-5 py-2.5" {...props}>
+      <Text className="font-inter text-base font-bold text-white">Done</Text>
     </TouchableOpacity>
   );
 
   const skipButton = ({ ...props }: any) => (
-    <TouchableOpacity className="py-2.5 px-5 bg-[#ccc] rounded-[30px] items-center justify-center" {...props}>
-      <Text className="font-inter text-white font-bold text-base">Skip</Text>
+    <TouchableOpacity className="items-center justify-center rounded-[30px] bg-[#ccc] px-5 py-2.5" {...props}>
+      <Text className="font-inter text-base font-bold text-white">Skip</Text>
     </TouchableOpacity>
   );
 
   const nextButton = ({ ...props }: any) => (
-    <TouchableOpacity className="py-2.5 px-5 bg-[#4A90E2] rounded-[30px] items-center justify-center" {...props}>
-      <Text className="font-inter text-white font-bold text-base">Next</Text>
+    <TouchableOpacity className="items-center justify-center rounded-[30px] bg-[#4A90E2] px-5 py-2.5" {...props}>
+      <Text className="font-inter text-base font-bold text-white">Next</Text>
     </TouchableOpacity>
   );
 

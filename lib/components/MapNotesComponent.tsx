@@ -16,7 +16,7 @@ interface MapNotesComponentProps {
 export const MapNotesComponent = ({ index, marker, onViewNote }: MapNotesComponentProps) => {
   return (
     <View
-      className="bg-surface dark:bg-[#222] rounded-lg mx-2.5 overflow-hidden justify-end elevation-2"
+      className="elevation-2 mx-2.5 justify-end overflow-hidden rounded-lg bg-surface dark:bg-[#222]"
       style={{
         height: CARD_HEIGHT,
         width: CARD_WIDTH,
@@ -27,11 +27,9 @@ export const MapNotesComponent = ({ index, marker, onViewNote }: MapNotesCompone
       }}
       key={index}
     >
-      {marker.images[0] && (
-        <Image source={marker.images[0]} className="flex-[2] w-full h-full self-center" resizeMode="cover" />
-      )}
+      {marker.images[0] && <Image source={marker.images[0]} className="h-full w-full flex-[2] self-center" resizeMode="cover" />}
       <View
-        className="flex-row flex-[2] p-2.5 absolute border border-white/20 justify-evenly"
+        className="absolute flex-[2] flex-row justify-evenly border border-white/20 p-2.5"
         style={{
           backgroundColor: "rgba(0, 0, 0, 0.5)",
           width: CARD_WIDTH,
@@ -54,9 +52,9 @@ export const MapNotesComponent = ({ index, marker, onViewNote }: MapNotesCompone
           </Text>
         </View>
 
-        <View className="items-center mt-[5px] w-[30%]">
+        <View className="mt-[5px] w-[30%] items-center">
           <TouchableOpacity onPress={() => onViewNote(marker)}>
-            <View className="flex-row justify-between items-center w-full">
+            <View className="w-full flex-row items-center justify-between">
               <FontAwesome6 name="arrow-right-long" size={20} color={"white"} />
             </View>
           </TouchableOpacity>

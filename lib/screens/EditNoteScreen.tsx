@@ -1,15 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import {
-  View,
-  TextInput,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
-  Keyboard,
-  Alert,
-  Text,
-  Dimensions,
-} from "react-native";
+import { View, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Keyboard, Alert, Text, Dimensions } from "react-native";
 import ToastMessage from "react-native-toast-message";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
@@ -18,7 +8,7 @@ import PhotoScroller from "../components/photoScroller";
 import { useAuthStore } from "../stores/authStore";
 import AudioContainer from "../components/audio";
 import type { Media, AudioType } from "../models/media_class";
-import { updateNote as apiUpdateNote } from "../utils/api_calls";
+import { useUpdateNote } from "../hooks/mutations/useUpdateNote";
 import TagWindow from "../components/tagging";
 import { DEFAULT_TOOLBAR_ITEMS, RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
 import { useTheme } from "../components/ThemeProvider";
@@ -65,10 +55,10 @@ const EditNoteScreen = () => {
     longitude: note.longitude || 0,
   });
   const [isTagging, setIsTagging] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
   const [viewMedia, setViewMedia] = useState(false);
   const [viewAudio, setViewAudio] = useState(false);
   const { colors } = useTheme();
+  const updateNoteMutation = useUpdateNote();
   const toggleAddNoteState = useAddNoteStore((s) => s.toggleAddNoteState);
   const editor = useEditorBridge({
     initialContent: note.text || "",
@@ -204,7 +194,6 @@ const EditNoteScreen = () => {
 
     if (!titleIsEmpty || !bodyIsEmpty || tags.length !== 0 || media.length !== 0 || newAudio.length !== 0) {
       setIsPublished(true);
-      setIsUpdating(true);
 
       try {
         const editedNote = {
@@ -221,7 +210,7 @@ const EditNoteScreen = () => {
           tags,
         };
 
-        await apiUpdateNote(editedNote);
+        await updateNoteMutation.mutateAsync(editedNote);
         setIsPublishBtnClicked(true);
 
         ToastMessage.show({
@@ -234,14 +223,12 @@ const EditNoteScreen = () => {
       } catch (error) {
         console.error("Error publishing note:", error);
       } finally {
-        setIsUpdating(false);
         toggleAddNoteState();
       }
     }
   };
 
   const handleSaveNote = async () => {
-    setIsUpdating(true);
     try {
       const textContent = await editor.getHTML();
       const editedNote = {
@@ -257,11 +244,10 @@ const EditNoteScreen = () => {
         time,
         tags,
       };
-      await apiUpdateNote(editedNote);
+      await updateNoteMutation.mutateAsync(editedNote);
     } catch (error) {
       console.error("Error updating the note:", error);
     } finally {
-      setIsUpdating(false);
       toggleAddNoteState();
       setIsPublishBtnClicked(true);
       router.back();
@@ -288,12 +274,10 @@ const EditNoteScreen = () => {
               time: new Date(),
             };
 
-            setIsUpdating(true);
-            await apiUpdateNote(updatedNote);
+            await updateNoteMutation.mutateAsync(updatedNote);
           } catch (e) {
             console.warn("Auto-save failed:", e);
           } finally {
-            setIsUpdating(false);
             toggleAddNoteState();
           }
         }, 300);
@@ -316,10 +300,18 @@ const EditNoteScreen = () => {
               className="flex-row items-center justify-between bg-primary px-[5px] text-center"
               style={{ paddingTop: Constants.statusBarHeight, height: height * 0.15 }}
             >
-              <TouchableOpacity className="z-[99] h-[50px] w-[50px] items-center justify-center rounded-full bg-tertiary" onPress={handleSaveNote}>
+              <TouchableOpacity
+                className="z-[99] h-[50px] w-[50px] items-center justify-center rounded-full bg-tertiary"
+                onPress={handleSaveNote}
+              >
                 <Ionicons name="arrow-back-outline" size={30} color="var(--color-foreground)" />
               </TouchableOpacity>
-              <TextInput className="mr-[5%] h-[45px] w-4/5 rounded-[18px] border border-foreground px-[10px] text-center text-[20px] text-foreground" placeholder="Title Field Note" value={title} onChangeText={setTitle} />
+              <TextInput
+                className="mr-[5%] h-[45px] w-4/5 rounded-[18px] border border-foreground px-[10px] text-center text-[20px] text-foreground"
+                placeholder="Title Field Note"
+                value={title}
+                onChangeText={setTitle}
+              />
             </View>
             <View className="w-full flex-row items-center justify-between bg-primary px-10 py-[5px]">
               <TouchableOpacity onPress={() => setViewMedia(!viewMedia)}>
@@ -353,7 +345,7 @@ const EditNoteScreen = () => {
             {isTagging && <TagWindow tags={tags} setTags={setTags} />}
           </View>
 
-          <View className="min-h-[300px] grow pb-[120px] ios:h-full android:flex-1">
+          <View className="ios:h-full android:flex-1 min-h-[300px] grow pb-[120px]">
             <RichText
               editor={editor}
               style={{
@@ -387,7 +379,7 @@ const EditNoteScreen = () => {
           )}
         </KeyboardAwareScrollView>
 
-        <LoadingModal visible={isUpdating} />
+        <LoadingModal visible={updateNoteMutation.isPending} />
       </KeyboardAvoidingView>
     </View>
   );

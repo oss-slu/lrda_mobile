@@ -31,11 +31,13 @@ This is the fastest and lowest-risk approach. Field names can be normalized acro
 ### Changes
 
 Replace:
+
 ```typescript
 const API_BASE_URL = process.env.API_BASE_URL || "https://lived-religion-dev.rerum.io/deer-lr/";
 ```
 
 With:
+
 ```typescript
 import { authFetch, AUTH_API_URL } from "../config/auth";
 ```
@@ -54,6 +56,7 @@ All API calls should use `authFetch` (from the auth migration) which attaches th
 **After:** `GET /api/notes?creatorId={userId}&limit=200&offset=0`, paginate with offset
 
 Response mapping (website → RERUM format):
+
 ```typescript
 // Map each note from website format to RERUM format
 function mapNoteResponse(note: any): any {
@@ -62,23 +65,25 @@ function mapNoteResponse(note: any): any {
     title: note.title,
     BodyText: note.text,
     creator: note.creatorId,
-    media: note.media?.map(m => ({
-      uuid: m.uuid,
-      type: m.type,
-      uri: m.uri,
-      thumbnail: m.thumbnailUri,
-    })) || [],
-    audio: note.audio?.map(a => ({
-      uuid: a.uuid,
-      type: "audio",
-      uri: a.uri,
-      duration: a.duration,
-      name: a.name,
-    })) || [],
+    media:
+      note.media?.map((m) => ({
+        uuid: m.uuid,
+        type: m.type,
+        uri: m.uri,
+        thumbnail: m.thumbnailUri,
+      })) || [],
+    audio:
+      note.audio?.map((a) => ({
+        uuid: a.uuid,
+        type: "audio",
+        uri: a.uri,
+        duration: a.duration,
+        name: a.name,
+      })) || [],
     latitude: note.latitude?.toString() || "",
     longitude: note.longitude?.toString() || "",
     published: note.isPublished,
-    tags: note.tags?.map(t => t.label) || [],
+    tags: note.tags?.map((t) => t.label) || [],
     time: note.time,
     isArchived: false, // website API doesn't have archive — notes are deleted
     __rerum: {
@@ -120,6 +125,7 @@ This is a significant improvement — search moves server-side. The website API 
 ### `writeNewNote()` (lines 334-354)
 
 **Before:**
+
 ```typescript
 POST {RERUM}/create
 {
@@ -130,6 +136,7 @@ POST {RERUM}/create
 ```
 
 **After:**
+
 ```typescript
 POST /api/notes  (with bearer token)
 {
@@ -166,12 +173,14 @@ Note: `creator` is no longer sent in the body — the website API infers it from
 ### `overwriteNote()` (lines 361-383)
 
 **Before:**
+
 ```typescript
 PUT {RERUM}/overwrite
 { "@id": note.id, title, BodyText, type: "message", creator, media, ... }
 ```
 
 **After:**
+
 ```typescript
 PATCH /api/notes/{note.id}  (with bearer token)
 {
@@ -215,6 +224,7 @@ The mobile app currently "deletes" notes by setting `isArchived: true` via `over
 ### `deleteNoteFromAPI()` (lines 300-327)
 
 **Before:**
+
 ```typescript
 DELETE {RERUM}/delete
 Headers: "Content-Type": "text/plain; charset=utf-8"
@@ -222,6 +232,7 @@ Body: { type: "message", creator: userId, "@id": id }
 ```
 
 **After:**
+
 ```typescript
 DELETE /api/notes/{id}  (with bearer token)
 // No body needed — note ID in URL, auth from token
@@ -294,6 +305,7 @@ This screen does NOT use `DataConversion` — it maps raw API responses directly
 ### Changes
 
 The `mapNoteToMarker()` function accesses RERUM-specific fields directly:
+
 - `note.__rerum.createdAt` → will be `note.createdAt` from website API (but if using the adapter from Step 2, this is already mapped to `__rerum.createdAt`)
 - `note.media[i].uri` → same field name, no change
 - `note.BodyText` → mapped to `BodyText` by adapter
@@ -301,6 +313,7 @@ The `mapNoteToMarker()` function accesses RERUM-specific fields directly:
 If using the adapter layer from Step 2, **no changes needed here**. The adapter ensures raw responses look like RERUM format.
 
 If NOT using the adapter (direct website format), update field references:
+
 - `note.__rerum.createdAt` → `note.createdAt`
 - `note.BodyText` → `note.text`
 - `note.published` → `note.isPublished`
@@ -342,22 +355,22 @@ Once all steps are complete and tested:
 
 ## Files Changed Summary
 
-| File | Action | Effort |
-|------|--------|--------|
-| `lib/utils/api_calls.ts` | **Rewrite all methods + add adapter** | Medium |
-| `lib/utils/S3_proxy.ts` | No change (Option A) or rewrite (Option B) | None / Medium |
-| `lib/utils/data_conversion.ts` | No change (adapter handles mapping) | None |
-| `lib/screens/mapPage/ExploreScreen.js` | No change (adapter) or update field refs | None / Low |
-| `lib/screens/HomeScreen.tsx` | No change | None |
-| `lib/screens/Library.tsx` | No change | None |
-| `lib/screens/AddNoteScreen.tsx` | No change | None |
-| `lib/screens/EditNoteScreen.tsx` | No change | None |
-| `lib/screens/ProfilePage.tsx` | No change | None |
-| `lib/screens/mapPage/NoteDetailModal.tsx` | No change | None |
-| `types.ts` | No change | None |
-| `lib/models/media_class.ts` | No change | None |
-| `app.config.js` / `.env` | Remove RERUM URL | Low |
-| `lib/utils/testing.js` | Update mocks | Low |
+| File                                      | Action                                     | Effort        |
+| ----------------------------------------- | ------------------------------------------ | ------------- |
+| `lib/utils/api_calls.ts`                  | **Rewrite all methods + add adapter**      | Medium        |
+| `lib/utils/S3_proxy.ts`                   | No change (Option A) or rewrite (Option B) | None / Medium |
+| `lib/utils/data_conversion.ts`            | No change (adapter handles mapping)        | None          |
+| `lib/screens/mapPage/ExploreScreen.js`    | No change (adapter) or update field refs   | None / Low    |
+| `lib/screens/HomeScreen.tsx`              | No change                                  | None          |
+| `lib/screens/Library.tsx`                 | No change                                  | None          |
+| `lib/screens/AddNoteScreen.tsx`           | No change                                  | None          |
+| `lib/screens/EditNoteScreen.tsx`          | No change                                  | None          |
+| `lib/screens/ProfilePage.tsx`             | No change                                  | None          |
+| `lib/screens/mapPage/NoteDetailModal.tsx` | No change                                  | None          |
+| `types.ts`                                | No change                                  | None          |
+| `lib/models/media_class.ts`               | No change                                  | None          |
+| `app.config.js` / `.env`                  | Remove RERUM URL                           | Low           |
+| `lib/utils/testing.js`                    | Update mocks                               | Low           |
 
 ---
 
@@ -408,6 +421,7 @@ pnpm api:db:studio      # Drizzle Studio on :5555 for DB inspection
 ### Data Shape Verification
 
 Use Drizzle Studio (`localhost:5555`) to verify:
+
 - Notes are created with correct fields in the `note` table
 - Media records appear in the `media` table with correct `noteId` references
 - Audio records appear in the `audio` table
@@ -419,15 +433,15 @@ Use Drizzle Studio (`localhost:5555`) to verify:
 
 For one developer (assumes auth migration is already done):
 
-| Phase | Time |
-|-------|------|
-| Backend prep (creator name endpoint, archive decision) | 0.5-1 day |
-| Steps 1-5 (api_calls.ts rewrite + adapter) | 2-3 days |
-| Step 6 (user data cleanup) | 0.5 day |
-| Steps 8-10 (ExploreScreen, config, cleanup) | 0.5 day |
-| Step 11 (tests) | 0.5-1 day |
-| QA / both platforms | 1-2 days |
-| **Total** | **~5-7 days** |
+| Phase                                                  | Time          |
+| ------------------------------------------------------ | ------------- |
+| Backend prep (creator name endpoint, archive decision) | 0.5-1 day     |
+| Steps 1-5 (api_calls.ts rewrite + adapter)             | 2-3 days      |
+| Step 6 (user data cleanup)                             | 0.5 day       |
+| Steps 8-10 (ExploreScreen, config, cleanup)            | 0.5 day       |
+| Step 11 (tests)                                        | 0.5-1 day     |
+| QA / both platforms                                    | 1-2 days      |
+| **Total**                                              | **~5-7 days** |
 
 This is smaller than the auth migration because the adapter layer keeps changes contained to `api_calls.ts`.
 

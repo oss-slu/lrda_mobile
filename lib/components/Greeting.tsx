@@ -23,7 +23,7 @@ const Greeting: React.FC = () => {
   }, []);
 
   return (
-    <View className="flex-1 justify-center items-center">
+    <View className="flex-1 items-center justify-center">
       <Text className="font-inter text-[13px] font-semibold">{greeting},</Text>
     </View>
   );

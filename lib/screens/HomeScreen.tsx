@@ -12,7 +12,6 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { updateNote as apiUpdateNote } from "../utils/api_calls";
 import { Note } from "../../types";
 import { SwipeListView } from "react-native-swipe-list-view";
 import NoteSkeleton from "../components/noteSkeleton";
@@ -30,6 +29,7 @@ import TooltipContent from "../onboarding/TooltipComponent";
 import { useRouter } from "expo-router";
 import { getHasDoneTutorial, setTutorialDone } from "../utils/tutorial";
 import { useUserInfo, useNotesList, useAnimatedSearch, sortNotes, filterNotes } from "../hooks/useNotesList";
+import { useUpdateNote } from "../hooks/mutations/useUpdateNote";
 import Constants from "expo-constants";
 
 const { width } = Dimensions.get("window");
@@ -49,13 +49,12 @@ const HomeScreen: React.FC = () => {
   const [isSortOpened, setIsSortOpened] = useState(false);
   const [selectedSortOption, setSelectedSortOption] = useState(1);
 
-  const { notes, setNotes, rendering, hasMore, isLoadingMore, handleLoadMore, refreshPage } = useNotesList(
-    () => ({
-      creatorId: authUser?.id || undefined,
-      published: published ? true : authUser?.id ? false : undefined,
-    }),
-    [published],
-  );
+  const updateNoteMutation = useUpdateNote();
+
+  const { notes, rendering, hasMore, isLoadingMore, handleLoadMore } = useNotesList({
+    creatorId: authUser?.id || undefined,
+    published: published ? true : authUser?.id ? false : undefined,
+  });
 
   const { isSearchVisible, searchQuery, setSearchQuery, toggleSearchBar, searchBarWidth } = useAnimatedSearch();
 
@@ -67,18 +66,11 @@ const HomeScreen: React.FC = () => {
     setNavigateToAddNote(() => navigateToAddNote);
   }, [router, notes]);
 
-  const updateNote = (note: Note) => {
-    setNotes((prev) => prev.map((n) => (n.id === note.id ? note : n)));
-    refreshPage();
-  };
-
   const handleArchiveNote = async (note: Note | undefined) => {
     if (note?.id) {
       try {
-        const updatedNote = { ...note, isPublished: false };
-        await apiUpdateNote(updatedNote);
+        await updateNoteMutation.mutateAsync({ ...note, isPublished: false });
         ToastMessage.show({ type: "success", text1: "Success", text2: "Note successfully archived." });
-        updateNote(updatedNote);
         return true;
       } catch (error) {
         ToastMessage.show({ type: "error", text1: "Error", text2: "Failed to archive note. System failure. Try again later." });
@@ -104,10 +96,7 @@ const HomeScreen: React.FC = () => {
     if (rowMap[id]) rowMap[id].closeRow();
     const noteToDelete = notes.find((note) => note.id === id);
     if (noteToDelete) {
-      const success = await handleArchiveNote(noteToDelete);
-      if (success) {
-        setNotes((prev) => prev.filter((note) => note.id !== id));
-      }
+      await handleArchiveNote(noteToDelete);
     }
   };
 
@@ -115,10 +104,8 @@ const HomeScreen: React.FC = () => {
     if (rowMap[id]) rowMap[id].closeRow();
     const found = notes.find((note) => note.id === id);
     if (!found) return;
-    const editedNote: Note = { ...found, isPublished: !found.isPublished };
     try {
-      await apiUpdateNote(editedNote);
-      refreshPage();
+      await updateNoteMutation.mutateAsync({ ...found, isPublished: !found.isPublished });
     } catch (error) {
       console.error("Error publishing note:", error);
       ToastMessage.show({ type: "error", text1: "Error", text2: "Failed to update note. Try again later." });
@@ -186,16 +173,13 @@ const HomeScreen: React.FC = () => {
   const sideMenu = (data: any, rowMap: any) => {
     const isNotePublished = data.item.isPublished;
     return (
-      <View className="w-full h-[140px] items-center flex-1 flex-row justify-between mt-px p-2.5 self-center" key={data.index}>
+      <View className="mt-px h-[140px] w-full flex-1 flex-row items-center justify-between self-center p-2.5" key={data.index}>
         <TouchableOpacity onPress={() => publishNote(data.item.id, rowMap)}>
           <Ionicons name={isNotePublished ? "arrow-undo" : "share"} size={30} color="green" />
         </TouchableOpacity>
-        <View className="items-end absolute bottom-0 justify-center top-0 w-1/2 right-0 pr-[17px] bg-brand-gray">
+        <View className="absolute bottom-0 right-0 top-0 w-1/2 items-end justify-center bg-brand-gray pr-[17px]">
           {isPrivate && (
-            <TouchableOpacity
-              className="justify-center items-center absolute right-5"
-              onPress={() => deleteNote(data.item.id, rowMap)}
-            >
+            <TouchableOpacity className="absolute right-5 items-center justify-center" onPress={() => deleteNote(data.item.id, rowMap)}>
               <Ionicons name="trash-outline" size={24} color="red" />
             </TouchableOpacity>
           )}
@@ -207,7 +191,7 @@ const HomeScreen: React.FC = () => {
   const renderFooter = () => {
     if (isLoadingMore) {
       return (
-        <View className="py-[50px] items-center mb-[100px]">
+        <View className="mb-[100px] items-center py-[50px]">
           <ActivityIndicator size="small" className="text-foreground" />
         </View>
       );
@@ -217,15 +201,19 @@ const HomeScreen: React.FC = () => {
         <TouchableOpacity
           testID="load-more"
           onPress={handleLoadMore}
-          className="py-5 w-[65%] items-center self-center rounded-lg my-1 bg-accent"
+          className="my-1 w-[65%] items-center self-center rounded-lg bg-accent py-5"
         >
-          <Text testID="load-more-button" className="font-inter text-foreground text-base font-normal">Load More</Text>
+          <Text testID="load-more-button" className="font-inter text-base font-normal text-foreground">
+            Load More
+          </Text>
         </TouchableOpacity>
       );
     }
     return (
-      <View className="p-5 items-center">
-        <Text testID="empty-state-text" className="font-inter text-gray-500 text-sm">End of the Page</Text>
+      <View className="items-center p-5">
+        <Text testID="empty-state-text" className="font-inter text-sm text-gray-500">
+          End of the Page
+        </Text>
       </View>
     );
   };
@@ -233,8 +221,14 @@ const HomeScreen: React.FC = () => {
   const renderList = () => {
     if (listData.length === 0) {
       return (
-        <View className="justify-center items-center">
-          <LottieView testID="no-results-animation" source={require("../../assets/animations/noResultFound.json")} autoPlay loop style={{ width: 100, height: 200 }} />
+        <View className="items-center justify-center">
+          <LottieView
+            testID="no-results-animation"
+            source={require("../../assets/animations/noResultFound.json")}
+            autoPlay
+            loop
+            style={{ width: 100, height: 200 }}
+          />
           <Text className="font-inter text-[15px] font-normal">No Results Found</Text>
         </View>
       );
@@ -286,39 +280,51 @@ const HomeScreen: React.FC = () => {
       <View
         testID="HomeScreen"
         className="bg-accent"
-        style={{ paddingTop: Constants.statusBarHeight - 20, height: width > 500 ? Dimensions.get("window").height * 0.12 : Dimensions.get("window").height * 0.19 }}
+        style={{
+          paddingTop: Constants.statusBarHeight - 20,
+          height: width > 500 ? Dimensions.get("window").height * 0.12 : Dimensions.get("window").height * 0.19,
+        }}
       >
-        <View className="flex-row items-center justify-between px-[5px] mb-0 mt-2.5 bg-accent">
-          <View className="flex-row items-center justify-between pb-[15px] pt-2.5 w-full">
+        <View className="mb-0 mt-2.5 flex-row items-center justify-between bg-accent px-[5px]">
+          <View className="w-full flex-row items-center justify-between pb-[15px] pt-2.5">
             <View className="flex-row items-center gap-2">
               <Tooltip
                 topAdjustment={Platform.OS === "android" ? -(StatusBar.currentHeight ?? 0) : 0}
                 showChildInTooltip={false}
                 isVisible={accountTip && !userTutorial}
                 content={
-                  <TooltipContent message="See account information here." onPressOk={() => { setAccountTip(false); setSearchTip(true); }} onSkip={skipTutorial} />
+                  <TooltipContent
+                    message="See account information here."
+                    onPressOk={() => {
+                      setAccountTip(false);
+                      setSearchTip(true);
+                    }}
+                    onSkip={skipTutorial}
+                  />
                 }
                 placement="bottom"
               >
                 <TouchableOpacity
                   testID="user-account"
-                  className="rounded-full items-center justify-center bg-[#161A1D] ml-2"
+                  className="ml-2 items-center justify-center rounded-full bg-[#161A1D]"
                   style={{ width: width > 1000 ? 50 : 30, height: width > 1000 ? 50 : 30 }}
                   onPress={() => router.push("/account")}
                 >
-                  <Text className="font-inter font-semibold text-sm self-center text-[#F7F8F9]">{userInitials}</Text>
+                  <Text className="self-center font-inter text-sm font-semibold text-[#F7F8F9]">{userInitials}</Text>
                 </TouchableOpacity>
               </Tooltip>
               <Text className="font-inter text-lg font-medium">Notes</Text>
             </View>
             <View testID="greeting-component" className="mr-2.5">
               <Greeting />
-              <Text testID="user-name" className="font-inter font-medium h-1/2 text-center self-center">{userName}</Text>
+              <Text testID="user-name" className="h-1/2 self-center text-center font-inter font-medium">
+                {userName}
+              </Text>
             </View>
           </View>
         </View>
 
-        <View className="flex-row justify-between items-center mt-2.5 mx-5">
+        <View className="mx-5 mt-2.5 flex-row items-center justify-between">
           {!isSearchVisible && (
             <View className="flex-row justify-between" style={{ width: width > 500 ? "20%" : "45%" }}>
               <Tooltip
@@ -326,33 +332,49 @@ const HomeScreen: React.FC = () => {
                 showChildInTooltip={false}
                 isVisible={pubPrivTip && !userTutorial}
                 content={
-                  <TooltipContent message="Switch between your published and privated notes with this switch" onPressOk={() => { setPubPrivTip(false); setTutorialDone("HomeScreen", true); }} onSkip={skipTutorial} />
+                  <TooltipContent
+                    message="Switch between your published and privated notes with this switch"
+                    onPressOk={() => {
+                      setPubPrivTip(false);
+                      setTutorialDone("HomeScreen", true);
+                    }}
+                    onSkip={skipTutorial}
+                  />
                 }
                 placement="bottom"
               >
-                <View className="bg-[#e7e7e7] h-[30px] w-[120px] rounded-lg mb-2.5 flex-row justify-evenly items-center">
-                  <Pressable onPress={() => { setIsPrivate(false); setPublished(true); }}>
+                <View className="mb-2.5 h-[30px] w-[120px] flex-row items-center justify-evenly rounded-lg bg-[#e7e7e7]">
+                  <Pressable
+                    onPress={() => {
+                      setIsPrivate(false);
+                      setPublished(true);
+                    }}
+                  >
                     <View
                       testID="public-btn"
-                      className="px-[5px] py-[3px] rounded-lg"
+                      className="rounded-lg px-[5px] py-[3px]"
                       style={{ backgroundColor: isPrivate ? "transparent" : "black" }}
                     >
-                      <Text
-                        className="font-inter text-[10px] font-semibold"
-                        style={{ color: isPrivate ? "black" : "white" }}
-                      > Published</Text>
+                      <Text className="font-inter text-[10px] font-semibold" style={{ color: isPrivate ? "black" : "white" }}>
+                        {" "}
+                        Published
+                      </Text>
                     </View>
                   </Pressable>
-                  <Pressable onPress={() => { setIsPrivate(true); setPublished(false); }}>
+                  <Pressable
+                    onPress={() => {
+                      setIsPrivate(true);
+                      setPublished(false);
+                    }}
+                  >
                     <View
                       testID="private-btn"
-                      className="px-[5px] py-[3px] rounded-lg"
+                      className="rounded-lg px-[5px] py-[3px]"
                       style={{ backgroundColor: isPrivate ? "black" : "transparent" }}
                     >
-                      <Text
-                        className="font-inter text-[10px] font-semibold"
-                        style={{ color: isPrivate ? "white" : "black" }}
-                      >Private</Text>
+                      <Text className="font-inter text-[10px] font-semibold" style={{ color: isPrivate ? "white" : "black" }}>
+                        Private
+                      </Text>
                     </View>
                   </Pressable>
                 </View>
@@ -363,7 +385,14 @@ const HomeScreen: React.FC = () => {
                     topAdjustment={Platform.OS === "android" ? -(StatusBar.currentHeight ?? 0) : 0}
                     isVisible={filterToolTip && !userTutorial}
                     content={
-                      <TooltipContent message="Filter your notes with this!" onPressOk={() => { setFilterToolTip(false); setPubPrivTip(true); }} onSkip={skipTutorial} />
+                      <TooltipContent
+                        message="Filter your notes with this!"
+                        onPressOk={() => {
+                          setFilterToolTip(false);
+                          setPubPrivTip(true);
+                        }}
+                        onSkip={skipTutorial}
+                      />
                     }
                     placement="bottom"
                   >
@@ -379,17 +408,26 @@ const HomeScreen: React.FC = () => {
               </View>
             </View>
           )}
-          <View className="flex-row justify-between items-center" style={{ width: isSearchVisible ? "95%" : 40 }}>
+          <View className="flex-row items-center justify-between" style={{ width: isSearchVisible ? "95%" : 40 }}>
             {isSearchVisible && (
               <Animated.View
-                className="right-0 bottom-0 bg-[#f0f0f0] justify-center items-center h-9 rounded-xl overflow-hidden mb-[23px]"
+                className="bottom-0 right-0 mb-[23px] h-9 items-center justify-center overflow-hidden rounded-xl bg-[#f0f0f0]"
                 style={{ width: searchBarWidth }}
               >
-                <TextInput testID="search-input" placeholder="Search..." value={searchQuery} placeholderTextColor="#999" onChangeText={setSearchQuery} className="font-inter flex-1 text-base text-black px-2.5 py-0 w-full" cursorColor="black" autoFocus />
+                <TextInput
+                  testID="search-input"
+                  placeholder="Search..."
+                  value={searchQuery}
+                  placeholderTextColor="#999"
+                  onChangeText={setSearchQuery}
+                  className="w-full flex-1 px-2.5 py-0 font-inter text-base text-black"
+                  cursorColor="black"
+                  autoFocus
+                />
               </Animated.View>
             )}
             {isSearchVisible ? (
-              <View className="mb-2.5 -mt-[25px]">
+              <View className="-mt-[25px] mb-2.5">
                 <TouchableOpacity testID="searchButton" onPress={toggleSearchBar}>
                   <Ionicons name="close" size={25} />
                 </TouchableOpacity>
@@ -401,7 +439,14 @@ const HomeScreen: React.FC = () => {
                     topAdjustment={Platform.OS === "android" ? -(StatusBar.currentHeight ?? 0) : 0}
                     isVisible={searchTip && !userTutorial}
                     content={
-                      <TooltipContent message="Try out our search bar!" onPressOk={() => { setSearchTip(false); setFilterToolTip(true); }} onSkip={skipTutorial} />
+                      <TooltipContent
+                        message="Try out our search bar!"
+                        onPressOk={() => {
+                          setSearchTip(false);
+                          setFilterToolTip(true);
+                        }}
+                        onSkip={skipTutorial}
+                      />
                     }
                     placement="bottom"
                   >
@@ -414,7 +459,7 @@ const HomeScreen: React.FC = () => {
         </View>
       </View>
 
-      <View testID="notes-list" className="flex-1 w-full">
+      <View testID="notes-list" className="w-full flex-1">
         {rendering ? <NoteSkeleton /> : renderList()}
       </View>
 
@@ -423,22 +468,28 @@ const HomeScreen: React.FC = () => {
       {isSortOpened && !isSearchVisible && (
         <View
           testID="sort-options"
-          className="absolute top-[120px] right-5 w-[200px] rounded-md p-2.5 z-10 shadow-md bg-white dark:bg-[#525252]"
+          className="absolute right-5 top-[120px] z-10 w-[200px] rounded-md bg-white p-2.5 shadow-md dark:bg-[#525252]"
           style={{ elevation: 10 }}
         >
-          <Text className="font-inter text-base font-semibold mb-2.5 text-black dark:text-[#c7c7c7]">Sort by</Text>
-          <View className="h-1/2 justify-evenly items-center">
+          <Text className="mb-2.5 font-inter text-base font-semibold text-black dark:text-[#c7c7c7]">Sort by</Text>
+          <View className="h-1/2 items-center justify-evenly">
             {[
               { option: 1, label: "Date & Time(latest)" },
               { option: 2, label: "A-Z" },
               { option: 3, label: "Z-A" },
             ].map(({ option, label }) => (
-              <TouchableOpacity key={option} onPress={() => { setSelectedSortOption(option); setIsSortOpened(false); }}>
+              <TouchableOpacity
+                key={option}
+                onPress={() => {
+                  setSelectedSortOption(option);
+                  setIsSortOpened(false);
+                }}
+              >
                 <View
-                  className={`w-[200px] justify-center items-center p-2.5 rounded-[10px] ${selectedSortOption === option ? "bg-accent" : "bg-transparent"}`}
+                  className={`w-[200px] items-center justify-center rounded-[10px] p-2.5 ${selectedSortOption === option ? "bg-accent" : "bg-transparent"}`}
                 >
                   <Text
-                    className="font-inter text-sm py-1.5"
+                    className="py-1.5 font-inter text-sm"
                     style={{ color: isDarkmode && selectedSortOption !== option ? "#ccc" : "#000" }}
                   >
                     {label}

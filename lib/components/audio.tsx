@@ -111,8 +111,8 @@ const AudioContainer = ({ newAudio, setNewAudio, insertAudioToEditor }: AudioCon
   };
 
   return (
-    <View className="bg-white mb-2.5 w-full items-center p-2.5" testID="audio-container">
-      <View className="flex-row items-center justify-between w-full">
+    <View className="mb-2.5 w-full items-center bg-white p-2.5" testID="audio-container">
+      <View className="w-full flex-row items-center justify-between">
         {isRecording ? <Ionicons name="mic-outline" size={60} color="red" /> : <Ionicons name="mic-outline" size={60} color="#111111" />}
 
         <Text className="font-inter text-2xl font-semibold">Recordings</Text>
@@ -133,7 +133,7 @@ const AudioContainer = ({ newAudio, setNewAudio, insertAudioToEditor }: AudioCon
         keyExtractor={(item) => item.uuid}
         contentContainerStyle={{ width: "100%", alignItems: "center" }}
         renderItem={({ item }) => (
-          <View className="bg-[#f0f2f3] mb-2.5 p-2.5 rounded-[5px] flex-row justify-between items-center w-[90%]">
+          <View className="mb-2.5 w-[90%] flex-row items-center justify-between rounded-[5px] bg-[#f0f2f3] p-2.5">
             <Text className="text-base font-medium text-[#333]">{item.name}</Text>
             <TouchableOpacity onPress={() => (playingAudio === item.uri ? stopAudio() : playAudio(item.uri))}>
               <Ionicons
@@ -144,7 +144,7 @@ const AudioContainer = ({ newAudio, setNewAudio, insertAudioToEditor }: AudioCon
             </TouchableOpacity>
           </View>
         )}
-        ListEmptyComponent={<Text className="text-[#888] text-base mt-5">No recordings available</Text>}
+        ListEmptyComponent={<Text className="mt-5 text-base text-[#888]">No recordings available</Text>}
       />
     </View>
   );

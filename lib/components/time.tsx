@@ -89,8 +89,8 @@ export default function LocationWindow({ time, setTime }: { time: Date; setTime:
   };
 
   return (
-    <View className="h-[110px] justify-center items-center p-5">
-      <Text className="font-inter text-lg font-bold mb-[1px]">Date & Time</Text>
+    <View className="h-[110px] items-center justify-center p-5">
+      <Text className="mb-[1px] font-inter text-lg font-bold">Date & Time</Text>
       {showPicker ? (
         <View className={Platform.OS === "ios" ? "flex-row" : "flex-col"}>
           {showDatePicker && (
@@ -100,7 +100,7 @@ export default function LocationWindow({ time, setTime }: { time: Date; setTime:
             <DateTimePicker testID="timePicker" value={chosenTime} mode="time" is24Hour={true} display="default" onChange={onChangeTime} />
           )}
           {isDateTimeSelected && Platform.OS === "android" && (
-            <Text className="font-inter mb-2.5 text-base text-center">
+            <Text className="mb-2.5 text-center font-inter text-base">
               Selected:{" "}
               {formatToLocalDateString(
                 new Date(
@@ -119,7 +119,7 @@ export default function LocationWindow({ time, setTime }: { time: Date; setTime:
         </View>
       ) : (
         <View>
-          <View className="items-center mt-2.5">
+          <View className="mt-2.5 items-center">
             <Text className="font-inter text-base">{formatToLocalDateString(savedDateTime || time)}</Text>
           </View>
           <Button
