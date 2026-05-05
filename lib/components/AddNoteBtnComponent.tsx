@@ -1,6 +1,5 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
-import { SvgIcon } from "./SvgIcon";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import { useThemeStore } from "../stores/themeStore";
@@ -25,11 +24,10 @@ function AddNoteBtnComponent() {
   const handlePublish = () => publishNote();
 
   return (
-    <View className="relative w-[75px] items-center">
-      <SvgIcon className="absolute bg-transparent bottom-[-35px]" style={{ width: 60, transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }} />
+    <View className="flex-1 items-center justify-center">
       <TouchableOpacity
         testID="fab-button"
-        className="bg-primary h-[50px] w-[50px] justify-center items-center rounded-full top-[-25px] shadow-md elevation-4"
+        className="bg-primary h-[50px] w-[50px] justify-center items-center rounded-full shadow-md elevation-4"
         style={{ shadowColor: isDarkmode ? "#fff" : "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4 }}
         onPress={isAddButtonMode ? handleAdd : handlePublish}
       >
@@ -39,7 +37,7 @@ function AddNoteBtnComponent() {
           <Feather name="upload-cloud" testID="publish-icon" size={25} style={{ color: appThemeColor, fontWeight: "800", fontSize: 30 }} />
         )}
       </TouchableOpacity>
-      <Text className="text-xs mt-[-13px]" style={{ color: appThemeColor || "gray" }}>
+      <Text className="text-xs mt-1" style={{ color: appThemeColor || "gray" }}>
         {isAddButtonMode ? "Add" : "Publish"}
       </Text>
     </View>

@@ -23,6 +23,7 @@ export default function TabsLayout() {
           paddingBottom: Platform.OS === "ios" ? 30 : 20,
           borderTopWidth: 0,
           elevation: 0,
+          overflow: "visible",
         },
         tabBarItemStyle: {
           backgroundColor: colors.primary,
@@ -52,6 +53,7 @@ export default function TabsLayout() {
         name="add-note-tab"
         options={{
           tabBarLabel: "Add",
+          tabBarItemStyle: { backgroundColor: "transparent", overflow: "visible" },
           tabBarButton: () => <AddNoteBtnComponent />,
         }}
       />

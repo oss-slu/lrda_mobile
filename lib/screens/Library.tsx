@@ -238,7 +238,7 @@ const Library = () => {
           <Tooltip
             isVisible={libraryTip && !userTutorial}
             showChildInTooltip={false}
-            topAdjustment={Platform.OS === "android" ? -400 : -400}
+            topAdjustment={Platform.OS === "android" ? -(StatusBar.currentHeight ?? 0) : 0}
             displayInsets={{ top: 20, bottom: 20, left: 10, right: 10 }}
             content={
               <TooltipContent
