@@ -9,6 +9,6 @@ appId: register.edu.slu.cs.oss.lrda
     direction: DOWN
 - tapOn: "Logout"
 
-- assertVisible:
-    text: "Login"
+- extendedWaitUntil:
+    visible: "Login"
     timeout: 10000

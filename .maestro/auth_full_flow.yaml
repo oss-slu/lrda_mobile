@@ -19,20 +19,20 @@ env:
 - runFlow: skip_login_splash.yaml
 
 # Login
-- tapOn:
-    id: "email-input"
+- tapOn: "Email..."
 - inputText: ${TEST_EMAIL}
 
-- tapOn:
-    id: "password-input"
+- tapOn: "Password..."
 - inputText: ${TEST_PASSWORD}
+
+- tapOn: "Login"
 
 - tapOn:
     id: "login-button"
 
-- assertVisible:
-    text: "Home"
-    timeout: 10000
+- extendedWaitUntil:
+    visible: "Home"
+    timeout: 15000
 
 # Logout
 - runFlow: auth_logout.yaml

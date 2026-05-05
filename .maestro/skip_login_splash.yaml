@@ -1,7 +1,16 @@
 appId: register.edu.slu.cs.oss.lrda
 ---
 # The login screen shows a "Where's Religion?" splash for 2 seconds.
-# Tap anywhere to dismiss it, then wait for the login form.
-- tapOn:
-    point: "50%,50%"
-- assertVisible: "Login"
+# Tap to dismiss it, then wait for the login form to appear.
+- runFlow:
+    when:
+      notVisible:
+        id: "login-button"
+    commands:
+      - tapOn:
+          point: "50%,50%"
+      - waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: "login-button"
+    timeout: 10000

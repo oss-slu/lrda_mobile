@@ -26,6 +26,6 @@ env:
 - tapOn:
     id: "login-button"
 
-- assertVisible:
-    text: "Home"
+- extendedWaitUntil:
+    visible: "Home"
     timeout: 10000

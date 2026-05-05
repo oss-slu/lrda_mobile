@@ -93,8 +93,8 @@ importers:
         specifier: ~10.0.8
         version: 10.0.8(expo@54.0.34)
       lottie-ios:
-        specifier: 4.5.0
-        version: 4.5.0
+        specifier: 4.6.0
+        version: 4.6.0
       lottie-react-native:
         specifier: ~7.3.1
         version: 7.3.6(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -4338,8 +4338,8 @@ packages:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
     hasBin: true
 
-  lottie-ios@4.5.0:
-    resolution: {integrity: sha512-lQa7L3YE4+FqZY+mhUO50kgZu1nVjIZUAF+bOrZBZjzJfLQFDXaX2RjNi1wbH6mH5wAlRTED04TvsSjIORMj4g==}
+  lottie-ios@4.6.0:
+    resolution: {integrity: sha512-Hq2BTa4wpAmqc+YcpTwGIMbXhNd5xIfpfSuQWkE2NuAkK7kuUyp62NVWeY+9sMwLlqbQZ3dG2HomVycKiv+neg==}
 
   lottie-react-native@7.3.6:
     resolution: {integrity: sha512-TevFHRvFURh6GlaqLKrSNXuKAxvBvFCiXfS7FXQI1K/ikOStgAwWLFPGjW0i1qB2/VzPACKmRs+535VjHUZZZQ==}
@@ -11245,7 +11245,7 @@ snapshots:
     dependencies:
       js-tokens: 4.0.0
 
-  lottie-ios@4.5.0: {}
+  lottie-ios@4.6.0: {}
 
   lottie-react-native@7.3.6(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0):
     dependencies:

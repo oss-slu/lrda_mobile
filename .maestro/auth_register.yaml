@@ -39,6 +39,6 @@ env:
 
 - tapOn: "Sign Up"
 
-- assertVisible:
-    text: "Signup successful"
+- extendedWaitUntil:
+    visible: "Signup successful"
     timeout: 10000
