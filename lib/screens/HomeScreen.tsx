@@ -290,7 +290,7 @@ const HomeScreen: React.FC = () => {
       >
         <View className="flex-row items-center justify-between px-[5px] mb-0 mt-2.5 bg-accent">
           <View className="flex-row items-center justify-between pb-[15px] pt-2.5 w-full">
-            <View className="flex-row justify-between items-center" style={{ width: width > 500 ? "13%" : "27%" }}>
+            <View className="flex-row items-center gap-2">
               <Tooltip
                 topAdjustment={Platform.OS === "android" ? -(StatusBar.currentHeight ?? 0) : 0}
                 showChildInTooltip={false}

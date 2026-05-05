@@ -163,9 +163,9 @@ const Library = () => {
         className="bg-accent"
         style={{ paddingTop: Constants.statusBarHeight - 20, height: width > 500 ? height * 0.12 : height * 0.19 }}
       >
-        <View className="flex-row items-center justify-between px-[5px] mt-[10px] bg-accent">
-          <View className="flex-row items-center justify-between w-full pb-[15px] pt-[10px]">
-            <View className="flex-row justify-between items-center" style={{ width: width > 500 ? "13%" : "27%" }}>
+        <View className="flex-row items-center justify-between px-[5px] mb-0 mt-2.5 bg-accent">
+          <View className="flex-row items-center justify-between pb-[15px] pt-2.5 w-full">
+            <View className="flex-row items-center gap-2">
               <TouchableOpacity
                 testID="account-page"
                 className="rounded-full items-center justify-center bg-foreground ml-2"
@@ -176,14 +176,14 @@ const Library = () => {
               </TouchableOpacity>
               <Text className="font-inter text-lg font-medium">Library</Text>
             </View>
-            <View testID="greeting-component" className="mr-[10px]">
+            <View testID="greeting-component" className="mr-2.5">
               <Greeting />
               <Text className="font-inter font-medium h-[50%] text-center self-center">{userName}</Text>
             </View>
           </View>
         </View>
 
-        <View testID="Filter" className="flex-row justify-between items-center mt-[10px] mx-5">
+        <View testID="Filter" className="flex-row justify-between items-center mt-2.5 mx-5">
           {!isSearchVisible && (
             <View>
               {!isSortOpened ? (
@@ -215,17 +215,13 @@ const Library = () => {
               </Animated.View>
             )}
             {isSearchVisible ? (
-              <View className="mb-[10px]" style={{ marginTop: -25 }}>
-                <TouchableOpacity onPress={toggleSearchBar} testID="close-button">
-                  <Ionicons name="close" size={25} />
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity onPress={toggleSearchBar} testID="close-button">
+                <Ionicons name="close" size={25} />
+              </TouchableOpacity>
             ) : (
-              <View className="mb-[10px]">
-                <TouchableOpacity onPress={toggleSearchBar} testID="search-button">
-                  <Ionicons name="search" size={25} />
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity onPress={toggleSearchBar} testID="search-button">
+                <Ionicons name="search" size={25} />
+              </TouchableOpacity>
             )}
           </View>
         </View>
