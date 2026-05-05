@@ -1,0 +1,31 @@
+appId: register.edu.slu.cs.oss.lrda
+env:
+  TEST_EMAIL: ""
+  TEST_PASSWORD: ""
+---
+# Auth flow: login with credentials and verify landing on home screen.
+#
+# Usage:
+#   maestro test .maestro/auth_login.yaml \
+#     -e TEST_EMAIL=you@example.com \
+#     -e TEST_PASSWORD=yourpassword
+
+- launchApp
+
+- runFlow: skip_onboarding.yaml
+- runFlow: skip_login_splash.yaml
+
+- tapOn:
+    id: "email-input"
+- inputText: ${TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+- inputText: ${TEST_PASSWORD}
+
+- tapOn:
+    id: "login-button"
+
+- assertVisible:
+    text: "Home"
+    timeout: 10000

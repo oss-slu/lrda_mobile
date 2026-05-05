@@ -1,0 +1,44 @@
+appId: register.edu.slu.cs.oss.lrda
+env:
+  TEST_FIRST_NAME: ""
+  TEST_LAST_NAME: ""
+  TEST_EMAIL: ""
+  TEST_PASSWORD: ""
+---
+# Auth flow: navigate to register screen, fill form, submit.
+# Assumes we are on the login screen (splash already dismissed).
+#
+# NOTE: this will actually create an account on the backend.
+# Use a unique/throwaway email for each run.
+
+- tapOn:
+    id: "register-button"
+
+- assertVisible: "Register"
+
+- tapOn: "First Name"
+- inputText: ${TEST_FIRST_NAME}
+
+- tapOn: "Last Name"
+- inputText: ${TEST_LAST_NAME}
+
+- tapOn:
+    text: "Email"
+    index: 0
+- inputText: ${TEST_EMAIL}
+
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: ${TEST_PASSWORD}
+
+- tapOn: "Confirm Password"
+- inputText: ${TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn: "Sign Up"
+
+- assertVisible:
+    text: "Signup successful"
+    timeout: 10000

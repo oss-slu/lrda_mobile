@@ -1,0 +1,7 @@
+appId: register.edu.slu.cs.oss.lrda
+---
+# The login screen shows a "Where's Religion?" splash for 2 seconds.
+# Tap anywhere to dismiss it, then wait for the login form.
+- tapOn:
+    point: "50%,50%"
+- assertVisible: "Login"

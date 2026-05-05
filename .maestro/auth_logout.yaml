@@ -1,0 +1,14 @@
+appId: register.edu.slu.cs.oss.lrda
+---
+# Auth flow: logout from the app.
+# Assumes we are already logged in and on the tabs screen.
+
+- tapOn: "More"
+- scrollUntilVisible:
+    element: "Logout"
+    direction: DOWN
+- tapOn: "Logout"
+
+- assertVisible:
+    text: "Login"
+    timeout: 10000
