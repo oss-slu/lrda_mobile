@@ -94,6 +94,11 @@ export default {
       "@react-native-community/datetimepicker",
       "expo-font",
       "expo-router",
+      "expo-secure-store",
+      "expo-splash-screen",
+      "expo-status-bar",
+      "expo-audio",
+      "expo-video",
     ],
   },
 };

@@ -1,25 +1,19 @@
 import React from "react";
 import { View } from "react-native";
-import { Video, ResizeMode } from "expo-av";
+import { VideoView, useVideoPlayer } from "expo-video";
 
 interface VideoPlayerProps {
   videoUri: string;
 }
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUri }) => {
-  const videoRef = React.useRef<Video>(null);
+  const player = useVideoPlayer(videoUri, (player) => {
+    player.play();
+  });
 
   return (
     <View className="h-[50%] w-[90%] items-center justify-center">
-      <Video
-        ref={videoRef}
-        source={{ uri: videoUri }}
-        style={{ width: "100%", height: "100%" }}
-        useNativeControls
-        resizeMode={ResizeMode.CONTAIN}
-        isLooping={false}
-        shouldPlay
-      />
+      <VideoView player={player} style={{ width: "100%", height: "100%" }} nativeControls contentFit="contain" />
     </View>
   );
 };

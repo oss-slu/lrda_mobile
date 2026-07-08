@@ -19,11 +19,3 @@ jest.mock("expo-router", () => ({
   Stack: { Screen: "Screen", Protected: "Protected" },
   Tabs: { Screen: "Screen" },
 }));
-
-// Mock @react-navigation/native (used by some screen components for useFocusEffect)
-jest.mock("@react-navigation/native", () => ({
-  useFocusEffect: jest.fn(),
-  useNavigation: () => ({
-    addListener: jest.fn(() => jest.fn()),
-  }),
-}));

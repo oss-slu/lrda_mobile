@@ -245,7 +245,7 @@ const ExploreScreen = () => {
       <MapView
         ref={_map}
         initialRegion={region}
-        className="flex-1"
+        style={{ flex: 1 }}
         customMapStyle={isDarkmode ? mapDarkStyle : mapStandardStyle}
         mapType={mapType}
       >

@@ -10,7 +10,12 @@ import * as SplashScreen from "expo-splash-screen";
 import { useAuthStore } from "../lib/stores/authStore";
 import { useOnboardingStore } from "../lib/stores/onboardingStore";
 import Toast from "react-native-toast-message";
+import { LogBox } from "react-native";
 import "react-native-gesture-handler";
+
+// TEMPORARY (dev-only): hide the LogBox warning banner, which covers the tab bar
+// and blocks UI automation. Remove once the underlying warnings are addressed.
+LogBox.ignoreAllLogs(true);
 
 SplashScreen.preventAutoHideAsync();
 
