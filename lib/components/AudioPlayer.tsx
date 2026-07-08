@@ -1,65 +1,30 @@
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import { View, Button, Text } from "react-native";
 import Slider from "@react-native-community/slider";
-import { Audio, AVPlaybackStatus } from "expo-av";
+import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 
 interface AudioPlayerProps {
   audioUri: string;
 }
 
 const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUri }) => {
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [duration, setDuration] = useState<number | null>(null);
-  const [position, setPosition] = useState<number>(0);
-  const soundRef = useRef<Audio.Sound | null>(null);
+  const player = useAudioPlayer({ uri: audioUri });
+  const status = useAudioPlayerStatus(player);
 
-  useEffect(() => {
-    const loadSound = async () => {
-      const { sound: newSound } = await Audio.Sound.createAsync({ uri: audioUri }, { shouldPlay: false }, onPlaybackStatusUpdate);
-      soundRef.current = newSound;
-      setSound(newSound);
+  const duration = status.isLoaded ? status.duration * 1000 : 0;
+  const position = status.isLoaded ? status.currentTime * 1000 : 0;
+  const isPlaying = status.playing;
 
-      const status = await newSound.getStatusAsync();
-      if (status.isLoaded) {
-        setDuration(status.durationMillis || 0);
-      }
-    };
-
-    loadSound();
-
-    return () => {
-      soundRef.current?.unloadAsync();
-    };
-  }, [audioUri]);
-
-  const onPlaybackStatusUpdate = (status: AVPlaybackStatus) => {
-    if (status.isLoaded) {
-      setPosition(status.positionMillis || 0);
-      if (status.didJustFinish) {
-        setIsPlaying(false);
-      }
+  const handlePlayPause = () => {
+    if (isPlaying) {
+      player.pause();
+    } else {
+      player.play();
     }
   };
 
-  const handlePlayPause = async () => {
-    if (sound) {
-      const status = await sound.getStatusAsync();
-      if (status.isLoaded) {
-        if (isPlaying) {
-          await sound.pauseAsync();
-        } else {
-          await sound.playAsync();
-        }
-        setIsPlaying(!isPlaying);
-      }
-    }
-  };
-
-  const handleSliderChange = async (value: number) => {
-    if (sound) {
-      await sound.setPositionAsync(value);
-    }
+  const handleSliderChange = (value: number) => {
+    player.seekTo(value / 1000);
   };
 
   const formatTime = (millis: number) => {

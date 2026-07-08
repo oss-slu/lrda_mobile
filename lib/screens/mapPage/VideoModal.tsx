@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Modal, View, ScrollView, Text, TouchableOpacity, Dimensions } from "react-native";
-import { Video, ResizeMode, Audio } from "expo-av";
+import { VideoView, useVideoPlayer } from "expo-video";
+import { setAudioModeAsync } from "expo-audio";
 
 interface VideoType {
   uri: string;
@@ -14,16 +15,24 @@ interface Props {
 
 const { width } = Dimensions.get("window");
 
+const VideoItem: React.FC<{ uri: string }> = ({ uri }) => {
+  const player = useVideoPlayer(uri, (player) => {
+    player.loop = true;
+  });
+
+  return <VideoView player={player} style={{ width, height: width }} nativeControls contentFit="contain" />;
+};
+
 const VideoModal: React.FC<Props> = ({ isVisible, onClose, videos }) => {
   const [isImageTouched, setIsImageTouched] = useState(false);
 
   useEffect(() => {
-    Audio.setAudioModeAsync({
-      playsInSilentModeIOS: true,
-      allowsRecordingIOS: false,
-      staysActiveInBackground: false,
-      shouldDuckAndroid: true,
-      playThroughEarpieceAndroid: false,
+    setAudioModeAsync({
+      playsInSilentMode: true,
+      allowsRecording: false,
+      shouldPlayInBackground: false,
+      interruptionMode: "duckOthers",
+      shouldRouteThroughEarpiece: false,
     }).catch((error) => {
       console.error("Failed to configure audio mode:", error);
     });
@@ -41,13 +50,7 @@ const VideoModal: React.FC<Props> = ({ isVisible, onClose, videos }) => {
           {videos && videos.length > 0 ? (
             videos.map((video, index) => (
               <View key={index} className="w-full items-center pb-[1.25px]">
-                <Video
-                  source={{ uri: video.uri }}
-                  style={{ width, height: width }}
-                  useNativeControls
-                  resizeMode={ResizeMode.CONTAIN}
-                  isLooping
-                />
+                <VideoItem uri={video.uri} />
               </View>
             ))
           ) : (

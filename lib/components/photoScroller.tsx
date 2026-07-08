@@ -8,7 +8,7 @@ import {
   requestMediaLibraryPermissionsAsync,
 } from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
-import { ResizeMode, Video } from "expo-av";
+import { VideoView, useVideoPlayer } from "expo-video";
 import type { Media, VideoType, PhotoType } from "../models/media_class";
 import uuid from "react-native-uuid";
 import { getThumbnail, convertHeicToJpg, uploadMedia } from "../utils/S3_proxy";
@@ -17,6 +17,15 @@ import DraggableFlatList from "react-native-draggable-flatlist";
 import ImageView from "react-native-image-viewing";
 import * as FileSystem from "expo-file-system/legacy";
 import * as MediaLibrary from "expo-media-library";
+
+const FullscreenVideo: React.FC<{ uri: string }> = ({ uri }) => {
+  const player = useVideoPlayer(uri, (player) => {
+    player.loop = true;
+    player.play();
+  });
+
+  return <VideoView player={player} style={{ width: "100%", height: "100%", alignSelf: "center" }} nativeControls contentFit="contain" />;
+};
 
 const PhotoScroller = forwardRef(function PhotoScroller(
   {
@@ -253,14 +262,7 @@ const PhotoScroller = forwardRef(function PhotoScroller(
             className="absolute my-[50px] w-full items-center justify-center bg-primary"
             style={{ height: Dimensions.get("screen").height - 70 }}
           >
-            <Video
-              source={{ uri: newMedia[imageIndex].uri }}
-              resizeMode={ResizeMode.CONTAIN}
-              shouldPlay={true}
-              useNativeControls={true}
-              isLooping={true}
-              className="h-full w-full justify-center self-center"
-            />
+            <FullscreenVideo key={newMedia[imageIndex].uri} uri={newMedia[imageIndex].uri} />
           </View>
         )}
       </View>

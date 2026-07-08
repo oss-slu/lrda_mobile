@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, FlatList, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Audio } from "expo-av";
+import { useAudioPlayer, useAudioPlayerStatus, useAudioRecorder, RecordingPresets, AudioModule, setAudioModeAsync } from "expo-audio";
 import uuid from "react-native-uuid";
 
 import { uploadAudio } from "../utils/S3_proxy";
@@ -15,35 +15,33 @@ type AudioContainerProps = {
 
 const AudioContainer = ({ newAudio, setNewAudio, insertAudioToEditor }: AudioContainerProps) => {
   const [isRecording, setIsRecording] = useState(false);
-  const [recording, setRecording] = useState<null | Audio.Recording>(null);
-  const [currentSound, setCurrentSound] = useState<Audio.Sound | null>(null);
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  const player = useAudioPlayer(null);
+  const playerStatus = useAudioPlayerStatus(player);
 
   useEffect(() => {
-    return () => {
-      if (currentSound) {
-        currentSound.unloadAsync();
-      }
-    };
-  }, [currentSound]);
+    if (playerStatus.didJustFinish) {
+      setPlayingAudio(null);
+    }
+  }, [playerStatus.didJustFinish]);
 
   const startRecording = async () => {
     try {
-      const permission = await Audio.requestPermissionsAsync();
-      if (permission.status !== "granted") {
+      const permission = await AudioModule.requestRecordingPermissionsAsync();
+      if (!permission.granted) {
         Alert.alert("Microphone Permission Denied", "Please enable microphone access.");
         return;
       }
 
       setIsRecording(true);
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
+      await setAudioModeAsync({
+        allowsRecording: true,
+        playsInSilentMode: true,
       });
 
-      const { recording } = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
-
-      setRecording(recording);
+      await recorder.prepareToRecordAsync();
+      recorder.record();
     } catch (error) {
       console.error("Failed to start recording", error);
       setIsRecording(false);
@@ -53,10 +51,10 @@ const AudioContainer = ({ newAudio, setNewAudio, insertAudioToEditor }: AudioCon
   const stopRecording = async () => {
     setIsRecording(false);
     try {
-      if (recording) {
-        await recording.stopAndUnloadAsync();
-        const uri = recording.getURI();
-        setRecording(null);
+      if (recorder.isRecording) {
+        await recorder.stop();
+        const uri = recorder.uri;
+        await setAudioModeAsync({ allowsRecording: false });
 
         if (uri) {
           const uploadedUri = await uploadAudio(uri);
@@ -79,35 +77,18 @@ const AudioContainer = ({ newAudio, setNewAudio, insertAudioToEditor }: AudioCon
   };
 
   const playAudio = async (uri: string) => {
-    if (currentSound) {
-      await currentSound.unloadAsync();
-      setCurrentSound(null);
-      setPlayingAudio(null);
-    }
-
     try {
-      const { sound } = await Audio.Sound.createAsync({ uri });
-      setCurrentSound(sound);
+      player.replace({ uri });
       setPlayingAudio(uri);
-      await sound.playAsync();
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.isLoaded && status.didJustFinish) {
-          setPlayingAudio(null);
-          sound.unloadAsync();
-        }
-      });
+      player.play();
     } catch (error) {
       console.error("Failed to play audio", error);
     }
   };
 
   const stopAudio = async () => {
-    if (currentSound) {
-      await currentSound.stopAsync();
-      await currentSound.unloadAsync();
-      setCurrentSound(null);
-      setPlayingAudio(null);
-    }
+    player.pause();
+    setPlayingAudio(null);
   };
 
   return (

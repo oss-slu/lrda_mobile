@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, memo, useMemo, useRef } from "react";
+import React, { useState, useEffect, memo, useMemo, useRef } from "react";
 import { Modal, TouchableOpacity, Image, View, Text, ScrollView, useWindowDimensions, ActivityIndicator, Animated } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
@@ -9,23 +9,16 @@ import { queryKeys } from "../../query/queryKeys";
 import { useTheme } from "../../components/ThemeProvider";
 import ImageModal from "./ImageModal";
 import VideoModal from "./VideoModal";
-import { Audio, Video, ResizeMode } from "expo-av";
+import { VideoView, useVideoPlayer } from "expo-video";
+import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
+import { useEvent } from "expo";
 
 const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
   const { colors, accentColor } = useTheme();
   const { width } = useWindowDimensions();
 
-  const [audioState, setAudioState] = useState<{
-    sound: Audio.Sound;
-    isPlaying: boolean;
-    progress: number;
-    duration: number;
-  } | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const soundRef = useRef<Audio.Sound | null>(null);
-
-  const [playingMedia, setPlayingMedia] = useState<string | null>(null);
+  const player = useAudioPlayer({ uri });
+  const status = useAudioPlayerStatus(player);
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -35,101 +28,29 @@ const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
     return `${mins}:${secs}`;
   };
 
-  const initializeAudio = useCallback(
-    async (uri: string) => {
-      if (audioState?.sound) return audioState;
-      try {
-        const { sound } = await Audio.Sound.createAsync({ uri });
-        const status = await sound.getStatusAsync();
-        soundRef.current = sound;
-        const newAudioState = {
-          sound,
-          isPlaying: false,
-          progress: 0,
-          duration: status.isLoaded ? (status.durationMillis ?? 0) / 1000 : 0,
-        };
-        setAudioState(newAudioState);
-        return newAudioState;
-      } catch (err) {
-        setError(true);
-        throw err;
-      }
-    },
-    [audioState]
-  );
-
-  const playPauseAudio = async (uri: string) => {
-    const state = await initializeAudio(uri);
-    if (state.sound) {
-      if (state.isPlaying) {
-        await state.sound.pauseAsync();
-        setAudioState({ ...state, isPlaying: false });
-        setPlayingMedia(null);
-      } else {
-        if (playingMedia && playingMedia !== uri && audioState?.sound) {
-          await audioState.sound.pauseAsync();
-          setAudioState((prev) => (prev ? { ...prev, isPlaying: false } : null));
-        }
-
-        setPlayingMedia(uri);
-        const status = await state.sound.getStatusAsync();
-        if (status.isLoaded && status.positionMillis === status.durationMillis) {
-          await state.sound.replayAsync();
-        } else {
-          await state.sound.playAsync();
-        }
-        state.sound.setOnPlaybackStatusUpdate((status) => {
-          if (status.isLoaded) {
-            setAudioState((prev) =>
-              prev
-                ? {
-                    ...prev,
-                    isPlaying: status.isPlaying,
-                    progress: status.positionMillis / 1000,
-                    duration: (status.durationMillis ?? 0) / 1000,
-                  }
-                : null
-            );
-            if (status.didJustFinish) {
-              state.sound.stopAsync();
-              setAudioState((prev) => (prev ? { ...prev, isPlaying: false, progress: 0 } : null));
-              setPlayingMedia(null);
-            }
-          }
-        });
-      }
-    }
-  };
-
-  const handleSlidingComplete = async (value: number) => {
-    if (audioState?.sound) {
-      await audioState.sound.setPositionAsync(value * 1000);
-      setAudioState({ ...audioState, progress: value });
-    }
-  };
-
   useEffect(() => {
-    let isMounted = true;
-    initializeAudio(uri)
-      .then(() => {
-        if (isMounted) setLoading(false);
-      })
-      .catch(() => {
-        if (isMounted) {
-          setError(true);
-          setLoading(false);
-        }
-      });
+    if (status.didJustFinish) {
+      player.pause();
+      player.seekTo(0);
+    }
+  }, [status.didJustFinish, player]);
 
-    return () => {
-      isMounted = false;
-      if (soundRef.current) {
-        soundRef.current.unloadAsync();
+  const playPauseAudio = () => {
+    if (status.playing) {
+      player.pause();
+    } else {
+      if (status.duration > 0 && status.currentTime >= status.duration) {
+        player.seekTo(0);
       }
-    };
-  }, [uri, initializeAudio]);
+      player.play();
+    }
+  };
 
-  if (error) {
+  const handleSlidingComplete = (value: number) => {
+    player.seekTo(value);
+  };
+
+  if (status.error) {
     return (
       <View className="flex-row items-center self-center rounded-[10px] bg-[#f0f0f0] p-2.5">
         <Ionicons name="alert-circle-outline" size={30} color={accentColor} />
@@ -138,7 +59,7 @@ const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
     );
   }
 
-  if (loading || !audioState) {
+  if (!status.isLoaded) {
     return (
       <View className="flex-row items-center self-center rounded-[10px] bg-[#f0f0f0] p-2.5">
         <ActivityIndicator testID="audioLoadingIndicator" size="large" color={accentColor} />
@@ -148,21 +69,21 @@ const LoadingAudio: React.FC<{ uri: string }> = ({ uri }) => {
 
   return (
     <View className="my-2.5 flex-row items-center self-center rounded-[10px] bg-[#f0f0f0] p-2.5" style={{ width: width - 40 }}>
-      <TouchableOpacity onPress={() => playPauseAudio(uri)} testID="audioButton">
-        <Ionicons name={audioState.isPlaying ? "pause-circle-outline" : "play-circle-outline"} size={30} color={colors.foreground} />
+      <TouchableOpacity onPress={playPauseAudio} testID="audioButton">
+        <Ionicons name={status.playing ? "pause-circle-outline" : "play-circle-outline"} size={30} color={colors.foreground} />
       </TouchableOpacity>
       <Slider
         style={{ flex: 1, marginHorizontal: 10 }}
         minimumValue={0}
-        maximumValue={audioState.duration}
-        value={audioState.progress}
+        maximumValue={status.duration}
+        value={status.currentTime}
         minimumTrackTintColor={colors.primary}
         maximumTrackTintColor="#d3d3d3"
         thumbTintColor={colors.primary}
         onSlidingComplete={handleSlidingComplete}
       />
       <Text className="w-[60px] text-right font-inter text-[#333]">
-        {formatTime(audioState.progress)} / {formatTime(audioState.duration)}
+        {formatTime(status.currentTime)} / {formatTime(status.duration)}
       </Text>
     </View>
   );
@@ -293,11 +214,14 @@ interface LoadingVideoProps {
 }
 
 const LoadingVideo: React.FC<LoadingVideoProps> = ({ uri, onPress, width }) => {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
   const containerWidth = width - 40;
   const containerHeight = containerWidth / 1.77;
   const { accentColor } = useTheme();
+
+  const player = useVideoPlayer(uri);
+  const { status } = useEvent(player, "statusChange", { status: player.status });
+  const loading = status === "idle" || status === "loading";
+  const error = status === "error";
 
   if (error) {
     return (
@@ -316,15 +240,7 @@ const LoadingVideo: React.FC<LoadingVideoProps> = ({ uri, onPress, width }) => {
 
   return (
     <View className="relative items-center justify-center bg-black" style={{ width: containerWidth, height: containerHeight }}>
-      <Video
-        source={{ uri }}
-        className="h-full w-full"
-        resizeMode={ResizeMode.CONTAIN}
-        shouldPlay={false}
-        isLooping={false}
-        onLoad={() => setLoading(false)}
-        onError={() => setError(true)}
-      />
+      <VideoView player={player} style={{ width: "100%", height: "100%" }} contentFit="contain" nativeControls={false} />
       {loading && (
         <View className="absolute bottom-0 left-0 right-0 top-0 items-center justify-center">
           <ActivityIndicator testID="videoLoadingIndicator" size="large" color={accentColor} />

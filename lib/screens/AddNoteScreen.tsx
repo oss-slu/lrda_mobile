@@ -25,7 +25,7 @@ import { DEFAULT_TOOLBAR_ITEMS, RichText, Toolbar, useEditorBridge } from "@10pl
 import { useTheme } from "../components/ThemeProvider";
 import LoadingModal from "../components/LoadingModal";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { Video, ResizeMode } from "expo-av";
+import { VideoView, useVideoPlayer } from "expo-video";
 import { getHasDoneTutorial, setTutorialDone } from "../utils/tutorial";
 import type { AudioType, Media } from "../models/media_class";
 import { useCreateNote } from "../hooks/mutations/useCreateNote";
@@ -67,6 +67,7 @@ const AddNoteScreen: React.FC = () => {
   const [isVideoModalVisible, setIsVideoModalVisible] = useState<boolean>(false);
   const [videoUri] = useState<string | null>(null);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const videoPlayer = useVideoPlayer(videoUri);
   const { setPublishNote } = useAddNoteContext();
   const bodyTextRef = useRef(bodyText);
   const tagsRef = useRef(tags);
@@ -458,14 +459,7 @@ const AddNoteScreen: React.FC = () => {
         <Modal animationType="slide" transparent={true} visible={isVideoModalVisible} onRequestClose={() => setIsVideoModalVisible(false)}>
           <View className="flex-1 items-center justify-center bg-black/50">
             <View className="w-[90%] items-center rounded-[10px] bg-white p-5">
-              {videoUri && (
-                <Video
-                  source={{ uri: videoUri }}
-                  useNativeControls
-                  resizeMode={ResizeMode.CONTAIN}
-                  style={{ width: "100%", height: 200 }}
-                />
-              )}
+              {videoUri && <VideoView player={videoPlayer} nativeControls contentFit="contain" style={{ width: "100%", height: 200 }} />}
               <TouchableOpacity onPress={() => setIsVideoModalVisible(false)}>
                 <Text className="mt-5 font-inter text-blue-500">Close</Text>
               </TouchableOpacity>

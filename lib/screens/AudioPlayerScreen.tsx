@@ -1,26 +1,16 @@
 import React from "react";
 import { View, Text, Button } from "react-native";
-import { Audio } from "expo-av";
+import { useAudioPlayer } from "expo-audio";
 import { useRouter, useLocalSearchParams } from "expo-router";
 
 const AudioPlayerScreen: React.FC = () => {
   const router = useRouter();
   const { audioUri } = useLocalSearchParams<{ audioUri: string }>();
-  const soundRef = React.useRef<Audio.Sound | null>(null);
+  const player = useAudioPlayer(audioUri ? { uri: audioUri } : null);
 
   React.useEffect(() => {
-    async function loadAudio() {
-      const { sound } = await Audio.Sound.createAsync({ uri: audioUri });
-      soundRef.current = sound;
-      await sound.playAsync();
-    }
-
-    loadAudio();
-
-    return () => {
-      soundRef.current?.unloadAsync();
-    };
-  }, [audioUri]);
+    player.play();
+  }, [player]);
 
   return (
     <View className="flex-1 items-center justify-center">

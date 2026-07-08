@@ -1,3 +1,6 @@
+// Pin the timezone so date-rendering snapshots are deterministic across machines
+process.env.TZ = "America/Chicago";
+
 module.exports = {
   preset: "jest-expo",
   testEnvironment: "node",
