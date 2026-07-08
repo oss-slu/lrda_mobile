@@ -189,7 +189,9 @@ const AddNoteScreen: React.FC = () => {
     setLocationButtonColor("red");
   };
 
-  const fetchCurrentLocation = useCallback(async () => {
+  // silent: skip the error alert for automatic fetches (e.g. on mount), where it
+  // can fire after the user has already navigated away.
+  const fetchCurrentLocation = useCallback(async ({ silent = false } = {}) => {
     const { status } = await Location.requestForegroundPermissionsAsync();
 
     if (status === "granted") {
@@ -202,7 +204,10 @@ const AddNoteScreen: React.FC = () => {
         setLocationButtonColor("#000");
       } catch (error) {
         console.error("Error fetching location:", error);
-        Alert.alert("Error", "Failed to retrieve location.");
+        if (!silent) {
+          Alert.alert("Error", "Failed to retrieve location.");
+        }
+        setLocationToZero();
       }
     } else {
       setLocationToZero();
@@ -218,7 +223,7 @@ const AddNoteScreen: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchCurrentLocation();
+    fetchCurrentLocation({ silent: true });
   }, [fetchCurrentLocation]);
 
   const displayErrorInEditor = async (errorMessage: string) => {
