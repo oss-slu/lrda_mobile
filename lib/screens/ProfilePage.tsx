@@ -66,7 +66,9 @@ export default function ProfilePage() {
               </View>
               <View className="mt-4 items-center self-center">
                 <Text className="font-inter text-4xl font-extralight text-foreground">{userName}</Text>
-                <Text className="font-inter text-sm text-[#AEB5BC]">Administrator</Text>
+                <Text className="font-inter text-sm text-[#AEB5BC]">
+                  {authUser?.role ? authUser.role.charAt(0).toUpperCase() + authUser.role.slice(1) : (authUser?.email ?? "")}
+                </Text>
               </View>
               <View className="mt-8 flex-row self-center">
                 <View className="flex-1 items-center">

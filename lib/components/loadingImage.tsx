@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Placeholder, PlaceholderMedia, Progressive } from "rn-placeholder";
+import Skeleton from "./Skeleton";
 
 interface LoadingImageProps {
   imageURI: string;
@@ -17,13 +17,7 @@ export default function LoadingImage({ imageURI, type, isImage, height = 70, wid
   if (isImage && imageURI !== "") {
     return (
       <View style={{ width, height }} className="items-center justify-center">
-        {isLoading && (
-          <Placeholder
-            style={{ top: width / 2 }}
-            Animation={Progressive}
-            Left={() => <PlaceholderMedia size={width} style={{ borderRadius: 10 }} />}
-          />
-        )}
+        {isLoading && <Skeleton width={width} height={height} borderRadius={10} style={{ position: "absolute" }} />}
         {type === "video" ? (
           <View style={{ width, height }} className="items-center justify-center">
             <Image
@@ -51,13 +45,7 @@ export default function LoadingImage({ imageURI, type, isImage, height = 70, wid
   } else {
     return (
       <View style={{ width, height }} className="items-center justify-center">
-        {isLoading && (
-          <Placeholder
-            style={{ top: width / 2 }}
-            Animation={Progressive}
-            Left={() => <PlaceholderMedia size={width} style={{ borderRadius: 10 }} />}
-          />
-        )}
+        {isLoading && <Skeleton width={width} height={height} borderRadius={10} style={{ position: "absolute" }} />}
         <Image
           className="content-center self-center rounded-[10px]"
           style={{ width, height }}

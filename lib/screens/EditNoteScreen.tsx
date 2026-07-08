@@ -110,7 +110,9 @@ const EditNoteScreen = () => {
     setLocation({ latitude: 0, longitude: 0 });
   };
 
-  const fetchCurrentLocation = useCallback(async () => {
+  // silent: skip the error alert for automatic fetches (e.g. on mount), where it
+  // can fire after the user has already navigated away.
+  const fetchCurrentLocation = useCallback(async ({ silent = false } = {}) => {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status === "granted") {
       try {
@@ -120,7 +122,10 @@ const EditNoteScreen = () => {
           longitude: userLocation.coords.longitude,
         });
       } catch {
-        Alert.alert("Error", "Failed to retrieve location.");
+        if (!silent) {
+          Alert.alert("Error", "Failed to retrieve location.");
+        }
+        setLocationToZero();
       }
     } else {
       setLocationToZero();
@@ -136,7 +141,7 @@ const EditNoteScreen = () => {
   };
 
   useEffect(() => {
-    fetchCurrentLocation();
+    fetchCurrentLocation({ silent: true });
   }, [fetchCurrentLocation]);
 
   const insertImageToEditor = async (imageUri: string) => {
