@@ -75,6 +75,10 @@ export default function TabsLayout() {
           ),
         }}
       />
+      {/* Note editors live inside the tabs navigator so the center tab button stays
+          visible and can act as the Publish button; href: null keeps them out of the bar. */}
+      <Tabs.Screen name="add-note" options={{ href: null }} />
+      <Tabs.Screen name="edit-note" options={{ href: null }} />
     </Tabs>
   );
 }

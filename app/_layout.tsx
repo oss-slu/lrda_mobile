@@ -43,8 +43,6 @@ function RootLayoutInner() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Protected guard={isOnboarded && isAuthenticated}>
           <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="add-note" />
-          <Stack.Screen name="edit-note" />
           <Stack.Screen name="account" />
           <Stack.Screen name="video-player" />
         </Stack.Protected>

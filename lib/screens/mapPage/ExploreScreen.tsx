@@ -304,81 +304,83 @@ const ExploreScreen = () => {
           <Ionicons name="search" size={25} onPress={handleSearch} color={colors.foreground} />
         </Tooltip>
       </View>
-      <Tooltip
-        isVisible={scrollTip}
-        showChildInTooltip={false}
-        topAdjustment={Platform.OS === "android" ? -250 : -250}
-        content={
-          <TooltipContent
-            message="Scroll left to view published notes all around the world!"
-            onPressOk={() => {
-              setScrollTip(false);
-              setTutorialDone("Explore", true);
-            }}
-            onSkip={() => {
-              setSearchToolTip(false);
-              setScrollTip(false);
-              setTutorialDone("Explore", true);
-            }}
-          />
-        }
-        placement="top"
-      >
-        <Animated.ScrollView
-          ref={_scrollView}
-          testID="cardScrollView"
-          horizontal
-          pagingEnabled
-          scrollEventThrottle={1}
-          showsHorizontalScrollIndicator={false}
-          snapToInterval={CARD_WIDTH + 20}
-          snapToAlignment="center"
-          style={{ position: "absolute", bottom: 90, left: 0, right: 0, paddingVertical: 10 }}
-          contentInset={{ top: 0, left: SPACING_FOR_CARD_INSET, bottom: 0, right: SPACING_FOR_CARD_INSET }}
-          contentContainerStyle={{ paddingHorizontal: Platform.OS === "android" ? SPACING_FOR_CARD_INSET : 0 }}
-          onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: mapAnimation } } }], {
-            useNativeDriver: true,
-          })}
-        >
-          {markers.map((marker, index) => (
-            <MapNotesComponent key={index} index={index} marker={marker} onViewNote={onViewNote} />
-          ))}
-
-          {shouldShowLoadMore && (
-            <View
-              testID="loadMoreButton"
-              className="items-center justify-center"
-              style={{
-                width: CARD_WIDTH,
-                height: CARD_HEIGHT - 55,
-                marginRight: 30,
-                marginLeft: -30,
-                borderRadius: 3,
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.2,
-                shadowRadius: 3,
-                elevation: 0,
+      <View style={{ position: "absolute", bottom: 90, left: 0, right: 0 }}>
+        <Tooltip
+          isVisible={scrollTip}
+          showChildInTooltip={false}
+          topAdjustment={Platform.OS === "android" ? -(StatusBar.currentHeight ?? 0) : 0}
+          content={
+            <TooltipContent
+              message="Scroll left to view published notes all around the world!"
+              onPressOk={() => {
+                setScrollTip(false);
+                setTutorialDone("Explore", true);
               }}
-            >
-              {isFetchingNextPage ? (
-                <ActivityIndicator size="small" color={colors.foreground} />
-              ) : (
-                <TouchableOpacity
-                  testID="loadMoreTouchable"
-                  onPress={handleLoadMore}
-                  className="h-[50%] w-[70%] items-center justify-center rounded-[3px]"
-                  style={{ backgroundColor: accentColor }}
-                >
-                  <Text className="text-[32px]" style={{ color: colors.foreground }}>
-                    Load More
-                  </Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          )}
-        </Animated.ScrollView>
-      </Tooltip>
+              onSkip={() => {
+                setSearchToolTip(false);
+                setScrollTip(false);
+                setTutorialDone("Explore", true);
+              }}
+            />
+          }
+          placement="top"
+        >
+          <Animated.ScrollView
+            ref={_scrollView}
+            testID="cardScrollView"
+            horizontal
+            pagingEnabled
+            scrollEventThrottle={1}
+            showsHorizontalScrollIndicator={false}
+            snapToInterval={CARD_WIDTH + 20}
+            snapToAlignment="center"
+            style={{ paddingVertical: 10 }}
+            contentInset={{ top: 0, left: SPACING_FOR_CARD_INSET, bottom: 0, right: SPACING_FOR_CARD_INSET }}
+            contentContainerStyle={{ paddingHorizontal: Platform.OS === "android" ? SPACING_FOR_CARD_INSET : 0 }}
+            onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: mapAnimation } } }], {
+              useNativeDriver: true,
+            })}
+          >
+            {markers.map((marker, index) => (
+              <MapNotesComponent key={index} index={index} marker={marker} onViewNote={onViewNote} />
+            ))}
+
+            {shouldShowLoadMore && (
+              <View
+                testID="loadMoreButton"
+                className="items-center justify-center"
+                style={{
+                  width: CARD_WIDTH,
+                  height: CARD_HEIGHT - 55,
+                  marginRight: 30,
+                  marginLeft: -30,
+                  borderRadius: 3,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.2,
+                  shadowRadius: 3,
+                  elevation: 0,
+                }}
+              >
+                {isFetchingNextPage ? (
+                  <ActivityIndicator size="small" color={colors.foreground} />
+                ) : (
+                  <TouchableOpacity
+                    testID="loadMoreTouchable"
+                    onPress={handleLoadMore}
+                    className="h-[50%] w-[70%] items-center justify-center rounded-[3px]"
+                    style={{ backgroundColor: accentColor }}
+                  >
+                    <Text className="text-[32px]" style={{ color: colors.foreground }}>
+                      Load More
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
+          </Animated.ScrollView>
+        </Tooltip>
+      </View>
 
       <NoteDetailModal isVisible={isModalVisible} onClose={() => setModalVisible(false)} note={selectedNote} />
     </View>
