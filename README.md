@@ -84,7 +84,6 @@ The app uses native modules (such as react-native-maps) that are not included in
 ## Known Bugs
 
 - The app does not compile to the web due to a dependency on react-native-maps.
-- In the location data section of a note, an error displaying "NaN" may appear.
 - Scroller on add note and edit note sometimes do not work on IOS
 - The notes orientation on map page for android is off centered.
 
