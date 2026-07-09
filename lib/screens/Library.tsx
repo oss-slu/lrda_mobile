@@ -1,31 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { Platform, View, Text, TouchableOpacity, Dimensions, TextInput, Animated, StatusBar, ActivityIndicator } from "react-native";
+import { Platform, View, Text, TouchableOpacity, Dimensions, TextInput, Animated, StatusBar } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import NoteSkeleton from "../components/noteSkeleton";
-import { formatToLocalDateString } from "../components/time";
 import { useTheme } from "../components/ThemeProvider";
-import NoteDetailModal, { NoteDetailData } from "./mapPage/NoteDetailModal";
 import Greeting from "../components/Greeting";
-import NotesComponent from "../components/NotesComponent";
-import LottieView from "lottie-react-native";
+import NotesList from "../components/NotesList";
 import Tooltip from "react-native-walkthrough-tooltip";
 import TooltipContent from "../onboarding/TooltipComponent";
 import { getHasDoneTutorial, setTutorialDone } from "../utils/tutorial";
 import { useUserInfo, useNotesList, useAnimatedSearch, sortNotes, filterNotes } from "../hooks/useNotesList";
-import { SwipeListView } from "react-native-swipe-list-view";
 import Constants from "expo-constants";
 
-const TEXT_LENGTH = 18;
 const { width, height } = Dimensions.get("window");
 
 const Library = () => {
   const router = useRouter();
-  const { colors, isDarkmode, accentColor } = useTheme();
+  const { accentColor } = useTheme();
   const { userInitials, userName } = useUserInfo();
 
-  const [selectedNote, setSelectedNote] = useState<NoteDetailData | undefined>(undefined);
-  const [isModalVisible, setModalVisible] = useState(false);
   const [isSortOpened, setIsSortOpened] = useState(false);
   const [selectedSortOption, setSelectedSortOption] = useState(1);
 
@@ -35,108 +28,7 @@ const Library = () => {
 
   const displayNotes = sortNotes(filterNotes(notes, searchQuery), selectedSortOption);
 
-  const renderItem = (data: any) => {
-    const item = data.item;
-    const showTime = formatToLocalDateString(new Date(item.time));
-    const mediaItem = item.media[0];
-    const ImageType = mediaItem?.type;
-    let ImageURI = "";
-    let IsImage = false;
-    if (ImageType === "image") {
-      ImageURI = mediaItem.uri;
-      IsImage = true;
-    } else if (ImageType === "video") {
-      ImageURI = mediaItem.thumbnail;
-      IsImage = true;
-    }
-    const resolvedImageURI = Platform.OS === "android" ? String(ImageURI || "") : ImageURI;
-
-    return (
-      <TouchableOpacity
-        key={item.id}
-        testID={`note-item-${data.index}`}
-        activeOpacity={1}
-        className="bg-secondary"
-        onPress={() => {
-          if (!item.isPublished) {
-            router.push({
-              pathname: "/edit-note",
-              params: { noteData: JSON.stringify({ ...item, time: item.time instanceof Date ? item.time.toISOString() : item.time }) },
-            });
-          } else {
-            setSelectedNote({
-              ...item,
-              time: formatToLocalDateString(new Date(item.time)),
-              description: item.text,
-              images: item.media.map((m: { uri: string }) => ({ uri: m.uri })),
-            });
-            setModalVisible(true);
-          }
-        }}
-      >
-        <NotesComponent
-          IsImage={IsImage}
-          resolvedImageURI={resolvedImageURI}
-          ImageType={ImageType}
-          textLength={TEXT_LENGTH}
-          showTime={showTime}
-          item={item}
-          isPublished={item.isPublished}
-          isDarkmode={isDarkmode}
-        />
-      </TouchableOpacity>
-    );
-  };
-
-  const renderFooter = () => {
-    if (isLoadingMore) {
-      return (
-        <View className="mb-[100px] items-center py-[50px]">
-          <ActivityIndicator size="small" color={colors.foreground} />
-        </View>
-      );
-    }
-    if (hasMore) {
-      return (
-        <TouchableOpacity
-          testID="load-more"
-          onPress={handleLoadMore}
-          className="my-1 w-[65%] items-center self-center rounded-lg bg-accent py-5"
-        >
-          <Text testID="load-more-button" className="font-inter text-base font-normal text-foreground">
-            Load More
-          </Text>
-        </TouchableOpacity>
-      );
-    }
-    return (
-      <View className="items-center p-5">
-        <Text testID="empty-state-text" className="font-inter text-sm text-gray-500">
-          End of the Page
-        </Text>
-      </View>
-    );
-  };
-
-  const renderList = () => {
-    if (displayNotes.length === 0) {
-      return (
-        <View className="items-center justify-center">
-          <LottieView source={require("../../assets/animations/noResultFound.json")} autoPlay loop style={{ width: 100, height: 200 }} />
-          <Text className="font-inter text-[15px] font-normal">No Results Found</Text>
-        </View>
-      );
-    }
-    return (
-      <SwipeListView
-        data={displayNotes}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: isLoadingMore ? 50 : 150 }}
-        ListFooterComponent={renderFooter}
-      />
-    );
-  };
+  const renderList = () => <NotesList notes={displayNotes} hasMore={hasMore} isLoadingMore={isLoadingMore} onLoadMore={handleLoadMore} />;
 
   const [userTutorial, setUserTutorial] = useState<boolean | null>(null);
   const [libraryTip, setLibraryTip] = useState(false);
@@ -277,8 +169,6 @@ const Library = () => {
           </View>
         </View>
       )}
-
-      <NoteDetailModal isVisible={isModalVisible} onClose={() => setModalVisible(false)} note={selectedNote} />
     </View>
   );
 };
