@@ -2,9 +2,8 @@ import React, { useEffect, useEffectEvent, useRef, useState } from "react";
 import { View, TouchableOpacity, Platform, KeyboardAvoidingView, Modal, ScrollView, Text, StatusBar } from "react-native";
 import ToastMessage from "react-native-toast-message";
 
-import { DEFAULT_TOOLBAR_ITEMS, Toolbar } from "@10play/tentap-editor";
 import LoadingModal from "../components/LoadingModal";
-import { NoteEditorHeader, NoteEditorActionRow, NoteEditorPanels, NoteEditorBody } from "../components/NoteEditor";
+import { NoteEditorHeader, NoteEditorActionRow, NoteEditorPanels, NoteEditorBody, NoteEditorToolbar } from "../components/NoteEditor";
 import { VideoView, useVideoPlayer } from "expo-video";
 import { getHasDoneTutorial, setTutorialDone } from "../utils/tutorial";
 import type { AudioType, Media } from "../models/media_class";
@@ -34,7 +33,7 @@ const AddNoteScreen: React.FC = () => {
   const [videoUri] = useState<string | null>(null);
   const videoPlayer = useVideoPlayer(videoUri);
   const { location, isLocationOff, toggleLocation } = useNoteLocation();
-  const keyboardVisible = useKeyboardVisible();
+  const { keyboardVisible, keyboardHeight } = useKeyboardVisible();
   const { setPublishNote } = useAddNoteContext();
   const bodyTextRef = useRef(bodyText);
   const tagsRef = useRef(tags);
@@ -236,19 +235,7 @@ const AddNoteScreen: React.FC = () => {
               insertAudioToEditor={insertAudioToEditor}
             />
             <NoteEditorBody editor={editor} testID="TenTapEditor" />
-
-            <View className="ios:h-[50px] android:h-[70px] absolute bottom-[27px] z-10 w-full justify-center px-[10px]" testID="RichEditor">
-              <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
-            </View>
-            {Platform.OS === "ios" && <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />}
           </View>
-          {keyboardVisible && (
-            <View className="absolute bottom-0 z-10 w-full border-[#ddd] bg-white py-[5px]" testID="doneButton">
-              <TouchableOpacity onPress={handleDonePress}>
-                <Text className="mr-[25px] p-0 text-right font-inter text-[14px] text-blue-500">Done</Text>
-              </TouchableOpacity>
-            </View>
-          )}
         </ScrollView>
         <Modal animationType="slide" transparent={true} visible={isVideoModalVisible} onRequestClose={() => setIsVideoModalVisible(false)}>
           <View className="flex-1 items-center justify-center bg-black/50">
@@ -263,6 +250,8 @@ const AddNoteScreen: React.FC = () => {
 
         <LoadingModal visible={createNoteMutation.isPending} />
       </KeyboardAvoidingView>
+
+      <NoteEditorToolbar editor={editor} keyboardVisible={keyboardVisible} keyboardHeight={keyboardHeight} onDone={handleDonePress} />
     </View>
   );
 };
