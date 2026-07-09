@@ -26,7 +26,11 @@ export function NoteEditorHeader({ title, onChangeTitle, onBack, onTitleFocus, r
       className={`flex-row items-center justify-between px-[5px] text-center ${rowClassName}`}
       style={{ paddingTop: Constants.statusBarHeight, height: height * 0.15 }}
     >
-      <TouchableOpacity className="z-[99] h-[50px] w-[50px] items-center justify-center rounded-full bg-tertiary" onPress={onBack}>
+      <TouchableOpacity
+        testID="note-back-button"
+        className="z-[99] h-[50px] w-[50px] items-center justify-center rounded-full bg-tertiary"
+        onPress={onBack}
+      >
         <Ionicons name="arrow-back-outline" size={30} color="var(--color-foreground)" />
       </TouchableOpacity>
       <TextInput

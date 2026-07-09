@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { Text, View, TextInput, TouchableOpacity, ImageBackground } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { Text, View, TextInput, TouchableOpacity, ImageBackground, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import Toast from "react-native-toast-message";
 import { authClient } from "../../auth/client";
 import { validateEmail, validatePassword } from "../../utils/validation";
@@ -65,65 +64,67 @@ const RegistrationScreen: React.FC = () => {
   };
 
   return (
-    <KeyboardAwareScrollView contentContainerStyle={{ flex: 1, justifyContent: "center" }}>
-      <ImageBackground source={require("../../../assets/splash.jpg")} className="flex-1 justify-center" resizeMode="cover">
-        <View className="w-[85%] self-center rounded-[10px] bg-white/80 p-[25px]">
-          <Text className="pl-[10px] pt-[10px] text-left font-inter text-[32px] font-bold text-black">Register</Text>
-          <View className="mt-10">
-            <TextInput
-              className="mb-10 border-b border-black pb-[7px] pl-[10px] text-[14px] text-black"
-              placeholder="First Name"
-              placeholderTextColor="#7D7D7D"
-              value={firstName}
-              onChangeText={setFirstName}
-            />
-            <TextInput
-              className="mb-10 border-b border-black pb-[7px] pl-[10px] text-[14px] text-black"
-              placeholder="Last Name"
-              placeholderTextColor="#7D7D7D"
-              value={lastName}
-              onChangeText={setLastName}
-            />
-            <TextInput
-              className="mb-10 border-b border-black pb-[7px] pl-[10px] text-[14px] text-black"
-              placeholder="Email"
-              placeholderTextColor="#7D7D7D"
-              value={email}
-              onChangeText={setEmail}
-            />
-            <TextInput
-              className="mb-10 border-b border-black pb-[7px] pl-[10px] text-[14px] text-black"
-              placeholder="Password"
-              secureTextEntry
-              placeholderTextColor="#7D7D7D"
-              value={password}
-              onChangeText={setPassword}
-            />
-            <TextInput
-              className="mb-10 border-b border-black pb-[7px] pl-[10px] text-[14px] text-black"
-              placeholder="Confirm Password"
-              secureTextEntry
-              placeholderTextColor="#7D7D7D"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-            />
-          </View>
-          <TouchableOpacity
-            onPress={handleRegister}
-            className="mt-5 items-center rounded-[15px] py-[10px]"
-            style={{ backgroundColor: "rgb(17,47,187)" }}
-          >
-            <Text className="font-inter text-[22px] font-bold text-white">Sign Up</Text>
-          </TouchableOpacity>
-          <Text className="mt-5 text-center font-inter text-[14px] text-black">
-            Already have an account?{" "}
-            <Text className="font-inter font-bold" style={{ color: "rgb(17,47,187)" }} onPress={() => router.replace("/(auth)/login")}>
-              Sign In
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1">
+      <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }} keyboardShouldPersistTaps="handled">
+        <ImageBackground source={require("../../../assets/splash.jpg")} className="flex-1 justify-center" resizeMode="cover">
+          <View className="w-[85%] self-center rounded-[10px] bg-white/80 p-[25px]">
+            <Text className="pl-[10px] pt-[10px] text-left font-inter text-[32px] font-bold text-black">Register</Text>
+            <View className="mt-10">
+              <TextInput
+                className="mb-10 border-b border-black pb-[7px] pl-[10px] text-[14px] text-black"
+                placeholder="First Name"
+                placeholderTextColor="#7D7D7D"
+                value={firstName}
+                onChangeText={setFirstName}
+              />
+              <TextInput
+                className="mb-10 border-b border-black pb-[7px] pl-[10px] text-[14px] text-black"
+                placeholder="Last Name"
+                placeholderTextColor="#7D7D7D"
+                value={lastName}
+                onChangeText={setLastName}
+              />
+              <TextInput
+                className="mb-10 border-b border-black pb-[7px] pl-[10px] text-[14px] text-black"
+                placeholder="Email"
+                placeholderTextColor="#7D7D7D"
+                value={email}
+                onChangeText={setEmail}
+              />
+              <TextInput
+                className="mb-10 border-b border-black pb-[7px] pl-[10px] text-[14px] text-black"
+                placeholder="Password"
+                secureTextEntry
+                placeholderTextColor="#7D7D7D"
+                value={password}
+                onChangeText={setPassword}
+              />
+              <TextInput
+                className="mb-10 border-b border-black pb-[7px] pl-[10px] text-[14px] text-black"
+                placeholder="Confirm Password"
+                secureTextEntry
+                placeholderTextColor="#7D7D7D"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+              />
+            </View>
+            <TouchableOpacity
+              onPress={handleRegister}
+              className="mt-5 items-center rounded-[15px] py-[10px]"
+              style={{ backgroundColor: "rgb(17,47,187)" }}
+            >
+              <Text className="font-inter text-[22px] font-bold text-white">Sign Up</Text>
+            </TouchableOpacity>
+            <Text className="mt-5 text-center font-inter text-[14px] text-black">
+              Already have an account?{" "}
+              <Text className="font-inter font-bold" style={{ color: "rgb(17,47,187)" }} onPress={() => router.replace("/(auth)/login")}>
+                Sign In
+              </Text>
             </Text>
-          </Text>
-        </View>
-      </ImageBackground>
-    </KeyboardAwareScrollView>
+          </View>
+        </ImageBackground>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 

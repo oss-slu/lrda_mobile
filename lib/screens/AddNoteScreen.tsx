@@ -1,11 +1,10 @@
 import React, { useEffect, useEffectEvent, useRef, useState } from "react";
-import { View, TouchableOpacity, Platform, KeyboardAvoidingView, Modal, Text, StatusBar } from "react-native";
+import { View, TouchableOpacity, Platform, KeyboardAvoidingView, Modal, ScrollView, Text, StatusBar } from "react-native";
 import ToastMessage from "react-native-toast-message";
 
 import { DEFAULT_TOOLBAR_ITEMS, Toolbar } from "@10play/tentap-editor";
 import LoadingModal from "../components/LoadingModal";
 import { NoteEditorHeader, NoteEditorActionRow, NoteEditorPanels, NoteEditorBody } from "../components/NoteEditor";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { VideoView, useVideoPlayer } from "expo-video";
 import { getHasDoneTutorial, setTutorialDone } from "../utils/tutorial";
 import type { AudioType, Media } from "../models/media_class";
@@ -73,24 +72,24 @@ const AddNoteScreen: React.FC = () => {
     isPublishedRef.current = isPublished;
   }, [isPublished]);
 
+  const hasNoteContent = () =>
+    titleTxtRef.current.length !== 0 ||
+    !isBodyEmpty(bodyTextRef.current) ||
+    tagsRef.current.length !== 0 ||
+    mediaRef.current.length !== 0 ||
+    audioRef.current.length !== 0;
+
+  // Single exit path: leaving the screen (back button or tab switch) fires this
+  // blur handler, which saves only when the note has content — otherwise the
+  // draft is discarded so backing out doesn't accumulate empty "Untitled" notes.
   const onBlur = useEffectEvent(async () => {
     if (!isPublishedRef.current) {
-      const latestContent = await editor.getHTML();
-      bodyTextRef.current = latestContent;
+      bodyTextRef.current = await editor.getHTML();
 
-      const bodyIsEmpty = isBodyEmpty(latestContent);
-
-      if (
-        titleTxtRef.current.length !== 0 ||
-        !bodyIsEmpty ||
-        tagsRef.current.length !== 0 ||
-        mediaRef.current.length !== 0 ||
-        audioRef.current.length !== 0
-      ) {
-        await saveNote(false);
+      if (hasNoteContent()) {
+        await saveNote(false, false);
       } else {
         toggleAddNoteState();
-        router.back();
       }
     }
   });
@@ -103,8 +102,6 @@ const AddNoteScreen: React.FC = () => {
     return unsubscribe;
   }, [navigation]);
 
-  const scrollViewRef = useRef<KeyboardAwareScrollView>(null);
-
   const onPublish = useEffectEvent(() => handleShareButtonPress());
 
   useEffect(() => {
@@ -114,15 +111,7 @@ const AddNoteScreen: React.FC = () => {
   const handleShareButtonPress = async () => {
     await syncEditorContent();
 
-    const bodyIsEmpty = isBodyEmpty(bodyTextRef.current);
-
-    if (
-      titleTxtRef.current.length !== 0 ||
-      !bodyIsEmpty ||
-      tagsRef.current.length !== 0 ||
-      mediaRef.current.length !== 0 ||
-      audioRef.current.length !== 0
-    ) {
+    if (hasNoteContent()) {
       setIsPublished(!isPublished);
       ToastMessage.show({
         type: "success",
@@ -155,12 +144,12 @@ const AddNoteScreen: React.FC = () => {
     };
   };
 
-  const saveNote = async (published: boolean) => {
+  const saveNote = async (published: boolean, navigateBack: boolean = true) => {
     const noteData = await prepareNoteData(published);
 
     try {
       await createNoteMutation.mutateAsync(noteData);
-      if (router.canGoBack()) {
+      if (navigateBack && router.canGoBack()) {
         router.back();
       }
     } catch (error) {
@@ -188,14 +177,7 @@ const AddNoteScreen: React.FC = () => {
   return (
     <View className="flex-1">
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1">
-        <KeyboardAwareScrollView
-          ref={scrollViewRef}
-          contentContainerStyle={{ flexGrow: 1 }}
-          enableOnAndroid
-          extraScrollHeight={Platform.OS === "ios" ? 80 : 100}
-          keyboardOpeningTime={0}
-          keyboardShouldPersistTaps="handled"
-        >
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
           <View className="flex-1">
             <Tooltip
               topAdjustment={Platform.OS === "android" ? -(StatusBar.currentHeight ?? 0) : 0}
@@ -222,7 +204,7 @@ const AddNoteScreen: React.FC = () => {
                 <NoteEditorHeader
                   title={titleText}
                   onChangeTitle={setTitleText}
-                  onBack={() => saveNote(false)}
+                  onBack={() => router.back()}
                   onTitleFocus={() => {
                     if (editor?.blur) {
                       editor.blur();
@@ -267,7 +249,7 @@ const AddNoteScreen: React.FC = () => {
               </TouchableOpacity>
             </View>
           )}
-        </KeyboardAwareScrollView>
+        </ScrollView>
         <Modal animationType="slide" transparent={true} visible={isVideoModalVisible} onRequestClose={() => setIsVideoModalVisible(false)}>
           <View className="flex-1 items-center justify-center bg-black/50">
             <View className="w-[90%] items-center rounded-[10px] bg-white p-5">

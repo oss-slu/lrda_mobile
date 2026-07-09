@@ -53,7 +53,6 @@
     "react-native-draggable-flatlist": "^4.0.1",
     "react-native-gesture-handler": "~2.31.2",
     "react-native-image-viewing": "^0.2.2",
-    "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-maps": "1.27.2",
     "react-native-modal": "^13.0.1",
     "react-native-onboarding-swiper": "^1.2.0",

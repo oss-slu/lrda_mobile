@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useEffectEvent, useRef, useMemo } from "react";
-import { View, TouchableOpacity, KeyboardAvoidingView, Platform, Text } from "react-native";
+import { View, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Text } from "react-native";
 import ToastMessage from "react-native-toast-message";
 import { useAuthStore } from "../stores/authStore";
 import type { Media, AudioType } from "../models/media_class";
@@ -11,7 +11,6 @@ import LoadingModal from "../components/LoadingModal";
 import { NoteEditorHeader, NoteEditorActionRow, NoteEditorPanels, NoteEditorBody } from "../components/NoteEditor";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import { useAddNoteStore } from "../stores/addNoteStore";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
 
 const EditNoteScreen = () => {
@@ -54,8 +53,6 @@ const EditNoteScreen = () => {
   useEffect(() => {
     setPublishNote(() => onPublish);
   }, [setPublishNote]);
-
-  const scrollViewRef = useRef(null);
 
   const handlePublishPress = async () => {
     const latestContent = await editor.getHTML();
@@ -168,7 +165,7 @@ const EditNoteScreen = () => {
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
         className="flex-1"
       >
-        <KeyboardAwareScrollView ref={scrollViewRef} contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
           <View className="min-h-[140px] bg-accent">
             <NoteEditorHeader title={title} onChangeTitle={setTitle} onBack={handleSaveNote} rowClassName="bg-primary" />
             <NoteEditorActionRow
@@ -214,7 +211,7 @@ const EditNoteScreen = () => {
               <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
             </View>
           )}
-        </KeyboardAwareScrollView>
+        </ScrollView>
 
         <LoadingModal visible={updateNoteMutation.isPending} />
       </KeyboardAvoidingView>

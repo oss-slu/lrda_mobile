@@ -1,0 +1,31 @@
+appId: register.edu.slu.cs.oss.lrda
+---
+# Note flow: open the note editor via the center tab button and back out
+# without entering anything. No empty "Untitled" draft should be saved.
+# Assumes a logged-in session whose private notes contain no "Untitled" notes.
+
+- launchApp
+
+- runFlow: skip_tutorial.yaml
+
+# Open the note editor via the center tab button
+- tapOn:
+    id: "fab-button"
+- extendedWaitUntil:
+    visible: "Title Field Note"
+    timeout: 15000
+- runFlow: skip_tutorial.yaml
+
+# Back out immediately; the empty draft is discarded
+- tapOn:
+    id: "note-back-button"
+- extendedWaitUntil:
+    visible:
+      id: "HomeScreen"
+    timeout: 15000
+
+# The private list must not have gained an "Untitled" draft
+- tapOn:
+    id: "private-btn"
+- waitForAnimationToEnd
+- assertNotVisible: ".*Untitled.*"

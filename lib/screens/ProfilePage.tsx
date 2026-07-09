@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { Text, View, SafeAreaView, Image, FlatList, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "../stores/authStore";
+import { useThemeStore } from "../stores/themeStore";
 import { Note } from "../../types";
 import DataConversion from "../utils/data_conversion";
 import { fetchAllNotes } from "../utils/api_calls";
@@ -12,6 +13,18 @@ import { useRouter } from "expo-router";
 export default function ProfilePage() {
   const navigation = useRouter();
   const authUser = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
+  const resetTheme = useThemeStore((state) => state.reset);
+
+  const onLogoutPress = async () => {
+    try {
+      await logout();
+      resetTheme();
+      navigation.replace("/(auth)/login");
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   const userName = authUser?.name ?? "";
   const userInitials = useMemo(() => {
@@ -56,9 +69,20 @@ export default function ProfilePage() {
           contentContainerStyle={{ paddingBottom: 200 }}
           ListHeaderComponent={() => (
             <View>
-              <TouchableOpacity onPress={() => navigation.back()}>
-                <Feather name={"arrow-left"} size={30} style={{ marginLeft: 20 }} />
-              </TouchableOpacity>
+              <View className="flex-row items-center justify-between px-5">
+                <TouchableOpacity onPress={() => navigation.back()}>
+                  <Feather name={"arrow-left"} size={30} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  testID="logout-button"
+                  accessibilityLabel="Logout"
+                  className="flex-row items-center"
+                  onPress={onLogoutPress}
+                >
+                  <Text className="mr-2 font-inter text-sm font-medium text-foreground">Logout</Text>
+                  <Feather name={"log-out"} size={24} />
+                </TouchableOpacity>
+              </View>
               <View className="self-center">
                 <View className="h-[190px] w-[190px] content-center justify-center rounded-full bg-foreground">
                   <Text className="self-center text-[60px] font-medium text-primary">{userInitials}</Text>
