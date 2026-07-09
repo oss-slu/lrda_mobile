@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Image, Dimensions, Platform, StatusBar, Linking } from "react-native";
 import { Ionicons, Feather, MaterialIcons, Entypo } from "@expo/vector-icons";
 import { useTheme } from "../components/ThemeProvider";
-import { useThemeStore } from "../stores/themeStore";
 import { useAuthStore } from "../stores/authStore";
 import { getHasDoneTutorial, setTutorialDone } from "../utils/tutorial";
 import { useRouter } from "expo-router";
@@ -12,6 +11,7 @@ import ReactNativeModal from "react-native-modal";
 import AppThemeSelectorScreen from "./AppThemeSelectorScreen";
 import Tooltip from "react-native-walkthrough-tooltip";
 import TooltipContent from "../onboarding/TooltipComponent";
+import { TAB_BAR_HEIGHT } from "../constants";
 const { width, height } = Dimensions.get("window");
 const data = [
   { source: require("../../assets/Pond_395.jpg") },
@@ -21,9 +21,7 @@ const data = [
 
 export default function MorePage() {
   const { isDarkmode, toggleDarkmode, accentColor } = useTheme();
-  const resetTheme = useThemeStore((state) => state.reset);
   const user = useAuthStore((s) => s.user);
-  const logout = useAuthStore((s) => s.logout);
   const router = useRouter();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isThemeOpen, setIsThemeOpen] = useState(false);
@@ -47,16 +45,6 @@ export default function MorePage() {
   const handleSettingsToggle = () => {
     setIsSettingsOpen(!isSettingsOpen);
   };
-  const onLogoutPress = async () => {
-    try {
-      await logout();
-      resetTheme();
-      router.replace("/(auth)/login");
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
   const handleReportClick = () => {
     const email = "yashkamal.bhatia@slu.edu";
     const subject = "Bug Report on 'Where's Religion?";
@@ -148,6 +136,7 @@ export default function MorePage() {
             >
               <View className="flex-row items-center justify-between" style={{ width: width > 500 ? "13%" : "27%" }}>
                 <TouchableOpacity
+                  testID="profile-button"
                   className="ml-2 items-center justify-center rounded-full bg-foreground"
                   style={{
                     width: width > 1000 ? 50 : 30,
@@ -166,7 +155,8 @@ export default function MorePage() {
           </View>
 
           <ScrollView
-            contentContainerStyle={{ alignItems: "center", paddingBottom: 200 }}
+            style={{ marginBottom: TAB_BAR_HEIGHT }}
+            contentContainerStyle={{ alignItems: "center", paddingBottom: 24 }}
             scrollEnabled={true}
             showsVerticalScrollIndicator={false}
           >
@@ -190,7 +180,7 @@ export default function MorePage() {
               topAdjustment={Platform.OS === "android" ? -(StatusBar.currentHeight ?? 0) : 0}
               content={
                 <TooltipContent
-                  message="Welcome to our more page! Here you can find settings, FAQ, logout, switch themes, and more!"
+                  message="Welcome to our more page! Here you can find settings, FAQ, switch themes, and more!"
                   onPressOk={() => {
                     setUserTutorial(true);
                     setMorePageTip(false);
@@ -217,7 +207,6 @@ export default function MorePage() {
                 <MenuItem title="Meet our team" iconName="people-outline" onPress={() => router.push("/more/team")} />
                 <MenuItem title="Settings" iconName="settings-outline" onPress={handleSettingsToggle} />
                 <MenuItem title="FAQ" iconName="help-circle-outline" onPress={() => {}} />
-                <MenuItem title="Logout" iconName="exit-outline" onPress={onLogoutPress} testID="logout-button" />
               </View>
             </Tooltip>
           </ScrollView>
