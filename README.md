@@ -84,7 +84,7 @@ The app uses native modules (such as react-native-maps) that are not included in
 ## Known Bugs
 
 - The app does not compile to the web due to a dependency on react-native-maps.
-- Scroller on add note and edit note sometimes do not work on IOS
+- iOS note editor (Add/Edit): scrolling toward the end of a long note can run past the content into blank space, hiding the text until you scroll back up. The editor WebView is sized to the full screen inside the outer ScrollView, so its document is much taller than its content.
 - The notes orientation on map page for android is off centered.
 
 ## License

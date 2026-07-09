@@ -2,9 +2,10 @@ appId: register.edu.slu.cs.oss.lrda
 ---
 # Note flow: open the first private note in the editor, then back out
 # (the back arrow saves it as a draft and returns home).
-# Assumes a logged-in session with at least one private note.
+# Data precondition: the account has at least one private note.
+# Logs in first if needed (auth_login is idempotent).
 
-- launchApp
+- runFlow: auth_login.yaml
 
 - runFlow: skip_tutorial.yaml
 

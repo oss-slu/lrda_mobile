@@ -1,25 +1,40 @@
 appId: register.edu.slu.cs.oss.lrda
 ---
-# Auth flow: logout from the app.
-# Assumes we are already logged in and on the tabs screen.
-# Logout lives on the profile page, reached via the avatar on the More tab.
+# Auth flow: logout from the app. Self-sufficient: launches the app and only
+# performs the logout taps if a session is active; ends on the login screen
+# either way. Logout lives on the profile page, reached via the More-tab avatar.
 
-- tapOn:
-    id: "tab-more"
+- launchApp
+
+- runFlow: skip_onboarding.yaml
+
+# Give an existing session time to land on Home before deciding
 - extendedWaitUntil:
     visible:
-      id: "profile-button"
-    timeout: 10000
-- tapOn:
-    id: "profile-button"
+      id: "HomeScreen"
+    timeout: 8000
+    optional: true
 
-- extendedWaitUntil:
-    visible:
-      id: "logout-button"
-    timeout: 10000
-- tapOn:
-    id: "logout-button"
+- runFlow:
+    when:
+      visible:
+        id: "HomeScreen"
+    commands:
+      - runFlow: skip_tutorial.yaml
+      - tapOn:
+          id: "tab-more"
+      - extendedWaitUntil:
+          visible:
+            id: "profile-button"
+          timeout: 10000
+      - tapOn:
+          id: "profile-button"
+      - extendedWaitUntil:
+          visible:
+            id: "logout-button"
+          timeout: 10000
+      - tapOn:
+          id: "logout-button"
 
-- extendedWaitUntil:
-    visible: "Login"
-    timeout: 10000
+# Ends on the login screen (skip_login_splash asserts the login button)
+- runFlow: skip_login_splash.yaml

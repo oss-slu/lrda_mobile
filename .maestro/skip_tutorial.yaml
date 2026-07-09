@@ -1,4 +1,6 @@
 appId: register.edu.slu.cs.oss.lrda
+tags:
+  - helper
 ---
 # First-run tutorial tooltips render as a single flattened accessibility
 # element, so the Okay button cannot be targeted by id or text. Each tap on
