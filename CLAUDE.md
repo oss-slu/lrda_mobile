@@ -97,6 +97,5 @@ Maestro E2E flows live in `.maestro/` (auth flows; see `.maestro/config.yaml`).
 ## Known Issues
 
 - Web compilation fails (react-native-maps)
-- Location data section may display "NaN" errors
 - iOS note scroller sometimes doesn't work on Add/Edit screens
 - Android note positioning is off-center on map
