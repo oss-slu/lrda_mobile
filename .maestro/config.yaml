@@ -1,1 +1,7 @@
 appId: register.edu.slu.cs.oss.lrda
+
+# Helpers are subflows, not tests; auth_register is manual-only (creates a
+# real account and needs throwaway credentials edited into its env defaults).
+excludeTags:
+  - helper
+  - manual

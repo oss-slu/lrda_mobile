@@ -1,9 +1,9 @@
 appId: register.edu.slu.cs.oss.lrda
 ---
 # Note flow: create a note via the center tab button, fill it in, and publish.
-# Assumes a logged-in session; run auth_login.yaml first if needed.
+# Logs in first if needed (auth_login is idempotent).
 
-- launchApp
+- runFlow: auth_login.yaml
 
 - runFlow: skip_tutorial.yaml
 

@@ -1,4 +1,6 @@
 appId: register.edu.slu.cs.oss.lrda
+tags:
+  - helper
 ---
 # Skip the onboarding carousel (only appears on first launch).
 # The onboarding "Skip" button completes onboarding and navigates to login.

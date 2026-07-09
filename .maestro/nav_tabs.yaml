@@ -1,9 +1,9 @@
 appId: register.edu.slu.cs.oss.lrda
 ---
 # Smoke test: visit every tab and verify each screen renders.
-# Assumes a logged-in session; run auth_login.yaml first if needed.
+# Logs in first if needed (auth_login is idempotent).
 
-- launchApp
+- runFlow: auth_login.yaml
 
 - runFlow: skip_tutorial.yaml
 

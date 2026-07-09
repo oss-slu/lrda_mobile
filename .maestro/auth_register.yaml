@@ -1,4 +1,6 @@
 appId: register.edu.slu.cs.oss.lrda
+tags:
+  - manual
 env:
   TEST_FIRST_NAME: ""
   TEST_LAST_NAME: ""

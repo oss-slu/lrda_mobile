@@ -2,9 +2,10 @@ appId: register.edu.slu.cs.oss.lrda
 ---
 # Note flow: open the note editor via the center tab button and back out
 # without entering anything. No empty "Untitled" draft should be saved.
-# Assumes a logged-in session whose private notes contain no "Untitled" notes.
+# Data precondition: the account's private notes contain no "Untitled" notes.
+# Logs in first if needed (auth_login is idempotent).
 
-- launchApp
+- runFlow: auth_login.yaml
 
 - runFlow: skip_tutorial.yaml
 

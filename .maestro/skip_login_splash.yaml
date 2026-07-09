@@ -1,4 +1,6 @@
 appId: register.edu.slu.cs.oss.lrda
+tags:
+  - helper
 ---
 # The login screen shows a "Where's Religion?" splash for 2 seconds.
 # Tap to dismiss it, then wait for the login form to appear.
