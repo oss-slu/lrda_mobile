@@ -1,50 +1,22 @@
-import { Ionicons } from "@expo/vector-icons";
-
-import React, { useCallback, useEffect, useEffectEvent, useRef, useState } from "react";
-import {
-  Alert,
-  View,
-  TextInput,
-  TouchableOpacity,
-  Keyboard,
-  Platform,
-  KeyboardAvoidingView,
-  Modal,
-  Text,
-  StatusBar,
-  Dimensions,
-} from "react-native";
-import * as Location from "expo-location";
+import React, { useEffect, useEffectEvent, useRef, useState } from "react";
+import { View, TouchableOpacity, Platform, KeyboardAvoidingView, Modal, Text, StatusBar } from "react-native";
 import ToastMessage from "react-native-toast-message";
-import AudioContainer from "../components/audio";
-import Constants from "expo-constants";
 
-import PhotoScroller from "../components/photoScroller";
-import TagWindow from "../components/tagging";
-import { DEFAULT_TOOLBAR_ITEMS, RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
-import { useTheme } from "../components/ThemeProvider";
+import { DEFAULT_TOOLBAR_ITEMS, Toolbar } from "@10play/tentap-editor";
 import LoadingModal from "../components/LoadingModal";
+import { NoteEditorHeader, NoteEditorActionRow, NoteEditorPanels, NoteEditorBody } from "../components/NoteEditor";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { VideoView, useVideoPlayer } from "expo-video";
 import { getHasDoneTutorial, setTutorialDone } from "../utils/tutorial";
 import type { AudioType, Media } from "../models/media_class";
 import { useCreateNote } from "../hooks/mutations/useCreateNote";
+import { useNoteLocation } from "../hooks/useNoteLocation";
+import { useNoteEditor, useKeyboardVisible, isBodyEmpty } from "../hooks/useNoteEditor";
 import { useAddNoteStore } from "../stores/addNoteStore";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import TooltipContent from "../onboarding/TooltipComponent";
 import Tooltip from "react-native-walkthrough-tooltip";
 import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
-
-const customImageCSS = `
-  .ProseMirror img {
-    max-width: 200px !important;
-    max-height: 200px !important;
-    object-fit: cover !important;
-    display: inline-block;
-  }
-`;
-
-const { height } = Dimensions.get("window");
 
 const AddNoteScreen: React.FC = () => {
   const router = useRouter();
@@ -59,15 +31,11 @@ const AddNoteScreen: React.FC = () => {
   const [viewAudio, setViewAudio] = useState<boolean>(false);
   const [isTagging, setIsTagging] = useState<boolean>(false);
   const [isPublished, setIsPublished] = useState<boolean>(false);
-  const [location, setLocation] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
-  const [locationButtonColor, setLocationButtonColor] = useState<string>("#000");
   const [isVideoModalVisible, setIsVideoModalVisible] = useState<boolean>(false);
   const [videoUri] = useState<string | null>(null);
-  const [keyboardVisible, setKeyboardVisible] = useState(false);
   const videoPlayer = useVideoPlayer(videoUri);
+  const { location, isLocationOff, toggleLocation } = useNoteLocation();
+  const keyboardVisible = useKeyboardVisible();
   const { setPublishNote } = useAddNoteContext();
   const bodyTextRef = useRef(bodyText);
   const tagsRef = useRef(tags);
@@ -79,10 +47,7 @@ const AddNoteScreen: React.FC = () => {
   const createNoteMutation = useCreateNote();
   const { toggleAddNoteState } = useAddNoteStore();
 
-  const editor = useEditorBridge({
-    initialContent: bodyText || "",
-    avoidIosKeyboard: true,
-  });
+  const { editor, insertImageToEditor, addVideoToEditor, insertAudioToEditor, handleDonePress } = useNoteEditor(bodyText || "");
 
   useEffect(() => {
     titleTxtRef.current = titleText;
@@ -138,7 +103,6 @@ const AddNoteScreen: React.FC = () => {
     return unsubscribe;
   }, [navigation]);
 
-  const { colors } = useTheme();
   const scrollViewRef = useRef<KeyboardAwareScrollView>(null);
 
   const onPublish = useEffectEvent(() => handleShareButtonPress());
@@ -146,128 +110,6 @@ const AddNoteScreen: React.FC = () => {
   useEffect(() => {
     setPublishNote(() => onPublish);
   }, [setPublishNote]);
-
-  useEffect(() => {
-    if (editor) {
-      const combinedCSS = `
-        ${customImageCSS}
-        body {
-          color: ${colors.foreground};
-        }
-      `;
-      editor.injectCSS(combinedCSS);
-    }
-  }, [editor, colors.foreground]);
-
-  const isBodyEmpty = (htmlString: string) => {
-    const textOnly = htmlString.replace(/<\/?[^>]+(>|$)/g, "").trim();
-    return textOnly.length === 0;
-  };
-
-  useEffect(() => {
-    const showKeyboardListener = Keyboard.addListener("keyboardDidShow", () => {
-      setKeyboardVisible(true);
-    });
-    const hideKeyboardListener = Keyboard.addListener("keyboardDidHide", () => {
-      setKeyboardVisible(false);
-    });
-
-    return () => {
-      showKeyboardListener.remove();
-      hideKeyboardListener.remove();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (editor) {
-      editor.injectCSS(customImageCSS);
-    }
-  }, [editor]);
-
-  const setLocationToZero = () => {
-    setLocation({ latitude: 0, longitude: 0 });
-    setLocationButtonColor("red");
-  };
-
-  // silent: skip the error alert for automatic fetches (e.g. on mount), where it
-  // can fire after the user has already navigated away.
-  const fetchCurrentLocation = useCallback(async ({ silent = false } = {}) => {
-    const { status } = await Location.requestForegroundPermissionsAsync();
-
-    if (status === "granted") {
-      try {
-        const userLocation = await Location.getCurrentPositionAsync({});
-        setLocation({
-          latitude: userLocation.coords.latitude,
-          longitude: userLocation.coords.longitude,
-        });
-        setLocationButtonColor("#000");
-      } catch (error) {
-        console.error("Error fetching location:", error);
-        if (!silent) {
-          Alert.alert("Error", "Failed to retrieve location.");
-        }
-        setLocationToZero();
-      }
-    } else {
-      setLocationToZero();
-    }
-  }, []);
-
-  const toggleLocation = () => {
-    if (location && location.latitude === 0 && location.longitude === 0) {
-      fetchCurrentLocation();
-    } else {
-      setLocationToZero();
-    }
-  };
-
-  useEffect(() => {
-    fetchCurrentLocation({ silent: true });
-  }, [fetchCurrentLocation]);
-
-  const displayErrorInEditor = async (errorMessage: string) => {
-    const currentContent = await editor.getHTML();
-    const errorTag = `<p style="color: red; font-weight: bold;">${errorMessage}</p><br />`;
-    editor.setContent(currentContent + errorTag);
-    editor.focus();
-  };
-
-  const insertImageToEditor = async (imageUri: string) => {
-    try {
-      const currentContent = await editor.getHTML();
-      const imageTag = `<img src="${imageUri}" style="max-width: 200px; max-height: 200px; object-fit: cover;" /><br />`;
-      editor.setContent(currentContent + imageTag);
-      editor.focus();
-    } catch (error) {
-      console.error("Error inserting image:", error);
-      displayErrorInEditor(`Error inserting image: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  };
-
-  const addVideoToEditor = async (videoUri: string) => {
-    try {
-      const currentContent = await editor.getHTML();
-      const videoLink = `${currentContent}<a href="${videoUri}">${videoUri}</a><br>`;
-      editor.setContent(videoLink);
-      editor.focus();
-    } catch (error) {
-      console.error("Error adding video:", error);
-      displayErrorInEditor(`Error adding video: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  };
-
-  const insertAudioToEditor = async (audioUri: string) => {
-    try {
-      const currentContent = await editor.getHTML();
-      const audioLink = `${currentContent}<a href="${audioUri}">${audioUri}</a><br>`;
-      editor.setContent(audioLink);
-      editor.focus();
-    } catch (error) {
-      console.error("Error adding audio:", error);
-      displayErrorInEditor(`Error adding audio: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  };
 
   const handleShareButtonPress = async () => {
     await syncEditorContent();
@@ -328,11 +170,6 @@ const AddNoteScreen: React.FC = () => {
     }
   };
 
-  const handleDonePress = () => {
-    editor.blur();
-    Keyboard.dismiss();
-  };
-
   const syncEditorContent = async () => {
     const latestContent = await editor.getHTML();
     setBodyText(latestContent);
@@ -382,71 +219,41 @@ const AddNoteScreen: React.FC = () => {
               placement="bottom"
             >
               <View className="min-h-[140px]">
-                <View
-                  className="flex-row items-center justify-between bg-accent px-[5px] text-center"
-                  style={{ paddingTop: Constants.statusBarHeight, height: height * 0.15 }}
-                >
-                  <TouchableOpacity
-                    className="z-[99] h-[50px] w-[50px] items-center justify-center rounded-full bg-tertiary"
-                    onPress={() => saveNote(false)}
-                  >
-                    <Ionicons name="arrow-back-outline" size={30} color="var(--color-foreground)" />
-                  </TouchableOpacity>
-                  <TextInput
-                    className="mr-[5%] h-[45px] w-4/5 rounded-[18px] border border-foreground px-[10px] text-center text-[20px] text-foreground"
-                    placeholder="Title Field Note"
-                    placeholderTextColor="var(--color-foreground)"
-                    onChangeText={setTitleText}
-                    value={titleText}
-                    onFocus={() => {
-                      if (editor?.blur) {
-                        editor.blur();
-                      }
-                    }}
-                  />
-                </View>
-                <View className="w-full flex-row items-center justify-between bg-primary px-10 py-[5px]">
-                  <TouchableOpacity onPress={() => setViewMedia(!viewMedia)} testID="imageButton">
-                    <Ionicons name="images-outline" size={30} color="var(--color-foreground)" />
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => setViewAudio(!viewAudio)}>
-                    <Ionicons name="mic-outline" size={30} color="var(--color-foreground)" />
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={toggleLocation} testID="checklocationpermission">
-                    <Ionicons name="location-outline" size={30} color={locationButtonColor} />
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => setIsTagging(!isTagging)}>
-                    <Ionicons name="pricetag-outline" size={30} color="var(--color-foreground)" />
-                  </TouchableOpacity>
-                </View>
+                <NoteEditorHeader
+                  title={titleText}
+                  onChangeTitle={setTitleText}
+                  onBack={() => saveNote(false)}
+                  onTitleFocus={() => {
+                    if (editor?.blur) {
+                      editor.blur();
+                    }
+                  }}
+                />
+                <NoteEditorActionRow
+                  onToggleMedia={() => setViewMedia(!viewMedia)}
+                  onToggleAudio={() => setViewAudio(!viewAudio)}
+                  onToggleLocation={toggleLocation}
+                  onToggleTags={() => setIsTagging(!isTagging)}
+                  locationOff={isLocationOff}
+                />
               </View>
             </Tooltip>
 
-            <View className="mb-1 w-full bg-tertiary">
-              <PhotoScroller
-                active={viewMedia}
-                newMedia={newMedia}
-                setNewMedia={setNewMedia}
-                insertImageToEditor={insertImageToEditor}
-                addVideoToEditor={addVideoToEditor}
-              />
-              {viewAudio && <AudioContainer newAudio={newAudio} setNewAudio={setNewAudio} insertAudioToEditor={insertAudioToEditor} />}
-              {isTagging && <TagWindow tags={tags} setTags={setTags} />}
-            </View>
-            <View className="ios:h-full android:flex-1 min-h-[300px] grow pb-[120px]" testID="TenTapEditor">
-              <RichText
-                editor={editor}
-                style={{
-                  flex: 1,
-                  width: "100%",
-                  minHeight: 200,
-                  paddingBottom: 120,
-                  padding: 10,
-                  marginBottom: 4,
-                  backgroundColor: colors.primary,
-                }}
-              />
-            </View>
+            <NoteEditorPanels
+              viewMedia={viewMedia}
+              viewAudio={viewAudio}
+              isTagging={isTagging}
+              media={newMedia}
+              setMedia={setNewMedia}
+              audio={newAudio}
+              setAudio={setNewAudio}
+              tags={tags}
+              setTags={setTags}
+              insertImageToEditor={insertImageToEditor}
+              addVideoToEditor={addVideoToEditor}
+              insertAudioToEditor={insertAudioToEditor}
+            />
+            <NoteEditorBody editor={editor} testID="TenTapEditor" />
 
             <View className="ios:h-[50px] android:h-[70px] absolute bottom-[27px] z-10 w-full justify-center px-[10px]" testID="RichEditor">
               <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />

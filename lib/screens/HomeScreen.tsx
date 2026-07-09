@@ -1,28 +1,13 @@
 import React, { useState, useEffect } from "react";
-import {
-  Platform,
-  View,
-  Text,
-  TouchableOpacity,
-  Dimensions,
-  TextInput,
-  Pressable,
-  Animated,
-  StatusBar,
-  ActivityIndicator,
-} from "react-native";
+import { Platform, View, Text, TouchableOpacity, Dimensions, TextInput, Pressable, Animated, StatusBar } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { Note } from "../../types";
-import { SwipeListView } from "react-native-swipe-list-view";
 import NoteSkeleton from "../components/noteSkeleton";
-import { formatToLocalDateString } from "../components/time";
 import { useTheme } from "../components/ThemeProvider";
-import NoteDetailModal, { NoteDetailData } from "./mapPage/NoteDetailModal";
 import ToastMessage from "react-native-toast-message";
-import NotesComponent from "../components/NotesComponent";
+import NotesList from "../components/NotesList";
 import Greeting from "../components/Greeting";
 import { useAddNoteContext } from "../context/AddNoteContext";
-import LottieView from "lottie-react-native";
 import { useAddNoteStore } from "../stores/addNoteStore";
 import Tooltip from "react-native-walkthrough-tooltip";
 import TooltipContent from "../onboarding/TooltipComponent";
@@ -33,7 +18,6 @@ import { useUpdateNote } from "../hooks/mutations/useUpdateNote";
 import Constants from "expo-constants";
 
 const { width } = Dimensions.get("window");
-const TEXT_LENGTH = 18;
 
 const HomeScreen: React.FC = () => {
   const router = useRouter();
@@ -44,8 +28,6 @@ const HomeScreen: React.FC = () => {
 
   const [isPrivate, setIsPrivate] = useState(true);
   const [published, setPublished] = useState(false);
-  const [selectedNote, setSelectedNote] = useState<NoteDetailData | undefined>(undefined);
-  const [isModalVisible, setModalVisible] = useState(false);
   const [isSortOpened, setIsSortOpened] = useState(false);
   const [selectedSortOption, setSelectedSortOption] = useState(1);
 
@@ -117,60 +99,6 @@ const HomeScreen: React.FC = () => {
   const publicData = displayNotes.filter((n) => n.isPublished);
   const listData = isPrivate ? privateData : publicData;
 
-  const renderItem = (data: any) => {
-    const item = data.item;
-    const showTime = formatToLocalDateString(new Date(item.time));
-    const mediaItem = item.media[0];
-    const ImageType = mediaItem?.type;
-    let ImageURI = "";
-    let IsImage = false;
-    if (ImageType === "image") {
-      ImageURI = mediaItem.uri;
-      IsImage = true;
-    } else if (ImageType === "video") {
-      ImageURI = mediaItem.thumbnail;
-      IsImage = true;
-    }
-    const resolvedImageURI = Platform.OS === "android" ? String(ImageURI || "") : ImageURI;
-
-    return (
-      <TouchableOpacity
-        key={item.id}
-        testID={`note-item-${data.index}`}
-        activeOpacity={1}
-        className="w-full bg-[#e6e6e6] dark:bg-black"
-        onPress={() => {
-          if (!item.isPublished) {
-            toggleAddNoteState();
-            router.push({
-              pathname: "/edit-note",
-              params: { noteData: JSON.stringify({ ...item, time: item.time.toISOString() }) },
-            });
-          } else {
-            setSelectedNote({
-              ...item,
-              time: formatToLocalDateString(new Date(item.time)),
-              description: item.text,
-              images: item.media.map((m: { uri: string }) => ({ uri: m.uri })),
-            });
-            setModalVisible(true);
-          }
-        }}
-      >
-        <NotesComponent
-          IsImage={IsImage}
-          resolvedImageURI={resolvedImageURI}
-          ImageType={ImageType}
-          textLength={TEXT_LENGTH}
-          showTime={showTime}
-          item={item}
-          isPublished={item.isPublished}
-          isDarkmode={isDarkmode}
-        />
-      </TouchableOpacity>
-    );
-  };
-
   const sideMenu = (data: any, rowMap: any) => {
     const isNotePublished = data.item.isPublished;
     return (
@@ -193,70 +121,27 @@ const HomeScreen: React.FC = () => {
     );
   };
 
-  const renderFooter = () => {
-    if (isLoadingMore) {
-      return (
-        <View className="mb-[100px] items-center py-[50px]">
-          <ActivityIndicator size="small" className="text-foreground" />
-        </View>
-      );
-    }
-    if (hasMore) {
-      return (
-        <TouchableOpacity
-          testID="load-more"
-          onPress={handleLoadMore}
-          className="my-1 w-[65%] items-center self-center rounded-lg bg-accent py-5"
-        >
-          <Text testID="load-more-button" className="font-inter text-base font-normal text-foreground">
-            Load More
-          </Text>
-        </TouchableOpacity>
-      );
-    }
-    return (
-      <View className="items-center p-5">
-        <Text testID="empty-state-text" className="font-inter text-sm text-gray-500">
-          End of the Page
-        </Text>
-      </View>
-    );
-  };
-
-  const renderList = () => {
-    if (listData.length === 0) {
-      return (
-        <View className="items-center justify-center">
-          <LottieView
-            testID="no-results-animation"
-            source={require("../../assets/animations/noResultFound.json")}
-            autoPlay
-            loop
-            style={{ width: 100, height: 200 }}
-          />
-          <Text className="font-inter text-[15px] font-normal">No Results Found</Text>
-        </View>
-      );
-    }
-    return (
-      <SwipeListView
-        data={listData}
-        renderItem={renderItem}
-        renderHiddenItem={sideMenu}
-        leftActivationValue={160}
-        rightActivationValue={isPrivate ? -160 : undefined}
-        leftOpenValue={75}
-        rightOpenValue={isPrivate ? -75 : undefined}
-        stopLeftSwipe={175}
-        stopRightSwipe={isPrivate ? -175 : undefined}
-        keyExtractor={(item) => item.id}
-        onRightAction={isPrivate ? (data, rowMap) => deleteNote(data, rowMap) : undefined}
-        onLeftAction={(data, rowMap) => publishNote(data, rowMap)}
-        contentContainerStyle={{ paddingBottom: 150 }}
-        ListFooterComponent={renderFooter}
-      />
-    );
-  };
+  const renderList = () => (
+    <NotesList
+      notes={listData}
+      hasMore={hasMore}
+      isLoadingMore={isLoadingMore}
+      onLoadMore={handleLoadMore}
+      onBeforeEditNote={() => toggleAddNoteState()}
+      itemClassName="w-full bg-[#e6e6e6] dark:bg-black"
+      swipeActions={{
+        renderHiddenItem: sideMenu,
+        leftActivationValue: 160,
+        rightActivationValue: isPrivate ? -160 : undefined,
+        leftOpenValue: 75,
+        rightOpenValue: isPrivate ? -75 : undefined,
+        stopLeftSwipe: 175,
+        stopRightSwipe: isPrivate ? -175 : undefined,
+        onRightAction: isPrivate ? (data, rowMap) => deleteNote(data, rowMap) : undefined,
+        onLeftAction: (data, rowMap) => publishNote(data, rowMap),
+      }}
+    />
+  );
 
   const [userTutorial, setUserTutorial] = useState<boolean | null>(null);
   const [accountTip, setAccountTip] = useState(false);
@@ -467,8 +352,6 @@ const HomeScreen: React.FC = () => {
       <View testID="notes-list" className="w-full flex-1">
         {rendering ? <NoteSkeleton /> : renderList()}
       </View>
-
-      <NoteDetailModal isVisible={isModalVisible} onClose={() => setModalVisible(false)} note={selectedNote} />
 
       {isSortOpened && !isSearchVisible && (
         <View
