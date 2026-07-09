@@ -1,31 +1,63 @@
 appId: register.edu.slu.cs.oss.lrda
 env:
-  TEST_EMAIL: ""
-  TEST_PASSWORD: ""
+  # Local dev/test account (seeded in the local API database).
+  # NOTE: overriding via `maestro test -e TEST_EMAIL=...` is broken in
+  # Maestro 2.5.1 on iOS (inputText types nothing when the value comes from
+  # the CLI); edit these defaults instead if you need another account.
+  TEST_EMAIL: "maestro-jul8@test.com"
+  TEST_PASSWORD: "TestPass1!"
 ---
 # Auth flow: login with credentials and verify landing on home screen.
-#
-# Usage:
-#   maestro test .maestro/auth_login.yaml \
-#     -e TEST_EMAIL=you@example.com \
-#     -e TEST_PASSWORD=yourpassword
+# Idempotent: if a previous session is still active the login part is skipped.
 
 - launchApp
 
 - runFlow: skip_onboarding.yaml
-- runFlow: skip_login_splash.yaml
 
-- tapOn:
-    id: "email-input"
-- inputText: ${TEST_EMAIL}
+# Give an existing session time to land on Home before deciding to log in
+- extendedWaitUntil:
+    visible:
+      id: "HomeScreen"
+    timeout: 8000
+    optional: true
 
-- tapOn:
-    id: "password-input"
-- inputText: ${TEST_PASSWORD}
+- runFlow:
+    when:
+      notVisible:
+        id: "HomeScreen"
+    commands:
+      - runFlow: skip_login_splash.yaml
 
-- tapOn:
-    id: "login-button"
+      # The login screen settles for several seconds after launch (splash
+      # fade, auth-state hydration); typing too early gets dropped.
+      # Optional wait on nonexistent text = fixed pause.
+      - extendedWaitUntil:
+          visible: "settle-wait-no-such-text"
+          timeout: 8000
+          optional: true
+
+      - tapOn:
+          id: "email-input"
+      - waitForAnimationToEnd
+      - inputText: ${TEST_EMAIL}
+      - waitForAnimationToEnd
+
+      - tapOn:
+          id: "password-input"
+      - waitForAnimationToEnd
+      - inputText: ${TEST_PASSWORD}
+      - waitForAnimationToEnd
+
+      # Dismiss the keyboard by tapping empty space (hideKeyboard is
+      # unreliable on iOS); the keyboard covers the login button otherwise
+      - tapOn:
+          point: "50%,25%"
+      - waitForAnimationToEnd
+
+      - tapOn:
+          id: "login-button"
 
 - extendedWaitUntil:
-    visible: "Home"
-    timeout: 10000
+    visible:
+      id: "HomeScreen"
+    timeout: 20000

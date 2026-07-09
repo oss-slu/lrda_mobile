@@ -1,0 +1,35 @@
+appId: register.edu.slu.cs.oss.lrda
+---
+# Smoke test: visit every tab and verify each screen renders.
+# Assumes a logged-in session; run auth_login.yaml first if needed.
+
+- launchApp
+
+- runFlow: skip_tutorial.yaml
+
+- tapOn:
+    id: "tab-library"
+- extendedWaitUntil:
+    visible:
+      id: "Library"
+    timeout: 10000
+- runFlow: skip_tutorial.yaml
+
+- tapOn:
+    id: "tab-map"
+- waitForAnimationToEnd
+- runFlow: skip_tutorial.yaml
+
+- tapOn:
+    id: "tab-more"
+- extendedWaitUntil:
+    visible: ".*Resource.*"
+    timeout: 10000
+- runFlow: skip_tutorial.yaml
+
+- tapOn:
+    id: "tab-home"
+- extendedWaitUntil:
+    visible:
+      id: "HomeScreen"
+    timeout: 10000

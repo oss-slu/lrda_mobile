@@ -111,10 +111,16 @@ const ExploreScreen = () => {
 
   useEffect(() => {
     (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status === "granted") {
-        const location = await Location.getCurrentPositionAsync({});
-        setUserLocation(location.coords);
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status === "granted") {
+          const location = await Location.getCurrentPositionAsync({});
+          setUserLocation(location.coords);
+        }
+      } catch (error) {
+        // Location can be unavailable (no GPS fix, simulator without a set
+        // location); the map falls back to its default region.
+        console.warn("Could not get current location:", error);
       }
     })();
   }, []);

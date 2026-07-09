@@ -54,6 +54,7 @@ const Library = () => {
     return (
       <TouchableOpacity
         key={item.id}
+        testID={`note-item-${data.index}`}
         activeOpacity={1}
         className="bg-secondary"
         onPress={() => {

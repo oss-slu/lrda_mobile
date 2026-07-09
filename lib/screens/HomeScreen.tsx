@@ -136,6 +136,7 @@ const HomeScreen: React.FC = () => {
     return (
       <TouchableOpacity
         key={item.id}
+        testID={`note-item-${data.index}`}
         activeOpacity={1}
         className="w-full bg-[#e6e6e6] dark:bg-black"
         onPress={() => {
@@ -174,12 +175,16 @@ const HomeScreen: React.FC = () => {
     const isNotePublished = data.item.isPublished;
     return (
       <View className="mt-px h-[140px] w-full flex-1 flex-row items-center justify-between self-center p-2.5" key={data.index}>
-        <TouchableOpacity onPress={() => publishNote(data.item.id, rowMap)}>
+        <TouchableOpacity testID={`note-publish-btn-${data.index}`} onPress={() => publishNote(data.item.id, rowMap)}>
           <Ionicons name={isNotePublished ? "arrow-undo" : "share"} size={30} color="green" />
         </TouchableOpacity>
         <View className="absolute bottom-0 right-0 top-0 w-1/2 items-end justify-center bg-brand-gray pr-[17px]">
           {isPrivate && (
-            <TouchableOpacity className="absolute right-5 items-center justify-center" onPress={() => deleteNote(data.item.id, rowMap)}>
+            <TouchableOpacity
+              testID={`note-delete-btn-${data.index}`}
+              className="absolute right-5 items-center justify-center"
+              onPress={() => deleteNote(data.item.id, rowMap)}
+            >
               <Ionicons name="trash-outline" size={24} color="red" />
             </TouchableOpacity>
           )}

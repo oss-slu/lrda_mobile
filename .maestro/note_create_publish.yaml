@@ -1,0 +1,52 @@
+appId: register.edu.slu.cs.oss.lrda
+---
+# Note flow: create a note via the center tab button, fill it in, and publish.
+# Assumes a logged-in session; run auth_login.yaml first if needed.
+
+- launchApp
+
+- runFlow: skip_tutorial.yaml
+
+# Open the note editor via the center tab button
+- tapOn:
+    id: "fab-button"
+- extendedWaitUntil:
+    visible: "Title Field Note"
+    timeout: 15000
+- runFlow: skip_tutorial.yaml
+
+# Fill in title and body
+- tapOn: "Title Field Note"
+- inputText: "Maestro Publish Test"
+- tapOn:
+    id: "TenTapEditor"
+- waitForAnimationToEnd
+- inputText: "Created by the note_create_publish Maestro flow."
+
+# Dismiss the keyboard; the tab bar (and its Publish button) hides while
+# the keyboard is open (tabBarHideOnKeyboard)
+- tapOn: "Done"
+- waitForAnimationToEnd
+
+# The center tab button becomes Publish inside the editor
+- assertVisible:
+    id: "publish-icon"
+- tapOn:
+    id: "fab-button"
+
+- extendedWaitUntil:
+    visible: "Note Published"
+    timeout: 20000
+
+# Back on home, the published note should be in the Public list.
+# Maestro text matching is full regex and note cards are flattened
+# (title + date in one accessibility label), so match a substring.
+- extendedWaitUntil:
+    visible:
+      id: "HomeScreen"
+    timeout: 15000
+- tapOn:
+    id: "public-btn"
+- extendedWaitUntil:
+    visible: ".*Maestro Publish Te.*"
+    timeout: 10000

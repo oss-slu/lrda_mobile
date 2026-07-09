@@ -97,12 +97,15 @@ export default function MorePage() {
     title,
     iconName,
     onPress,
+    testID,
   }: {
     title: string;
     iconName: React.ComponentProps<typeof Ionicons>["name"];
     onPress: () => void;
+    testID?: string;
   }) => (
     <TouchableOpacity
+      testID={testID}
       className="mb-3 w-[90%] flex-row items-center justify-between rounded-[16px] bg-white px-[30px] py-[18px]"
       style={{
         shadowColor: "#000",
@@ -214,7 +217,7 @@ export default function MorePage() {
                 <MenuItem title="Meet our team" iconName="people-outline" onPress={() => router.push("/more/team")} />
                 <MenuItem title="Settings" iconName="settings-outline" onPress={handleSettingsToggle} />
                 <MenuItem title="FAQ" iconName="help-circle-outline" onPress={() => {}} />
-                <MenuItem title="Logout" iconName="exit-outline" onPress={onLogoutPress} />
+                <MenuItem title="Logout" iconName="exit-outline" onPress={onLogoutPress} testID="logout-button" />
               </View>
             </Tooltip>
           </ScrollView>

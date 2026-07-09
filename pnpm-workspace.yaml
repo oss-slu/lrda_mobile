@@ -1,9 +1,5 @@
+overrides:
+  eslint-plugin-react-hooks: ^7.1.1
+
 onlyBuiltDependencies:
-  - b
-  - d
-  - e
-  - i
-  - l
-  - s
-  - u
   - unrs-resolver

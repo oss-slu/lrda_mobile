@@ -10,6 +10,10 @@ env:
 #
 # NOTE: this will actually create an account on the backend.
 # Use a unique/throwaway email for each run.
+#
+# WARNING: passing values via `maestro test -e` is broken in Maestro 2.5.1
+# on iOS (inputText types nothing when the value comes from the CLI).
+# Set the env defaults above to your throwaway values before running.
 
 - tapOn:
     id: "register-button"

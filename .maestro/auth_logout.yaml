@@ -3,11 +3,22 @@ appId: register.edu.slu.cs.oss.lrda
 # Auth flow: logout from the app.
 # Assumes we are already logged in and on the tabs screen.
 
-- tapOn: "More"
+- tapOn:
+    id: "tab-more"
+- extendedWaitUntil:
+    visible:
+      id: "logout-button"
+    timeout: 10000
+
+# The Logout row sits underneath the floating tab bar (and its center is
+# covered by the center Add button) until the menu is scrolled up.
 - scrollUntilVisible:
-    element: "Logout"
+    element:
+      id: "logout-button"
     direction: DOWN
-- tapOn: "Logout"
+    centerElement: true
+- tapOn:
+    id: "logout-button"
 
 - extendedWaitUntil:
     visible: "Login"
