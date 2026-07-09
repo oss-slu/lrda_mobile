@@ -63,30 +63,23 @@ Make sure you have Node.js, React Native, and Expo CLI installed on your machine
 Once you have the prerequisites installed, you can install the dependencies for the app by running:
 
 ```bash
-yarn install
+pnpm install
 ```
 
 ### Starting the App
 
-To start the app, run:
+To build and run the app on a simulator, run:
 
 ```bash
-yarn run start
+pnpm ios       # iOS simulator
+pnpm android   # Android emulator
 ```
 
-This command will start the Expo server, compiling the JavaScript code for the app, which you can run either on a simulator or your mobile device.
-
-## Running via Simulator
-
-Depending on whether you have an Android or an iOS device, when you run `yarn run start`, it will provide a QR code along with options `a` for running on an Android simulator or `i` for running the application on an iOS simulator.
+These commands build the native app, install it on the simulator, and start the Metro bundler. After the first build you can restart just the bundler with `pnpm start`.
 
 ## Running via Phone
 
-To run the application on your phone, you need to download the **EXPO** application, available on both the Android Play Store and iOS App Store.
-
-## Usage
-
-Launch the app on your device or emulator using the `yarn run start` command. This will open the Expo DevTools in your browser, where you can select the device or emulator to run the app.
+The app uses native modules (such as react-native-maps) that are not included in the Expo Go app, so it requires a development build. Connect a device and run `pnpm ios --device` / `pnpm android --device`, or install a build produced by EAS (`pnpm build:ios` / `pnpm build:android`).
 
 ## Known Bugs
 

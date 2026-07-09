@@ -97,10 +97,5 @@
     "typescript": "~6.0.3"
   },
   "private": true,
-  "packageManager": "pnpm@10.11.0",
-  "pnpm": {
-    "overrides": {
-      "eslint-plugin-react-hooks": "^7.1.1"
-    }
-  }
+  "packageManager": "pnpm@10.11.0"
 }

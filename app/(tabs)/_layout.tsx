@@ -35,6 +35,7 @@ export default function TabsLayout() {
         name="index"
         options={{
           tabBarLabel: "Home",
+          tabBarButtonTestID: "tab-home",
           tabBarIcon: ({ size, focused }) => (
             <Ionicons name="home" size={size} color={focused ? (isDarkmode ? "white" : "black") : accentColor} />
           ),
@@ -44,6 +45,7 @@ export default function TabsLayout() {
         name="library"
         options={{
           tabBarLabel: "Library",
+          tabBarButtonTestID: "tab-library",
           tabBarIcon: ({ size, focused }) => (
             <Ionicons name="library" size={size} color={focused ? (isDarkmode ? "white" : "black") : accentColor} />
           ),
@@ -61,6 +63,7 @@ export default function TabsLayout() {
         name="map"
         options={{
           tabBarLabel: "Map",
+          tabBarButtonTestID: "tab-map",
           tabBarIcon: ({ size, focused }) => (
             <Ionicons name="map" size={size} color={focused ? (isDarkmode ? "white" : "black") : accentColor} />
           ),
@@ -70,6 +73,7 @@ export default function TabsLayout() {
         name="more"
         options={{
           tabBarLabel: "More",
+          tabBarButtonTestID: "tab-more",
           tabBarIcon: ({ size, focused }) => (
             <Ionicons name="menu-outline" size={size + 10} color={focused ? (isDarkmode ? "white" : "black") : accentColor} />
           ),

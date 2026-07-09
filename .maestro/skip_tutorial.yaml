@@ -1,0 +1,11 @@
+appId: register.edu.slu.cs.oss.lrda
+---
+# First-run tutorial tooltips render as a single flattened accessibility
+# element, so the Okay button cannot be targeted by id or text. Each tap on
+# the tooltip body advances/dismisses it; loop until no tooltip remains.
+- repeat:
+    while:
+      visible: ".*Skip Tutorial.*"
+    commands:
+      - tapOn: ".*Skip Tutorial.*"
+      - waitForAnimationToEnd

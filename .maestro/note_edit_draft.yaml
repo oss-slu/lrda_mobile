@@ -1,0 +1,28 @@
+appId: register.edu.slu.cs.oss.lrda
+---
+# Note flow: open the first private note in the editor, then back out
+# (the back arrow saves it as a draft and returns home).
+# Assumes a logged-in session with at least one private note.
+
+- launchApp
+
+- runFlow: skip_tutorial.yaml
+
+# Private notes list is the default; open the first note
+- tapOn:
+    id: "private-btn"
+- tapOn:
+    id: "note-item-0"
+- extendedWaitUntil:
+    visible:
+      id: "EditNoteScreen"
+    timeout: 15000
+- runFlow: skip_tutorial.yaml
+
+# Back arrow saves as draft and returns home
+- tapOn:
+    point: "7%,10%"
+- extendedWaitUntil:
+    visible:
+      id: "HomeScreen"
+    timeout: 15000

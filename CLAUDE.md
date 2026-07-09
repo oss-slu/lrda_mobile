@@ -23,10 +23,9 @@ pnpm build:android    # Production Android build via EAS
 
 ### State Management
 
-- **Redux Toolkit** with slices: `themeSlice`, `addNoteStateSlice`
-- **Redux Persist** with AsyncStorage for offline persistence
-- **AddNoteContext** - React Context for note publishing coordination
-- **Zustand** - `addNoteStore` for note creation state
+- **Zustand** stores in `lib/stores/`: `authStore` (session/user), `themeStore` (persisted to AsyncStorage), `addNoteStore` (note creation state), `onboardingStore`
+- **TanStack Query** (`lib/query/`, `lib/hooks/`) - server state: note lists and create/update mutations
+- **AddNoteContext** (`lib/context/`) - React Context for note publishing coordination
 
 ### Navigation Structure (Expo Router)
 
@@ -37,11 +36,11 @@ File-based routing via `app/` directory:
 3. `(tabs)/` - Main app with bottom tabs: Home, Library, Add Note, Map, More
 4. Modal screens: add-note, edit-note, account, video-player
 
-### Key Singletons and Classes
+### Key Modules
 
-- **User class** (`lib/models/user_class.ts`) - Auth singleton with Better Auth session/token management
+- **Auth** - Better Auth client in `lib/auth/client.ts`, session state in `lib/stores/authStore.ts`
 - **Media hierarchy** (`lib/models/media_class.ts`) - Photo, Video, Audio classes extending base Media
-- **ApiService** (`lib/utils/api_calls.ts`) - Static class for all Hono API interactions
+- **API layer** (`lib/utils/api_calls.ts`) - plain exported functions (`fetchNotes`, `createNote`, `updateNote`, `deleteNote`) for all Hono API interactions
 
 ### Backend Integration
 
@@ -66,15 +65,15 @@ lib/
 │   ├── loginScreens/  # Auth screens
 │   └── mapPage/       # Map-related screens
 ├── components/        # Reusable UI components
-├── models/            # User and Media classes
+├── models/            # Media classes
 ├── utils/             # API calls, validation, storage helpers
 ├── auth/              # Better Auth client
+├── config/            # Env/auth configuration
 ├── context/           # AddNoteContext
-├── stores/            # Zustand stores
+├── hooks/             # TanStack Query hooks (note list, mutations)
+├── query/             # Query client and query keys
+├── stores/            # Zustand stores (auth, theme, addNote, onboarding)
 └── onboarding/        # Tutorial components
-redux/
-├── slice/             # Redux slices
-└── store/             # Store configuration
 ```
 
 ## Testing
@@ -84,15 +83,16 @@ Tests are in `__tests__/` using Jest with jest-expo preset and React Testing Lib
 Run a single test file:
 
 ```bash
-pnpm test __tests__/HomeScreen.test.tsx
+pnpm test __tests__/api_calls.test.ts
 ```
+
+Maestro E2E flows live in `.maestro/` (auth flows; see `.maestro/config.yaml`).
 
 ## Code Style
 
 - TypeScript throughout
 - Prettier configured with 140 char width, double quotes, ES5 trailing commas
-- React Native Paper for Material Design components
-- Ionicons via react-native-vector-icons
+- Ionicons via @expo/vector-icons
 
 ## Known Issues
 
