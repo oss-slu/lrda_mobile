@@ -84,7 +84,6 @@ The app uses native modules (such as react-native-maps) that are not included in
 ## Known Bugs
 
 - The app does not compile to the web due to a dependency on react-native-maps.
-- The notes orientation on map page for android is off centered.
 
 ## License
 

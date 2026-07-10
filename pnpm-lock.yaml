@@ -8,6 +8,9 @@ overrides:
   eslint-plugin-react-hooks: ^7.1.1
 
 patchedDependencies:
+  '@10play/tentap-editor':
+    hash: eea6cb7b45df8651adfd8a2c2a5b376a326641fec751a3507aeccc53b3b71e99
+    path: patches/@10play__tentap-editor.patch
   react-native-css-interop:
     hash: a6f8b6f0a546205ad1062c7dac6c0f0533a1a466e4ae4c2d5eb4e168dd3e3355
     path: patches/react-native-css-interop.patch
@@ -18,7 +21,7 @@ importers:
     dependencies:
       '@10play/tentap-editor':
         specifier: ^0.5.23
-        version: 0.5.33(@tiptap/core@2.27.2(@tiptap/pm@2.27.2))(react-native-webview@13.16.1(react-native@0.85.3(@babel/core@7.29.0)(@react-native/jest-preset@0.85.3(@babel/core@7.29.0)(react@19.2.3))(@react-native/metro-config@0.85.3(@babel/core@7.29.0))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3))(react-native@0.85.3(@babel/core@7.29.0)(@react-native/jest-preset@0.85.3(@babel/core@7.29.0)(react@19.2.3))(@react-native/metro-config@0.85.3(@babel/core@7.29.0))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)
+        version: 0.5.33(patch_hash=eea6cb7b45df8651adfd8a2c2a5b376a326641fec751a3507aeccc53b3b71e99)(@tiptap/core@2.27.2(@tiptap/pm@2.27.2))(react-native-webview@13.16.1(react-native@0.85.3(@babel/core@7.29.0)(@react-native/jest-preset@0.85.3(@babel/core@7.29.0)(react@19.2.3))(@react-native/metro-config@0.85.3(@babel/core@7.29.0))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3))(react-native@0.85.3(@babel/core@7.29.0)(@react-native/jest-preset@0.85.3(@babel/core@7.29.0)(react@19.2.3))(@react-native/metro-config@0.85.3(@babel/core@7.29.0))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)
       '@better-auth/expo':
         specifier: ^1.6.9
         version: 1.6.9(@better-auth/core@1.6.9(@better-auth/utils@0.4.0)(@better-fetch/fetch@1.1.21)(better-call@1.3.5(zod@4.4.3))(jose@6.2.3)(kysely@0.28.17)(nanostores@1.3.0))(better-auth@1.6.9(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(expo-constants@56.0.20)(expo-linking@56.0.15)(expo-network@56.0.5(expo@56.0.15)(react@19.2.3))
@@ -6126,7 +6129,7 @@ packages:
 
 snapshots:
 
-  '@10play/tentap-editor@0.5.33(@tiptap/core@2.27.2(@tiptap/pm@2.27.2))(react-native-webview@13.16.1(react-native@0.85.3(@babel/core@7.29.0)(@react-native/jest-preset@0.85.3(@babel/core@7.29.0)(react@19.2.3))(@react-native/metro-config@0.85.3(@babel/core@7.29.0))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3))(react-native@0.85.3(@babel/core@7.29.0)(@react-native/jest-preset@0.85.3(@babel/core@7.29.0)(react@19.2.3))(@react-native/metro-config@0.85.3(@babel/core@7.29.0))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)':
+  '@10play/tentap-editor@0.5.33(patch_hash=eea6cb7b45df8651adfd8a2c2a5b376a326641fec751a3507aeccc53b3b71e99)(@tiptap/core@2.27.2(@tiptap/pm@2.27.2))(react-native-webview@13.16.1(react-native@0.85.3(@babel/core@7.29.0)(@react-native/jest-preset@0.85.3(@babel/core@7.29.0)(react@19.2.3))(@react-native/metro-config@0.85.3(@babel/core@7.29.0))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3))(react-native@0.85.3(@babel/core@7.29.0)(@react-native/jest-preset@0.85.3(@babel/core@7.29.0)(react@19.2.3))(@react-native/metro-config@0.85.3(@babel/core@7.29.0))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)':
     dependencies:
       '@tiptap/extension-blockquote': 2.27.2(@tiptap/core@2.27.2(@tiptap/pm@2.27.2))
       '@tiptap/extension-bold': 2.27.2(@tiptap/core@2.27.2(@tiptap/pm@2.27.2))
