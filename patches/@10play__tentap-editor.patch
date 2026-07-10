@@ -1,0 +1,22 @@
+diff --git a/android/src/main/java/com/tentap/TenTapViewManager.kt b/android/src/main/java/com/tentap/TenTapViewManager.kt
+index d90e66f1053667fd2df73a7a7f28fa5917a09e34..2d9dea03621f83d881dba7f299538f3f1ffbe167 100644
+--- a/android/src/main/java/com/tentap/TenTapViewManager.kt
++++ b/android/src/main/java/com/tentap/TenTapViewManager.kt
+@@ -21,14 +21,11 @@ class TenTapViewManager :
+   TenTapViewManagerSpec<TenTapView>() {
+ 
+   private fun dispatchUIUpdate(runnable: Runnable){
++    // UIManagerModule.onBatchComplete() no longer exists on RN 0.79+; this
++    // path only runs on the old architecture (see setCustomKeyboardVisibility),
++    // so just run the update without the batch-complete nudge.
+     UiThreadUtil.runOnUiThread(Runnable {
+         runnable.run()
+-        var uiManagerModule = reactContext.getNativeModule(UIManagerModule::class.java)
+-        if(uiManagerModule != null) {
+-          reactContext.runOnNativeModulesQueueThread(Runnable {
+-            uiManagerModule.onBatchComplete()
+-          })
+-        }
+     })
+   }
+ 

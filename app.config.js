@@ -59,7 +59,10 @@ export default {
       },
       config: {
         googleMaps: {
-          apiKey: "",
+          // Google Maps hard-crashes the Map tab without a key. eas.json sets
+          // MAP_API_KEY for production builds; export it locally before
+          // `expo prebuild`/`expo run:android` for a working dev map.
+          apiKey: process.env.MAP_API_KEY ?? "",
         },
       },
       package: "register.edu.slu.cs.oss.lrda",

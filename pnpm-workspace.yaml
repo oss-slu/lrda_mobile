@@ -4,3 +4,4 @@ overrides:
   eslint-plugin-react-hooks: ^7.1.1
 patchedDependencies:
   react-native-css-interop: patches/react-native-css-interop.patch
+  '@10play/tentap-editor': patches/@10play__tentap-editor.patch

@@ -35,6 +35,18 @@ const CARD_WIDTH = width * 0.8;
 const SPACING_FOR_CARD_INSET = width * 0.1 - 10;
 const LIMIT = 20;
 
+// The pin tip in marker_pin.png sits at 92.1% of the image height. Each
+// platform needs a different marker mechanism: Android never renders custom
+// child views on the new architecture (empty bitmap), so it gets the native
+// `image` prop with `anchor` in image fractions; iOS doesn't reliably render
+// the `image` prop, so it gets a child view shifted by `centerOffset`. Both
+// place the pin tip exactly on the note's coordinate — without them Android
+// pins the view's bottom edge to the coordinate and iOS pins its center.
+const PIN_SIZE = 30;
+const PIN_TIP_Y = 0.921;
+const PIN_ANCHOR = { x: 0.5, y: PIN_TIP_Y };
+const PIN_CENTER_OFFSET = { x: 0, y: -(PIN_TIP_Y - 0.5) * PIN_SIZE };
+
 const ExploreScreen = () => {
   const { colors, isDarkmode, accentColor } = useTheme();
   const [isModalVisible, setModalVisible] = useState(false);
@@ -256,10 +268,17 @@ const ExploreScreen = () => {
         mapType={mapType}
       >
         {markers.map((marker, index) => (
-          <Marker key={index} coordinate={marker.coordinate} onPress={() => onMarkerPress(marker)}>
-            <Animated.View style={{ alignItems: "center", justifyContent: "center", width: 50, height: 50 }}>
-              <Animated.Image source={require("../../../assets/marker.png")} style={{ width: 30, height: 30 }} resizeMode="cover" />
-            </Animated.View>
+          <Marker
+            key={index}
+            coordinate={marker.coordinate}
+            anchor={PIN_ANCHOR}
+            centerOffset={PIN_CENTER_OFFSET}
+            image={Platform.OS === "android" ? require("../../../assets/marker_pin.png") : undefined}
+            onPress={() => onMarkerPress(marker)}
+          >
+            {Platform.OS === "ios" && (
+              <Image source={require("../../../assets/marker_pin.png")} style={{ width: PIN_SIZE, height: PIN_SIZE }} />
+            )}
           </Marker>
         ))}
       </MapView>

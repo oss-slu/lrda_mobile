@@ -99,4 +99,3 @@ Maestro E2E flows live in `.maestro/` (see `.maestro/config.yaml`). Run them wit
 ## Known Issues
 
 - Web compilation fails (react-native-maps)
-- Android note positioning is off-center on map
