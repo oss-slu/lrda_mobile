@@ -7,6 +7,11 @@ settings:
 overrides:
   eslint-plugin-react-hooks: ^7.1.1
 
+patchedDependencies:
+  react-native-css-interop:
+    hash: a6f8b6f0a546205ad1062c7dac6c0f0533a1a466e4ae4c2d5eb4e168dd3e3355
+    path: patches/react-native-css-interop.patch
+
 importers:
 
   .:
@@ -11433,7 +11438,7 @@ snapshots:
     dependencies:
       comment-json: 4.6.2
       debug: 4.4.3
-      react-native-css-interop: 0.2.3(56d0878c846e4c5bd2330f33abce12e2)
+      react-native-css-interop: 0.2.3(patch_hash=a6f8b6f0a546205ad1062c7dac6c0f0533a1a466e4ae4c2d5eb4e168dd3e3355)(56d0878c846e4c5bd2330f33abce12e2)
       tailwindcss: 3.4.17
     transitivePeerDependencies:
       - react
@@ -11921,7 +11926,7 @@ snapshots:
     dependencies:
       prop-types: 15.8.1
 
-  react-native-css-interop@0.2.3(56d0878c846e4c5bd2330f33abce12e2):
+  react-native-css-interop@0.2.3(patch_hash=a6f8b6f0a546205ad1062c7dac6c0f0533a1a466e4ae4c2d5eb4e168dd3e3355)(56d0878c846e4c5bd2330f33abce12e2):
     dependencies:
       '@babel/helper-module-imports': 7.28.6
       '@babel/traverse': 7.29.0

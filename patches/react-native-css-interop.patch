@@ -1,0 +1,29 @@
+diff --git a/dist/metro/index.js b/dist/metro/index.js
+index c91ba6adf049dd5c6eec1ec8301ecc0802f41bfc..1fe79d48190a953375ad641120085eb578c5e7f8 100644
+--- a/dist/metro/index.js
++++ b/dist/metro/index.js
+@@ -177,6 +177,7 @@ async function startCSSProcessor(filePath, platform, isDev, { input, getCSSForPl
+                 : getNativeJS((0, css_to_rn_1.cssToReactNativeRuntime)(css, options), debug)));
+             debug(`virtualStyles.emit ${platform}`);
+             haste.emit("change", {
++                // Legacy Metro shape (kept for compatibility)
+                 eventsQueue: [
+                     {
+                         filePath,
+@@ -188,6 +189,16 @@ async function startCSSProcessor(filePath, platform, isDev, { input, getCSSForPl
+                         type: "change",
+                     },
+                 ],
++                // Modern Metro (SDK 56 / RN 0.85) reads { changes, rootDir } in
++                // DependencyGraph._onHasteChange; without these the emit crashes
++                // the dev server (nativewind/nativewind#1786). Empty maps still
++                // trigger the resolution-cache flush and "change" re-emit.
++                changes: {
++                    addedFiles: new Map(),
++                    modifiedFiles: new Map(),
++                    removedFiles: new Map(),
++                },
++                rootDir: "",
+             });
+         }).then((css) => {
+             debug(`virtualStyles.initial ${platform}`);

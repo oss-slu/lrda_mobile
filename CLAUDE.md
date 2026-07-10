@@ -86,7 +86,9 @@ Run a single test file:
 pnpm test __tests__/api_calls.test.ts
 ```
 
-Maestro E2E flows live in `.maestro/` (auth flows; see `.maestro/config.yaml`).
+Maestro E2E flows live in `.maestro/` (see `.maestro/config.yaml`). Run them with `pnpm e2e` (full suite) or `pnpm e2e <flow-name>` (single flow) — the script checks backend health, boots the simulator, fixes the hardware-keyboard/GPS settings, and starts Metro if needed before invoking Maestro. The backend must be running from the sibling `lrda_website` repo.
+
+`react-native-css-interop` is patched (`patches/`) to stop its CSS fast-refresh event from crashing Metro on newer Metro versions (nativewind/nativewind#1786); drop the patch if a fixed upstream release ships.
 
 ## Code Style
 
