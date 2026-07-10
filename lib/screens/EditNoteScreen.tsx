@@ -1,14 +1,13 @@
 import React, { useState, useEffect, useEffectEvent, useRef, useMemo } from "react";
-import { View, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Text } from "react-native";
+import { View, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import ToastMessage from "react-native-toast-message";
 import { useAuthStore } from "../stores/authStore";
 import type { Media, AudioType } from "../models/media_class";
 import { useUpdateNote } from "../hooks/mutations/useUpdateNote";
 import { useNoteLocation } from "../hooks/useNoteLocation";
 import { useNoteEditor, useKeyboardVisible } from "../hooks/useNoteEditor";
-import { DEFAULT_TOOLBAR_ITEMS, Toolbar } from "@10play/tentap-editor";
 import LoadingModal from "../components/LoadingModal";
-import { NoteEditorHeader, NoteEditorActionRow, NoteEditorPanels, NoteEditorBody } from "../components/NoteEditor";
+import { NoteEditorHeader, NoteEditorActionRow, NoteEditorPanels, NoteEditorBody, NoteEditorToolbar } from "../components/NoteEditor";
 import { useAddNoteContext } from "../context/AddNoteContext";
 import { useAddNoteStore } from "../stores/addNoteStore";
 import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
@@ -25,7 +24,7 @@ const EditNoteScreen = () => {
       return {};
     }
   }, [noteData]);
-  const keyboardVisible = useKeyboardVisible();
+  const { keyboardVisible, keyboardHeight } = useKeyboardVisible();
 
   const [title, setTitle] = useState(note.title || "Untitled");
   const [time] = useState(new Date(note.time));
@@ -193,28 +192,12 @@ const EditNoteScreen = () => {
           />
 
           <NoteEditorBody editor={editor} />
-
-          {Platform.OS === "ios" && (
-            <View className="absolute bottom-[27px] z-10 h-[50px] w-full justify-center px-[10px]" testID="Toolbar">
-              <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
-            </View>
-          )}
-          {keyboardVisible && (
-            <View className="absolute right-4 z-10" style={{ bottom: 7 }} testID="doneButton">
-              <TouchableOpacity onPress={handleDonePress}>
-                <Text className="text-right text-[14px] text-blue-500">Done</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-          {Platform.OS === "android" && (
-            <View className="absolute bottom-[27px] z-10 h-[50px] w-full justify-center px-[10px]" testID="Toolbar">
-              <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
-            </View>
-          )}
         </ScrollView>
 
         <LoadingModal visible={updateNoteMutation.isPending} />
       </KeyboardAvoidingView>
+
+      <NoteEditorToolbar editor={editor} keyboardVisible={keyboardVisible} keyboardHeight={keyboardHeight} onDone={handleDonePress} />
     </View>
   );
 };

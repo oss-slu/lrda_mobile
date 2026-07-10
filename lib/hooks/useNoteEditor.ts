@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Keyboard } from "react-native";
+import { Keyboard, Platform } from "react-native";
 import { useEditorBridge } from "@10play/tentap-editor";
 import { useTheme } from "../components/ThemeProvider";
 
@@ -18,17 +18,25 @@ export function isBodyEmpty(htmlString: string): boolean {
 
 export function useKeyboardVisible() {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   useEffect(() => {
-    const showListener = Keyboard.addListener("keyboardDidShow", () => setKeyboardVisible(true));
-    const hideListener = Keyboard.addListener("keyboardDidHide", () => setKeyboardVisible(false));
+    // will* events fire on iOS only; they track the keyboard animation so the
+    // toolbar moves in step with it instead of jumping after it settles.
+    const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+    const showListener = Keyboard.addListener(showEvent, (event) => {
+      setKeyboardVisible(true);
+      setKeyboardHeight(event.endCoordinates.height);
+    });
+    const hideListener = Keyboard.addListener(hideEvent, () => setKeyboardVisible(false));
     return () => {
       showListener.remove();
       hideListener.remove();
     };
   }, []);
 
-  return keyboardVisible;
+  return { keyboardVisible, keyboardHeight };
 }
 
 /**
@@ -48,6 +56,12 @@ export function useNoteEditor(initialContent: string) {
         ${customImageCSS}
         body {
           color: ${colors.foreground};
+        }
+        /* Keeps the last lines reachable above the overlaid toolbar. Inside
+           the document (not the native container) so the whole body area
+           stays tappable WebView. */
+        .ProseMirror {
+          padding-bottom: 80px;
         }
       `;
       editor.injectCSS(combinedCSS);

@@ -97,5 +97,4 @@ Maestro E2E flows live in `.maestro/` (auth flows; see `.maestro/config.yaml`).
 ## Known Issues
 
 - Web compilation fails (react-native-maps)
-- iOS note editor scroll overshoots into blank space past the end of long notes (editor WebView is full-screen height inside the outer ScrollView; see NoteEditorBody in lib/components/NoteEditor.tsx)
 - Android note positioning is off-center on map

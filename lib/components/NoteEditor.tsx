@@ -1,8 +1,8 @@
 import React from "react";
-import { Dimensions, TextInput, TouchableOpacity, View } from "react-native";
+import { Dimensions, Platform, TextInput, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
-import { RichText, type EditorBridge } from "@10play/tentap-editor";
+import { DEFAULT_TOOLBAR_ITEMS, RichText, Toolbar, type EditorBridge } from "@10play/tentap-editor";
 import PhotoScroller from "./photoScroller";
 import AudioContainer from "./audio";
 import TagWindow from "./tagging";
@@ -122,6 +122,42 @@ export function NoteEditorPanels({
   );
 }
 
+interface NoteEditorToolbarProps {
+  editor: EditorBridge;
+  keyboardVisible: boolean;
+  keyboardHeight: number;
+  /** Dismiss the keyboard (the chevron-down button). */
+  onDone: () => void;
+}
+
+/**
+ * Formatting toolbar pinned flush above the keyboard, with a keyboard-dismiss
+ * button on the right. Rendered as a sibling of the KeyboardAvoidingView so
+ * `bottom: keyboardHeight` is measured from the screen edge.
+ */
+export function NoteEditorToolbar({ editor, keyboardVisible, keyboardHeight, onDone }: NoteEditorToolbarProps) {
+  return (
+    <View
+      className="absolute left-0 z-20 h-[50px] w-full flex-row items-center overflow-hidden rounded-t-[18px] bg-white"
+      style={{
+        bottom: keyboardVisible ? (Platform.OS === "android" ? keyboardHeight + 20 : keyboardHeight) : 0,
+        display: keyboardVisible ? "flex" : "none",
+      }}
+      pointerEvents={keyboardVisible ? "auto" : "none"}
+      testID="Toolbar"
+    >
+      {/* 105% height nudges the Toolbar up to clip its built-in top border,
+          which cannot be styled directly. */}
+      <View className="h-[105%] flex-1 justify-center">
+        <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS} />
+      </View>
+      <TouchableOpacity testID="doneButton" onPress={onDone} className="z-30 h-full items-center justify-center px-3">
+        <Ionicons name="chevron-down" size={28} color="#007AFF" />
+      </TouchableOpacity>
+    </View>
+  );
+}
+
 interface NoteEditorBodyProps {
   editor: EditorBridge;
   testID?: string;
@@ -130,16 +166,14 @@ interface NoteEditorBodyProps {
 export function NoteEditorBody({ editor, testID }: NoteEditorBodyProps) {
   const { colors } = useTheme();
   return (
-    <View className="ios:h-full android:flex-1 min-h-[300px] grow pb-[120px]" testID={testID}>
+    <View className="min-h-[300px] flex-1" testID={testID}>
       <RichText
         editor={editor}
         style={{
           flex: 1,
           width: "100%",
           minHeight: 200,
-          paddingBottom: 120,
           padding: 10,
-          marginBottom: 4,
           backgroundColor: colors.primary,
         }}
       />
