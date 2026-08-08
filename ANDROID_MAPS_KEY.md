@@ -28,9 +28,17 @@ scraped copy is useless and cannot generate charges.
    - Application restrictions -> **Android apps** -> add an entry per
      certificate below (package name + SHA-1).
    - API restrictions -> Restrict key -> **Maps SDK for Android** only.
-3. Put the key in `eas.json` under `MAP_API_KEY` (safe to commit once
+3. Put the key in `eas.json` under `MAP_API_KEY`, replacing the
+   `REPLACE_WITH_ANDROID_RESTRICTED_KEY` placeholder (safe to commit once
    restricted), bump `versionCode` in `app.config.js`, then
    `eas build -p android` and submit.
+
+Note: on 2026-08-08 the `eas.json` production env was also updated for the
+Better Auth / PostgreSQL migration -- it now sets `AUTH_API_URL` and
+`API_BASE_URL` to `https://api.wheresreligion.org` and drops the unused
+Firebase variables (the old Firebase key was revoked in the same incident).
+The next production build is therefore the migrated app; verify the mobile
+migration is release-ready before submitting.
 
 ## Certificate entries
 
