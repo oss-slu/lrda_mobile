@@ -23,7 +23,7 @@
     "@react-native-community/slider": "5.2.0",
     "@tanstack/react-query": "^5.100.9",
     "babel-plugin-transform-inline-environment-variables": "^0.4.4",
-    "better-auth": "^1.6.9",
+    "better-auth": "^1.6.13",
     "dotenv": "^16.5.0",
     "expo": "^56.0.15",
     "expo-audio": "~56.0.12",
