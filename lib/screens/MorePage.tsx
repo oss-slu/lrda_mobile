@@ -11,7 +11,7 @@ import ReactNativeModal from "react-native-modal";
 import AppThemeSelectorScreen from "./AppThemeSelectorScreen";
 import Tooltip from "react-native-walkthrough-tooltip";
 import TooltipContent from "../onboarding/TooltipComponent";
-import { TAB_BAR_HEIGHT } from "../constants";
+import { TAB_BAR_HEIGHT, DELETE_ACCOUNT_URL } from "../constants";
 const { width, height } = Dimensions.get("window");
 const data = [
   { source: require("../../assets/Pond_395.jpg") },
@@ -53,6 +53,10 @@ export default function MorePage() {
     const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
     Linking.openURL(mailtoLink).catch((err) => console.error("Error opening email client:", err));
+  };
+
+  const handleDeleteAccountClick = () => {
+    Linking.openURL(DELETE_ACCOUNT_URL).catch((err) => console.error("Error opening delete account page:", err));
   };
 
   const SettingOptions = ({
@@ -233,6 +237,9 @@ export default function MorePage() {
               </TouchableOpacity>
               <TouchableOpacity onPress={handleReportClick}>
                 <SettingOptions optionName={"Report an Issue"} icon={"report"} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleDeleteAccountClick}>
+                <SettingOptions optionName={"Delete Account"} icon={"delete"} />
               </TouchableOpacity>
             </View>
           </ScrollView>
