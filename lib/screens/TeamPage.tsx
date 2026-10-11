@@ -107,6 +107,24 @@ const teamMembers = [
     role: "Developer",
     image: require("../../assets/F-22.jpg"),
   },
+  {
+    id: 15,
+    name: "Garrett Glencoe",
+    role: "Developer",
+    image: { uri: "https://github.com/GGlencoe.png" },
+  },
+  {
+    id: 16,
+    name: "Sean Kee",
+    role: "Developer",
+    image: { uri: "https://github.com/keeini.png" },
+  },
+  {
+    id: 17,
+    name: "Nolen Cowans",
+    role: "Developer",
+    image: { uri: "https://github.com/Nolencc24.png" },
+  },
 ];
 
 export default function TeamPage() {
