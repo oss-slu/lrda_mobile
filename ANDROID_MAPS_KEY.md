@@ -36,7 +36,7 @@ scraped copy is useless and cannot generate charges.
 Note: on 2026-08-08 the `eas.json` production env was also updated for the
 Better Auth / PostgreSQL migration -- it now sets `AUTH_API_URL` and
 `API_BASE_URL` to `https://api.wheresreligion.org` and drops the unused
-Firebase variables (the old Firebase key was revoked in the same incident).
+legacy auth variables (the old auth key was revoked in the same incident).
 The next production build is therefore the migrated app; verify the mobile
 migration is release-ready before submitting.
 
