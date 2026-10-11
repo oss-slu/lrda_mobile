@@ -78,6 +78,12 @@ const teamMembers = [
     image: require("../../assets/Zanxiang.jpg"),
   },
   {
+    id: 14,
+    name: "Mathew Shereni",
+    role: "Tech Lead",
+    image: { uri: "https://github.com/MATHEW-SHERENI.png" },
+  },
+  {
     id: 10,
     name: "Amy Chen",
     role: "Developer",
