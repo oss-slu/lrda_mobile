@@ -1,5 +1,6 @@
 import React from "react";
-import { Dimensions, TouchableOpacity, Text } from "react-native";
+import { Dimensions, TouchableOpacity, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Onboarding from "react-native-onboarding-swiper";
 import { VideoView, useVideoPlayer, VideoSource } from "expo-video";
 import { useOnboardingStore } from "../stores/onboardingStore";
@@ -18,6 +19,9 @@ const BackgroundVideo = ({ source }: { source: VideoSource }) => {
 
 const OnboardingScreen = () => {
   const completeOnboarding = useOnboardingStore((s) => s.completeOnboarding);
+  // Android draws edge-to-edge, and the swiper's built-in SafeAreaView only insets on iOS,
+  // so pad by the real navigation-bar height to keep Skip/Next/Done tappable.
+  const { bottom } = useSafeAreaInsets();
   const handleDone = () => {
     completeOnboarding();
   };
@@ -41,46 +45,48 @@ const OnboardingScreen = () => {
   );
 
   return (
-    <Onboarding
-      onDone={handleDone}
-      onSkip={handleDone}
-      DoneButtonComponent={doneButton}
-      SkipButtonComponent={skipButton}
-      NextButtonComponent={nextButton}
-      pages={[
-        {
-          backgroundColor: "#87ceeb",
-          image: <BackgroundVideo source={require("../../assets/videos/v3_1.mp4")} />,
-          title: "Welcome to Our App!",
-          subtitle: "Learn more about our features in this onboarding experience.",
-        },
-        {
-          backgroundColor: "#ff7f50",
-          image: <BackgroundVideo source={require("../../assets/videos/v1.mp4")} />,
-          title: "Stay Connected",
-          subtitle: "Interact and stay connected with our community.",
-        },
-        {
-          backgroundColor: "#ffe135",
-          image: <BackgroundVideo source={require("../../assets/videos/v4_1.mp4")} />,
-          title: "Get Notified",
-          subtitle: "Receive instant notifications and stay updated.",
-        },
-        {
-          backgroundColor: "#ffa280",
-          image: <BackgroundVideo source={require("../../assets/videos/v2.mp4")} />,
-          title: "Explore Features",
-          subtitle: "Discover new functionalities tailored just for you.",
-        },
-        {
-          backgroundColor: "#90ee90",
-          image: <BackgroundVideo source={require("../../assets/videos/v5_2.mp4")} />,
-          title: "Get Started!",
-          subtitle: 'Tap "Done" to start using the app.',
-        },
-      ]}
-      transitionAnimationDuration={300}
-    />
+    <View style={{ flex: 1, paddingBottom: bottom, backgroundColor: "#000" }}>
+      <Onboarding
+        onDone={handleDone}
+        onSkip={handleDone}
+        DoneButtonComponent={doneButton}
+        SkipButtonComponent={skipButton}
+        NextButtonComponent={nextButton}
+        pages={[
+          {
+            backgroundColor: "#87ceeb",
+            image: <BackgroundVideo source={require("../../assets/videos/v3_1.mp4")} />,
+            title: "Welcome to Our App!",
+            subtitle: "Learn more about our features in this onboarding experience.",
+          },
+          {
+            backgroundColor: "#ff7f50",
+            image: <BackgroundVideo source={require("../../assets/videos/v1.mp4")} />,
+            title: "Stay Connected",
+            subtitle: "Interact and stay connected with our community.",
+          },
+          {
+            backgroundColor: "#ffe135",
+            image: <BackgroundVideo source={require("../../assets/videos/v4_1.mp4")} />,
+            title: "Get Notified",
+            subtitle: "Receive instant notifications and stay updated.",
+          },
+          {
+            backgroundColor: "#ffa280",
+            image: <BackgroundVideo source={require("../../assets/videos/v2.mp4")} />,
+            title: "Explore Features",
+            subtitle: "Discover new functionalities tailored just for you.",
+          },
+          {
+            backgroundColor: "#90ee90",
+            image: <BackgroundVideo source={require("../../assets/videos/v5_2.mp4")} />,
+            title: "Get Started!",
+            subtitle: 'Tap "Done" to start using the app.',
+          },
+        ]}
+        transitionAnimationDuration={300}
+      />
+    </View>
   );
 };
 
