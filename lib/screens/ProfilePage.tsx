@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Text, View, SafeAreaView, Image, FlatList, TouchableOpacity, ActivityIndicator } from "react-native";
+import { Text, View, Image, FlatList, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "../stores/authStore";
 import { useThemeStore } from "../stores/themeStore";
@@ -9,9 +9,11 @@ import { fetchAllNotes } from "../utils/api_calls";
 import { queryKeys } from "../query/queryKeys";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ProfilePage() {
   const navigation = useRouter();
+  const { top } = useSafeAreaInsets();
   const authUser = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const resetTheme = useThemeStore((state) => state.reset);
@@ -56,7 +58,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-primary">
+    <View className="flex-1 bg-primary" style={{ paddingTop: top }}>
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" />
@@ -69,14 +71,15 @@ export default function ProfilePage() {
           contentContainerStyle={{ paddingBottom: 200 }}
           ListHeaderComponent={() => (
             <View>
-              <View className="flex-row items-center justify-between px-5">
-                <TouchableOpacity onPress={() => navigation.back()}>
+              <View className="flex-row items-center justify-between px-5 py-2">
+                <TouchableOpacity onPress={() => navigation.back()} hitSlop={10}>
                   <Feather name={"arrow-left"} size={30} />
                 </TouchableOpacity>
                 <TouchableOpacity
                   testID="logout-button"
                   accessibilityLabel="Logout"
                   className="flex-row items-center"
+                  hitSlop={10}
                   onPress={onLogoutPress}
                 >
                   <Text className="mr-2 font-inter text-sm font-medium text-foreground">Logout</Text>
@@ -113,6 +116,6 @@ export default function ProfilePage() {
           )}
         />
       )}
-    </SafeAreaView>
+    </View>
   );
 }
