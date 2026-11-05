@@ -11,7 +11,8 @@ import ReactNativeModal from "react-native-modal";
 import AppThemeSelectorScreen from "./AppThemeSelectorScreen";
 import Tooltip from "react-native-walkthrough-tooltip";
 import TooltipContent from "../onboarding/TooltipComponent";
-import { TAB_BAR_HEIGHT, DELETE_ACCOUNT_URL } from "../constants";
+import { DELETE_ACCOUNT_URL } from "../constants";
+import { useTabBarHeight } from "../hooks/useTabBarHeight";
 const { width, height } = Dimensions.get("window");
 const data = [
   { source: require("../../assets/Pond_395.jpg") },
@@ -23,6 +24,7 @@ export default function MorePage() {
   const { isDarkmode, toggleDarkmode, accentColor } = useTheme();
   const user = useAuthStore((s) => s.user);
   const router = useRouter();
+  const tabBarHeight = useTabBarHeight();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isThemeOpen, setIsThemeOpen] = useState(false);
   const [userInitials, setUserInitials] = useState("N/A");
@@ -159,7 +161,7 @@ export default function MorePage() {
           </View>
 
           <ScrollView
-            style={{ marginBottom: TAB_BAR_HEIGHT }}
+            style={{ marginBottom: tabBarHeight }}
             contentContainerStyle={{ alignItems: "center", paddingBottom: 24 }}
             scrollEnabled={true}
             showsVerticalScrollIndicator={false}
