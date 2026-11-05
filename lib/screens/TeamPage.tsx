@@ -134,7 +134,7 @@ export default function TeamPage() {
     <View className="mx-2 flex-1 items-center">
       <Image source={item.image} className="mb-2 h-20 w-20 rounded-full" accessible accessibilityLabel={`${item.name}, ${item.role}`} />
       <Text className="text-center font-inter text-sm font-bold text-foreground">{item.name}</Text>
-      <Text className="text-center font-inter text-xs text-tertiary">{item.role}</Text>
+      <Text className="text-center font-inter text-xs text-foreground opacity-70">{item.role}</Text>
     </View>
   );
 
@@ -159,7 +159,9 @@ export default function TeamPage() {
         </View>
 
         <View className="mb-6 px-4">
-          <Text className="mb-3 text-center font-inter text-base text-tertiary">The Saint Louis University Where&apos;s Religion Team</Text>
+          <Text className="mb-3 text-center font-inter text-base text-foreground opacity-70">
+            The Saint Louis University Where&apos;s Religion Team
+          </Text>
           <FlatList
             data={WR_team}
             renderItem={renderItem}
@@ -172,7 +174,7 @@ export default function TeamPage() {
         </View>
 
         <View className="mb-6 px-4">
-          <Text className="mb-3 text-center font-inter text-base text-tertiary">The Development Team</Text>
+          <Text className="mb-3 text-center font-inter text-base text-foreground opacity-70">The Development Team</Text>
           <FlatList
             data={teamMembers}
             renderItem={renderItem}
