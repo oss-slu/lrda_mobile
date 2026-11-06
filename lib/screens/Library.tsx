@@ -135,7 +135,10 @@ const Library = () => {
                 }}
               />
             }
-            placement="bottom"
+            // Above the list: "bottom" put the bubble below the full-height list, behind the tab bar
+            // and Android's navigation bar, where Okay/Skip couldn't be tapped and the overlay
+            // blocked the rest of the app. ("center" falls back to "top" when there are children.)
+            placement="top"
           >
             {renderList()}
           </Tooltip>
