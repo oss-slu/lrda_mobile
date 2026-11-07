@@ -115,33 +115,37 @@ const Library = () => {
         {rendering ? (
           <NoteSkeleton />
         ) : (
-          <Tooltip
-            isVisible={libraryTip && !userTutorial}
-            showChildInTooltip={false}
-            topAdjustment={Platform.OS === "android" ? -(StatusBar.currentHeight ?? 0) : 0}
-            displayInsets={{ top: 20, bottom: 20, left: 10, right: 10 }}
-            content={
-              <TooltipContent
-                message="Welcome to library! Scroll to view all published notes from other creators."
-                onPressOk={() => {
-                  setUserTutorial(true);
-                  setLibraryTip(false);
-                  setTutorialDone("Library", true);
-                }}
-                onSkip={() => {
-                  setUserTutorial(true);
-                  setLibraryTip(false);
-                  setTutorialDone("Library", true);
-                }}
-              />
-            }
-            // Above the list: "bottom" put the bubble below the full-height list, behind the tab bar
-            // and Android's navigation bar, where Okay/Skip couldn't be tapped and the overlay
-            // blocked the rest of the app. ("center" falls back to "top" when there are children.)
-            placement="top"
-          >
+          <>
+            <Tooltip
+              isVisible={libraryTip && !userTutorial}
+              showChildInTooltip={false}
+              topAdjustment={Platform.OS === "android" ? -(StatusBar.currentHeight ?? 0) : 0}
+              displayInsets={{ top: 20, bottom: 20, left: 10, right: 10 }}
+              content={
+                <TooltipContent
+                  message="Welcome to library! Scroll to view all published notes from other creators."
+                  onPressOk={() => {
+                    setUserTutorial(true);
+                    setLibraryTip(false);
+                    setTutorialDone("Library", true);
+                  }}
+                  onSkip={() => {
+                    setUserTutorial(true);
+                    setLibraryTip(false);
+                    setTutorialDone("Library", true);
+                  }}
+                />
+              }
+              placement="bottom"
+            >
+              {/* Anchor the tip to the top edge of the list so it shows just below the header.
+                  Wrapping the full-height list put it below the list, behind the tab bar and
+                  Android's navigation bar (Okay/Skip couldn't be tapped and the overlay blocked
+                  the app), and "top" pushed it up under the status bar and camera. */}
+              <View />
+            </Tooltip>
             {renderList()}
-          </Tooltip>
+          </>
         )}
       </View>
 
