@@ -2,11 +2,13 @@ import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Platform } from "react-native";
 import { useTheme } from "../../lib/components/ThemeProvider";
-import { TAB_BAR_HEIGHT } from "../../lib/constants";
+import { useTabBarBottomInset, useTabBarHeight } from "../../lib/hooks/useTabBarHeight";
 import AddNoteBtnComponent from "../../lib/components/AddNoteBtnComponent";
 
 export default function TabsLayout() {
   const { colors, isDarkmode, accentColor } = useTheme();
+  const tabBarHeight = useTabBarHeight();
+  const bottomInset = useTabBarBottomInset();
 
   return (
     <Tabs
@@ -20,8 +22,8 @@ export default function TabsLayout() {
           bottom: 0,
           left: 0,
           right: 0,
-          height: TAB_BAR_HEIGHT,
-          paddingBottom: Platform.OS === "ios" ? 30 : 20,
+          height: tabBarHeight,
+          paddingBottom: (Platform.OS === "ios" ? 30 : 20) + bottomInset,
           borderTopWidth: 0,
           elevation: 0,
           overflow: "visible",
