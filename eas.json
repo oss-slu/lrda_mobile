@@ -18,7 +18,7 @@
         "buildType": "app-bundle"
       },
       "env": {
-        "MAP_API_KEY": "REPLACE_WITH_ANDROID_RESTRICTED_KEY",
+        "MAP_API_KEY": "AIzaSyCYsHbHsGSTqpbcfZMIoNZy9KxBr2mCZ7Q",
         "AUTH_API_URL": "https://api.wheresreligion.org",
         "API_BASE_URL": "https://api.wheresreligion.org",
         "S3_PROXY_PREFIX": "http://s3-proxy.rerum.io/S3/"

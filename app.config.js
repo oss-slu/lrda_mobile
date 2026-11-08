@@ -18,7 +18,7 @@ export default {
     name: "Where's Religion?",
     slug: "lrda_mobile",
     scheme: "lrda",
-    version: "1.0.8",
+    version: "1.0.10",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -66,7 +66,7 @@ export default {
         },
       },
       package: "register.edu.slu.cs.oss.lrda",
-      versionCode: 28,
+      versionCode: 30,
     },
     web: {
       favicon: "./assets/favicon.png",
