@@ -146,7 +146,7 @@ const NotesList: React.FC<NotesListProps> = ({
           loop
           style={{ width: 100, height: 200 }}
         />
-        <Text className="font-inter text-[15px] font-normal">No Results Found</Text>
+        <Text className="font-inter text-[15px] font-normal text-foreground">No Results Found</Text>
       </View>
     );
   }
