@@ -158,7 +158,7 @@ const EditNoteScreen = () => {
   }, [navigation]);
 
   return (
-    <View className="flex-1" testID="EditNoteScreen">
+    <View className="flex-1 bg-primary" testID="EditNoteScreen">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}

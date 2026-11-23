@@ -21,6 +21,9 @@ interface NoteEditorHeaderProps {
 }
 
 export function NoteEditorHeader({ title, onChangeTitle, onBack, onTitleFocus, rowClassName = "bg-accent" }: NoteEditorHeaderProps) {
+  // Icon and placeholder colors are props, not styles, so CSS variables like
+  // var(--color-foreground) don't resolve there; use the theme value directly.
+  const { colors } = useTheme();
   return (
     <View
       className={`flex-row items-center justify-between px-[5px] text-center ${rowClassName}`}
@@ -31,12 +34,12 @@ export function NoteEditorHeader({ title, onChangeTitle, onBack, onTitleFocus, r
         className="z-[99] h-[50px] w-[50px] items-center justify-center rounded-full bg-tertiary"
         onPress={onBack}
       >
-        <Ionicons name="arrow-back-outline" size={30} color="var(--color-foreground)" />
+        <Ionicons name="arrow-back-outline" size={30} color={colors.foreground} />
       </TouchableOpacity>
       <TextInput
         className="mr-[5%] h-[45px] w-4/5 rounded-[18px] border border-foreground px-[10px] text-center text-[20px] text-foreground"
         placeholder="Title Field Note"
-        placeholderTextColor="var(--color-foreground)"
+        placeholderTextColor={colors.foreground}
         onChangeText={onChangeTitle}
         value={title}
         onFocus={onTitleFocus}
@@ -60,19 +63,20 @@ export function NoteEditorActionRow({
   onToggleTags,
   locationOff,
 }: NoteEditorActionRowProps) {
+  const { colors } = useTheme();
   return (
     <View className="w-full flex-row items-center justify-between bg-primary px-10 py-[5px]">
       <TouchableOpacity onPress={onToggleMedia} testID="imageButton">
-        <Ionicons name="images-outline" size={30} color="var(--color-foreground)" />
+        <Ionicons name="images-outline" size={30} color={colors.foreground} />
       </TouchableOpacity>
       <TouchableOpacity onPress={onToggleAudio}>
-        <Ionicons name="mic-outline" size={30} color="var(--color-foreground)" />
+        <Ionicons name="mic-outline" size={30} color={colors.foreground} />
       </TouchableOpacity>
       <TouchableOpacity onPress={onToggleLocation} testID="checklocationpermission">
-        <Ionicons name="location-outline" size={30} color={locationOff ? "red" : "var(--color-foreground)"} />
+        <Ionicons name="location-outline" size={30} color={locationOff ? "red" : colors.foreground} />
       </TouchableOpacity>
       <TouchableOpacity onPress={onToggleTags}>
-        <Ionicons name="pricetag-outline" size={30} color="var(--color-foreground)" />
+        <Ionicons name="pricetag-outline" size={30} color={colors.foreground} />
       </TouchableOpacity>
     </View>
   );
@@ -138,7 +142,7 @@ interface NoteEditorToolbarProps {
 export function NoteEditorToolbar({ editor, keyboardVisible, keyboardHeight, onDone }: NoteEditorToolbarProps) {
   return (
     <View
-      className="absolute left-0 z-20 h-[50px] w-full flex-row items-center overflow-hidden rounded-t-[18px] bg-white"
+      className="absolute left-0 z-20 h-[50px] w-full flex-row items-center overflow-hidden rounded-t-[18px] bg-primary"
       style={{
         bottom: keyboardVisible ? (Platform.OS === "android" ? keyboardHeight + 20 : keyboardHeight) : 0,
         display: keyboardVisible ? "flex" : "none",

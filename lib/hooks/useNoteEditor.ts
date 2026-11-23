@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { Keyboard, Platform } from "react-native";
-import { useEditorBridge } from "@10play/tentap-editor";
+import { darkEditorTheme, useEditorBridge } from "@10play/tentap-editor";
 import { useTheme } from "../components/ThemeProvider";
+
+// Only the toolbar part of tentap's dark theme: the editor background and text
+// colors come from the app theme (RichText style and the injected CSS below).
+// Module-level so the reference is stable; useEditorBridge re-merges the theme
+// whenever this object changes.
+const darkToolbarTheme = { toolbar: darkEditorTheme.toolbar };
 
 const customImageCSS = `
   .ProseMirror img {
@@ -44,10 +50,11 @@ export function useKeyboardVisible() {
  * helpers for appending media links/tags to the document.
  */
 export function useNoteEditor(initialContent: string) {
-  const { colors } = useTheme();
+  const { colors, isDarkmode } = useTheme();
   const editor = useEditorBridge({
     initialContent,
     avoidIosKeyboard: true,
+    theme: isDarkmode ? darkToolbarTheme : undefined,
   });
 
   useEffect(() => {
