@@ -174,7 +174,7 @@ const AddNoteScreen: React.FC = () => {
   }, []);
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 bg-primary">
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1">
         <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
           <View className="flex-1">
