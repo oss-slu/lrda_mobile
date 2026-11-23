@@ -21,7 +21,7 @@ const data = [
 ];
 
 export default function MorePage() {
-  const { isDarkmode, toggleDarkmode, accentColor } = useTheme();
+  const { isDarkmode, toggleDarkmode, accentColor, colors } = useTheme();
   const user = useAuthStore((s) => s.user);
   const router = useRouter();
   const tabBarHeight = useTabBarHeight();
@@ -69,21 +69,20 @@ export default function MorePage() {
     icon: React.ComponentProps<typeof MaterialIcons>["name"] | "none";
   }) => (
     <View
-      className="mt-[30px] h-[60px] flex-row items-center justify-between rounded-[10px] px-5"
+      className={`mt-[30px] h-[60px] flex-row items-center justify-between rounded-[10px] px-5 ${isDarkmode ? "bg-secondary" : "bg-[#e5e8e5]"}`}
       style={{
         width: width * 0.8,
-        backgroundColor: "#e5e8e5",
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.1,
         shadowRadius: 6,
       }}
     >
-      <Text className={`font-inter text-sm font-medium ${icon === "delete" ? "text-red-500" : "text-black"}`}>{optionName}</Text>
+      <Text className={`font-inter text-sm font-medium ${icon === "delete" ? "text-red-500" : "text-foreground"}`}>{optionName}</Text>
       {icon === "none" ? (
         <View className="h-[25px] w-[25px] rounded-full border-[0.5px]" style={{ backgroundColor: accentColor }} />
       ) : (
-        <MaterialIcons name={icon} size={25} color={icon === "delete" ? "red" : "black"} />
+        <MaterialIcons name={icon} size={25} color={icon === "delete" ? "red" : colors.foreground} />
       )}
     </View>
   );
@@ -100,7 +99,7 @@ export default function MorePage() {
   }) => (
     <TouchableOpacity
       testID={testID}
-      className="mb-3 w-[90%] flex-row items-center justify-between rounded-[16px] bg-white px-[30px] py-[18px]"
+      className={`mb-3 w-[90%] flex-row items-center justify-between rounded-[16px] px-[30px] py-[18px] ${isDarkmode ? "bg-secondary" : "bg-white"}`}
       style={{
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 4 },
@@ -111,8 +110,8 @@ export default function MorePage() {
       onPress={onPress}
     >
       <View className="w-[90%] flex-row items-center justify-between">
-        <Text className="ml-[30px] font-inter text-sm font-medium text-black">{title}</Text>
-        <Ionicons name={iconName} size={28} color={"black"} />
+        <Text className="ml-[30px] font-inter text-sm font-medium text-foreground">{title}</Text>
+        <Ionicons name={iconName} size={28} color={colors.foreground} />
       </View>
     </TouchableOpacity>
   );
@@ -130,7 +129,7 @@ export default function MorePage() {
   }, []);
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 bg-primary">
       <StatusBar translucent backgroundColor="transparent" />
 
       {!isSettingsOpen ? (
@@ -152,7 +151,7 @@ export default function MorePage() {
                     router.push("/account");
                   }}
                 >
-                  <Text className="self-center font-inter text-sm font-semibold text-white">{userInitials}</Text>
+                  <Text className="self-center font-inter text-sm font-semibold text-primary">{userInitials}</Text>
                 </TouchableOpacity>
                 <Text className="font-inter text-lg font-medium">More</Text>
               </View>
